@@ -22,8 +22,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>che-java-testing-junit-server</module>
-        <!--<module>che-java-testing-core-ide</module>-->
-        <!--<module>che-java-testing-core-shared</module>-->
+        <module>che-java-testing-junit-shared</module>
+        <!--<module>che-java-testing-junit-ide</module>-->
     </modules>
 
     <dependencyManagement>

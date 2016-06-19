@@ -6,7 +6,7 @@
         <groupId>org.eclipse.che.plugin</groupId>
         <version>4.4.0-RC1-SNAPSHOT</version>
     </parent>
-    <artifactId>che-java-testing-core-shared</artifactId>
+    <artifactId>che-java-testing-junit-shared</artifactId>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>
@@ -27,6 +27,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-gwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-java-testing-core-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
@@ -104,10 +108,10 @@
                         </goals>
                         <configuration>
                             <dtoPackages>
-                                <package>org.eclipse.che.ide.ext.java.testing.shared</package>
+                                <package>org.eclipse.che.ide.ext.java.testing.junit4x.shared</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.ide.ext.java.testing.client.dto.DtoClientImpls</genClassName>
+                            <genClassName>org.eclipse.che.ide.ext.java.testing.junit.client.dto.DtoClientImpls</genClassName>
                             <impl>client</impl>
                         </configuration>
                     </execution>
@@ -119,10 +123,10 @@
                         </goals>
                         <configuration>
                             <dtoPackages>
-                                <package>org.eclipse.che.ide.ext.java.testing.shared</package>
+                                <package>org.eclipse.che.ide.ext.java.testing.junit4x.shared</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.ide.ext.java.testing.server.dto.DtoServerImpls</genClassName>
+                            <genClassName>org.eclipse.che.ide.ext.java.testing.junit.server.dto.DtoServerImpls</genClassName>
                             <impl>server</impl>
                         </configuration>
                     </execution>

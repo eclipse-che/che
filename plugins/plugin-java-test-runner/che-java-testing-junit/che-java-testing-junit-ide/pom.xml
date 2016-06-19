@@ -18,7 +18,7 @@
         <groupId>org.eclipse.che.plugin</groupId>
         <version>4.4.0-RC1-SNAPSHOT</version>
     </parent>
-    <artifactId>che-java-testing-core-ide</artifactId>
+    <artifactId>che-java-testing-junit-ide</artifactId>
     <dependencies>
         <dependency>
             <groupId>com.google.inject</groupId>

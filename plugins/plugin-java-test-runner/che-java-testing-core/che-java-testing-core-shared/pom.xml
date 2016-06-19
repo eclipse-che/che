@@ -104,10 +104,10 @@
                         </goals>
                         <configuration>
                             <dtoPackages>
-                                <package>org.eclipse.che.ide.ext.java.testing.shared</package>
+                                <package>org.eclipse.che.ide.ext.java.testing.core.shared</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.ide.ext.java.testing.client.dto.DtoClientImpls</genClassName>
+                            <genClassName>org.eclipse.che.ide.ext.java.testing.core.client.dto.DtoClientImpls</genClassName>
                             <impl>client</impl>
                         </configuration>
                     </execution>
@@ -119,10 +119,10 @@
                         </goals>
                         <configuration>
                             <dtoPackages>
-                                <package>org.eclipse.che.ide.ext.java.testing.shared</package>
+                                <package>org.eclipse.che.ide.ext.java.testing.core.shared</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.ide.ext.java.testing.server.dto.DtoServerImpls</genClassName>
+                            <genClassName>org.eclipse.che.ide.ext.java.testing.core.server.dto.DtoServerImpls</genClassName>
                             <impl>server</impl>
                         </configuration>
                     </execution>

@@ -7,8 +7,9 @@ import org.eclipse.che.dto.server.DtoFactory;
 
 import org.eclipse.che.ide.ext.java.testing.core.server.classpath.TestClasspathProvider;
 import org.eclipse.che.ide.ext.java.testing.core.server.framework.TestRunner;
-import org.eclipse.che.ide.ext.java.testing.shared.Failure;
-import org.eclipse.che.ide.ext.java.testing.shared.TestResult;
+import org.eclipse.che.ide.ext.java.testing.junit4x.shared.JUnitTestResult;
+import org.eclipse.che.ide.ext.java.testing.core.shared.Failure;
+import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -83,7 +84,7 @@ public class JUnit4TestRunner implements TestRunner {
 
         Object result = clsJUnitCore.getMethod("runClasses", Class[].class).invoke(null, new Object[]{classes});
 
-        TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
+        JUnitTestResult dtoResult = DtoFactory.getInstance().createDto(JUnitTestResult.class);
 
 
         boolean isSuccess = (Boolean) clsResult.getMethod("wasSuccessful").invoke(result);
@@ -130,7 +131,7 @@ public class JUnit4TestRunner implements TestRunner {
         dtoResult.setSuccess(isSuccess);
         dtoResult.setFailureCount(jUnitFailures.size());
         dtoResult.setFailures(jUnitFailures);
-
+        dtoResult.setFrameworkVersion("4.x");
         return dtoResult;
     }
 

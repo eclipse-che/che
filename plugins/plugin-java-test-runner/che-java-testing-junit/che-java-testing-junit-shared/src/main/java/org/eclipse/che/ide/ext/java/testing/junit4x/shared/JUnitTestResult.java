@@ -8,27 +8,18 @@
  * Contributors:
  * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.testing.shared;
+package org.eclipse.che.ide.ext.java.testing.junit4x.shared;
 
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
+
 
 import java.util.List;
 
 @DTO
-public interface TestResult {
-    String getTestFramework();
+public interface JUnitTestResult extends TestResult {
+    String getFrameworkVersion();
 
-    void setTestFramework(String framework);
+    void setFrameworkVersion(String framework);
 
-    boolean isSuccess();
-
-    void setSuccess(boolean success);
-
-    List<Failure> getFailures();
-
-    void setFailures(List<Failure> failures);
-
-    int getFailureCount();
-
-    void setFailureCount(int count);
 }

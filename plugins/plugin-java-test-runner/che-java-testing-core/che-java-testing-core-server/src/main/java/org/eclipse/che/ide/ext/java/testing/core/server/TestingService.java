@@ -14,7 +14,7 @@ package org.eclipse.che.ide.ext.java.testing.core.server;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.ide.ext.java.testing.core.server.classpath.TestClasspathRegistry;
 import org.eclipse.che.ide.ext.java.testing.core.server.framework.TestFrameworkRegistry;
-import org.eclipse.che.ide.ext.java.testing.shared.TestResult;
+import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import javax.inject.Inject;

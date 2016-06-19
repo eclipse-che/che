@@ -8,7 +8,7 @@
  * Contributors:
  * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.testing.shared;
+package org.eclipse.che.ide.ext.java.testing.core.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 

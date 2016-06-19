@@ -1,7 +1,7 @@
 package org.eclipse.che.ide.ext.java.testing.core.server.framework;
 
 import org.eclipse.che.ide.ext.java.testing.core.server.classpath.TestClasspathProvider;
-import org.eclipse.che.ide.ext.java.testing.shared.TestResult;
+import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 
 import java.util.Map;
 
