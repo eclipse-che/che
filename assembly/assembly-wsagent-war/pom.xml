@@ -96,6 +96,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-java-testing-classpath-maven-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-java-testing-core-server</artifactId>
         </dependency>
         <dependency>
