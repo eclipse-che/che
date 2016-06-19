@@ -82,9 +82,10 @@ public class TestingService {
             projectType = projectManager.getProject(projectPath).getType();
             System.out.println(projectType);
         }
+        String testFramework = queryParameters.get("testFramework");
         System.out.println(queryParameters.toString());
-        System.out.println(frameworkRegistry.getTestRunner("junit"));
-        TestResult result = frameworkRegistry.getTestRunner("junit").execute(queryParameters,
+        System.out.println(frameworkRegistry.getTestRunner(testFramework));
+        TestResult result = frameworkRegistry.getTestRunner(testFramework).execute(queryParameters,
                 classpathRegistry.getTestClasspathProvider(projectType));
         System.out.println(result);
         return result;
