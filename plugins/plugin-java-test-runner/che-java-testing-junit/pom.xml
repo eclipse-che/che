@@ -23,7 +23,7 @@
     <modules>
         <module>che-java-testing-junit-server</module>
         <module>che-java-testing-junit-shared</module>
-        <!--<module>che-java-testing-junit-ide</module>-->
+        <module>che-java-testing-junit-ide</module>
     </modules>
 
     <dependencyManagement>
