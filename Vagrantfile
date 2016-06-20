@@ -13,7 +13,8 @@ $https_proxy   = ENV['HTTPS_PROXY'] || ""
 $no_proxy      = ENV['NO_PROXY'] || "localhost,127.0.0.1"
 $che_version   = ENV['CHE_VERSION'] || "nightly"
 $ip            = ENV['CHE_IP'] || "192.168.28.100"
-$port          = (ENV['CHE_PORT'] || 8080).to_i
+$hostPort      = (ENV['CHE_PORT'] || 8080).to_i
+$containerPort = (ENV['CHE_CONTAINER_PORT'] || ($hostPort == -1 ? 8080 : $hostPort)).to_i
 $user_data     = ENV['CHE_DATA'] || "."
 
 Vagrant.configure(2) do |config|
@@ -37,7 +38,9 @@ Vagrant.configure(2) do |config|
   config.vm.box_download_insecure = true
   config.ssh.insert_key = false
   config.vm.network :private_network, ip: $ip
-  config.vm.network "forwarded_port", guest: $port, host: $port
+  if $hostPort != -1
+    config.vm.network "forwarded_port", guest: $containerPort, host: $hostPort
+  end
   config.vm.synced_folder $user_data, "/home/user/che"
   config.vm.define "che" do |che|
   end
@@ -135,14 +138,16 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell" do |s| 
     s.inline = $script
-    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version, $ip, $port]
+    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version, $ip, $containerPort]
   end
 
   $script2 = <<-SHELL
     IP=$1
     PORT=$2
+    MAPPED_PORT=$3
 
     rm -f /home/user/che/.che_url
+    rm -f /home/user/che/.che_host_port
     CHE_URL="http://${IP}:${PORT}"
 
     # Test the default dashboard page to see when it returns a non-error value.
@@ -153,6 +158,7 @@ Vagrant.configure(2) do |config|
       exitcode=$?
       if [ $exitcode == "0" ]; then
         echo "${CHE_URL}" > /home/user/che/.che_url
+        echo "${MAPPED_PORT}" > /home/user/che/.che_host_port
         echo "---------------------------------------"
         echo "ECLIPSE CHE: BOOTED AND REACHABLE"
         echo "ECLIPSE CHE: ${CHE_URL}      "
@@ -165,7 +171,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell", run: "always" do |s|
     s.inline = $script2
-    s.args = [$ip, $port]
+    s.args = [$ip, $containerPort, $hostPort]
   end
 
 end
