@@ -8,12 +8,13 @@
 #   Codenvy, S.A. - initial API and implementation
 
 # Set to "<proto>://<user>:<pass>@<host>:<port>"
-$http_proxy  = ""
-$https_proxy = ""
-$no_proxy    = "localhost,127.0.0.1"
-$che_version = "nightly"
-$ip          = "192.168.28.100"
-$port        = 8080
+$http_proxy    = ENV['HTTP_PROXY'] || ""
+$https_proxy   = ENV['HTTPS_PROXY'] || ""
+$no_proxy      = ENV['NO_PROXY'] || "localhost,127.0.0.1"
+$che_version   = ENV['CHE_VERSION'] || "nightly"
+$ip            = ENV['CHE_IP'] || "192.168.28.100"
+$port          = (ENV['CHE_PORT'] || 8080).to_i
+$user_data     = ENV['CHE_DATA'] || "."
 
 Vagrant.configure(2) do |config|
   puts ("ECLIPSE CHE: VAGRANT INSTALLER")
@@ -37,7 +38,7 @@ Vagrant.configure(2) do |config|
   config.ssh.insert_key = false
   config.vm.network :private_network, ip: $ip
   config.vm.network "forwarded_port", guest: $port, host: $port
-  config.vm.synced_folder ".", "/home/user/che"
+  config.vm.synced_folder $user_data, "/home/user/che"
   config.vm.define "che" do |che|
   end
 
@@ -141,16 +142,20 @@ Vagrant.configure(2) do |config|
     IP=$1
     PORT=$2
 
+    rm -f /home/user/che/.che_url
+    CHE_URL="http://${IP}:${PORT}"
+
     # Test the default dashboard page to see when it returns a non-error value.
     # Che is active once it returns success        
     while [ true ]; do
       printf "#"
-      curl -v http://${IP}:${PORT}/dashboard &>/dev/null
+      curl -v ${CHE_URL}/dashboard &>/dev/null
       exitcode=$?
       if [ $exitcode == "0" ]; then
+        echo "${CHE_URL}" > /home/user/che/.che_url
         echo "---------------------------------------"
         echo "ECLIPSE CHE: BOOTED AND REACHABLE"
-        echo "ECLIPSE CHE: http://${IP}:${PORT}      "
+        echo "ECLIPSE CHE: ${CHE_URL}      "
         echo "---------------------------------------"
         exit 0             
       fi 
