@@ -37,7 +37,11 @@ Vagrant.configure(2) do |config|
   config.vm.box = "boxcutter/centos72-docker"
   config.vm.box_download_insecure = true
   config.ssh.insert_key = false
-  config.vm.network :private_network, ip: $ip
+  if $ip.to_s.downcase == "dhcp"
+    config.vm.network :private_network, type: "dhcp"
+  else
+    config.vm.network :private_network, ip: $ip
+  end
   if $hostPort != -1
     config.vm.network "forwarded_port", guest: $containerPort, host: $hostPort
   end
@@ -50,13 +54,31 @@ Vagrant.configure(2) do |config|
     vb.name = "eclipse-che-vm"
   end
 
-  $script = <<-SHELL
+  $script = <<-'SHELL'
     HTTP_PROXY=$1
     HTTPS_PROXY=$2
     NO_PROXY=$3
     CHE_VERSION=$4
     IP=$5
     PORT=$6
+
+    if [ "${IP,,}" = "dhcp" ]; then
+       echo "----------------------------------------"
+       echo "ECLIPSE CHE: CHECKING DYNAMIC IP ADDRESS"
+       echo "----------------------------------------"
+       DEV=$(grep -l "VAGRANT-BEGIN" /etc/sysconfig/network-scripts/ifcfg-*|xargs grep "DEVICE="|sort|tail -1|cut -d "=" -f 2)
+       if [ -z "${DEV}" ]; then
+          >&2 echo "Unable to find DHCP network device"
+          exit 1
+       fi
+       IP=$(ip addr show dev ${DEV} | sed -r -e '/inet [0-9]/!d;s/^[[:space:]]*inet ([^[:space:]/]+).*$/\1/')
+       if [ -z "${IP}" ]; then
+          >&2 echo "Unable to find DHCP network ip"
+          exit 1
+       fi
+       echo "IP: ${IP}"
+       echo
+    fi
 
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
       echo "-------------------------------------"
@@ -141,10 +163,15 @@ Vagrant.configure(2) do |config|
     s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version, $ip, $containerPort]
   end
 
-  $script2 = <<-SHELL
+  $script2 = <<-'SHELL'
     IP=$1
     PORT=$2
     MAPPED_PORT=$3
+
+    if [ "${IP,,}" = "dhcp" ]; then
+       DEV=$(grep -l "VAGRANT-BEGIN" /etc/sysconfig/network-scripts/ifcfg-*|xargs grep "DEVICE="|sort|tail -1|cut -d "=" -f 2)
+       IP=$(ip addr show dev ${DEV} | sed -r -e '/inet [0-9]/!d;s/^[[:space:]]*inet ([^[:space:]/]+).*$/\1/')
+    fi
 
     rm -f /home/user/che/.che_url
     rm -f /home/user/che/.che_host_port
