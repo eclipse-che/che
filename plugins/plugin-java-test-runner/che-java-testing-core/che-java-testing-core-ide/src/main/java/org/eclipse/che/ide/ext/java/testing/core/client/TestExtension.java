@@ -91,10 +91,5 @@ public class TestExtension {
 //        Log.info(TestExtension.class,"TestRunner test menu context");
 //        actionManager.registerAction("TestMenuID2", action);
 
-//        keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('z').build(),
-//                "TestActionRunAll");
-//
-//        keyBinding.getGlobal().addKey(new KeyBuilder().action().shift().charCode('z').build(),
-//                "TestActionRunClass");
     }
 }

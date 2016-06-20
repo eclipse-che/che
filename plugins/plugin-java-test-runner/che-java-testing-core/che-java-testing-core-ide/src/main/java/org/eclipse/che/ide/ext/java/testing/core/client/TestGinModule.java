@@ -12,10 +12,7 @@ import org.eclipse.che.ide.util.loging.Log;
 public class TestGinModule extends AbstractGinModule{
     @Override
     protected void configure() {
-        Log.info(TestGinModule.class,"TestGinModule init");
         install(new GinFactoryModuleBuilder().build(TestResultNodeFactory.class));
-//        GinMultibinder.newSetBinder(binder(), TestAction.class).addBinding().to(PlainJavaProjectWizardRegistrar.class);
         GinMultibinder.newSetBinder(binder(), TestAction.class);
-
     }
 }

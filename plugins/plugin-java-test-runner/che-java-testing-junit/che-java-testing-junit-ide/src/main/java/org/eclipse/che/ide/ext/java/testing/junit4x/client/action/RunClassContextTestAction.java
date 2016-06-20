@@ -8,7 +8,7 @@
  * Contributors:
  * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.testing.junit4x.client;
+package org.eclipse.che.ide.ext.java.testing.junit4x.client.action;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -29,7 +29,9 @@ import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
 import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestServiceClient;
-import org.eclipse.che.ide.ext.java.testing.junit4x.client.view.TestResultPresenter;
+import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestLocalizationConstant;
+import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestResources;
+import org.eclipse.che.ide.ext.java.testing.core.client.view.TestResultPresenter;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
@@ -60,10 +62,10 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
     private final SelectionAgent selectionAgent;
 
     @Inject
-    public RunClassContextTestAction(TestResources resources, NotificationManager notificationManager, EditorAgent editorAgent,
+    public RunClassContextTestAction(JUnitTestResources resources, NotificationManager notificationManager, EditorAgent editorAgent,
                                      AppContext appContext, TestResultPresenter presenter,
                                      TestServiceClient service, DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                                     SelectionAgent selectionAgent, TestLocalizationConstant localization) {
+                                     SelectionAgent selectionAgent, JUnitTestLocalizationConstant localization) {
         super(Arrays.asList(PROJECT_PERSPECTIVE_ID), localization.actionRunClassContextTitle(),
                 localization.actionRunClassContextDescription(), null, resources.testIcon());
         this.notificationManager = notificationManager;

@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.java.testing.junit4x.client;
 import com.google.gwt.resources.client.ClientBundle;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-public interface TestResources extends ClientBundle {
+public interface JUnitTestResources extends ClientBundle {
 
     @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test.svg")
     SVGResource testIcon();
@@ -21,10 +21,4 @@ public interface TestResources extends ClientBundle {
     @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test_all.svg")
     SVGResource testAllIcon();
 
-
-    @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test_results_pass.svg")
-    SVGResource testResultsPass();
-
-    @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test_results_fail.svg")
-    SVGResource testResultsFail();
 }

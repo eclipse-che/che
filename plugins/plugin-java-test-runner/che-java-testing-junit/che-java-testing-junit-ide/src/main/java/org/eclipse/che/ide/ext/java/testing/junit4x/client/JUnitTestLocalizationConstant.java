@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.testing.core.client;
+package org.eclipse.che.ide.ext.java.testing.junit4x.client;
 
 import com.google.gwt.i18n.client.Messages;
 
@@ -18,12 +18,7 @@ import com.google.gwt.i18n.client.Messages;
  *
  * @author Artem Zatsarynnyi
  */
-public interface TestLocalizationConstant extends Messages {
-
-    /* Actions */
-
-    @Key("actionGroup.menu.name")
-    String actionGroupMenuName();
+public interface JUnitTestLocalizationConstant extends Messages {
 
     @Key("action.runClass.title")
     String actionRunClassTitle();
