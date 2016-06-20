@@ -17,6 +17,8 @@ $hostPort      = (ENV['CHE_PORT'] || 8080).to_i
 $containerPort = (ENV['CHE_CONTAINER_PORT'] || ($hostPort == -1 ? 8080 : $hostPort)).to_i
 $user_data     = ENV['CHE_DATA'] || "."
 
+$provisionProgress = ENV['PROVISION_PROGRESS'] || "basic"
+
 Vagrant.configure(2) do |config|
   puts ("ECLIPSE CHE: VAGRANT INSTALLER")
   puts ("ECLIPSE CHE: REQUIRED: VIRTUALBOX 5.x")
@@ -61,6 +63,7 @@ Vagrant.configure(2) do |config|
     CHE_VERSION=$4
     IP=$5
     PORT=$6
+    PROVISION_PROGRESS=$7
 
     if [ "${IP,,}" = "dhcp" ]; then
        echo "----------------------------------------"
@@ -98,16 +101,39 @@ Vagrant.configure(2) do |config|
       echo "HTTPS PROXY set to: $HTTPS_PROXY"
     fi
 
-    # Add the user in the VM to the docker group
+    function perform
+    {
+      local progress=$1
+      local command=$2
+      shift 2
+      
+      local pid=""
+      
+      case "$progress" in
+        extended)
+          # simulate tty environment to get full output of progress bars and percentages
+          printf "set timeout -1\nspawn %s\nexpect eof" "$command $*" | expect -f -
+          ;;
+        basic|*)
+          $command "$@" &>/dev/null &
+          pid=$!
+          while kill -0 "$pid" >/dev/null 2>&1; do
+            printf "#"
+            sleep 10
+          done
+          wait $pid # return pid's exit code
+          ;;
+      esac
+    }
+    
     echo "------------------------------------"
     echo "ECLIPSE CHE: UPGRADING DOCKER ENGINE"
     echo "------------------------------------"
-    echo 'y' | sudo yum update docker-engine &>/dev/null &
-    PROC_ID=$!
-    while kill -0 "$PROC_ID" >/dev/null 2>&1; do
-      printf "#"
-      sleep 10
-    done
+    if [ "$PROVISION_PROGRESS" = "extended" ]; then
+       # we sacrifice a few seconds of additional install time for much better progress afterwards
+       perform basic yum -y install expect
+    fi
+    perform $PROVISION_PROGRESS sudo yum -y update docker-engine
 
     echo $(docker --version)
  
@@ -137,13 +163,7 @@ Vagrant.configure(2) do |config|
     echo "-------------------------------------------------"
     echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE DOCKER IMAGE"
     echo "-------------------------------------------------"
-    docker pull codenvy/che:${CHE_VERSION} &>/dev/null &
-    PROC_ID=$!
- 
-    while kill -0 "$PROC_ID" >/dev/null 2>&1; do
-      printf "#"
-      sleep 10
-    done
+    perform $PROVISION_PROGRESS docker pull codenvy/che:${CHE_VERSION}
 
     echo "--------------------------------"
     echo "ECLIPSE CHE: BOOTING ECLIPSE CHE"
@@ -160,7 +180,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell" do |s| 
     s.inline = $script
-    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version, $ip, $containerPort]
+    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version, $ip, $containerPort, $provisionProgress]
   end
 
   $script2 = <<-'SHELL'
