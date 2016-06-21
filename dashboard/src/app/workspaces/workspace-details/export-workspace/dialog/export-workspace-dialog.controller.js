@@ -110,48 +110,54 @@ export class ExportWorkspaceDialogController {
         return environment.name === defaultEnvName;
       });
 
-      let recipeLocation = defaultEnvironment.machineConfigs[0].source.location;
+      let machineSource = defaultEnvironment.machineConfigs[0].source;
+      let recipeLocation = machineSource.location;
+      if (recipeLocation) {
 
-      // get content of recipe
-      this.$http.get(recipeLocation).then((response) => {
+        // get content of recipe
+        this.$http.get(recipeLocation).then((response) => {
 
-        let recipeScriptContent = response.data;
-        // now upload the recipe to the remote service
-        let remoteRecipeAPI = this.cheRemote.newRecipe(authData);
+          let recipeScriptContent = response.data;
+          this.exportToPrivateCloudRecipeContent(recipeScriptContent, copyOfConfig, authData);
 
-        let recipeContent = this.cheRecipeTemplate.getDefaultRecipe();
-        recipeContent.name = 'recipe-' + copyOfConfig.name;
-        recipeContent.script = recipeScriptContent;
-
-        let createRecipePromise = remoteRecipeAPI.create(recipeContent);
-        createRecipePromise.then((recipe) => {
-          let findLink = this.lodash.find(recipe.links, (link) => {
-            return link.rel === 'get recipe script';
-          });
-
-          // update copy of workspace with new recipe link
-          let recipeLink = findLink.href;
-          defaultEnvironment.machineConfigs[0].source.location = recipeLink;
-
-          let remoteWorkspaceAPI = this.cheRemote.newWorkspace(authData);
-          this.exportInCloudSteps += 'Creating remote workspace...';
-          let createWorkspacePromise = remoteWorkspaceAPI.createWorkspaceFromConfig(null, copyOfConfig);
-          createWorkspacePromise.then((remoteWorkspace) => {
-            this.exportInCloudSteps += 'ok !<br>';
-
-            if (remoteWorkspace.config.projects && remoteWorkspace.config.projects.length > 0) {
-              this.startRemoteWorkspace(remoteWorkspaceAPI, remoteWorkspace, authData);
-            } else {
-              this.finishWorkspaceExporting(remoteWorkspace);
-            }
-          }, (error) => {
-            this.handleError(error);
-          })
+        }, (error) => {
+          this.handleError(error);
         });
-      }, (error) => {
-        this.handleError(error);
-      });
 
+      } else {
+        // use content from machine source
+        this.exportToPrivateCloudRecipeContent(machineSource.content, copyOfConfig, authData);
+      }
+    }, (error) => {
+      this.handleError(error);
+    });
+  }
+
+  /**
+   * Export the given workspace using authentication data provided and using specified recipe content
+   * @param recipeScriptContent the content of the machine configuration
+   * @param workspaceConfig the workspace configuration to use
+   * @param authData the data including token to deal with remote server
+   */
+  exportToPrivateCloudRecipeContent(recipeScriptContent, workspaceConfig, authData) {
+    let environments = workspaceConfig.environments;
+    let defaultEnvName = workspaceConfig.defaultEnv;
+    let defaultEnvironment = this.lodash.find(environments, (environment) => {
+      return environment.name === defaultEnvName;
+    });
+
+    defaultEnvironment.machineConfigs[0].source.content = recipeScriptContent;
+    let remoteWorkspaceAPI = this.cheRemote.newWorkspace(authData);
+    this.exportInCloudSteps += 'Creating remote workspace...';
+    let createWorkspacePromise = remoteWorkspaceAPI.createWorkspaceFromConfig(null, workspaceConfig);
+    createWorkspacePromise.then((remoteWorkspace) => {
+      this.exportInCloudSteps += 'ok !<br>';
+
+      if (remoteWorkspace.config.projects && remoteWorkspace.config.projects.length > 0) {
+        this.startRemoteWorkspace(remoteWorkspaceAPI, remoteWorkspace, authData);
+      } else {
+        this.finishWorkspaceExporting(remoteWorkspace);
+      }
     }, (error) => {
       this.handleError(error);
     });
