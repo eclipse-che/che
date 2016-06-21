@@ -40,13 +40,14 @@ public class InitialAuthConfig {
 
     AuthConfig predefinedConfig;
 
+    private String serverAddress = "https://index.docker.io/v1/";
+
     /** For testing purposes */
     public InitialAuthConfig() {
     }
 
     @Inject
     public InitialAuthConfig(ConfigurationProperties configurationProperties) {
-        String serverAddress = "https://index.docker.io/v1/";
         String username = null, password = null;
         for (Map.Entry<String, String> e : configurationProperties.getProperties(CONFIGURATION_PREFIX_PATTERN).entrySet()) {
             final String classifier = e.getKey().replaceFirst(CONFIGURATION_PREFIX, "");
@@ -66,16 +67,15 @@ public class InitialAuthConfig {
             }
         }
         if (!isNullOrEmpty(serverAddress) && !isNullOrEmpty(username) && !isNullOrEmpty(password)) {
-            predefinedConfig = DtoFactory.newDto(AuthConfig.class).withServeraddress(serverAddress)
-                                         .withUsername(username)
-                                         .withPassword(password);
+            predefinedConfig = DtoFactory.newDto(AuthConfig.class).withUsername(username)
+                                                                  .withPassword(password);
         }
     }
 
     public AuthConfigs getAuthConfigs() {
         AuthConfigs authConfigs = DtoFactory.newDto(AuthConfigs.class);
         if (predefinedConfig != null) {
-            authConfigs.getConfigs().put(predefinedConfig.getServeraddress(), predefinedConfig);
+            authConfigs.getConfigs().put(serverAddress, predefinedConfig);
         }
         return authConfigs;
     }

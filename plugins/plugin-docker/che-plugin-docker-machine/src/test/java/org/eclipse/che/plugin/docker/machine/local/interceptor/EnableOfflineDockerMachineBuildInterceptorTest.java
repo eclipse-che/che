@@ -14,11 +14,14 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerImage;
+import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.Dockerfile;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
+import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -51,8 +54,16 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
     @Mock
     private DockerImage dockerImage;
 
+    @Mock
+    private UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
+
     @InjectMocks
     private EnableOfflineDockerMachineBuildInterceptor interceptor;
+
+    @BeforeMethod
+    private void setup() {
+        when(dockerCredentials.getCredentials()).thenReturn(null);
+    }
 
     @Test
     public void shouldProceedInterceptedMethodIfForcePullIsDisabled() throws Throwable {
@@ -74,6 +85,9 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
         when(dockerfile.getImages()).thenReturn(Collections.singletonList(dockerImage));
         final String tag = "latest";
         final String repo = "my_repo/my_image";
+        final PullParams pullParams = PullParams.create(repo)
+                                                .withTag(tag)
+                                                .withAuthConfigs(null);
         when(dockerImage.getFrom()).thenReturn(repo + ":" + tag);
 
 
@@ -83,7 +97,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
         assertFalse((Boolean)arguments[3]);
         verify(methodInvocation).proceed();
         verify(dockerfile).getImages();
-        verify(dockerConnector).pull(eq(repo), eq(tag), eq(null), any(ProgressMonitor.class));
+        verify(dockerConnector).pull(eq(pullParams), any(ProgressMonitor.class));
     }
 
     @Test(dataProvider = "throwableProvider")
@@ -119,7 +133,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
         assertFalse((Boolean)arguments[3]);
         verify(methodInvocation).proceed();
         verify(dockerfile).getImages();
-        verify(dockerConnector).pull(eq(repo), eq("latest"), eq(null), any(ProgressMonitor.class));
+        verify(dockerConnector).pull(eq(PullParams.create(repo).withTag("latest")), any(ProgressMonitor.class));
     }
 
     @DataProvider(name = "throwableProvider")

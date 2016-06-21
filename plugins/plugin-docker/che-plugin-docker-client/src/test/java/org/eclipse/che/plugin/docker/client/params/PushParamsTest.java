@@ -93,4 +93,30 @@ public class PushParamsTest {
         assertNull(pushParams.getAuthConfigs());
     }
 
+    @Test
+    public void getFullRepoShouldReturnRegistryAndRepository() {
+        pushParams = PushParams.create(REPOSITORY)
+                               .withRegistry(REGISTRY)
+                               .withTag(TAG);
+
+        assertEquals(pushParams.getFullRepo(), REGISTRY + '/' + REPOSITORY);
+    }
+
+    @Test
+    public void getFullRepoShouldReturnRepositoryOnlyIfRegistryIsNotSet() {
+        pushParams = PushParams.create(REPOSITORY)
+                               .withTag(TAG);
+
+        assertEquals(pushParams.getFullRepo(), REPOSITORY);
+    }
+
+    @Test
+    public void getFullRepoShouldReturnRepositoryOnlyIfRegistryIsDockerHub() {
+        pushParams = PushParams.create(REPOSITORY)
+                               .withRegistry("docker.io")
+                               .withTag(TAG);
+
+        assertEquals(pushParams.getFullRepo(), REPOSITORY);
+    }
+
 }
