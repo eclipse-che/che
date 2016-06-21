@@ -61,16 +61,14 @@ public class DockerRegistryAuthResolver {
      * @return base64 encoded X-Registry-Auth header value
      */
     public String getXRegistryAuthHeaderValue(@Nullable String registry, @Nullable AuthConfigs paramAuthConfigs) {
-        if (DEFAULT_REGISTRY_SYNONYMS.contains(registry)) {
-            registry = DEFAULT_REGISTRY;
-        }
+        String normalizedRegistry = DEFAULT_REGISTRY_SYNONYMS.contains(registry) ? DEFAULT_REGISTRY : registry;
 
         AuthConfig authConfig = null;
         if (paramAuthConfigs != null && paramAuthConfigs.getConfigs() != null) {
-            authConfig = paramAuthConfigs.getConfigs().get(registry);
+            authConfig = normalizeDockerHubRegistryUrl(paramAuthConfigs.getConfigs()).get(normalizedRegistry);
         }
         if (authConfig == null) {
-            authConfig = initialAuthConfig.getAuthConfigs().getConfigs().get(registry);
+            authConfig = normalizeDockerHubRegistryUrl(initialAuthConfig.getAuthConfigs().getConfigs()).get(normalizedRegistry);
         }
 
         String authConfigJson;
@@ -100,13 +98,18 @@ public class DockerRegistryAuthResolver {
             authConfigs.putAll(paramAuthConfigs.getConfigs());
         }
 
-        // normalize docker hub registry url
-        AuthConfig abnormalDefaultRegistryAuthConfig = authConfigs.remove("docker.io");
-        if (abnormalDefaultRegistryAuthConfig != null) {
-            authConfigs.put(DEFAULT_REGISTRY, abnormalDefaultRegistryAuthConfig);
-        }
+       authConfigs = normalizeDockerHubRegistryUrl(authConfigs);
 
         return Base64.getEncoder().encodeToString(JsonHelper.toJson(authConfigs).getBytes());
+    }
+
+    private Map<String, AuthConfig> normalizeDockerHubRegistryUrl(Map<String, AuthConfig> authConfigs) {
+        if (authConfigs.containsKey("docker.io")) {
+            Map<String,AuthConfig> normalizedAuthConfigMap = new HashMap<>(authConfigs);
+            normalizedAuthConfigMap.put(DEFAULT_REGISTRY, normalizedAuthConfigMap.remove("docker.io"));
+            return normalizedAuthConfigMap;
+        }
+        return authConfigs;
     }
 
 }

@@ -20,12 +20,6 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface AuthConfig {
-    String getServeraddress();
-
-    void setServeraddress(String serveraddress);
-
-    AuthConfig withServeraddress(String serveraddress);
-
     String getUsername();
 
     void setUsername(String username);
@@ -37,16 +31,4 @@ public interface AuthConfig {
     void setPassword(String password);
 
     AuthConfig withPassword(String password);
-
-    String getEmail();
-
-    void setEmail(String email);
-
-    AuthConfig withEmail(String email);
-
-    String getAuth();
-
-    void setAuth(String auth);
-
-    AuthConfig withAuth(String auth);
 }
