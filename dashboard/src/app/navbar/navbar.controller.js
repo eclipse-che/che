@@ -16,7 +16,7 @@ export class CheNavBarCtrl {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI, $rootScope, $window) {
+  constructor($mdSidenav, $scope, $location, $route, cheAPI, $window) {
     this.mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
@@ -24,14 +24,6 @@ export class CheNavBarCtrl {
     this.cheAPI = cheAPI;
     this.$window = $window;
     this.links = [{href: '#/create-workspace', name: 'New Workspace'}];
-
-    this.displayLoginItem = userDashboardConfig.developmentMode;
-
-    let promiseAdminService = this.cheAPI.getAdminService().fetchServices();
-    promiseAdminService.then(() => {
-      this.isAdminServiceAvailable = cheAPI.getAdminService().isAdminServiceAvailable();
-      this.isAdminPluginServiceAvailable = cheAPI.getAdminService().isServiceAvailable(cheAPI.getAdminPlugins().getPluginsServicePath());
-    });
 
     this.profile = cheAPI.getProfile().getProfile();
     if (this.profile.attributes) {
@@ -48,16 +40,10 @@ export class CheNavBarCtrl {
       dashboard: '#/',
       projects: '#/projects',
       workspaces: '#/workspaces',
-      factories: '#/factories',
-
-      // subsection
+      administration: '#/administration',
+      // subsections
       plugins: '#/admin/plugins',
-
-      // subsection
-      account: '#/account',
-      team: '#/team',
-      subscriptions: '#/subscriptions',
-      billing: '#/billing'
+      account: '#/account'
     };
 
     // highlight navbar menu item
