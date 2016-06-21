@@ -37,7 +37,7 @@ public class DockerExtConfBindingProvider implements Provider<String> {
     public static final String EXT_CHE_LOCAL_CONF_DIR = "/mnt/che/conf";
 
     private static final String PLUGIN_CONF      = "plugin-conf";
-    private static final String CONTAINER_TARGET = ":" + EXT_CHE_LOCAL_CONF_DIR + ":ro";
+    private static final String CONTAINER_TARGET = ":" + EXT_CHE_LOCAL_CONF_DIR + ":ro,Z";
     private static final Logger LOG              = LoggerFactory.getLogger(DockerExtConfBindingProvider.class);
 
     @Override
