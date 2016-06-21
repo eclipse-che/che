@@ -38,6 +38,7 @@ import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerFileException;
+import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.Dockerfile;
 import org.eclipse.che.plugin.docker.client.DockerfileParser;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
@@ -94,29 +95,31 @@ public class DockerInstanceProvider implements InstanceProvider {
      */
     public static final String DOCKER_IMAGE_TYPE = "image";
 
-    private final DockerConnector                  docker;
-    private final DockerInstanceStopDetector       dockerInstanceStopDetector;
-    private final DockerContainerNameGenerator     containerNameGenerator;
-    private final WorkspaceFolderPathProvider      workspaceFolderPathProvider;
-    private final boolean                          doForcePullOnBuild;
-    private final boolean                          privilegeMode;
-    private final Set<String>                      supportedRecipeTypes;
-    private final DockerMachineFactory             dockerMachineFactory;
-    private final Map<String, Map<String, String>> devMachinePortsToExpose;
-    private final Map<String, Map<String, String>> commonMachinePortsToExpose;
-    private final String[]                         devMachineSystemVolumes;
-    private final String[]                         commonMachineSystemVolumes;
-    private final Set<String>                      devMachineEnvVariables;
-    private final Set<String>                      commonMachineEnvVariables;
-    private final String[]                         allMachinesExtraHosts;
-    private final String                           projectFolderPath;
-    private final boolean                          snapshotUseRegistry;
-    private final RecipeRetriever                  recipeRetriever;
-    private final double                           memorySwapMultiplier;
+    private final DockerConnector                               docker;
+    private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
+    private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
+    private final DockerContainerNameGenerator                  containerNameGenerator;
+    private final WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
+    private final boolean                                       doForcePullOnBuild;
+    private final boolean                                       privilegeMode;
+    private final Set<String>                                   supportedRecipeTypes;
+    private final DockerMachineFactory                          dockerMachineFactory;
+    private final Map<String, Map<String, String>>              devMachinePortsToExpose;
+    private final Map<String, Map<String, String>>              commonMachinePortsToExpose;
+    private final String[]                                      devMachineSystemVolumes;
+    private final String[]                                      commonMachineSystemVolumes;
+    private final Set<String>                                   devMachineEnvVariables;
+    private final Set<String>                                   commonMachineEnvVariables;
+    private final String[]                                      allMachinesExtraHosts;
+    private final String                                        projectFolderPath;
+    private final boolean                                       snapshotUseRegistry;
+    private final RecipeRetriever                               recipeRetriever;
+    private final double                                        memorySwapMultiplier;
 
     @Inject
     public DockerInstanceProvider(DockerConnector docker,
                                   DockerConnectorConfiguration dockerConnectorConfiguration,
+                                  UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                   DockerMachineFactory dockerMachineFactory,
                                   DockerInstanceStopDetector dockerInstanceStopDetector,
                                   DockerContainerNameGenerator containerNameGenerator,
@@ -135,6 +138,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                   @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
                                   @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier) throws IOException {
         this.docker = docker;
+        this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.containerNameGenerator = containerNameGenerator;
@@ -392,7 +396,7 @@ public class DockerInstanceProvider implements InstanceProvider {
             };
             docker.buildImage(imageName,
                               progressMonitor,
-                              null,
+                              dockerCredentials.getCredentials(),
                               doForcePullOnBuild,
                               memoryLimit,
                               memorySwapLimit,
@@ -419,7 +423,8 @@ public class DockerInstanceProvider implements InstanceProvider {
         }
         PullParams pullParams = PullParams.create(dockerMachineSource.getRepository())
                                           .withTag(tag)
-                                          .withRegistry(dockerMachineSource.getRegistry());
+                                          .withRegistry(dockerMachineSource.getRegistry())
+                                          .withAuthConfigs(dockerCredentials.getCredentials());
         try {
             final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
             docker.pull(pullParams,

@@ -31,6 +31,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
+import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -113,6 +114,9 @@ public class DockerInstanceProviderTest {
     @Mock
     private WorkspaceFolderPathProvider workspaceFolderPathProvider;
 
+    @Mock
+    private UserSpecificDockerRegistryCredentialsProvider credentialsReader;
+
     @Captor
     private ArgumentCaptor<ContainerConfig> containerConfigArgumentCaptor;
 
@@ -127,6 +131,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = spy(new DockerInstanceProvider(dockerConnector,
                                                                 dockerConnectorConfiguration,
+                                                                credentialsReader,
                                                                 dockerMachineFactory,
                                                                 dockerInstanceStopDetector,
                                                                 containerNameGenerator,
@@ -302,6 +307,7 @@ public class DockerInstanceProviderTest {
     public void shouldCreateContainerWithPrivilegeMode() throws Exception {
         dockerInstanceProvider = spy(new DockerInstanceProvider(dockerConnector,
                                                                 dockerConnectorConfiguration,
+                                                                credentialsReader,
                                                                 dockerMachineFactory,
                                                                 dockerInstanceStopDetector,
                                                                 containerNameGenerator,
@@ -487,6 +493,7 @@ public class DockerInstanceProviderTest {
         // given
         dockerInstanceProvider = spy(new DockerInstanceProvider(dockerConnector,
                                                                 dockerConnectorConfiguration,
+                                                                credentialsReader,
                                                                 dockerMachineFactory,
                                                                 dockerInstanceStopDetector,
                                                                 containerNameGenerator,
@@ -551,6 +558,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -592,6 +600,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -639,6 +648,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -680,6 +690,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -722,6 +733,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -767,6 +779,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -812,6 +825,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -857,6 +871,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -897,6 +912,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -937,6 +953,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -976,6 +993,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1015,6 +1033,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1061,6 +1080,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1108,6 +1128,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1154,6 +1175,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1198,6 +1220,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1242,6 +1265,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1286,6 +1310,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1330,6 +1355,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1376,6 +1402,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1491,6 +1518,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1527,6 +1555,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1568,6 +1597,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1604,6 +1634,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1642,6 +1673,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1688,6 +1720,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1734,6 +1767,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1780,6 +1814,7 @@ public class DockerInstanceProviderTest {
 
         dockerInstanceProvider = new DockerInstanceProvider(dockerConnector,
                                                             dockerConnectorConfiguration,
+                                                            credentialsReader,
                                                             dockerMachineFactory,
                                                             dockerInstanceStopDetector,
                                                             containerNameGenerator,
@@ -1900,6 +1935,7 @@ public class DockerInstanceProviderTest {
     private DockerInstanceProvider getDockerInstanceProvider(boolean snapshotUseRegistry) throws Exception {
         return spy(new DockerInstanceProvider(dockerConnector,
                                               dockerConnectorConfiguration,
+                                              credentialsReader,
                                               dockerMachineFactory,
                                               dockerInstanceStopDetector,
                                               containerNameGenerator,
