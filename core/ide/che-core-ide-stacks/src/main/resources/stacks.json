@@ -48,7 +48,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -110,7 +110,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -177,7 +177,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -253,7 +253,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -323,7 +323,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -427,7 +427,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -506,7 +506,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -596,7 +596,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -675,7 +675,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -750,7 +750,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -820,7 +820,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -901,7 +901,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -985,7 +985,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -1059,7 +1059,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -1130,7 +1130,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -1220,7 +1220,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -1287,7 +1287,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
@@ -1347,7 +1347,7 @@
                 "type": "dockerfile"
               },
               "type": "docker",
-              "dev": true
+              "isDev": true
             }
           ]
         }
