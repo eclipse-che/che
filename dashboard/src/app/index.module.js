@@ -15,6 +15,7 @@ import {Register} from '../components/utils/register';
 import {ComponentsConfig} from '../components/components-config';
 
 import {AdminsConfig} from './admin/admin-config';
+import {AdministrationConfig} from './administration/administration-config';
 import {CheColorsConfig} from './colors/che-color.constant';
 import {CheOutputColorsConfig} from './colors/che-output-colors.constant';
 import {CheCountriesConfig} from './constants/che-countries.constant';
@@ -345,6 +346,7 @@ new CheCountriesConfig(instanceRegister);
 new CheJobsConfig(instanceRegister);
 new ComponentsConfig(instanceRegister);
 new AdminsConfig(instanceRegister);
+new AdministrationConfig(instanceRegister);
 new IdeConfig(instanceRegister);
 
 new NavbarConfig(instanceRegister);
