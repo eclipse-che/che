@@ -29,12 +29,11 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException> {
     @Override
     public Response toResponse(RuntimeException exception) {
-        String errorMessage = exception.getMessage();
+        String errorMessage = exception.getLocalizedMessage();
         if (!isNullOrEmpty(errorMessage)) {
-            DtoFactory dtoFactory = DtoFactory.getInstance();
-            ServiceError serviceError = dtoFactory.createDto(ServiceError.class).withMessage(errorMessage);
+            ServiceError serviceError = DtoFactory.getInstance().createDto(ServiceError.class).withMessage(errorMessage);
             return Response.serverError()
-                           .entity(dtoFactory.toJson(serviceError))
+                           .entity(DtoFactory.getInstance().toJson(serviceError))
                            .type(MediaType.APPLICATION_JSON)
                            .build();
         }
