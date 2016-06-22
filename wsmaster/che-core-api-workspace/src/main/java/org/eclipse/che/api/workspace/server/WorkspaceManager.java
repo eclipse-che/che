@@ -89,7 +89,6 @@ public class WorkspaceManager {
     private final EventService      eventService;
     private final ExecutorService   executor;
     private final MachineManager    machineManager;
-    private final UserManager       userManager;
     private final boolean           defaultAutoSnapshot;
     private final boolean           defaultAutoRestore;
 
@@ -100,14 +99,12 @@ public class WorkspaceManager {
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
                             MachineManager machineManager,
-                            UserManager userManager,
                             @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
                             @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
         this.eventService = eventService;
         this.machineManager = machineManager;
-        this.userManager = userManager;
         this.defaultAutoSnapshot = defaultAutoSnapshot;
         this.defaultAutoRestore = defaultAutoRestore;
 
