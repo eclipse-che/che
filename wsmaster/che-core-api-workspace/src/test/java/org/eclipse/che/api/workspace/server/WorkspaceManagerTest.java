@@ -23,7 +23,6 @@ import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -96,8 +95,6 @@ public class WorkspaceManagerTest {
     private MachineManager                machineManager;
     @Mock
     private WorkspaceRuntimes             runtimes;
-    @Mock
-    private UserManager                   userManager;
     @Captor
     private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -109,7 +106,6 @@ public class WorkspaceManagerTest {
                                                     runtimes,
                                                     eventService,
                                                     machineManager,
-                                                    userManager,
                                                     false,
                                                     false));
         workspaceManager.setHooks(workspaceHooks);
@@ -544,7 +540,6 @@ public class WorkspaceManagerTest {
                                                     runtimes,
                                                     eventService,
                                                     machineManager,
-                                                    userManager,
                                                     true,
                                                     false));
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
@@ -564,7 +559,6 @@ public class WorkspaceManagerTest {
                                                     runtimes,
                                                     eventService,
                                                     machineManager,
-                                                    userManager,
                                                     false,
                                                     true));
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");

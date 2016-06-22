@@ -26,7 +26,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
