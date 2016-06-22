@@ -31,7 +31,7 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
     public Response toResponse(RuntimeException exception) {
         String errorMessage = exception.getLocalizedMessage();
         if (!isNullOrEmpty(errorMessage)) {
-            ServiceError serviceError = DtoFactory.getInstance().createDto(ServiceError.class).withMessage(errorMessage);
+            ServiceError serviceError = DtoFactory.newDto(ServiceError.class).withMessage(errorMessage);
             return Response.serverError()
                            .entity(DtoFactory.getInstance().toJson(serviceError))
                            .type(MediaType.APPLICATION_JSON)
