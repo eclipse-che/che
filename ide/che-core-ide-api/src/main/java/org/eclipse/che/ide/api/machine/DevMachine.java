@@ -133,4 +133,10 @@ public class DevMachine {
     public List<Link> getDevMachineLinks() {
         return devMachineLinks;
     }
+
+    /** Returns address (host:port) of the Workspace Agent. */
+    public String getAddress() {
+        final DevMachineServer server = getServer(Constants.WSAGENT_REFERENCE);
+        return Strings.nullToEmpty(server.getAddress());
+    }
 }
