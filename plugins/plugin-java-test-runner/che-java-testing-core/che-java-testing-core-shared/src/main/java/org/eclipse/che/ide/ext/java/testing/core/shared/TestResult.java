@@ -14,20 +14,42 @@ import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 
+/**
+ * DTO for representing the executed test result of a Java unit test.
+ *
+ * @author Mirage Abeysekara
+ */
 @DTO
 public interface TestResult {
+
+    /**
+     * Returns the framework name used for executing the test cases.
+     * @return the framework name
+     */
     String getTestFramework();
 
     void setTestFramework(String framework);
 
+    /**
+     * Indicates whether the test was successful.
+     * @return true if all tests are passed.
+     */
     boolean isSuccess();
 
     void setSuccess(boolean success);
 
+    /**
+     * Returns the details of the failing test cases.
+     * @return a list of test failures.
+     */
     List<Failure> getFailures();
 
     void setFailures(List<Failure> failures);
 
+    /**
+     * Indicates how many tests were failed.
+     * @return the count of test failures.
+     */
     int getFailureCount();
 
     void setFailureCount(int count);

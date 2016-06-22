@@ -20,7 +20,9 @@ import org.eclipse.che.inject.DynaModule;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
-
+/**
+ * @author Mirage Abeysekara
+ */
 @DynaModule
 public class TestGuiceModule extends AbstractModule {
     @Override

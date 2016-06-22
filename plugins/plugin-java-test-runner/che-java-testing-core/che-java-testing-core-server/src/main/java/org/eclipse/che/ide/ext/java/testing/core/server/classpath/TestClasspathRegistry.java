@@ -4,9 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * <p>
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.testing.core.server.classpath;
 
@@ -18,25 +18,36 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Registry for test class path providers on the server.
+ *
+ * @author Mirage Abeysekara
+ */
 @Singleton
 public class TestClasspathRegistry {
 
-    private final Map<String,TestClasspathProvider> classpathProviders = new HashMap<>();
+    private final Map<String, TestClasspathProvider> classpathProviders = new HashMap<>();
 
 
     @Inject
     public TestClasspathRegistry(Set<TestClasspathProvider> testClasspathProviders) {
-        System.out.println("inititilaized TestClasspathRegistry " + testClasspathProviders.size()+ " wkwkwkwkwk " +
+        System.out.println("inititilaized TestClasspathRegistry " + testClasspathProviders.size() + " wkwkwkwkwk " +
                 testClasspathProviders.toString());
 
         testClasspathProviders.forEach(this::register);
     }
 
     private void register(@NotNull TestClasspathProvider provider) {
-        classpathProviders.put(provider.getProjectType(),provider);
+        classpathProviders.put(provider.getProjectType(), provider);
     }
 
-    public TestClasspathProvider getTestClasspathProvider(String projectType){
+    /**
+     * Get the classpath provider for a given project type.
+     *
+     * @param projectType string representation of the project type.
+     * @return the TestClasspathProvider implementation for the project type if available, otherwise null.
+     */
+    public TestClasspathProvider getTestClasspathProvider(String projectType) {
         return classpathProviders.get(projectType);
     }
 

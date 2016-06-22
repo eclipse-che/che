@@ -4,9 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * <p>
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.testing.junit4x.server;
 
@@ -30,7 +30,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * JUnit implementation for the test runner service.
+ *
+ * @author Mirage Abeysekara
+ */
 public class JUnit4TestRunner implements TestRunner {
 
 
@@ -145,6 +149,9 @@ public class JUnit4TestRunner implements TestRunner {
         return dtoResult;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TestResult execute(Map<String, String> testParameters, TestClasspathProvider classpathProvider) {
         projectPath = testParameters.get("absoluteProjectPath");
@@ -165,6 +172,9 @@ public class JUnit4TestRunner implements TestRunner {
         return a;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName() {
         return "junit";

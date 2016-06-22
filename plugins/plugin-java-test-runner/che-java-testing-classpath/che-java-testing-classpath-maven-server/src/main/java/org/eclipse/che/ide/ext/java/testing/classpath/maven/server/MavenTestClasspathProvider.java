@@ -4,9 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * <p>
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.testing.classpath.maven.server;
 
@@ -26,6 +26,11 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Maven implementation for the test classpath provider.
+ *
+ * @author Mirage Abeysekara
+ */
 public class MavenTestClasspathProvider implements TestClasspathProvider {
 
     private static final String JUNIT4X_RUNNER_CLASS = "org.junit.runner.JUnitCore";
@@ -95,11 +100,14 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
         return classUrls;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ClassLoader getClassLoader(String projectPath, boolean updateClasspath) {
         List<URL> classUrls = new ArrayList<>();
         try {
-            if(updateClasspath) {
+            if (updateClasspath) {
                 buildClasspath(projectPath);
             }
             classUrls = getProjectClasspath(projectPath);
@@ -109,6 +117,9 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
         return new URLClassLoader(classUrls.toArray(new URL[classUrls.size()]), null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getProjectType() {
         return "maven";

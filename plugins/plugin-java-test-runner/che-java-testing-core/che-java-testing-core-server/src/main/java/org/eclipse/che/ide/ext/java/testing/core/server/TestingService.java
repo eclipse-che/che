@@ -4,13 +4,17 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * <p>
  * Contributors:
- *   Codenvy, S.A. - initial API and implementation
+ * Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.testing.core.server;
 
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.ide.ext.java.testing.core.server.classpath.TestClasspathRegistry;
 import org.eclipse.che.ide.ext.java.testing.core.server.framework.TestFrameworkRegistry;
@@ -29,6 +33,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service for executing Java unit tests.
+ *
+ * @author Mirage Abeysekara
+ */
+@Api(value = "/java-testing", description = "Java test runner API")
 @Path("java/testing")
 public class TestingService {
 
@@ -45,29 +55,20 @@ public class TestingService {
         System.out.println("inititilaized TestingService");
     }
 
-//    @GET
-//    @Path("runClass")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public TestResult runClass(@QueryParam("projectpath") String projectPath, @QueryParam("fqn") String fqn) throws Exception {
-//        String absoluteProjectPath = ResourcesPlugin.getPathToWorkspace() + projectPath;
-//        TestRunnerFactory runnerFactory = new TestRunnerFactory();
-//        TestRunner testRunner = runnerFactory.getTestRunner(absoluteProjectPath);
-//        return testRunner.run(fqn);
-//    }
-//
-//    @GET
-//    @Path("runAll")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public TestResult runAll(@QueryParam("projectpath") String projectPath) throws Exception {
-//        String absoluteProjectPath = ResourcesPlugin.getPathToWorkspace() + projectPath;
-//        TestRunnerFactory runnerFactory = new TestRunnerFactory();
-//        TestRunner testRunner = runnerFactory.getTestRunner(absoluteProjectPath);
-//        return testRunner.runAll();
-//    }
-
+    /**
+     * Execute the Java test cases and return the test result.
+     *
+     * @param uriInfo JAX-RS implementation of UrlInfo with set of query parameters.
+     * @return the test result of test case
+     * @throws Exception when the test runner failed to execute test cases.
+     */
     @GET
     @Path("run")
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Execute Java tests and return results",
+            notes = "The GET parameters are passed to the test framework implementation.")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 500, message = "Server error")})
     public TestResult run(@Context UriInfo uriInfo) throws Exception {
         Map<String, String> queryParameters = getMap(uriInfo.getQueryParameters());
         String projectPath = queryParameters.get("projectPath");
