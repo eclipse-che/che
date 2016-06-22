@@ -253,29 +253,44 @@ public abstract class OAuthAuthenticator {
      * WARN!!!. DO not use it directly.
      *
      * @param userId
-     * @return
+     *         user identifier
+     * @return token value or {@code null}. When user have valid token then it will be returned,
+     * when user have expired token and it can be refreshed then refreshed value will be returned,
+     * when none token found for user then {@code null} will be returned,
+     * when user have expired token and it can't be refreshed then {@code null} will be returned
      * @throws IOException
+     *         when error occurs during token loading
      * @see org.eclipse.che.api.auth.oauth.OAuthTokenProvider#getToken(String, String)
      */
     public OAuthToken getToken(String userId) throws IOException {
         if (!isConfigured()) {
             throw new IOException("Authenticator is not configured");
         }
-
         Credential credential = flow.loadCredential(userId);
-        if (credential != null) {
-            Long expirationTime = credential.getExpiresInSeconds();
-            if (expirationTime != null && expirationTime < 0) {
-                if (credential.refreshToken()) {
-                    credential = flow.loadCredential(userId);
-                } else {
-                    return null;
-                }
-            }
-
-            return newDto(OAuthToken.class).withToken(credential.getAccessToken());
+        if (credential == null) {
+            return null;
         }
-        return null;
+        final Long expirationTime = credential.getExpiresInSeconds();
+        if (expirationTime != null && expirationTime < 0) {
+            boolean tokenRefreshed;
+            try {
+                tokenRefreshed = credential.refreshToken();
+            } catch (IOException ioEx) {
+                tokenRefreshed = false;
+            }
+            if (tokenRefreshed) {
+                credential = flow.loadCredential(userId);
+            } else {
+                // if token is not refreshed then old value should be invalidated
+                // and null result should be returned
+                try {
+                    invalidateToken(userId);
+                } catch (IOException ignored) {
+                }
+                return null;
+            }
+        }
+        return newDto(OAuthToken.class).withToken(credential.getAccessToken());
     }
 
     /**
