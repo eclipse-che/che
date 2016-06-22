@@ -38,7 +38,7 @@
     </scm>
     <properties>
         <che.lib.version>4.3.0</che.lib.version>
-        <che.version>4.3.4-SNAPSHOT</che.version>
+        <che.version>4.3.4</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
