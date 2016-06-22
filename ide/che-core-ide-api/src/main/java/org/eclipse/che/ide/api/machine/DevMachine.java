@@ -137,6 +137,6 @@ public class DevMachine {
     /** Returns address (host:port) of the Workspace Agent. */
     public String getAddress() {
         final DevMachineServer server = getServer(Constants.WSAGENT_REFERENCE);
-        return Strings.nullToEmpty(server.getAddress());
+        return server.getProtocol() + "://" + server.getAddress();
     }
 }
