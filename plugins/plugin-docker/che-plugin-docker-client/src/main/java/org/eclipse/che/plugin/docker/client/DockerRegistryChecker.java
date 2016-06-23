@@ -10,11 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client;
 
-import com.google.common.annotations.VisibleForTesting;
-
-import org.eclipse.che.api.core.ApiException;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +19,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.Boolean.TRUE;
 
 /**
  * Checks that docker registry is available.
@@ -39,40 +35,37 @@ public class DockerRegistryChecker {
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerRegistryChecker.class);
 
-    private final HttpJsonRequestFactory requestFactory;
-    private final String                 registryUrl;
-    private final Boolean                snapshotUseRegistry;
+    @Inject
+    @Nullable
+    @Named("machine.docker.registry")
+    private String machineDockerRegistry;
 
     @Inject
-    public DockerRegistryChecker(HttpJsonRequestFactory requestFactory,
-                                 @Nullable @Named("machine.docker.registry") String registryUrl,
-                                 @Nullable @Named("machine.docker.snapshot_use_registry") Boolean snapshotUseRegistry) {
-        this.requestFactory = requestFactory;
-        this.registryUrl = registryUrl;
-        this.snapshotUseRegistry = snapshotUseRegistry;
-    }
+    @Named("machine.docker.snapshot_use_registry")
+    private boolean snapshotUseRegistry;
 
     /**
      * Checks that registry is available and if it is not - logs warning message.
      */
-    @VisibleForTesting
     @PostConstruct
-    void checkRegistryIsAvailable() {
-        if (TRUE.equals(snapshotUseRegistry) && !isNullOrEmpty(registryUrl)) {
-            String registryLink = "http://" + registryUrl;
+    private void checkRegistryIsAvailable() throws IOException {
+        if (snapshotUseRegistry && !isNullOrEmpty(machineDockerRegistry)) {
+            String registryUrl = "http://" + machineDockerRegistry;
 
-            LOG.info("Probing registry '{}'", registryLink);
-
+            LOG.info("Probing registry '{}'", registryUrl);
+            final HttpURLConnection conn = (HttpURLConnection) new URL(registryUrl).openConnection();
+            conn.setConnectTimeout(30 * 1000);
             try {
-                HttpJsonResponse response = requestFactory.fromUrl(registryLink).setTimeout(30 * 1000).request();
-                final int responseCode = response.getResponseCode();
-                LOG.info("Probe of registry '{}' succeed with HTTP response code '{}'", registryLink, responseCode);
-            } catch (ApiException | IOException ex) {
-                LOG.warn("Docker registry " + registryLink + " is not available, " +
+                final int responseCode = conn.getResponseCode();
+                LOG.info("Probe of registry '{}' succeed with HTTP response code '{}'", registryUrl, responseCode);
+            } catch (IOException ioEx) {
+                LOG.warn("Docker registry {} is not available, " +
                          "which means that you won't be able to save snapshots of your workspaces." +
                          "\nHow to configure registry?" +
                          "\n\tLocal registry  -> https://docs.docker.com/registry/" +
-                         "\n\tRemote registry -> set up 'docker.registry.auth.*' properties");
+                         "\n\tRemote registry -> set up 'docker.registry.auth.*' properties", registryUrl);
+            } finally {
+                conn.disconnect();
             }
         }
     }

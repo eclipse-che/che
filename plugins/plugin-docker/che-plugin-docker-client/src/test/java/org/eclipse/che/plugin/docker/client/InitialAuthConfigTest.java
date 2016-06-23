@@ -42,7 +42,6 @@ public class InitialAuthConfigTest {
     private static final String PASSWORD1_KEY    = "registry1.password";
     private static final String PASSWORD1_VALUE  = "The game is afoot";
 
-
     private static final String URL2_KEY         = "registry2.url";
     private static final String URL2_VALUE       = "http://some.private.registry";
     private static final String USER_NAME2_KEY   = "registry2.username";
@@ -90,7 +89,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed '.' in property '" + CONFIG_PREFIX + "url'. " +
+          expectedExceptionsMessageRegExp = "In the property '" + CONFIG_PREFIX + "url' is missing '.'. " +
                                             "Valid credential registry format is '" + VALID_DOCKER_PROPERTY_NAME_EXAMPLE + "'")
     public void shouldThrowExceptionWhenUserMissedPointInProperty() throws IllegalArgumentException {
         properties.put(CONFIG_PREFIX + "url", URL1_VALUE);
@@ -99,7 +98,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You set redundant '.' in property '" + CONFIG_PREFIX + "my.registry.docker.url'. " +
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + "my.registry.docker.url' contains redundant '.'. " +
                                             "Valid credential registry format is '" + VALID_DOCKER_PROPERTY_NAME_EXAMPLE + "'")
     public void shouldThrowExceptionWhenUserSetRedundantPointInProperty() throws IllegalArgumentException {
         properties.put(CONFIG_PREFIX + "my.registry.docker.url", URL1_VALUE);
@@ -108,7 +107,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed property " + CONFIG_PREFIX + URL1_KEY)
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + URL1_KEY + "' is missing.")
     public void shouldThrowExceptionIfUserMissedUrlProperty() throws IllegalArgumentException {
         properties.remove(CONFIG_PREFIX + URL1_KEY);
 
@@ -116,7 +115,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed property " + CONFIG_PREFIX + USER_NAME1_KEY)
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + USER_NAME1_KEY + "' is missing.")
     public void shouldThrowExceptionIfUserMissedUserProperty() throws IllegalArgumentException {
         properties.remove(CONFIG_PREFIX + USER_NAME1_KEY);
 
@@ -124,7 +123,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed property " + CONFIG_PREFIX + PASSWORD1_KEY)
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + PASSWORD1_KEY + "' is missing.")
     public void shouldThrowExceptionIfUserMissedPasswordProperty() throws IllegalArgumentException {
         properties.remove(CONFIG_PREFIX + PASSWORD1_KEY);
 
@@ -141,7 +140,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed property " + CONFIG_PREFIX + URL1_KEY)
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + URL1_KEY + "' is missing.")
     public void shouldThrowExceptionIfUserSetEmptyUrlValue() throws IllegalArgumentException {
         properties.put(CONFIG_PREFIX + URL1_KEY, "");
 
@@ -149,7 +148,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed property " + CONFIG_PREFIX + URL1_KEY)
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + URL1_KEY + "' is missing.")
     public void shouldThrowExceptionIfUserSetNullUrlValue() throws IllegalArgumentException {
         properties.put(CONFIG_PREFIX + URL1_KEY, null);
 
@@ -157,7 +156,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed property " + CONFIG_PREFIX + USER_NAME1_KEY)
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + USER_NAME1_KEY + "' is missing.")
     public void shouldThrowExceptionIfUserSetEmptyUserNameValue() throws IllegalArgumentException {
         properties.put(CONFIG_PREFIX + USER_NAME1_KEY, "");
 
@@ -165,7 +164,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed property " + CONFIG_PREFIX + USER_NAME1_KEY)
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + USER_NAME1_KEY + "' is missing.")
     public void shouldThrowExceptionIfUserSetNullUserNameValue() throws IllegalArgumentException {
         properties.put(CONFIG_PREFIX + USER_NAME1_KEY, null);
 
@@ -173,7 +172,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed property " + CONFIG_PREFIX + PASSWORD1_KEY)
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + PASSWORD1_KEY + "' is missing.")
     public void shouldThrowExceptionIfUserSetEmptyPasswordValue() throws IllegalArgumentException {
         properties.put(CONFIG_PREFIX + PASSWORD1_KEY, "");
 
@@ -181,7 +180,7 @@ public class InitialAuthConfigTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "You missed property " + CONFIG_PREFIX + PASSWORD1_KEY)
+          expectedExceptionsMessageRegExp = "Property '" + CONFIG_PREFIX + PASSWORD1_KEY + "' is missing.")
     public void shouldThrowExceptionIfUserSetNullPasswordValue() throws IllegalArgumentException {
         properties.put(CONFIG_PREFIX + PASSWORD1_KEY, null);
 
