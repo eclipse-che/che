@@ -94,7 +94,8 @@ public class UnixSocketConnection extends DockerConnection {
             writer.write(String.valueOf(header.second));
             writer.write("\r\n");
         }
-        writer.write("\r\n");
+        // Host header is mandatory in HTTP 1.1
+        writer.write("Host: \r\n\r\n");
         writer.flush();
     }
 
