@@ -1,16 +1,16 @@
-<che-toolbar che-title="{{projectDetailsCtrl.projectName}}"
-             che-title-icons-controller="projectDetailsCtrl"
+<che-toolbar che-title="{{projectDetailsController.projectName}}"
+             che-title-icons-controller="projectDetailsController"
              che-button-name="Open"
-             che-button-href="#/ide/{{projectDetailsCtrl.getWorkspaceName(projectDetailsCtrl.workspaceId)}}"
+             che-button-href="#/ide/{{projectDetailsController.getWorkspaceName(projectDetailsController.workspaceId)}}"
              che-breadcrumb-title="All projects"
              che-breadcrumb-href="#/projects"
-             che-subheader-icon="chefont cheico-type-{{projectDetailsCtrl.projectDetails.type}} cheico-type-blank"
-             che-subheader-title="{{projectDetailsCtrl.projectDetails.type}}">
+             che-subheader-icon="chefont cheico-type-{{projectDetailsController.projectDetails.type}} cheico-type-blank"
+             che-subheader-title="{{projectDetailsController.projectDetails.type}}">
 </che-toolbar>
-<md-progress-linear md-mode="indeterminate" ng-show="projectDetailsCtrl.loading"></md-progress-linear>
+<md-progress-linear md-mode="indeterminate" ng-show="projectDetailsController.loading"></md-progress-linear>
 
 <md-content md-scroll-y flex class="projects-details-project"
-            ng-show="projectDetailsCtrl.projectDetails" md-theme="maincontent-theme">
+            ng-show="projectDetailsController.projectDetails" md-theme="maincontent-theme">
   <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="selectedIndex" class="project-details-menu">
     <md-tab>
       <md-tab-label>
@@ -24,9 +24,9 @@
                         che-name="name"
                         che-label-name="Name"
                         che-place-holder="Name of the project"
-                        ng-model="projectDetailsCtrl.projectDetails.name"
+                        ng-model="projectDetailsController.projectDetails.name"
                         required
-                        unique-project-name="projectDetailsCtrl.getWorkspaceProjects()"
+                        unique-project-name="projectDetailsController.getWorkspaceProjects()"
                         ng-maxlength="128"
                         ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
               <div ng-message="required">A name is required.</div>
@@ -39,19 +39,19 @@
                         che-name="description"
                         che-label-name="Description"
                         che-place-holder="Description of the project"
-                        ng-model="projectDetailsCtrl.projectDetails.description"
+                        ng-model="projectDetailsController.projectDetails.description"
                         ng-maxlength="256">
               <div ng-message="maxlength">The name has to be less than 256 characters long.</div>
               <div ng-message="md-maxlength">The name has to be less than 256 characters long.</div>
             </che-input>
           </ng-form>
           <che-button-primary
-            ng-disabled="projectInformationForm.$invalid || !(projectDetailsCtrl.isNameChanged() || projectDetailsCtrl.isDescriptionChanged())"
-            che-button-title="Update" name="updateButton" ng-click="projectDetailsCtrl.updateInfo(projectInformationForm.$valid)"/>
+            ng-disabled="projectInformationForm.$invalid || !(projectDetailsController.isNameChanged() || projectDetailsController.isDescriptionChanged())"
+            che-button-title="Update" name="updateButton" ng-click="projectDetailsController.updateInfo(projectInformationForm.$valid)"/>
         </che-panel>
         <che-panel che-title="Workspace">
           <div layout="column" flex layout-align="space-around start">
-            <che-label che-label-text="{{projectDetailsCtrl.getWorkspaceName(projectDetailsCtrl.workspaceId)}}"></che-label>
+            <che-label che-label-text="{{projectDetailsController.getWorkspaceName(projectDetailsController.workspaceId)}}"></che-label>
           </div>
         </che-panel>
         <che-panel che-title="Delete Project">
@@ -59,7 +59,7 @@
             <label flex flex-gt-xs="15"></label>
 
             <div layout="column" flex-xs="none" flex-gt-xs="85">
-              <che-button-danger che-button-title="Delete" ng-click="projectDetailsCtrl.deleteProject($event)"/>
+              <che-button-danger che-button-title="Delete" ng-click="projectDetailsController.deleteProject($event)"/>
             </div>
           </div>
         </che-panel>
@@ -101,17 +101,17 @@
 </md-content>
 
 
-<md-content ng-show="projectDetailsCtrl.invalidProject">
-  {{projectDetailsCtrl.invalidProject}}
+<md-content ng-show="projectDetailsController.invalidProject">
+  {{projectDetailsController.invalidProject}}
 </md-content>
 
 
 <md-content md-scroll-y flex class="projects-details-project"
-            ng-show="projectDetailsCtrl.noWorkspaceRuntime" layout="column" layout-align="center center" md-theme="maincontent-theme">
+            ng-show="projectDetailsController.noWorkspaceRuntime" layout="column" layout-align="center center" md-theme="maincontent-theme">
     <che-empty-state che-value="This project's workspace is not currently running."
                      che-icon-class="fa fa-folder-open"></che-empty-state>
 
-  <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsCtrl.workspaceId}}" che-link-text="Start workspace"></che-link>
+  <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsController.workspaceId}}" che-link-text="Start workspace"></che-link>
 
 </md-content>
 
