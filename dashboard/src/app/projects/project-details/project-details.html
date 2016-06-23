@@ -20,7 +20,7 @@
       <md-tab-body>
         <che-panel che-title="Project Information">
           <ng-form name="projectInformationForm">
-            <che-input che-form="projectInformationForm"
+            <che-input  che-form="projectInformationForm"
                         che-name="name"
                         che-label-name="Name"
                         che-place-holder="Name of the project"
@@ -28,7 +28,8 @@
                         required
                         unique-project-name="projectDetailsController.getWorkspaceProjects()"
                         ng-maxlength="128"
-                        ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+                        ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
+                        readonly>
               <div ng-message="required">A name is required.</div>
               <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
               <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
