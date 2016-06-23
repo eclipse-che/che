@@ -30,8 +30,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
+import static java.util.stream.Stream.concat;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
@@ -74,7 +76,8 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
         public void setValues(String attributeName, List<String> values) throws ValueStorageException {
             Map<String, List<String>> attributes = projectRegistryProvider.get().getProject(projectFolder.getProject()).getAttributes();
             if (attributes.containsKey(attributeName)) {
-                attributes.get(attributeName).addAll(values);
+                attributes.put(attributeName,
+                               concat(values.stream(), attributes.get(attributeName).stream()).collect(Collectors.toList()));
             } else {
                 attributes.put(attributeName, values);
             }

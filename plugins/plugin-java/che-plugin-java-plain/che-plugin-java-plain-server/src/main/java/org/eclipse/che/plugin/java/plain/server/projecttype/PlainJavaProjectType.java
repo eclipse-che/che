@@ -36,7 +36,7 @@ public class PlainJavaProjectType extends ProjectTypeDef {
         setValueProviderFactory(SOURCE_FOLDER, valueProviderFactory);
         setValueProviderFactory(OUTPUT_FOLDER, valueProviderFactory);
 
-        addVariableDefinition(LIBRARY_FOLDER, "java library folder", false, valueProviderFactory);
+        addVariableDefinition(LIBRARY_FOLDER, "java library folder", false);
 
         addParent(JAVA_ID);
     }
