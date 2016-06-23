@@ -25,8 +25,8 @@ export class ProjectRepository {
 
     this.templateUrl = 'app/projects/project-details/repository/project-repository.html';
 
-    this.controller = 'ProjectRepositoryCtrl';
-    this.controllerAs = 'projectRepositoryCtrl';
+    this.controller = 'ProjectRepositoryController';
+    this.controllerAs = 'projectRepositoryController';
 
     this.bindToController = true;
 
