@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangePreview;
@@ -178,7 +179,7 @@ final class PreviewViewImpl extends Window implements PreviewView {
     /** {@inheritDoc} */
     @Override
     public void showErrorMessage(RefactoringStatus status) {
-        errorLabel.getElement().getStyle().setColor("#C34d4d");
+        errorLabel.getElement().getStyle().setColor(Style.getErrorColor());
 
         showMessage(status);
     }
