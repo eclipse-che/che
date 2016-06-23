@@ -12,6 +12,8 @@ package org.eclipse.che.api.core.rest;
 
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
 import javax.ws.rs.core.MediaType;
@@ -27,10 +29,13 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 @Provider
 @Singleton
 public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException> {
+    private static final Logger LOG = LoggerFactory.getLogger(RuntimeExceptionMapper.class);
+
     @Override
     public Response toResponse(RuntimeException exception) {
         String errorMessage = exception.getLocalizedMessage();
         if (!isNullOrEmpty(errorMessage)) {
+            LOG.error(errorMessage);
             ServiceError serviceError = DtoFactory.newDto(ServiceError.class).withMessage(errorMessage);
             return Response.serverError()
                            .entity(DtoFactory.getInstance().toJson(serviceError))
