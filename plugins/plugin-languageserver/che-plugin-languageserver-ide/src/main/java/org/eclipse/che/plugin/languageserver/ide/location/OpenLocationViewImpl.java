@@ -27,7 +27,6 @@ import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
-import org.eclipse.che.plugin.languageserver.ide.util.FilePathNormalizer;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
 
 import javax.validation.constraints.NotNull;
@@ -84,7 +83,7 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
 
         @Override
         public void updatePresentation(@NotNull NodePresentation presentation) {
-            presentation.setPresentableText(FilePathNormalizer.normalizePath(location.getUri()));
+            presentation.setPresentableText(location.getUri());
             presentation.setInfoText(
                     "From:" + location.getRange().getStart().getLine() + ":" + location.getRange().getStart().getCharacter() + " To:" +
                     location.getRange().getEnd().getLine() + ":" + location.getRange().getEnd().getCharacter());

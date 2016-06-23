@@ -2,6 +2,7 @@ package org.eclipse.che.plugin.languageserver.server;
 
 import io.typefox.lsapi.CompletionItem;
 import io.typefox.lsapi.Location;
+import io.typefox.lsapi.LocationImpl;
 import io.typefox.lsapi.SymbolInformation;
 import io.typefox.lsapi.services.LanguageServer;
 
@@ -35,6 +36,8 @@ import static java.util.Collections.emptyList;
 @Path("languageserver/textDocument")
 public class TextDocumentServiceImpl {
 
+    private static final String FILE_PROJECTS = "file:///projects";
+
     LanguageServerRegistry languageServerRegistry;
 
     @Inject
@@ -43,7 +46,14 @@ public class TextDocumentServiceImpl {
     }
     
     static String prefixURI(String relativePath) {
-        return "file:///projects"+relativePath;
+        return FILE_PROJECTS + relativePath;
+    }
+
+    static String removePrefixUri(String uri) {
+        if(uri.startsWith(FILE_PROJECTS)){
+            return uri.substring(FILE_PROJECTS.length());
+        }
+        return uri;
     }
 
     @POST
@@ -89,8 +99,16 @@ public class TextDocumentServiceImpl {
             return emptyList();
         }
 
-        return server.getTextDocumentService().references(params).get();
+        List<? extends Location> locations = server.getTextDocumentService().references(params).get();
+        locations.forEach(o -> {
+            if (o instanceof LocationImpl) {
+                ((LocationImpl)o).setUri(removePrefixUri(o.getUri()));
+            }
+        });
+        return locations;
     }
+
+
 
     @POST
     @Path("definition")
@@ -104,7 +122,13 @@ public class TextDocumentServiceImpl {
             return emptyList();
         }
 
-        return server.getTextDocumentService().definition(params).get();
+        List<? extends Location> locations = server.getTextDocumentService().definition(params).get();
+        locations.forEach(o -> {
+            if (o instanceof LocationImpl) {
+                ((LocationImpl)o).setUri(removePrefixUri(o.getUri()));
+            }
+        });
+        return locations;
     }
 
 

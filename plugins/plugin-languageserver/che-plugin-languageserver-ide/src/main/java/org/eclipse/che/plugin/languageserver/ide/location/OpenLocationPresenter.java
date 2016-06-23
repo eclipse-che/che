@@ -27,7 +27,6 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
-import org.eclipse.che.plugin.languageserver.ide.util.FilePathNormalizer;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
@@ -123,7 +122,7 @@ public class OpenLocationPresenter extends BasePresenter implements OpenLocation
     @Override
     public void onLocationSelected(LocationDTO location) {
         RangeDTO range = location.getRange();
-        helper.openFile(FilePathNormalizer.normalizePath(location.getUri()), new TextRange(new TextPosition(
+        helper.openFile(location.getUri(), new TextRange(new TextPosition(
                 range.getStart().getLine(),
                 range.getStart().getCharacter()), new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter())));
     }

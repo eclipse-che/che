@@ -29,18 +29,16 @@ import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.filters.FuzzyMatches;
 import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKind;
-import org.eclipse.che.plugin.languageserver.ide.util.FilePathNormalizer;
-import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.WorkspaceServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.SymbolInformationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -135,8 +133,6 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
                 LocationDTO location = element.getLocation();
                 if (location != null && location.getUri() != null) {
                     String filePath = location.getUri();
-                    filePath = FilePathNormalizer.normalizePath(filePath);
-                    String container = filePath;
                     RangeDTO locationRange = location.getRange();
 
                     TextRange range = null;
@@ -145,7 +141,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
                                               new TextPosition(locationRange.getEnd().getLine(), locationRange.getEnd().getCharacter()));
 
                     }
-                    result.add(new SymbolEntry(element.getName(), "", container, filePath, symbolKind.from(element.getKind()), range,
+                    result.add(new SymbolEntry(element.getName(), "", filePath, filePath, symbolKind.from(element.getKind()), range,
                                                symbolKind.getIcon(element.getKind()), editorHelper, matches));
                 }
             }

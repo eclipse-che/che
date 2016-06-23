@@ -81,8 +81,12 @@ public class LanguageServerRegistry {
 	public void register(final LanguageServer server, final List<LanguageDescriptionDTO> languages) {
 		InitializeParamsImpl initializeParams = new InitializeParamsImpl();
 		initializeParams.setProcessId(PROCESS_ID);
-		//TODO test added only for C# demo, remove it
-		initializeParams.setRootPath("/projects/test/");
+        //TODO remove if it's only for demo
+        if (languages != null && "csharp".equals(languages.get(0).getLanguageId())) {
+            initializeParams.setRootPath("/projects/test/");
+        }else {
+            initializeParams.setRootPath("/projects/");
+        }
 		initializeParams.setClientName("EclipseChe");
 		connect(server);
 		CompletableFuture<InitializeResult> result = server.initialize(initializeParams);
@@ -126,6 +130,5 @@ public class LanguageServerRegistry {
 		server.getTextDocumentService().onPublishDiagnostics(publishDiagnosticsMessenger::onEvent);
         //TODO do we need to send this log messages ot client(browser)?
 		server.getWindowService().onLogMessage(messageParams -> LOG.error(messageParams.getType() + " " + messageParams.getMessage()));
-//		server.getWindowService().onTelemetryEvent(System.out::println);
 	}
 }
