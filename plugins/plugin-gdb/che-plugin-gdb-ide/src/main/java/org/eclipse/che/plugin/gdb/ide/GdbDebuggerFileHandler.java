@@ -15,11 +15,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.data.tree.Node;
@@ -27,12 +31,8 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
 
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 
@@ -46,87 +46,66 @@ public class GdbDebuggerFileHandler implements ActiveFileHandler {
     private final EditorAgent              editorAgent;
     private final EventBus                 eventBus;
     private final ProjectExplorerPresenter projectExplorer;
+    private final AppContext               appContext;
 
     @Inject
     public GdbDebuggerFileHandler(EditorAgent editorAgent,
+                                  ProjectExplorerPresenter projectExplorer,
                                   EventBus eventBus,
-                                  ProjectExplorerPresenter projectExplorer) {
+                                  AppContext appContext) {
         this.editorAgent = editorAgent;
         this.eventBus = eventBus;
         this.projectExplorer = projectExplorer;
+        this.appContext = appContext;
     }
 
     @Override
-    public void openFile(final List<String> filePaths,
-                         final String className,
-                         final int lineNumber,
-                         final AsyncCallback<VirtualFile> callback) {
+    public void openFile(final Location location, final AsyncCallback<VirtualFile> callback) {
+        CurrentProject currentProject = appContext.getCurrentProject();
+        if (currentProject == null) {
+            return;
+        }
+        String filePath = currentProject.getProjectConfig().getPath() + "/" + location.getTarget();
         VirtualFile activeFile = null;
         final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
         if (activeEditor != null) {
             activeFile = activeEditor.getEditorInput().getFile();
         }
 
-        if (activeFile == null || !filePaths.contains(activeFile.getPath())) {
-            openFile(className, filePaths, 0, new AsyncCallback<VirtualFile>() {
-                @Override
-                public void onSuccess(VirtualFile result) {
-                    scrollEditorToExecutionPoint((TextEditorPresenter)editorAgent.getActiveEditor(), lineNumber);
-                    callback.onSuccess(result);
-                }
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    callback.onFailure(caught);
-                }
-            });
+        if (activeEditor == null || !activeFile.getPath().equals(filePath)) {
+            doOpenFile(filePath, location.getLineNumber(), callback);
         } else {
-            scrollEditorToExecutionPoint((TextEditorPresenter)activeEditor, lineNumber);
-            callback.onSuccess(activeFile);
+            scrollEditorToExecutionPoint((TextEditor)activeEditor, location.getLineNumber());
+            callback.onSuccess(activeEditor.getEditorInput().getFile());
         }
     }
 
-    /**
-     * Tries to open file from the project.
-     * If fails then method will try to find resource from external dependencies.
-     */
-    private void openFile(@NotNull final String className,
-                          final List<String> filePaths,
-                          final int pathNumber,
-                          final AsyncCallback<VirtualFile> callback) {
-        if (pathNumber == filePaths.size()) {
-            callback.onFailure(new IllegalArgumentException("Can't open resource " + className));
-            return;
-        }
-
-        String filePath = filePaths.get(pathNumber);
-
+    private void doOpenFile(final String filePath, final int lineNumber, final AsyncCallback<VirtualFile> callback) {
         projectExplorer.getNodeByPath(new HasStorablePath.StorablePath(filePath)).then(new Operation<Node>() {
             @Override
             public void apply(final Node node) throws OperationException {
                 if (!(node instanceof FileReferenceNode)) {
                     return;
                 }
-
-                handleActivateFile((VirtualFile)node, callback);
+                handleActivatedFile((VirtualFile)node, callback, lineNumber);
                 eventBus.fireEvent(new FileEvent((VirtualFile)node, OPEN));
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                // try another path
-                openFile(className, filePaths, pathNumber + 1, callback);
+                callback.onFailure(error.getCause());
             }
         });
     }
 
-    public void handleActivateFile(final VirtualFile virtualFile, final AsyncCallback<VirtualFile> callback) {
+    public void handleActivatedFile(final VirtualFile virtualFile, final AsyncCallback<VirtualFile> callback, final int debugLine) {
         editorAgent.openEditor(virtualFile, new EditorAgent.OpenEditorCallback() {
             @Override
             public void onEditorOpened(EditorPartPresenter editor) {
                 new Timer() {
                     @Override
                     public void run() {
+                        scrollEditorToExecutionPoint((TextEditor)editorAgent.getActiveEditor(), debugLine);
                         callback.onSuccess(virtualFile);
                     }
                 }.schedule(300);
@@ -137,6 +116,7 @@ public class GdbDebuggerFileHandler implements ActiveFileHandler {
                 new Timer() {
                     @Override
                     public void run() {
+                        scrollEditorToExecutionPoint((TextEditor)editorAgent.getActiveEditor(), debugLine);
                         callback.onSuccess(virtualFile);
                     }
                 }.schedule(300);
@@ -149,7 +129,7 @@ public class GdbDebuggerFileHandler implements ActiveFileHandler {
         });
     }
 
-    private void scrollEditorToExecutionPoint(TextEditorPresenter editor, int lineNumber) {
+    private void scrollEditorToExecutionPoint(TextEditor editor, int lineNumber) {
         Document document = editor.getDocument();
 
         if (document != null) {

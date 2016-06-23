@@ -36,12 +36,11 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -54,8 +53,6 @@ import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,7 +61,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -109,13 +105,9 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private EventBus              eventBus;
     @Mock
-    private AppContext            appContext;
-    @Mock
     private ActiveFileHandler     activeFileHandler;
     @Mock
     private DebuggerManager       debuggerManager;
-    @Mock
-    private FileTypeRegistry      fileTypeRegistry;
     @Mock
     private BreakpointManager     breakpointManager;
 
@@ -129,8 +121,6 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private VirtualFile        file;
     @Mock
-    private FqnResolverFactory fqnResolverFactory;
-    @Mock
     private LocalStorage       localStorage;
     @Mock
     private DebuggerObserver   observer;
@@ -138,8 +128,6 @@ public class DebuggerTest extends BaseTest {
     private LocationDto        locationDto;
     @Mock
     private BreakpointDto      breakpointDto;
-    @Mock
-    private FqnResolver        fgnResolver;
 
     @Captor
     private ArgumentCaptor<WsAgentStateHandler>             extServerStateHandlerCaptor;
@@ -178,13 +166,10 @@ public class DebuggerTest extends BaseTest {
         doReturn(DEBUG_INFO).when(localStorage).getItem(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY);
         doReturn(debugSessionDto).when(dtoFactory).createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
-        doReturn(fgnResolver).when(fqnResolverFactory).getResolver(anyString());
-        doReturn(FQN).when(fgnResolver).resolveFqn(file);
-
         doReturn(PATH).when(file).getPath();
 
-        debugger = new TestDebugger(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus, fqnResolverFactory,
-                                    activeFileHandler, debuggerManager, fileTypeRegistry, "id");
+        debugger = new TestDebugger(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus,
+                                    activeFileHandler, debuggerManager, "id");
         doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
         doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -196,7 +181,6 @@ public class DebuggerTest extends BaseTest {
 
         FileType fileType = mock(FileType.class);
         doReturn("java").when(fileType).getExtension();
-        doReturn(fileType).when(fileTypeRegistry).getFileTypeByFile(eq(file));
     }
 
     @Test
@@ -567,29 +551,26 @@ public class DebuggerTest extends BaseTest {
                             LocalStorageProvider localStorageProvider,
                             MessageBusProvider messageBusProvider,
                             EventBus eventBus,
-                            FqnResolverFactory fqnResolverFactory,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
-                            FileTypeRegistry fileTypeRegistry,
                             String id) {
             super(service,
                   dtoFactory,
                   localStorageProvider,
                   messageBusProvider,
                   eventBus,
-                  fqnResolverFactory,
                   activeFileHandler,
                   debuggerManager,
-                  fileTypeRegistry,
                   breakpointManager,
                   id);
         }
 
         @Override
-        protected List<String> fqnToPath(@NotNull Location location) {
-            return Collections.emptyList();
+        protected String fqnToPath(Location location) {
+            return PATH;
         }
 
+        @Nullable
         @Override
         protected String pathToFqn(VirtualFile file) {
             return FQN;
