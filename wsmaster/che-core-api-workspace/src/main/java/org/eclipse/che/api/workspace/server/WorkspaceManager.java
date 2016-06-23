@@ -278,7 +278,7 @@ public class WorkspaceManager {
      *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getByNamespace(String)}
      */
     public List<WorkspaceImpl> getByNamespace(String namespace) throws ServerException {
-        requireNonNull(namespace, "Required non-null user namespace");
+        requireNonNull(namespace, "Required non-null namespace");
         final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
         workspaces.forEach(this::normalizeState);
         return workspaces;
