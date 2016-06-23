@@ -239,6 +239,34 @@ public class WorkspaceManagerTest {
     }
 
     @Test
+    public void shouldBeAbleToGetWorkspacesByNamespace() throws Exception {
+        // given
+        final WorkspaceConfig config = createConfig();
+
+        final WorkspaceImpl workspace1 = workspaceManager.createWorkspace(config, "user123", null);
+        final WorkspaceImpl workspace2 = workspaceManager.createWorkspace(config, "user321", null);
+
+        when(workspaceDao.getByNamespace("user321")).thenReturn(asList(workspace2));
+        final RuntimeDescriptor descriptor = createDescriptor(workspace2, RUNNING);
+        when(runtimes.get(workspace2.getId())).thenReturn(descriptor);
+
+        // when
+        final List<WorkspaceImpl> result = workspaceManager.getByNamespace("user321");
+
+        // then
+        assertEquals(result.size(), 1);
+
+        final WorkspaceImpl res1 = result.get(0);
+        assertEquals(res1.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
+        assertFalse(res1.isTemporary(), "Workspace must be permanent");
+        assertNotNull(res1.getConfig()
+                          .getEnvironments()
+                          .get(0)
+                          .getMachineConfigs()
+                          .get(0));
+    }
+
+    @Test
     public void getWorkspaceByNameShouldReturnWorkspaceWithStatusEqualToItsRuntimeStatus() throws Exception {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
         when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace())).thenReturn(workspace);

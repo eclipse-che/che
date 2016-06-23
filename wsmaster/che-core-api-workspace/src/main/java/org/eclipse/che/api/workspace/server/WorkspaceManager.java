@@ -252,13 +252,34 @@ public class WorkspaceManager {
      *         the id of the user
      * @return the list of workspaces or empty list if user can't read any workspace
      * @throws NullPointerException
-     *         when {@code owner} is null
+     *         when {@code user} is null
      * @throws ServerException
      *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getWorkspaces(String)}
      */
     public List<WorkspaceImpl> getWorkspaces(String user) throws ServerException {
         requireNonNull(user, "Required non-null user id");
         final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
+        workspaces.forEach(this::normalizeState);
+        return workspaces;
+    }
+
+    /**
+     * Gets list of workspaces which has given namespace
+     *
+     * <p>Returned workspaces have either {@link WorkspaceStatus#STOPPED} status
+     * or status defined by their runtime instances(if those exist).
+     *
+     * @param namespace
+     *         the namespace to find workspaces
+     * @return the list of workspaces or empty list if no matches
+     * @throws NullPointerException
+     *         when {@code namespace} is null
+     * @throws ServerException
+     *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getByNamespace(String)}
+     */
+    public List<WorkspaceImpl> getByNamespace(String namespace) throws ServerException {
+        requireNonNull(namespace, "Required non-null user namespace");
+        final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
         workspaces.forEach(this::normalizeState);
         return workspaces;
     }
