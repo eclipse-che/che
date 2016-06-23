@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.languageserver.ide.quickopen;
 
 import org.eclipse.che.ide.api.editor.text.TextRange;
-import org.eclipse.che.plugin.languageserver.ide.open.OpenFileInEditorHelper;
+import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 
 /**
  * Quick open entry that can be opened in editor.

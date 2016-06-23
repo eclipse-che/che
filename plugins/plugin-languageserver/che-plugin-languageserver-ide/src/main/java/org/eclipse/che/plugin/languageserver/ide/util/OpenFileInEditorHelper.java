@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.ide.open;
+package org.eclipse.che.plugin.languageserver.ide.util;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;

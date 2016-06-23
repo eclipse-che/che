@@ -35,7 +35,7 @@ public class JsonLanguageServerRegistrant {
     @Inject
     public void registerJsonServer(LanguageServerRegistry registry) {
         try {
-            ProcessBuilder languageServerStarter = new ProcessBuilder("node", "--debug=5858", "/projects/vscode-json-server/server.js");
+            ProcessBuilder languageServerStarter = new ProcessBuilder("node", "/projects/vscode-json-server/server.js");
             languageServerStarter.redirectInput(ProcessBuilder.Redirect.PIPE);
             languageServerStarter.redirectOutput(ProcessBuilder.Redirect.PIPE);
             Process process = languageServerStarter.start();

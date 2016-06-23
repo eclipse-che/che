@@ -1,6 +1,7 @@
 package org.eclipse.che.plugin.languageserver.ide.service;
 
 import io.typefox.lsapi.CompletionItem;
+import io.typefox.lsapi.Location;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,7 +28,9 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentPa
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.ReferenceParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.SymbolInformationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
@@ -104,6 +107,36 @@ public class TextDocumentServiceClient {
     public Promise<List<SymbolInformationDTO>> documentSymbol(DocumentSymbolParamsDTO params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/documentSymbol";
         Unmarshallable<List<SymbolInformationDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(SymbolInformationDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, params)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .send(unmarshaller);
+    }
+
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#references(io.typefox.lsapi.ReferenceParams)}
+     *
+     * @param params
+     * @return
+     */
+    public Promise<List<LocationDTO>> references(ReferenceParamsDTO params) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/references";
+        Unmarshallable<List<LocationDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(LocationDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, params)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .send(unmarshaller);
+    }
+
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#references(io.typefox.lsapi.ReferenceParams)}
+     *
+     * @param params
+     * @return
+     */
+    public Promise<List<LocationDTO>> definition(TextDocumentPositionParamsDTO params) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/definition";
+        Unmarshallable<List<LocationDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(LocationDTO.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)

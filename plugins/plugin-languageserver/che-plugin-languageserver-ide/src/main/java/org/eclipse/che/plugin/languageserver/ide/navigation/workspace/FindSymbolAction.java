@@ -29,7 +29,8 @@ import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.filters.FuzzyMatches;
 import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKind;
-import org.eclipse.che.plugin.languageserver.ide.open.OpenFileInEditorHelper;
+import org.eclipse.che.plugin.languageserver.ide.util.FilePathNormalizer;
+import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.WorkspaceServiceClient;
@@ -55,7 +56,7 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class FindSymbolAction extends AbstractPerspectiveAction implements QuickOpenPresenter.QuickOpenPresenterOpts {
 
     private static final Set<String> SUPPORTED_OPEN_TYPES = Sets.newHashSet("class", "interface", "enum","function", "method");
-    private static final String FILE = "file:///projects";
+   ;
     private final OpenFileInEditorHelper editorHelper;
     private final QuickOpenPresenter presenter;
     private final WorkspaceServiceClient workspaceServiceClient;
@@ -134,9 +135,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
                 LocationDTO location = element.getLocation();
                 if (location != null && location.getUri() != null) {
                     String filePath = location.getUri();
-                    if(filePath.startsWith(FILE)){
-                        filePath = filePath.substring(FILE.length());
-                    }
+                    filePath = FilePathNormalizer.normalizePath(filePath);
                     String container = filePath;
                     RangeDTO locationRange = location.getRange();
 

@@ -71,6 +71,9 @@ public interface LanguageServerResources extends ClientBundle {
     @Source("svg/codeassist/value.svg")
     SVGResource valueItem();
 
+    @Source("svg/find.svg")
+    SVGResource findIcon();
+
     interface LSCss extends CssResource {
 
         @ClassName("overview-mark-warning")

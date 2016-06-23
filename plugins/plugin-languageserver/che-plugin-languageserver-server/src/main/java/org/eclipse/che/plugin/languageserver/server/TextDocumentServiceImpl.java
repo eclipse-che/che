@@ -1,6 +1,7 @@
 package org.eclipse.che.plugin.languageserver.server;
 
 import io.typefox.lsapi.CompletionItem;
+import io.typefox.lsapi.Location;
 import io.typefox.lsapi.SymbolInformation;
 import io.typefox.lsapi.services.LanguageServer;
 
@@ -13,6 +14,7 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentPa
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.ReferenceParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 import javax.ws.rs.Consumes;
@@ -73,6 +75,36 @@ public class TextDocumentServiceImpl {
         }
 
         return server.getTextDocumentService().documentSymbol(documentSymbolParams).get();
+    }
+
+    @POST
+    @Path("references")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<? extends Location> references(ReferenceParamsDTO params)
+            throws ExecutionException, InterruptedException {
+        params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
+        LanguageServer server = getServer(params.getTextDocument().getUri());
+        if (server == null) {
+            return emptyList();
+        }
+
+        return server.getTextDocumentService().references(params).get();
+    }
+
+    @POST
+    @Path("definition")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<? extends Location> definition(TextDocumentPositionParamsDTO params)
+            throws ExecutionException, InterruptedException {
+        params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
+        LanguageServer server = getServer(params.getTextDocument().getUri());
+        if (server == null) {
+            return emptyList();
+        }
+
+        return server.getTextDocumentService().definition(params).get();
     }
 
 
