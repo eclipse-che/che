@@ -67,6 +67,10 @@ class IdeSvc {
     }
     this.lastWorkspace = workspace;
 
+    if (this.openedWorkspace && this.openedWorkspace.id === workspace.id) {
+      this.openedWorkspace = null;
+    }
+
     this.updateRecentWorkspace(workspace.id);
 
     let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
@@ -225,8 +229,11 @@ class IdeSvc {
     this.updateRecentWorkspace(workspaceId);
 
     if (this.openedWorkspace && this.openedWorkspace.id === workspaceId) {
-      this.restoreIDE();
-      return;
+      let openedWorkspaceStatus = this.cheWorkspace.getWorkspaceById(this.openedWorkspace.id).status;
+      if (openedWorkspaceStatus === 'STARTING' || openedWorkspaceStatus === 'RUNNING') {
+        this.restoreIDE();
+        return;
+      }
     }
 
     let inDevMode = this.userDashboardConfig.developmentMode;

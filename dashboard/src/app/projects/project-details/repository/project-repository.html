@@ -13,49 +13,49 @@
 <div class="project-repositories">
 
   <!-- Mobile version -->
-  <che-panel ng-if="projectRepositoryCtrl.localGitRepository || projectRepositoryCtrl.remoteSvnRepository"
+  <che-panel ng-if="projectRepositoryController.localGitRepository || projectRepositoryController.remoteSvnRepository"
               che-title="Local Clone" hide-gt-md>
-    <div ng-if="projectRepositoryCtrl.localGitRepository" class="repository-mobile" layout="row" flex layout-align="space-around start">
+    <div ng-if="projectRepositoryController.localGitRepository" class="repository-mobile" layout="row" flex layout-align="space-around start">
       <div class="label-name">GIT&nbsp;URL:</div>
       <div>
-        <label class="url-label"><span>{{projectRepositoryCtrl.localGitRepository}}</span></label>
+        <label class="url-label"><span>{{projectRepositoryController.localGitRepository}}</span></label>
 
-        <che-clipboard che-value="projectRepositoryCtrl.localGitRepository" class="copy-clipboard"></che-clipboard>
+        <che-clipboard che-value="projectRepositoryController.localGitRepository" class="copy-clipboard"></che-clipboard>
       </div>
     </div>
-    <div ng-if="projectRepositoryCtrl.remoteSvnRepository" class="repository-mobile" layout="row" flex layout-align="space-around start">
+    <div ng-if="projectRepositoryController.remoteSvnRepository" class="repository-mobile" layout="row" flex layout-align="space-around start">
       <div class="label-name">SVN&nbsp;URL:</div>
       <div>
-        <label class="url-label"><span>{{projectRepositoryCtrl.localSvnRepository}}</span></label>
+        <label class="url-label"><span>{{projectRepositoryController.localSvnRepository}}</span></label>
 
-        <che-clipboard che-value="projectRepositoryCtrl.remoteSvnRepository" class="copy-clipboard"></che-clipboard>
+        <che-clipboard che-value="projectRepositoryController.remoteSvnRepository" class="copy-clipboard"></che-clipboard>
       </div>
     </div>
   </che-panel>
   <!-- Desktop version -->
-  <che-panel ng-if="projectRepositoryCtrl.localGitRepository || projectRepositoryCtrl.remoteSvnRepository"
+  <che-panel ng-if="projectRepositoryController.localGitRepository || projectRepositoryController.remoteSvnRepository"
               che-title="Local Clone" hide-sm hide-md>
-    <div ng-if="projectRepositoryCtrl.localGitRepository">
+    <div ng-if="projectRepositoryController.localGitRepository">
       <div class="repository-desktop" layout="row" flex layout-align="space-around start">
         <div class="label-name" flex="20">GIT&nbsp;URL:</div>
         <div layout="column" flex="80">
           <div>
-            <label class="url-label"><span>{{projectRepositoryCtrl.localGitRepository}}</span></label>
+            <label class="url-label"><span>{{projectRepositoryController.localGitRepository}}</span></label>
 
-            <che-clipboard che-value="projectRepositoryCtrl.localGitRepository" class="copy-clipboard"></che-clipboard>
+            <che-clipboard che-value="projectRepositoryController.localGitRepository" class="copy-clipboard"></che-clipboard>
           </div>
         </div>
       </div>
       <label class="prompt">Clone repository with command <span>git clone &lt;url&gt;</span></label>
     </div>
-    <div ng-if="projectRepositoryCtrl.remoteSvnRepository">
+    <div ng-if="projectRepositoryController.remoteSvnRepository">
       <div class="repository-desktop" layout="row" flex layout-align="space-around start">
         <div class="label-name" flex="20">SVN&nbsp;URL:</div>
         <div layout="column" flex="80">
           <div>
-            <label class="url-label"><span>{{projectRepositoryCtrl.remoteSvnRepository}}</span></label>
+            <label class="url-label"><span>{{projectRepositoryController.remoteSvnRepository}}</span></label>
 
-            <che-clipboard che-value="projectRepositoryCtrl.remoteSvnRepository" class="copy-clipboard"></che-clipboard>
+            <che-clipboard che-value="projectRepositoryController.remoteSvnRepository" class="copy-clipboard"></che-clipboard>
           </div>
         </div>
       </div>
@@ -64,8 +64,8 @@
   </che-panel>
 
   <!-- Mobile version -->
-  <che-panel ng-if="projectRepositoryCtrl.remoteGitRepositories.length" che-title="Remote Repository" hide-gt-md>
-    <div class="repository-mobile" ng-repeat="remoteRepository in projectRepositoryCtrl.remoteGitRepositories" layout="row" flex>
+  <che-panel ng-if="projectRepositoryController.remoteGitRepositories.length" che-title="Remote Repository" hide-gt-md>
+    <div class="repository-mobile" ng-repeat="remoteRepository in projectRepositoryController.remoteGitRepositories" layout="row" flex>
       <div class="label-name"><span>{{remoteRepository.name}}</span>GIT&nbsp;URL:</div>
       <div>
         <label class="url-label"><span>{{remoteRepository.url}}</span></label>
@@ -75,8 +75,8 @@
     </div>
   </che-panel>
   <!-- Desktop version -->
-  <che-panel ng-if="projectRepositoryCtrl.remoteGitRepositories.length" che-title="Remote Repository" hide-sm hide-md>
-    <div class="repository-desktop" ng-repeat="remoteRepository in projectRepositoryCtrl.remoteGitRepositories" layout="row" flex>
+  <che-panel ng-if="projectRepositoryController.remoteGitRepositories.length" che-title="Remote Repository" hide-sm hide-md>
+    <div class="repository-desktop" ng-repeat="remoteRepository in projectRepositoryController.remoteGitRepositories" layout="row" flex>
       <div flex="20" class="label-name"><span>{{remoteRepository.name}}</span>GIT&nbsp;URL:</div>
       <div layout="column" flex="80">
         <label class="url-label"><span>{{remoteRepository.url}}</span></label>
@@ -86,7 +86,7 @@
     </div>
   </che-panel>
 
-  <div layout="row" layout-align="center center" class="empty-repository" ng-if="projectRepositoryCtrl.isEmptyState">
+  <div layout="row" layout-align="center center" class="empty-repository" ng-if="projectRepositoryController.isEmptyState">
     <che-empty-state che-value="There are no repositories yet."
                      che-prompt="You can add a GIT or SVN repository in the menu."
                      che-icon-class="fa fa-code-fork"></che-empty-state>

@@ -40,9 +40,20 @@ export class CreateProjectPopupCtrl {
     this.createProjectSvc.hidePopup();
   }
 
+  closePopup() {
+    if (this.isLastCreateProjectProgressStep()) {
+      this.resetCreateNewProject();
+    } else {
+      this.hidePopup();
+    }
+  }
 
   isCreateProjectInProgress() {
     return this.createProjectSvc.isCreateProjectInProgress();
+  }
+
+  isLastCreateProjectProgressStep() {
+    return this.createProjectSvc.getCurrentProgressStep() === (this.createProjectSvc.getProjectCreationSteps().length - 1);
   }
 
   getIDELink() {

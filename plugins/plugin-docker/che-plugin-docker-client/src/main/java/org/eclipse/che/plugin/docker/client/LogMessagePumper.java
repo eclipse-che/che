@@ -64,8 +64,13 @@ class LogMessagePumper extends MessagePumper<LogMessage> {
                     endOfLine = false;
                     if (buf[i] == '\n' || buf[i] == '\r' || lineLength > MAX_LINE_LENGTH) {
                         int length = i - offset;
+                        boolean isLineFeedFollowed = false;
                         if (buf[i] == '\r') {
-                            length += 1; // include <CR> char in log message
+                            int nextIndex = i + 1;
+                            isLineFeedFollowed = nextIndex < MAX_LINE_LENGTH && nextIndex < r && buf[nextIndex] == '\n';
+                            if (!isLineFeedFollowed) {
+                                length += 1; // include <CR> char in log message
+                            }
                         }
                         if (lineBuf != null && lineBuf.length() > 0) {
                             lineBuf.append(new String(buf, offset, length));
@@ -73,6 +78,10 @@ class LogMessagePumper extends MessagePumper<LogMessage> {
                             lineBuf.setLength(0);
                         } else {
                             target.process(new LogMessage(logMessageType, new String(buf, offset, length)));
+                        }
+
+                        if (isLineFeedFollowed) {
+                            i++;
                         }
                         offset = i + 1;
                         lineLength = 0;

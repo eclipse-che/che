@@ -15,7 +15,7 @@
  * @author Florent Benoit
  * @author Oleksii Orel
  */
-export class ProjectDetailsCtrl {
+export class ProjectDetailsController {
 
   /**
    * Default constructor that is using resource injection
@@ -59,23 +59,45 @@ export class ProjectDetailsCtrl {
   }
 
   fetchProjectDetails() {
-    this.projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspaceId).getProject();
+    this.loading = true;
+    this.noWorkspaceRuntime = true;
 
-    if (!this.projectService.getProjectDetailsByKey(this.projectPath)) {
-      let promise = this.projectService.fetchProjectDetails(this.workspaceId, this.projectPath);
-      promise.then(() => {
-        this.updateProjectDetails();
-      }, (error) => {
-        if (error.status === 304) {
-          this.updateProjectDetails();
-        } else {
-          this.loading = false;
-          this.invalidProject = error.statusText + error.status;
-        }
-    });
-    } else {
-      this.updateProjectDetails();
+    if (this.workspace.status !== 'STARTING' && this.workspace.status !== 'RUNNING') {
+      this.loading = false;
+      return;
     }
+
+    this.cheAPI.getWorkspace().fetchStatusChange(this.workspaceId, 'RUNNING').then(() => {
+      return this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspaceId);
+    }).then(() => {
+
+      this.projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspaceId).getProject();
+
+      if (this.projectService.getProjectDetailsByKey(this.projectPath)) {
+        this.loading = false;
+        this.noWorkspaceRuntime = false;
+        this.updateProjectDetails();
+      } else {
+        this.projectService.fetchProjectDetails(this.workspaceId, this.projectPath).then(() => {
+          this.loading = false;
+          this.noWorkspaceRuntime = false;
+          this.updateProjectDetails();
+        }, (error) => {
+          if (error.status === 304) {
+            this.loading = false;
+            this.noWorkspaceRuntime = false;
+            this.updateProjectDetails();
+          } else {
+            this.$log.error(error);
+            this.loading = false;
+            this.invalidProject = error.statusText + error.status;
+          }
+        });
+      }
+    }, (error) => {
+      this.$log.error(error);
+      this.loading = false;
+    });
   }
 
   /**

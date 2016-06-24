@@ -93,4 +93,30 @@ public class PullParamsTest {
         assertNull(pullParams.getAuthConfigs());
     }
 
+    @Test
+    public void getFullRepoShouldReturnRegistryAndImage() {
+        pullParams = PullParams.create(IMAGE)
+                               .withRegistry(REGISTRY)
+                               .withTag(TAG);
+
+        assertEquals(pullParams.getFullRepo(), REGISTRY + '/' + IMAGE);
+    }
+
+    @Test
+    public void getFullRepoShouldReturnImageOnlyIfRegistryIsNotSet() {
+        pullParams = PullParams.create(IMAGE)
+                               .withTag(TAG);
+
+        assertEquals(pullParams.getFullRepo(), IMAGE);
+    }
+
+    @Test
+    public void getFullRepoShouldReturnImageOnlyIfRegistryIsDockerHub() {
+        pullParams = PullParams.create(IMAGE)
+                               .withRegistry("docker.io")
+                               .withTag(TAG);
+
+        assertEquals(pullParams.getFullRepo(), IMAGE);
+    }
+
 }

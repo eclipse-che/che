@@ -68,7 +68,8 @@ export class NavbarDropdownMenu {
     });
 
     let self = this;
-    this.$document.off().on('mousedown contextmenu', '.md-menu-backdrop', (e) => {
+    this.$document.off('.dropdown-menu')
+      .on('mousedown.dropdown-menu contextmenu.dropdown-menu', '.md-menu-backdrop', (e) => {
       let eventType = e.type,
         eventWhich = e.which,
         backdropEl = angular.element(e.target);
