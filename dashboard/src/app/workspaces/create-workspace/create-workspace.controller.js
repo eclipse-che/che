@@ -130,7 +130,8 @@ export class CreateWorkspaceCtrl {
         this.submitWorkspace(source);
       }
     } else if (this.selectSourceOption === 'select-source-import') {
-      let workspaceConfig = this.importWorkspace.length > 0 ? angular.fromJson(this.importWorkspace).config : {};
+      let workspaceConfig = this.importWorkspace.length > 0 ? angular.fromJson(this.importWorkspace) : {};
+      workspaceConfig.name = this.workspaceName;
       let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig);
       this.redirectAfterSubmitWorkspace(creationPromise);
     } else {

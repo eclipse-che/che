@@ -35,7 +35,7 @@ import {CreateProjectPopup} from './create-project/popup/create-project-popup.di
 
 import {CreateProjectZip} from './create-project/zip/create-project-zip.directive';
 import {CreateProjectConfFile} from './create-project/config-file/create-project-conf-file.directive';
-import {ProjectDetailsCtrl} from './project-details/project-details.controller';
+import {ProjectDetailsController} from './project-details/project-details.controller';
 import {ProjectRepositoryConfig} from './project-details/repository/project-repository-config';
 import {CheProjectItem} from './list-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './list-projects/project-item/project-item.controller';
@@ -51,7 +51,7 @@ export class ProjectsConfig {
 
     register.controller('ListProjectsCtrl', ListProjectsCtrl);
 
-    register.controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
+    register.controller('ProjectDetailsController', ProjectDetailsController);
 
     register.controller('CreateProjectPopupCtrl', CreateProjectPopupCtrl);
     register.directive('createProjectPopup', CreateProjectPopup);
@@ -99,8 +99,8 @@ export class ProjectsConfig {
       })
         .accessWhen('/project/:workspaceId/:projectName', {
           templateUrl: 'app/projects/project-details/project-details.html',
-          controller: 'ProjectDetailsCtrl',
-          controllerAs: 'projectDetailsCtrl'
+          controller: 'ProjectDetailsController',
+          controllerAs: 'projectDetailsController'
         })
         .accessWhen('/create-project', locationCreateProjectProvider)
         .accessWhen('/create-project/:tabName', locationCreateProjectProvider);

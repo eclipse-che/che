@@ -17,6 +17,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.download.DownloadContainer;
@@ -34,19 +35,22 @@ public class DownloadItemAction extends Action {
 
     private final String BASE_URL;
 
-    private final AppContext appContext;
-    private final DownloadContainer downloadContainer;
+    private final AppContext               appContext;
+    private final DownloadContainer        downloadContainer;
     private final ProjectExplorerPresenter projectExplorer;
+    private final WsAgentURLModifier       agentURLModifier;
 
     @Inject
     public DownloadItemAction(AppContext appContext,
                               CoreLocalizationConstant locale,
                               DownloadContainer downloadContainer,
-                              ProjectExplorerPresenter projectExplorer) {
+                              ProjectExplorerPresenter projectExplorer,
+                              WsAgentURLModifier agentURLModifier) {
         super(locale.downloadItemName(), locale.downloadItemDescription());
         this.appContext = appContext;
         this.downloadContainer = downloadContainer;
         this.projectExplorer = projectExplorer;
+        this.agentURLModifier = agentURLModifier;
 
         BASE_URL = "/project/export/";
     }
@@ -64,9 +68,7 @@ public class DownloadItemAction extends Action {
         if (!(selectedNode instanceof HasStorablePath)) {
             return;
         }
-
-        String url = getUrl((HasStorablePath)selectedNode);
-        downloadContainer.setUrl(url);
+        downloadContainer.setUrl(agentURLModifier.modify(getUrl((HasStorablePath)selectedNode)));
     }
 
     /** {@inheritDoc} */

@@ -13,21 +13,23 @@
 <md-content flex class="projects-create-project-samples">
   <div
     ng-repeat="templatesByCategory in filteredItems = (createProjectSamplesCtrl.templates | sampleTagFilter:createProjectCtrl.currentStackTags | sampleFilterProjectType:createProjectSamplesCtrl.filterProjectType | sampleNameFilter:createProjectSamplesCtrl.projectNameFilter | orderBy:'projectType' | groupBy:'category') ">
-    <div ng-repeat="lstTemplate in templatesByCategory | orderBy:'displayName' | groupBy:'projectType'">
+
       <che-list class="projects-create-project-samples-list">
-        <che-list-item ng-repeat="template in lstTemplate" flex>
-          <div layout-gt-sm="row" flex layout-align="start center">
-            <div class="projects-create-project-samples-list-item"
-                 ng-class="{'projects-create-project-samples-list-item-active' : template.name === createProjectSamplesCtrl.selectedTemplateName}"
-                 ng-click="createProjectSamplesCtrl.selectTemplate(template, createProjectCtrl)"
-                 ng-init="createProjectSamplesCtrl.initItem($first, template, createProjectCtrl)" layout="column" flex>
-              <div class="projects-create-project-samples-list-samplename">{{template.displayName}}</div>
-              <div class="projects-create-project-samples-list-sampledescription">{{template.description}}</div>
+        <div ng-repeat="lstTemplate in templatesByCategory | orderBy:'displayName' | groupBy:'projectType'">
+          <che-list-item ng-repeat="template in lstTemplate" flex>
+            <div layout-gt-sm="row" flex layout-align="start center">
+              <div class="projects-create-project-samples-list-item"
+                   ng-class="{'projects-create-project-samples-list-item-active' : template.name === createProjectSamplesCtrl.selectedTemplateName}"
+                   ng-click="createProjectSamplesCtrl.selectTemplate(template, createProjectCtrl)"
+                   ng-init="createProjectSamplesCtrl.initItem($first, template, createProjectCtrl)" layout="column" flex>
+                <div class="projects-create-project-samples-list-samplename">{{template.displayName}}</div>
+                <div class="projects-create-project-samples-list-sampledescription">{{template.description}}</div>
+              </div>
             </div>
-          </div>
-        </che-list-item>
+          </che-list-item>
+        </div>
       </che-list>
-    </div>
+
   </div>
   <div ng-show="createProjectSamplesCtrl.getItemsSize(filteredItems) === 0">
     No matching sample.

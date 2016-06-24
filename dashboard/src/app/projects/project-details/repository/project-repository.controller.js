@@ -12,7 +12,7 @@
 
 import {gitMixinId, subversionMixinId} from '../repository/project-repository-data';
 
-export class ProjectRepositoryCtrl {
+export class ProjectRepositoryController {
 
   /**
    * Controller for the project local repository and remote repositories details
@@ -31,20 +31,27 @@ export class ProjectRepositoryCtrl {
     var workspaceId = $route.current.params.workspaceId;
     var projectPath = '/' + $route.current.params.projectName;
 
-    this.wsagent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId);
+    let workspace = this.cheAPI.getWorkspace().getWorkspaceById(workspaceId);
+    if (workspace && (workspace.status === 'STARTING' || workspace.status === 'RUNNING')) {
+      this.cheAPI.getWorkspace().fetchStatusChange(workspaceId, 'RUNNING').then(() => {
+        return this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspaceId);
+      }).then(() => {
+        this.wsagent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId);
+        if (this.wsagent !== null) {
+          if (!this.wsagent.getProject().getProjectDetailsByKey(projectPath)) {
+            let promise = this.wsagent.getProject().fetchProjectDetails(workspaceId, projectPath);
 
-    if (!this.wsagent.getProject().getProjectDetailsByKey(projectPath)) {
-      let promise = this.wsagent.getProject().fetchProjectDetails(workspaceId, projectPath);
-
-      promise.then(() => {
-        var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
-        this.updateRepositories(projectDetails);
+            promise.then(() => {
+              var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
+              this.updateRepositories(projectDetails);
+            });
+          } else {
+            var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
+            this.updateRepositories(projectDetails);
+          }
+        }
       });
-    } else {
-      var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
-      this.updateRepositories(projectDetails);
     }
-
   }
 
   updateRepositories(projectDetails) {
