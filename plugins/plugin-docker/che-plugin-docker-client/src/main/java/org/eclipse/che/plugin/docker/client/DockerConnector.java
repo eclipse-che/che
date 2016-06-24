@@ -21,6 +21,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonNameConvention;
 import org.eclipse.che.commons.json.JsonParseException;
+import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.TarUtils;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
@@ -29,6 +30,8 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
+import org.eclipse.che.plugin.docker.client.exception.DockerException;
+import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
@@ -375,7 +378,8 @@ public class DockerConnector {
      * @deprecated use {@link #tag(TagParams)} instead
      */
     @Deprecated
-    public void tag(String image, String repository, String tag) throws IOException {
+    public void tag(String image, String repository, String tag) throws ImageNotFoundException,
+                                                                        IOException {
         tag(TagParams.create(image, repository).withTag(tag), dockerDaemonUri);
     }
 
@@ -1242,21 +1246,29 @@ public class DockerConnector {
      * @deprecated use {@link #tag(TagParams)}
      */
     @Deprecated
-    protected void doTag(String image, String repository, String tag, URI dockerDaemonUri) throws IOException {
+    protected void doTag(String image,
+                         String repository,
+                         String tag,
+                         URI dockerDaemonUri) throws ImageNotFoundException,
+                                                     IOException {
         tag(TagParams.create(image, repository).withTag(tag), dockerDaemonUri);
     }
 
     /**
      * Tag the docker image into a repository.
      *
+     * @throws ImageNotFoundException
+     *         when docker api return 404 status
      * @throws IOException
-     *          when a problem occurs with docker api calls
+     *         when a problem occurs with docker api calls
      */
-    public void tag(final TagParams params) throws IOException {
+    public void tag(final TagParams params) throws ImageNotFoundException,
+                                                   IOException {
         tag(params, dockerDaemonUri);
     }
 
-    private void tag(final TagParams params, URI dockerDaemonUri) throws IOException {
+    private void tag(final TagParams params, URI dockerDaemonUri) throws ImageNotFoundException,
+                                                                         IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/images/" + params.getImage() + "/tag")
@@ -1264,7 +1276,9 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "force", params.isForce());
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
-            if (response.getStatus() / 100 != 2) {
+            if (response.getStatus() == 404) {
+                throw new ImageNotFoundException(IoUtil.readStream(response.getInputStream()));
+            } else if (response.getStatus() / 100 != 2) {
                 throw getDockerException(response);
             }
         }

@@ -22,11 +22,13 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
@@ -61,6 +63,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 /**
@@ -71,11 +74,15 @@ import static org.testng.Assert.assertNotNull;
  */
 @Listeners(MockitoTestNGListener.class)
 public class MachineManagerTest {
+
     private static final int    DEFAULT_MACHINE_MEMORY_SIZE_MB = 1000;
     private static final String WS_ID                          = "testWsId";
     private static final String ENVIRONMENT_NAME               = "testEnvName";
     private static final String USER_ID                        = "userId";
     private static final String MACHINE_ID                     = "machineId";
+    private static final String NAMESPACE                      = "namespace";
+
+    private static final SubjectImpl CREATOR = new SubjectImpl("name", USER_ID, "token", false);
 
     @Mock
     private MachineInstanceProviders machineInstanceProviders;
@@ -95,12 +102,13 @@ public class MachineManagerTest {
     private InstanceProcess          instanceProcess;
     @Mock
     private LineConsumer             processLogger;
+    @Mock
+    private SnapshotDao              snapshotDao;
 
     private MachineManager manager;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        final SnapshotDao snapshotDao = mock(SnapshotDao.class);
         final EventService eventService = mock(EventService.class);
         final String machineLogsDir = targetDir().resolve("logs-dir").toString();
         IoUtil.deleteRecursive(new File(machineLogsDir));
@@ -113,7 +121,7 @@ public class MachineManagerTest {
                                          wsAgentLauncher));
 
         EnvironmentContext envCont = new EnvironmentContext();
-        envCont.setSubject(new SubjectImpl(null, USER_ID, null, false));
+        envCont.setSubject(CREATOR);
         EnvironmentContext.setCurrent(envCont);
 
         RecipeImpl recipe = new RecipeImpl().withScript("script").withType("Dockerfile");
@@ -123,6 +131,7 @@ public class MachineManagerTest {
         when(machineInstanceProviders.getProvider(anyString())).thenReturn(instanceProvider);
         HashSet<String> recipeTypes = new HashSet<>();
         recipeTypes.add("test type 1");
+        recipeTypes.add("snapshot");
         recipeTypes.add("dockerfile");
         when(instanceProvider.getRecipeTypes()).thenReturn(recipeTypes);
         when(instanceProvider.createInstance(any(Machine.class), any(LineConsumer.class))).thenReturn(instance);
@@ -259,6 +268,40 @@ public class MachineManagerTest {
         verify(machineLogger).close();
     }
 
+    @Test
+    public void shouldCreateMachineFromOriginalSourceWhenMachineRecoverFails() throws Exception {
+        final SnapshotImpl snapshot = createSnapshot();
+        final MachineConfigImpl config = createMachineConfig();
+        when(manager.generateMachineId()).thenReturn(MACHINE_ID);
+        final MachineImpl machine = new MachineImpl(config,
+                                                    MACHINE_ID,
+                                                    WS_ID,
+                                                    ENVIRONMENT_NAME,
+                                                    CREATOR.getUserId(),
+                                                    MachineStatus.CREATING,
+                                                    null);
+        machine.getConfig().setSource(snapshot.getMachineSource());
+        when(snapshotDao.getSnapshot(WS_ID, ENVIRONMENT_NAME, config.getName())).thenReturn(snapshot);
+        when(instanceProvider.createInstance(eq(machine), any(LineConsumer.class))).thenThrow(new SourceNotFoundException(""));
+        when(machineRegistry.getMachine(MACHINE_ID)).thenReturn(machine);
+
+        final MachineImpl result = manager.recoverMachine(config, WS_ID, ENVIRONMENT_NAME);
+
+        machine.getConfig().setSource(config.getSource());
+        assertEquals(result, machine);
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldThrowExceptionWhenMachineCreationFromOriginSourceFailed() throws Exception {
+        final MachineConfigImpl config = createMachineConfig();
+        when(manager.generateMachineId()).thenReturn(MACHINE_ID);
+
+        when(instanceProvider.createInstance(any(MachineImpl.class),
+                                             any(LineConsumer.class))).thenThrow(new MachineException(""));
+
+        manager.recoverMachine(config, WS_ID, ENVIRONMENT_NAME);
+    }
+
     private void waitForExecutorIsCompletedTask() throws Exception {
         for (int i = 0; ((ThreadPoolExecutor)manager.executor).getCompletedTaskCount() == 0 && i < 10; i++) {
             Thread.sleep(300);
@@ -286,5 +329,17 @@ public class MachineManagerTest {
                                                                       "someprotocol",
                                                                       "/some/path")),
                                      Collections.singletonMap("key1", "value1"));
+    }
+
+    private SnapshotImpl createSnapshot() {
+        return SnapshotImpl.builder()
+                           .setId("snapshot12")
+                           .fromConfig(createMachineConfig())
+                           .setWorkspaceId(WS_ID)
+                           .setEnvName(ENVIRONMENT_NAME)
+                           .setNamespace(NAMESPACE)
+                           .setMachineSource(new MachineSourceImpl("snapshot").setLocation("location"))
+                           .setDev(true)
+                           .build();
     }
 }
