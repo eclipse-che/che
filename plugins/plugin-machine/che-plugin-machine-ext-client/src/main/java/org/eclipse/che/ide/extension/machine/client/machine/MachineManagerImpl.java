@@ -30,13 +30,11 @@ import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
 import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedHandler;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier.RunningListener;
-import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsolePresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.util.loging.Log;
@@ -51,7 +49,6 @@ import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINE_
 import static org.eclipse.che.ide.api.machine.MachineManager.MachineOperationType.DESTROY;
 import static org.eclipse.che.ide.api.machine.MachineManager.MachineOperationType.RESTART;
 import static org.eclipse.che.ide.api.machine.MachineManager.MachineOperationType.START;
-import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.MACHINE_BOOTING;
 import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.ERROR;
 import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
@@ -63,15 +60,14 @@ import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandler {
+public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent.Handler {
 
     private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
     private final MachineServiceClient    machineServiceClient;
     private final WorkspaceServiceClient  workspaceServiceClient;
-    private final MachineConsolePresenter machineConsolePresenter;
+    private final ConsolesPanelPresenter  consolesPanelPresenter;
     private final MachineStatusNotifier   machineStatusNotifier;
     private final InitialLoadingInfo      initialLoadingInfo;
-    private final PerspectiveManager      perspectiveManager;
     private final AppContext              appContext;
     private final DtoFactory              dtoFactory;
     private final EventBus                eventBus;
@@ -89,21 +85,19 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     public MachineManagerImpl(DtoUnmarshallerFactory dtoUnmarshallerFactory,
                               MachineServiceClient machineServiceClient,
                               WorkspaceServiceClient workspaceServiceClient,
-                              MachineConsolePresenter machineConsolePresenter,
+                              ConsolesPanelPresenter consolesPanelPresenter,
                               MachineStatusNotifier machineStatusNotifier,
                               final MessageBusProvider messageBusProvider,
                               final InitialLoadingInfo initialLoadingInfo,
-                              final PerspectiveManager perspectiveManager,
                               EventBus eventBus,
                               final AppContext appContext,
                               DtoFactory dtoFactory) {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.machineServiceClient = machineServiceClient;
         this.workspaceServiceClient = workspaceServiceClient;
-        this.machineConsolePresenter = machineConsolePresenter;
+        this.consolesPanelPresenter = consolesPanelPresenter;
         this.machineStatusNotifier = machineStatusNotifier;
         this.initialLoadingInfo = initialLoadingInfo;
-        this.perspectiveManager = perspectiveManager;
         this.appContext = appContext;
         this.dtoFactory = dtoFactory;
         this.eventBus = eventBus;
@@ -124,16 +118,13 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
                 switch (event.getEventType()) {
                     case RUNNING:
                         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), SUCCESS);
-
-                        String machineId = event.getMachineId();
-                        onMachineRunning(machineId);
-
+                        onMachineRunning(event.getMachineId());
                         eventBus.fireEvent(new DevMachineStateEvent(event));
                         break;
+
                     case ERROR:
                         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), ERROR);
                         break;
-                    default:
                 }
             }
 
@@ -145,8 +136,8 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
 
         outputHandler = new SubscriptionHandler<String>(new OutputMessageUnmarshaller()) {
             @Override
-            protected void onMessageReceived(String result) {
-                machineConsolePresenter.print(result);
+            protected void onMessageReceived(String text) {
+                consolesPanelPresenter.printDevMachineOutput(text);
             }
 
             @Override
@@ -158,19 +149,15 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-        boolean statusChannelNotNull = statusChannel != null;
-        boolean outputChannelNotNull = outputChannel != null;
-        boolean wsLogChannelNotNull = wsAgentLogChannel != null;
-
-        if (statusChannelNotNull && messageBus.isHandlerSubscribed(statusHandler, statusChannel)) {
+        if (statusChannel != null && messageBus.isHandlerSubscribed(statusHandler, statusChannel)) {
             unsubscribeChannel(statusChannel, statusHandler);
         }
 
-        if (outputChannelNotNull && messageBus.isHandlerSubscribed(outputHandler, outputChannel)) {
+        if (outputChannel != null && messageBus.isHandlerSubscribed(outputHandler, outputChannel)) {
             unsubscribeChannel(outputChannel, outputHandler);
         }
 
-        if (wsLogChannelNotNull && messageBus.isHandlerSubscribed(outputHandler, wsAgentLogChannel)) {
+        if (wsAgentLogChannel != null && messageBus.isHandlerSubscribed(outputHandler, wsAgentLogChannel)) {
             unsubscribeChannel(wsAgentLogChannel, outputHandler);
         }
     }
@@ -219,7 +206,6 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
                               .withContent(source.getContent());
     }
 
-
     /** Start new machine. */
     @Override
     public void startMachine(String recipeURL, String displayName) {
@@ -231,8 +217,6 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
     public void startDevMachine(String recipeURL, String displayName) {
         startMachine(recipeURL, displayName, true, START, "dockerfile", "docker");
     }
-
-
 
     /**
      * @param recipeURL
@@ -253,6 +237,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
         MachineSourceDto sourceDto = dtoFactory.createDto(MachineSourceDto.class).withType(sourceType).withLocation(recipeURL);
         startMachine(sourceDto, displayName, isDev, operationType, machineType);
     }
+
     /**
      * @param machineSourceDto
      * @param displayName
@@ -337,7 +322,6 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedHandl
 
     @Override
     public void onDevMachineCreating(MachineConfigDto machineConfig) {
-        perspectiveManager.setPerspectiveId(OPERATIONS_PERSPECTIVE_ID);
         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), IN_PROGRESS);
 
         if (machineConfig.getLink(LINK_REL_GET_MACHINE_LOGS_CHANNEL) != null &&

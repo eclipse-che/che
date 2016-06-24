@@ -27,6 +27,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
@@ -127,7 +128,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
                     isTerminalConnected = false;
-                    notificationManager.notify(locale.failedToConnectTheTerminal(), locale.terminalCanNotLoadScript(), FAIL, FLOAT_MODE);
+                    notificationManager.notify(locale.failedToConnectTheTerminal(), locale.terminalCanNotLoadScript(), FAIL, NOT_EMERGE_MODE);
 
                     tryToReconnect();
 

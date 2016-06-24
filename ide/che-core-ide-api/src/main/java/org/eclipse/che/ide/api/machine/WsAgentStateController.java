@@ -25,7 +25,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.RestServiceInfo;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
@@ -113,12 +112,10 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     public void onOpen() {
         messageBus.removeOnOpenHandler(this);
         MessageBus.ReadyState readyState = messageBus.getReadyState();
-        Log.info(getClass(), readyState.toString());
         //need to make sure ready state equals 1 (OPEN) in same situations after opening it still equals 0 (CONNECTING)
         new Timer() {
             @Override
             public void run() {
-                Log.info(getClass(), messageBus.getReadyState());
                 if (messageBus.getReadyState().equals(MessageBus.ReadyState.OPEN)) {
                     cancel();
                     started();

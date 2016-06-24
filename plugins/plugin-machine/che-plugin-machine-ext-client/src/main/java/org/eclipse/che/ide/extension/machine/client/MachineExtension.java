@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -43,8 +44,6 @@ import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBo
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
-import org.eclipse.che.ide.extension.machine.client.machine.console.ClearConsoleAction;
-import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsoleToolbar;
 import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
@@ -52,7 +51,6 @@ import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConso
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
-import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
@@ -103,14 +101,6 @@ public class MachineExtension {
                  * OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
                  */
 
-                /* Add Outputs and Consoles to Operation perspective */
-                perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
-                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
-
-                /* Add Outputs and Consoles to Project perspective */
-                perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
-                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
-
                 if (appContext.getFactory() == null) {
                     consolesPanelPresenter.newTerminal();
                 }
@@ -118,6 +108,21 @@ public class MachineExtension {
 
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
+            }
+        });
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                /* Add Consoles to Operation perspective */
+                perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
+                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
+
+                /* Add Consoles to Project perspective */
+                perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
+                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
+
+                workspaceAgent.setActivePart(consolesPanelPresenter);
             }
         });
 
@@ -222,18 +227,6 @@ public class MachineExtension {
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");
 
         iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
-    }
-
-    @Inject
-    private void setUpMachineConsole(ActionManager actionManager,
-                                     ClearConsoleAction clearConsoleAction,
-                                     @MachineConsoleToolbar ToolbarPresenter machineConsoleToolbar) {
-
-        // add toolbar to Machine console
-        final DefaultActionGroup consoleToolbarActionGroup = new DefaultActionGroup(GROUP_MACHINE_CONSOLE_TOOLBAR, false, actionManager);
-        consoleToolbarActionGroup.add(clearConsoleAction);
-        consoleToolbarActionGroup.addSeparator();
-        machineConsoleToolbar.bindMainGroup(consoleToolbarActionGroup);
     }
 
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.actions;
 
+import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -34,6 +35,8 @@ public class EditCommandsActionTest {
     private EditCommandsPresenter       editCommandsPresenter;
     @Mock
     private ActionEvent                 event;
+    @Mock
+    private EventBus                    eventBus;
 
     @InjectMocks
     private EditCommandsAction action;

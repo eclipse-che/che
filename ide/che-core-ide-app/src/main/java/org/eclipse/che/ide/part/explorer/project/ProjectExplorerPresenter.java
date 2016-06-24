@@ -61,6 +61,7 @@ import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView.ActionDelegate;
 import org.eclipse.che.ide.part.explorer.project.synchronize.ProjectConfigSynchronizationListener;
 import org.eclipse.che.ide.project.event.ProjectExplorerLoadedEvent;
@@ -112,7 +113,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
                                                                        ConfigureProjectHandler,
                                                                        ResourceNodeRenamedHandler,
                                                                        ResourceNodeDeletedHandler,
-                                                                       ModuleCreatedHandler {
+                                                                       ModuleCreatedHandler,
+                                                                       WorkspaceStoppedEvent.Handler {
     private final ProjectExplorerView          view;
     private final EventBus                     eventBus;
     private final NodeManager                  nodeManager;
@@ -130,6 +132,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     public static final int PART_SIZE = 250;
 
     private boolean hiddenFilesAreShown;
+    private boolean showProjects;
 
     @Inject
     public ProjectExplorerPresenter(ProjectExplorerView view,
@@ -170,6 +173,7 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         eventBus.addHandler(ResourceNodeRenamedEvent.getType(), this);
         eventBus.addHandler(ResourceNodeDeletedEvent.getType(), this);
         eventBus.addHandler(ModuleCreatedEvent.getType(), this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
 
         addBeforeExpandHandler(synchronizationListener);
     }
@@ -177,6 +181,8 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     /** {@inheritDoc} */
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
+        showProjects = true;
+
         nodeManager.getProjectNodes().then(new Operation<List<Node>>() {
             @Override
             public void apply(List<Node> nodes) throws OperationException {
@@ -196,9 +202,22 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
     /** {@inheritDoc} */
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
-        view.removeAllNodes();
-        notificationManager.notify(locale.projectExplorerExtensionServerStopped(),
-                                   locale.projectExplorerExtensionServerStoppedDescription(), FAIL, NOT_EMERGE_MODE);
+        hideProjects();
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        hideProjects();
+    }
+
+    private void hideProjects() {
+        if (showProjects) {
+            showProjects = false;
+
+            view.removeAllNodes();
+            notificationManager.notify(locale.projectExplorerExtensionServerStopped(),
+                    locale.projectExplorerExtensionServerStoppedDescription(), FAIL, NOT_EMERGE_MODE);
+        }
     }
 
     /** {@inheritDoc} */
@@ -870,4 +889,5 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             }
         });
     }
+
 }
