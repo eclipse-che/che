@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.workspace.event;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 
 /**
  * Event informing about starting a workspace.
@@ -32,13 +32,13 @@ public class WorkspaceStartingEvent extends GwtEvent<WorkspaceStartingEvent.Hand
 
     public static final GwtEvent.Type<WorkspaceStartingEvent.Handler> TYPE = new GwtEvent.Type<>();
 
-    private final WorkspaceDto workspace;
+    private final Workspace workspace;
 
-    public WorkspaceStartingEvent(WorkspaceDto workspace) {
+    public WorkspaceStartingEvent(Workspace workspace) {
         this.workspace = workspace;
     }
 
-    public WorkspaceDto getWorkspace() {
+    public Workspace getWorkspace() {
         return workspace;
     }
 
