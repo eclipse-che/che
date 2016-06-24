@@ -44,7 +44,7 @@ public class UnixSocketConnection extends DockerConnection {
     }
 
     @Override
-    protected DockerResponse request(String method, String path, String query, List<Pair<String, ?>> headers, Entity entity)
+    protected DockerResponse request(String method, String path, String query, List<Pair<String, ?>> headers, Entity<?> entity)
             throws IOException {
         fd = connect();
         final OutputStream output = new BufferedOutputStream(openOutputStream(fd));
