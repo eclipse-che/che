@@ -18,7 +18,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.actions.StopMachineAction;
 import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
@@ -140,7 +139,6 @@ public class MachineExtension {
                                 RestartMachineAction restartMachine,
                                 DestroyMachineAction destroyMachineAction,
                                 StopWorkspaceAction stopWorkspaceAction,
-                                StopMachineAction stopMachineAction,
                                 SwitchPerspectiveAction switchPerspectiveAction,
                                 CreateSnapshotAction createSnapshotAction,
                                 RunCommandAction runCommandAction,
@@ -171,7 +169,6 @@ public class MachineExtension {
         actionManager.registerAction("destroyMachine", destroyMachineAction);
         actionManager.registerAction("restartMachine", restartMachine);
         actionManager.registerAction("stopWorkspace", stopWorkspaceAction);
-        actionManager.registerAction("stopMachine", stopMachineAction);
         actionManager.registerAction("createSnapshot", createSnapshotAction);
         actionManager.registerAction("runCommand", runCommandAction);
         actionManager.registerAction("newTerminal", newTerminalAction);
@@ -188,7 +185,6 @@ public class MachineExtension {
         machineMenu.add(createMachine);
         machineMenu.add(restartMachine);
         machineMenu.add(destroyMachineAction);
-        machineMenu.add(stopMachineAction);
         machineMenu.add(createSnapshotAction);
 
         // add actions on center part of toolbar
