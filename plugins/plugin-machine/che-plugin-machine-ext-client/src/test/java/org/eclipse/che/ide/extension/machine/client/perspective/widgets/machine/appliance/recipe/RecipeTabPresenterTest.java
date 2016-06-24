@@ -10,15 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.recipe;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
+import org.eclipse.che.ide.websocket.rest.RequestCallback;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Valeriy Svydenko
@@ -29,6 +36,9 @@ public class RecipeTabPresenterTest {
     private RecipeView view;
     @Mock
     private Machine    machine;
+
+    @Captor
+    private ArgumentCaptor<RequestCallback> argumentCaptor;
 
     @InjectMocks
     private RecipeTabPresenter presenter;
@@ -50,6 +60,13 @@ public class RecipeTabPresenterTest {
         presenter.setVisible(true);
 
         verify(view).setVisible(true);
+    }
+
+    @Test
+    public void tabGetScriptAsContent() throws Exception {
+        when(machine.getRecipeContent()).thenReturn("test content");
+        presenter.updateInfo(machine);
+        verify(view).setScript("test content");
     }
 
 

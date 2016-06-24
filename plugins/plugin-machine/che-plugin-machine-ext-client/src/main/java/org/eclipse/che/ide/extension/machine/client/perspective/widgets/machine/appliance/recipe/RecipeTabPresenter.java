@@ -50,7 +50,7 @@ public class RecipeTabPresenter implements TabPresenter {
      */
     public void updateInfo(@NotNull Machine machine) {
         String scriptLocation = machine.getRecipeLocation();
-        if (!isNullOrEmpty(scriptLocation)) {
+        if (!isNullOrEmpty(scriptLocation)) { //TODO : need to add test this block
             RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, scriptLocation);
             try {
                 requestBuilder.sendRequest(null, new RequestCallback() {
