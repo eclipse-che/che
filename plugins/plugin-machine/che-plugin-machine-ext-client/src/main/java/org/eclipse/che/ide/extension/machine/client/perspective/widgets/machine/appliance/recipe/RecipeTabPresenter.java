@@ -25,6 +25,8 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * The class contains business logic which allows update a recipe for current machine. The class is a tab presenter and
  * shows current machine recipe.
@@ -47,28 +49,26 @@ public class RecipeTabPresenter implements TabPresenter {
      *         machine for which need update information
      */
     public void updateInfo(@NotNull Machine machine) {
-        String scriptLocation = machine.getRecipeUrl();
+        String scriptLocation = machine.getRecipeLocation();
+        if (!isNullOrEmpty(scriptLocation)) {
+            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, scriptLocation);
+            try {
+                requestBuilder.sendRequest(null, new RequestCallback() {
+                    @Override
+                    public void onResponseReceived(Request request, Response response) {
+                        view.setScript(response.getText());
+                    }
 
-        if (scriptLocation.isEmpty()) {
-            return;
-        }
+                    @Override
+                    public void onError(Request request, Throwable exception) {
 
-        RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, scriptLocation);
-
-        try {
-            requestBuilder.sendRequest(null, new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-                    view.setScript(response.getText());
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-
-                }
-            });
-        } catch (RequestException exception) {
-            Log.error(getClass(), exception);
+                    }
+                });
+            } catch (RequestException exception) {
+                Log.error(getClass(), exception);
+            }
+        } else if (!isNullOrEmpty(machine.getRecipeContent())) {
+            view.setScript(machine.getRecipeContent());
         }
     }
 
