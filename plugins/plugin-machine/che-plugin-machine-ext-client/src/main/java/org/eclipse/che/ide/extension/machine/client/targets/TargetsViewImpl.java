@@ -53,7 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
-import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeRenderer.MACHINE_LABELS_BY_CATEGORY_MAP;
+import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeRenderer.LABELS;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -215,8 +215,8 @@ public class TargetsViewImpl extends Window implements TargetsView {
             return machineLabel;
         }
 
-        if (MACHINE_LABELS_BY_CATEGORY_MAP.containsKey(machineCategory)) {
-            machineLabel.setInnerText(MACHINE_LABELS_BY_CATEGORY_MAP.get(machineCategory));
+        if (LABELS.containsKey(machineCategory)) {
+            machineLabel.setInnerText(LABELS.get(machineCategory));
             machineLabel.setClassName(this.machineResources.getCss().dockerMachineLabel());
             return machineLabel;
         }

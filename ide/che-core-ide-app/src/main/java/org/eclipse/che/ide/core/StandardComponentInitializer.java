@@ -100,6 +100,7 @@ import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_
  */
 @Singleton
 public class StandardComponentInitializer {
+
     public interface ParserResource extends ClientBundle {
         @Source("org/eclipse/che/ide/blank.svg")
         SVGResource samplesCategoryBlank();

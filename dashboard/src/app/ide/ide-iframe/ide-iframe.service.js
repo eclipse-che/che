@@ -28,7 +28,7 @@ class IdeIFrameSvc {
     this.$compile = $compile;
 
     $window.addEventListener("message", (event) => {
-      if ("ide-loaded" === event.data || "ide-recover-dialog" === event.data) {
+      if ("ide-loaded" === event.data) {
         // check whether user is still waiting for IDE
         if (/\/ide\//.test($location.path())) {
           $rootScope.$apply(() => {

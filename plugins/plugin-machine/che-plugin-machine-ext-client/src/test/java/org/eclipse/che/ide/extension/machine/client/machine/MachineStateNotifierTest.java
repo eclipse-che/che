@@ -17,7 +17,6 @@ import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -89,7 +88,7 @@ public class MachineStateNotifierTest {
     @Captor
     private ArgumentCaptor<StatusNotification>      notificationCaptor;
     @Captor
-    private ArgumentCaptor<WorkspaceStartedHandler> startWorkspaceHandlerCaptor;
+    private ArgumentCaptor<WorkspaceStartedEvent.Handler> startWorkspaceHandlerCaptor;
 
     @InjectMocks
     private MachineStatusNotifier stateNotifier;
@@ -142,4 +141,5 @@ public class MachineStateNotifierTest {
 
         verify(messageBus).subscribe(anyString(), Matchers.<MessageHandler>anyObject());
     }
+
 }

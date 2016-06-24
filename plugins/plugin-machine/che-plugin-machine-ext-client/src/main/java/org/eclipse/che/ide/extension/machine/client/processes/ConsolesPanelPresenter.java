@@ -24,8 +24,8 @@ import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedHandler;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.mvp.View;
@@ -81,8 +81,10 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
                                                                      HasView,
                                                                      ProcessFinishedEvent.Handler,
                                                                      OutputConsole.ConsoleOutputListener,
-                                                                     WorkspaceStoppedHandler,
-                                                                     MachineStateEvent.Handler {
+                                                                     WorkspaceStartingEvent.Handler,
+                                                                     WorkspaceStoppedEvent.Handler,
+                                                                     MachineStateEvent.Handler,
+                                                                     DevMachineStateEvent.Handler {
 
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
 
@@ -103,10 +105,12 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     private final CommandTypeRegistry          commandTypeRegistry;
     private final Map<String, ProcessTreeNode> machineNodes;
 
-    final List<ProcessTreeNode>                rootChildren;
+    final List<ProcessTreeNode>                rootNodes;
     final Map<String, TerminalPresenter>       terminals;
     final Map<String, OutputConsole>           consoles;
     final Map<OutputConsole, String>           consoleCommands;
+
+    private OutputConsole                      workspaceConsole;
 
     ProcessTreeNode                            rootNode;
     ProcessTreeNode                            selectedTreeNode;
@@ -145,7 +149,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         this.machineService = machineService;
         this.consoleTreeContextMenuFactory = consoleTreeContextMenuFactory;
 
-        this.rootChildren = new ArrayList<>();
+        this.rootNodes = new ArrayList<>();
         this.terminals = new HashMap<>();
         this.consoles = new HashMap<>();
         this.consoleCommands = new HashMap<>();
@@ -154,31 +158,18 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         this.view.setDelegate(this);
         this.view.setTitle(localizationConstant.viewConsolesTitle());
 
-        eventBus.addHandler(DevMachineStateEvent.TYPE, new DevMachineStateEvent.Handler() {
-            @Override
-            public void onDevMachineStarted(DevMachineStateEvent event) {
-                fetchMachines();
-            }
-
-            @Override
-            public void onDevMachineDestroyed(DevMachineStateEvent event) {
-            }
-        });
-
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
+        eventBus.addHandler(DevMachineStateEvent.TYPE, this);
+
+        rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootNodes);
+
+        workspaceConsole = commandConsoleFactory.create("");
+        updateCommandOutput("", workspaceConsole);
 
         fetchMachines();
-    }
-
-    @Override
-    public void onProcessFinished(ProcessFinishedEvent event) {
-        for (Map.Entry<String, OutputConsole> entry : consoles.entrySet()) {
-            if (entry.getValue().isFinished()) {
-                view.setStopButtonVisibility(entry.getKey(), false);
-            }
-        }
     }
 
     @Override
@@ -215,6 +206,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
 
     @Override
     public void onMachineCreating(MachineStateEvent event) {
+        workspaceAgent.setActivePart(this);
     }
 
     @Override
@@ -224,7 +216,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         machineService.getMachine(event.getMachineId()).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto machine) throws OperationException {
-                addMachineToConsoles(machine);
+                addMachineNode(machine);
             }
         });
     }
@@ -238,30 +230,38 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
             return;
         }
 
-        rootChildren.remove(destroyedMachineNode);
+        rootNodes.remove(destroyedMachineNode);
         onCloseTerminal(destroyedMachineNode);
         onStopCommandProcess(destroyedMachineNode);
 
         view.setProcessesData(rootNode);
     }
 
+    @Override
+    public void onDevMachineStarted(DevMachineStateEvent event) {
+    }
+
+    @Override
+    public void onDevMachineDestroyed(DevMachineStateEvent event) {
+    }
+
     /** Get the list of all available machines. */
     public void fetchMachines() {
-        String workspaceId = appContext.getWorkspaceId();
-
-        machineService.getMachines(workspaceId).then(new Operation<List<MachineDto>>() {
+        machineService.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
             @Override
             public void apply(List<MachineDto> machines) throws OperationException {
-                rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootChildren);
-
                 MachineDto devMachine = getDevMachine(machines);
-                addMachineToConsoles(devMachine);
+                ProcessTreeNode devMachineTreeNode = addMachineNode(devMachine);
 
                 machines.remove(devMachine);
 
                 for (MachineDto machine : machines) {
-                    addMachineToConsoles(machine);
+                    addMachineNode(machine);
                 }
+
+                view.selectNode(devMachineTreeNode);
+
+                workspaceAgent.setActivePart(ConsolesPanelPresenter.this);
             }
         });
     }
@@ -276,23 +276,31 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         throw new IllegalArgumentException("Dev machine can not be null");
     }
 
-    private void addMachineToConsoles(MachineDto machine) {
+    public void printDevMachineOutput(String text) {
+        OutputConsole console = consoles.get("");
+        if (console != null && console instanceof DefaultOutputConsole) {
+            ((DefaultOutputConsole)console).printText(text);
+        }
+    }
+
+    private ProcessTreeNode addMachineNode(MachineDto machine) {
         List<ProcessTreeNode> processTreeNodes = new ArrayList<ProcessTreeNode>();
+
         ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, processTreeNodes);
         machineNode.setRunning(true);
+        machineNodes.put(machine.getId(), machineNode);
 
-        if (rootChildren.contains(machineNode)) {
-            rootChildren.remove(machineNode);
+        if (rootNodes.contains(machineNode)) {
+            rootNodes.remove(machineNode);
         }
 
-        rootChildren.add(machineNode);
+        rootNodes.add(machineNode);
+
         view.setProcessesData(rootNode);
 
-        String machineId = machine.getId();
+        restoreState(machine.getId());
 
-        restoreState(machineId);
-
-        machineNodes.put(machineId, machineNode);
+        return machineNode;
     }
 
     private void restoreState(final String machineId) {
@@ -607,7 +615,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         }
 
         int countWidgets = terminals.size() + consoles.size();
-        if (countWidgets == 1) {
+        if (countWidgets <= 2) {
             view.hideProcessOutput(processId);
             removeChildFromMachineNode(node, parentNode);
             return;
@@ -692,6 +700,15 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         return null;
     }
 
+    @Override
+    public void onProcessFinished(ProcessFinishedEvent event) {
+        for (Map.Entry<String, OutputConsole> entry : consoles.entrySet()) {
+            if (entry.getValue().isFinished()) {
+                view.setStopButtonVisibility(entry.getKey(), false);
+            }
+        }
+    }
+
     private boolean isCommandStopped(String commandId) {
         return consoles.containsKey(commandId) && consoles.get(commandId).isFinished();
     }
@@ -702,6 +719,14 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         if (command != null) {
             view.markProcessHasOutput(command);
         }
+    }
+
+    @Override
+    public void onWorkspaceStarting(WorkspaceStartingEvent event) {
+        workspaceConsole = commandConsoleFactory.create("");
+        updateCommandOutput("", workspaceConsole);
+
+        fetchMachines();
     }
 
     @Override
@@ -717,10 +742,11 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         }
 
         rootNode.getChildren().clear();
-        rootChildren.clear();
+        rootNodes.clear();
 
         view.clear();
         view.selectNode(null);
         view.setProcessesData(rootNode);
     }
+
 }

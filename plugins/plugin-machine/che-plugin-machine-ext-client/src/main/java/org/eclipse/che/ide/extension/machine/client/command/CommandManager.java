@@ -99,7 +99,7 @@ public class CommandManager {
         executeCommand(configuration, devMachineId);
     }
 
-    private void executeCommand(@NotNull final CommandConfiguration configuration, @NotNull final String machineId) {
+    public void executeCommand(@NotNull final CommandConfiguration configuration, @NotNull final String machineId) {
         if (machineId == null) {
             notificationManager.notify(localizationConstant.failedToExecuteCommand(),
                                        localizationConstant.noDevMachine(),

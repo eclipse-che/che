@@ -34,7 +34,6 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
@@ -96,7 +95,7 @@ public class BootstrapController {
 
     @Inject
     private void startWsAgentComponents(EventBus eventBus, final Map<String, Provider<WsAgentComponent>> components) {
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedHandler() {
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedEvent.Handler() {
             @Override
             public void onWorkspaceStarted(WorkspaceStartedEvent event) {
                 workspaceService.getWorkspace(event.getWorkspace().getId()).then(new Operation<WorkspaceDto>() {
@@ -126,11 +125,9 @@ public class BootstrapController {
             Provider<Component> componentProvider = componentProviderIterator.next();
 
             final Component component = componentProvider.get();
-            Log.info(component.getClass(), "starting...");
             component.start(new Callback<Component, Exception>() {
                 @Override
                 public void onSuccess(Component result) {
-                    Log.info(result.getClass(), "started");
                     startComponents(componentProviderIterator);
                 }
 
@@ -150,11 +147,9 @@ public class BootstrapController {
             Provider<WsAgentComponent> componentProvider = componentProviderIterator.next();
 
             final WsAgentComponent component = componentProvider.get();
-            Log.info(component.getClass(), "starting...");
             component.start(new Callback<WsAgentComponent, Exception>() {
                 @Override
                 public void onSuccess(WsAgentComponent result) {
-                    Log.info(result.getClass(), "started");
                     startWsAgentComponents(componentProviderIterator);
                 }
 
