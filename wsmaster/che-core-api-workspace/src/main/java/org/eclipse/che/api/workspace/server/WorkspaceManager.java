@@ -15,10 +15,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -425,6 +427,42 @@ public class WorkspaceManager {
     }
 
     /**
+     * Starts machine in running workspace
+     *
+     * @param machineConfig configuration of machine to start
+     * @param workspaceId id of workspace in which machine should be started
+     * @return starting machine instance
+     * @throws NotFoundException
+     *         if machine type from recipe is unsupported
+     * @throws NotFoundException
+     *         if no instance provider implementation found for provided machine type
+     * @throws ConflictException
+     *         if machine with given name already exists
+     * @throws ConflictException
+     *         if workspace is not in RUNNING state
+     * @throws BadRequestException
+     *         if machine name is invalid
+     * @throws ServerException
+     *         if any other exception occurs during starting
+     */
+    public MachineImpl startMachine(MachineConfig machineConfig, String workspaceId)
+            throws ServerException,
+                   ConflictException,
+                   BadRequestException,
+                   NotFoundException {
+
+        final WorkspaceImpl workspace = getWorkspace(workspaceId);
+        if (RUNNING != workspace.getStatus()) {
+            throw new ConflictException(format("Workspace '%s' is not running, new machine can't be started", workspaceId));
+        }
+
+        return machineManager.createMachineAsync(machineConfig,
+                                                 workspaceId,
+                                                 workspace.getRuntime().getActiveEnv(),
+                                                 runtimes.getMachineLogger(workspaceId, machineConfig.getName()));
+    }
+
+    /**
      * Asynchronously stops the workspace.
      *
      * @param workspaceId
@@ -493,6 +531,19 @@ public class WorkspaceManager {
         // check if workspace exists
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         return machineManager.getSnapshots(workspace.getNamespace(), workspaceId);
+    }
+
+    /**
+     * Removes all snapshots of workspace machines
+     *
+     * @param workspaceId workspace id to remove machine snapshots
+     * @throws NotFoundException
+     *         when workspace with given id doesn't exists
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public void removeSnapshots(String workspaceId) throws NotFoundException, ServerException {
+        machineManager.removeSnapshots(getWorkspace(workspaceId).getNamespace(), workspaceId);
     }
 
     /** Asynchronously starts given workspace. */

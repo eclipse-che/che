@@ -27,7 +27,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -81,7 +80,6 @@ public class WorkspaceService extends Service {
 
     private final WorkspaceManager   workspaceManager;
     private final WorkspaceValidator validator;
-    private final MachineManager     machineManager;
     private final WorkspaceServiceLinksInjector linksInjector;
 
     @Context
@@ -89,11 +87,9 @@ public class WorkspaceService extends Service {
 
     @Inject
     public WorkspaceService(WorkspaceManager workspaceManager,
-                            MachineManager machineManager,
                             WorkspaceValidator validator,
                             WorkspaceServiceLinksInjector workspaceServiceLinksInjector) {
         this.workspaceManager = workspaceManager;
-        this.machineManager = machineManager;
         this.validator = validator;
         this.linksInjector = workspaceServiceLinksInjector;
     }
@@ -240,7 +236,7 @@ public class WorkspaceService extends Service {
                                                                                         ConflictException,
                                                                                         ForbiddenException {
         if (!workspaceManager.getSnapshot(id).isEmpty()) {
-            machineManager.removeSnapshots(workspaceManager.getWorkspace(id).getNamespace(), id);
+            workspaceManager.removeSnapshots(id);
         }
         workspaceManager.removeWorkspace(id);
     }
@@ -646,7 +642,8 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 403, message = "The user does not have access to create the new machine"),
                    @ApiResponse(code = 409, message = "Conflict error occurred during the machine creation" +
-                                                      "(e.g. The machine with such name already exists)"),
+                                                      "(e.g. The machine with such name already exists)." +
+                                                      "Workspace is not in RUNNING state"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response createMachine(@ApiParam("The workspace id")
                                   @PathParam("id")
@@ -665,14 +662,7 @@ public class WorkspaceService extends Service {
         requiredOnlyOneNotNull(machineConfig.getSource().getLocation(), machineConfig.getSource().getContent(),
                                "Machine source should provide either location or content");
 
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
-        if (workspace.getRuntime() == null) {
-            throw new NotFoundException(format("Workspace '%s' is not running, new machine can't be started", workspaceId));
-        }
-
-        final MachineImpl machine = machineManager.createMachineAsync(machineConfig,
-                                                                      workspaceId,
-                                                                      workspace.getRuntime().getActiveEnv());
+        final MachineImpl machine = workspaceManager.startMachine(machineConfig, workspaceId);
 
         return Response.status(201)
                        .entity(linksInjector.injectMachineLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),
