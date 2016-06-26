@@ -38,7 +38,6 @@ An extension is a set of code and resources that are packaged into a plugin that
 * [Authoring Extensions in Eclipse](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extension-using-the-eclipse-ide)
 * [Authoring Extensions in IntelliJ](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extensions-using-intellij-ide)
 * [Dependency Injection](https://eclipse-che.readme.io/docs/dependency-injection-basics)
-
 * [Extensions Packaged With Che](https://github.com/eclipse/che/tree/master/plugins)
 * [Extension SDK JavaDoc](https://eclipse-che.readme.io/v4.0/docs/java-class-reference)
 
