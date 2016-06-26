@@ -38,26 +38,23 @@ An extension is a set of code and resources that are packaged into a plugin that
 * [Authoring Extensions in Eclipse](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extension-using-the-eclipse-ide)
 * [Authoring Extensions in IntelliJ](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extensions-using-intellij-ide)
 * [Dependency Injection](https://eclipse-che.readme.io/docs/dependency-injection-basics)
-* [Editors](https://eclipse-che.readme.io/docs/code-editors)
-* [Project Type](https://eclipse-che.readme.io/docs/project-types)
-* [Actions](https://eclipse-che.readme.io/docs/actions)
-* [Services](https://eclipse-che.readme.io/docs/serverworkspace-access)
-* [Parts](https://eclipse-che.readme.io/docs/parts)
+
 * [Extensions Packaged With Che](https://github.com/eclipse/che/tree/master/plugins)
 * [Extension SDK JavaDoc](https://eclipse-che.readme.io/v4.0/docs/java-class-reference)
 
 #### IDE Extensions
 IDE extensions are compiled into JavaScript with other extensions to create a single, JavaScript application. You can package many extensions together into a single JavaScript application. The JavaScript application is cross-browser optimized. You can debug extensions and perform execution traces from within the browser of extension code. IDE extensions can invoke REST services that are running within the Che server or within a workspace. Che provides default workspace REST APIs or you can provide your own with workspace extensions.
 * [Invoking Workspace REST APIs](https://eclipse-che.readme.io/v4.0/docs/calling-workspace-apis)
+* [Editors](https://eclipse-che.readme.io/docs/code-editors)
+* [Project Type](https://eclipse-che.readme.io/docs/project-types)
 * [Actions](https://eclipse-che.readme.io/docs/actions)
+* [Services](https://eclipse-che.readme.io/docs/serverworkspace-access)
+* [Parts](https://eclipse-che.readme.io/docs/parts)
 * [Commands](https://github.com/benoitf/ide-plugin-demo)
-* * TODO: Register Project Type
-* * TODO: Menus
 * [Events](https://eclipse-che.readme.io/docs/events)
 * * TODO: Panels 
 * * TODO: Popups
 * * TODO: Wizards
-* * TODO: Editors
 
 #### Server-Side Extensions
 Server-side extensions are libraries that are deployed into the workspace agent when the workspace is activated. Che deploys some standard server-side extensions that expose the Workspace REST API to the outside world. You can author extensions that modify or extend this API with your own services. New workspace APIs are exposed as JAX-RS services and you use dependency injection to define the API interfaces.
