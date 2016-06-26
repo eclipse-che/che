@@ -31,12 +31,18 @@ A command is a process that is injected into your workspace. It's outputs are st
 
 #### Extension Development
 An extension is a set of code and resources that are packaged into a plugin that alter the behavior of the system. Extensions can be IDE extensions, workspace extensions (they are injected into the workspace agent running within each workspace), or Che extensions (injected into the Che server). Extensions are authored in Java and maven, and then packaged into JAR / ZIP files for deployment into Eclipse Che.
-* [Developing Extensions](https://eclipse-che.readme.io/docs/developing-extensions)
-* [Workspace Extension Tutorial](https://eclipse-che.readme.io/docs/developing-extensions#server-side-extension-example)
-* [IDE Extension Tutorial](https://eclipse-che.readme.io/docs/developing-extensions#ide-extension-example)
-* [Authoring Extensions in Che](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-the-che-ide)
-* [Authoring Extensions in Eclipse](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-the-eclipse-ide)
-* [Authoring Extensions in IntelliJ](https://eclipse-che.readme.io/docs/developing-extensions#author-extensions-using-intellij-ide)
+* [Che Extensions Introduction](https://dash.readme.io/project/eclipse-che/v4.3/docs/introduction-1)
+* [Developing Extensions](https://eclipse-che.readme.io/docs/create-and-build-extensions)
+* [JSON Extension Tutorial](https://eclipse-che.readme.io/v4.3/docs/introduction-1#section-the-json-example)
+* [Authoring Extensions in Che](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extension-using-the-che-ide)
+* [Authoring Extensions in Eclipse](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extension-using-the-eclipse-ide)
+* [Authoring Extensions in IntelliJ](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extensions-using-intellij-ide)
+* [Dependency Injection](https://eclipse-che.readme.io/docs/dependency-injection-basics)
+* [Editors](https://eclipse-che.readme.io/docs/code-editors)
+* [Project Type](https://eclipse-che.readme.io/docs/project-types)
+* [Actions](https://eclipse-che.readme.io/docs/actions)
+* [Services](https://eclipse-che.readme.io/docs/serverworkspace-access)
+* [Parts](https://eclipse-che.readme.io/docs/parts)
 * [Extensions Packaged With Che](https://github.com/eclipse/che/tree/master/plugins)
 * [Extension SDK JavaDoc](https://eclipse-che.readme.io/v4.0/docs/java-class-reference)
 
