@@ -209,16 +209,16 @@ public class BootstrapController {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override
             public void execute() {
-                notifyIDELoaded();
+                notifyShowIDE();
             }
         });
     }
 
     /**
-     * Sends a message to the parent frame to inform that IDE application has been loaded.
+     * Sends a message to the parent frame to inform that IDE application can be shown.
      */
-    private native void notifyIDELoaded() /*-{
-        $wnd.parent.postMessage("ide-loaded", "*");
+    private native void notifyShowIDE() /*-{
+        $wnd.parent.postMessage("show-ide", "*");
     }-*/;
 
     /**
@@ -231,6 +231,7 @@ public class BootstrapController {
     private native void initializationFailed(String reason) /*-{
         try {
             $wnd.IDE.eventHandlers.initializationFailed(reason);
+            this.@org.eclipse.che.ide.client.BootstrapController::notifyShowIDE()();
         } catch (e) {
             console.log(e.message);
         }
