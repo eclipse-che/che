@@ -21,7 +21,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonNameConvention;
 import org.eclipse.che.commons.json.JsonParseException;
-import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.TarUtils;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
@@ -36,8 +35,8 @@ import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
-import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.ExecConfig;
@@ -61,6 +60,7 @@ import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
+import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
@@ -72,7 +72,6 @@ import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.TopParams;
 import org.eclipse.che.plugin.docker.client.params.WaitContainerParams;
-import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,6 +102,7 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
 /**
  * Client for docker API.
@@ -1277,7 +1277,7 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
             if (response.getStatus() == 404) {
-                throw new ImageNotFoundException(IoUtil.readStream(response.getInputStream()));
+                throw new ImageNotFoundException(readAndCloseQuietly(response.getInputStream()));
             } else if (response.getStatus() / 100 != 2) {
                 throw getDockerException(response);
             }
