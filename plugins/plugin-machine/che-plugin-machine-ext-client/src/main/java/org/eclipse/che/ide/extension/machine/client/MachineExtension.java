@@ -94,15 +94,6 @@ public class MachineExtension {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 machinePortProvider.get();
-
-                /**
-                 * There is a bug in perspective management and it's unable to add Consoles part in
-                 * OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
-                 */
-
-                if (appContext.getFactory() == null) {
-                    consolesPanelPresenter.newTerminal();
-                }
             }
 
             @Override
@@ -113,6 +104,10 @@ public class MachineExtension {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
+                /* There is a bug in perspective management and it's unable to add Consoles part in
+                 * OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
+                 */
+
                 /* Add Consoles to Operation perspective */
                 perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
                 workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
@@ -121,7 +116,11 @@ public class MachineExtension {
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
                 workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
 
-                workspaceAgent.setActivePart(consolesPanelPresenter);
+                /* Do not show terminal on factories by default */
+                if (appContext.getFactory() == null) {
+                    consolesPanelPresenter.newTerminal();
+                    workspaceAgent.setActivePart(consolesPanelPresenter);
+                }
             }
         });
 
