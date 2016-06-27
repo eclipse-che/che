@@ -115,15 +115,12 @@ public class PullTest {
         connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
         connection.commit(newDto(CommitRequest.class).withMessage("remote test"));
 
-        GitConnection connection2 = connectToInitializedGitRepository(connectionFactory, remoteRepo);
-        addFile(connection2, "EMPTY", "");
-        connection2.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection2.commit(newDto(CommitRequest.class).withMessage("init"));
+        GitConnection connection2 = connectToGitRepositoryWithContent(connectionFactory, remoteRepo);
 
         //when
         PullRequest request = newDto(PullRequest.class);
         request.setRemote(connection.getWorkingDir().getAbsolutePath());
-        request.setRefSpec(branchName);
+        request.setRefSpec("refs/heads/remoteBranch:refs/heads/remoteBranch");
         connection2.pull(request);
         //then
         assertTrue(new File(remoteRepo.getAbsolutePath(), "remoteFile").exists());
