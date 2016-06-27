@@ -13,7 +13,6 @@ package org.eclipse.che.ide.workspace;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -268,10 +267,10 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     }
 
     /**
-     * Sends a message to the parent frame to inform that IDE application has been loaded.
+     * Sends a message to the parent frame to inform that IDE application can be shown.
      */
-    private native void notifyIDELoaded() /*-{
-        $wnd.parent.postMessage("ide-loaded", "*");
+    private native void notifyShowIDE() /*-{
+        $wnd.parent.postMessage("show-ide", "*");
     }-*/;
 
     /**
@@ -304,7 +303,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                 })
                      .show();
 
-        notifyIDELoaded();
+        notifyShowIDE();
     }
 
     /**

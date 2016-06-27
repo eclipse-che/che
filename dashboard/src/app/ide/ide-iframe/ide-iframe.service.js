@@ -29,7 +29,7 @@ class IdeIFrameSvc {
     this.$location = $location;
 
     $window.addEventListener("message", (event) => {
-      if ("ide-loaded" === event.data) {
+      if ("show-ide" === event.data) {
         // check whether user is still waiting for IDE
         if (/\/ide\//.test($location.path())) {
           $rootScope.$apply(() => {
