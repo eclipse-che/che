@@ -1276,9 +1276,11 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "force", params.isForce());
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
-            if (response.getStatus() == 404) {
+            final int status = response.getStatus();
+            if (status == 404) {
                 throw new ImageNotFoundException(readAndCloseQuietly(response.getInputStream()));
-            } else if (response.getStatus() / 100 != 2) {
+            }
+            if (status / 100 != 2) {
                 throw getDockerException(response);
             }
         }
