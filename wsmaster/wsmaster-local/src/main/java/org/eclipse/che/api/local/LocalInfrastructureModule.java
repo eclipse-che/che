@@ -18,14 +18,15 @@ import org.eclipse.che.api.machine.server.dao.RecipeDao;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
 import org.eclipse.che.api.user.server.TokenValidator;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.ProfileDao;
+import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 
 import javax.inject.Named;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class LocalInfrastructureModule extends AbstractModule {
     protected void configure() {
         bind(UserDao.class).to(LocalUserDaoImpl.class);
         bind(WorkspaceDao.class).to(LocalWorkspaceDaoImpl.class);
-        bind(UserProfileDao.class).to(LocalProfileDaoImpl.class);
+        bind(ProfileDao.class).to(LocalProfileDaoImpl.class);
         bind(PreferenceDao.class).to(LocalPreferenceDaoImpl.class);
         bind(SnapshotDao.class).to(LocalSnapshotDaoImpl.class);
         bind(SshDao.class).to(LocalSshDaoImpl.class);
@@ -46,13 +47,13 @@ public class LocalInfrastructureModule extends AbstractModule {
 
     @Provides
     @Named("codenvy.local.infrastructure.users")
-    Set<User> users() {
-        final Set<User> users = new HashSet<>(1);
-        final User user = new User().withId("che")
-                                    .withName("che")
-                                    .withEmail("che@eclipse.org")
-                                    .withPassword("secret");
-        user.getAliases().add("che@eclipse.org");
+    Set<UserImpl> users() {
+        final Set<UserImpl> users = new HashSet<>();
+        final UserImpl user = new UserImpl("che",
+                                           "che@eclipse.org",
+                                           "che",
+                                           "secret",
+                                           Collections.emptyList());
         users.add(user);
         return users;
     }

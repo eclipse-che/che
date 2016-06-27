@@ -17,8 +17,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
-import org.eclipse.che.api.user.server.UserProfileService;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.inject.Inject;
@@ -44,12 +43,12 @@ public class RemotePreferenceDao implements PreferenceDao {
 
     @Inject
     public RemotePreferenceDao(@Named("api.endpoint") String apiUrl, HttpJsonRequestFactory requestFactory) {
-        this.prefsUrl = apiUrl + "/profile/prefs";
+        this.prefsUrl = apiUrl + "/preferences";
         this.requestFactory = requestFactory;
     }
 
     @Override
-    public void setPreferences(String userId, Map<String, String> preferences) throws ServerException, NotFoundException {
+    public void setPreferences(String userId, Map<String, String> preferences) throws ServerException {
         requireNonNull(preferences, "Required non-null preferences");
         checkUserId(requireNonNull(userId, "Required non-null user id"));
         try {
