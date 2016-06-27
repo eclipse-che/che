@@ -19,7 +19,7 @@ import org.eclipse.che.api.machine.server.MachineInstanceProviders;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.MachineRegistry;
 import org.eclipse.che.api.machine.server.MachineService;
-import org.eclipse.che.api.machine.server.dao.SnapshotDao;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -128,7 +128,7 @@ public class ServiceTest {
                 .withHostConfig(new HostConfig().withPortBindings(
                         singletonMap("5000/tcp", new PortBinding[]{new PortBinding().withHostPort("5000")})));
 
-        registryContainerId = docker.createContainer(containerConfig, null).getId();
+        registryContainerId = docker.createContainer(containerConfig, null).getUserId();
 
         docker.startContainer(registryContainerId, null);
     }
@@ -192,7 +192,7 @@ public class ServiceTest {
             }
 
             @Override
-            public String getId() {
+            public String getUserId() {
                 return USER;
             }
 
@@ -208,7 +208,7 @@ public class ServiceTest {
     @AfterMethod
     public void tearDown() throws Exception {
         for (MachineStateImpl machine : new ArrayList<>(machineManager.getMachinesStates())) {
-            machineManager.destroy(machine.getId(), false);
+            machineManager.destroy(machine.getUserId(), false);
         }
         EnvironmentContext.reset();
     }
@@ -224,7 +224,7 @@ public class ServiceTest {
                                                 .withType("Dockerfile")
                                                 .withScript("FROM ubuntu\nCMD tail -f /dev/null\n")));
 
-        waitMachineIsRunning(machine.getId());
+        waitMachineIsRunning(machine.getUserId());
     }
 
     @Test(dependsOnMethods = "saveSnapshotTest", enabled = false)
@@ -242,27 +242,27 @@ public class ServiceTest {
         final MachineStateDescriptor machine = machineService
                 .createMachineFromSnapshot(newDto(SnapshotMachineCreationMetadata.class).withSnapshotId(SNAPSHOT_ID));
 
-        waitMachineIsRunning(machine.getId());
+        waitMachineIsRunning(machine.getUserId());
     }
 
     @Test
     public void getMachineTest() throws Exception {
         final MachineImpl machine = createMachineAndWaitRunningState();
 
-        final MachineDescriptor machineById = machineService.getMachineById(machine.getId());
+        final MachineDescriptor machineById = machineService.getMachineById(machine.getUserId());
 
-        assertEquals(machineById.getId(), machine.getId());
+        assertEquals(machineById.getUserId(), machine.getUserId());
     }
 
     @Test
     public void getMachinesTest() throws Exception {
         Set<String> expected = new HashSet<>();
-        expected.add(createMachineAndWaitRunningState().getId());
-        expected.add(createMachineAndWaitRunningState().getId());
+        expected.add(createMachineAndWaitRunningState().getUserId());
+        expected.add(createMachineAndWaitRunningState().getUserId());
 
         Set<String> actual = machineManager.getMachinesStates()
                                            .stream()
-                                           .map(MachineImpl::getId)
+                                           .map(MachineImpl::getUserId)
                                            .collect(Collectors.toSet());
         assertEquals(actual, expected);
     }
@@ -271,14 +271,14 @@ public class ServiceTest {
     public void destroyMachineTest() throws Exception {
         final MachineImpl machine = createMachineAndWaitRunningState();
 
-        machineService.destroyMachine(machine.getId());
+        machineService.destroyMachine(machine.getUserId());
 
-        assertEquals(machineService.getMachineStateById(machine.getId()).getStatus(), MachineStatus.DESTROYING);
+        assertEquals(machineService.getMachineStateById(machine.getUserId()).getStatus(), MachineStatus.DESTROYING);
 
         int counter = 0;
         while (++counter < 1000) {
             try {
-                machineManager.getMachine(machine.getId());
+                machineManager.getMachine(machine.getUserId());
             } catch (NotFoundException e) {
                 return;
             }
@@ -293,7 +293,7 @@ public class ServiceTest {
 
         // use machine manager instead of machine service because it returns future with snapshot
         // that allows check operation result
-        final SnapshotImpl snapshot = machineManager.save(machine.getId(), USER, "test description");
+        final SnapshotImpl snapshot = machineManager.save(machine.getUserId(), USER, "test description");
 
         for (int i = 0; snapshot.getInstanceKey() == null && i < 10; ++i) {
             Thread.sleep(500);
@@ -337,13 +337,13 @@ public class ServiceTest {
         final MachineImpl machine = createMachineAndWaitRunningState();
 
         String commandInMachine = "echo \"command in machine\" && tail -f /dev/null";
-        machineService.executeCommandInMachine(machine.getId(),
+        machineService.executeCommandInMachine(machine.getUserId(),
                                                DtoFactory.newDto(CommandDto.class).withCommandLine(commandInMachine),
                                                null);
 
         Thread.sleep(500);
 
-        final List<MachineProcessDto> processes = machineService.getProcesses(machine.getId());
+        final List<MachineProcessDto> processes = machineService.getProcesses(machine.getUserId());
         assertEquals(processes.size(), 1);
         assertEquals(processes.get(0).getCommandLine(), commandInMachine);
     }
@@ -357,12 +357,12 @@ public class ServiceTest {
         commands.add("sleep 10000");
 
         for (String command : commands) {
-            machineService.executeCommandInMachine(machine.getId(), DtoFactory.newDto(CommandDto.class).withCommandLine(command), null);
+            machineService.executeCommandInMachine(machine.getUserId(), DtoFactory.newDto(CommandDto.class).withCommandLine(command), null);
         }
 
         Thread.sleep(500);
 
-        final List<MachineProcessDto> processes = machineService.getProcesses(machine.getId());
+        final List<MachineProcessDto> processes = machineService.getProcesses(machine.getUserId());
         assertEquals(processes.size(), 2);
         Set<String> actualCommandLines = new HashSet<>(2);
         for (MachineProcessDto process : processes) {
@@ -377,19 +377,19 @@ public class ServiceTest {
         final MachineImpl machine = createMachineAndWaitRunningState();
 
         String commandInMachine = "echo \"command in machine\" && tail -f /dev/null";
-        machineService.executeCommandInMachine(machine.getId(),
+        machineService.executeCommandInMachine(machine.getUserId(),
                                                DtoFactory.newDto(CommandDto.class).withCommandLine(commandInMachine),
                                                null);
 
         Thread.sleep(500);
 
-        final List<MachineProcessDto> processes = machineService.getProcesses(machine.getId());
+        final List<MachineProcessDto> processes = machineService.getProcesses(machine.getUserId());
         assertEquals(processes.size(), 1);
         assertEquals(processes.get(0).getCommandLine(), commandInMachine);
 
-        machineService.stopProcess(machine.getId(), processes.get(0).getPid());
+        machineService.stopProcess(machine.getUserId(), processes.get(0).getPid());
 
-        assertTrue(machineService.getProcesses(machine.getId()).isEmpty());
+        assertTrue(machineService.getProcesses(machine.getUserId()).isEmpty());
     }
 
     @Test(expectedExceptions = NotFoundException.class, expectedExceptionsMessageRegExp = "Process with pid .* not found")
@@ -397,17 +397,17 @@ public class ServiceTest {
         final MachineImpl machine = createMachineAndWaitRunningState();
 
         String commandInMachine = "echo \"command in machine\" && tail -f /dev/null";
-        machineService.executeCommandInMachine(machine.getId(),
+        machineService.executeCommandInMachine(machine.getUserId(),
                                                DtoFactory.newDto(CommandDto.class).withCommandLine(commandInMachine),
                                                null);
 
         Thread.sleep(500);
 
-        final List<MachineProcessDto> processes = machineService.getProcesses(machine.getId());
+        final List<MachineProcessDto> processes = machineService.getProcesses(machine.getUserId());
         assertEquals(processes.size(), 1);
         assertEquals(processes.get(0).getCommandLine(), commandInMachine);
 
-        machineService.stopProcess(machine.getId(), processes.get(0).getPid() + 100);
+        machineService.stopProcess(machine.getUserId(), processes.get(0).getPid() + 100);
     }
 
     private MachineImpl createMachineAndWaitRunningState() throws Exception {
@@ -423,7 +423,7 @@ public class ServiceTest {
                                                                     .withDev(false)
                                                                     .withDisplayName("displayName" + System.currentTimeMillis())
                                                           , false);
-        waitMachineIsRunning(machine.getId());
+        waitMachineIsRunning(machine.getUserId());
         return machine;
     }
 

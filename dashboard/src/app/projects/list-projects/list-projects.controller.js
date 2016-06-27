@@ -49,9 +49,9 @@ export class ListProjectsCtrl {
         }
       });
 
-    let profilePreferences = cheAPI.getProfile().getPreferences();
+    let preferences = cheAPI.getPreferences().getPreferences();
 
-    this.profileCreationDate = profilePreferences['che:created'];
+    this.profileCreationDate = preferences['che:created'];
 
     this.menuOptions = [
       {

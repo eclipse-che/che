@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.user;
 
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
+import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.validation.constraints.NotNull;
@@ -29,7 +28,7 @@ public interface UserProfileServiceClient {
      *
      * @param callback
      */
-    void getCurrentProfile(AsyncRequestCallback<ProfileDescriptor> callback);
+    void getCurrentProfile(AsyncRequestCallback<ProfileDto> callback);
 
     /**
      * Update current user's profile.
@@ -38,7 +37,7 @@ public interface UserProfileServiceClient {
      *         attributes to update
      * @param callback
      */
-    void updateCurrentProfile(@NotNull Map<String, String> updates, AsyncRequestCallback<ProfileDescriptor> callback);
+    void updateCurrentProfile(@NotNull Map<String, String> updates, AsyncRequestCallback<ProfileDto> callback);
 
     /**
      * Get profile by id.
@@ -47,26 +46,8 @@ public interface UserProfileServiceClient {
      *         profile's id
      * @param callback
      */
-    void getProfileById(@NotNull String id, AsyncRequestCallback<ProfileDescriptor> callback);
+    void getProfileById(@NotNull String id, AsyncRequestCallback<ProfileDto> callback);
 
-    /**
-     * Get user preferences
-     *
-     * @param callback
-     *         which contains some action with user preferences
-     * @deprecated use {@link #getPreferences()}
-     */
-    @Deprecated
-    void getPreferences(AsyncRequestCallback<Map<String, String>> callback);
-
-    /**
-     * Get user preferences
-     *
-     * @return the promise which either uses preferences for some actions or rejects with an error
-     */
-    Promise<Map<String, String>> getPreferences();
-
-    /**
 
     /**
      * Update profile.
@@ -77,25 +58,5 @@ public interface UserProfileServiceClient {
      *         attributes to update
      * @param callback
      */
-    void updateProfile(@NotNull String id, Map<String, String> updates, AsyncRequestCallback<ProfileDescriptor> callback);
-
-    /**
-     * Update preferences.
-     *
-     * @param prefsToUpdate
-     *         preferences to update
-     * @param callback
-     *         which contains some action with user preferences
-     * @deprecated use {@link #updatePreferences(Map)}
-     */
-    @Deprecated
-    void updatePreferences(@NotNull Map<String, String> prefsToUpdate, AsyncRequestCallback<Map<String, String>> callback);
-
-    /**
-     * Update preferences.
-     *
-     * @param prefsToUpdate
-     * @return promise which either uses preferences for some actions or rejects with an error
-     */
-    Promise<Map<String, String>> updatePreferences(@NotNull Map<String, String> prefsToUpdate);
+    void updateProfile(@NotNull String id, Map<String, String> updates, AsyncRequestCallback<ProfileDto> callback);
 }
