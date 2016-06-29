@@ -17,6 +17,7 @@ import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Presenter for choosing source directory.
@@ -26,9 +27,9 @@ import java.util.Collections;
 @Singleton
 public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
 
-    private final SelectNodeView view;
+    private final SelectNodeView           view;
     private final ProjectExplorerPresenter projectExplorerPresenter;
-    private SelectionDelegate selectionDelegate;
+    private       SelectionDelegate        selectionDelegate;
 
     @Inject
     public SelectNodePresenter(SelectNodeView view, ProjectExplorerPresenter projectExplorerPresenter) {
@@ -57,7 +58,7 @@ public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
 
     /** {@inheritDoc} */
     @Override
-    public void setSelectedNode(String path) {
-        selectionDelegate.onNodeSelected(path);
+    public void setSelectedNode(List<Node> selectedNodes) {
+        selectionDelegate.onNodeSelected(selectedNodes);
     }
 }
