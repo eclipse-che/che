@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +22,13 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * Checks that docker registry is available.
  *
  * @author Yevhenii Voevodin
+ * @author Alexander Andrienko
  */
 @Singleton
 public class DockerRegistryChecker {
@@ -32,28 +36,37 @@ public class DockerRegistryChecker {
     private static final Logger LOG = LoggerFactory.getLogger(DockerRegistryChecker.class);
 
     @Inject
-    @Named("docker.registry.auth.url")
-    private String registryUrl;
+    @Nullable
+    @Named("machine.docker.registry")
+    private String machineDockerRegistry;
+
+    @Inject
+    @Named("machine.docker.snapshot_use_registry")
+    private boolean snapshotUseRegistry;
 
     /**
      * Checks that registry is available and if it is not - logs warning message.
      */
     @PostConstruct
     private void checkRegistryIsAvailable() throws IOException {
-        LOG.info("Probing registry '{}'", registryUrl);
-        final HttpURLConnection conn = (HttpURLConnection) new URL(registryUrl).openConnection();
-        conn.setConnectTimeout(30 * 1000);
-        try {
-            final int responseCode = conn.getResponseCode();
-            LOG.info("Probe of registry '{}' succeed with HTTP response code '{}'", registryUrl, responseCode);
-        } catch (IOException ioEx) {
-            LOG.warn("Docker registry " + registryUrl + " is not available, " +
-                     "which means that you won't be able to save snapshots of your workspaces." +
-                     "\nHow to configure registry?" +
-                     "\n\tLocal registry  -> https://docs.docker.com/registry/" +
-                     "\n\tRemote registry -> set up 'docker.registry.auth.*' properties");
-        } finally {
-            conn.disconnect();
+        if (snapshotUseRegistry && !isNullOrEmpty(machineDockerRegistry)) {
+            String registryUrl = "http://" + machineDockerRegistry;
+
+            LOG.info("Probing registry '{}'", registryUrl);
+            final HttpURLConnection conn = (HttpURLConnection) new URL(registryUrl).openConnection();
+            conn.setConnectTimeout(30 * 1000);
+            try {
+                final int responseCode = conn.getResponseCode();
+                LOG.info("Probe of registry '{}' succeed with HTTP response code '{}'", registryUrl, responseCode);
+            } catch (IOException ioEx) {
+                LOG.warn("Docker registry {} is not available, " +
+                         "which means that you won't be able to save snapshots of your workspaces." +
+                         "\nHow to configure registry?" +
+                         "\n\tLocal registry  -> https://docs.docker.com/registry/" +
+                         "\n\tRemote registry -> set up 'docker.registry.auth.*' properties", registryUrl);
+            } finally {
+                conn.disconnect();
+            }
         }
     }
 }

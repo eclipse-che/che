@@ -37,6 +37,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
@@ -166,6 +167,9 @@ public class EditCommandsPresenterTest {
         when(view.getSelectedConfiguration()).thenReturn(commandConfiguration);
         when(commandConfiguration.getType()).thenReturn(mock(CommandType.class));
         when(commandConfiguration.getName()).thenReturn(COMMAND_NAME);
+
+        when(workspacePromise.thenPromise(any(Function.class))).thenReturn(workspacePromise);
+        when(workspacePromise.then((Operation)anyObject())).thenReturn(workspacePromise);
 
         presenter.onEnterClicked();
 

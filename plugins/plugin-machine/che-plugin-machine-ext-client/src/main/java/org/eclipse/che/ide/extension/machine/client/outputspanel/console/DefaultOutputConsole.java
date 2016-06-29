@@ -26,13 +26,18 @@ import java.util.List;
  *
  * @author Valeriy Svydenko
  */
-public class DefaultOutputConsole implements OutputConsole {
+public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.ActionDelegate {
 
-    private final OutputConsoleView view;
-    private final MachineResources  resources;
-    private       String            title;
+    private final OutputConsoleView             view;
+    private final MachineResources              resources;
+    private       String                        title;
 
-    private final List<ConsoleOutputListener> outputListeners;
+    private final List<ConsoleOutputListener>   outputListeners;
+
+    private boolean                             wrapText;
+
+    /** Follow output when printing text */
+    private boolean                             followOutput = true;
 
     @Inject
     public DefaultOutputConsole(OutputConsoleView view,
@@ -43,8 +48,12 @@ public class DefaultOutputConsole implements OutputConsole {
         this.resources = resources;
         outputListeners = new ArrayList<>();
 
+        view.setDelegate(this);
+
         view.hideCommand();
         view.hidePreview();
+        view.setReRunButtonVisible(false);
+        view.setStopButtonVisible(false);
     }
 
     /**
@@ -119,6 +128,40 @@ public class DefaultOutputConsole implements OutputConsole {
     @Override
     public void addOutputListener(ConsoleOutputListener listener) {
         outputListeners.add(listener);
+    }
+
+    @Override
+    public void reRunProcessButtonClicked() {
+    }
+
+    @Override
+    public void stopProcessButtonClicked() {
+    }
+
+    @Override
+    public void clearOutputsButtonClicked() {
+        view.clearConsole();
+    }
+
+    @Override
+    public void wrapTextButtonClicked() {
+        wrapText = !wrapText;
+        view.wrapText(wrapText);
+        view.toggleWrapTextButton(wrapText);
+    }
+
+    @Override
+    public void scrollToBottomButtonClicked() {
+        followOutput = !followOutput;
+
+        view.toggleScrollToEndButton(followOutput);
+        view.enableAutoScroll(followOutput);
+    }
+
+    @Override
+    public void onOutputScrolled(boolean bottomReached) {
+        followOutput = bottomReached;
+        view.toggleScrollToEndButton(bottomReached);
     }
 
 }

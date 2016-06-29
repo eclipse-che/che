@@ -1,5 +1,128 @@
 # Change Log
 
+## [4.4.0](https://github.com/eclipse/che/tree/4.4.0) (2016-06-28)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.5...4.4.0)
+
+**Issues with no labels:**
+
+- Is there a factory file? [\#1590](https://github.com/eclipse/che/issues/1590)
+
+**Pull requests merged:**
+
+- CODENVY-703; do not show terminal by default in factories [\#1586](https://github.com/eclipse/che/pull/1586) ([mshaposhnik](https://github.com/mshaposhnik))
+- Fix docker connector tag image test [\#1585](https://github.com/eclipse/che/pull/1585) ([akorneta](https://github.com/akorneta))
+- CHE-1276: Fix closing of the docker response stream [\#1584](https://github.com/eclipse/che/pull/1584) ([akorneta](https://github.com/akorneta))
+- CHE-699: handle IDE initialization failed error [\#1582](https://github.com/eclipse/che/pull/1582) ([ashumilova](https://github.com/ashumilova))
+- CODENVY-677: fix IDE iframe injector for UD [\#1581](https://github.com/eclipse/che/pull/1581) ([olexii4](https://github.com/olexii4))
+- CHE-1276: Add exception handler during creation machine from snapshot [\#1579](https://github.com/eclipse/che/pull/1579) ([akorneta](https://github.com/akorneta))
+- Add Go stack [\#1578](https://github.com/eclipse/che/pull/1578) ([ddementieva](https://github.com/ddementieva))
+- CHE-1376. Remove 'Stop dev machine' action from 'Machine' menu [\#1577](https://github.com/eclipse/che/pull/1577) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- CHE-1359: fix NPE in case recipe set as content but not location URL [\#1575](https://github.com/eclipse/che/pull/1575) ([vparfonov](https://github.com/vparfonov))
+- CODENVY-338 Remove explicit guice dependency version [\#1556](https://github.com/eclipse/che/pull/1556) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Add docker group IDs for boot2docker and Docker for Mac Beta [\#1490](https://github.com/eclipse/che/pull/1490) ([l0rd](https://github.com/l0rd))
+- CHE-1218: Add TCK tests for User/Profile [\#1459](https://github.com/eclipse/che/pull/1459) ([evoevodin](https://github.com/evoevodin))
+- CHE-1314 Add loader during workspace snapshotting process [\#1503](https://github.com/eclipse/che/pull/1503) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- CHE-1142: \[dashboard\] improve project creation popup [\#1461](https://github.com/eclipse/che/pull/1461) ([akurinnoy](https://github.com/akurinnoy))
+- CHE-1136. Show workspace start logs when workspace is in STARTING state [\#1355](https://github.com/eclipse/che/pull/1355) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- CHE-167: Improve java debugger for opening java files from external project modules. [\#1300](https://github.com/eclipse/che/pull/1300) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+
+## [4.3.5](https://github.com/eclipse/che/tree/4.3.5) (2016-06-24)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.4...4.3.5)
+
+**Issues with no labels:**
+
+- add shortcut for Quick Fix to editor [\#1570](https://github.com/eclipse/che/issues/1570)
+- Cannot connect Agent when creating workspace: cannot find or open /mnt/che/ws-agent.zip [\#1554](https://github.com/eclipse/che/issues/1554)
+- Document/support private SSH key [\#1540](https://github.com/eclipse/che/issues/1540)
+- Always loading And can't connection failed with terminal   Help! [\#1507](https://github.com/eclipse/che/issues/1507)
+
+**Pull requests merged:**
+
+- CHE-1277 Move machines output to project perpective [\#1574](https://github.com/eclipse/che/pull/1574) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- Add key binding for the Quick Fix action [\#1573](https://github.com/eclipse/che/pull/1573) ([vzhukovskii](https://github.com/vzhukovskii))
+- CHE-1335: add readonly attribute to the project name input tag becaus… [\#1569](https://github.com/eclipse/che/pull/1569) ([olexii4](https://github.com/olexii4))
+- CHE-1377: add confirm dialog event to the parent frame [\#1563](https://github.com/eclipse/che/pull/1563) ([olexii4](https://github.com/olexii4))
+- CHE-1375: fix re-starting of workspace from User Dashboard [\#1562](https://github.com/eclipse/che/pull/1562) ([akurinnoy](https://github.com/akurinnoy))
+- CHE-1346: fix project detail view on starting workspace [\#1559](https://github.com/eclipse/che/pull/1559) ([akurinnoy](https://github.com/akurinnoy))
+- Dashboard fixups [\#1558](https://github.com/eclipse/che/pull/1558) ([ashumilova](https://github.com/ashumilova))
+- Codenvy 694 remove unused field of WorkspaceManager and add getByNamespace manager mehod [\#1555](https://github.com/eclipse/che/pull/1555) ([mshaposhnik](https://github.com/mshaposhnik))
+- CHE-957: fixed a problem with updating content of the compare widget [\#1553](https://github.com/eclipse/che/pull/1553) ([svor](https://github.com/svor))
+- CODENVY-630: save a value of the library folder [\#1552](https://github.com/eclipse/che/pull/1552) ([svor](https://github.com/svor))
+- CODENVY-693: Fix download file feature for hosted assembly [\#1551](https://github.com/eclipse/che/pull/1551) ([akorneta](https://github.com/akorneta))
+- Add HTTP Host header to support Docker v1.12 [\#1550](https://github.com/eclipse/che/pull/1550) ([l0rd](https://github.com/l0rd))
+- CHE-1354: fix RAM allocation slider [\#1549](https://github.com/eclipse/che/pull/1549) ([akurinnoy](https://github.com/akurinnoy))
+- CODENVY-672: Add invalidation of token when the refresh failed [\#1548](https://github.com/eclipse/che/pull/1548) ([akorneta](https://github.com/akorneta))
+- Add method for getting WsAgent URL [\#1546](https://github.com/eclipse/che/pull/1546) ([azatsarynnyy](https://github.com/azatsarynnyy))
+- CHE-1312: Add ability to configure credentials for several docker private registries [\#1544](https://github.com/eclipse/che/pull/1544) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- CHE-1234 Encode command name when making request to service [\#1526](https://github.com/eclipse/che/pull/1526) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- CHE-1180: add ability to configure private docker registries [\#1454](https://github.com/eclipse/che/pull/1454) ([olexii4](https://github.com/olexii4))
+
+## [4.3.4](https://github.com/eclipse/che/tree/4.3.4) (2016-06-22)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.3...4.3.4)
+
+**Issues with 'enhancement' label:**
+
+- Parameterize the Che Vagrantfile [\#1531](https://github.com/eclipse/che/issues/1531)
+
+**Issues with no labels:**
+
+- Client has aborted connection. Response writing omitted.Help!  [\#1530](https://github.com/eclipse/che/issues/1530)
+- Show hidden files in project explorer [\#1529](https://github.com/eclipse/che/issues/1529)
+
+**Pull requests merged:**
+
+- CODENVY-688 Restore back "export workspace" feature \(again\) [\#1545](https://github.com/eclipse/che/pull/1545) ([benoitf](https://github.com/benoitf))
+- Temporary exclude MavenServerManagerTest … [\#1537](https://github.com/eclipse/che/pull/1537) ([vparfonov](https://github.com/vparfonov))
+- CODENVY-659: remove unnecessary data from workspace config [\#1536](https://github.com/eclipse/che/pull/1536) ([akurinnoy](https://github.com/akurinnoy))
+- Add Z suffix to override ws agent conf on RHEL systems [\#1534](https://github.com/eclipse/che/pull/1534) ([eivantsov](https://github.com/eivantsov))
+- 1531: Parameterized Vagrantfile [\#1532](https://github.com/eclipse/che/pull/1532) ([creckord](https://github.com/creckord))
+- Che-1296: Use docker auth config saved in user preferences to start machine from private image [\#1524](https://github.com/eclipse/che/pull/1524) ([mmorhun](https://github.com/mmorhun))
+- CODENVY-620: fix country constant in json [\#1523](https://github.com/eclipse/che/pull/1523) ([olexii4](https://github.com/olexii4))
+- CHE-1264. Don't include CR char in log message when LF char follow [\#1451](https://github.com/eclipse/che/pull/1451) ([RomanNikitenko](https://github.com/RomanNikitenko))
+
+## [4.3.3](https://github.com/eclipse/che/tree/4.3.3) (2016-06-17)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.2...4.3.3)
+
+**Issues with no labels:**
+
+- Codenvy beta installs the entire OS after container stopped, causing huge startup delays [\#1516](https://github.com/eclipse/che/issues/1516)
+- Can't start machine ws-machine because machine recipe downloading failed. [\#1504](https://github.com/eclipse/che/issues/1504)
+
+**Pull requests merged:**
+
+- Fix UD transitive dependency of gulp-angular-templatecache  [\#1522](https://github.com/eclipse/che/pull/1522) ([benoitf](https://github.com/benoitf))
+- CODENVY-669: Catch exception on init projects for avoiding crash wsagent [\#1521](https://github.com/eclipse/che/pull/1521) ([vparfonov](https://github.com/vparfonov))
+- CODENVY-667 Adapt predefined recipes and stacks to new format [\#1520](https://github.com/eclipse/che/pull/1520) ([sleshchenko](https://github.com/sleshchenko))
+- Cleanup in maven module build [\#1519](https://github.com/eclipse/che/pull/1519) ([skabashnyuk](https://github.com/skabashnyuk))
+- Fix name convention [\#1514](https://github.com/eclipse/che/pull/1514) ([mmorhun](https://github.com/mmorhun))
+- CHE-1340: Move ide related modules to /che/ide [\#1513](https://github.com/eclipse/che/pull/1513) ([vparfonov](https://github.com/vparfonov))
+- CHE-1328: fix checking on equals in case checking null and empty string [\#1510](https://github.com/eclipse/che/pull/1510) ([vparfonov](https://github.com/vparfonov))
+- CHE-1326: avoid creation recipe on workspace creation from stack and overriding environment [\#1509](https://github.com/eclipse/che/pull/1509) ([ashumilova](https://github.com/ashumilova))
+- CHE-1095: add new UD/IDE navigation experience [\#1508](https://github.com/eclipse/che/pull/1508) ([akurinnoy](https://github.com/akurinnoy))
+- Some improvement of CHE-1245 [\#1502](https://github.com/eclipse/che/pull/1502) ([mmorhun](https://github.com/mmorhun))
+- CHE-1300: \[dashboard\] open recent project in IDE [\#1497](https://github.com/eclipse/che/pull/1497) ([akurinnoy](https://github.com/akurinnoy))
+- CHE-1168: determine source folders with generated artifacts [\#1453](https://github.com/eclipse/che/pull/1453) ([svor](https://github.com/svor))
+- CHE-1228 Add context menu to the consoles tree [\#1448](https://github.com/eclipse/che/pull/1448) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+
+## [4.3.2](https://github.com/eclipse/che/tree/4.3.2) (2016-06-14)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.1...4.3.2)
+
+**Pull requests merged:**
+
+- CHE-1337: fix import Maven project form dashboard [\#1506](https://github.com/eclipse/che/pull/1506) ([olexii4](https://github.com/olexii4))
+- Added .dockerignore file to speed up Che Docker image build [\#1499](https://github.com/eclipse/che/pull/1499) ([l0rd](https://github.com/l0rd))
+
+## [4.3.1](https://github.com/eclipse/che/tree/4.3.1) (2016-06-14)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.0...4.3.1)
+
+**Pull requests merged:**
+
+- CHE-1317: add a second attempt with type blank if we have an error du… [\#1501](https://github.com/eclipse/che/pull/1501) ([olexii4](https://github.com/olexii4))
+- Export proxy object instead of real maven terminal object. … [\#1500](https://github.com/eclipse/che/pull/1500) ([vparfonov](https://github.com/vparfonov))
+- CHE-1317: catch import project errors [\#1498](https://github.com/eclipse/che/pull/1498) ([olexii4](https://github.com/olexii4))
+- CHE-1324. Fix url for download item request [\#1496](https://github.com/eclipse/che/pull/1496) ([RomanNikitenko](https://github.com/RomanNikitenko))
+- CHE-1323: Fix default classpath generation [\#1494](https://github.com/eclipse/che/pull/1494) ([vparfonov](https://github.com/vparfonov))
+
 ## [4.3.0](https://github.com/eclipse/che/tree/4.3.0) (2016-06-13)
 [Full Changelog](https://github.com/eclipse/che/compare/4.3.0-RC1...4.3.0)
 
@@ -114,6 +237,7 @@
 - CHE-377 Add actions to re-run and stop a command [\#1370](https://github.com/eclipse/che/pull/1370) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
 - Add JSON Example [\#1369](https://github.com/eclipse/che/pull/1369) ([ashumilova](https://github.com/ashumilova))
 - Cleanup pom.xml files [\#1368](https://github.com/eclipse/che/pull/1368) ([vparfonov](https://github.com/vparfonov))
+- CODENVY-560 : new types of docker recipes, remove InstanceKey, rework InstanceProvider [\#1366](https://github.com/eclipse/che/pull/1366) ([benoitf](https://github.com/benoitf))
 - CHE-1223. Use terminal url of corresponding machine at creating new terminal [\#1365](https://github.com/eclipse/che/pull/1365) ([RomanNikitenko](https://github.com/RomanNikitenko))
 - CHE-1244: Add checking of the workspace status during asynchronous stop [\#1363](https://github.com/eclipse/che/pull/1363) ([akorneta](https://github.com/akorneta))
 - CHE-1230: return default test source dir if not set other [\#1362](https://github.com/eclipse/che/pull/1362) ([vparfonov](https://github.com/vparfonov))
@@ -160,7 +284,6 @@
 
 **Pull requests merged:**
 
-- CODENVY-560 : new types of docker recipes, remove InstanceKey, rework InstanceProvider [\#1366](https://github.com/eclipse/che/pull/1366) ([benoitf](https://github.com/benoitf))
 - CODENVY-542: use Provider for inject  ProjectRegistry in MavenWorkspace [\#1350](https://github.com/eclipse/che/pull/1350) ([vparfonov](https://github.com/vparfonov))
 - CODENVY-468: add sorting algorithm to the 'ready-to-go stacks' and 's… [\#1348](https://github.com/eclipse/che/pull/1348) ([olexii4](https://github.com/olexii4))
 - CODENVY-457: fix NPE when swarm doesn't detect container death [\#1346](https://github.com/eclipse/che/pull/1346) ([garagatyi](https://github.com/garagatyi))
@@ -190,7 +313,7 @@
 - CHE-956 Move che-jdt-ext-machine to java-ext-lang-server module  [\#1306](https://github.com/eclipse/che/pull/1306) ([evidolob](https://github.com/evidolob))
 - CHE-962: Add ability to store and use SSH keys for Subversion hosts [\#1305](https://github.com/eclipse/che/pull/1305) ([tolusha](https://github.com/tolusha))
 - CODENVY-538:Fix checking of recipe location: now will match only host… [\#1301](https://github.com/eclipse/che/pull/1301) ([vparfonov](https://github.com/vparfonov))
-- CHE-1104: Fix activation  breakpoints in the Java Debugger  [\#1298](https://github.com/eclipse/che/pull/1298) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- CHE-1104: Fix activation  breakpoints in the Java Debugger [\#1298](https://github.com/eclipse/che/pull/1298) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
 - CHE-1183 : Allow to use json string provided as body [\#1296](https://github.com/eclipse/che/pull/1296) ([benoitf](https://github.com/benoitf))
 - CODENVY-439 Initialize Lucene searcher asynchronously [\#1295](https://github.com/eclipse/che/pull/1295) ([mkuznyetsov](https://github.com/mkuznyetsov))
 - CHE-1083: Refactor modules registration [\#1288](https://github.com/eclipse/che/pull/1288) ([azatsarynnyy](https://github.com/azatsarynnyy))
@@ -919,6 +1042,7 @@
 - CHE-383: Move FqnProvider to che-core-ide-api [\#644](https://github.com/eclipse/che/pull/644) ([dimasnurenko](https://github.com/dimasnurenko))
 - CHE-383: Add ability to show and copy fqn and path of files [\#637](https://github.com/eclipse/che/pull/637) ([dimasnurenko](https://github.com/dimasnurenko))
 - Added changeslog for 4.0.0-RC9 - 4.0.0-RC11 [\#636](https://github.com/eclipse/che/pull/636) ([skabashnyuk](https://github.com/skabashnyuk))
+- CHE-214 \[dashboard\] use real project path for commands [\#632](https://github.com/eclipse/che/pull/632) ([benoitf](https://github.com/benoitf))
 - CODENVY-174 pre-select correct branch when start point is set [\#629](https://github.com/eclipse/che/pull/629) ([mshaposhnik](https://github.com/mshaposhnik))
 
 ## [4.0.0-RC11](https://github.com/eclipse/che/tree/4.0.0-RC11) (2016-03-03)
@@ -935,12 +1059,12 @@
 
 **Pull requests merged:**
 
-- CHE-214 \[dashboard\] use real project path for commands [\#632](https://github.com/eclipse/che/pull/632) ([benoitf](https://github.com/benoitf))
 - CHE-651 \[dashboard\] Add missing shadow on popup [\#628](https://github.com/eclipse/che/pull/628) ([benoitf](https://github.com/benoitf))
 - CHE-700 Add subversion to blank stack [\#627](https://github.com/eclipse/che/pull/627) ([benoitf](https://github.com/benoitf))
 - Add Z suffix to fix mounting issues on Fedora with SELinux enabled [\#623](https://github.com/eclipse/che/pull/623) ([eivantsov](https://github.com/eivantsov))
 - CHE-653: Change value fails with NullPointerException [\#622](https://github.com/eclipse/che/pull/622) ([mmorhun](https://github.com/mmorhun))
 - CHE-695 : \[dashboard\] use fixed versions [\#621](https://github.com/eclipse/che/pull/621) ([benoitf](https://github.com/benoitf))
+- CHE-435 \[dashboard\] Introduce meaningful warning if browser is not being able ping ws agent [\#620](https://github.com/eclipse/che/pull/620) ([benoitf](https://github.com/benoitf))
 - Add promise-based methods for GitHub client service [\#618](https://github.com/eclipse/che/pull/618) ([mkuznyetsov](https://github.com/mkuznyetsov))
 - Che 212  disable field auto completion after its adjustments [\#617](https://github.com/eclipse/che/pull/617) ([olexii4](https://github.com/olexii4))
 - CHE-201: remove breakpoints in case of absence of linked file [\#607](https://github.com/eclipse/che/pull/607) ([dmytro-ndp](https://github.com/dmytro-ndp))
@@ -997,8 +1121,7 @@
 
 **Pull requests merged:**
 
-- CHE-435 \[dashboard\] Introduce meaningful warning if browser is not being able ping ws agent [\#620](https://github.com/eclipse/che/pull/620) ([benoitf](https://github.com/benoitf))
-- CHE-495 Used simple entropy source.  [\#619](https://github.com/eclipse/che/pull/619) ([skabashnyuk](https://github.com/skabashnyuk))
+- CHE-495 Used simple entropy source. [\#619](https://github.com/eclipse/che/pull/619) ([skabashnyuk](https://github.com/skabashnyuk))
 - CHE-209: fix recipes [\#616](https://github.com/eclipse/che/pull/616) ([akurinnoy](https://github.com/akurinnoy))
 - CHE-439: fix referencing attributes due to model changes [\#615](https://github.com/eclipse/che/pull/615) ([ashumilova](https://github.com/ashumilova))
 - CHE-689 \[dashboard\] report error when starting agent [\#614](https://github.com/eclipse/che/pull/614) ([benoitf](https://github.com/benoitf))
@@ -1053,6 +1176,7 @@
 - Add promise based getRepository method to the GithubServiceClient [\#540](https://github.com/eclipse/che/pull/540) ([evoevodin](https://github.com/evoevodin))
 - CHE-559: Fix output of creating new machine in existed workspace [\#539](https://github.com/eclipse/che/pull/539) ([dimasnurenko](https://github.com/dimasnurenko))
 - CHE-514: fix jdt tests [\#538](https://github.com/eclipse/che/pull/538) ([svor](https://github.com/svor))
+- Silky smooth factory workflow [\#536](https://github.com/eclipse/che/pull/536) ([benoitf](https://github.com/benoitf))
 - \[dashboard\] CHE-611 fix links to get channels due to model change on machine config [\#535](https://github.com/eclipse/che/pull/535) ([benoitf](https://github.com/benoitf))
 - CODENVY-88 Setup new jvm defaults [\#528](https://github.com/eclipse/che/pull/528) ([skabashnyuk](https://github.com/skabashnyuk))
 - CHE-12: Fix NPE when there is no template [\#527](https://github.com/eclipse/che/pull/527) ([dimasnurenko](https://github.com/dimasnurenko))
@@ -1079,7 +1203,6 @@
 
 **Pull requests merged:**
 
-- Silky smooth factory workflow [\#536](https://github.com/eclipse/che/pull/536) ([benoitf](https://github.com/benoitf))
 - Fix of websocket closed errors [\#521](https://github.com/eclipse/che/pull/521) ([mshaposhnik](https://github.com/mshaposhnik))
 - Poject & Factory & GitServiceClient improvements [\#520](https://github.com/eclipse/che/pull/520) ([evoevodin](https://github.com/evoevodin))
 - CHE-395 Add visual feedback to clarify whether machine process is finished or still running [\#514](https://github.com/eclipse/che/pull/514) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
@@ -1096,6 +1219,7 @@
 - CHE-127: Load repo button on import from Github takes too much time [\#482](https://github.com/eclipse/che/pull/482) ([tolusha](https://github.com/tolusha))
 - CHE-127: Load repo button on import from Github takes too much time [\#481](https://github.com/eclipse/che/pull/481) ([tolusha](https://github.com/tolusha))
 - Add debug id for the testing purpose [\#480](https://github.com/eclipse/che/pull/480) ([vzhukovskii](https://github.com/vzhukovskii))
+- CHE-498: fix bulk edit in dashboard [\#477](https://github.com/eclipse/che/pull/477) ([akurinnoy](https://github.com/akurinnoy))
 - CODENVY-31: Replaced messages from git importer on error codes [\#470](https://github.com/eclipse/che/pull/470) ([akorneta](https://github.com/akorneta))
 - CHE-494: fix websocket machine channels [\#469](https://github.com/eclipse/che/pull/469) ([olexii4](https://github.com/olexii4))
 - CHE-314. Exclude che-core-api-analytics from packaging into assembly-machine-war [\#468](https://github.com/eclipse/che/pull/468) ([RomanNikitenko](https://github.com/RomanNikitenko))
@@ -1105,6 +1229,7 @@
 - UD-941: connect to stacks API [\#460](https://github.com/eclipse/che/pull/460) ([akurinnoy](https://github.com/akurinnoy))
 - Fixed tests [\#456](https://github.com/eclipse/che/pull/456) ([eivantsov](https://github.com/eivantsov))
 - Fall back to unix socket on Linux if DOCKER\_HOST is malformed [\#454](https://github.com/eclipse/che/pull/454) ([eivantsov](https://github.com/eivantsov))
+- \[dashboard\] CHE\_510 Adopt new style [\#452](https://github.com/eclipse/che/pull/452) ([benoitf](https://github.com/benoitf))
 - CHE-494: fix machine and workspace models [\#449](https://github.com/eclipse/che/pull/449) ([olexii4](https://github.com/olexii4))
 - CHE-439: add stackId to workspace and respect it on project creation [\#439](https://github.com/eclipse/che/pull/439) ([ashumilova](https://github.com/ashumilova))
 - Show auth window when performing import project from private repo or use factory with private repo [\#434](https://github.com/eclipse/che/pull/434) ([mshaposhnik](https://github.com/mshaposhnik))
@@ -1124,8 +1249,6 @@
 
 **Pull requests merged:**
 
-- CHE-498: fix bulk edit in dashboard [\#477](https://github.com/eclipse/che/pull/477) ([akurinnoy](https://github.com/akurinnoy))
-- \[dashboard\] CHE\_510 Adopt new style [\#452](https://github.com/eclipse/che/pull/452) ([benoitf](https://github.com/benoitf))
 - CHE-555: Fix wrong preview URL for application [\#447](https://github.com/eclipse/che/pull/447) ([dimasnurenko](https://github.com/dimasnurenko))
 - CHE-50: Fix NPE when loading GitHub repositories list [\#446](https://github.com/eclipse/che/pull/446) ([vinokurig](https://github.com/vinokurig))
 - CODENVY-128. Fix configure multimodular project with module without java files. [\#445](https://github.com/eclipse/che/pull/445) ([RomanNikitenko](https://github.com/RomanNikitenko))

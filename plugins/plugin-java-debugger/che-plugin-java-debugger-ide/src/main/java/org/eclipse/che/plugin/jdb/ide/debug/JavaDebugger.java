@@ -14,8 +14,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -23,7 +22,8 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
+import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
+import org.eclipse.che.ide.ext.java.client.project.node.jar.JarFileNode;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
@@ -31,9 +31,6 @@ import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.plugin.jdb.ide.debug.JavaDebugger.ConnectionProperties.HOST;
@@ -49,7 +46,8 @@ public class JavaDebugger extends AbstractDebugger {
 
     public static final String ID = "jdb";
 
-    private final AppContext appContext;
+    public final FqnResolverFactory fqnResolverFactory;
+    public final FileTypeRegistry   fileTypeRegistry;
 
     @Inject
     public JavaDebugger(DebuggerServiceClient service,
@@ -61,45 +59,36 @@ public class JavaDebugger extends AbstractDebugger {
                         JavaDebuggerFileHandler javaDebuggerFileHandler,
                         DebuggerManager debuggerManager,
                         FileTypeRegistry fileTypeRegistry,
-                        BreakpointManager breakpointManager,
-                        AppContext appContext) {
+                        BreakpointManager breakpointManager) {
         super(service,
               dtoFactory,
               localStorageProvider,
               messageBusProvider,
               eventBus,
-              fqnResolverFactory,
               javaDebuggerFileHandler,
               debuggerManager,
-              fileTypeRegistry,
               breakpointManager,
               ID);
-        this.appContext = appContext;
+        this.fqnResolverFactory = fqnResolverFactory;
+        this.fileTypeRegistry = fileTypeRegistry;
     }
 
     @Override
-    protected List<String> fqnToPath(@NotNull Location location) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-
-        if (currentProject == null) {
-            return Collections.emptyList();
-        }
-
-        String pathSuffix = location.getTarget().replace(".", "/") + ".java";
-
-        List<String> sourceFolders = JavaSourceFolderUtil.getSourceFolders(currentProject);
-        List<String> filePaths = new ArrayList<>(sourceFolders.size() + 1);
-
-        for (String sourceFolder : sourceFolders) {
-            filePaths.add(sourceFolder + pathSuffix);
-        }
-        filePaths.add(location.getTarget());
-
-        return filePaths;
+    protected String fqnToPath(@NotNull Location location) {
+        String resourcePath = location.getResourcePath();
+        return  resourcePath != null ? resourcePath : location.getTarget();
     }
 
+    @Nullable
     @Override
     protected String pathToFqn(VirtualFile file) {
+        if (file instanceof JavaFileNode) {
+            return ((JavaFileNode)file).getFqn();
+        }
+        if (file instanceof JarFileNode) {
+            return file.getPath();
+        }
+
         String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
 
         FqnResolver resolver = fqnResolverFactory.getResolver(fileExtension);

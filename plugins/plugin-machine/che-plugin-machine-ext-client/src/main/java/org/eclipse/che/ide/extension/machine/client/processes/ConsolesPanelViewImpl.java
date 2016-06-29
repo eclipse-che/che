@@ -185,6 +185,8 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
         minimizeButton.ensureDebugId("consoles-minimizeButton");
 
         tuneSplitter();
+
+        splitLayoutPanel.setWidgetHidden(navigationPanel, true);
     }
 
     /**
@@ -269,6 +271,8 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
 
     @Override
     public void setProcessesData(@NotNull ProcessTreeNode root) {
+        splitLayoutPanel.setWidgetHidden(navigationPanel, false);
+
         processTree.asWidget().setVisible(true);
         processTree.getModel().setRoot(root);
         processTree.renderTree(-1);
@@ -305,6 +309,10 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
 
     @Override
     public void showProcessOutput(String processId) {
+        if (!processWidgets.containsKey(processId)) {
+            processId = "";
+        }
+
         if (processWidgets.containsKey(processId)) {
             onResize();
             outputPanel.showWidget(processWidgets.get(processId).asWidget());

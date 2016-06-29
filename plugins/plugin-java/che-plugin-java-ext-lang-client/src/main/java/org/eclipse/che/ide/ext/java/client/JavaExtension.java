@@ -151,12 +151,14 @@ public class JavaExtension {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode(KeyCodeMap.F12).build(), "javaClassStructure");
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().control().charCode('o').build(), "organizeImports");
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('p').build(), "parametersInfo");
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode(KeyCodeMap.ENTER).build(), "quickFix");
         } else {
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().action().charCode('b').build(), "openImplementation");
             keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('q').build(), "showQuickDoc");
             keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode(KeyCodeMap.F12).build(), "javaClassStructure");
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().action().charCode('o').build(), "organizeImports");
             keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('p').build(), "parametersInfo");
+            keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.ENTER).build(), "quickFix");
         }
         keyBinding.getGlobal().addKey(new KeyBuilder().none().charCode(KeyCodeMap.F4).build(), "openJavaDeclaration");
         keyBinding.getGlobal().addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F6).build(), "javaRenameRefactoring");

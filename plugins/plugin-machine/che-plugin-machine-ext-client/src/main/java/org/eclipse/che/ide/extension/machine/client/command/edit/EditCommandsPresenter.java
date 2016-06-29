@@ -142,6 +142,11 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, F
                 fetchCommands();
                 fireConfigurationUpdated(selectedConfiguration);
             }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                dialogFactory.createMessageDialog("Error", arg.getMessage(), null).show();
+            }
         });
     }
 
@@ -302,6 +307,11 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, F
                         commandProcessingCallback = getCommandProcessingCallback();
                         fetchCommands();
                         fireConfigurationRemoved(selectedConfiguration);
+                    }
+                }).catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError arg) throws OperationException {
+                        dialogFactory.createMessageDialog("Error", arg.getMessage(), null).show();
                     }
                 });
             }
@@ -529,7 +539,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, F
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                dialogFactory.createMessageDialog("Error", arg.toString(), null).show();
+                dialogFactory.createMessageDialog("Error", arg.getMessage(), null).show();
             }
         });
     }

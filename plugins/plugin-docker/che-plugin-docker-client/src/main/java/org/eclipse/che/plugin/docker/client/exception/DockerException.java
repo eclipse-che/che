@@ -8,14 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.docker.client;
+package org.eclipse.che.plugin.docker.client.exception;
 
 import java.io.IOException;
 
 /**
  * @author andrew00x
  */
-public final class DockerException extends IOException {
+public class DockerException extends IOException {
     private final int    status;
     private final String originError;
 

@@ -17,7 +17,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedHandler;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
@@ -33,7 +32,7 @@ import java.util.List;
  * @author Mihail Kuznyetsov
  */
 @Singleton
-public class CheWorkspaceStoppedHandler implements WorkspaceStoppedHandler {
+public class CheWorkspaceStoppedHandler implements WorkspaceStoppedEvent.Handler {
 
     private final static int SKIP_COUNT = 0;
     private final static int MAX_COUNT  = 10;
@@ -76,4 +75,5 @@ public class CheWorkspaceStoppedHandler implements WorkspaceStoppedHandler {
             }
         });
     }
+
 }

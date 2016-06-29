@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.machine;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -34,6 +35,8 @@ import java.util.Objects;
  *
  * @author Dmitry Shnurenko
  */
+@Deprecated
+//TODO: need to rework this class it must implement org.eclipse.che.api.core.model.machine.Machine
 public class Machine {
 
     private final MachineDto    descriptor;
@@ -73,17 +76,15 @@ public class Machine {
     }
 
     /** @return script of machine recipe */
-    public String getRecipeUrl() {
+    public String getRecipeLocation() {
         MachineSourceDto machineSource = descriptor.getConfig().getSource();
+        return machineSource.getLocation();
+    }
 
-        String machineSourceType = machineSource.getType();
-
-        // recipe is left for backward compatibility
-        if ("recipe".equalsIgnoreCase(machineSourceType) || "dockerfile".equalsIgnoreCase(machineSourceType)) {
-            return machineSource.getLocation();
-        }
-
-        return "";
+    /** @return script of machine recipe */
+    public String getRecipeContent() {
+        MachineSourceDto machineSource = descriptor.getConfig().getSource();
+        return machineSource.getContent();
     }
 
     /**

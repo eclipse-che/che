@@ -76,8 +76,6 @@ class IdeCtrl {
       $location.url(selectedWorkspaceIdeUrl, false);
 
     } else {
-      this.ideIFrameSvc.addIFrame();
-
       let promise = cheWorkspace.fetchWorkspaces();
 
       if ($routeParams.showLogs) {

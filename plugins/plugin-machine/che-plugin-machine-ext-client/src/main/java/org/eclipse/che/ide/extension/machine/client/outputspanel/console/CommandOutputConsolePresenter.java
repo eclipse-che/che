@@ -246,12 +246,12 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Override
     public void reRunProcessButtonClicked() {
         if (isFinished()) {
-            commandManager.execute(commandConfiguration);
+            commandManager.executeCommand(commandConfiguration, machineId);
         } else {
             machineServiceClient.stopProcess(machineId, pid).then(new Operation<Void>() {
                 @Override
                 public void apply(Void arg) throws OperationException {
-                    commandManager.execute(commandConfiguration);
+                    commandManager.executeCommand(commandConfiguration, machineId);
                 }
             });
         }
