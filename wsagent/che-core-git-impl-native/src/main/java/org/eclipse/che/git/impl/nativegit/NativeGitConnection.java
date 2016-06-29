@@ -132,6 +132,8 @@ public class NativeGitConnection implements GitConnection {
      *         loader for credentials
      * @throws GitException
      *         when some error occurs
+     * @deprecated
+     *         use JGit implementation instead
      */
     public NativeGitConnection(File repository, SshScriptProvider sshScriptProvider,
                                CredentialsLoader credentialsLoader, GitUserResolver userResolver) throws GitException {
