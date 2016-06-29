@@ -22,6 +22,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.git.Config;
 import org.eclipse.che.api.git.CredentialsLoader;
@@ -100,6 +101,7 @@ import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.dircache.DirCache;
+import org.eclipse.jgit.lib.BatchingProgressMonitor;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -224,8 +226,9 @@ class JGitConnection implements GitConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
 
-    private Git            git;
-    private JGitConfigImpl config;
+    private Git                 git;
+    private JGitConfigImpl      config;
+    private LineConsumerFactory lineConsumerFactory;
 
     private final CredentialsLoader credentialsLoader;
     private final SshKeyProvider    sshKeyProvider;
@@ -457,6 +460,35 @@ class JGitConnection implements GitConnection {
             } else {
                 cloneCommand.setBranchesToClone(request.getBranchesToFetch());
             }
+
+            LineConsumer lineConsumer = lineConsumerFactory.newLineConsumer();
+            cloneCommand.setProgressMonitor(new BatchingProgressMonitor() {
+                @Override
+                protected void onUpdate(String taskName, int workCurr) {
+                    try {
+                        lineConsumer.writeLine(taskName + ": " + workCurr + " completed");
+                    } catch (IOException exception) {
+                        LOG.error(exception.getMessage(), exception);
+                    }
+                }
+
+                @Override
+                protected void onEndTask(String taskName, int workCurr) {
+                }
+
+                @Override
+                protected void onUpdate(String taskName, int workCurr, int workTotal, int percentDone) {
+                    try {
+                        lineConsumer.writeLine(taskName + ": " + workCurr + " of " + workTotal + " completed, " + percentDone + "% done");
+                    } catch (IOException exception) {
+                        LOG.error(exception.getMessage(), exception);
+                    }
+                }
+
+                @Override
+                protected void onEndTask(String taskName, int workCurr, int workTotal, int percentDone) {
+                }
+            });
 
             executeRemoteCommand(remoteUri, cloneCommand);
 
@@ -1446,8 +1478,8 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void setOutputLineConsumerFactory(LineConsumerFactory outputPublisherFactory) {
-        //nothing to do, not outputs are produced by JGit
+    public void setOutputLineConsumerFactory(LineConsumerFactory lineConsumerFactory) {
+        this.lineConsumerFactory = lineConsumerFactory;
     }
 
     private Git getGit() {
