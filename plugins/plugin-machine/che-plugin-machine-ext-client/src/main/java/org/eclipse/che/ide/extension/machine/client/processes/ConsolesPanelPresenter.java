@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes;
 
+import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
@@ -17,7 +18,6 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
@@ -83,32 +83,35 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
                                                                      OutputConsole.ConsoleOutputListener,
                                                                      WorkspaceStartingEvent.Handler,
                                                                      WorkspaceStoppedEvent.Handler,
-                                                                     MachineStateEvent.Handler,
-                                                                     DevMachineStateEvent.Handler {
+                                                                     MachineStateEvent.Handler {
 
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
 
     public static final String SSH_PORT = "22";
 
-    private final DtoFactory                   dtoFactory;
-    private final DialogFactory                dialogFactory;
-    private final EntityFactory                entityFactory;
-    private final TerminalFactory              terminalFactory;
-    private final CommandConsoleFactory        commandConsoleFactory;
-    private final NotificationManager          notificationManager;
-    private final MachineLocalizationConstant  localizationConstant;
-    private final ConsolesPanelView            view;
-    private final MachineResources             resources;
-    private final AppContext                   appContext;
-    private final MachineServiceClient         machineService;
-    private final WorkspaceAgent               workspaceAgent;
-    private final CommandTypeRegistry          commandTypeRegistry;
-    private final Map<String, ProcessTreeNode> machineNodes;
+    private final DtoFactory                  dtoFactory;
+    private final DialogFactory               dialogFactory;
+    private final EntityFactory               entityFactory;
+    private final TerminalFactory             terminalFactory;
+    private final CommandConsoleFactory       commandConsoleFactory;
+    private final NotificationManager         notificationManager;
+    private final MachineLocalizationConstant localizationConstant;
+    private final ConsolesPanelView           view;
+    private final MachineResources            resources;
+    private final AppContext                  appContext;
+    private final MachineServiceClient        machineService;
+    private final WorkspaceAgent              workspaceAgent;
+    private final CommandTypeRegistry         commandTypeRegistry;
+    private final Map<OutputConsole, String>  consoleCommands;
 
-    final List<ProcessTreeNode>                rootNodes;
-    final Map<String, TerminalPresenter>       terminals;
-    final Map<String, OutputConsole>           consoles;
-    final Map<OutputConsole, String>           consoleCommands;
+    @VisibleForTesting
+    final List<ProcessTreeNode>          rootNodes;
+    @VisibleForTesting
+    final Map<String, ProcessTreeNode>   machineNodes;
+    @VisibleForTesting
+    final Map<String, TerminalPresenter> terminals;
+    @VisibleForTesting
+    final Map<String, OutputConsole>     consoles;
 
     private OutputConsole                      workspaceConsole;
 
@@ -162,7 +165,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
-        eventBus.addHandler(DevMachineStateEvent.TYPE, this);
 
         rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootNodes);
 
@@ -235,14 +237,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         onStopCommandProcess(destroyedMachineNode);
 
         view.setProcessesData(rootNode);
-    }
-
-    @Override
-    public void onDevMachineStarted(DevMachineStateEvent event) {
-    }
-
-    @Override
-    public void onDevMachineDestroyed(DevMachineStateEvent event) {
     }
 
     /** Get the list of all available machines. */

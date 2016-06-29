@@ -337,10 +337,12 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         List<MachineConfigDto> machineConfigs =
                 currentEnvironment != null ? currentEnvironment.getMachineConfigs() : Collections.<MachineConfigDto>emptyList();
 
+        MachineManager machineManager = machineManagerProvider.get();
         for (MachineConfigDto machineConfig : machineConfigs) {
             if (machineConfig.isDev()) {
-                MachineManager machineManager = machineManagerProvider.get();
                 machineManager.onDevMachineCreating(machineConfig);
+            } else {
+                machineManager.onNotDevMachineCreating(machineConfig);
             }
         }
     }

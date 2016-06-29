@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -42,6 +41,7 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
@@ -62,6 +62,7 @@ import java.util.List;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.MACHINE_NODE;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.ROOT_NODE;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
@@ -138,8 +139,6 @@ public class ConsolesPanelPresenterTest {
     @Captor
     private ArgumentCaptor<Operation<MachineDto>>              machineCaptor;
     @Captor
-    private ArgumentCaptor<DevMachineStateEvent.Handler>       devMachineStateHandlerCaptor;
-    @Captor
     private ArgumentCaptor<Operation<PromiseError>>            errorOperation;
 
     private ConsolesPanelPresenter presenter;
@@ -206,27 +205,30 @@ public class ConsolesPanelPresenterTest {
     }
 
     @Test
-    public void shouldFetchMachines() throws Exception {
+    public void shouldAddMachineToConsoleOnRunning() throws Exception {
+        ArgumentCaptor<MachineStateEvent.Handler> machineStateHandlerCaptor = ArgumentCaptor.forClass(MachineStateEvent.Handler.class);
         MachineDto machineDto = mock(MachineDto.class);
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
+        when(machineDto.getId()).thenReturn("machineId");
         when(machineDto.getConfig()).thenReturn(machineConfigDto);
         when(machineConfigDto.isDev()).thenReturn(true);
         when(machineDto.getStatus()).thenReturn(MachineStatus.RUNNING);
-        List<MachineDto> machines = new ArrayList<>(2);
-        machines.add(machineDto);
 
         when(appContext.getWorkspace()).thenReturn(workspace);
-        DevMachineStateEvent devMachineStateEvent = mock(DevMachineStateEvent.class);
-        verify(eventBus, times(5)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
+        MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
+        when(machineStateEvent.getMachineId()).thenReturn("machineId");
+        verify(eventBus, times(4)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
 
-        DevMachineStateEvent.Handler devMachineStateHandler = devMachineStateHandlerCaptor.getAllValues().get(0);
-        devMachineStateHandler.onDevMachineStarted(devMachineStateEvent);
+        MachineStateEvent.Handler devMachineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
+        devMachineStateHandler.onMachineRunning(machineStateEvent);
 
         verify(appContext).getWorkspaceId();
-        verify(machineService).getMachines(eq(WORKSPACE_ID));
-        verify(machinesPromise).then(machinesCaptor.capture());
-        machinesCaptor.getValue().apply(machines);
+        verify(machineService).getMachine(eq("machineId"));
+        verify(machinePromise).then(machineCaptor.capture());
+        machineCaptor.getValue().apply(machineDto);
         verify(view).setProcessesData(anyObject());
+        assertTrue(presenter.machineNodes.containsKey("machineId"));
+        assertTrue(presenter.rootNodes.contains(presenter.machineNodes.get("machineId")));
     }
 
     @Test
