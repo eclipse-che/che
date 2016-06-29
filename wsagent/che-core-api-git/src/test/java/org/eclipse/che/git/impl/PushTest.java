@@ -35,6 +35,7 @@ import java.util.Arrays;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -113,5 +114,29 @@ public class PushTest {
         //when
         PushRequest request = newDto(PushRequest.class);
         connection.push(request);
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
+    public void testPushWhenLocalRepositoryIsNotSynchronisedWithRemote(GitConnectionFactory connectionFactory)
+            throws IOException, ServerException, URISyntaxException, UnauthorizedException {
+        //given
+        GitConnection remoteConnection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        GitConnection localConnection = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
+        localConnection.clone(newDto(CloneRequest.class).withRemoteUri(remoteConnection.getWorkingDir().getAbsolutePath()));
+        addFile(remoteConnection, "newfile", "content");
+        remoteConnection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
+        remoteConnection.commit(newDto(CommitRequest.class).withMessage("Fake commit"));
+
+        //when
+        String errorMessage = "";
+        try {
+            localConnection.push(newDto(PushRequest.class).withRemote("origin").withTimeout(-1));
+        } catch (GitException exception) {
+            errorMessage = exception.getMessage();
+        }
+
+        //then
+        assertTrue(errorMessage.contains("master -> master"));
+        assertTrue(errorMessage.contains(remoteConnection.getWorkingDir().getAbsolutePath()));
     }
 }
