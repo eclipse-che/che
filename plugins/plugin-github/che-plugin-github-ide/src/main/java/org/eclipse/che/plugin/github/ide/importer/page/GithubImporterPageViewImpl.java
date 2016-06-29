@@ -78,6 +78,9 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
     TextBox projectUrl;
 
     @UiField
+    CheckBox recursive;
+
+    @UiField
     FlowPanel bottomPanel;
 
     @UiField
@@ -198,6 +201,11 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
     @UiHandler("projectUrl")
     void onProjectUrlChanged(KeyUpEvent event) {
         delegate.projectUrlChanged(projectUrl.getValue());
+    }
+
+    @UiHandler("recursive")
+    void recursiveHandler(ValueChangeEvent<Boolean> event) {
+        delegate.onRecursiveSelected(event.getValue());
     }
 
     @UiHandler("projectDescription")
