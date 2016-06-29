@@ -20,12 +20,14 @@ import org.eclipse.che.api.user.server.dao.Profile;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -55,11 +57,11 @@ public class UserManager {
     public UserManager(UserDao userDao,
                        UserProfileDao profileDao,
                        PreferenceDao preferenceDao,
-                       @Named("user.reserved_names") String[] reservedNames) {
+                       @Nullable @Named("user.reserved_names") String[] reservedNames) {
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.preferenceDao = preferenceDao;
-        this.reservedNames = Sets.newHashSet(reservedNames);
+        this.reservedNames = reservedNames == null ? Collections.emptySet() : Sets.newHashSet(reservedNames);
     }
 
 
