@@ -27,9 +27,11 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static java.nio.file.Files.write;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
 import static org.testng.Assert.assertEquals;
 
@@ -107,5 +109,34 @@ public class CommitTest {
         int afterCount = connection.log(newDto(LogRequest.class)).getCommits().size();
         assertEquals(revision.getMessage(), commitRequest.getMessage());
         assertEquals(beforeCount, afterCount);
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+          expectedExceptions = GitException.class)
+    public void testCommitWithNotStagedChanges(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        //given
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        //Prepare unstaged deletion
+        addFile(connection, "FileToDelete.txt", "content");
+        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("FileToDelete.txt")));
+        connection.commit(newDto(CommitRequest.class).withMessage("File to delete"));
+        new File(connection.getWorkingDir().getAbsolutePath(), "FileToDelete.txt").delete();
+        //Prepare unstaged new file
+        addFile(connection, "newFile", "content");
+        //Prepare unstaged editing
+        write(new File(connection.getWorkingDir(), "README.txt").toPath(), "new content".getBytes());
+
+        //when
+        connection.commit(newDto(CommitRequest.class)).withMessage("test commit");
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+          expectedExceptions = GitException.class)
+    public void testCommitWithCleanIndex(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        //given
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+
+        //when
+        connection.commit(newDto(CommitRequest.class)).withMessage("test commit");
     }
 }
