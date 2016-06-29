@@ -23,6 +23,7 @@ import org.eclipse.che.api.git.shared.BranchListRequest;
 import org.eclipse.che.api.git.shared.CloneRequest;
 import org.eclipse.che.api.git.shared.CommitRequest;
 import org.eclipse.che.api.git.shared.PushRequest;
+import org.eclipse.che.api.git.shared.PushResponse;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -30,7 +31,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.util.Collections;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
@@ -69,11 +70,11 @@ public class PushTest {
         remoteConnection.clone(newDto(CloneRequest.class).withRemoteUri(connection.getWorkingDir().getAbsolutePath())
                                                          .withWorkingDir(remoteConnection.getWorkingDir().getAbsolutePath()));
         addFile(remoteConnection, "newfile", "content");
-        remoteConnection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
+        remoteConnection.add(newDto(AddRequest.class).withFilepattern(Collections.singletonList(".")));
         remoteConnection.commit(newDto(CommitRequest.class).withMessage("Fake commit"));
         //when
         remoteConnection.push(newDto(PushRequest.class)
-                                      .withRefSpec(Arrays.asList("refs/heads/master:refs/heads/test"))
+                                      .withRefSpec(Collections.singletonList("refs/heads/master:refs/heads/test"))
                                       .withRemote("origin")
                                       .withTimeout(-1));
         //then
@@ -91,12 +92,12 @@ public class PushTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         GitConnection remoteConnection = connectToInitializedGitRepository(connectionFactory, remoteRepo);
         addFile(connection, "README", "README");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
+        connection.add(newDto(AddRequest.class).withFilepattern(Collections.singletonList(".")));
         connection.commit(newDto(CommitRequest.class).withMessage("Init commit."));
         //make push
         int branchesBefore = remoteConnection.branchList(newDto(BranchListRequest.class)).size();
         //when
-        connection.push(newDto(PushRequest.class).withRefSpec(Arrays.asList("refs/heads/master:refs/heads/test"))
+        connection.push(newDto(PushRequest.class).withRefSpec(Collections.singletonList("refs/heads/master:refs/heads/test"))
                                                  .withRemote(remoteRepo.getAbsolutePath())
                                                  .withTimeout(-1));
         //then
@@ -124,7 +125,7 @@ public class PushTest {
         GitConnection localConnection = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
         localConnection.clone(newDto(CloneRequest.class).withRemoteUri(remoteConnection.getWorkingDir().getAbsolutePath()));
         addFile(remoteConnection, "newfile", "content");
-        remoteConnection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
+        remoteConnection.add(newDto(AddRequest.class).withFilepattern(Collections.singletonList(".")));
         remoteConnection.commit(newDto(CommitRequest.class).withMessage("Fake commit"));
 
         //when
@@ -138,5 +139,22 @@ public class PushTest {
         //then
         assertTrue(errorMessage.contains("master -> master"));
         assertTrue(errorMessage.contains(remoteConnection.getWorkingDir().getAbsolutePath()));
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
+    public void testPushWhenLocalRepositoryIsUpToDate(GitConnectionFactory connectionFactory)
+            throws IOException, ServerException, URISyntaxException, UnauthorizedException {
+        //given
+        GitConnection remoteConnection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        GitConnection localConnection = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
+        localConnection.clone(newDto(CloneRequest.class).withRemoteUri(remoteConnection.getWorkingDir().getAbsolutePath()));
+
+        //when
+        PushResponse pushResponse = localConnection.push(newDto(PushRequest.class)
+                                                                 .withRemote("origin")
+                                                                 .withTimeout(-1));
+
+        //then
+        assertEquals(pushResponse.getCommandOutput(), "Everything up-to-date");
     }
 }

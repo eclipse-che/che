@@ -206,7 +206,7 @@ class JGitConnection implements GitConnection {
 
     private static final String ERROR_PUSH_CONFLICTS_PRESENT = "failed to push '%s' to '%s'. Try to merge " +
                                                                "remote changes using pull, and then push again.";
-    private static final String INFO_PUSH_IGNORED_UP_TO_DATE = "Could not push because the repository is up-to-date.";
+    private static final String INFO_PUSH_IGNORED_UP_TO_DATE = "Everything up-to-date";
 
     private static final String ERROR_AUTHENTICATION_REQUIRED = "Authentication is required but no CredentialsProvider has been registered";
     private static final String ERROR_AUTHENTICATION_FAILED   = "fatal: Authentication failed for '%s/'" + lineSeparator();
@@ -1004,7 +1004,7 @@ class JGitConnection implements GitConnection {
             @SuppressWarnings("unchecked")
             Iterable<PushResult> pushResults = (Iterable<PushResult>)executeRemoteCommand(remoteUri, pushCommand);
             PushResult pushResult = pushResults.iterator().next();
-            String commandOutput = pushResult.getMessages();
+            String commandOutput = pushResult.getMessages().isEmpty() ? "Successfully pushed to " + remoteUri : pushResult.getMessages();
             Collection<RemoteRefUpdate> refUpdates = pushResult.getRemoteUpdates();
 
             for (RemoteRefUpdate remoteRefUpdate : refUpdates) {
