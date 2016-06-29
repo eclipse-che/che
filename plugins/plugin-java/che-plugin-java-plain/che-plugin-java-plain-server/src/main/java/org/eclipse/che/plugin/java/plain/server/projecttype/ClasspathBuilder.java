@@ -74,35 +74,37 @@ public class ClasspathBuilder {
         if (library == null || library.isEmpty()) {
             return;
         }
-        String libFolder = library.get(0);
-        if (libFolder.isEmpty()) {
-            return;
-        }
 
-        IFolder libraryFolder = project.getProject().getFolder(libFolder);
-        if (!libraryFolder.exists()) {
-            return;
-        }
+        for (String libFolder : library) {
 
-        try {
-            libraryFolder.accept(proxy -> {
-                if (IResource.FILE != proxy.getType()) {
-                    return true;
-                }
+            if (libFolder.isEmpty()) {
+                continue;
+            }
 
-                IPath path = proxy.requestFullPath();
-                if (!path.toString().endsWith(".jar")) {
+            IFolder libraryFolder = project.getProject().getFolder(libFolder);
+            if (!libraryFolder.exists()) {
+                return;
+            }
+
+            try {
+                libraryFolder.accept(proxy -> {
+                    if (IResource.FILE != proxy.getType()) {
+                        return true;
+                    }
+
+                    IPath path = proxy.requestFullPath();
+                    if (!path.toString().endsWith(".jar")) {
+                        return false;
+                    }
+
+                    IClasspathEntry libEntry = JavaCore.newLibraryEntry(proxy.requestResource().getLocation(), null, null);
+                    classpathEntries.add(libEntry);
+
                     return false;
-                }
-
-                IClasspathEntry libEntry = JavaCore.newLibraryEntry(proxy.requestResource().getLocation(), null, null);
-                classpathEntries.add(libEntry);
-
-                return false;
-            }, IContainer.INCLUDE_PHANTOMS);
-        } catch (CoreException e) {
-            LOG.warn("Can't read folder structure: " + libraryFolder.getFullPath().toString());
-            e.printStackTrace();
+                }, IContainer.INCLUDE_PHANTOMS);
+            } catch (CoreException e) {
+                LOG.warn("Can't read folder structure: " + libraryFolder.getFullPath().toString());
+            }
         }
     }
 
