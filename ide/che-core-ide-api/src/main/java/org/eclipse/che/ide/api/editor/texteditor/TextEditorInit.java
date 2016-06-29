@@ -202,8 +202,9 @@ public class TextEditorInit<T extends EditorWidget> {
 
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     showCompletion(codeAssistant);
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();
@@ -219,8 +220,9 @@ public class TextEditorInit<T extends EditorWidget> {
         } else {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     showCompletion();
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();
@@ -283,11 +285,12 @@ public class TextEditorInit<T extends EditorWidget> {
         if (this.quickAssist != null) {
             final KeyBindingAction action = new KeyBindingAction() {
                 @Override
-                public void action() {
+                public boolean action() {
                     final PositionConverter positionConverter = textEditor.getPositionConverter();
                     if (positionConverter != null) {
                         textEditor.showQuickAssist();
                     }
+                    return true;
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();

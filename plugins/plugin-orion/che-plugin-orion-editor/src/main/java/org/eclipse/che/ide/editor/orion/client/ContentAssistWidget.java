@@ -247,64 +247,73 @@ public class ContentAssistWidget implements EventListener {
         // add key event listener on popup
         textEditor.getTextView().setAction("cheContentAssistCancel", new Action() {
             @Override
-            public void onAction() {
+            public boolean onAction() {
                 hide();
+                return true;
             }
         });
 
         textEditor.getTextView().setAction("cheContentAssistApply", new Action() {
             @Override
-            public void onAction() {
+            public boolean onAction() {
                 validateItem(true);
+                return true;
             }
         });
 
         textEditor.getTextView().setAction("cheContentAssistPreviousProposal", new Action() {
             @Override
-            public void onAction() {
+            public boolean onAction() {
                 selectPrevious();
+                return true;
             }
         });
 
         textEditor.getTextView().setAction("cheContentAssistNextProposal", new Action() {
             @Override
-            public void onAction() {
+            public boolean onAction() {
                 selectNext();
+                return true;
             }
         });
 
         textEditor.getTextView().setAction("cheContentAssistNextPage", new Action() {
             @Override
-            public void onAction() {
+            public boolean onAction() {
                 selectNext(listElement.getParentElement().getOffsetHeight() / listElement.getFirstElementChild().getOffsetHeight() - 1);
+                return true;
             }
         });
 
         textEditor.getTextView().setAction("cheContentAssistPreviousPage", new Action() {
             @Override
-            public void onAction() {
+            public boolean onAction() {
                 selectPrevious(listElement.getParentElement().getOffsetHeight() / listElement.getFirstElementChild().getOffsetHeight() - 1);
+                return true;
             }
         });
 
         textEditor.getTextView().setAction("cheContentAssistEnd", new Action() {
             @Override
-            public void onAction() {
+            public boolean onAction() {
                 selectElement(listElement.getLastElementChild());
+                return true;
             }
         });
 
         textEditor.getTextView().setAction("cheContentAssistHome", new Action() {
             @Override
-            public void onAction() {
+            public boolean onAction() {
                 selectElement(listElement.getFirstElementChild());
+                return true;
             }
         });
 
         textEditor.getTextView().setAction("cheContentAssistTab", new Action() {
             @Override
-            public void onAction() {
+            public boolean onAction() {
                 validateItem(false);
+                return true;
             }
         });
 

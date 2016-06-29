@@ -31,14 +31,41 @@ public class OrionKeyStrokeOverlay extends JavaScriptObject {
      * @param modifier4
      *         the fourth modifier (usually Control on the Mac).
      * @param type
-     *         the type of event that the keybinding matches; either "keydown" or "keypress".
+     *         the type of event that the key binding matches; either "keydown" or "keypress".
      */
     public static final native OrionKeyStrokeOverlay create(int keyCode,
                                                             boolean modifier1,
                                                             boolean modifier2,
                                                             boolean modifier3,
                                                             boolean modifier4,
-                                                            String type, JavaScriptObject keyBindingModule) /*-{
+                                                            String type, 
+                                                            JavaScriptObject keyBindingModule) /*-{
         return new keyBindingModule.KeyStroke(keyCode, modifier1, modifier2, modifier3, modifier4, type);
+    }-*/;
+    
+    /**
+     * Constructs a new key stroke with the given character, modifiers and event type.
+     *
+     * @param character
+     *         the character of the key binding.
+     * @param modifier1
+     *         the primary modifier (usually Command on Mac and Control on other platforms).
+     * @param modifier2
+     *         the secondary modifier (usually Shift).
+     * @param modifier3
+     *         the third modifier (usually Alt).
+     * @param modifier4
+     *         the fourth modifier (usually Control on the Mac).
+     * @param type
+     *         the type of event that the key binding matches; either "keydown" or "keypress".
+     */
+    public static final native OrionKeyStrokeOverlay create(String character,
+                                                            boolean modifier1,
+                                                            boolean modifier2,
+                                                            boolean modifier3,
+                                                            boolean modifier4,
+                                                            String type, 
+                                                            JavaScriptObject keyBindingModule) /*-{
+        return new keyBindingModule.KeyStroke(character, modifier1, modifier2, modifier3, modifier4, type);
     }-*/;
 }

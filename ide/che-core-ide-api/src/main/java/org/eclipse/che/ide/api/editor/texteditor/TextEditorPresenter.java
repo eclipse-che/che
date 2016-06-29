@@ -258,9 +258,10 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         });
         this.editorWidget.addKeyBinding(new KeyBinding(true, false, false, false, KeyCodes.KEY_F8, new KeyBindingAction() {
             @Override
-            public void action() {
+            public boolean action() {
                 int currentLine = editorWidget.getDocument().getCursorPosition().getLine();
                 breakpointManager.changeBreakpointState(currentLine);
+                return true;
             }
         }), TOGGLE_LINE_BREAKPOINT);
     }
