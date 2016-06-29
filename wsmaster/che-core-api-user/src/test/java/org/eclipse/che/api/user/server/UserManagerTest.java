@@ -10,15 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
-import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.api.user.server.dao.Profile;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -26,7 +26,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -45,12 +44,17 @@ public class UserManagerTest {
     @Mock
     PreferenceDao  preferenceDao;
 
-    @InjectMocks
     UserManager manager;
+
+    @BeforeMethod
+    public void setUp() {
+        manager = new UserManager(userDao, profileDao, preferenceDao, new String[0]);
+    }
 
     @Test
     public void shouldCreateProfileAndPreferencesOnUserCreation() throws Exception {
         final User user = new User().withEmail("test@email.com").withName("testName");
+
         manager.create(user, false);
 
         verify(profileDao).create(any(Profile.class));
@@ -60,8 +64,16 @@ public class UserManagerTest {
     @Test
     public void shouldGeneratedPasswordWhenCreatingUserAndItIsMissing() throws Exception {
         final User user = new User().withEmail("test@email.com").withName("testName");
+
         manager.create(user, false);
 
         verify(userDao).create(eq(user.withPassword("<none>")));
+    }
+
+    @Test(expectedExceptions = ConflictException.class)
+    public void shouldThrowConflictExceptionOnCreationIfUserNameIsReserved() throws Exception {
+        final User user = new User().withEmail("test@email.com").withName("reserved");
+
+        new UserManager(userDao, profileDao, preferenceDao, new String[] {"reserved"}).create(user, false);
     }
 }
