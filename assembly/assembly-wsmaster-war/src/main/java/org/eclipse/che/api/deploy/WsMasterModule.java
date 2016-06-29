@@ -102,11 +102,4 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
         install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
     }
-
-    @Named("user.reserved_names")
-    @Provides
-    @SuppressWarnings("unchecked")
-    String[] reservedNamesProvider() {
-        return null;
-    }
 }

@@ -27,6 +27,7 @@ import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link UserManager}
@@ -48,7 +49,8 @@ public class UserManagerTest {
 
     @BeforeMethod
     public void setUp() {
-        manager = new UserManager(userDao, profileDao, preferenceDao, new String[0]);
+        manager = new UserManager(userDao, profileDao, preferenceDao);
+        manager.setReservedNames(null);
     }
 
     @Test
@@ -74,6 +76,9 @@ public class UserManagerTest {
     public void shouldThrowConflictExceptionOnCreationIfUserNameIsReserved() throws Exception {
         final User user = new User().withEmail("test@email.com").withName("reserved");
 
-        new UserManager(userDao, profileDao, preferenceDao, new String[] {"reserved"}).create(user, false);
+        UserManager userManager = new UserManager(userDao, profileDao, preferenceDao);
+        userManager.setReservedNames(new String[] {"reserved"});
+
+        userManager.create(user, false);
     }
 }
