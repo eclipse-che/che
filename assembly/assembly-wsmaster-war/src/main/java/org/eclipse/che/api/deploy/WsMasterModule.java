@@ -11,16 +11,12 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.inject.DynaModule;
 import org.everrest.guice.ServiceBindingHelper;
-
-import javax.inject.Named;
 
 /** @author andrew00x */
 @DynaModule
