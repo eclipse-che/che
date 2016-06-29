@@ -36,6 +36,9 @@ public interface GithubImporterPageView extends View<GithubImporterPageView.Acti
          */
         void projectUrlChanged(@NotNull String url);
 
+        /** Performs any actions appropriate in response to the user has selected recursive checkbox. */
+        void onRecursiveSelected(boolean recursiveSelected);
+
         /**
          * Performs any actions appropriate in response to the user having changed the project's description.
          */

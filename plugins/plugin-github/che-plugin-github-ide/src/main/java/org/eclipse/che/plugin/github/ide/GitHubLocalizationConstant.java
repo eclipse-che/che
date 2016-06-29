@@ -70,6 +70,9 @@ public interface GitHubLocalizationConstant extends Messages {
     @Key("view.import.githubImporterPage.projectUrl")
     String githubImporterPageProjectUrl();
 
+    @Key("view.import.githubImporterPage.recursive")
+    String githubImporterPageRecursive();
+
     @Key("view.import.githubImporterPage.projectInfo")
     String githubImporterPageProjectInfo();
 

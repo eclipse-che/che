@@ -424,6 +424,28 @@ public class GithubImporterPagePresenterTest {
     }
 
     @Test
+    public void recursiveCloneSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getDirectoryName()).thenReturn("recursive");
+
+        presenter.onRecursiveSelected(true);
+
+        assertTrue(parameters.containsKey("recursive"));
+    }
+
+    @Test
+    public void recursiveCloneUnSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("recursive", null);
+        when(source.getParameters()).thenReturn(parameters);
+
+        presenter.onRecursiveSelected(false);
+
+        assertTrue(parameters.isEmpty());
+    }
+
+    @Test
     public void keepDirectoryNameChangedAndKeepDirectorySelectedTest() {
         Map<String, String> parameters = new HashMap<>();
         when(source.getParameters()).thenReturn(parameters);

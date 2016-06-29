@@ -145,6 +145,15 @@ public class GithubImporterPagePresenter extends AbstractWizardPage<ProjectConfi
     }
 
     @Override
+    public void onRecursiveSelected(boolean recursiveSelected) {
+        if (recursiveSelected) {
+            projectParameters().put("recursive", null);
+        } else {
+            projectParameters().remove("recursive");
+        }
+    }
+
+    @Override
     public void projectDescriptionChanged(@NotNull String projectDescription) {
         dataObject.setDescription(projectDescription);
         updateDelegate.updateControls();

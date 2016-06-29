@@ -314,6 +314,7 @@ public class NativeGitConnection implements GitConnection {
         CloneCommand clone = nativeGit.createCloneCommand();
         clone.setRemoteUri(remoteUri);
         clone.setRemoteName(request.getRemoteName());
+        clone.setRecursiveEnabled(request.isRecursive());
         if (clone.getTimeout() > 0) {
             clone.setTimeout(request.getTimeout());
         }

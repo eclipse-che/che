@@ -25,6 +25,10 @@
                                debugId="file-importProject-projectUrl"/>
                     <g:Label ui:field="labelUrlError" width="100%" wordWrap="true" addStyleNames="{style.labelErrorPosition}"/>
                 </g:FlowPanel>
+                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
+                    <g:CheckBox ui:field="recursive" text="{locale.gitImporterPageRecursive}"
+                                debugId="file-importProject-recursive" addStyleNames="{style.alignLeft}" />
+                </g:FlowPanel>
                 <g:FlowPanel height="0" addStyleNames="{style.horizontalLine}"/>
                 <g:FlowPanel height="35px" addStyleNames="{style.namePanel}">
                     <g:Label text="{locale.gitImporterPageProjectInfo}" addStyleNames="{style.label}"/>
@@ -45,7 +49,7 @@
                                 tabIndex="5"/>
                 </g:FlowPanel>
 
-                <g:FlowPanel height="25px" addStyleNames="{style.namePanel}">
+                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
                         <g:CheckBox ui:field="keepDirectory" text="{locale.gitImporterPageKeepDirectory}"
                                     debugId="file-importProject-keepDirectory" addStyleNames="{style.alignLeft}" />
                 </g:FlowPanel>
@@ -56,7 +60,7 @@
                                tabIndex="9" debugId="file-importProject-keepDirectoryName" title="{locale.gitImporterPageBranchField}"/>
                 </g:FlowPanel>
 
-                <g:FlowPanel height="25px" addStyleNames="{style.namePanel}">
+                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
                     <g:CheckBox ui:field="branchSelection" text="{locale.gitImporterPageBranch}"
                                 debugId="file-importProject-branch" addStyleNames="{style.alignLeft}" />
                 </g:FlowPanel>
