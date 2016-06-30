@@ -26,8 +26,8 @@ import java.util.List;
 public interface SelectNodeView extends View<SelectNodeView.ActionDelegate> {
     /** Needs for delegate some function into SelectPath view. */
     interface ActionDelegate {
-        /** Sets selected node. */
-        void setSelectedNode(String path);
+        /** Sets selected nodes. */
+        void setSelectedNode(List<Node> selectedNodes);
     }
 
     /**

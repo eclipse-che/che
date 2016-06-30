@@ -29,17 +29,20 @@ public interface GithubImporterPageView extends View<GithubImporterPageView.Acti
         /**
          * Performs any actions appropriate in response to the user having changed the project's name.
          */
-        void projectNameChanged(@NotNull String name);
+        void onProjectNameChanged(@NotNull String name);
 
         /**
          * Performs any actions appropriate in response to the user having changed the project's URL.
          */
-        void projectUrlChanged(@NotNull String url);
+        void onProjectUrlChanged(@NotNull String url);
+
+        /** Performs any actions appropriate in response to the user has selected recursive checkbox. */
+        void onRecursiveSelected(boolean recursiveSelected);
 
         /**
          * Performs any actions appropriate in response to the user having changed the project's description.
          */
-        void projectDescriptionChanged(@NotNull String projectDescriptionValue);
+        void onProjectDescriptionChanged(@NotNull String projectDescriptionValue);
 
         /**
          * Performs any actions appropriate in response to the user having clicked the 'LoadRepo' key.
@@ -60,10 +63,16 @@ public interface GithubImporterPageView extends View<GithubImporterPageView.Acti
         void onAccountChanged();
 
         /** Perform actions when selecting Keep Directory checkbox. */
-        void keepDirectorySelected(boolean keepDirectory);
+        void onKeepDirectorySelected(boolean keepDirectory);
 
         /** Perform actions when changing the name of a directory. */
-        void keepDirectoryNameChanged(@NotNull String url);
+        void onKeepDirectoryNameChanged(@NotNull String url);
+
+        /** Perform actions when selecting Branch checkbox. */
+        void onBranchCheckBoxSelected(boolean isSelected);
+
+        /** Perform actions when changing the name of a branch. */
+        void onBranchNameChanged(@NotNull String branchName);
     }
 
     /**
@@ -237,5 +246,45 @@ public interface GithubImporterPageView extends View<GithubImporterPageView.Acti
     /**
      * Focuses directory name field.
      */
-    void focusDirectoryNameFiend();
+    void focusDirectoryNameField();
+
+    /**
+     *  Sets whether user wants to checkout to a special branch.
+     *
+     * @param selected <b>true</b> to check the field or <b>false</b> to leave it unchecked
+     */
+    void setBranchCheckBoxSelected(boolean selected);
+
+    /**
+     * Returns whether user wants to checkout to a special branch.
+     *
+     * @return <b>true</b> if user has selected the Branch checkbox, otherwise returns <b>false</b>
+     */
+    boolean isBranchCheckBoxSelected();
+
+    /**
+     * Sets new value of Branch name field.
+     *
+     * @param branchName new value of Branch name field
+     */
+    void setBranchName(String branchName);
+
+    /**
+     * Returns the name of a branch to checkout.
+     *
+     * @return name of a branch to checkout
+     */
+    String getBranchName();
+
+    /**
+     * Enables or disables Branch name field.
+     *
+     * @param enabled <b>true</b> or <b>false</b> to enable or disable the field
+     */
+    void enableBranchNameField(boolean enabled);
+
+    /**
+     * Focuses Branch name field.
+     */
+    void focusBranchNameField();
 }

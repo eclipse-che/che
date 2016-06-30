@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 
+import org.eclipse.che.ide.api.data.tree.Node;
+
+import java.util.List;
+
 /**
  * Delegate which handles result of the node selection.
  *
@@ -18,10 +22,10 @@ package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 public interface SelectionDelegate {
 
     /**
-     * Fires when some node was selected.
+     * Fires when some nodes was selected.
      *
-     * @param path
-     *         path to the project
+     * @param selectedNodes
+     *         list of the selected nodes
      */
-    void onNodeSelected(String path);
+    void onNodeSelected(List<Node> selectedNodes);
 }

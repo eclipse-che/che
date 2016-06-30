@@ -39,7 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
+import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.MULTI;
 
 /**
  * Implementation of {@link SelectNodeView}.
@@ -50,8 +50,8 @@ import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 public class SelectNodeViewImpl extends Window implements SelectNodeView {
     private final FolderNodeInterceptor folderNodeInterceptor;
 
-    private Tree                     tree;
-    private ActionDelegate           delegate;
+    private Tree           tree;
+    private ActionDelegate delegate;
 
     private Button acceptButton;
     private Button cancelButton;
@@ -89,7 +89,7 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
 
         tree = new Tree(nodeStorage, loader);
         tree.setAutoSelect(true);
-        tree.getSelectionModel().setSelectionMode(SINGLE);
+        tree.getSelectionModel().setSelectionMode(MULTI);
         treeContainer.add(tree);
 
         KeyboardNavigationHandler handler = new KeyboardNavigationHandler() {
@@ -161,9 +161,8 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
         if (nodes.isEmpty()) {
             return;
         }
-        Node selectedNode = nodes.get(0);
 
-        delegate.setSelectedNode(((HasStorablePath)selectedNode).getStorablePath());
+        delegate.setSelectedNode(nodes);
 
         hide();
     }

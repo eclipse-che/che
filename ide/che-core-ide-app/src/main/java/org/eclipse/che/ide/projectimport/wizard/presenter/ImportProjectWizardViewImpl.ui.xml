@@ -28,7 +28,7 @@
             position: absolute !important;
         }
     </ui:style>
-    <g:FlowPanel width="774px" height="470px" addStyleNames="{style.rootPanel}">
+    <g:FlowPanel width="774px" height="550px" addStyleNames="{style.rootPanel}">
         <g:SimplePanel ui:field="wizardPanel" addStyleNames="{style.tab}"/>
     </g:FlowPanel>
 </ui:UiBinder>

@@ -18,8 +18,8 @@
 
     <ui:style field="style">
         .main {
-            width: 400px;
-            height: 450px;
+            width: 300px;
+            height: 380px;
         }
     </ui:style>
 

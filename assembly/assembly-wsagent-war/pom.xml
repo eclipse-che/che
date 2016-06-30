@@ -84,7 +84,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-git-impl-native</artifactId>
+            <artifactId>che-core-git-impl-jgit</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
