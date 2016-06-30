@@ -93,4 +93,10 @@ public interface GitHubLocalizationConstant extends Messages {
 
     @Key("view.import.githubImporterPage.keepDirectoryField")
     String githubImporterPageKeepDirectoryField();
+
+    @Key("view.import.githubImporterPage.branchField")
+    String githubImporterPageBranchField();
+
+    @Key("view.import.githubImporterPage.branch")
+    String githubImporterPageBranch();
 }

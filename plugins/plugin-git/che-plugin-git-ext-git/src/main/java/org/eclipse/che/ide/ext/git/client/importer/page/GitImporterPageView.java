@@ -174,7 +174,7 @@ public interface GitImporterPageView extends View<GitImporterPageView.ActionDele
     /**
      * Focuses directory name field.
      */
-    void focusDirectoryNameFiend();
+    void focusDirectoryNameField();
 
     /**
      * Sets new value of Branch name field.
@@ -210,4 +210,9 @@ public interface GitImporterPageView extends View<GitImporterPageView.ActionDele
      * @param enable true or false to enable or disable the field
      */
     void enableBranchNameField(boolean enable);
+
+    /**
+     * Focuses Branch name field.
+     */
+    void focusBranchNameField();
 }
