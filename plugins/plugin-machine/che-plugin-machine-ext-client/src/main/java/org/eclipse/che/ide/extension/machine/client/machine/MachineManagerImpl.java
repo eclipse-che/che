@@ -339,7 +339,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
     }
 
     @Override
-    public void onNotDevMachineCreating(MachineConfigDto machineConfig) {
+    public void onMachineCreating(MachineConfigDto machineConfig) {
         subscribeToOutputStatusChannels(machineConfig);
     }
 

@@ -35,12 +35,12 @@ public interface MachineManager {
     void onDevMachineCreating(MachineConfigDto machineConfig);
 
     /**
-     * Performs some actions when not dev machine is creating.
+     * Performs some actions when machine is creating.
      *
      * @param machineConfig
      *         contains information about machine configuration
      */
-    void onNotDevMachineCreating(MachineConfigDto machineConfig);
+    void onMachineCreating(MachineConfigDto machineConfig);
 
     /**
      * Performs some actions when machine is running.
