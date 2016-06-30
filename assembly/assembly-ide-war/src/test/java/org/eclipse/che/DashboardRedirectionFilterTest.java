@@ -54,8 +54,8 @@ public class DashboardRedirectionFilterTest {
     public void shouldSkipRequestToProject() throws Exception {
         //given
         when(request.getMethod()).thenReturn("GET");
-        when(request.getRequestURI()).thenReturn("/ide/namespace/ws-id/project1");
-        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/ide/namespace/ws-id/project1"));
+        when(request.getRequestURI()).thenReturn("/namespace/ws-id/project1");
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/namespace/ws-id/project1"));
         EnvironmentContext context = new EnvironmentContext();
         context.setWorkspaceId("ws-id");
         EnvironmentContext.setCurrent(context);
@@ -88,8 +88,8 @@ public class DashboardRedirectionFilterTest {
 
     @DataProvider(name = "nonNamespacePathProvider")
     public Object[][] nonProjectPathProvider() {
-        return new Object[][]{{"/ws-id/", "http://localhost:8080/ide/ws-id123123/"},
-                              {"/wsname", "http://localhost:8080/ide/wsname_only"},
+        return new Object[][]{{"/ws-id/", "http://localhost:8080/ws-id123123/"},
+                              {"/wsname", "http://localhost:8080/wsname_only"},
         };
     }
 
@@ -97,8 +97,8 @@ public class DashboardRedirectionFilterTest {
     public void shouldSkipNotGETRequest(String method) throws Exception {
         //given
         when(request.getMethod()).thenReturn(method);
-        when(request.getRequestURI()).thenReturn("/ide/ws-id/project1");
-        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/ide/ws-id/project1"));
+        when(request.getRequestURI()).thenReturn("/ws-id/project1");
+        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:8080/ws-id/project1"));
         EnvironmentContext context = new EnvironmentContext();
         context.setWorkspaceId("ws-id");
         EnvironmentContext.setCurrent(context);

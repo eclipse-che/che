@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
+import com.google.common.collect.Sets;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -22,9 +24,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
@@ -45,15 +49,17 @@ public class UserManager {
     private final UserDao        userDao;
     private final UserProfileDao profileDao;
     private final PreferenceDao  preferenceDao;
-
+    private final Set<String>    reservedNames;
 
     @Inject
     public UserManager(UserDao userDao,
                        UserProfileDao profileDao,
-                       PreferenceDao preferenceDao) {
+                       PreferenceDao preferenceDao,
+                       @Named("user.reserved_names") String[] reservedNames) {
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.preferenceDao = preferenceDao;
+        this.reservedNames = Sets.newHashSet(reservedNames);
     }
 
 
@@ -68,6 +74,9 @@ public class UserManager {
      *         when any other error occurs
      */
     public void create(User user, boolean isTemporary) throws ConflictException, ServerException {
+        if (reservedNames.contains(user.getName().toLowerCase())) {
+            throw new ConflictException(String.format("Username \"%s\" is reserved", user.getName()));
+        }
         user.withId(generate("user", ID_LENGTH))
             .withPassword(firstNonNull(user.getPassword(), generate("", PASSWORD_LENGTH)));
         userDao.create(user);

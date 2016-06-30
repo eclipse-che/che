@@ -23,9 +23,7 @@ import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedHandler;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedHandler;
 import org.eclipse.che.ide.ui.Tooltip;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.RIGHT;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
@@ -36,7 +34,7 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
  * @author Oleksii Orel
  */
 public class RedirectToDashboardAction extends Action implements CustomComponentAction,
-        WorkspaceStartedHandler, WorkspaceStoppedHandler {
+        WorkspaceStartedEvent.Handler, WorkspaceStoppedEvent.Handler {
 
     private final DashboardLocalizationConstant constant;
     private final DashboardResources            resources;

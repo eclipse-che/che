@@ -16,15 +16,27 @@ import org.eclipse.che.dto.shared.DTO;
 /** @author andrew00x */
 @DTO
 public interface LocationDto extends Location {
-    String getTarget();
-
     void setTarget(String target);
 
     LocationDto withTarget(String target);
 
-    int getLineNumber();
-
     void setLineNumber(int lineNumber);
 
     LocationDto withLineNumber(int lineNumber);
+
+    void setExternalResource(boolean externalResource);
+
+    void setResourcePath(String resourcePath);
+
+    LocationDto withResourcePath(String resourcePath);
+
+    LocationDto withExternalResource(boolean externalResource);
+
+    void setExternalResourceId(int externalResourceId);
+
+    LocationDto withExternalResourceId(int externalResourceId);
+
+    void setResourceProjectPath(String resourceProjectPath);
+
+    LocationDto withResourceProjectPath(String resourceProjectPath);
 }

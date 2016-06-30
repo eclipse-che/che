@@ -124,7 +124,77 @@
       "Android"
     ]
   },
-    {
+  {
+    "name": "web-go-simple",
+    "displayName": "web-go-simple",
+    "path": "/web-go-simple",
+    "description": "Simple Go Hello World.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "go"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-go-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && go get -d && go run main.go",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Go"
+    ]
+  },
+  {
+    "name": "desktop-go-simple",
+    "displayName": "desktop-go-simple",
+    "path": "/desktop-go-simple",
+    "description": "Simple Go Hello World.",
+    "projectType": "blank",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "go"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/desktop-go-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && go get -d && go run main.go",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Go"
+    ]
+  },
+  {
     "name": "console-python3-simple",
     "displayName": "console-python3.5-simple",
     "path": "/console-python3-simple",

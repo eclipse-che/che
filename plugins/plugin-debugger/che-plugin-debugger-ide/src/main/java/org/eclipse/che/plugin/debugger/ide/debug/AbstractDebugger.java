@@ -50,7 +50,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -69,7 +68,6 @@ import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.exceptions.ServerException;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -87,8 +85,6 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     public static final String LOCAL_STORAGE_DEBUGGER_STATE_KEY   = "che-debugger-state";
 
     protected final DtoFactory         dtoFactory;
-    protected final FileTypeRegistry   fileTypeRegistry;
-    protected final FqnResolverFactory fqnResolverFactory;
 
     private final List<DebuggerObserver> observers;
     private final DebuggerServiceClient  service;
@@ -111,22 +107,18 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
                             LocalStorageProvider localStorageProvider,
                             MessageBusProvider messageBusProvider,
                             EventBus eventBus,
-                            FqnResolverFactory fqnResolverFactory,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
-                            FileTypeRegistry fileTypeRegistry,
                             BreakpointManager breakpointManager,
                             String type) {
         this.service = service;
         this.dtoFactory = dtoFactory;
         this.localStorageProvider = localStorageProvider;
         this.eventBus = eventBus;
-        this.fqnResolverFactory = fqnResolverFactory;
         this.activeFileHandler = activeFileHandler;
         this.debuggerManager = debuggerManager;
         this.breakpointManager = breakpointManager;
         this.observers = new ArrayList<>();
-        this.fileTypeRegistry = fileTypeRegistry;
         this.debuggerType = type;
         this.eventChannel = debuggerType + ":events:";
 
@@ -234,9 +226,8 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     }
 
     private void openCurrentFile() {
-        activeFileHandler.openFile(fqnToPath(currentLocation),
-                                   currentLocation.getTarget(),
-                                   currentLocation.getLineNumber(),
+        //todo we need add possibility to handle few files
+        activeFileHandler.openFile(currentLocation,
                                    new AsyncCallback<VirtualFile>() {
                                        @Override
                                        public void onFailure(Throwable caught) {
@@ -265,11 +256,9 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
      * <li>etc</li>
      */
     private void onBreakpointActivated(LocationDto locationDto) {
-        List<String> filePaths = fqnToPath(locationDto);
-        for (String filePath : filePaths) {
-            for (DebuggerObserver observer : observers) {
-                observer.onBreakpointActivated(filePath, locationDto.getLineNumber() - 1);
-            }
+        String filePath = fqnToPath(locationDto);
+        for (DebuggerObserver observer : observers) {
+            observer.onBreakpointActivated(filePath, locationDto.getLineNumber() - 1);
         }
     }
 
@@ -326,6 +315,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         if (isConnected()) {
             LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
             locationDto.setLineNumber(lineNumber + 1);
+            locationDto.setResourcePath(file.getPath());
 
             String fqn = pathToFqn(file);
             if (fqn == null) {
@@ -453,6 +443,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
         for (Breakpoint b : breakpointManager.getBreakpointList()) {
             LocationDto locationDto = dtoFactory.createDto(LocationDto.class);
             locationDto.setLineNumber(b.getLineNumber() + 1);
+            locationDto.setResourcePath(b.getPath());
 
             String target = pathToFqn(b.getFile());
             if (target != null) {
@@ -730,7 +721,7 @@ public abstract class AbstractDebugger implements Debugger, DebuggerObservable {
     /**
      * Transforms FQN to file path.
      */
-    abstract protected List<String> fqnToPath(@NotNull Location location);
+    abstract protected String fqnToPath(@NotNull Location location);
 
     /**
      * Transforms file path to FQN>

@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
 
 import java.util.Set;
@@ -65,6 +66,7 @@ public interface InstanceProvider {
     Instance createInstance(Machine machine,
                             LineConsumer creationLogsOutput) throws UnsupportedRecipeException,
                                                                     InvalidRecipeException,
+                                                                    SourceNotFoundException,
                                                                     NotFoundException,
                                                                     MachineException;
 

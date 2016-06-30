@@ -29,12 +29,14 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
+import org.eclipse.che.plugin.docker.client.exception.DockerException;
+import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
-import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.ExecConfig;
@@ -58,6 +60,7 @@ import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
+import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
@@ -69,7 +72,6 @@ import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.TopParams;
 import org.eclipse.che.plugin.docker.client.params.WaitContainerParams;
-import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +102,7 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
 /**
  * Client for docker API.
@@ -375,7 +378,8 @@ public class DockerConnector {
      * @deprecated use {@link #tag(TagParams)} instead
      */
     @Deprecated
-    public void tag(String image, String repository, String tag) throws IOException {
+    public void tag(String image, String repository, String tag) throws ImageNotFoundException,
+                                                                        IOException {
         tag(TagParams.create(image, repository).withTag(tag), dockerDaemonUri);
     }
 
@@ -1242,21 +1246,29 @@ public class DockerConnector {
      * @deprecated use {@link #tag(TagParams)}
      */
     @Deprecated
-    protected void doTag(String image, String repository, String tag, URI dockerDaemonUri) throws IOException {
+    protected void doTag(String image,
+                         String repository,
+                         String tag,
+                         URI dockerDaemonUri) throws ImageNotFoundException,
+                                                     IOException {
         tag(TagParams.create(image, repository).withTag(tag), dockerDaemonUri);
     }
 
     /**
      * Tag the docker image into a repository.
      *
+     * @throws ImageNotFoundException
+     *         when docker api return 404 status
      * @throws IOException
-     *          when a problem occurs with docker api calls
+     *         when a problem occurs with docker api calls
      */
-    public void tag(final TagParams params) throws IOException {
+    public void tag(final TagParams params) throws ImageNotFoundException,
+                                                   IOException {
         tag(params, dockerDaemonUri);
     }
 
-    private void tag(final TagParams params, URI dockerDaemonUri) throws IOException {
+    private void tag(final TagParams params, URI dockerDaemonUri) throws ImageNotFoundException,
+                                                                         IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/images/" + params.getImage() + "/tag")
@@ -1264,7 +1276,11 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "force", params.isForce());
             addQueryParamIfNotNull(connection, "tag", params.getTag());
             final DockerResponse response = connection.request();
-            if (response.getStatus() / 100 != 2) {
+            final int status = response.getStatus();
+            if (status == 404) {
+                throw new ImageNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
+            if (status / 100 != 2) {
                 throw getDockerException(response);
             }
         }

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.workspace;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -40,6 +41,7 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -161,7 +163,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 
-
     abstract void tryStartWorkspace();
 
     /**
@@ -209,27 +210,26 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                         subscribeToWorkspaceStatusWebSocket(workspace);
 
                         WorkspaceStatus workspaceStatus = workspace.getStatus();
+
                         switch (workspaceStatus) {
                             case STARTING:
                                 handleWsStart(workspace);
                                 break;
+
                             case RUNNING:
-                                initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), SUCCESS);
                                 setCurrentWorkspace(workspace);
-                                eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
-                                break;
-                            default:
-                                workspaceServiceClient.getSnapshot(workspace.getId()).then(new Operation<List<SnapshotDto>>() {
+                                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                                     @Override
-                                    public void apply(List<SnapshotDto> snapshots) throws OperationException {
-                                        if (snapshots.isEmpty()) {
-                                            handleWsStart(workspaceServiceClient.startById(workspace.getId(),
-                                                                                           workspace.getConfig().getDefaultEnv()));
-                                        } else {
-                                            showRecoverWorkspaceConfirmDialog(workspace);
-                                        }
+                                    public void execute() {
+                                        initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), SUCCESS);
+                                        notificationManager.notify(locale.startedWs(), StatusNotification.Status.SUCCESS, FLOAT_MODE);
+                                        eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
                                     }
                                 });
+                                break;
+
+                            default:
+                                checkWorkspaceForSnapshots(workspace);
                         }
                     }
                 });
@@ -245,11 +245,32 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         });
     }
 
+
     /**
-     * Sends a message to the parent frame to inform about showing recover workspace dialog.
+     * Checks workspace for snapshots and asks the uses for an action.
+     *
+     * @param workspace
+     *          workspace
      */
-    private native void notifyIDERecoverDialog() /*-{
-      $wnd.parent.postMessage("ide-recover-dialog", "*");
+    private void checkWorkspaceForSnapshots(final WorkspaceDto workspace) {
+        workspaceServiceClient.getSnapshot(workspace.getId()).then(new Operation<List<SnapshotDto>>() {
+            @Override
+            public void apply(List<SnapshotDto> snapshots) throws OperationException {
+                if (snapshots.isEmpty()) {
+                    handleWsStart(workspaceServiceClient.startById(workspace.getId(),
+                            workspace.getConfig().getDefaultEnv()));
+                } else {
+                    showRecoverWorkspaceConfirmDialog(workspace);
+                }
+            }
+        });
+    }
+
+    /**
+     * Sends a message to the parent frame to inform that IDE application can be shown.
+     */
+    private native void notifyShowIDE() /*-{
+        $wnd.parent.postMessage("show-ide", "*");
     }-*/;
 
     /**
@@ -260,26 +281,29 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      */
     private void showRecoverWorkspaceConfirmDialog(final WorkspaceDto workspace) {
         dialogFactory.createConfirmDialog("Workspace recovering",
-                                          "Do you want to recover the workspace from snapshot?",
-                                          new ConfirmCallback() {
-                                              @Override
-                                              public void accepted() {
-                                                  handleWsStart(workspaceServiceClient.recoverWorkspace(workspace.getId(),
-                                                                                                        workspace.getConfig()
-                                                                                                                 .getDefaultEnv(),
-                                                                                                        null));
-                                              }
-                                          },
-                                          new CancelCallback() {
-                                              @Override
-                                              public void cancelled() {
-                                                  handleWsStart(workspaceServiceClient.startById(workspace.getId(),
-                                                                                                 workspace.getConfig()
-                                                                                                          .getDefaultEnv()));
-                                              }
-                                          })
+                "Do you want to recover the workspace from snapshot?",
+                "Yes",
+                "No",
+                new ConfirmCallback() {
+                    @Override
+                    public void accepted() {
+                        handleWsStart(workspaceServiceClient.recoverWorkspace(workspace.getId(),
+                                workspace.getConfig()
+                                        .getDefaultEnv(),
+                                null));
+                    }
+                },
+                new CancelCallback() {
+                    @Override
+                    public void cancelled() {
+                        handleWsStart(workspaceServiceClient.startById(workspace.getId(),
+                                workspace.getConfig()
+                                        .getDefaultEnv()));
+                    }
+                })
                      .show();
-        notifyIDERecoverDialog();
+
+        notifyShowIDE();
     }
 
     /**
@@ -329,8 +353,10 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                 @Override
                 protected void onMessageReceived(WorkspaceStatusEvent statusEvent) {
                     String workspaceName = workspace.getConfig().getName();
-
                     switch (statusEvent.getEventType()) {
+                        case STARTING:
+                            eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+                            break;
 
                         case RUNNING:
                             setCurrentWorkspace(workspace);
@@ -365,7 +391,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                             snapshotLoader.hide();
                             snapshotCreator.creationError("Snapshot creation error: " + statusEvent.getError());
                             break;
-
                     }
                 }
 

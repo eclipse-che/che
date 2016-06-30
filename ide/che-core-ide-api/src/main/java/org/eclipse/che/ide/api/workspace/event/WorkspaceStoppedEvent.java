@@ -10,35 +10,46 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.workspace.event;
 
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 
 /**
  * Event fired when workspace has been stopped.
  *
  * @author Vitaliy Guliy
  */
-public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedHandler> {
+public class WorkspaceStoppedEvent extends GwtEvent<WorkspaceStoppedEvent.Handler> {
 
-    public static final Type<WorkspaceStoppedHandler> TYPE = new Type<>();
+    public interface Handler extends EventHandler {
+        /**
+         * Perform actions when workspace is stopped.
+         *
+         * @param event
+         *         workspace stopped event
+         */
+        void onWorkspaceStopped(WorkspaceStoppedEvent event);
+    }
 
-    private final WorkspaceDto workspace;
+    public static final Type<WorkspaceStoppedEvent.Handler> TYPE = new Type<>();
 
-    public WorkspaceStoppedEvent(WorkspaceDto workspace) {
+    private final Workspace workspace;
+
+    public WorkspaceStoppedEvent(Workspace workspace) {
         this.workspace = workspace;
     }
 
-    public WorkspaceDto getWorkspace() {
+    public Workspace getWorkspace() {
         return workspace;
     }
 
     @Override
-    public Type<WorkspaceStoppedHandler> getAssociatedType() {
+    public Type<WorkspaceStoppedEvent.Handler> getAssociatedType() {
         return TYPE;
     }
 
     @Override
-    protected void dispatch(WorkspaceStoppedHandler handler) {
+    protected void dispatch(WorkspaceStoppedEvent.Handler handler) {
         handler.onWorkspaceStopped(this);
     }
 

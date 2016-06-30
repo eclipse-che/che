@@ -8,22 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.workspace.event;
-
-import com.google.gwt.event.shared.EventHandler;
+package org.eclipse.che.plugin.docker.client.exception;
 
 /**
- * Provides method which is called when workspace started.
+ * Occurs when docker image is not found.
  *
- * @author Dmitry Shnurenko
+ * @author Anton Korneta
  */
-public interface WorkspaceStartedHandler extends EventHandler {
+public class ImageNotFoundException extends DockerException {
 
-    /**
-     * Performs some actions when workspace started.
-     *
-     * @param event
-     *         contains information about started workspace
-     */
-    void onWorkspaceStarted(WorkspaceStartedEvent event);
+    public ImageNotFoundException(String message) {
+        super(message, 404);
+    }
 }

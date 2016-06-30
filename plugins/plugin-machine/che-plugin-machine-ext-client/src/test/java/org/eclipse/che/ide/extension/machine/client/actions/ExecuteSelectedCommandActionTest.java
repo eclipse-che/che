@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.actions;
 
+import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -40,6 +41,8 @@ public class ExecuteSelectedCommandActionTest {
     private CommandManager              commandManager;
     @Mock
     private ActionEvent                 event;
+    @Mock
+    private EventBus                    eventBus;
 
     @Mock
     private CommandConfiguration command;
