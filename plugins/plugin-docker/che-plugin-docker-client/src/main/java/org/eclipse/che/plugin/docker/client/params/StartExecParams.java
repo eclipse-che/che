@@ -111,4 +111,12 @@ public class StartExecParams {
         return Objects.hash(execId, detach, tty);
     }
 
+    @Override
+    public String toString() {
+        return "StartExecParams{" +
+               "execId='" + execId + '\'' +
+               ", detach=" + detach +
+               ", tty=" + tty +
+               '}';
+    }
 }

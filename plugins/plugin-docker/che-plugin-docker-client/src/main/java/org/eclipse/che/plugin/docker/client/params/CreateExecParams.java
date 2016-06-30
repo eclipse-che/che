@@ -122,4 +122,13 @@ public class CreateExecParams {
         return Objects.hash(container, detach, Arrays.hashCode(cmd));
     }
 
+
+    @Override
+    public String toString() {
+        return "CreateExecParams{" +
+               "container='" + container + '\'' +
+               ", detach=" + detach +
+               ", cmd=" + Arrays.toString(cmd) +
+               '}';
+    }
 }

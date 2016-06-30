@@ -21,7 +21,6 @@ import com.google.gson.reflect.TypeToken;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.TarUtils;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
 import org.eclipse.che.plugin.docker.client.connection.CloseConnectionInputStream;
@@ -33,7 +32,6 @@ import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
-import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
@@ -45,7 +43,6 @@ import org.eclipse.che.plugin.docker.client.json.ExecCreated;
 import org.eclipse.che.plugin.docker.client.json.ExecInfo;
 import org.eclipse.che.plugin.docker.client.json.ExecStart;
 import org.eclipse.che.plugin.docker.client.json.Filters;
-import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.Image;
 import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.json.NetworkCreated;
@@ -103,11 +100,9 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
@@ -249,87 +244,6 @@ public class DockerConnector {
     }
 
     /**
-     * The same as {@link #buildImage(String, ProgressMonitor, AuthConfigs, boolean, long, long, File...)} but without memory limits.
-     *
-     * @see #buildImage(String, ProgressMonitor, AuthConfigs, boolean, long, long, File...)
-     * @deprecated use {@link #buildImage(BuildImageParams, ProgressMonitor)} instead
-     */
-    @Deprecated
-    public String buildImage(String repository,
-                             ProgressMonitor progressMonitor,
-                             AuthConfigs authConfigs,
-                             boolean doForcePull,
-                             File... files) throws IOException, InterruptedException {
-        return buildImage(repository, progressMonitor, authConfigs, doForcePull, 0, 0, files);
-    }
-
-    /**
-     * Builds new docker image from specified dockerfile.
-     *
-     * @param repository
-     *         full repository name to be applied to newly created image
-     * @param progressMonitor
-     *         ProgressMonitor for images creation process
-     * @param authConfigs
-     *         Authentication configuration for private registries. Can be null.
-     * @param memoryLimit
-     *         Memory limit for build in bytes
-     * @param memorySwapLimit
-     *         Total memory in bytes (memory + swap), -1 to enable unlimited swap
-     * @param files
-     *         files that are needed for creation docker images (e.g. file of directories used in ADD instruction in Dockerfile), one of
-     *         them must be Dockerfile.
-     * @return image id
-     * @throws IOException
-     * @throws InterruptedException
-     *         if build process was interrupted
-     * @deprecated use {@link #buildImage(BuildImageParams, ProgressMonitor)} instead
-     */
-    @Deprecated
-    public String buildImage(String repository,
-                             ProgressMonitor progressMonitor,
-                             AuthConfigs authConfigs,
-                             boolean doForcePull,
-                             long memoryLimit,
-                             long memorySwapLimit,
-                             File... files) throws IOException, InterruptedException {
-        final File tar = Files.createTempFile(null, ".tar").toFile();
-        try {
-            createTarArchive(tar, files);
-            return doBuildImage(repository, tar, progressMonitor, dockerDaemonUri, authConfigs, doForcePull, memoryLimit, memorySwapLimit);
-        } finally {
-            FileCleaner.addFile(tar);
-        }
-    }
-
-    /**
-     * Builds new docker image from specified tar archive that must contain Dockerfile.
-     *
-     * @param repository
-     *         full repository name to be applied to newly created image
-     * @param tar
-     *         archived files that are needed for creation docker images (e.g. file of directories used in ADD instruction in Dockerfile).
-     *         One of them must be Dockerfile.
-     * @param progressMonitor
-     *         ProgressMonitor for images creation process
-     * @param authConfigs
-     *         Authentication configuration for private registries. Can be null.
-     * @return image id
-     * @throws IOException
-     * @throws InterruptedException
-     *         if build process was interrupted
-     * @deprecated use {@link #buildImage(BuildImageParams, ProgressMonitor)} instead
-     */
-    @Deprecated
-    protected String buildImage(String repository,
-                                File tar,
-                                final ProgressMonitor progressMonitor,
-                                AuthConfigs authConfigs,
-                                boolean doForcePull) throws IOException, InterruptedException {
-        return doBuildImage(repository, tar, progressMonitor, dockerDaemonUri, authConfigs, doForcePull);
-    }
-
-    /**
      * Gets detailed information about docker image.
      *
      * @param image
@@ -342,14 +256,6 @@ public class DockerConnector {
     }
 
     /**
-     * @deprecated use {@link #inspectImage(InspectImageParams)} instead
-     */
-    @Deprecated
-    protected ImageInfo doInspectImage(String image, URI dockerDaemonUri) throws IOException {
-        return inspectImage(InspectImageParams.create(image), dockerDaemonUri);
-    }
-
-    /**
      * Gets detailed information about docker image.
      *
      * @return detailed information about {@code image}
@@ -357,10 +263,6 @@ public class DockerConnector {
      *          when a problem occurs with docker api calls
      */
     public ImageInfo inspectImage(InspectImageParams params) throws IOException {
-        return inspectImage(params, dockerDaemonUri);
-    }
-
-    private ImageInfo inspectImage(InspectImageParams params, URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/images/" + params.getImage() + "/json")) {
@@ -370,101 +272,6 @@ public class DockerConnector {
             }
             return parseResponseStreamAndClose(response.getInputStream(), ImageInfo.class);
         }
-    }
-
-    /**
-     * @deprecated use {@link #removeImage(RemoveImageParams)} instead
-     */
-    @Deprecated
-    public void removeImage(String image, boolean force) throws IOException {
-        removeImage(RemoveImageParams.create(image)
-                                     .withForce(force));
-    }
-
-    /**
-     * @deprecated use {@link #tag(TagParams)} instead
-     */
-    @Deprecated
-    public void tag(String image, String repository, String tag) throws ImageNotFoundException,
-                                                                        IOException {
-        tag(TagParams.create(image, repository).withTag(tag), dockerDaemonUri);
-    }
-
-    /**
-     * Push docker image to the registry
-     *
-     * @param repository
-     *         full repository name to be applied to newly created image
-     * @param tag
-     *         tag of the image
-     * @param registry
-     *         registry url
-     * @param progressMonitor
-     *         ProgressMonitor for images creation process
-     * @return digest of just pushed image
-     * @throws IOException
-     *          when a problem occurs with docker api calls
-     * @throws InterruptedException
-     *         if push process was interrupted
-     * @deprecated use {@link #push(PushParams, ProgressMonitor)}
-     */
-    @Deprecated
-    public String push(String repository,
-                       String tag,
-                       String registry,
-                       final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
-        return doPush(repository, tag, registry, progressMonitor, dockerDaemonUri);
-    }
-
-    /**
-     * See <a href="https://docs.docker.com/reference/api/docker_remote_api_v1.16/#create-an-image">Docker remote API # Create an
-     * image</a>.
-     * To pull from private registry use registry.address:port/image as image. This is not documented.
-     *
-     * @throws IOException
-     * @throws InterruptedException
-     * @deprecated use {@link #pull(PullParams, ProgressMonitor)} instead
-     */
-    @Deprecated
-    public void pull(String image,
-                     String tag,
-                     String registry,
-                     ProgressMonitor progressMonitor) throws IOException, InterruptedException {
-        doPull(image, tag, registry, progressMonitor, dockerDaemonUri);
-    }
-
-    /**
-     * @deprecated use {@link #createContainer(CreateContainerParams)} instead
-     */
-    @Deprecated
-    public ContainerCreated createContainer(ContainerConfig containerConfig, String containerName) throws IOException {
-        return createContainer(CreateContainerParams.create(containerConfig).withContainerName(containerName), dockerDaemonUri);
-    }
-
-    /**
-     * @deprecated use {@link #startContainer(StartContainerParams)} instead
-     */
-    @Deprecated
-    public void startContainer(String container, HostConfig hostConfig) throws IOException {
-        doStartContainer(container, hostConfig, dockerDaemonUri);
-    }
-
-    /**
-     * Stops container.
-     *
-     * @param container
-     *         container identifier, either id or name
-     * @param timeout
-     *         time to wait for the container to stop before killing it
-     * @param timeunit
-     *         time unit of the timeout parameter
-     * @throws IOException
-     * @deprecated use {@link #stopContainer(StopContainerParams)} instead
-     */
-    @Deprecated
-    public void stopContainer(String container, long timeout, TimeUnit timeunit) throws IOException {
-        stopContainer(StopContainerParams.create(container)
-                                         .withTimeout(timeout, timeunit));
     }
 
     /**
@@ -486,21 +293,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
         }
-    }
-
-    /**
-     * Kills running container Kill a running container using specified signal.
-     *
-     * @param container
-     *         container identifier, either id or name
-     * @param signal
-     *         code of signal, e.g. 9 in case of SIGKILL
-     * @throws IOException
-     * @deprecated use {@link #killContainer(KillContainerParams)} instead
-     */
-    @Deprecated
-    public void killContainer(String container, int signal) throws IOException {
-        killContainer(KillContainerParams.create(container).withSignal(signal));
     }
 
     /**
@@ -531,26 +323,6 @@ public class DockerConnector {
      */
     public void killContainer(String container) throws IOException {
         killContainer(KillContainerParams.create(container));
-    }
-
-    /**
-     * Removes container.
-     *
-     * @param container
-     *         container identifier, either id or name
-     * @param force
-     *         if {@code true} kills the running container then remove it
-     * @param removeVolumes
-     *         if {@code true} removes volumes associated to the container
-     * @throws IOException
-     *          when a problem occurs with docker api calls
-     * @deprecated use {@link #removeContainer(RemoveContainerParams)} instead
-     */
-    @Deprecated
-    public void removeContainer(String container, boolean force, boolean removeVolumes) throws IOException {
-        removeContainer(RemoveContainerParams.create(container)
-                                             .withForce(force)
-                                             .withRemoveVolumes(removeVolumes));
     }
 
     /**
@@ -616,14 +388,6 @@ public class DockerConnector {
     }
 
     /**
-     * @deprecated use {@link #createContainer(CreateContainerParams)} instead
-     */
-    @Deprecated
-    protected ContainerInfo doInspectContainer(String container, URI dockerDaemonUri) throws IOException {
-        return inspectContainer(InspectContainerParams.create(container), dockerDaemonUri);
-    }
-
-    /**
      * Gets detailed information about docker container.
      *
      * @return detailed information about {@code container}
@@ -631,10 +395,6 @@ public class DockerConnector {
      *          when a problem occurs with docker api calls
      */
     public ContainerInfo inspectContainer(final InspectContainerParams params) throws IOException {
-        return inspectContainer(params, dockerDaemonUri);
-    }
-
-    private ContainerInfo inspectContainer(final InspectContainerParams params, URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/containers/" + params.getContainer() + "/json")) {
@@ -645,26 +405,6 @@ public class DockerConnector {
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerInfo.class);
         }
-    }
-
-    /**
-     * Attaches to the container with specified id.
-     *
-     * @param container
-     *         id of container
-     * @param containerLogsProcessor
-     *         output for container logs
-     * @param stream
-     *         if {@code true} then get 'live' stream from container. Typically need to run this method in separate thread, if {@code
-     *         stream} is {@code true} since this method blocks until container is running.
-     * @throws IOException
-     * @deprecated use {@link #attachContainer(AttachContainerParams, MessageProcessor)} instead
-     */
-    @Deprecated
-    public void attachContainer(String container, MessageProcessor<LogMessage> containerLogsProcessor, boolean stream) throws IOException {
-        attachContainer(AttachContainerParams.create(container)
-                                             .withStream(stream),
-                        containerLogsProcessor);
     }
 
     /**
@@ -738,24 +478,6 @@ public class DockerConnector {
     }
 
     /**
-     * @deprecated use {@link #commit(CommitParams)} instead
-     */
-    @Deprecated
-    public String commit(String container, String repository, String tag, String comment, String author) throws IOException {
-        // todo: pause container
-        return commit(CommitParams.create(container, repository).withTag(tag).withComment(comment).withAuthor(author), dockerDaemonUri);
-    }
-
-    /**
-     * @deprecated use {@link #createExec(CreateExecParams)} instead
-     */
-    @Deprecated
-    public Exec createExec(String container, boolean detach, String... cmd) throws IOException {
-        return createExec(CreateExecParams.create(container, cmd)
-                                          .withDetach(detach));
-    }
-
-    /**
      * Sets up an exec instance in a running container.
      *
      * @return just created exec info
@@ -780,14 +502,6 @@ public class DockerConnector {
             }
             return new Exec(params.getCmd(), parseResponseStreamAndClose(response.getInputStream(), ExecCreated.class).getId());
         }
-    }
-
-    /**
-     * @deprecated use {@link #startExec(StartExecParams, MessageProcessor)} instead
-     */
-    @Deprecated
-    public void startExec(String execId, MessageProcessor<LogMessage> execOutputProcessor) throws IOException {
-        startExec(StartExecParams.create(execId), execOutputProcessor);
     }
 
     /**
@@ -856,15 +570,6 @@ public class DockerConnector {
     }
 
     /**
-     * @deprecated use {@link #top(TopParams)} instead
-     */
-    @Deprecated
-    public ContainerProcesses top(String container, String... psArgs) throws IOException {
-        return top(TopParams.create(container)
-                            .withPsArgs(psArgs));
-    }
-
-    /**
      * List processes running inside the container.
      *
      * @return processes running inside the container
@@ -899,24 +604,6 @@ public class DockerConnector {
     /**
      * Gets files from the specified container.
      *
-     * @param container
-     *         container id
-     * @param sourcePath
-     *         path to file or directory inside specified container
-     * @return stream of resources from the specified container filesystem, with retention connection
-     * @throws IOException
-     *          when a problem occurs with docker api calls
-     * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8.0 version
-     * @deprecated use {@link #getResource(GetResourceParams)} instead
-     */
-    @Deprecated
-    public InputStream getResource(String container, String sourcePath) throws IOException {
-       return getResource(GetResourceParams.create(container, sourcePath));
-    }
-
-    /**
-     * Gets files from the specified container.
-     *
      * @return stream of resources from the specified container filesystem, with retention connection
      * @throws IOException
      *          when a problem occurs with docker api calls
@@ -939,33 +626,6 @@ public class DockerConnector {
             connection.close();
             throw io;
         }
-    }
-
-    /**
-     * Puts files into specified container.
-     *
-     * @param container
-     *         container id
-     * @param targetPath
-     *         path to file or directory inside specified container
-     * @param sourceStream
-     *         stream of files from source container
-     * @param noOverwriteDirNonDir
-     *         If "false" then it will be an error if unpacking the given content would cause
-     *         an existing directory to be replaced with a non-directory or other resource and vice versa.
-     * @throws IOException
-     *          when a problem occurs with docker api calls, or during file system operations
-     * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8 version
-     * @deprecated use {@link #putResource(PutResourceParams)} instead
-     */
-    @Deprecated
-    public void putResource(String container,
-                            String targetPath,
-                            InputStream sourceStream,
-                            boolean noOverwriteDirNonDir) throws IOException {
-       putResource(PutResourceParams.create(container, targetPath)
-                                    .withSourceStream(sourceStream)
-                                    .withNoOverwriteDirNonDir(noOverwriteDirNonDir));
     }
 
     /**
@@ -1017,40 +677,6 @@ public class DockerConnector {
      * If {@code sinceSecond} is 0 no old events will be got.<br>
      * With some connection implementations method can fail due to connection timeout in streaming mode.
      *
-     * @param sinceSecond
-     *         UNIX date in seconds. allow omit events created before specified date.
-     * @param untilSecond
-     *         UNIX date in seconds. allow omit events created after specified date.
-     * @param filters
-     *         filter of needed events. Available filters: {@code event=<string>}
-     *         {@code image=<string>} {@code container=<string>}
-     * @param messageProcessor
-     *         processor of all found events that satisfy specified parameters
-     * @throws IOException
-     * @deprecated use {@link #getEvents(GetEventsParams, MessageProcessor)} instead
-     */
-    @Deprecated
-    public void getEvents(long sinceSecond,
-                          long untilSecond,
-                          Filters filters,
-                          MessageProcessor<Event> messageProcessor) throws IOException {
-        getEvents(GetEventsParams.create()
-                                 .withSinceSecond(sinceSecond)
-                                 .withUntilSecond(untilSecond)
-                                 .withFilters(filters),
-                  messageProcessor);
-    }
-
-    /**
-     * Get docker events.
-     * Parameter {@code untilSecond} does nothing if {@code sinceSecond} is 0.<br>
-     * If {@code untilSecond} and {@code sinceSecond} are 0 method gets new events only (streaming mode).<br>
-     * If {@code untilSecond} and {@code sinceSecond} are not 0 (but less that current date)
-     * methods get events that were generated between specified dates.<br>
-     * If {@code untilSecond} is 0 but {@code sinceSecond} is not method gets old events and streams new ones.<br>
-     * If {@code sinceSecond} is 0 no old events will be got.<br>
-     * With some connection implementations method can fail due to connection timeout in streaming mode.
-     *
      * @param messageProcessor
      *         processor of all found events that satisfy specified parameters
      * @throws IOException
@@ -1079,66 +705,6 @@ public class DockerConnector {
     }
 
     /**
-     * The same as {@link #doBuildImage(String, File, ProgressMonitor, URI, AuthConfigs, boolean, long, long)} but without memory limits.
-     *
-     * @see #doBuildImage(String, File, ProgressMonitor, URI, AuthConfigs, boolean, long, long)
-     * @deprecated use {@link #}
-     */
-    @Deprecated
-    protected String doBuildImage(String repository,
-                                  File tar,
-                                  final ProgressMonitor progressMonitor,
-                                  URI dockerDaemonUri,
-                                  AuthConfigs authConfigs,
-                                  boolean doForcePull) throws IOException, InterruptedException {
-        return doBuildImage(repository, tar, progressMonitor, dockerDaemonUri, authConfigs, doForcePull, 0, 0);
-    }
-
-    /**
-     * Builds new docker image from specified tar archive that must contain Dockerfile.
-     *
-     * @param repository
-     *         full repository name to be applied to newly created image
-     * @param tar
-     *         archived files that are needed for creation docker images (e.g. file of directories used in ADD instruction in Dockerfile).
-     *         One of them must be Dockerfile.
-     * @param progressMonitor
-     *         ProgressMonitor for images creation process
-     * @param dockerDaemonUri
-     *         Uri for remote access to docker API
-     * @param authConfigs
-     *         Authentication configuration for private registries. Can be null.
-     * @param memoryLimit
-     *         Memory limit for build in bytes
-     * @param memorySwapLimit
-     *         Total memory in bytes (memory + swap), -1 to enable unlimited swap
-     * @return image id
-     * @throws IOException
-     * @throws InterruptedException
-     *         if build process was interrupted
-     * @deprecated use {@link #buildImage(BuildImageParams, ProgressMonitor)} instead
-     */
-    @Deprecated
-    protected String doBuildImage(String repository,
-                                  File tar,
-                                  final ProgressMonitor progressMonitor,
-                                  URI dockerDaemonUri,
-                                  AuthConfigs authConfigs,
-                                  boolean doForcePull,
-                                  long memoryLimit,
-                                  long memorySwapLimit) throws IOException, InterruptedException {
-        return buildImage(BuildImageParams.create(new File[]{new File(".")}) // used tar instead it
-                                          .withRepository(repository)
-                                          .withAuthConfigs(authConfigs)
-                                          .withDoForcePull(doForcePull)
-                                          .withMemoryLimit(memoryLimit)
-                                          .withMemorySwapLimit(memorySwapLimit),
-                          progressMonitor,
-                          tar,
-                          dockerDaemonUri);
-    }
-
-    /**
      * Builds new image.
      *
      * @param progressMonitor
@@ -1163,7 +729,7 @@ public class DockerConnector {
 
     private String buildImage(final BuildImageParams params,
                               final ProgressMonitor progressMonitor,
-                              File tar, // tar from params.files() (uses temporary until delete deprecated methods)
+                              File tar,
                               URI dockerDaemonUri) throws IOException, InterruptedException {
         final AuthConfigs authConfigs = params.getAuthConfigs();
         final String repository = params.getRepository();
@@ -1238,13 +804,6 @@ public class DockerConnector {
         }
     }
 
-    /**
-     * @deprecated use {@link #removeImage(RemoveImageParams)} instead
-     */
-    @Deprecated
-    protected void doRemoveImage(String image, boolean force, URI dockerDaemonUri) throws IOException {
-        removeImage(RemoveImageParams.create(image).withForce(force), dockerDaemonUri);
-    }
 
     /**
      * Removes docker image.
@@ -1265,10 +824,6 @@ public class DockerConnector {
      *          when a problem occurs with docker api calls
      */
     public void removeImage(final RemoveImageParams params) throws IOException {
-        removeImage(params, dockerDaemonUri);
-    }
-
-    private void removeImage(final RemoveImageParams params, URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("DELETE")
                                                             .path("/images/" + params.getImage())) {
@@ -1281,18 +836,6 @@ public class DockerConnector {
     }
 
     /**
-     * @deprecated use {@link #tag(TagParams)}
-     */
-    @Deprecated
-    protected void doTag(String image,
-                         String repository,
-                         String tag,
-                         URI dockerDaemonUri) throws ImageNotFoundException,
-                                                     IOException {
-        tag(TagParams.create(image, repository).withTag(tag), dockerDaemonUri);
-    }
-
-    /**
      * Tag the docker image into a repository.
      *
      * @throws ImageNotFoundException
@@ -1302,11 +845,6 @@ public class DockerConnector {
      */
     public void tag(final TagParams params) throws ImageNotFoundException,
                                                    IOException {
-        tag(params, dockerDaemonUri);
-    }
-
-    private void tag(final TagParams params, URI dockerDaemonUri) throws ImageNotFoundException,
-                                                                         IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/images/" + params.getImage() + "/tag")
@@ -1325,22 +863,6 @@ public class DockerConnector {
     }
 
     /**
-     * @deprecated use {@link #push(PushParams, ProgressMonitor)} instead
-     */
-    @Deprecated
-    protected String doPush(final String repository,
-                            final String tag,
-                            final String registry,
-                            final ProgressMonitor progressMonitor,
-                            final URI dockerDaemonUri) throws IOException, InterruptedException {
-        return push(PushParams.create(repository)
-                              .withTag(tag)
-                              .withRegistry(registry),
-                    progressMonitor,
-                    dockerDaemonUri);
-    }
-
-    /**
      * Push docker image to the registry.
      *
      * @param progressMonitor
@@ -1352,11 +874,6 @@ public class DockerConnector {
      *         if push process was interrupted
      */
     public String push(final PushParams params, final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
-        return push(params, progressMonitor, dockerDaemonUri);
-    }
-
-    private String push(final PushParams params, final ProgressMonitor progressMonitor, URI dockerDaemonUri)
-            throws IOException, InterruptedException {
         final String fullRepo = params.getFullRepo();
 
         final ValueHolder<String> digestHolder = new ValueHolder<>();
@@ -1436,24 +953,6 @@ public class DockerConnector {
     }
 
     /**
-     * @deprecated use {@link #commit(CommitParams)} instead
-     */
-    @Deprecated
-    protected String doCommit(String container,
-                              String repository,
-                              String tag,
-                              String comment,
-                              String author,
-                              URI dockerDaemonUri) throws IOException {
-        // todo: pause container
-        return commit(CommitParams.create(container, repository)
-                                  .withTag(tag)
-                                  .withComment(comment)
-                                  .withAuthor(author),
-                      dockerDaemonUri);
-    }
-
-    /**
      * Creates a new image from a container’s changes.
      *
      * @return id of a new image
@@ -1461,10 +960,6 @@ public class DockerConnector {
      *          when a problem occurs with docker api calls
      */
     public String commit(final CommitParams params) throws IOException {
-        return commit(params, dockerDaemonUri);
-    }
-
-    private String commit(final CommitParams params, URI dockerDaemonUri) throws IOException {
         // TODO: add option to pause container
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
@@ -1482,28 +977,6 @@ public class DockerConnector {
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerCommitted.class).getId();
         }
-    }
-
-    /**
-     * See <a href="https://docs.docker.com/reference/api/docker_remote_api_v1.16/#create-an-image">Docker remote API # Create an
-     * image</a>.
-     * To pull from private registry use registry.address:port/image as image. This is not documented.
-     *
-     * @throws IOException
-     * @throws InterruptedException
-     * @deprecated use {@link #pull(PullParams, ProgressMonitor)} instead
-     */
-    @Deprecated
-    protected void doPull(String image,
-                          String tag,
-                          String registry,
-                          final ProgressMonitor progressMonitor,
-                          URI dockerDaemonUri) throws IOException, InterruptedException {
-        pull(PullParams.create(image)
-                       .withTag(tag)
-                       .withRegistry(registry),
-             progressMonitor,
-             dockerDaemonUri);
     }
 
     /**
@@ -1534,9 +1007,9 @@ public class DockerConnector {
      * @throws InterruptedException
      *         if push process was interrupted
      */
-    private void pull(final PullParams params,
-                      final ProgressMonitor progressMonitor,
-                      final URI dockerDaemonUri) throws IOException, InterruptedException {
+    protected void pull(final PullParams params,
+                        final ProgressMonitor progressMonitor,
+                        final URI dockerDaemonUri) throws IOException, InterruptedException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path("/images/create")
@@ -1588,22 +1061,6 @@ public class DockerConnector {
     }
 
     /**
-     * The same as {@link #createContainer(CreateContainerParams)} but with docker service uri parameter
-     *
-     * @param dockerDaemonUri
-     *         docker service URI
-     * @deprecated use {@link #createContainer(CreateContainerParams)} instead
-     */
-    @Deprecated
-    protected ContainerCreated doCreateContainer(ContainerConfig containerConfig,
-                                                 String containerName,
-                                                 URI dockerDaemonUri) throws IOException {
-        return createContainer(CreateContainerParams.create(containerConfig)
-                                                    .withContainerName(containerName),
-                               dockerDaemonUri);
-    }
-
-    /**
      * Creates docker container.
      *
      * @return information about just created container
@@ -1611,10 +1068,6 @@ public class DockerConnector {
      *          when a problem occurs with docker api calls
      */
     public ContainerCreated createContainer(final CreateContainerParams params) throws IOException {
-        return createContainer(params, dockerDaemonUri);
-    }
-
-    private ContainerCreated createContainer(final CreateContainerParams params, URI dockerDaemonUri) throws IOException {
         byte[] entityBytesArray = toJson(params.getContainerConfig()).getBytes();
 
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
@@ -1629,39 +1082,6 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), ContainerCreated.class);
-        }
-    }
-
-    /**
-     * @deprecated use {@link #startContainer(StartContainerParams)} instead
-     */
-    @Deprecated
-    protected void doStartContainer(String container,
-                                    HostConfig hostConfig,
-                                    URI dockerDaemonUri) throws IOException {
-        final List<Pair<String, ?>> headers = new ArrayList<>(2);
-        headers.add(Pair.of("Content-Type", MediaType.APPLICATION_JSON));
-        final String entity = (hostConfig == null) ? "{}" : toJson(hostConfig);
-        byte[] entityBytesArray = entity.getBytes();
-        headers.add(Pair.of("Content-Length", entityBytesArray.length));
-
-        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
-                                                            .method("POST")
-                                                            .path("/containers/" + container + "/start")
-                                                            .headers(headers)
-                                                            .entity(entityBytesArray)) {
-            final DockerResponse response = connection.request();
-            final int status = response.getStatus();
-            if (!(NO_CONTENT.getStatusCode() == status || NOT_MODIFIED.getStatusCode() == status)) {
-
-                final DockerException dockerException = getDockerException(response);
-                if (OK.getStatusCode() == status) {
-                    // docker API 1.20 returns 200 with warning message about usage of loopback docker backend
-                    LOG.warn(dockerException.getLocalizedMessage());
-                } else {
-                    throw dockerException;
-                }
-            }
         }
     }
 
