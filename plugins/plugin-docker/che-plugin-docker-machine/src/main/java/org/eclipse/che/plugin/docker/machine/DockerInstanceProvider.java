@@ -61,6 +61,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -193,12 +195,13 @@ public class DockerInstanceProvider implements InstanceProvider {
         envVariablesForDevMachine.addAll(devMachineEnvVariables);
         this.devMachineEnvVariables = envVariablesForDevMachine;
 
-        // always add the docker host
-        String dockerHost = DockerInstanceRuntimeInfo.CHE_HOST.concat(":").concat(dockerConnectorConfiguration.getDockerHostIp());
+        // always add Che server to hosts list
+        String cheHost = dockerConnectorConfiguration.getDockerHostIp();
+        String cheHostAlias = DockerInstanceRuntimeInfo.CHE_HOST.concat(":").concat(cheHost);
         if (isNullOrEmpty(allMachinesExtraHosts)) {
-            this.allMachinesExtraHosts = new String[] {dockerHost};
+            this.allMachinesExtraHosts = new String[] {cheHostAlias};
         } else {
-            this.allMachinesExtraHosts = ObjectArrays.concat(allMachinesExtraHosts.split(","), dockerHost);
+            this.allMachinesExtraHosts = ObjectArrays.concat(allMachinesExtraHosts.split(","), cheHostAlias);
         }
     }
 
