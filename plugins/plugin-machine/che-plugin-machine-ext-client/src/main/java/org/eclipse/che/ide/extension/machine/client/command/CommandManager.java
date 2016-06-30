@@ -90,17 +90,17 @@ public class CommandManager {
      *         machine in which command will be executed
      */
     public void execute(@NotNull CommandConfiguration command, @NotNull Machine machine) {
-        executeCommand(command, machine.getId());
+        executeCommand(command, machine);
     }
 
     /** Execute the the given command configuration on the developer machine. */
     public void execute(@NotNull CommandConfiguration configuration) {
-        final String devMachineId = appContext.getDevMachine().getId();
-        executeCommand(configuration, devMachineId);
+        final Machine devMachine = appContext.getDevMachine().getDescriptor();
+        executeCommand(configuration, devMachine);
     }
 
-    public void executeCommand(@NotNull final CommandConfiguration configuration, @NotNull final String machineId) {
-        if (machineId == null) {
+    public void executeCommand(@NotNull final CommandConfiguration configuration, @NotNull final Machine machine) {
+        if (machine == null) {
             notificationManager.notify(localizationConstant.failedToExecuteCommand(),
                                        localizationConstant.noDevMachine(),
                                        FAIL,
@@ -110,9 +110,9 @@ public class CommandManager {
 
         final String outputChannel = "process:output:" + UUID.uuid();
 
-        final CommandOutputConsole console = commandConsoleFactory.create(configuration, machineId);
+        final CommandOutputConsole console = commandConsoleFactory.create(configuration, machine);
         console.listenToOutput(outputChannel);
-        consolesPanelPresenter.addCommandOutput(machineId, console);
+        consolesPanelPresenter.addCommandOutput(machine.getId(), console);
         workspaceAgent.setActivePart(consolesPanelPresenter);
 
         substituteProperties(configuration.toCommandLine()).then(new Operation<String>() {
@@ -123,7 +123,7 @@ public class CommandManager {
                                                      .withCommandLine(arg)
                                                      .withType(configuration.getType().getId());
 
-                final Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machineId, command, outputChannel);
+                final Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machine.getId(), command, outputChannel);
                 processPromise.then(new Operation<MachineProcessDto>() {
                     @Override
                     public void apply(MachineProcessDto process) throws OperationException {

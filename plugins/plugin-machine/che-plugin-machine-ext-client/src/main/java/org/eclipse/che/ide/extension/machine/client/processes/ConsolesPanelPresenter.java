@@ -16,24 +16,26 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.HasView;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -48,8 +50,6 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Command
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.util.loging.Log;
@@ -298,13 +298,13 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
 
         view.setProcessesData(rootNode);
 
-        restoreState(machine.getId());
+        restoreState(machine);
 
         return machineNode;
     }
 
-    private void restoreState(final String machineId) {
-        machineService.getProcesses(machineId).then(new Operation<List<MachineProcessDto>>() {
+    private void restoreState(final org.eclipse.che.api.core.model.machine.Machine machine) {
+        machineService.getProcesses(machine.getId()).then(new Operation<List<MachineProcessDto>>() {
             @Override
             public void apply(List<MachineProcessDto> arg) throws OperationException {
                 for (MachineProcessDto machineProcessDto : arg) {
@@ -316,10 +316,10 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
                     final CommandType type = commandTypeRegistry.getCommandTypeById(commandDto.getType());
                     if (type != null) {
                         final CommandConfiguration configuration = type.getConfigurationFactory().createFromDto(commandDto);
-                        final CommandOutputConsole console = commandConsoleFactory.create(configuration, machineId);
+                        final CommandOutputConsole console = commandConsoleFactory.create(configuration, machine);
                         console.listenToOutput(machineProcessDto.getOutputChannel());
                         console.attachToProcess(machineProcessDto);
-                        addCommandOutput(machineId, console);
+                        addCommandOutput(machine.getId(), console);
                     }
 
                 }
@@ -327,7 +327,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(localizationConstant.failedToGetProcesses(machineId));
+                notificationManager.notify(localizationConstant.failedToGetProcesses(machine.getId()));
             }
         });
     }
