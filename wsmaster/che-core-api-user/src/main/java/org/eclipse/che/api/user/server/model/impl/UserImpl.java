@@ -12,6 +12,13 @@ package org.eclipse.che.api.user.server.model.impl;
 
 import org.eclipse.che.api.core.model.user.User;
 
+import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -22,13 +29,27 @@ import java.util.Objects;
  *
  * @author Yevhenii Voevodin
  */
+@Entity(name = "User")
 public class UserImpl implements User {
 
-    private String       id;
-    private String       email;
-    private String       name;
-    private String       password;
+    @Id
+    private String id;
+
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(unique = true, nullable = false)
+    private String name;
+
+    @Basic
+    private String password;
+
+    @ElementCollection
+    @Column(name = "alias", nullable = false, unique = true)
+    @CollectionTable(name = "user_aliases", joinColumns = @JoinColumn(name = "user_id"))
     private List<String> aliases;
+
+    public UserImpl() {}
 
     public UserImpl(String id) {
         this.id = id;
@@ -63,6 +84,10 @@ public class UserImpl implements User {
     @Override
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override

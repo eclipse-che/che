@@ -15,18 +15,31 @@ import org.testng.ITestListener;
 import org.testng.ITestResult;
 
 /**
- * Listener representing fake db server url injection for testing "attributes sharing"
- * using {@link ITestContext} test suite instance.
+ * Skeletal implementation of the {@link ITestListener}.
+ * In most cases only 2 methods are needed {@link #onStart(ITestContext)} and {@link #onFinish(ITestContext)}.
  *
  * @author Yevhenii Voevodin
  */
-public class DBServerListener extends AbstractTestListener {
-
-    public static final String DB_SERVER_URL_ATTRIBUTE_NAME = "db_server_url";
-    public static final String DB_SERVER_URL                = "localhost:12345";
+public abstract class AbstractTestListener implements ITestListener {
 
     @Override
-    public void onStart(ITestContext context) {
-        context.setAttribute(DB_SERVER_URL_ATTRIBUTE_NAME, DB_SERVER_URL);
-    }
+    public void onTestStart(ITestResult result) {}
+
+    @Override
+    public void onTestSuccess(ITestResult result) {}
+
+    @Override
+    public void onTestFailure(ITestResult result) {}
+
+    @Override
+    public void onTestSkipped(ITestResult result) {}
+
+    @Override
+    public void onTestFailedButWithinSuccessPercentage(ITestResult result) {}
+
+    @Override
+    public void onStart(ITestContext context) {}
+
+    @Override
+    public void onFinish(ITestContext context) {}
 }

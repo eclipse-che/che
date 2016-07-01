@@ -92,16 +92,14 @@ public class ProfileDaoTest {
         profileDao.getById(null);
     }
 
-    @Test(dependsOnMethods = "shouldGetProfileById")
+    @Test(dependsOnMethods = {"shouldGetProfileById", "shouldRemoveProfile"})
     public void shouldCreateProfile() throws Exception {
-        final ProfileImpl newProfile = new ProfileImpl("user123",
-                                                       ImmutableMap.of("attribute1", "value1",
-                                                                       "attribute2", "value2",
-                                                                       "attribute3", "value3"));
+        final ProfileImpl profile = profiles[0];
 
-        profileDao.create(newProfile);
+        profileDao.remove(profile.getUserId());
+        profileDao.create(profile);
 
-        assertEquals(profileDao.getById(newProfile.getUserId()), newProfile);
+        assertEquals(profileDao.getById(profile.getUserId()), profile);
     }
 
     @Test(expectedExceptions = ConflictException.class)

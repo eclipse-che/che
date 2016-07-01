@@ -21,7 +21,6 @@ import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
-import org.eclipse.che.api.user.server.spi.UserDao;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
