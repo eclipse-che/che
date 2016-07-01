@@ -29,20 +29,20 @@ export class ProjectDetailsController {
     this.$location = $location;
     this.lodash = lodash;
 
-    this.workspaceId = $route.current.params.workspaceId;
+    this.namespace = $route.current.params.namespace;
+    this.workspaceName = $route.current.params.workspaceName;
     this.projectName = $route.current.params.projectName;
     this.projectPath = '/' + this.projectName;
 
     this.loading = true;
 
-    this.workspacesById = cheAPI.getWorkspace().getWorkspacesById();
     cheAPI.getWorkspace().fetchWorkspaces();
 
-    this.workspace = cheAPI.getWorkspace().getWorkspaceById(this.workspaceId);
+    this.workspace = cheAPI.getWorkspace().getWorkspaceByName(this.namespace, this.workspaceName);
 
     if (!this.workspace || !this.workspace.runtime) {
-      cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspaceId).then(() => {
-        this.workspace = cheAPI.getWorkspace().getWorkspaceById(this.workspaceId);
+      cheAPI.getWorkspace().fetchWorkspaceDetails(this.namespace + ':' + this.workspaceName).then(() => {
+        this.workspace = cheAPI.getWorkspace().getWorkspaceByName(this.namespace, this.workspsaceName);
         if (this.workspace && this.workspace.runtime) {
          this.fetchProjectDetails();
         } else {
@@ -67,18 +67,18 @@ export class ProjectDetailsController {
       return;
     }
 
-    this.cheAPI.getWorkspace().fetchStatusChange(this.workspaceId, 'RUNNING').then(() => {
-      return this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspaceId);
+    this.cheAPI.getWorkspace().fetchStatusChange(this.workspace.id, 'RUNNING').then(() => {
+      return this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.id);
     }).then(() => {
 
-      this.projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspaceId).getProject();
+      this.projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspace.id).getProject();
 
       if (this.projectService.getProjectDetailsByKey(this.projectPath)) {
         this.loading = false;
         this.noWorkspaceRuntime = false;
         this.updateProjectDetails();
       } else {
-        this.projectService.fetchProjectDetails(this.workspaceId, this.projectPath).then(() => {
+        this.projectService.fetchProjectDetails(this.workspace.id, this.projectPath).then(() => {
           this.loading = false;
           this.noWorkspaceRuntime = false;
           this.updateProjectDetails();
@@ -100,19 +100,6 @@ export class ProjectDetailsController {
     });
   }
 
-  /**
-   * Gets the name of the workspace based on its ID
-   * @param workspaceId
-   * @returns {CheWorkspace.name|*}
-   */
-  getWorkspaceName(workspaceId) {
-    let workspace = this.workspacesById.get(workspaceId);
-    if (workspace && workspace.config) {
-      return workspace.config.name;
-    }
-    return '';
-  }
-
   updateProjectDetails() {
     this.projectDetails = this.projectService.getProjectDetailsByKey(this.projectPath);
     this.projectName = angular.copy(this.projectDetails.name);
@@ -124,7 +111,7 @@ export class ProjectDetailsController {
     if (this.$location.path().endsWith(this.projectDetails.name)) {
       return;
     }
-    this.$location.path('/project/' + this.projectDetails.workspaceId + '/' + this.projectDetails.name);
+    this.$location.path('/project/' + this.namespace + '/' + this.workspaceName + '/' + this.projectDetails.name);
   }
 
   setProjectDetails(projectDetails) {
@@ -177,7 +164,7 @@ export class ProjectDetailsController {
         if (!this.isDescriptionChanged()) {
           this.cheNotification.showInfo('Project information successfully updated.');
           this.updateLocation();
-          this.projectService.fetchProjectDetails(this.workspaceId, this.projectPath).then(() => {
+          this.projectService.fetchProjectDetails(this.workspace.id, this.projectPath).then(() => {
             this.updateProjectDetails();
           });
         } else {
@@ -218,7 +205,7 @@ export class ProjectDetailsController {
    * @returns {*|Array}
    */
   getWorkspaceProjects() {
-    let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspaceId];
+    let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspace.id];
     let _projects = this.lodash.filter(projects, (project) => { return project.name !== this.projectName});
     return _projects;
   }

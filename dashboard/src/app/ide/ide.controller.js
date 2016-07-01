@@ -32,6 +32,7 @@ class IdeCtrl {
     $rootScope.wantTokeepLoader = true;
 
     // search the selected workspace
+    let namespace = $routeParams.namespace;
     let workspace = $routeParams.workspaceName;
     if (!workspace) {
       this.selectedWorkspaceName = null;

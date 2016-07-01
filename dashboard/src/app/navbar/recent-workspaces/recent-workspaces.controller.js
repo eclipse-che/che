@@ -123,7 +123,8 @@ export class NavbarRecentWorkspacesController {
    * @returns {string}
    */
   getIdeLink(workspaceId) {
-    return '#/ide/' + this.getWorkspaceName(workspaceId);
+    let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
+    return '#/ide/' + (workspace ? (workspace.namespace + '/' + workspace.config.name) : 'unknown');
   }
 
   /**

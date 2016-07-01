@@ -45,7 +45,7 @@
       ng-if="listProjectsCtrl.projects.length > 0"
       ng-repeat="(workspaceId, projects) in listProjectsCtrl.getProjectsPerWorkspace() | listProjectWorkspaceFilter:listProjectsCtrl.filtersWorkspaceSelected">
       <che-list-title che-icon="fa fa-folder">
-        <span class="projects-list-workspace-name">{{listProjectsCtrl.getWorkspaceName(workspaceId)}}</span>
+        <span class="projects-list-workspace-name">{{listProjectsCtrl.getWorkspace(workspaceId).config.name}}</span>
         <span ng-show="projects.length == 0" class="project-list-empty">- No projects inside</span>
         <span ng-show="(projects | filter:listProjectsCtrl.projectFilter).length == 0 && projects.length > 0" class="project-list-empty">- No projects found</span>
       </che-list-title>
@@ -53,8 +53,7 @@
         <che-project-item ng-repeat="project in projects | filter:listProjectsCtrl.projectFilter"
                            ng-model="listProjectsCtrl.projectsSelectedStatus[project.workspaceId + project.path]"
                            che-selectable="true"
-                           che-project-item-workspace-id="workspaceId"
-                           che-project-item-workspace-name="listProjectsCtrl.getWorkspaceName(workspaceId)"
+                           che-project-item-workspace="listProjectsCtrl.getWorkspace(workspaceId)"
                            che-project-item-project="project"
                            che-profile-creation-date="listProjectsCtrl.profileCreationDate"></che-project-item>
       </che-list>
