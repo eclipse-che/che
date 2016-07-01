@@ -19,7 +19,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#removeNetwork(RemoveNetworkParams)}.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class RemoveNetworkParams {
     private String netId;
@@ -59,22 +59,21 @@ public class RemoveNetworkParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof RemoveNetworkParams)) return false;
-        RemoveNetworkParams that = (RemoveNetworkParams)o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof RemoveNetworkParams)) {
+            return false;
+        }
+        final RemoveNetworkParams that = (RemoveNetworkParams)obj;
         return Objects.equals(netId, that.netId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(netId);
-    }
-
-    @Override
-    public String toString() {
-        return "RemoveNetworkParams{" +
-               "netId='" + netId + '\'' +
-               '}';
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(netId);
+        return hash;
     }
 }

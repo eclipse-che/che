@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Represents description of container inside {@link Network}.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class ContainerInNetwork {
     private String name;
@@ -90,20 +90,30 @@ public class ContainerInNetwork {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ContainerInNetwork)) return false;
-        ContainerInNetwork that = (ContainerInNetwork)o;
-        return Objects.equals(name, that.name) &&
-               Objects.equals(endpointID, that.endpointID) &&
-               Objects.equals(macAddress, that.macAddress) &&
-               Objects.equals(iPv4Address, that.iPv4Address) &&
-               Objects.equals(iPv6Address, that.iPv6Address);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ContainerInNetwork)) {
+            return false;
+        }
+        final ContainerInNetwork that = (ContainerInNetwork)obj;
+        return Objects.equals(name, that.name)
+               && Objects.equals(endpointID, that.endpointID)
+               && Objects.equals(macAddress, that.macAddress)
+               && Objects.equals(iPv4Address, that.iPv4Address)
+               && Objects.equals(iPv6Address, that.iPv6Address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, endpointID, macAddress, iPv4Address, iPv6Address);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(name);
+        hash = 31 * hash + Objects.hashCode(endpointID);
+        hash = 31 * hash + Objects.hashCode(macAddress);
+        hash = 31 * hash + Objects.hashCode(iPv4Address);
+        hash = 31 * hash + Objects.hashCode(iPv6Address);
+        return hash;
     }
 
     @Override

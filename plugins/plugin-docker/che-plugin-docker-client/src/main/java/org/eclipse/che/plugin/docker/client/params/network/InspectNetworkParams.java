@@ -19,7 +19,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#inspectNetwork(InspectNetworkParams)}.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class InspectNetworkParams {
     private String netId;
@@ -59,16 +59,22 @@ public class InspectNetworkParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof InspectNetworkParams)) return false;
-        InspectNetworkParams that = (InspectNetworkParams)o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof InspectNetworkParams)) {
+            return false;
+        }
+        final InspectNetworkParams that = (InspectNetworkParams)obj;
         return Objects.equals(netId, that.netId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(netId);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(netId);
+        return hash;
     }
 
     @Override

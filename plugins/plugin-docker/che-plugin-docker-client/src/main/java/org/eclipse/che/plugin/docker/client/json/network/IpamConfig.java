@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.docker.client.json.network;
 import java.util.Objects;
 
 /**
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class IpamConfig {
     private String subnet;
@@ -60,18 +60,26 @@ public class IpamConfig {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof IpamConfig)) return false;
-        IpamConfig that = (IpamConfig)o;
-        return Objects.equals(subnet, that.subnet) &&
-               Objects.equals(gateway, that.gateway) &&
-               Objects.equals(iPRange, that.iPRange);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof IpamConfig)) {
+            return false;
+        }
+        final IpamConfig that = (IpamConfig)obj;
+        return Objects.equals(subnet, that.subnet)
+               && Objects.equals(gateway, that.gateway)
+               && Objects.equals(iPRange, that.iPRange);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(subnet, gateway, iPRange);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(subnet);
+        hash = 31 * hash + Objects.hashCode(gateway);
+        hash = 31 * hash + Objects.hashCode(iPRange);
+        return hash;
     }
 
     @Override

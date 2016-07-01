@@ -15,6 +15,7 @@ import org.eclipse.che.plugin.docker.client.json.container.NetworkingConfig;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /** @author andrew00x */
 public class ContainerConfig {
@@ -359,6 +360,71 @@ public class ContainerConfig {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ContainerConfig)) {
+            return false;
+        }
+        final ContainerConfig that = (ContainerConfig)obj;
+        return cpuShares == that.cpuShares
+               && attachStdin == that.attachStdin
+               && attachStdout == that.attachStdout
+               && attachStderr == that.attachStderr
+               && tty == that.tty
+               && openStdin == that.openStdin
+               && stdinOnce == that.stdinOnce
+               && networkDisabled == that.networkDisabled
+               && Objects.equals(domainName, that.domainName)
+               && Objects.equals(cpuset, that.cpuset)
+               && Arrays.equals(env, that.env)
+               && Arrays.equals(cmd, that.cmd)
+               && Arrays.equals(entrypoint, that.entrypoint)
+               && Objects.equals(image, that.image)
+               && Objects.equals(macAddress, that.macAddress)
+               && Arrays.equals(securityOpts, that.securityOpts)
+               && Objects.equals(hostConfig, that.hostConfig)
+               && Objects.equals(networkingConfig, that.networkingConfig)
+               && getExposedPorts().equals(that.getExposedPorts())
+               && Objects.equals(user, that.user)
+               && Objects.equals(hostname, that.hostname)
+               && Objects.equals(workingDir, that.workingDir)
+               && getVolumes().equals(that.getVolumes())
+               && getLabels().equals(that.getLabels());
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(domainName);
+        hash = 31 * hash + cpuShares;
+        hash = 31 * hash + Objects.hashCode(cpuset);
+        hash = 31 * hash + Boolean.hashCode(attachStdin);
+        hash = 31 * hash + Boolean.hashCode(attachStdout);
+        hash = 31 * hash + Boolean.hashCode(attachStderr);
+        hash = 31 * hash + Boolean.hashCode(tty);
+        hash = 31 * hash + Boolean.hashCode(openStdin);
+        hash = 31 * hash + Boolean.hashCode(stdinOnce);
+        hash = 31 * hash + Arrays.hashCode(env);
+        hash = 31 * hash + Arrays.hashCode(cmd);
+        hash = 31 * hash + Arrays.hashCode(entrypoint);
+        hash = 31 * hash + Objects.hashCode(image);
+        hash = 31 * hash + Boolean.hashCode(networkDisabled);
+        hash = 31 * hash + Objects.hashCode(macAddress);
+        hash = 31 * hash + Arrays.hashCode(securityOpts);
+        hash = 31 * hash + Objects.hashCode(hostConfig);
+        hash = 31 * hash + Objects.hashCode(networkingConfig);
+        hash = 31 * hash + getExposedPorts().hashCode();
+        hash = 31 * hash + Objects.hashCode(user);
+        hash = 31 * hash + Objects.hashCode(hostname);
+        hash = 31 * hash + Objects.hashCode(workingDir);
+        hash = 31 * hash + getVolumes().hashCode();
+        hash = 31 * hash + getLabels().hashCode();
+        return hash;
+    }
+
+    @Override
     public String toString() {
         return "ContainerConfig{" +
                "domainName='" + domainName + '\'' +
@@ -372,19 +438,19 @@ public class ContainerConfig {
                ", stdinOnce=" + stdinOnce +
                ", env=" + Arrays.toString(env) +
                ", cmd=" + Arrays.toString(cmd) +
-               ", entrypoint='" + Arrays.toString(entrypoint) + '\'' +
+               ", entrypoint=" + Arrays.toString(entrypoint) +
                ", image='" + image + '\'' +
                ", networkDisabled=" + networkDisabled +
                ", macAddress='" + macAddress + '\'' +
                ", securityOpts=" + Arrays.toString(securityOpts) +
                ", hostConfig=" + hostConfig +
+               ", networkingConfig=" + networkingConfig +
                ", exposedPorts=" + exposedPorts +
                ", user='" + user + '\'' +
                ", hostname='" + hostname + '\'' +
                ", workingDir='" + workingDir + '\'' +
                ", volumes=" + volumes +
                ", labels=" + labels +
-               ", networkingConfig=" + networkingConfig +
                '}';
     }
 }

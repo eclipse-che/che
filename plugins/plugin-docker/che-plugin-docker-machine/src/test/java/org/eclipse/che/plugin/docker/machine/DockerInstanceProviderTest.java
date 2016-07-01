@@ -36,11 +36,9 @@ import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredential
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerState;
-import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
-import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;

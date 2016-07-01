@@ -77,17 +77,31 @@ public class RemoveImageParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RemoveImageParams that = (RemoveImageParams)o;
-        return Objects.equals(image, that.image) &&
-               Objects.equals(force, that.force);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof RemoveImageParams)) {
+            return false;
+        }
+        final RemoveImageParams that = (RemoveImageParams)obj;
+        return Objects.equals(image, that.image)
+               && Objects.equals(force, that.force);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(image, force);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(image);
+        hash = 31 * hash + Objects.hashCode(force);
+        return hash;
     }
 
+    @Override
+    public String toString() {
+        return "RemoveImageParams{" +
+               "image='" + image + '\'' +
+               ", force=" + force +
+               '}';
+    }
 }

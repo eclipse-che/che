@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Represents response from docker API on successful creation of network.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class NetworkCreated {
     private String id;
@@ -48,17 +48,24 @@ public class NetworkCreated {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof NetworkCreated)) return false;
-        NetworkCreated that = (NetworkCreated)o;
-        return Objects.equals(id, that.id) &&
-               Objects.equals(warning, that.warning);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof NetworkCreated)) {
+            return false;
+        }
+        final NetworkCreated that = (NetworkCreated)obj;
+        return Objects.equals(id, that.id)
+               && Objects.equals(warning, that.warning);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, warning);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(warning);
+        return hash;
     }
 
     @Override

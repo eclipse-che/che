@@ -269,7 +269,7 @@ public class DockerConnectorTest {
     public void shouldBeAbleToGetListImages() throws IOException, JsonParseException {
         List<Image> images = new ArrayList<>();
 
-        doReturn(images).when(dockerConnector).parseResponseStreamAsListAndClose(eq(inputStream), any());
+        doReturn(images).when(dockerConnector).parseResponseStreamAndClose(eq(inputStream), any(TypeToken.class));
 
         List<Image> returnedImages =
                 dockerConnector.listImages();
@@ -300,7 +300,7 @@ public class DockerConnectorTest {
         ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
         List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
 
-        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAsListAndClose(eq(inputStream), any());
+        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAndClose(eq(inputStream), any(TypeToken.class));
 
         List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 
@@ -312,7 +312,7 @@ public class DockerConnectorTest {
         verify(dockerConnection).request();
         verify(dockerResponse).getStatus();
         verify(dockerResponse).getInputStream();
-        verify(dockerConnector).parseResponseStreamAsListAndClose(eq(inputStream), any());
+        verify(dockerConnector).parseResponseStreamAndClose(eq(inputStream), any(TypeToken.class));
 
         assertEquals(containers, expectedListContainers);
     }
@@ -324,7 +324,7 @@ public class DockerConnectorTest {
         ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
         List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
 
-        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAsListAndClose(eq(inputStream), any());
+        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAndClose(eq(inputStream), any(TypeToken.class));
 
         List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 
@@ -1356,8 +1356,8 @@ public class DockerConnectorTest {
                           "  }\n" +
                           "]\n";
 
-        List<Image> images = dockerConnector.parseResponseStreamAsListAndClose(new ByteArrayInputStream(response.getBytes()),
-                                                                               new TypeToken<List<Image>>() {}.getType());
+        List<Image> images = dockerConnector.parseResponseStreamAndClose(new ByteArrayInputStream(response.getBytes()),
+                                                                         new TypeToken<List<Image>>() {});
         assertEquals(images.size(), 2);
         Image actualImage1 = images.get(0);
         Image actualImage2 = images.get(1);
@@ -1392,9 +1392,8 @@ public class DockerConnectorTest {
                           "         }" +
                           "]\n";
 
-        List<ContainerListEntry> containers = dockerConnector.parseResponseStreamAsListAndClose(new ByteArrayInputStream(response.getBytes()),
-                                                                                            new TypeToken<List<ContainerListEntry>>() {}
-                                                                                                    .getType());
+        List<ContainerListEntry> containers = dockerConnector.parseResponseStreamAndClose(new ByteArrayInputStream(response.getBytes()),
+                                                                                          new TypeToken<List<ContainerListEntry>>() {});
         assertEquals(containers.size(), 1);
         ContainerListEntry actualContainer1 = containers.get(0);
 
@@ -1411,9 +1410,8 @@ public class DockerConnectorTest {
     public void shouldBeAbleToParseResponseStreamAsEmptyListOfContainersAndClose() throws IOException, JsonParseException {
         String response = "[]";
 
-        List<ContainerListEntry> containers = dockerConnector.parseResponseStreamAsListAndClose(new ByteArrayInputStream(response.getBytes()),
-                                                                                                new TypeToken<List<ContainerListEntry>>() {}
-                                                                                                        .getType());
+        List<ContainerListEntry> containers = dockerConnector.parseResponseStreamAndClose(new ByteArrayInputStream(response.getBytes()),
+                                                                                          new TypeToken<List<ContainerListEntry>>() {});
         assertEquals(containers.size(), 0);
     }
 
@@ -1734,8 +1732,8 @@ public class DockerConnectorTest {
     private ConnectContainer createConnectContainer() {
         return new ConnectContainer().withContainer("container_id")
                                      .withEndpointConfig(
-                                             new EndpointConfig().withLinks(singletonList("link_1"))
-                                                                 .withAliases(singletonList("alias_1"))
+                                             new EndpointConfig().withLinks(new String[] {"link_1"})
+                                                                 .withAliases(new String[] {"alias_1"})
                                                                  .withIPAMConfig(new NewIpamConfig().withIPv4Address("ipv4_address")
                                                                                                     .withIPv6Address("ipv6_address")));
     }

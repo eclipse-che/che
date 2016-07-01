@@ -132,19 +132,37 @@ public class PutResourceParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PutResourceParams that = (PutResourceParams)o;
-        return Objects.equals(container, that.container) &&
-               Objects.equals(targetPath, that.targetPath) &&
-               Objects.equals(sourceStream, that.sourceStream) &&
-               Objects.equals(noOverwriteDirNonDir, that.noOverwriteDirNonDir);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PutResourceParams)) {
+            return false;
+        }
+        final PutResourceParams that = (PutResourceParams)obj;
+        return Objects.equals(container, that.container)
+               && Objects.equals(targetPath, that.targetPath)
+               && Objects.equals(sourceStream, that.sourceStream)
+               && Objects.equals(noOverwriteDirNonDir, that.noOverwriteDirNonDir);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(container, targetPath, sourceStream, noOverwriteDirNonDir);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(container);
+        hash = 31 * hash + Objects.hashCode(targetPath);
+        hash = 31 * hash + Objects.hashCode(sourceStream);
+        hash = 31 * hash + Objects.hashCode(noOverwriteDirNonDir);
+        return hash;
     }
 
+    @Override
+    public String toString() {
+        return "PutResourceParams{" +
+               "container='" + container + '\'' +
+               ", targetPath='" + targetPath + '\'' +
+               ", sourceStream=" + sourceStream +
+               ", noOverwriteDirNonDir=" + noOverwriteDirNonDir +
+               '}';
+    }
 }

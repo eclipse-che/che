@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Represents configuration that should be passed to docker API to connect container to network.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class ConnectContainer {
     private String         container;
@@ -48,17 +48,24 @@ public class ConnectContainer {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ConnectContainer)) return false;
-        ConnectContainer that = (ConnectContainer)o;
-        return Objects.equals(container, that.container) &&
-               Objects.equals(endpointConfig, that.endpointConfig);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ConnectContainer)) {
+            return false;
+        }
+        final ConnectContainer that = (ConnectContainer)obj;
+        return Objects.equals(container, that.container)
+               && Objects.equals(endpointConfig, that.endpointConfig);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(container, endpointConfig);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(container);
+        hash = 31 * hash + Objects.hashCode(endpointConfig);
+        return hash;
     }
 
     @Override

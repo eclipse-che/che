@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class Ipam {
     private String              driver;
@@ -62,18 +62,26 @@ public class Ipam {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Ipam)) return false;
-        Ipam ipam = (Ipam)o;
-        return Objects.equals(driver, ipam.driver) &&
-               Objects.equals(config, ipam.config) &&
-               Objects.equals(options, ipam.options);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Ipam)) {
+            return false;
+        }
+        final Ipam that = (Ipam)obj;
+        return Objects.equals(driver, that.driver)
+               && getConfig().equals(that.getConfig())
+               && getOptions().equals(that.getOptions());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(driver, config, options);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(driver);
+        hash = 31 * hash + getConfig().hashCode();
+        hash = 31 * hash + getOptions().hashCode();
+        return hash;
     }
 
     @Override

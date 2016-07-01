@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.docker.client.params.network;
 import org.eclipse.che.plugin.docker.client.json.network.DisconnectContainer;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
@@ -20,7 +21,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#disconnectContainerFromNetwork(DisconnectContainerFromNetworkParams)}.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class DisconnectContainerFromNetworkParams {
     private String              netId;
@@ -59,10 +60,6 @@ public class DisconnectContainerFromNetworkParams {
         return this;
     }
 
-    public String getNetworkId() {
-        return netId;
-    }
-
     /**
      * Adds container identifier to this parameters.
      *
@@ -78,22 +75,33 @@ public class DisconnectContainerFromNetworkParams {
         return this;
     }
 
+    public String getNetworkId() {
+        return netId;
+    }
+
     public DisconnectContainer getDisconnectContainer() {
         return disconnectContainer;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DisconnectContainerFromNetworkParams)) return false;
-        DisconnectContainerFromNetworkParams that = (DisconnectContainerFromNetworkParams)o;
-        return Objects.equals(netId, that.netId) &&
-               Objects.equals(disconnectContainer, that.disconnectContainer);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof DisconnectContainerFromNetworkParams)) {
+            return false;
+        }
+        final DisconnectContainerFromNetworkParams that = (DisconnectContainerFromNetworkParams)obj;
+        return Objects.equals(netId, that.netId)
+               && Objects.equals(disconnectContainer, that.disconnectContainer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(netId, disconnectContainer);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(netId);
+        hash = 31 * hash + Objects.hashCode(disconnectContainer);
+        return hash;
     }
 
     @Override

@@ -50,4 +50,5 @@ public class ParamsUtils {
         }
     }
 
+    private ParamsUtils() {}
 }

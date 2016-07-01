@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#createNetwork(CreateNetworkParams)}.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class CreateNetworkParams {
     // todo consider validation that network config has all required fields
@@ -62,16 +62,22 @@ public class CreateNetworkParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CreateNetworkParams)) return false;
-        CreateNetworkParams that = (CreateNetworkParams)o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof CreateNetworkParams)) {
+            return false;
+        }
+        final CreateNetworkParams that = (CreateNetworkParams)obj;
         return Objects.equals(network, that.network);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(network);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(network);
+        return hash;
     }
 
     @Override

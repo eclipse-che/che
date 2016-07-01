@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Represents configuration that should be passed to docker API to disconnect container from network.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class DisconnectContainer {
     private String  container;
@@ -44,21 +44,28 @@ public class DisconnectContainer {
 
     public DisconnectContainer withForce(boolean force) {
         this.force = force;
-        return  this;
+        return this;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DisconnectContainer)) return false;
-        DisconnectContainer that = (DisconnectContainer)o;
-        return force == that.force &&
-               Objects.equals(container, that.container);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof DisconnectContainer)) {
+            return false;
+        }
+        final DisconnectContainer that = (DisconnectContainer)obj;
+        return force == that.force
+               && Objects.equals(container, that.container);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(container, force);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(container);
+        hash = 31 * hash + Boolean.hashCode(force);
+        return hash;
     }
 
     @Override

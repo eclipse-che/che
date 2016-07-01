@@ -162,11 +162,11 @@ public class BuildImageParams {
      *         if other parameter incompatible with files is set
      */
     public BuildImageParams withFiles(@NotNull File... files) {
-        requireNonNull(files);
-        requireNonEmptyArray(files);
         if (remote != null) {
             throw new IllegalStateException("Remote parameter is already set. Remote and files parameters are mutually exclusive.");
         }
+        requireNonNull(files);
+        requireNonEmptyArray(files);
         this.files = new ArrayList<>(files.length + 1);
         return addFiles(files);
     }
@@ -262,24 +262,38 @@ public class BuildImageParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BuildImageParams)) return false;
-        BuildImageParams that = (BuildImageParams)o;
-        return Objects.equals(repository, that.repository) &&
-               Objects.equals(tag, that.tag) &&
-               Objects.equals(authConfigs, that.authConfigs) &&
-               Objects.equals(doForcePull, that.doForcePull) &&
-               Objects.equals(memoryLimit, that.memoryLimit) &&
-               Objects.equals(memorySwapLimit, that.memorySwapLimit) &&
-               Objects.equals(files, that.files) &&
-               Objects.equals(dockerfile, that.dockerfile) &&
-               Objects.equals(remote, that.remote);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof BuildImageParams)) {
+            return false;
+        }
+        final BuildImageParams that = (BuildImageParams)obj;
+        return Objects.equals(repository, that.repository)
+               && Objects.equals(tag, that.tag)
+               && Objects.equals(authConfigs, that.authConfigs)
+               && Objects.equals(doForcePull, that.doForcePull)
+               && Objects.equals(memoryLimit, that.memoryLimit)
+               && Objects.equals(memorySwapLimit, that.memorySwapLimit)
+               && getFiles().equals(that.getFiles())
+               && Objects.equals(dockerfile, that.dockerfile)
+               && Objects.equals(remote, that.remote);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(repository, tag, authConfigs, doForcePull, memoryLimit, memorySwapLimit, files, dockerfile, remote);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(repository);
+        hash = 31 * hash + Objects.hashCode(tag);
+        hash = 31 * hash + Objects.hashCode(authConfigs);
+        hash = 31 * hash + Objects.hashCode(doForcePull);
+        hash = 31 * hash + Objects.hashCode(memoryLimit);
+        hash = 31 * hash + Objects.hashCode(memorySwapLimit);
+        hash = 31 * hash + getFiles().hashCode();
+        hash = 31 * hash + Objects.hashCode(dockerfile);
+        hash = 31 * hash + Objects.hashCode(remote);
+        return hash;
     }
 
     @Override

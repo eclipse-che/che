@@ -16,7 +16,7 @@ import java.util.Objects;
 /**
  * Represents docker network description.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class Network {
     private String                          name;
@@ -161,25 +161,40 @@ public class Network {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Network)) return false;
-        Network network = (Network)o;
-        return enableIPv6 == network.enableIPv6 &&
-               internal == network.internal &&
-               Objects.equals(name, network.name) &&
-               Objects.equals(id, network.id) &&
-               Objects.equals(scope, network.scope) &&
-               Objects.equals(driver, network.driver) &&
-               Objects.equals(iPAM, network.iPAM) &&
-               Objects.equals(containers, network.containers) &&
-               Objects.equals(options, network.options) &&
-               Objects.equals(labels, network.labels);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Network)) {
+            return false;
+        }
+        final Network that = (Network)obj;
+        return enableIPv6 == that.enableIPv6
+               && internal == that.internal
+               && Objects.equals(name, that.name)
+               && Objects.equals(id, that.id)
+               && Objects.equals(scope, that.scope)
+               && Objects.equals(driver, that.driver)
+               && Objects.equals(iPAM, that.iPAM)
+               && getContainers().equals(that.getContainers())
+               && getOptions().equals(that.getOptions())
+               && getLabels().equals(that.getLabels());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, id, scope, driver, enableIPv6, internal, iPAM, containers, options, labels);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(name);
+        hash = 31 * hash + Objects.hashCode(id);
+        hash = 31 * hash + Objects.hashCode(scope);
+        hash = 31 * hash + Objects.hashCode(driver);
+        hash = 31 * hash + Boolean.hashCode(enableIPv6);
+        hash = 31 * hash + Boolean.hashCode(internal);
+        hash = 31 * hash + Objects.hashCode(iPAM);
+        hash = 31 * hash + getContainers().hashCode();
+        hash = 31 * hash + getOptions().hashCode();
+        hash = 31 * hash + getLabels().hashCode();
+        return hash;
     }
 
     @Override

@@ -108,20 +108,27 @@ public class CreateExecParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CreateExecParams that = (CreateExecParams)o;
-        return Objects.equals(container, that.container) &&
-               Objects.equals(detach, that.detach) &&
-               Arrays.equals(cmd, that.cmd);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof CreateExecParams)) {
+            return false;
+        }
+        final CreateExecParams that = (CreateExecParams)obj;
+        return Objects.equals(container, that.container)
+               && Objects.equals(detach, that.detach)
+               && Arrays.equals(cmd, that.cmd);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(container, detach, Arrays.hashCode(cmd));
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(container);
+        hash = 31 * hash + Objects.hashCode(detach);
+        hash = 31 * hash + Arrays.hashCode(cmd);
+        return hash;
     }
-
 
     @Override
     public String toString() {

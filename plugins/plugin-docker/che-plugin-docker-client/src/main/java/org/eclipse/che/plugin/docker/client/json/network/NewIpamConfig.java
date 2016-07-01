@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.docker.client.json.network;
 import java.util.Objects;
 
 /**
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class NewIpamConfig {
     private String iPv4Address;
@@ -46,17 +46,24 @@ public class NewIpamConfig {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof NewIpamConfig)) return false;
-        NewIpamConfig that = (NewIpamConfig)o;
-        return Objects.equals(iPv4Address, that.iPv4Address) &&
-               Objects.equals(iPv6Address, that.iPv6Address);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof NewIpamConfig)) {
+            return false;
+        }
+        final NewIpamConfig that = (NewIpamConfig)obj;
+        return Objects.equals(iPv4Address, that.iPv4Address)
+               && Objects.equals(iPv6Address, that.iPv6Address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(iPv4Address, iPv6Address);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(iPv4Address);
+        hash = 31 * hash + Objects.hashCode(iPv6Address);
+        return hash;
     }
 
     @Override

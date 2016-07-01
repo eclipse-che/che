@@ -16,7 +16,7 @@ import java.util.Objects;
 /**
  * Represents configuration that should be passed to docker API to create new network.
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class NewNetwork {
     private String              name;
@@ -133,23 +133,36 @@ public class NewNetwork {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof NewNetwork)) return false;
-        NewNetwork that = (NewNetwork)o;
-        return checkDuplicate == that.checkDuplicate &&
-               internal == that.internal &&
-               enableIPv6 == that.enableIPv6 &&
-               Objects.equals(name, that.name) &&
-               Objects.equals(driver, that.driver) &&
-               Objects.equals(iPAM, that.iPAM) &&
-               Objects.equals(options, that.options) &&
-               Objects.equals(labels, that.labels);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof NewNetwork)) {
+            return false;
+        }
+        final NewNetwork that = (NewNetwork)obj;
+        return checkDuplicate == that.checkDuplicate
+               && internal == that.internal
+               && enableIPv6 == that.enableIPv6
+               && Objects.equals(name, that.name)
+               && Objects.equals(driver, that.driver)
+               && Objects.equals(iPAM, that.iPAM)
+               && getOptions().equals(that.getOptions())
+               && getLabels().equals(that.getLabels());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, checkDuplicate, driver, internal, iPAM, enableIPv6, options, labels);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(name);
+        hash = 31 * hash + Boolean.hashCode(checkDuplicate);
+        hash = 31 * hash + Objects.hashCode(driver);
+        hash = 31 * hash + Boolean.hashCode(internal);
+        hash = 31 * hash + Objects.hashCode(iPAM);
+        hash = 31 * hash + Boolean.hashCode(enableIPv6);
+        hash = 31 * hash + getOptions().hashCode();
+        hash = 31 * hash + getLabels().hashCode();
+        return hash;
     }
 
     @Override

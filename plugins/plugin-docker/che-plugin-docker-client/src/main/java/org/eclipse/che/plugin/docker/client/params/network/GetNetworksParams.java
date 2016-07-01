@@ -50,16 +50,22 @@ public class GetNetworksParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof GetNetworksParams)) return false;
-        GetNetworksParams that = (GetNetworksParams)o;
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof GetNetworksParams)) {
+            return false;
+        }
+        final GetNetworksParams that = (GetNetworksParams)obj;
         return Objects.equals(filters, that.filters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(filters);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(filters);
+        return hash;
     }
 
     @Override

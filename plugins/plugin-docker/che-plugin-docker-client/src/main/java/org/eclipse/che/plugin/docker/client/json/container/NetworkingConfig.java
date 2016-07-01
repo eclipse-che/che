@@ -13,12 +13,11 @@ package org.eclipse.che.plugin.docker.client.json.container;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Represents description of network inside {@link org.eclipse.che.plugin.docker.client.json.ContainerConfig}
  *
- * author Alexander Garagatyi
+ * @author Alexander Garagatyi
  */
 public class NetworkingConfig {
     private Map<String, EndpointConfig> endpointsConfig;
@@ -37,16 +36,22 @@ public class NetworkingConfig {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof NetworkingConfig)) return false;
-        NetworkingConfig that = (NetworkingConfig)o;
-        return Objects.equals(endpointsConfig, that.endpointsConfig);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof NetworkingConfig)) {
+            return false;
+        }
+        final NetworkingConfig that = (NetworkingConfig)obj;
+        return getEndpointsConfig().equals(that.getEndpointsConfig());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(endpointsConfig);
+        int hash = 7;
+        hash = 31 * hash + getEndpointsConfig().hashCode();
+        return hash;
     }
 
     @Override
