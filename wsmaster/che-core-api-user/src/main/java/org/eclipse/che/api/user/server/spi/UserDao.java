@@ -13,7 +13,6 @@ package org.eclipse.che.api.user.server.spi;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 /**
@@ -33,22 +32,21 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 public interface UserDao {
 
     /**
-     * // TODO remove this method from spi
-     * Authenticates user.
+     * Gets user by alias and password
      *
      * @param emailOrAliasOrName
-     *         one of the user identifiers such as email/name/alias
+     *         one of user aliases such as email/name/alias(but not id)
      * @param password
      *         password
      * @return user identifier
      * @throws NullPointerException
      *         when either {@code emailOrAliasOrName} or {@code password} is null
-     * @throws UnauthorizedException
-     *         when user with such {@code aliasOrName} and {@code password} doesn't exist
+     * @throws NotFoundException
+     *         when user with such {@code emailOrAliasOrName} and {@code password} doesn't exist
      * @throws ServerException
      *         when any other error occurs
      */
-    String authenticate(String emailOrAliasOrName, String password) throws UnauthorizedException, ServerException;
+    UserImpl getByAliasAndPassword(String emailOrAliasOrName, String password) throws NotFoundException, ServerException;
 
     /**
      * Creates a new user.
