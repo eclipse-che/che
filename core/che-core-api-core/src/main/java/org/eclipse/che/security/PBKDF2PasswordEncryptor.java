@@ -67,7 +67,7 @@ public class PBKDF2PasswordEncryptor implements PasswordEncryptor {
             return false;
         }
         // retrieve salt, password hash and iterations count from hash
-        final Integer iterations = tryParse(firstNonNull(matcher.group("iterations"), ""));
+        final Integer iterations = tryParse(matcher.group("iterations"));
         final String salt = matcher.group("saltHash");
         final String pwdHash = matcher.group("pwdHash");
         // compute password's hash and test whether it matches to given hash
