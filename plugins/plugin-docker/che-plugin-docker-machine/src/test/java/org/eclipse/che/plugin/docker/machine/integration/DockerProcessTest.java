@@ -52,7 +52,7 @@ public class DockerProcessTest {
                                      new DockerRegistryAuthResolver(null));
 
         final ContainerCreated containerCreated = docker.createContainer(new ContainerConfig().withImage("ubuntu")
-                                                                                              .withCmd("tailf", "/dev/null"),
+                                                                                              .withCmd("tail", "-f", "/dev/null"),
                                                                          null);
         container = containerCreated.getId();
         docker.startContainer(containerCreated.getId(), null);
@@ -86,7 +86,7 @@ public class DockerProcessTest {
                                          new DockerConnectionFactory(dockerConnectorConfiguration),
                                          new DockerRegistryAuthResolver(null));
         }
-        Command command = new CommandImpl("tailf", "tailf /dev/null", "mvn");
+        Command command = new CommandImpl("tailf", "tail -f /dev/null", "mvn");
         final DockerProcess dockerProcess = new DockerProcess(docker,
                                                               command,
                                                               container,
