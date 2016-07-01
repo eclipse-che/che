@@ -30,7 +30,7 @@ import static java.util.Collections.emptyList;
 
 /**
  * REST API for the workspace/* services defined in https://github.com/Microsoft/vscode-languageserver-protocol
- * Dispatches onto the {@link LanguageServerRegistry}.
+ * Dispatches onto the {@link LanguageServerRegistryImpl}.
  *
  * @author Evgen Vidolob
  */
@@ -48,8 +48,8 @@ public class WorkspaceServiceImpl {
     @Path("symbol")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends SymbolInformation> documentSymbol(WorkspaceSymbolParamsDTO workspaceSymbolParams)
-            throws ExecutionException, InterruptedException {
+    public List<? extends SymbolInformation> documentSymbol(WorkspaceSymbolParamsDTO workspaceSymbolParams) throws ExecutionException,
+                                                                                                                   InterruptedException {
         LanguageServer server = getServer(workspaceSymbolParams.getFileUri());
         if (server == null) {
             return emptyList();

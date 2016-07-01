@@ -13,16 +13,18 @@ package org.eclipse.che.plugin.languageserver.server;
 import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.services.LanguageServer;
 
-import org.eclipse.che.commons.annotation.Nullable;
-
-import java.util.List;
+import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 
 /**
  * @author Anatoliy Bazko
  */
-public interface LanguageServerRegistry {
-    @Nullable
-    LanguageServer findServer(String uri);
+public interface LanguageServerFactory {
 
-    List<LanguageDescription> getSupportedLanguages();
+    /**
+     * Starts {@link io.typefox.lsapi.services.LanguageServer}.
+     * @param projectPath
+     */
+    LanguageServer create(String projectPath) throws LanguageServerException;
+
+    LanguageDescription getLanguageDescription();
 }

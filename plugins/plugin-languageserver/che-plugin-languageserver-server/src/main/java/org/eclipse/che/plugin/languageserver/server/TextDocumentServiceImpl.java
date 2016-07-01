@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server;
 
 import io.typefox.lsapi.CompletionItem;
@@ -30,7 +40,7 @@ import static java.util.Collections.emptyList;
 
 /**
  * REST API for the textDocument/* services defined in https://github.com/Microsoft/vscode-languageserver-protocol
- * Dispatches onto the {@link LanguageServerRegistry}.
+ * Dispatches onto the {@link LanguageServerRegistryImpl}.
  */
 @Singleton
 @Path("languageserver/textDocument")
@@ -38,19 +48,19 @@ public class TextDocumentServiceImpl {
 
     private static final String FILE_PROJECTS = "file:///projects";
 
-    LanguageServerRegistry languageServerRegistry;
+    private final LanguageServerRegistry languageServerRegistry;
 
     @Inject
     public TextDocumentServiceImpl(LanguageServerRegistry languageServerRegistry) {
         this.languageServerRegistry = languageServerRegistry;
     }
-    
+
     static String prefixURI(String relativePath) {
         return FILE_PROJECTS + relativePath;
     }
 
     static String removePrefixUri(String uri) {
-        if(uri.startsWith(FILE_PROJECTS)){
+        if (uri.startsWith(FILE_PROJECTS)) {
             return uri.substring(FILE_PROJECTS.length());
         }
         return uri;
@@ -60,12 +70,13 @@ public class TextDocumentServiceImpl {
     @Path("completion")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams) throws InterruptedException, ExecutionException {
+    public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams)
+            throws InterruptedException, ExecutionException {
         textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
         textDocumentPositionParams.setUri(prefixURI(textDocumentPositionParams.getUri()));
         LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
         if (server == null) {
-        	return emptyList();
+            return emptyList();
         }
         List<? extends CompletionItem> completion = server.getTextDocumentService()
                                                           .completion(textDocumentPositionParams).get().getItems();
