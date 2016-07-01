@@ -21,14 +21,16 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.plugin.docker.client.params.ParamsUtils.requireNonEmptyArray;
+import static org.eclipse.che.plugin.docker.client.params.ParamsUtils.requireNonNullNorEmpty;
 
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#buildImage(BuildImageParams, ProgressMonitor)}.
  *
  * @author Mykola Morhun
+ * @author Alexander Garagatyi
  */
 public class BuildImageParams {
-
+    // todo add next parameters q, nocache, rm, forcerm
     private String      repository;
     private String      tag;
     private AuthConfigs authConfigs;
@@ -36,6 +38,8 @@ public class BuildImageParams {
     private Long        memoryLimit;
     private Long        memorySwapLimit;
     private List<File>  files;
+    private String      dockerfile;
+    private String      remote;
 
     /**
      * Creates arguments holder with required parameters.
@@ -51,6 +55,21 @@ public class BuildImageParams {
      */
     public static BuildImageParams create(@NotNull File... files) {
         return new BuildImageParams().withFiles(files);
+    }
+
+    /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param remote
+     *         info about this parameter see {@link #withRemote(String)}
+     * @return arguments holder with required parameters
+     * @throws NullPointerException
+     *         if {@code remote} is null
+     * @throws IllegalArgumentException
+     *         if {@code remote} is empty
+     */
+    public static BuildImageParams create(@NotNull String remote) {
+        return new BuildImageParams().withRemote(remote);
     }
 
     private BuildImageParams() {}
@@ -139,10 +158,15 @@ public class BuildImageParams {
      *         if {@code files} is null
      * @throws IllegalArgumentException
      *         if {@code files} is empty array
+     * @throws IllegalStateException
+     *         if other parameter incompatible with files is set
      */
     public BuildImageParams withFiles(@NotNull File... files) {
         requireNonNull(files);
         requireNonEmptyArray(files);
+        if (remote != null) {
+            throw new IllegalStateException("Remote parameter is already set. Remote and files parameters are mutually exclusive.");
+        }
         this.files = new ArrayList<>(files.length + 1);
         return addFiles(files);
     }
@@ -163,6 +187,41 @@ public class BuildImageParams {
             requireNonNull(file);
             this.files.add(file);
         }
+        return this;
+    }
+
+    /**
+     * Sets GIT repo or HTTP(S) location of dockerfile or build sources
+     *
+     * @param remote
+     *         URI of build context
+     * @return this params instance
+     * @throws NullPointerException
+     *         if {@code remote} is null
+     * @throws IllegalArgumentException
+     *         if {@code remote} is empty
+     * @throws IllegalStateException
+     *         if other parameter incompatible with remote is set
+     */
+    public BuildImageParams withRemote(@NotNull String remote) {
+        requireNonNullNorEmpty(remote);
+        if (files != null) {
+            throw new IllegalStateException("Files parameter is already set. Remote and files parameters are mutually exclusive.");
+        }
+
+        this.remote = remote;
+        return this;
+    }
+
+    /**
+     * Sets path to alternate dockerfile in build context
+     *
+     * @param dockerfilePath
+     *         path of alternate dockerfile
+     * @return this params instance
+     */
+    public BuildImageParams withDockerfile(String dockerfilePath) {
+        this.dockerfile = dockerfilePath;
         return this;
     }
 
@@ -194,22 +253,47 @@ public class BuildImageParams {
         return files;
     }
 
+    public String getDockerfile() {
+        return dockerfile;
+    }
+
+    public String getRemote() {
+        return remote;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof BuildImageParams)) return false;
         BuildImageParams that = (BuildImageParams)o;
         return Objects.equals(repository, that.repository) &&
+               Objects.equals(tag, that.tag) &&
                Objects.equals(authConfigs, that.authConfigs) &&
                Objects.equals(doForcePull, that.doForcePull) &&
                Objects.equals(memoryLimit, that.memoryLimit) &&
                Objects.equals(memorySwapLimit, that.memorySwapLimit) &&
-               Objects.equals(files, that.files);
+               Objects.equals(files, that.files) &&
+               Objects.equals(dockerfile, that.dockerfile) &&
+               Objects.equals(remote, that.remote);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(repository, authConfigs, doForcePull, memoryLimit, memorySwapLimit, files);
+        return Objects.hash(repository, tag, authConfigs, doForcePull, memoryLimit, memorySwapLimit, files, dockerfile, remote);
     }
 
+    @Override
+    public String toString() {
+        return "BuildImageParams{" +
+               "repository='" + repository + '\'' +
+               ", tag='" + tag + '\'' +
+               ", authConfigs=" + authConfigs +
+               ", doForcePull=" + doForcePull +
+               ", memoryLimit=" + memoryLimit +
+               ", memorySwapLimit=" + memorySwapLimit +
+               ", files=" + files +
+               ", dockerfile='" + dockerfile + '\'' +
+               ", remote='" + remote + '\'' +
+               '}';
+    }
 }

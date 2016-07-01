@@ -716,36 +716,49 @@ public class DockerConnector {
      */
     public String buildImage(final BuildImageParams params,
                              final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
+
+        if (params.getRemote() != null) {
+            // build context provided by remote URL
+            DockerConnection dockerConnection = connectionFactory.openConnection(dockerDaemonUri)
+                                                                 .query("remote", params.getRemote());
+            return buildImage(dockerConnection,
+                              params,
+                              progressMonitor);
+        }
+
+        // build context is set of files
         final File tar = Files.createTempFile(null, ".tar").toFile();
         try {
             File[] files = new File[params.getFiles().size()];
             files = params.getFiles().toArray(files);
             createTarArchive(tar, files);
-            return buildImage(params, progressMonitor, tar, dockerDaemonUri);
+            try (InputStream tarInput = new FileInputStream(tar)) {
+                DockerConnection dockerConnection = connectionFactory.openConnection(dockerDaemonUri)
+                                                                     .header("Content-Type", "application/x-compressed-tar")
+                                                                     .header("Content-Length", tar.length())
+                                                                     .entity(tarInput);
+                return buildImage(dockerConnection,
+                                  params,
+                                  progressMonitor);
+            }
         } finally {
             FileCleaner.addFile(tar);
         }
     }
 
-    private String buildImage(final BuildImageParams params,
-                              final ProgressMonitor progressMonitor,
-                              File tar,
-                              URI dockerDaemonUri) throws IOException, InterruptedException {
+    private String buildImage(final DockerConnection dockerConnection,
+                              final BuildImageParams params,
+                              final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
         final AuthConfigs authConfigs = params.getAuthConfigs();
         final String repository = params.getRepository();
         final String tag = params.getTag();
 
-        try (InputStream tarInput = new FileInputStream(tar);
-             DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
-                                                            .method("POST")
-                                                            .path("/build")
-                                                            .query("rm", 1)
-                                                            .query("forcerm", 1)
-                                                            .header("Content-Type", "application/x-compressed-tar")
-                                                            .header("Content-Length", tar.length())
-                                                            .header("X-Registry-Config",
-                                                                    authResolver.getXRegistryConfigHeaderValue(authConfigs))
-                                                            .entity(tarInput)) {
+        try (DockerConnection connection = dockerConnection.method("POST")
+                                                           .path("/build")
+                                                           .query("rm", 1)
+                                                           .query("forcerm", 1)
+                                                           .header("X-Registry-Config",
+                                                                   authResolver.getXRegistryConfigHeaderValue(authConfigs))) {
             if (tag == null) {
                 addQueryParamIfNotNull(connection, "t", repository);
             } else {
@@ -754,6 +767,8 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "memory", params.getMemoryLimit());
             addQueryParamIfNotNull(connection, "memswap", params.getMemorySwapLimit());
             addQueryParamIfNotNull(connection, "pull", params.isDoForcePull());
+            addQueryParamIfNotNull(connection, "dockerfile", params.getDockerfile());
+
             final DockerResponse response = connection.request();
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);
