@@ -36,9 +36,14 @@ import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
+import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ContainerState;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
@@ -117,8 +122,14 @@ public class DockerInstanceProviderTest {
     @Mock
     private UserSpecificDockerRegistryCredentialsProvider credentialsReader;
 
+    @Mock
+    private ContainerInfo containerInfo;
+
+    @Mock
+    private ContainerState containerState;
+
     @Captor
-    private ArgumentCaptor<ContainerConfig> containerConfigArgumentCaptor;
+    private ArgumentCaptor<CreateContainerParams> createContainerParamsArgumentCaptor;
 
     @Mock
     private RecipeRetriever recipeRetriever;
@@ -159,8 +170,11 @@ public class DockerInstanceProviderTest {
         when(recipeRetriever.getRecipe(any(MachineConfig.class))).thenReturn(new RecipeImpl().withType(DOCKER_FILE_TYPE).withScript("FROM codenvy"));
 
         when(dockerMachineFactory.createNode(anyString(), anyString())).thenReturn(dockerNode);
-        when(dockerConnector.createContainer(any(ContainerConfig.class), anyString()))
+        when(dockerConnector.createContainer(any(CreateContainerParams.class)))
                 .thenReturn(new ContainerCreated(CONTAINER_ID, new String[0]));
+        when(dockerConnector.inspectContainer(any(InspectContainerParams.class))).thenReturn(containerInfo);
+        when(containerInfo.getState()).thenReturn(containerState);
+        when(containerState.isRunning()).thenReturn(false);
     }
 
     @AfterMethod
@@ -276,16 +290,16 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe();
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(argumentCaptor.getValue().getImage(), "eclipse-che/" + generatedContainerId);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getImage(), "eclipse-che/" + generatedContainerId);
     }
 
     @Test
     public void shouldStartContainerOnCreateInstanceFromRecipe() throws Exception {
         createInstanceFromRecipe();
 
-        verify(dockerConnector).startContainer(eq(CONTAINER_ID), any(HostConfig.class));
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
     }
 
     @Test
@@ -298,9 +312,9 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot();
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertEquals(argumentCaptor.getValue().getImage(), "eclipse-che/" + generatedContainerId);
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getImage(), "eclipse-che/" + generatedContainerId);
     }
 
     @Test
@@ -328,15 +342,15 @@ public class DockerInstanceProviderTest {
 
         createInstanceFromRecipe();
 
-        verify(dockerConnector).createContainer(containerConfigArgumentCaptor.capture(), anyString());
-        assertTrue(containerConfigArgumentCaptor.getValue().getHostConfig().isPrivileged());
+        verify(dockerConnector).createContainer(createContainerParamsArgumentCaptor.capture());
+        assertTrue(createContainerParamsArgumentCaptor.getValue().getContainerConfig().getHostConfig().isPrivileged());
     }
 
     @Test
     public void shouldStartContainerOnCreateInstanceFromSnapshot() throws Exception {
         createInstanceFromSnapshot();
 
-        verify(dockerConnector).startContainer(eq(CONTAINER_ID), any(HostConfig.class));
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
     }
 
     @Test
@@ -466,11 +480,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(memorySizeMB);
 
 
-        ArgumentCaptor<ContainerConfig> createContainerCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(createContainerCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> createContainerCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(createContainerCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
         // docker accepts memory size in bytes
-        assertEquals(createContainerCaptor.getValue().getHostConfig().getMemory(), memorySizeMB * 1024 * 1024);
+        assertEquals(createContainerCaptor.getValue().getContainerConfig().getHostConfig().getMemory(), memorySizeMB * 1024 * 1024);
     }
 
     @Test
@@ -481,11 +495,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(memorySizeMB);
 
 
-        ArgumentCaptor<ContainerConfig> createContainerCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(createContainerCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> createContainerCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(createContainerCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
         // docker accepts memory size in bytes
-        assertEquals(createContainerCaptor.getValue().getHostConfig().getMemory(), memorySizeMB * 1024 * 1024);
+        assertEquals(createContainerCaptor.getValue().getContainerConfig().getHostConfig().getMemory(), memorySizeMB * 1024 * 1024);
     }
 
     @Test(dataProvider = "swapTestProvider")
@@ -516,9 +530,9 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(memoryMB);
 
         // then
-        ArgumentCaptor<ContainerConfig> createContainerCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(createContainerCaptor.capture(), anyString());
-        assertEquals(createContainerCaptor.getValue().getHostConfig().getMemorySwap(), expectedSwapSize);
+        ArgumentCaptor<CreateContainerParams> createContainerCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(createContainerCaptor.capture());
+        assertEquals(createContainerCaptor.getValue().getContainerConfig().getHostConfig().getMemorySwap(), expectedSwapSize);
     }
 
     @DataProvider(name = "swapTestProvider")
@@ -583,10 +597,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
 
-        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getContainerConfig().getExposedPorts().keySet())
+                                  .containsAll(expectedExposedPorts));
     }
 
     @Test
@@ -625,10 +640,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
 
-        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getContainerConfig().getExposedPorts().keySet())
+                                  .containsAll(expectedExposedPorts));
     }
 
     @Test
@@ -673,10 +689,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
 
-        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getContainerConfig().getExposedPorts().keySet())
+                                  .containsAll(expectedExposedPorts));
     }
 
     @Test
@@ -715,10 +732,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
 
-        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getContainerConfig().getExposedPorts().keySet())
+                                  .containsAll(expectedExposedPorts));
     }
 
     @Test
@@ -761,10 +779,11 @@ public class DockerInstanceProviderTest {
                                                       .build());
 
         // then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
 
-        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getContainerConfig().getExposedPorts().keySet())
+                                  .containsAll(expectedExposedPorts));
     }
 
     @Test
@@ -807,10 +826,11 @@ public class DockerInstanceProviderTest {
                                                     .build());
 
         // then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
 
-        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getContainerConfig().getExposedPorts().keySet())
+                                  .containsAll(expectedExposedPorts));
     }
 
     @Test
@@ -853,10 +873,11 @@ public class DockerInstanceProviderTest {
                                                       .build());
 
         // then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
 
-        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getContainerConfig().getExposedPorts().keySet())
+                                  .containsAll(expectedExposedPorts));
     }
 
     @Test
@@ -899,10 +920,11 @@ public class DockerInstanceProviderTest {
                                                     .build());
 
         // then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
 
-        assertTrue(new ArrayList<>(argumentCaptor.getValue().getExposedPorts().keySet()).containsAll(expectedExposedPorts));
+        assertTrue(new ArrayList<>(argumentCaptor.getValue().getContainerConfig().getExposedPorts().keySet())
+                                  .containsAll(expectedExposedPorts));
     }
 
     @Test
@@ -939,11 +961,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        assertEquals(argumentCaptor.getValue().getHostConfig().getBinds(), expectedVolumes);
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds(), expectedVolumes);
     }
 
     @Test
@@ -980,11 +1002,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        assertEquals(argumentCaptor.getValue().getHostConfig().getBinds(), expectedVolumes);
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds(), expectedVolumes);
     }
 
     @Test
@@ -1020,11 +1042,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        assertEquals(argumentCaptor.getValue().getHostConfig().getBinds(), expectedVolumes);
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds(), expectedVolumes);
     }
 
     @Test
@@ -1060,11 +1082,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        assertEquals(argumentCaptor.getValue().getHostConfig().getBinds(), expectedVolumes);
+        assertEquals(argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds(), expectedVolumes);
     }
 
     @Test
@@ -1106,11 +1128,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] actualBinds = argumentCaptor.getValue().getHostConfig().getBinds();
+        final String[] actualBinds = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
         assertEquals(actualBinds.length, expectedVolumes.size());
         assertEquals(new HashSet<>(asList(actualBinds)), new HashSet<>(expectedVolumes));
     }
@@ -1155,11 +1177,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] actualBinds = argumentCaptor.getValue().getHostConfig().getBinds();
+        final String[] actualBinds = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
         assertEquals(actualBinds.length, expectedVolumes.size());
         assertEquals(new HashSet<>(asList(actualBinds)), new HashSet<>(expectedVolumes));
     }
@@ -1202,11 +1224,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] actualBinds = argumentCaptor.getValue().getHostConfig().getBinds();
+        final String[] actualBinds = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
         assertEquals(actualBinds.length, expectedVolumes.size());
         assertEquals(new HashSet<>(asList(actualBinds)), new HashSet<>(expectedVolumes));
     }
@@ -1247,11 +1269,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
         //then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] extraHosts = argumentCaptor.getValue().getHostConfig().getExtraHosts();
+        final String[] extraHosts = argumentCaptor.getValue().getContainerConfig().getHostConfig().getExtraHosts();
         assertEquals(extraHosts.length, 2);
         assertEquals(extraHosts[0], "dev.box.com:192.168.0.1");
     }
@@ -1291,11 +1313,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
         //then
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] extraHosts = argumentCaptor.getValue().getHostConfig().getExtraHosts();
+        final String[] extraHosts = argumentCaptor.getValue().getContainerConfig().getHostConfig().getExtraHosts();
         assertEquals(extraHosts.length, 3);
         assertEquals(extraHosts[0], "dev.box.com:192.168.0.1");
         assertEquals(extraHosts[1], "codenvy.com.com:185");
@@ -1337,11 +1359,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
         //then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] extraHosts = argumentCaptor.getValue().getHostConfig().getExtraHosts();
+        final String[] extraHosts = argumentCaptor.getValue().getContainerConfig().getHostConfig().getExtraHosts();
         assertEquals(extraHosts.length, 2);
         assertEquals(extraHosts[0], "dev.box.com:192.168.0.1");
     }
@@ -1381,11 +1403,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
         //then
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] extraHosts = argumentCaptor.getValue().getHostConfig().getExtraHosts();
+        final String[] extraHosts = argumentCaptor.getValue().getContainerConfig().getHostConfig().getExtraHosts();
         assertEquals(extraHosts.length, 3);
         assertEquals(extraHosts[0], "dev.box.com:192.168.0.1");
         assertEquals(extraHosts[1], "codenvy.com.com:185");
@@ -1429,11 +1451,11 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        verify(dockerConnector).startContainer(anyString(), eq(null));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        verify(dockerConnector).startContainer(any(StartContainerParams.class));
 
-        final String[] actualBinds = argumentCaptor.getValue().getHostConfig().getBinds();
+        final String[] actualBinds = argumentCaptor.getValue().getContainerConfig().getHostConfig().getBinds();
         assertEquals(actualBinds.length, expectedVolumes.size());
         assertEquals(new HashSet<>(asList(actualBinds)), new HashSet<>(expectedVolumes));
     }
@@ -1442,33 +1464,33 @@ public class DockerInstanceProviderTest {
     public void shouldAddWorkspaceIdEnvVariableOnDevInstanceCreationFromRecipe() throws Exception {
         String wsId = "myWs";
         createInstanceFromRecipe(true, wsId);
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(asList(argumentCaptor.getValue().getEnv())
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
                            .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
                    "Workspace Id variable is missing. Required " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId +
-                   ". Found " + Arrays.toString(argumentCaptor.getValue().getEnv()));
+                   ". Found " + Arrays.toString(argumentCaptor.getValue().getContainerConfig().getEnv()));
     }
 
     @Test
     public void shouldAddWorkspaceIdEnvVariableOnDevInstanceCreationFromSnapshot() throws Exception {
         String wsId = "myWs";
         createInstanceFromSnapshot(true, wsId);
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(asList(argumentCaptor.getValue().getEnv())
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
                            .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
                    "Workspace Id variable is missing. Required " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId +
-                   ". Found " + Arrays.toString(argumentCaptor.getValue().getEnv()));
+                   ". Found " + Arrays.toString(argumentCaptor.getValue().getContainerConfig().getEnv()));
     }
 
     @Test
     public void shouldNotAddWorkspaceIdEnvVariableOnNonDevInstanceCreationFromRecipe() throws Exception {
         String wsId = "myWs";
         createInstanceFromRecipe(false, wsId);
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertFalse(asList(argumentCaptor.getValue().getEnv())
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertFalse(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
                             .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
                     "Non dev machine should not contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
     }
@@ -1477,9 +1499,9 @@ public class DockerInstanceProviderTest {
     public void shouldNotAddWorkspaceIdEnvVariableOnNonDevInstanceCreationFromSnapshot() throws Exception {
         String wsId = "myWs";
         createInstanceFromSnapshot(false, wsId);
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertFalse(asList(argumentCaptor.getValue().getEnv())
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertFalse(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
                             .contains(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID + "=" + wsId),
                     "Non dev machine should not contains " + DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID);
     }
@@ -1543,9 +1565,9 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getEnv())).containsAll(expectedEnv));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getContainerConfig().getEnv())).containsAll(expectedEnv));
     }
 
     @Test
@@ -1580,9 +1602,9 @@ public class DockerInstanceProviderTest {
         createInstanceFromRecipe(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getEnv())).containsAll(commonEnv));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getContainerConfig().getEnv())).containsAll(commonEnv));
     }
 
     @Test
@@ -1622,9 +1644,9 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getEnv())).containsAll(expectedEnv));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getContainerConfig().getEnv())).containsAll(expectedEnv));
     }
 
     @Test
@@ -1659,9 +1681,9 @@ public class DockerInstanceProviderTest {
         createInstanceFromSnapshot(isDev);
 
 
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getEnv())).containsAll(commonEnv));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(new HashSet<>(asList(argumentCaptor.getValue().getContainerConfig().getEnv())).containsAll(commonEnv));
     }
 
     @Test
@@ -1701,14 +1723,13 @@ public class DockerInstanceProviderTest {
                                                       .build());
 
         // then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(asList(argumentCaptor.getValue().getEnv()).containsAll(envVarsFromConfig.entrySet()
-                                                                                           .stream()
-                                                                                           .map(entry -> entry.getKey() +
-                                                                                                         "=" +
-                                                                                                         entry.getValue())
-                                                                                           .collect(Collectors.toList())));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+                           .containsAll(envVarsFromConfig.entrySet()
+                                                         .stream()
+                                                         .map(entry -> entry.getKey() + "=" + entry.getValue())
+                                                         .collect(Collectors.toList())));
     }
 
     @Test
@@ -1748,14 +1769,13 @@ public class DockerInstanceProviderTest {
                                                       .build());
 
         // then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(asList(argumentCaptor.getValue().getEnv()).containsAll(envVarsFromConfig.entrySet()
-                                                                                           .stream()
-                                                                                           .map(entry -> entry.getKey() +
-                                                                                                         "=" +
-                                                                                                         entry.getValue())
-                                                                                           .collect(Collectors.toList())));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+                         .containsAll(envVarsFromConfig.entrySet()
+                                                       .stream()
+                                                       .map(entry -> entry.getKey() + "=" + entry.getValue())
+                                                       .collect(Collectors.toList())));
     }
 
     @Test
@@ -1795,14 +1815,13 @@ public class DockerInstanceProviderTest {
                                                     .build());
 
         // then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(asList(argumentCaptor.getValue().getEnv()).containsAll(envVarsFromConfig.entrySet()
-                                                                                           .stream()
-                                                                                           .map(entry -> entry.getKey() +
-                                                                                                         "=" +
-                                                                                                         entry.getValue())
-                                                                                           .collect(Collectors.toList())));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv()).containsAll(
+                envVarsFromConfig.entrySet()
+                                 .stream()
+                                 .map(entry -> entry.getKey() + "=" + entry.getValue())
+                                 .collect(Collectors.toList())));
     }
 
     @Test
@@ -1842,14 +1861,13 @@ public class DockerInstanceProviderTest {
                                                     .build());
 
         // then
-        ArgumentCaptor<ContainerConfig> argumentCaptor = ArgumentCaptor.forClass(ContainerConfig.class);
-        verify(dockerConnector).createContainer(argumentCaptor.capture(), anyString());
-        assertTrue(asList(argumentCaptor.getValue().getEnv()).containsAll(envVarsFromConfig.entrySet()
-                                                                                           .stream()
-                                                                                           .map(entry -> entry.getKey() +
-                                                                                                         "=" +
-                                                                                                         entry.getValue())
-                                                                                           .collect(Collectors.toList())));
+        ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
+        verify(dockerConnector).createContainer(argumentCaptor.capture());
+        assertTrue(asList(argumentCaptor.getValue().getContainerConfig().getEnv())
+                         .containsAll(envVarsFromConfig.entrySet()
+                                                       .stream()
+                                                       .map(entry -> entry.getKey() + "=" + entry.getValue())
+                                                       .collect(Collectors.toList())));
     }
 
     private void createInstanceFromRecipe() throws Exception {
