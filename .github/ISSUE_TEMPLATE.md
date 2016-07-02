@@ -14,10 +14,10 @@
 
 [Describe observed behavior here]
 
-**Che version:**    [Enter Che version here]
-**OS and version:** [Enter OS name and version here]
-**Docker version:** [Enter your Docker version here `docker version` on CLI]
-**Che install:**    [Did you run Che in Vagrant, Docker container, server (zip), Bitnami installer, Yatta installer, or Codenvy?]
+**Che version:**    [Enter Che version here] 
+**OS and version:** [Enter OS name and version here] 
+**Docker version:** [Enter your Docker version here `docker version` on CLI] 
+**Che install:**    [Vagrant, Docker container, server (zip), Bitnami, Yatta, or Codenvy?] 
 
 **Additional information:**
 
