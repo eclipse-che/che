@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.python.ide.project;
 
 import com.google.inject.Provider;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 
@@ -29,7 +29,7 @@ import static org.eclipse.che.plugin.python.shared.ProjectAttributes.PYTHON_ID;
  * @author Valeriy Svydenko
  */
 public class PythonProjectWizardRegistrar implements ProjectWizardRegistrar {
-    private final List<Provider<? extends WizardPage<ProjectConfigDto>>> wizardPages;
+    private final List<Provider<? extends WizardPage<MutableProjectConfig>>> wizardPages;
 
     public PythonProjectWizardRegistrar() {
         wizardPages = new ArrayList<>();
@@ -46,7 +46,7 @@ public class PythonProjectWizardRegistrar implements ProjectWizardRegistrar {
     }
 
     @NotNull
-    public List<Provider<? extends WizardPage<ProjectConfigDto>>> getWizardPages() {
+    public List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages() {
         return wizardPages;
     }
 

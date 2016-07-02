@@ -12,10 +12,12 @@ package org.eclipse.che.ide.ext.java.client.command.mainclass;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.api.resources.Resource;
 
 import java.util.List;
+
 
 /**
  * Represents the structure of the project for choosing Main class.
@@ -27,7 +29,7 @@ public interface SelectNodeView extends View<SelectNodeView.ActionDelegate> {
     /** Needs for delegate some function into SelectPath view. */
     interface ActionDelegate {
         /** Sets selected node. */
-        void setSelectedNode(String path, String fqn);
+        void setSelectedNode(Resource resource, String fqn);
     }
 
     /**

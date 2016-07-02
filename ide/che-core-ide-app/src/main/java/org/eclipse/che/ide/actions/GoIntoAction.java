@@ -21,7 +21,10 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import java.util.List;
 
 /**
+ * Sets "Go Into" mode on node which is supports that mode.
+ *
  * @author Vlad Zhukovskiy
+ * @see Node#supportGoInto()
  */
 @Singleton
 public class GoIntoAction extends ProjectAction {
@@ -34,6 +37,7 @@ public class GoIntoAction extends ProjectAction {
         this.projectExplorer = projectExplorer;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void updateProjectAction(ActionEvent e) {
         List<?> selection = projectExplorer.getSelection().getAllElements();
@@ -43,6 +47,7 @@ public class GoIntoAction extends ProjectAction {
                                                  && isNodeSupportGoInto(selection.get(0)));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
         List<?> selection = projectExplorer.getSelection().getAllElements();

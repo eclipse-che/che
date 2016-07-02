@@ -13,7 +13,7 @@ package org.eclipse.che.ide.part.editor.recent;
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.resources.tree.FileNode;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public interface OpenRecentFilesView extends View<OpenRecentFilesView.ActionDele
      * @param recentFiles
      *         recent file list
      */
-    void setRecentFiles(List<FileReferenceNode> recentFiles);
+    void setRecentFiles(List<FileNode> recentFiles);
 
     /**
      * Clear recent file list.

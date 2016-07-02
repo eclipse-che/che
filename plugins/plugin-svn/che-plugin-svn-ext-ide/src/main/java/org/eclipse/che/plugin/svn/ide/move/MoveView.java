@@ -10,41 +10,33 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.move;
 
+import com.google.inject.ImplementedBy;
+
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
-import org.eclipse.che.ide.api.project.tree.TreeNode;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 
 /**
  * View for {@link MovePresenter}.
  *
  * @author Vladyslav Zhukovskyi
  */
+@ImplementedBy(MoveViewImpl.class)
 public interface MoveView extends View<MoveView.ActionDelegate> {
     /** Action handler for the view actions/controls. */
-    public interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate extends BaseActionDelegate {
         void onMoveClicked();
 
         /** Perform actions when cancel button clicked. */
         void onCancelClicked();
-
-        /** Perform actions when node selected in project explorer. */
-        void onNodeSelected(TreeNode<?> destinationNode);
-
-        /** Perform actions when node expanded in project explorer. */
-        void onNodeExpanded(TreeNode<?> node);
 
         /** Perform actions when url fields changed. */
         void onUrlsChanged();
     }
 
     /** Set project tree nodes. */
-    void setProjectNodes(List<TreeNode<?>> rootNodes);
-
-    /** Update project tree node. */
-    void updateProjectNode(@NotNull TreeNode<?> oldNode, @NotNull TreeNode<?> newNode);
+    void setProject(Project project);
 
     /** Show error marker with specified message. */
     void showErrorMarker(String message);
@@ -64,11 +56,8 @@ public interface MoveView extends View<MoveView.ActionDelegate> {
     /** Return comment. */
     String getComment();
 
-    /** Return new name for target item. */
-    String getNewName();
-
     /** Return target node, in case if we perform copying WC->WC. */
-    TreeNode<?> getDestinationNode();
+    Resource getDestinationNode();
 
     /** Perform actions when close window performed. */
     void onClose();

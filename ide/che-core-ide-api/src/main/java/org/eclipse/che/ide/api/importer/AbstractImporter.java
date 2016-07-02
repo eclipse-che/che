@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.importer;
 
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.core.model.project.SourceStorage;
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.resource.Path;
 
-import javax.validation.constraints.NotNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The general class for all importers. The class contains business logic which allows add and remove projects in list projects
@@ -27,49 +28,41 @@ import javax.validation.constraints.NotNull;
  * some exception occurs.
  *
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 public abstract class AbstractImporter {
 
-    protected final AppContext appContext;
-
-    protected final ProjectServiceClient                       projectService;
+    protected final AppContext                                 appContext;
     protected final ImportProjectNotificationSubscriberFactory subscriberFactory;
 
-    protected AbstractImporter(@NotNull AppContext appContext,
-                               @NotNull ProjectServiceClient projectService,
-                               @NotNull ImportProjectNotificationSubscriberFactory subscriberFactory) {
-        this.appContext = appContext;
-        this.projectService = projectService;
-        this.subscriberFactory = subscriberFactory;
+    protected AbstractImporter(AppContext appContext, ImportProjectNotificationSubscriberFactory subscriberFactory) {
+        this.appContext = checkNotNull(appContext);
+        this.subscriberFactory = checkNotNull(subscriberFactory);
     }
 
     /**
      * Starts project importing. This method should be called when we want mark project as importing.
      *
-     * @param pathToProject
-     *         path to project which will be imported. Path example '/project_name'
-     * @param projectName
-     *         name of project
      * @param sourceStorage
      *         information about project location and repository type
      * @return returns instance of Promise
      */
-    protected Promise<Void> startImport(@NotNull final String pathToProject,
-                                        @NotNull final String projectName,
-                                        @NotNull final SourceStorageDto sourceStorage) {
-        appContext.addProjectToImporting(pathToProject);
+    protected Promise<Project> startImport(final Path path, SourceStorage sourceStorage) {
+        appContext.addProjectToImporting(path.toString());
 
-        Promise<Void> importPromise = importProject(pathToProject, projectName, sourceStorage);
-
-        return importPromise.then(new Operation<Void>() {
+        return importProject(path, sourceStorage).then(new Function<Project, Project>() {
             @Override
-            public void apply(Void arg) throws OperationException {
-                appContext.removeProjectFromImporting(pathToProject);
+            public Project apply(Project project) throws FunctionException {
+                appContext.removeProjectFromImporting(project.getLocation().toString());
+
+                return project;
             }
-        }).catchError(new Operation<PromiseError>() {
+        }).catchErrorPromise(new Function<PromiseError, Promise<Project>>() {
             @Override
-            public void apply(PromiseError error) throws OperationException {
-                appContext.removeProjectFromImporting(pathToProject);
+            public Promise<Project> apply(PromiseError error) throws FunctionException {
+                appContext.removeProjectFromImporting(path.toString());
+
+                throw new IllegalStateException(error.getCause());
             }
         });
     }
@@ -77,15 +70,9 @@ public abstract class AbstractImporter {
     /**
      * The method imports projects from location.
      *
-     * @param pathToProject
-     *         path to project which will be imported. Path example '/project_name'
-     * @param projectName
-     *         name of project
      * @param sourceStorage
      *         information about project location and repository type
      * @return returns instance of Promise
      */
-    protected abstract Promise<Void> importProject(@NotNull String pathToProject,
-                                                   @NotNull final String projectName,
-                                                   @NotNull final SourceStorageDto sourceStorage);
+    protected abstract Promise<Project> importProject(Path path, SourceStorage sourceStorage);
 }

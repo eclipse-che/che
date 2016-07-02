@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.commit.CommitPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn commit" command.
@@ -29,18 +28,16 @@ public class CommitAction extends SubversionAction {
     private final CommitPresenter presenter;
 
     @Inject
-    public CommitAction(final AppContext appContext,
-                        final CommitPresenter presenter,
-                        final ProjectExplorerPresenter projectExplorerPresenter,
-                        final SubversionExtensionLocalizationConstants constants,
-                        final SubversionExtensionResources resources) {
-        super(constants.commitTitle(), constants.commitDescription(), resources.commit(), appContext,
-              constants, resources, projectExplorerPresenter);
+    public CommitAction(AppContext appContext,
+                        CommitPresenter presenter,
+                        SubversionExtensionLocalizationConstants constants,
+                        SubversionExtensionResources resources) {
+        super(constants.commitTitle(), constants.commitDescription(), resources.commit(), appContext, constants, resources);
         this.presenter = presenter;
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        this.presenter.show();
+        presenter.show();
     }
 }

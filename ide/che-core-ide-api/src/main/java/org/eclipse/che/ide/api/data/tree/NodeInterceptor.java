@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.data.tree;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.api.data.tree.Node;
 
 import java.util.List;
 

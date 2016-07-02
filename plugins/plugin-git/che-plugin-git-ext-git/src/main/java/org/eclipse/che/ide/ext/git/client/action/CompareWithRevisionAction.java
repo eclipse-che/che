@@ -15,48 +15,53 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.revisionsList.RevisionListPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
 
 import javax.validation.constraints.NotNull;
+
+import static com.google.common.base.Preconditions.checkState;
+import static org.eclipse.che.ide.api.resources.Resource.FILE;
 
 /**
  * Action for comparing with revision.
  *
  * @author Igor Vinokur
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class CompareWithRevisionAction extends GitAction {
     private final RevisionListPresenter    presenter;
-    private final ProjectExplorerPresenter projectExplorer;
 
     @Inject
     public CompareWithRevisionAction(RevisionListPresenter presenter,
                                      AppContext appContext,
-                                     GitLocalizationConstant locale,
-                                     ProjectExplorerPresenter projectExplorer) {
-        super(locale.compareWithRevisionTitle(), locale.compareWithRevisionTitle(), appContext, projectExplorer);
+                                     GitLocalizationConstant locale) {
+        super(locale.compareWithRevisionTitle(), locale.compareWithRevisionTitle(), null, appContext);
         this.presenter = presenter;
-        this.projectExplorer = projectExplorer;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        presenter.showRevisions();
+        final Project project = appContext.getRootProject();
+        final Resource resource = appContext.getResource();
+
+        checkState(project != null, "Null project occurred");
+        checkState(resource instanceof File, "Invalid file occurred");
+
+        presenter.showRevisions(project, (File)resource);
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setVisible(getActiveProject() != null);
-        event.getPresentation().setEnabled(isGitRepository() && compareSupported());
-    }
+        super.updateInPerspective(event);
 
-    private boolean compareSupported() {
-        Selection selection = projectExplorer.getSelection();
-        return selection.isSingleSelection() && selection.getHeadElement() instanceof FileReferenceNode;
+        final Resource resource = appContext.getResource();
+
+        event.getPresentation().setEnabled(resource != null && resource.getResourceType() == FILE);
     }
 }

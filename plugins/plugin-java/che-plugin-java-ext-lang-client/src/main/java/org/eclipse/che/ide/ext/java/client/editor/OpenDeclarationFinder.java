@@ -10,61 +10,56 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
-import com.google.gwt.user.client.Timer;
+import com.google.common.base.Optional;
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
+import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * @author Evgen Vidolob
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class OpenDeclarationFinder {
 
-    private final EditorAgent              editorAgent;
-    private final JavaNavigationService    navigationService;
-    private       DtoUnmarshallerFactory   factory;
-    private       AppContext               context;
-    private final ProjectExplorerPresenter projectExplorer;
-    private final JavaNodeManager          javaNodeManager;
+    private final EditorAgent           editorAgent;
+    private final JavaNavigationService navigationService;
+    private final AppContext            appContext;
+    private       JavaNodeFactory       javaNodeFactory;
 
     @Inject
     public OpenDeclarationFinder(EditorAgent editorAgent,
                                  JavaNavigationService navigationService,
-                                 DtoUnmarshallerFactory factory,
-                                 AppContext context,
-                                 ProjectExplorerPresenter projectExplorer,
-                                 JavaNodeManager javaNodeManager) {
+                                 AppContext appContext,
+                                 JavaNodeFactory javaNodeFactory) {
         this.editorAgent = editorAgent;
-        this.factory = factory;
         this.navigationService = navigationService;
-        this.context = context;
-        this.projectExplorer = projectExplorer;
-        this.javaNodeManager = javaNodeManager;
+        this.appContext = appContext;
+        this.javaNodeFactory = javaNodeFactory;
     }
 
     public void openDeclaration() {
@@ -80,99 +75,121 @@ public class OpenDeclarationFinder {
         TextEditorPresenter editor = ((TextEditorPresenter)activeEditor);
         int offset = editor.getCursorOffset();
         final VirtualFile file = editor.getEditorInput().getFile();
-        Unmarshallable<OpenDeclarationDescriptor> unmarshaller =
-                factory.newUnmarshaller(OpenDeclarationDescriptor.class);
-        navigationService
-                .findDeclaration(file.getProject().getProjectConfig().getPath(), JavaSourceFolderUtil.getFQNForFile(file), offset,
-                                 new AsyncRequestCallback<OpenDeclarationDescriptor>(unmarshaller) {
-                                     @Override
-                                     protected void onSuccess(OpenDeclarationDescriptor result) {
-                                         if (result != null) {
-                                             handleDescriptor(result);
-                                         }
-                                     }
 
-                                     @Override
-                                     protected void onFailure(Throwable exception) {
-                                         Log.error(OpenDeclarationFinder.class, exception);
-                                     }
-                                 });
+        if (file instanceof Resource) {
+            final Optional<Project> project = ((Resource)file).getRelatedProject();
+
+            final Optional<Resource> srcFolder = ((Resource)file).getParentWithMarker(SourceFolderMarker.ID);
+
+            if (!srcFolder.isPresent()) {
+                return;
+            }
+
+            final String fqn = JavaUtil.resolveFQN((Container)srcFolder.get(), (Resource)file);
+
+            navigationService.findDeclaration(project.get().getLocation(), fqn, offset).then(new Operation<OpenDeclarationDescriptor>() {
+                @Override
+                public void apply(OpenDeclarationDescriptor result) throws OperationException {
+                    if (result != null) {
+                        handleDescriptor(project.get(), result);
+                    }
+                }
+            });
+
+        }
     }
 
-    private void handleDescriptor(final OpenDeclarationDescriptor descriptor) {
-        EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(Path.valueOf(descriptor.getPath()));
+    private void setCursorAndActivateEditor(final EditorPartPresenter editor, final int offset) {
+
+        /*
+          For some undefined reason we need to wrap cursor and focus setting into timer with 1ms.
+          When editors are switching, they don't have enough time to redraw and set focus. Need
+          to investigate this problem more deeply. But at this moment this trick works as well.
+          */
+
+        new DelayedTask(){
+            @Override
+            public void onExecute() {
+                if (editor instanceof TextEditorPresenter) {
+                    ((TextEditorPresenter)editor).getDocument().setSelectedRange(LinearRange.createWithStart(offset).andLength(0), true);
+                    editor.activate(); //force set focus to the editor
+                }
+            }
+        }.delay(1);
+    }
+
+    private void handleDescriptor(final Project project, final OpenDeclarationDescriptor descriptor) {
+        final EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(Path.valueOf(descriptor.getPath()));
         if (openedEditor != null) {
-            editorAgent.activateEditor(openedEditor);
-            fileOpened(openedEditor, descriptor.getOffset());
+            editorAgent.openEditor(openedEditor.getEditorInput().getFile(), new OpenEditorCallbackImpl() {
+                @Override
+                public void onEditorOpened(EditorPartPresenter editor) {
+                    setCursorAndActivateEditor(editor, descriptor.getOffset());
+                }
+
+                @Override
+                public void onEditorActivated(EditorPartPresenter editor) {
+                    setCursorAndActivateEditor(editor, descriptor.getOffset());
+                }
+            });
             return;
         }
 
         if (descriptor.isBinary()) {
-            javaNodeManager.getClassNode(context.getCurrentProject().getProjectConfig(), descriptor.getLibId(), descriptor.getPath())
-                           .then(new Operation<Node>() {
-                               @Override
-                               public void apply(Node node) throws OperationException {
-                                   if (node instanceof VirtualFile) {
-                                       openFile((VirtualFile)node, descriptor);
-                                   }
-                               }
-                           });
+            navigationService.getEntry(project.getLocation(), descriptor.getLibId(), descriptor.getPath())
+                             .then(new Operation<JarEntry>() {
+                                 @Override
+                                 public void apply(final JarEntry entry) throws OperationException {
+                                     navigationService
+                                             .getContent(project.getLocation(), descriptor.getLibId(), Path.valueOf(entry.getPath()))
+                                             .then(new Operation<ClassContent>() {
+                                                 @Override
+                                                 public void apply(ClassContent content) throws OperationException {
+                                                     final VirtualFile file = javaNodeFactory
+                                                             .newJarFileNode(entry, descriptor.getLibId(), project.getLocation(), null);
+                                                     editorAgent.openEditor(file, new OpenEditorCallbackImpl() {
+                                                         @Override
+                                                         public void onEditorOpened(final EditorPartPresenter editor) {
+                                                             Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                                                                 @Override
+                                                                 public void execute() {
+                                                                     if (editor instanceof TextEditorPresenter) {
+                                                                         ((TextEditorPresenter)editor).getDocument().setSelectedRange(
+                                                                                 LinearRange.createWithStart(descriptor.getOffset())
+                                                                                            .andLength(0), true);
+                                                                         editor.activate();
+                                                                     }
+                                                                 }
+                                                             });
+                                                         }
+                                                     });
+                                                 }
+                                             });
+                                 }
+                             });
         } else {
-            projectExplorer.getNodeByPath(new HasStorablePath.StorablePath(descriptor.getPath()))
-                           .then(selectNode())
-                           .then(openNode(descriptor));
-        }
-    }
-
-    protected Function<Node, Node> selectNode() {
-        return new Function<Node, Node>() {
-            @Override
-            public Node apply(Node node) throws FunctionException {
-                projectExplorer.select(node, false);
-
-                return node;
-            }
-        };
-    }
-
-    protected Function<Node, Node> openNode(final OpenDeclarationDescriptor descriptor) {
-        return new Function<Node, Node>() {
-            @Override
-            public Node apply(Node node) throws FunctionException {
-                if (node instanceof FileReferenceNode) {
-                    openFile((VirtualFile)node, descriptor);
-                }
-
-                return node;
-            }
-        };
-    }
-
-    private void openFile(VirtualFile result, final OpenDeclarationDescriptor descriptor) {
-        Log.info(getClass(), result.getPath());
-        EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(Path.valueOf(result.getPath()));
-        if (openedEditor != null) {
-            editorAgent.activateEditor(openedEditor);
-            fileOpened(openedEditor, descriptor.getOffset());
-        } else {
-            editorAgent.openEditor(result, new OpenEditorCallbackImpl() {
+            appContext.getWorkspaceRoot().getFile(descriptor.getPath()).then(new Operation<Optional<File>>() {
                 @Override
-                public void onEditorOpened(EditorPartPresenter editor) {
-                    fileOpened(editor, descriptor.getOffset());
+                public void apply(Optional<File> file) throws OperationException {
+                    if (file.isPresent()) {
+                        editorAgent.openEditor(file.get(), new OpenEditorCallbackImpl() {
+                            @Override
+                            public void onEditorOpened(final EditorPartPresenter editor) {
+                                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                                    @Override
+                                    public void execute() {
+                                        if (editor instanceof TextEditorPresenter) {
+                                            ((TextEditorPresenter)editor).getDocument().setSelectedRange(
+                                                    LinearRange.createWithStart(descriptor.getOffset()).andLength(0), true);
+                                            editor.activate();
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
                 }
             });
         }
-    }
-
-    private void fileOpened(final EditorPartPresenter editor, final int offset) {
-        new Timer() { //in some reason we need here timeout otherwise it not work cursor don't set to correct position
-            @Override
-            public void run() {
-                if (editor instanceof TextEditorPresenter) {
-                    ((TextEditorPresenter)editor).getDocument().setSelectedRange(
-                            LinearRange.createWithStart(offset).andLength(0), true);
-                }
-            }
-        }.schedule(100);
     }
 }

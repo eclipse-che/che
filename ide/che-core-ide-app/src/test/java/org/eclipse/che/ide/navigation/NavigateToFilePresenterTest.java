@@ -10,26 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.ide.navigation;
 
+import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,51 +40,46 @@ import static org.mockito.Mockito.when;
  *
  * @author Ann Shumilova
  * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskyi
  */
 @RunWith(MockitoJUnitRunner.class)
 public class NavigateToFilePresenterTest {
 
-    public static final String PROJECT_NAME      = "test";
-    public static final String FILE_IN_ROOT_NAME = "pom.xml";
-
     @Mock
-    private NavigateToFileView       view;
+    private NavigateToFileView      view;
     @Mock
-    private EventBus                 eventBus;
+    private EventBus                eventBus;
     @Mock
-    private MessageBusProvider       messageBusProvider;
+    private MessageBusProvider      messageBusProvider;
     @Mock
-    private CurrentProject           project;
+    private Container               container;
     @Mock
-    private ProjectExplorerPresenter explorerPresenter;
+    private MessageBus              messageBus;
     @Mock
-    private DtoFactory               dtoFactory;
-
+    private DtoUnmarshallerFactory  dtoUnmarshallerFactory;
     @Mock
-    private MessageBus             messageBus;
+    private WsAgentStateEvent       wsAgentStateEvent;
     @Mock
-    private DtoUnmarshallerFactory dtoUnmarshallerFactory;
+    private Promise<Optional<File>> optFilePromise;
     @Mock
-    private NotificationManager    notificationManager;
-    @Mock
-    private WsAgentStateEvent      wsAgentStateEvent;
-    @Mock
-    private WorkspaceDto           workspace;
-    @Mock
-    private Promise<Node>          nodePromise;
+    private AppContext              appContext;
 
     private NavigateToFilePresenter presenter;
 
     @Before
     public void setUp() {
+        DevMachine devMachine = mock(DevMachine.class);
+        when(devMachine.getId()).thenReturn("id");
+        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(appContext.getWorkspaceRoot()).thenReturn(container);
+        when(container.getFile(any(Path.class))).thenReturn(optFilePromise);
         when(messageBusProvider.getMachineMessageBus()).thenReturn(messageBus);
 
         presenter = new NavigateToFilePresenter(view,
                                                 eventBus,
                                                 dtoUnmarshallerFactory,
-                                                explorerPresenter,
                                                 messageBusProvider,
-                                                dtoFactory);
+                                                appContext);
 
         presenter.onWsAgentStarted(wsAgentStateEvent);
     }
@@ -95,16 +92,11 @@ public class NavigateToFilePresenterTest {
         verify(view).clearInput();
     }
 
-    @Ignore
     @Test
     public void testOnFileSelected() throws Exception {
-        String displayName = FILE_IN_ROOT_NAME + " (" + PROJECT_NAME + ")";
-        when(view.getItemPath()).thenReturn(displayName);
-
-        presenter.showDialog();
-        presenter.onFileSelected();
+        presenter.onFileSelected(Path.ROOT);
 
         verify(view).close();
-        verify(view).getItemPath();
+        verify(container).getFile(eq(Path.ROOT));
     }
 }

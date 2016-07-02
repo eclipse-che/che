@@ -11,13 +11,15 @@
 package org.eclipse.che.plugin.svn.ide.merge;
 
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.inject.ImplementedBy;
 
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.project.tree.TreeNode;
 
 /**
  * An interface representing Merge view.
  */
+@ImplementedBy(MergeViewImpl.class)
 public interface MergeView extends View<MergeView.ActionDelegate> {
 
     /** Delegate to handle user actions */
@@ -36,11 +38,7 @@ public interface MergeView extends View<MergeView.ActionDelegate> {
         void onSourceURLChanged(String sourceURL);
 
         /** Perform actions after node selection in project explorer. */
-        void onNodeSelected(TreeNode<?> destinationNode);
-
-        /** Perform actions after node expanding in project explorer. */
-        void onNodeExpanded(TreeNode<?> node);
-
+        void onNodeSelected(Node destinationNode);
     }
 
     /**
@@ -57,10 +55,7 @@ public interface MergeView extends View<MergeView.ActionDelegate> {
     HasValue<String> targetTextBox();
 
     /** Sets root node to subversion tree. */
-    void setRootNode(TreeNode<?> rootNode);
-
-    /** Renders necessary node in subversion tree. */
-    void render(TreeNode<?> node);
+    void setRootNode(Node rootNode);
 
     /** Returns source URL check box. */
     HasValue<Boolean> sourceCheckBox();
