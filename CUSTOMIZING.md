@@ -2,9 +2,8 @@ Eclipse Che is a platform for creating distributed developer tooling. There are 
 
 #### Stacks
 A stack is the configuration of a runtime that can be used to power a workspace. Users choose the stack that powers a workspace within the user dashboard. Stacks have a recipe that defines how the container should be created and also meta data that defines the tags associated with the stack. 
-* [Add Stacks](https://eclipse-che.readme.io/docs/stacks#custom-stacks-for-che)
-* [Stack JSON Object](https://eclipse-che.readme.io/docs/stack)
-* [Che Stacks](https://eclipse-che.readme.io/docs/stacks)
+* [Add Your Stacks to Che](https://eclipse-che.readme.io/docs/stacks#custom-stacks-for-che)
+* [Stack Data Model](https://eclipse-che.readme.io/docs/stack)
 * [Che Included Stacks](https://eclipse-che.readme.io/docs/stacks#section-ready-to-go-stacks)
 * [Add Your Stack to Default Che Assembly](https://eclipse-che.readme.io/v4.0/docs/stacks#adding-stacks-to-the-che-default-assembly)
 * * TODO: Update this link to point to wiki page that can be updated by community
