@@ -23,6 +23,7 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfig;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
+import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -44,6 +45,7 @@ import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.GetEventsParams;
 import org.eclipse.che.plugin.docker.client.params.GetExecInfoParams;
 import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
@@ -108,6 +110,7 @@ public class DockerConnectorTest {
 
     private static final String EXCEPTION_ERROR_MESSAGE  = "Error response from docker API, status: 500, message: Error";
     private static final int    RESPONSE_ERROR_CODE      = 500;
+    private static final int    RESPONSE_NOT_FOUND_CODE  = 404;
     private static final int    RESPONSE_SUCCESS_CODE    = 200;
     private static final int    RESPONSE_NO_CONTENT_CODE = 204;
     private static final int    RESPONSE_CREATED_CODE    = 201;
@@ -602,6 +605,49 @@ public class DockerConnectorTest {
         when(dockerResponse.getStatus()).thenReturn(RESPONSE_ERROR_CODE);
 
         dockerConnector.attachContainer(attachContainerParams, logMessageProcessor);
+
+        verify(dockerResponse).getStatus();
+        verify(dockerConnector).getDockerException(dockerResponse);
+    }
+
+    @Test
+    public void shouldBeAbleToGetContainerLogs() throws IOException {
+        GetContainerLogsParams getContainerLogsParams = GetContainerLogsParams.create(CONTAINER);
+
+        when(dockerResponse.getInputStream()).thenReturn(new ByteArrayInputStream(DOCKER_RESPONSE_BYTES));
+
+        dockerConnector.getContainerLogs(getContainerLogsParams, logMessageProcessor);
+
+        verify(dockerConnectionFactory).openConnection(any(URI.class));
+        verify(dockerConnection).method(REQUEST_METHOD_GET);
+        verify(dockerConnection).path("/containers/" + getContainerLogsParams.getContainer() + "/logs");
+        verify(dockerConnection).query("stdout", 1);
+        verify(dockerConnection).query("stderr", 1);
+        verify(dockerConnection).request();
+        verify(dockerResponse).getStatus();
+        verify(dockerResponse).getInputStream();
+    }
+
+    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = EXCEPTION_ERROR_MESSAGE)
+    public void shouldThrowDockerExceptionWhileGettingContainerLogsIfResponseCodeIs5xx() throws IOException {
+        GetContainerLogsParams getContainerLogsParams = GetContainerLogsParams.create(CONTAINER);
+
+        when(dockerResponse.getStatus()).thenReturn(RESPONSE_ERROR_CODE);
+
+        dockerConnector.getContainerLogs(getContainerLogsParams, logMessageProcessor);
+
+        verify(dockerResponse).getStatus();
+        verify(dockerConnector).getDockerException(dockerResponse);
+    }
+
+    @Test(expectedExceptions = ContainerNotFoundException.class)
+    public void shouldThrowContainerNotFoundExceptionWhileGettingContainerLogsIfResponseCodeIs404() throws IOException {
+        GetContainerLogsParams getContainerLogsParams = GetContainerLogsParams.create(CONTAINER);
+
+        when(dockerResponse.getInputStream()).thenReturn(new ByteArrayInputStream("container not found".getBytes()));
+        when(dockerResponse.getStatus()).thenReturn(RESPONSE_NOT_FOUND_CODE);
+
+        dockerConnector.getContainerLogs(getContainerLogsParams, logMessageProcessor);
 
         verify(dockerResponse).getStatus();
         verify(dockerConnector).getDockerException(dockerResponse);

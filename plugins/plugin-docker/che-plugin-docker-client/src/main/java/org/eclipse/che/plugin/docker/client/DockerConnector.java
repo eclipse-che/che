@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
+import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
@@ -54,6 +55,7 @@ import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.GetEventsParams;
 import org.eclipse.che.plugin.docker.client.params.GetExecInfoParams;
 import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
@@ -690,6 +692,44 @@ public class DockerConnector {
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);
             }
+            try (InputStream responseStream = response.getInputStream()) {
+                new LogMessagePumper(responseStream, containerLogsProcessor).start();
+            }
+        }
+    }
+
+    /**
+     * Get stdout and stderr logs from container.
+     *
+     * @param containerLogsProcessor
+     *         output for container logs
+     * @throws ContainerNotFoundException
+     *         when container not found by docker (docker api returns 404)
+     * @throws IOException
+     *         when a problem occurs with docker api calls
+     */
+    public void getContainerLogs(final GetContainerLogsParams params, MessageProcessor<LogMessage> containerLogsProcessor)
+            throws IOException {
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("GET")
+                                                            .path("/containers/" + params.getContainer() + "/logs")
+                                                            .query("stdout", 1)
+                                                            .query("stderr", 1)) {
+            addQueryParamIfNotNull(connection, "details", params.isDetails());
+            addQueryParamIfNotNull(connection, "follow", params.isFollow());
+            addQueryParamIfNotNull(connection, "since", params.getSince());
+            addQueryParamIfNotNull(connection, "timestamps", params.isTimestamps());
+            addQueryParamIfNotNull(connection, "tail", params.getTail());
+
+            final DockerResponse response = connection.request();
+            final int status = response.getStatus();
+            if (status == 404) {
+                throw new ContainerNotFoundException(readAndCloseQuietly(response.getInputStream()));
+            }
+            if (status != OK.getStatusCode()) {
+                throw getDockerException(response);
+            }
+
             try (InputStream responseStream = response.getInputStream()) {
                 new LogMessagePumper(responseStream, containerLogsProcessor).start();
             }
