@@ -23,13 +23,13 @@ A template is a packaged set of sample code that is launched in the workspace wh
 
 #### Commands
 A command is a process that is injected into your workspace. It's outputs are streamed into the console. Commands have type and you can create, save, update and delete commands from within the IDE. You can create templates that have sample projects with default commands that are pre-populated in the IDE. Commands can reference macros that intelligently navigate the project tree or current selections.
-* [Create Commands](https://eclipse-che.readme.io/docs/commands)
-* [Command Macros](https://eclipse-che.readme.io/docs/commands#macros)
-* [Command JSON Object](https://eclipse-che.readme.io/docs/command)
+* [Commands](https://eclipse-che.readme.io/docs/commands)
+* [Macros](https://eclipse-che.readme.io/docs/commands#macros)
+* [Command Data Model](https://eclipse-che.readme.io/docs/command)
 
 #### Extension Development
 An extension is a set of code and resources that are packaged into a plugin that alter the behavior of the system. Extensions can be IDE extensions, workspace extensions (they are injected into the workspace agent running within each workspace), or Che extensions (injected into the Che server). Extensions are authored in Java and maven, and then packaged into JAR / ZIP files for deployment into Eclipse Che.
-* [Che Extensions Introduction](https://dash.readme.io/project/eclipse-che/v4.3/docs/introduction-1)
+* [Extension Intro](https://dash.readme.io/project/eclipse-che/docs/introduction-1)
 * [Developing Extensions](https://eclipse-che.readme.io/docs/create-and-build-extensions)
 * [JSON Extension Tutorial](https://eclipse-che.readme.io/docs/introduction-1#section-the-json-example)
 * [Authoring Extensions in Che](https://eclipse-che.readme.io/docs/setup-che-workspace#author-extension-using-the-che-ide)
@@ -41,7 +41,7 @@ An extension is a set of code and resources that are packaged into a plugin that
 
 #### IDE Extensions
 IDE extensions are compiled into JavaScript with other extensions to create a single, JavaScript application. You can package many extensions together into a single JavaScript application. The JavaScript application is cross-browser optimized. You can debug extensions and perform execution traces from within the browser of extension code. IDE extensions can invoke REST services that are running within the Che server or within a workspace. Che provides default workspace REST APIs or you can provide your own with workspace extensions.
-* [Invoking Workspace REST APIs](https://eclipse-che.readme.io/v4.0/docs/calling-workspace-apis)
+* [Invoking Workspace REST APIs](https://eclipse-che.readme.io/docs/calling-workspace-apis)
 * [Editors](https://eclipse-che.readme.io/docs/code-editors)
 * [Project Type](https://eclipse-che.readme.io/docs/project-types)
 * [Actions](https://eclipse-che.readme.io/docs/actions)
@@ -60,16 +60,16 @@ Server-side extensions are libraries that are deployed into the workspace agent 
 
 #### Workspace REST API
 IDE extensions have access to a default set of workspace APIs that are deployed within each workspace. These APIs are available through a Swagger configuration. 
-* [Swagger Configuration of APIs](https://eclipse-che.readme.io/docs/rest-api)
+* [Swagger](https://eclipse-che.readme.io/docs/rest-api)
 * [Authentication](https://eclipse-che.readme.io/docs/authentication)
 * [Workspaces](https://eclipse-che.readme.io/docs/create-workspaces-and-projects)
 * [Projects](https://eclipse-che.readme.io/docs/api-projects)
 * [Project Types](https://eclipse-che.readme.io/docs/custom-project-types)
-* [File Acces](https://eclipse-che.readme.io/docs/edit-build-and-run)
+* [File Access](https://eclipse-che.readme.io/docs/edit-build-and-run)
 * [Events](https://eclipse-che.readme.io/docs/events)
 
 #### Plug-Ins and Assemblies
 A plugin is a set of extensions (both IDE and workspace extensions) along with their collective reosurces that are packaged into a single deployable unit, usually as a JAR or ZIP file. An assembly is a set of plug-ins combined with the Eclipse Che core that is assembled into a re-distributable set of binaries. A new assembly can fundamentally alter the Che branding. Che can create assemblies packaged as a desktop IDE or as a new Che server.
 * [Plugin Development](https://eclipse-che.readme.io/docs/plug-ins)
-* [Drag and Drop Plugins](https://eclipse-che.readme.io/docs/developing-plugins) - Not yet updated for 4.x
+* [Drag and Drop](https://eclipse-che.readme.io/docs/developing-plugins) - Not yet updated for 4.x
 * [Assemblies](https://eclipse-che.readme.io/docs/assemblies)
