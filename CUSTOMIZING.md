@@ -13,13 +13,12 @@ A recipe defines the runtime of a workspace environment.  Workspaces can have mu
 * [Recipes](https://eclipse-che.readme.io/docs/recipes)
 * [Writing Custom Recipes](https://eclipse-che.readme.io/v4.3/docs/recipes#section-authoring-custom-recipes)
 * [Che Included Recipes](https://github.com/codenvy/dockerfiles)
-* [Che Recipes Requirements](https://eclipse-che.readme.io/v4.3/docs/recipes#section-inherit-from-non-eclipse-che-base-images)
 
 #### Templates
 A template is a packaged set of sample code that is launched in the workspace when a user creates a new project. Users can select from a template while using the user dashboard. Templates have both sample code and a default set of commands associated with them. Templates are loaded based upon the type of stack selected. You can add your own templates to the default Che distribution.
+* [Templates](https://eclipse-che.readme.io/docs/templates)
 * [Add Templates](https://eclipse-che.readme.io/docs/templates#register-new-project-templates)
-* [Template JSON Object](https://eclipse-che.readme.io/docs/template)
-* [Che Templates](https://eclipse-che.readme.io/docs/templates)
+* [Template Data Model](https://eclipse-che.readme.io/docs/template)
 * [Add Your Template to Default Che Assembly](https://eclipse-che.readme.io/docs/templates#section-add-your-template-to-default-che-assembly)
 
 #### Commands
