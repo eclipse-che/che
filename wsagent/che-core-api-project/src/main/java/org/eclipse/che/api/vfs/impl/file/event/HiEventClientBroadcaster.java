@@ -40,7 +40,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Beta
 @Singleton
-class HiEventClientBroadcaster implements HiEventBroadcaster {
+public class HiEventClientBroadcaster implements HiEventBroadcaster {
     private static final Logger LOG = getLogger(HiEventClientBroadcaster.class);
 
     @Override
