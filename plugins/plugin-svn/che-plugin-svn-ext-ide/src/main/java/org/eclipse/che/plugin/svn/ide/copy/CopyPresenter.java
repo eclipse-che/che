@@ -10,27 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.copy;
 
-import com.google.common.base.Strings;
+import com.google.common.base.Preconditions;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
-import org.eclipse.che.ide.project.node.FolderReferenceNode;
-import org.eclipse.che.ide.project.node.ProjectNode;
-import org.eclipse.che.ide.project.node.ResourceBasedNode;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.RegExpUtils;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.SvnUtil;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
@@ -52,34 +50,11 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
     private       CopyView                                 view;
     private       NotificationManager                      notificationManager;
     private       SubversionClientService                  service;
-    private       DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
     private       SubversionExtensionLocalizationConstants constants;
-    private       ResourceBasedNode<?>                     sourceNode;
-    private TargetHolder targetHolder = new TargetHolder();
+    private       Resource                     sourceNode;
 
     private RegExp urlRegExp = RegExp.compile("^(https?|ftp)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
-
-    private class TargetHolder {
-        // /project/path/to/destination/directory
-        String dir;
-        // /project/path/to/destination/directory/[item_name]
-        String name;
-
-        /** Prepare target directory and item name to normal path. */
-        String normalize() {
-            dir = dir.endsWith("/") ? dir : dir + '/';
-
-            if (!Strings.isNullOrEmpty(name)) {
-                name = name.startsWith("/") ? name.substring(1) : name;
-            } else if (!Strings.isNullOrEmpty(view.getNewName())) {
-                name = view.getNewName();
-            } else if (sourceNode != null) {
-                name = sourceNode.getName();
-            }
-
-            return dir + name;
-        }
-    }
+    private Resource target;
 
     @Inject
     protected CopyPresenter(AppContext appContext,
@@ -88,86 +63,80 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
                             CopyView view,
                             NotificationManager notificationManager,
                             SubversionClientService service,
-                            DtoUnmarshallerFactory dtoUnmarshallerFactory,
                             SubversionExtensionLocalizationConstants constants,
-                            final ProjectExplorerPresenter projectExplorerPart,
-                            final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
+                            StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
         this.view = view;
         this.notificationManager = notificationManager;
         this.service = service;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.constants = constants;
         this.view.setDelegate(this);
     }
 
     /** Show copy dialog. */
-    public void showCopy(ResourceBasedNode<?> sourceNode) {
-        if (sourceNode == null) {
-            return;
-        }
+    public void showCopy() {
+        final Project project = appContext.getRootProject();
 
-        this.sourceNode = sourceNode;
+        Preconditions.checkState(project != null && SvnUtil.isUnderSvn(project));
 
-        if (sourceNode instanceof FileReferenceNode) {
+        final Resource[] resources = appContext.getResources();
+
+        Preconditions.checkState(resources != null && resources.length == 1);
+
+        sourceNode = resources[0];
+
+        if (sourceNode.getResourceType() == Resource.FILE) {
             view.setDialogTitle(constants.copyViewTitleFile());
-        } else if (sourceNode instanceof FolderReferenceNode || sourceNode instanceof ProjectNode) {
+        } else {
             view.setDialogTitle(constants.copyViewTitleDirectory());
         }
 
-        targetHolder.name = sourceNode.getName();
-
-        view.setNewName(targetHolder.name);
-        view.setComment(targetHolder.name);
-        view.setSourcePath(getStorableNodePath(sourceNode), false);
+        view.setNewName(sourceNode.getName());
+        view.setComment(sourceNode.getName());
+        view.setSourcePath(sourceNode.getLocation().toString(), false);
 
         validate();
 
         view.show();
+        view.setProjectNode(project);
     }
 
     /** {@inheritDoc} */
     @Override
     public void onCopyClicked() {
-        final String projectPath = getCurrentProjectPath();
+        final Project project = appContext.getRootProject();
 
-        if (projectPath == null) {
-            return;
-        }
+        Preconditions.checkState(project != null);
 
-        final String src = view.isSourceCheckBoxSelected() ? view.getSourcePath() : relPath(projectPath, getStorableNodePath(sourceNode));
-        final String target = view.isTargetCheckBoxSelected() ? view.getTargetUrl() : relPath(projectPath, targetHolder.normalize());
+        final Path src = view.isSourceCheckBoxSelected() ? Path.valueOf(view.getSourcePath()) : toRelative(project, sourceNode);
+        final Path target = view.isTargetCheckBoxSelected() ? Path.valueOf(view.getTargetUrl()) : toRelative(project, this.target);
         final String comment = view.isTargetCheckBoxSelected() ? view.getComment() : null;
 
-        final StatusNotification notification = new StatusNotification(constants.copyNotificationStarted(src), PROGRESS, FLOAT_MODE);
+        final StatusNotification notification = new StatusNotification(constants.copyNotificationStarted(src.toString()), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
         view.hide();
 
-        service.copy(projectPath, src, target, comment,
-                     new AsyncRequestCallback<CLIOutputResponse>(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class)) {
-                         @Override
-                         protected void onSuccess(CLIOutputResponse result) {
-                             printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(), constants.commandCopy());
+        service.copy(project.getLocation(), src, target, comment).then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse response) throws OperationException {
+                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandCopy());
 
-                             notification.setTitle(constants.copyNotificationSuccessful());
-                             notification.setStatus(SUCCESS);
-                         }
-
-                         @Override
-                         protected void onFailure(Throwable exception) {
-                             String errorMessage = exception.getMessage();
-
-                             notification.setTitle(constants.copyNotificationFailed() + ": " + errorMessage);
-                             notification.setStatus(FAIL);
-                         }
-                     });
+                notification.setTitle(constants.copyNotificationSuccessful());
+                notification.setStatus(SUCCESS);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notification.setTitle(constants.copyNotificationFailed());
+                notification.setStatus(FAIL);
+            }
+        });
     }
 
     /** {@inheritDoc} */
     @Override
     public void onNewNameChanged(String newName) {
-        targetHolder.name = newName;
         validate();
     }
 
@@ -179,8 +148,8 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
 
     /** {@inheritDoc} */
     @Override
-    public void onNodeSelected(ResourceBasedNode<?> destinationNode) {
-        targetHolder.dir = getStorableNodePath(destinationNode);
+    public void onNodeSelected(Resource target) {
+        this.target = target;
         validate();
     }
 
@@ -203,11 +172,9 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
         if (view.isSourceCheckBoxSelected()) {
             view.setSourcePath("", true);
             view.setNewName("name");
-            targetHolder.name = null;
         } else {
-            view.setSourcePath(getStorableNodePath(sourceNode), false);
+            view.setSourcePath(sourceNode.getLocation().toString(), false);
             view.setNewName(sourceNode.getName());
-            targetHolder.name = sourceNode.getName();
         }
 
         validate();
@@ -229,22 +196,6 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
     @Override
     public void activatePart() {
         //stub
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onNodeExpanded(final ResourceBasedNode<?> node) {
-
-    }
-
-    private String relPath(String base, String path) {
-        if (!path.startsWith(base)) {
-            return null;
-        }
-
-        final String temp = path.substring(base.length());
-
-        return temp.startsWith("/") ? temp.substring(1) : temp;
     }
 
     private void validate() {
@@ -269,11 +220,6 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
         }
     }
 
-    @Nullable
-    private String getStorableNodePath(ResourceBasedNode<?> node) {
-        return node instanceof HasStorablePath ? ((HasStorablePath)node).getStorablePath() : null;
-    }
-
     private interface ValidationStrategy {
         boolean isValid();
     }
@@ -281,18 +227,8 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
     private class FileFileValidation implements ValidationStrategy {
         @Override
         public boolean isValid() {
-            if (Strings.isNullOrEmpty(targetHolder.dir)) {
+            if (target == null) {
                 view.showErrorMarker(constants.copyEmptyTarget());
-                return false;
-            }
-
-            if (targetHolder.normalize().equals(getStorableNodePath(sourceNode))) {
-                view.showErrorMarker(constants.copyItemEqual());
-                return false;
-            }
-
-            if (targetHolder.dir.startsWith(Strings.nullToEmpty(getStorableNodePath(sourceNode)))) {
-                view.showErrorMarker(constants.copyItemChildDetect());
                 return false;
             }
 
@@ -303,7 +239,7 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
     private class UrlFileValidation implements ValidationStrategy {
         @Override
         public boolean isValid() {
-            if (Strings.isNullOrEmpty(targetHolder.dir)) {
+            if (target == null) {
                 view.showErrorMarker(constants.copyEmptyTarget());
                 return false;
             }

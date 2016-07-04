@@ -13,14 +13,16 @@ package org.eclipse.che.plugin.svn.ide.property;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -32,6 +34,7 @@ import org.eclipse.che.plugin.svn.shared.Depth;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
@@ -48,7 +51,6 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
 
     private PropertyEditorView                       view;
     private SubversionClientService                  service;
-    private DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
     private NotificationManager                      notificationManager;
     private SubversionExtensionLocalizationConstants constants;
 
@@ -56,17 +58,14 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
     protected PropertyEditorPresenter(AppContext appContext,
                                       SubversionOutputConsoleFactory consoleFactory,
                                       ConsolesPanelPresenter consolesPanelPresenter,
-                                      ProjectExplorerPresenter projectExplorerPart,
                                       PropertyEditorView view,
                                       SubversionClientService service,
-                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                       NotificationManager notificationManager,
                                       SubversionExtensionLocalizationConstants constants,
-                                      final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
+                                      StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
         this.view = view;
         this.service = service;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.notificationManager = notificationManager;
         this.constants = constants;
         view.setDelegate(this);
@@ -89,30 +88,43 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
      */
     @Override
     public void onOkClicked() {
-        final String projectPath = getCurrentProjectPath();
+        final Project project = appContext.getRootProject();
 
-        if (projectPath == null) {
-            return;
-        }
+        checkState(project != null);
 
         view.onClose();
 
         if (view.isEditPropertySelected()) {
-            editProperty(projectPath);
+            editProperty(project);
         } else if (view.isDeletePropertySelected()) {
-            deleteProperty(projectPath);
+            deleteProperty(project);
         }
     }
 
     @Override
     public void onPropertyNameChanged(String propertyName) {
-        final String projectPath = getCurrentProjectPath();
+        final Project project = appContext.getRootProject();
 
-        if (projectPath == null) {
-            return;
-        }
+        checkState(project != null);
 
-        getAndShowPropertyValue(propertyName, projectPath);
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+        checkState(resources.length == 1);
+
+        service.propertyGet(project.getLocation(), propertyName, toRelative(project, resources[0]))
+               .then(new Operation<CLIOutputResponse>() {
+                    @Override
+                    public void apply(CLIOutputResponse response) throws OperationException {
+                        view.setPropertyCurrentValue(response.getOutput());
+                    }
+                })
+                .catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                    }
+                });
     }
 
     /**
@@ -131,110 +143,95 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
         // stub
     }
 
-    private void getAndShowPropertyValue(String property, String projectPath) {
-        String headPath = getSelectedPaths().get(0);
-        Unmarshallable<CLIOutputResponse> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class);
-        service.propertyGet(projectPath, property, headPath, new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
-            @Override
-            protected void onSuccess(CLIOutputResponse result) {
-                List<String> values = result.getOutput();
-                view.setPropertyCurrentValue(values);
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
-            }
-        });
-    }
-
-    private void editProperty(String projectPath) {
+    private void editProperty(Project project) {
         final String propertyName = view.getSelectedProperty();
         final Depth depth = view.getDepth();
         final String propertyValue = view.getPropertyValue();
         final boolean force = view.isForceSelected();
 
-        String headPath = getSelectedPaths().get(0);
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+        checkState(resources.length == 1);
 
         final StatusNotification notification = new StatusNotification(constants.propertyModifyStart(), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        Unmarshallable<CLIOutputResponse> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class);
-        service.propertySet(projectPath, propertyName, propertyValue, depth, force, headPath,
-                            new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
-                                @Override
-                                protected void onSuccess(CLIOutputResponse result) {
-                                    printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(), constants.commandProperty());
+        service.propertySet(project.getLocation(), propertyName, propertyValue, depth, force, toRelative(project, resources[0]))
+                .then(new Operation<CLIOutputResponse>() {
+                    @Override
+                    public void apply(CLIOutputResponse response) throws OperationException {
+                        printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandProperty());
 
-                                    notification.setTitle(constants.propertyModifyFinished());
-                                    notification.setStatus(SUCCESS);
-                                }
-
-                                @Override
-                                protected void onFailure(Throwable exception) {
-                                    String errorMessage = exception.getMessage();
-
-                                    notification.setTitle(constants.propertyModifyFailed() + errorMessage);
-                                    notification.setStatus(FAIL);
-                                }
-                            });
+                        notification.setTitle(constants.propertyModifyFinished());
+                        notification.setStatus(SUCCESS);
+                    }
+                })
+                .catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        notification.setTitle(constants.propertyModifyFailed());
+                        notification.setStatus(FAIL);
+                    }
+                });
     }
 
-    private void deleteProperty(String projectPath) {
+    private void deleteProperty(Project project) {
         final String propertyName = view.getSelectedProperty();
         final Depth depth = view.getDepth();
         final boolean force = view.isForceSelected();
 
-        String headPath = getSelectedPaths().get(0);
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+        checkState(resources.length == 1);
 
         final StatusNotification notification = new StatusNotification(constants.propertyRemoveStart(), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        Unmarshallable<CLIOutputResponse> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class);
-        service.propertyDelete(projectPath, propertyName, depth, force, headPath,
-                               new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
-                                   @Override
-                                   protected void onSuccess(CLIOutputResponse result) {
-                                       printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(), constants.commandProperty());
+        service.propertyDelete(project.getLocation(), propertyName, depth, force, toRelative(project, resources[0]))
+                .then(new Operation<CLIOutputResponse>() {
+                    @Override
+                    public void apply(CLIOutputResponse response) throws OperationException {
+                        printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandProperty());
 
-                                       notification.setTitle(constants.propertyRemoveFinished());
-                                       notification.setStatus(SUCCESS);
-                                   }
-
-                                   @Override
-                                   protected void onFailure(Throwable exception) {
-                                       String errorMessage = exception.getMessage();
-
-                                       notification.setTitle(constants.propertyRemoveFailed() + errorMessage);
-                                       notification.setStatus(FAIL);
-                                   }
-                               });
+                        notification.setTitle(constants.propertyRemoveFinished());
+                        notification.setStatus(SUCCESS);
+                    }
+                })
+                .catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        notification.setTitle(constants.propertyRemoveFailed());
+                        notification.setStatus(FAIL);
+                    }
+                });
     }
 
     @Override
     public void obtainExistingPropertiesForPath() {
-        final String projectPath = getCurrentProjectPath();
+        final Project project = appContext.getRootProject();
 
-        if (projectPath == null) {
-            return;
-        }
+        checkState(project != null);
 
-        String headPath = getSelectedPaths().get(0);
+        final Resource[] resources = appContext.getResources();
 
-        Unmarshallable<CLIOutputResponse> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class);
-        service.propertyList(projectPath, headPath, new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
+        checkState(!Arrays.isNullOrEmpty(resources));
+        checkState(resources.length == 1);
+
+        service.propertyList(project.getLocation(), toRelative(project, resources[0])).then(new Operation<CLIOutputResponse>() {
             @Override
-            protected void onSuccess(CLIOutputResponse result) {
+            public void apply(CLIOutputResponse response) throws OperationException {
                 List<String> properties = new ArrayList<String>();
-                for (String property : result.getOutput()) {
+                for (String property : response.getOutput()) {
                     properties.add(property.trim());
                 }
                 view.setExistingPropertiesForPath(properties);
             }
-
+        }).catchError(new Operation<PromiseError>() {
             @Override
-            protected void onFailure(Throwable exception) {
-                notificationManager.notify(notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE));
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE));
             }
         });
     }

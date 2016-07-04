@@ -17,9 +17,7 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -28,8 +26,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.plugin.github.ide.GitHubLocalizationConstant;
-import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
 import org.eclipse.che.plugin.ssh.key.client.manage.SshKeyManagerPresenter;
 import org.eclipse.che.security.oauth.OAuthStatus;
 import org.junit.Before;
@@ -189,11 +187,6 @@ public class GitHubAuthenticatorImplTest {
         ProfileDescriptor profile = mock(ProfileDescriptor.class);
         when(view.isGenerateKeysSelected()).thenReturn(true);
         when(registry.getUploader(GITHUB_HOST)).thenReturn(keyProvider);
-
-        CurrentProject currentProject = mock(CurrentProject.class);
-        ProjectConfigDto projectConfigDto = mock(ProjectConfigDto.class);
-        when(appContext.getCurrentProject()).thenReturn(currentProject);
-        when(currentProject.getRootProject()).thenReturn(projectConfigDto);
 
         when(appContext.getCurrentUser()).thenReturn(user);
         when(user.getProfile()).thenReturn(profile);

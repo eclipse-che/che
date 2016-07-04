@@ -12,12 +12,15 @@ package org.eclipse.che.plugin.svn.ide.log;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -27,6 +30,7 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.SubversionItem;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -35,8 +39,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 public class ShowLogPresenter extends SubversionActionPresenter {
 
-    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
-    private final SubversionClientService                  subversionClientService;
+    private final SubversionClientService                  service;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
 
@@ -46,20 +49,17 @@ public class ShowLogPresenter extends SubversionActionPresenter {
      * Creates an instance of this presenter.
      */
     @Inject
-    protected ShowLogPresenter(final AppContext appContext,
-                               final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                               final SubversionOutputConsoleFactory consoleFactory,
-                               final ConsolesPanelPresenter consolesPanelPresenter,
-                               final SubversionClientService subversionClientService,
-                               final NotificationManager notificationManager,
-                               final ProjectExplorerPresenter projectExplorerPart,
-                               final SubversionExtensionLocalizationConstants constants,
-                               final ShowLogsView view,
-                               final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
+    protected ShowLogPresenter(AppContext appContext,
+                               SubversionOutputConsoleFactory consoleFactory,
+                               ConsolesPanelPresenter consolesPanelPresenter,
+                               SubversionClientService service,
+                               NotificationManager notificationManager,
+                               SubversionExtensionLocalizationConstants constants,
+                               ShowLogsView view,
+                               StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
 
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.subversionClientService = subversionClientService;
+        this.service = service;
         this.notificationManager = notificationManager;
         this.constants = constants;
         this.view = view;
@@ -67,16 +67,16 @@ public class ShowLogPresenter extends SubversionActionPresenter {
         view.setDelegate(new ShowLogsView.Delegate() {
             @Override
             public void logClicked() {
-                String range = view.rangeField().getValue();
+                String range = ShowLogPresenter.this.view.rangeField().getValue();
                 if (range != null && !range.trim().isEmpty()) {
-                    view.hide();
+                    ShowLogPresenter.this.view.hide();
                     showLogs(range);
                 }
             }
 
             @Override
             public void cancelClicked() {
-                view.hide();
+                ShowLogPresenter.this.view.hide();
             }
         });
     }
@@ -85,32 +85,35 @@ public class ShowLogPresenter extends SubversionActionPresenter {
      * Fetches the count of revisions and opens the popup.
      */
     public void showLog() {
-        if (getActiveProject() == null) {
-            return;
-        }
+        final Project project = appContext.getRootProject();
 
-        subversionClientService.info(getActiveProject().getRootProject().getPath(), getSelectedPaths().get(0), "HEAD", false,
-                new AsyncRequestCallback<InfoResponse>(dtoUnmarshallerFactory.newUnmarshaller(InfoResponse.class)) {
-                    @Override
-                    protected void onSuccess(InfoResponse result) {
-                        if (result.getErrorOutput() != null && !result.getErrorOutput().isEmpty()) {
-                            printErrors(result.getErrorOutput(), constants.commandInfo());
-                            notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
-                            return;
-                        }
+        checkState(project != null);
 
-                        SubversionItem subversionItem = result.getItems().get(0);
-                        view.setRevisionCount(subversionItem.getRevision());
-                        view.rangeField().setValue("1:" + subversionItem.getRevision());
-                        view.show();
-                    }
+        final Resource[] resources = appContext.getResources();
 
-                    @Override
-                    protected void onFailure(Throwable exception) {
-                        notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
-                    }
-                });
+        checkState(!Arrays.isNullOrEmpty(resources));
+        checkState(resources.length == 1);
 
+        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false).then(new Operation<InfoResponse>() {
+            @Override
+            public void apply(InfoResponse response) throws OperationException {
+                if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
+                    printErrors(response.getErrorOutput(), constants.commandInfo());
+                    notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
+                    return;
+                }
+
+                SubversionItem subversionItem = response.getItems().get(0);
+                view.setRevisionCount(subversionItem.getRevision());
+                view.rangeField().setValue("1:" + subversionItem.getRevision());
+                view.show();
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
     }
 
     /**
@@ -119,18 +122,25 @@ public class ShowLogPresenter extends SubversionActionPresenter {
      * @param range range to be logged
      */
     private void showLogs(String range) {
-        subversionClientService.showLog(getActiveProject().getRootProject().getPath(), getSelectedPaths(), range,
-                new AsyncRequestCallback<CLIOutputResponse>(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class)) {
-                    @Override
-                    protected void onSuccess(CLIOutputResponse result) {
-                        printResponse(result.getCommand(), result.getOutput(), null, constants.commandLog());
-                    }
+        final Project project = appContext.getRootProject();
 
-                    @Override
-                    protected void onFailure(Throwable exception) {
-                        notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
-                    }
-                });
+        checkState(project != null);
+
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+
+        service.showLog(project.getLocation(), toRelative(project, resources), range).then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse response) throws OperationException {
+                printResponse(response.getCommand(), response.getOutput(), null, constants.commandLog());
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
     }
 
 }

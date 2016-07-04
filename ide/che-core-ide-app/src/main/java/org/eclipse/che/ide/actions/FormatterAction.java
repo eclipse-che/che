@@ -23,8 +23,8 @@ import org.eclipse.che.ide.api.editor.texteditor.HandlesTextOperations;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -43,7 +43,7 @@ public class FormatterAction extends AbstractPerspectiveAction {
                            EditorAgent editorAgent,
                            CoreLocalizationConstant localization,
                            Resources resources) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
+        super(singletonList(PROJECT_PERSPECTIVE_ID),
               localization.formatName(),
               localization.formatDescription(),
               null,
@@ -76,6 +76,5 @@ public class FormatterAction extends AbstractPerspectiveAction {
         }
 
         event.getPresentation().setEnabled(isCanDoOperation);
-        event.getPresentation().setVisible(appContext.getCurrentProject() != null);
     }
 }

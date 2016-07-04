@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.sel
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
+import org.eclipse.che.ide.ext.java.client.tree.PackageNode;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
 
 import java.util.ArrayList;

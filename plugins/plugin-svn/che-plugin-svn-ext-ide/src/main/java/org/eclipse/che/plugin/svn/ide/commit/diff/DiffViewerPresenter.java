@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
@@ -34,10 +33,9 @@ public class DiffViewerPresenter extends SubversionActionPresenter implements Di
     protected DiffViewerPresenter(AppContext appContext,
                                   SubversionOutputConsoleFactory consoleFactory,
                                   ConsolesPanelPresenter consolesPanelPresenter,
-                                  ProjectExplorerPresenter projectExplorerPart,
                                   DiffViewerView view,
-                                  final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
+                                  StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
         this.view = view;
         this.view.setDelegate(this);
     }

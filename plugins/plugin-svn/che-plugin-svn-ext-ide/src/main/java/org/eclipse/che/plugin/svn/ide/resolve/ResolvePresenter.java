@@ -10,17 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.resolve;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -29,10 +30,12 @@ import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -41,25 +44,24 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
     private final NotificationManager                      notificationManager;
     private final DialogFactory                            dialogFactory;
     private final SubversionExtensionLocalizationConstants constants;
-    private final SubversionClientService                  subversionClientService;
+    private final SubversionClientService                  service;
     private final ResolveView                              view;
 
-    private List<String> conflictsPaths;
+    private List<String> conflictsList;
 
     @Inject
-    protected ResolvePresenter(final ConsolesPanelPresenter consolesPanelPresenter,
-                               final SubversionOutputConsoleFactory consoleFactory,
-                               final AppContext appContext,
-                               final SubversionExtensionLocalizationConstants constants,
-                               final NotificationManager notificationManager,
-                               final DialogFactory dialogFactory,
-                               final SubversionClientService subversionClientService,
-                               final ResolveView view,
-                               final ProjectExplorerPresenter projectExplorerPart,
-                               final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
+    protected ResolvePresenter(ConsolesPanelPresenter consolesPanelPresenter,
+                               SubversionOutputConsoleFactory consoleFactory,
+                               AppContext appContext,
+                               SubversionExtensionLocalizationConstants constants,
+                               NotificationManager notificationManager,
+                               DialogFactory dialogFactory,
+                               SubversionClientService service,
+                               ResolveView view,
+                               StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
 
-        this.subversionClientService = subversionClientService;
+        this.service = service;
         this.notificationManager = notificationManager;
         this.dialogFactory = dialogFactory;
         this.constants = constants;
@@ -68,57 +70,50 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
         this.view.setDelegate(this);
     }
 
-    public boolean containsConflicts() {
-        return conflictsPaths != null && !conflictsPaths.isEmpty();
-    }
-
-    public void fetchConflictsList(boolean forCurrentSelection) {
-        CurrentProject currentProject = getActiveProject();
-        if (currentProject == null) {
-            return;
-        }
-
-        ProjectConfigDto projectConfig = currentProject.getRootProject();
-        if (projectConfig == null) {
-            return;
-        }
-
-        if (projectConfig.getPath() == null) {
-            return;
-        }
-
-        if (!projectConfig.getProblems().isEmpty()) {
-            return;
-        }
-
-        subversionClientService.showConflicts(projectConfig.getPath(),
-                                              forCurrentSelection ? getSelectedPaths() : null,
-                                              new AsyncCallback<List<String>>() {
-                                                  @Override
-                                                  public void onSuccess(List<String> conflictsList) {
-                                                      conflictsPaths = conflictsList;
-                                                  }
-
-                                                  @Override
-                                                  public void onFailure(Throwable exception) {
-                                                      notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
-                                                  }
-                                              });
-    }
-
     public void showConflictsDialog() {
-        if (conflictsPaths != null && !conflictsPaths.isEmpty()) {
-            for (String file : conflictsPaths) {
-                view.addConflictingFile(file);
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null);
+
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+
+        service.showConflicts(project.getLocation(), toRelative(project, resources)).then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse response) throws OperationException {
+                conflictsList = parseConflictsList(response.getOutput());
+
+                if (conflictsList.isEmpty()) {
+                    dialogFactory.createMessageDialog(constants.resolveNoConflictTitle(), constants.resolveNoConflictContent(), null)
+                                 .show();
+
+                    return;
+                }
+
+                for (String file : conflictsList) {
+                    view.addConflictingFile(file);
+                }
+                view.showDialog();
             }
-            view.showDialog();
-        } else {
-            dialogFactory.createMessageDialog(constants.resolveNoConflictTitle(), constants.resolveNoConflictContent(),
-                                              new ConfirmCallback() {
-                                                  @Override
-                                                  public void accepted() {}
-                                              }).show();
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+
+            }
+        });
+    }
+
+    protected List<String> parseConflictsList(List<String> output) {
+        List<String> conflictsList = new ArrayList<>();
+        for (String line : output) {
+            if (line.startsWith("C ")) {
+                int lastSpaceIndex = line.lastIndexOf(' ');
+                String filePathMatched = line.substring(lastSpaceIndex + 1);
+                conflictsList.add(filePathMatched);
+            }
         }
+        return conflictsList;
     }
 
     @Override
@@ -128,18 +123,13 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
 
     @Override
     public void onResolveClicked() {
-        CurrentProject currentProject = getActiveProject();
-        if (currentProject == null) {
-            return;
-        }
 
-        ProjectConfigDto project = currentProject.getRootProject();
-        if (project == null) {
-            return;
-        }
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null);
 
         HashMap<String, String> filesConflictResolutionActions = new HashMap<String, String>();
-        Iterator<String> iterConflicts = conflictsPaths.iterator();
+        Iterator<String> iterConflicts = conflictsList.iterator();
 
         while (iterConflicts.hasNext()) {
             String path = iterConflicts.next();
@@ -151,21 +141,19 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
         }
 
         if (filesConflictResolutionActions.size() > 0) {
-            subversionClientService.resolve(project.getPath(), filesConflictResolutionActions, "infinity",
-                                            new AsyncCallback<CLIOutputResponseList>() {
-                                                @Override
-                                                public void onSuccess(CLIOutputResponseList result) {
-                                                    for (CLIOutputResponse outputResponse : result.getCLIOutputResponses()) {
-                                                        printResponse(outputResponse.getCommand(), outputResponse.getOutput(), null,
-                                                                      constants.commandResolve());
-                                                    }
-                                                }
-
-                                                @Override
-                                                public void onFailure(Throwable exception) {
-                                                    notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
-                                                }
-                                            });
+            service.resolve(project.getLocation(), filesConflictResolutionActions, "infinity").then(new Operation<CLIOutputResponseList>() {
+                @Override
+                public void apply(CLIOutputResponseList response) throws OperationException {
+                    for (CLIOutputResponse outputResponse : response.getCLIOutputResponses()) {
+                        printResponse(outputResponse.getCommand(), outputResponse.getOutput(), null, constants.commandResolve());
+                    }
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError error) throws OperationException {
+                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                }
+            });
         }
         view.close();
     }

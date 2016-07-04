@@ -42,7 +42,7 @@ public abstract class ProjectAction extends Action {
 
     @Override
     public final void update(ActionEvent e) {
-        if (appContext.getCurrentProject() == null) {
+        if (appContext.getRootProject() == null) {
             e.getPresentation().setEnabledAndVisible(false);
             return;
         }

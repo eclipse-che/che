@@ -31,8 +31,10 @@ import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier.RunningListener;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
@@ -305,8 +307,11 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
             public void apply(MachineDto machineDto) throws OperationException {
                 if (machineDto.getConfig().isDev()) {
                     DevMachine devMachine = new DevMachine(machineDto);
-                    appContext.setDevMachine(devMachine);
-                    appContext.setProjectsRoot(machineDto.getRuntime().projectsRoot());
+
+                    if (appContext instanceof AppContextImpl) {
+                        ((AppContextImpl)appContext).setDevMachine(devMachine);
+                        ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(machineDto.getRuntime().projectsRoot()));
+                    }
                 }
                 eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.RUNNING));
             }
@@ -321,8 +326,8 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
                 machineStatusNotifier.trackMachine(machineState, DESTROY);
 
                 final DevMachine devMachine = appContext.getDevMachine();
-                if (devMachine != null && machineState.getId().equals(devMachine.getId())) {
-                    appContext.setDevMachine(null);
+                if (devMachine != null && machineState.getId().equals(devMachine.getId()) && appContext instanceof AppContextImpl) {
+                    ((AppContextImpl)appContext).setDevMachine(null);
                 }
             }
         });

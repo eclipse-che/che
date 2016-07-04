@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.part.editor.actions;
 
 import com.google.common.base.Predicate;
-import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -24,6 +23,7 @@ import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 
 import static com.google.common.collect.Iterables.filter;
+import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
 
 /**
  * Performs closing all opened editors except selected one.
@@ -53,12 +53,7 @@ public class CloseOtherAction extends EditorAbstractAction {
         });
 
         for (final EditorPartPresenter toClose : filtered) {
-            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                @Override
-                public void execute() {
-                    eventBus.fireEvent(new FileEvent(toClose.getEditorInput().getFile(), FileEvent.FileOperation.CLOSE));
-                }
-            });
+            eventBus.fireEvent(new FileEvent(toClose.getEditorInput().getFile(), CLOSE));
         }
     }
 }

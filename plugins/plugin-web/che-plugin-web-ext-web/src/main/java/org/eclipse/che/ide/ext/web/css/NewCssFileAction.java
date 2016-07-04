@@ -10,25 +10,37 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web.css;
 
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.web.WebLocalizationConstant;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * Action to create new CSS file.
  *
  * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class NewCssFileAction extends AbstractNewResourceAction {
     private static final String DEFAULT_CONTENT = "@CHARSET \"UTF-8\";";
 
     @Inject
-    public NewCssFileAction(WebLocalizationConstant localizationConstant) {
+    public NewCssFileAction(WebLocalizationConstant localizationConstant,
+                            DialogFactory dialogFactory,
+                            CoreLocalizationConstant coreLocalizationConstant,
+                            EventBus eventBus,
+                            AppContext appContext,
+                            NotificationManager notificationManager) {
         super(localizationConstant.newCssFileActionTitle(),
               localizationConstant.newCssFileActionDescription(),
-              null);
+              null, dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
     }
 
     @Override

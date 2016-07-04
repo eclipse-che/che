@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.update.UpdatePresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn update" command (For the latest revision).
@@ -29,13 +28,11 @@ public class UpdateAction extends SubversionAction {
     private final UpdatePresenter presenter;
 
     @Inject
-    public UpdateAction(final AppContext appContext,
-                        final ProjectExplorerPresenter projectExplorerPresenter,
-                        final SubversionExtensionLocalizationConstants constants,
-                        final SubversionExtensionResources resources,
-                        final UpdatePresenter presenter) {
-        super(constants.updateTitle(), constants.updateDescription(), resources.update(), appContext,
-              constants, resources, projectExplorerPresenter);
+    public UpdateAction(AppContext appContext,
+                        SubversionExtensionLocalizationConstants constants,
+                        SubversionExtensionResources resources,
+                        UpdatePresenter presenter) {
+        super(constants.updateTitle(), constants.updateDescription(), resources.update(), appContext, constants, resources);
 
         this.presenter = presenter;
     }

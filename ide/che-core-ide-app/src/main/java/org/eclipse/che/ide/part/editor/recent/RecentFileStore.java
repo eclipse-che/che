@@ -14,8 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -25,11 +23,8 @@ import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
-import org.eclipse.che.ide.api.project.node.HasStorablePath.StorablePath;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.util.Pair;
 
 import javax.validation.constraints.NotNull;
@@ -57,24 +52,21 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
     public static final int    MAX_PATH_LENGTH_TO_DISPLAY = 50;
     public static final String RECENT_GROUP_ID            = "Recent";
 
-    private final ProjectExplorerPresenter projectExplorer;
     private final OpenRecentFilesPresenter openRecentFilesPresenter;
     private final ActionManager            actionManager;
     private final RecentFileActionFactory  recentFileActionFactory;
     private final CoreLocalizationConstant locale;
     private final DefaultActionGroup       recentGroup;
 
-    private LinkedList<FileReferenceNode>                         recentStorage = newLinkedList();
-    private LinkedList<Pair<FileReferenceNode, RecentFileAction>> fileToAction  = newLinkedList();
+    private LinkedList<File>                         recentStorage = newLinkedList();
+    private LinkedList<Pair<File, RecentFileAction>> fileToAction  = newLinkedList();
 
     @Inject
     public RecentFileStore(EventBus eventBus,
-                           ProjectExplorerPresenter projectExplorer,
                            OpenRecentFilesPresenter openRecentFilesPresenter,
                            ActionManager actionManager,
                            RecentFileActionFactory recentFileActionFactory,
                            CoreLocalizationConstant locale) {
-        this.projectExplorer = projectExplorer;
         this.openRecentFilesPresenter = openRecentFilesPresenter;
         this.actionManager = actionManager;
         this.recentFileActionFactory = recentFileActionFactory;
@@ -100,18 +92,8 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
     public void onFileOperation(FileEvent event) {
         if (event.getOperationType() == OPEN) {
             VirtualFile file = event.getFile();
-            if (file instanceof FileReferenceNode) {
-                add((FileReferenceNode)file);
-            } else {
-                //we got this file not from the project explorer
-                projectExplorer.getNodeByPath(new StorablePath(file.getPath())).then(new Operation<Node>() {
-                    @Override
-                    public void apply(Node node) throws OperationException {
-                        if (node instanceof FileReferenceNode) {
-                            add((FileReferenceNode)node);
-                        }
-                    }
-                });
+            if (file instanceof File) {
+                add((File)file);
             }
         }
     }
@@ -124,7 +106,7 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
 
     /** {@inheritDoc} */
     @Override
-    public boolean add(final FileReferenceNode item) {
+    public boolean add(final File item) {
         if (item == null) {
             return false;
         }
@@ -150,14 +132,14 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
 
     /** {@inheritDoc} */
     @Override
-    public boolean remove(FileReferenceNode item) {
+    public boolean remove(File item) {
         recentStorage.remove(item);
         openRecentFilesPresenter.setRecentFiles(getAll());
 
         //with one cycle de-register action and remove it from recent group
-        Iterator<Pair<FileReferenceNode, RecentFileAction>> iterator = fileToAction.iterator();
+        Iterator<Pair<File, RecentFileAction>> iterator = fileToAction.iterator();
         while (iterator.hasNext()) {
-            Pair<FileReferenceNode, RecentFileAction> pair = iterator.next();
+            Pair<File, RecentFileAction> pair = iterator.next();
             if (pair.getFirst().equals(item)) {
                 recentGroup.remove(pair.getSecond());
                 actionManager.unregisterAction(pair.getSecond().getId());
@@ -171,13 +153,13 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
 
     /** {@inheritDoc} */
     @Override
-    public boolean contains(FileReferenceNode item) {
+    public boolean contains(File item) {
         return recentStorage.contains(item);
     }
 
     /** {@inheritDoc} */
     @Override
-    public List<FileReferenceNode> getAll() {
+    public List<File> getAll() {
         return recentStorage;
     }
 
@@ -189,7 +171,7 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
         recentStorage.clear();
 
         //de-register all previously registered actions
-        for (Pair<FileReferenceNode, RecentFileAction> pair : fileToAction) {
+        for (Pair<File, RecentFileAction> pair : fileToAction) {
             actionManager.unregisterAction(pair.getSecond().getId());
             recentGroup.remove(pair.getSecond());
         }

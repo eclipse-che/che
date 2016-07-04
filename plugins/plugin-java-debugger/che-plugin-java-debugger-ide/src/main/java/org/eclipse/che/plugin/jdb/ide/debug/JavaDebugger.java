@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -22,8 +21,6 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
-import org.eclipse.che.ide.ext.java.client.project.node.jar.JarFileNode;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
@@ -79,16 +76,8 @@ public class JavaDebugger extends AbstractDebugger {
         return  resourcePath != null ? resourcePath : location.getTarget();
     }
 
-    @Nullable
     @Override
     protected String pathToFqn(VirtualFile file) {
-        if (file instanceof JavaFileNode) {
-            return ((JavaFileNode)file).getFqn();
-        }
-        if (file instanceof JarFileNode) {
-            return file.getPath();
-        }
-
         String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
 
         FqnResolver resolver = fqnResolverFactory.getResolver(fileExtension);

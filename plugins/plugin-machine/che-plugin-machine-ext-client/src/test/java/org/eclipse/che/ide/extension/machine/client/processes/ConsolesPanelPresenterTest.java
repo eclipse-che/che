@@ -16,6 +16,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
@@ -145,7 +146,9 @@ public class ConsolesPanelPresenterTest {
 
     @Before
     public void setUp() {
-        when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        DevMachine devMachine = mock(DevMachine.class);
+        when(devMachine.getId()).thenReturn(WORKSPACE_ID);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
 
         when(machineService.getMachines(anyString())).thenReturn(machinesPromise);
         when(machineService.getMachine(anyString())).thenReturn(machinePromise);
@@ -154,6 +157,8 @@ public class ConsolesPanelPresenterTest {
         when(machineService.getProcesses(anyString())).thenReturn(processesPromise);
         when(processesPromise.then(Matchers.<Operation<List<MachineProcessDto>>>anyObject())).thenReturn(processesPromise);
         when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
+
+        when(appContext.getWorkspaceId()).thenReturn("workspaceID");
 
         presenter =
                 new ConsolesPanelPresenter(view, eventBus, dtoFactory, dialogFactory, entityFactory, terminalFactory, commandConsoleFactory,
@@ -214,15 +219,14 @@ public class ConsolesPanelPresenterTest {
         when(machineConfigDto.isDev()).thenReturn(true);
         when(machineDto.getStatus()).thenReturn(MachineStatus.RUNNING);
 
-        when(appContext.getWorkspace()).thenReturn(workspace);
+        when(appContext.getWorkspaceId()).thenReturn("workspaceID");
         MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
         when(machineStateEvent.getMachineId()).thenReturn("machineId");
         verify(eventBus, times(4)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
 
-        MachineStateEvent.Handler devMachineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
-        devMachineStateHandler.onMachineRunning(machineStateEvent);
+        MachineStateEvent.Handler machineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
+        machineStateHandler.onMachineRunning(machineStateEvent);
 
-        verify(appContext).getWorkspaceId();
         verify(machineService).getMachine(eq("machineId"));
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machineDto);

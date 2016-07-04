@@ -14,25 +14,38 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.MergeResult;
+import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.api.git.shared.Revision;
+import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Folder;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.List;
+
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,6 +56,10 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseTest {
     public static final String  PROJECT_PATH    = "/test";
+    public static final String  FILE_1_PATH     = "/test/a/file_1";
+    public static final String  FILE_2_PATH     = "/test/a/file_2";
+    public static final String  FOLDER_1_PATH   = "/test/a";
+    public static final String  FOLDER_2_PATH   = "/test/a";
     public static final boolean SELECTED_ITEM   = true;
     public static final boolean UNSELECTED_ITEM = false;
     public static final boolean ENABLE_BUTTON   = true;
@@ -58,58 +75,117 @@ public abstract class BaseTest {
     public static final String  REPOSITORY_NAME = "origin";
     public static final String  LOCAL_BRANCH    = "localBranch";
     public static final String  REMOTE_BRANCH   = "remoteBranch";
+    public static final String  WS_ID           = "id";
     @Mock
-    protected CurrentProject           currentProject;
+    protected Project                 project;
     @Mock
-    protected ProjectConfigDto         projectConfig;
-    @Mock
-    protected ProjectConfigDto         rootProjectConfig;
-    @Mock
-    protected AppContext               appContext;
+    protected AppContext              appContext;
     @Mock
     protected DevMachine               devMachine;
     @Mock
-    protected GitServiceClient         service;
+    protected GitServiceClient        service;
     @Mock
-    protected GitLocalizationConstant  constant;
+    protected GitLocalizationConstant constant;
     @Mock
-    protected GitOutputConsole         console;
+    protected GitOutputConsole        console;
     @Mock
-    protected GitOutputConsoleFactory  gitOutputConsoleFactory;
+    protected GitOutputConsoleFactory gitOutputConsoleFactory;
     @Mock
-    protected ConsolesPanelPresenter   consolesPanelPresenter;
+    protected ConsolesPanelPresenter  consolesPanelPresenter;
     @Mock
-    protected GitResources             resources;
+    protected GitResources            resources;
     @Mock
-    protected EventBus                 eventBus;
+    protected EventBus                eventBus;
     @Mock
-    protected SelectionAgent           selectionAgent;
+    protected NotificationManager     notificationManager;
     @Mock
-    protected NotificationManager      notificationManager;
+    protected DtoFactory              dtoFactory;
     @Mock
-    protected DtoFactory               dtoFactory;
+    protected DtoUnmarshallerFactory  dtoUnmarshallerFactory;
     @Mock
-    protected DtoUnmarshallerFactory   dtoUnmarshallerFactory;
+    protected DialogFactory           dialogFactory;
     @Mock
-    protected DialogFactory            dialogFactory;
+    protected PromiseError            promiseError;
     @Mock
-    protected ProjectServiceClient     projectServiceClient;
+    protected Throwable               throwable;
+
     @Mock
-    protected ProjectExplorerPresenter projectExplorer;
+    protected File   file_1;
+    @Mock
+    protected File   file_2;
+    @Mock
+    protected Folder folder_1;
+    @Mock
+    protected Folder folder_2;
+
+    @Mock
+    protected Promise<Status>                         statusPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<Status>>       statusPromiseCaptor;
+    @Captor
+    protected ArgumentCaptor<Operation<PromiseError>> promiseErrorCaptor;
+
+    @Mock
+    protected Promise<Void>                   voidPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<Void>> voidPromiseCaptor;
+
+    @Mock
+    protected Promise<List<Branch>>                   branchListPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<List<Branch>>> branchListCaptor;
+
+    @Mock
+    protected Promise<Branch>                   branchPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<Branch>> branchCaptor;
+
+    @Mock
+    protected Promise<Resource[]>                   synchronizePromise;
+    @Captor
+    protected ArgumentCaptor<Operation<Resource[]>> synchronizeCaptor;
+
+    @Mock
+    protected Promise<Revision>                   revisionPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<Revision>> revisionCaptor;
+
+    @Mock
+    protected Promise<List<Remote>>                   remoteListPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<List<Remote>>> remoteListCaptor;
+
+    @Mock
+    protected Promise<MergeResult>                   mergeResultPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<MergeResult>> mergeResultCaptor;
+
+    @Mock
+    protected Promise<String>                   stringPromise;
+    @Captor
+    protected ArgumentCaptor<Operation<String>> stringCaptor;
 
     @Before
     public void disarm() {
-        when(appContext.getCurrentProject()).thenReturn(currentProject);
-
-        when(currentProject.getProjectConfig()).thenReturn(projectConfig);
-        when(currentProject.getRootProject()).thenReturn(rootProjectConfig);
-
-        when(projectConfig.getName()).thenReturn(PROJECT_NAME);
-        when(projectConfig.getPath()).thenReturn(PROJECT_PATH);
-
-        when(rootProjectConfig.getName()).thenReturn(PROJECT_NAME);
-        when(rootProjectConfig.getPath()).thenReturn(PROJECT_PATH);
+        when(project.getName()).thenReturn(PROJECT_NAME);
+        when(project.getLocation()).thenReturn(Path.valueOf(PROJECT_PATH));
 
         when(gitOutputConsoleFactory.create(anyString())).thenReturn(console);
+
+        when(file_1.getLocation()).thenReturn(Path.valueOf(FILE_1_PATH));
+        when(file_2.getLocation()).thenReturn(Path.valueOf(FILE_2_PATH));
+
+        when(folder_1.getLocation()).thenReturn(Path.valueOf(FOLDER_1_PATH));
+        when(folder_2.getLocation()).thenReturn(Path.valueOf(FOLDER_2_PATH));
+
+        when(promiseError.getMessage()).thenReturn("error");
+        when(promiseError.getCause()).thenReturn(throwable);
+        when(throwable.getMessage()).thenReturn("error");
+
+        when(project.synchronize()).thenReturn(synchronizePromise);
+
+        DevMachine devMachine = mock(DevMachine.class);
+        when(devMachine.getId()).thenReturn("id");
+        when(appContext.getDevMachine()).thenReturn(devMachine);
     }
 }

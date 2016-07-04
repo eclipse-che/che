@@ -28,7 +28,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.search.selectpath.SelectPathPresenter;
 import org.eclipse.che.ide.ui.window.Window;
 
@@ -47,7 +46,6 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
     Label                    errLabel;
     @UiField(provided = true)
     CoreLocalizationConstant locale;
-    private final AppContext appContext;
     @UiField
     TextBox  text;
     @UiField
@@ -71,10 +69,8 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
     @Inject
     public FullTextSearchViewImpl(CoreLocalizationConstant locale,
                                   final SelectPathPresenter selectPathPresenter,
-                                  FullTextSearchViewImplUiBinder uiBinder,
-                                  AppContext appContext) {
+                                  FullTextSearchViewImplUiBinder uiBinder) {
         this.locale = locale;
-        this.appContext = appContext;
         this.selectPathPresenter = selectPathPresenter;
 
         setTitle(locale.textSearchTitle());
@@ -84,6 +80,8 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
 
         createButtons();
         addHandlers();
+
+        directory.setReadOnly(true);
     }
 
     @Override
@@ -104,7 +102,7 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
         isUseDirectory.setValue(false);
         directory.setEnabled(false);
         selectPathButton.setEnabled(false);
-        directory.setText(appContext.getCurrentProject().getRootProject().getPath());
+        directory.setText("");
         filesMask.setText("*.*");
         directory.setText("/");
         errLabel.setText("");

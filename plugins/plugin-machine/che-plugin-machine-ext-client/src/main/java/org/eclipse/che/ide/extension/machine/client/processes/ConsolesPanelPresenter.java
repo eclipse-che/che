@@ -89,23 +89,26 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
 
     public static final String SSH_PORT = "22";
 
-    private final DtoFactory                  dtoFactory;
-    private final DialogFactory               dialogFactory;
-    private final EntityFactory               entityFactory;
-    private final TerminalFactory             terminalFactory;
-    private final CommandConsoleFactory       commandConsoleFactory;
-    private final NotificationManager         notificationManager;
-    private final MachineLocalizationConstant localizationConstant;
-    private final ConsolesPanelView           view;
-    private final MachineResources            resources;
-    private final AppContext                  appContext;
-    private final MachineServiceClient        machineService;
-    private final WorkspaceAgent              workspaceAgent;
-    private final CommandTypeRegistry         commandTypeRegistry;
-    private final Map<OutputConsole, String>  consoleCommands;
+    private final DtoFactory                    dtoFactory;
+    private final DialogFactory                 dialogFactory;
+    private final EntityFactory                 entityFactory;
+    private final TerminalFactory               terminalFactory;
+    private final CommandConsoleFactory         commandConsoleFactory;
+    private final NotificationManager           notificationManager;
+    private final MachineLocalizationConstant   localizationConstant;
+    private final ConsolesPanelView             view;
+    private final MachineResources              resources;
+    private final AppContext                    appContext;
+    private final MachineServiceClient          machineService;
+    private final WorkspaceAgent                workspaceAgent;
+    private final CommandTypeRegistry           commandTypeRegistry;
+    private final Map<OutputConsole, String>    consoleCommands;
+    private final ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
 
     @VisibleForTesting
     final List<ProcessTreeNode>          rootNodes;
+    @VisibleForTesting
+    final ProcessTreeNode                rootNode;
     @VisibleForTesting
     final Map<String, ProcessTreeNode>   machineNodes;
     @VisibleForTesting
@@ -113,13 +116,9 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     @VisibleForTesting
     final Map<String, OutputConsole>     consoles;
 
-    private OutputConsole                      workspaceConsole;
-
-    ProcessTreeNode                            rootNode;
-    ProcessTreeNode                            selectedTreeNode;
-    ProcessTreeNode                            contextTreeNode;
-
-    private ConsoleTreeContextMenuFactory      consoleTreeContextMenuFactory;
+    private OutputConsole   workspaceConsole;
+    private ProcessTreeNode selectedTreeNode;
+    private ProcessTreeNode contextTreeNode;
 
     @Inject
     public ConsolesPanelPresenter(ConsolesPanelView view,

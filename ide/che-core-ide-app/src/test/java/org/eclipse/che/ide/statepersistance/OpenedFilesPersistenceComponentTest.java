@@ -17,8 +17,10 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.statepersistance.dto.ActionDescriptor;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,10 +79,10 @@ public class OpenedFilesPersistenceComponentTest {
     private EditorInput editorInput2;
 
     @Mock
-    private VirtualFile virtualFile1;
+    private File virtualFile1;
 
     @Mock
-    private VirtualFile virtualFile2;
+    private File virtualFile2;
 
     @InjectMocks
     private OpenedFilesPersistenceComponent component;
@@ -105,20 +107,9 @@ public class OpenedFilesPersistenceComponentTest {
         assertEquals(2, actionDescriptors.size());
     }
 
-    @Test
-    public void shouldAddActionForActivatingLastFile() {
-        configureOpenedEditors();
-        when(editorAgent.getActiveEditor()).thenReturn(editorPartPresenter1);
-        when(editorAgent.getLastEditor()).thenReturn(editorPartPresenter2);
-
-        List<ActionDescriptor> actionDescriptors = component.getActions();
-
-        assertEquals(3, actionDescriptors.size());
-    }
-
     private void configureOpenedEditors() {
-        when(virtualFile1.getPath()).thenReturn(FILE1_PATH);
-        when(virtualFile2.getPath()).thenReturn(FILE2_PATH);
+        when(virtualFile1.getLocation()).thenReturn(Path.valueOf(FILE1_PATH));
+        when(virtualFile2.getLocation()).thenReturn(Path.valueOf(FILE2_PATH));
         when(editorInput1.getFile()).thenReturn(virtualFile1);
         when(editorInput2.getFile()).thenReturn(virtualFile2);
         when(editorPartPresenter1.getEditorInput()).thenReturn(editorInput1);

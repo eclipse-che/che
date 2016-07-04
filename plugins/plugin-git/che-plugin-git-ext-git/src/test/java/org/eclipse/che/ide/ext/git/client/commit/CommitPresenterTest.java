@@ -10,37 +10,24 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.commit;
 
-import com.googlecode.gwt.test.utils.GwtReflectionUtils;
-
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.DateTimeFormatter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import java.lang.reflect.Method;
-
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.eclipse.che.ide.ext.git.client.commit.CommitPresenter.COMMIT_COMMAND_NAME;
 
 /**
  * Testing {@link CommitPresenter} functionality.
  *
  * @author Andrey Plotnikov
+ * @author Vlad Zhukovskyi
  */
 public class CommitPresenterTest extends BaseTest {
     @Captor
@@ -55,8 +42,6 @@ public class CommitPresenterTest extends BaseTest {
     private Revision                 revision;
     @Mock
     private DateTimeFormatter        dateTimeFormatter;
-    @Mock
-    private ProjectExplorerPresenter projectExplorer;
 
     private CommitPresenter presenter;
 
@@ -69,10 +54,8 @@ public class CommitPresenterTest extends BaseTest {
                                         constant,
                                         notificationManager,
                                         dialogFactory,
-                                        dtoUnmarshallerFactory,
                                         appContext,
                                         dateTimeFormatter,
-                                        projectExplorer,
                                         gitOutputConsoleFactory,
                                         consolesPanelPresenter);
     }
@@ -80,7 +63,7 @@ public class CommitPresenterTest extends BaseTest {
     @Test
     public void testShowDialog() throws Exception {
         when(view.getMessage()).thenReturn(EMPTY_TEXT);
-        presenter.showDialog();
+        presenter.showDialog(project);
 
         verify(view).setAmend(eq(!IS_OVERWRITTEN));
         verify(view).setAllFilesInclude(eq(!ALL_FILE_INCLUDES));
@@ -93,7 +76,7 @@ public class CommitPresenterTest extends BaseTest {
     @Test
     public void testShowDialogWithExistingMessage() throws Exception {
         when(view.getMessage()).thenReturn("foo");
-        presenter.showDialog();
+        presenter.showDialog(project);
 
         verify(view).setAmend(eq(!IS_OVERWRITTEN));
         verify(view).setAllFilesInclude(eq(!ALL_FILE_INCLUDES));
@@ -101,77 +84,6 @@ public class CommitPresenterTest extends BaseTest {
         verify(view).setEnableCommitButton(eq(ENABLE_BUTTON));
         verify(view).getMessage();
         verify(view).showDialog();
-    }
-
-    @Test
-    public void testOnCommitClickedWhenCommitWSRequestIsSuccessful() throws Exception {
-        when(view.getMessage()).thenReturn(COMMIT_TEXT);
-        when(view.isAllFilesInclued()).thenReturn(ALL_FILE_INCLUDES);
-        when(view.isAmend()).thenReturn(IS_OVERWRITTEN);
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Revision> callback = (AsyncRequestCallback<Revision>)arguments[4];
-                @SuppressWarnings("NonJREEmulationClassesInClientCode")
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, revision);
-                return callback;
-            }
-        }).when(service).commit(devMachine, anyObject(), anyString(), anyBoolean(), anyBoolean(),
-                                (AsyncRequestCallback<Revision>)anyObject());
-
-        presenter.showDialog();
-        presenter.onCommitClicked();
-
-        verify(view, times(2)).getMessage();
-        verify(view).isAllFilesInclued();
-        verify(view).isAmend();
-        verify(view).close();
-        verify(view).setMessage(eq(EMPTY_TEXT));
-
-        verify(service).commit(eq(devMachine), eq(rootProjectConfig), eq(COMMIT_TEXT), eq(ALL_FILE_INCLUDES), eq(IS_OVERWRITTEN),
-                               (AsyncRequestCallback<Revision>)anyObject());
-        verify(gitOutputConsoleFactory).create(COMMIT_COMMAND_NAME);
-        verify(console).print(anyString());
-        verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
-    }
-
-    @Test
-    public void testOnCommitClickedWhenCommitRequestIsFailed() throws Exception {
-        when(view.getMessage()).thenReturn(COMMIT_TEXT);
-        when(view.isAllFilesInclued()).thenReturn(ALL_FILE_INCLUDES);
-        when(view.isAmend()).thenReturn(IS_OVERWRITTEN);
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Revision> callback = (AsyncRequestCallback<Revision>)arguments[4];
-                @SuppressWarnings("NonJREEmulationClassesInClientCode")
-                Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
-                onFailure.invoke(callback, mock(Throwable.class));
-                return callback;
-            }
-        }).when(service).commit(devMachine, anyObject(), anyString(), anyBoolean(), anyBoolean(),
-                                (AsyncRequestCallback<Revision>)anyObject());
-
-        presenter.showDialog();
-        presenter.onCommitClicked();
-
-        verify(view, times(2)).getMessage();
-        verify(view).isAllFilesInclued();
-        verify(view).isAmend();
-        verify(view).close();
-        verify(view, times(0)).setMessage(anyString());
-
-        verify(service).commit(eq(devMachine), eq(rootProjectConfig), eq(COMMIT_TEXT), eq(ALL_FILE_INCLUDES), eq(IS_OVERWRITTEN),
-                               (AsyncRequestCallback<Revision>)anyObject());
-        verify(constant).commitFailed();
-        verify(gitOutputConsoleFactory).create(COMMIT_COMMAND_NAME);
-        verify(console).printError(anyString());
-        verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
     }
 
     @Test
