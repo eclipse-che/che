@@ -85,6 +85,7 @@ import org.eclipse.che.plugin.docker.client.params.network.GetNetworksParams;
 import org.eclipse.che.plugin.docker.client.params.network.InspectNetworkParams;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -209,6 +210,7 @@ public class DockerConnectorTest {
                                                   authManager,
                                                   dockerApiVersionPathPrefixProvider));
 
+        //noinspection ThrowableResultOfMethodCallIgnored
         doReturn(new DockerException(EXCEPTION_ERROR_MESSAGE, RESPONSE_ERROR_CODE))
                 .when(dockerConnector).getDockerException(any(DockerResponse.class));
 
@@ -258,6 +260,7 @@ public class DockerConnectorTest {
         dockerConnector.getSystemInfo();
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -287,6 +290,7 @@ public class DockerConnectorTest {
         dockerConnector.getVersion();
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -294,7 +298,8 @@ public class DockerConnectorTest {
     public void shouldBeAbleToGetListImages() throws IOException, JsonParseException {
         List<Image> images = new ArrayList<>();
 
-        doReturn(images).when(dockerConnector).parseResponseStreamAndClose(eq(inputStream), any(TypeToken.class));
+        doReturn(images).when(dockerConnector).parseResponseStreamAndClose(eq(inputStream),
+                                                                           Matchers.<TypeToken<List<Image>>>any());
 
         List<Image> returnedImages =
                 dockerConnector.listImages();
@@ -316,6 +321,7 @@ public class DockerConnectorTest {
         dockerConnector.listImages();
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -325,7 +331,10 @@ public class DockerConnectorTest {
         ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
         List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
 
-        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAndClose(eq(inputStream), any(TypeToken.class));
+        //noinspection ThrowableResultOfMethodCallIgnored
+        doReturn(expectedListContainers).when(dockerConnector)
+                                        .parseResponseStreamAndClose(eq(inputStream),
+                                                                     Matchers.<TypeToken<List<ContainerListEntry>>>any());
 
         List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 
@@ -337,7 +346,8 @@ public class DockerConnectorTest {
         verify(dockerConnection).request();
         verify(dockerResponse).getStatus();
         verify(dockerResponse).getInputStream();
-        verify(dockerConnector).parseResponseStreamAndClose(eq(inputStream), any(TypeToken.class));
+        //noinspection ThrowableResultOfMethodCallIgnored
+        verify(dockerConnector).parseResponseStreamAndClose(eq(inputStream), Matchers.<TypeToken<List<ContainerListEntry>>>any());
 
         assertEquals(containers, expectedListContainers);
     }
@@ -349,7 +359,10 @@ public class DockerConnectorTest {
         ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
         List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
 
-        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAndClose(eq(inputStream), any(TypeToken.class));
+        //noinspection ThrowableResultOfMethodCallIgnored
+        doReturn(expectedListContainers).when(dockerConnector)
+                                        .parseResponseStreamAndClose(eq(inputStream),
+                                                                     Matchers.<TypeToken<List<ContainerListEntry>>>any());
 
         List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 
@@ -367,6 +380,7 @@ public class DockerConnectorTest {
         dockerConnector.listContainers(listContainersParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -380,7 +394,8 @@ public class DockerConnectorTest {
 
         List<ContainerListEntry> result = dockerConnector.listContainers();
 
-        ArgumentCaptor<ListContainersParams> listContainersParamsArgumentCaptor = ArgumentCaptor.forClass(ListContainersParams.class);
+        ArgumentCaptor<ListContainersParams> listContainersParamsArgumentCaptor =
+                ArgumentCaptor.forClass(ListContainersParams.class);
         verify(dockerConnector).listContainers(listContainersParamsArgumentCaptor.capture());
 
         assertEquals(result, expectedListContainers);
@@ -434,6 +449,7 @@ public class DockerConnectorTest {
         dockerConnector.inspectImage(inspectImageParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -459,6 +475,7 @@ public class DockerConnectorTest {
         dockerConnector.stopContainer(stopContainerParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -499,6 +516,7 @@ public class DockerConnectorTest {
         dockerConnector.killContainer(killContainerParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -526,6 +544,7 @@ public class DockerConnectorTest {
         dockerConnector.removeContainer(removeContainerParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -575,6 +594,7 @@ public class DockerConnectorTest {
         dockerConnector.waitContainer(waitContainerParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -625,6 +645,7 @@ public class DockerConnectorTest {
         dockerConnector.inspectContainer(inspectContainerParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -654,6 +675,7 @@ public class DockerConnectorTest {
         dockerConnector.attachContainer(attachContainerParams, logMessageProcessor);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -684,6 +706,7 @@ public class DockerConnectorTest {
         dockerConnector.getContainerLogs(getContainerLogsParams, logMessageProcessor);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -697,6 +720,7 @@ public class DockerConnectorTest {
         dockerConnector.getContainerLogs(getContainerLogsParams, logMessageProcessor);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -735,6 +759,7 @@ public class DockerConnectorTest {
         dockerConnector.createExec(inspectContainerParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -766,6 +791,7 @@ public class DockerConnectorTest {
         dockerConnector.startExec(startExecParams, logMessageProcessor);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -814,6 +840,7 @@ public class DockerConnectorTest {
         dockerConnector.getExecInfo(getExecInfoParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -870,6 +897,7 @@ public class DockerConnectorTest {
         dockerConnector.top(topParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -904,14 +932,14 @@ public class DockerConnectorTest {
         dockerConnector.getResource(getResourceParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
     public void shouldBeAbleToPutResourcesIntoContainer() throws IOException {
         InputStream source = new CloseConnectionInputStream(new ByteArrayInputStream(STREAM_DATA_BYTES), dockerConnection);
-        PutResourceParams putResourceParams = PutResourceParams.create(CONTAINER, PATH_TO_FILE)
-                                                               .withSourceStream(source);
+        PutResourceParams putResourceParams = PutResourceParams.create(CONTAINER, PATH_TO_FILE, source);
 
         dockerConnector.putResource(putResourceParams);
 
@@ -929,8 +957,7 @@ public class DockerConnectorTest {
     @Test(expectedExceptions = IOException.class, expectedExceptionsMessageRegExp = EXCEPTION_ERROR_MESSAGE)
     public void shouldProduceErrorWhenPutsResourcesIntoContainerIfResponseCodeIsNotSuccess() throws IOException {
         InputStream source = new CloseConnectionInputStream(new ByteArrayInputStream(ERROR_MESSAGE.getBytes()), dockerConnection);
-        PutResourceParams putResourceParams = PutResourceParams.create(CONTAINER, PATH_TO_FILE)
-                                                               .withSourceStream(source);
+        PutResourceParams putResourceParams = PutResourceParams.create(CONTAINER, PATH_TO_FILE, source);
 
         when(dockerResponse.getStatus()).thenReturn(RESPONSE_ERROR_CODE);
         when(dockerResponse.getInputStream())
@@ -939,6 +966,7 @@ public class DockerConnectorTest {
         dockerConnector.putResource(putResourceParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -967,6 +995,7 @@ public class DockerConnectorTest {
         dockerConnector.getEvents(getExecInfoParams, eventMessageProcessor);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -1020,10 +1049,12 @@ public class DockerConnectorTest {
         dockerConnector.buildImage(getExecInfoParams, progressMonitor);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
-    @Test(expectedExceptions = java.io.IOException.class, expectedExceptionsMessageRegExp = "Docker image build failed")
+    @Test(expectedExceptions = IOException.class,
+          expectedExceptionsMessageRegExp = "Docker image build failed. Image id not found in build output.")
     public void shouldThrowIOExceptionWhenBuildImageButNoSuccessMessageInResponse() throws IOException, InterruptedException {
         AuthConfigs authConfigs = DtoFactory.newDto(AuthConfigs.class);
         AuthConfig authConfig = DtoFactory.newDto(AuthConfig.class);
@@ -1076,6 +1107,7 @@ public class DockerConnectorTest {
         dockerConnector.removeImage(removeImageParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -1102,6 +1134,7 @@ public class DockerConnectorTest {
         dockerConnector.tag(tagParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -1151,12 +1184,39 @@ public class DockerConnectorTest {
         dockerConnector.push(pushParams, progressMonitor);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test(expectedExceptions = DockerException.class,
-          expectedExceptionsMessageRegExp = "Docker image was successfully pushed, but its digest wasn't obtained")
-    public void shouldThrowDockerExceptionWhenPushImageButDigestWasNotParsed() throws IOException, InterruptedException {
+          expectedExceptionsMessageRegExp = "Docker image pushing failed. Cause: Docker push response doesn't contain image digest")
+    public void shouldThrowDockerExceptionWhenPushImageButDigestOutputMissing() throws IOException, InterruptedException {
+        String dockerPushOutput = "{\"progress\":\"[=====>              ] 25%\"}\n" +
+                                  "{\"status\":\"Image already exists\"}\n" +
+                                  "{\"progress\":\"[===============>    ] 75%\"}\n";
+
+        when(dockerResponse.getInputStream()).thenReturn(new ByteArrayInputStream(dockerPushOutput.getBytes()));
+        PushParams pushParams = PushParams.create(REPOSITORY);
+
+        dockerConnector.push(pushParams, progressMonitor);
+    }
+
+    @Test(expectedExceptions = DockerException.class,
+          expectedExceptionsMessageRegExp = "Docker image pushing failed. Cause: .*")
+    public void shouldThrowDockerExceptionWhenPushImageButOutputIsEmpty() throws IOException, InterruptedException {
+        PushParams pushParams = PushParams.create(REPOSITORY);
+
+        dockerConnector.push(pushParams, progressMonitor);
+    }
+
+    @Test(expectedExceptions = DockerException.class,
+          expectedExceptionsMessageRegExp = "Docker image pushing failed. Cause: test error")
+    public void shouldThrowDockerExceptionWhenPushFails() throws IOException, InterruptedException {
+        String dockerPushOutput = "{\"progress\":\"[=====>              ] 25%\"}\n" +
+                                  "{\"progress\":\"[===============>    ] 75%\"}\n" +
+                                  "{\"error\":\"test error\"}\n";
+
+        when(dockerResponse.getInputStream()).thenReturn(new ByteArrayInputStream(dockerPushOutput.getBytes()));
         PushParams pushParams = PushParams.create(REPOSITORY);
 
         dockerConnector.push(pushParams, progressMonitor);
@@ -1179,7 +1239,7 @@ public class DockerConnectorTest {
 
     @Test
     public void shouldBeAbleToCommitImage() throws IOException, JsonParseException {
-        CommitParams commitParams = CommitParams.create(CONTAINER, REPOSITORY);
+        CommitParams commitParams = CommitParams.create(CONTAINER).withRepository(REPOSITORY);
 
         ContainerCommitted containerCommitted = mock(ContainerCommitted.class);
 
@@ -1204,13 +1264,14 @@ public class DockerConnectorTest {
 
     @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = EXCEPTION_ERROR_MESSAGE)
     public void shouldThrowDockerExceptionWhileCommittingImageIfResponseCodeIsNotSuccess() throws IOException {
-        CommitParams commitParams = CommitParams.create(CONTAINER, REPOSITORY);
+        CommitParams commitParams = CommitParams.create(CONTAINER).withRepository(REPOSITORY);
 
         when(dockerResponse.getStatus()).thenReturn(RESPONSE_ERROR_CODE);
 
         dockerConnector.commit(commitParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -1260,6 +1321,7 @@ public class DockerConnectorTest {
         dockerConnector.pull(pullParams, progressMonitor);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -1297,6 +1359,7 @@ public class DockerConnectorTest {
         dockerConnector.createContainer(createContainerParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -1322,6 +1385,7 @@ public class DockerConnectorTest {
         dockerConnector.startContainer(startContainerParams);
 
         verify(dockerResponse).getStatus();
+        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).getDockerException(dockerResponse);
     }
 
@@ -1345,7 +1409,8 @@ public class DockerConnectorTest {
         version.setOs("linux");
         version.setArch("amd64");
 
-        Version parsedVersion = dockerConnector.parseResponseStreamAndClose(new ByteArrayInputStream(response.getBytes()), Version.class);
+        Version parsedVersion = dockerConnector.parseResponseStreamAndClose(
+                new ByteArrayInputStream(response.getBytes()), Version.class);
 
         assertEquals(parsedVersion, version);
     }
