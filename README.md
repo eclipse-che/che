@@ -98,7 +98,8 @@ docker run -it --rm --name build-che
                -Dskip-validate-sources 
                clean install
                
-# For Windows, replace $HOME with location of Maven repository and $PWD with the directory where Che source code is installed.
+# For Windows, replace $HOME with maven repo directory.
+# For Windows, replace $PWD with Che source code directory.
 ```
 
 ### Run Che as a Server
