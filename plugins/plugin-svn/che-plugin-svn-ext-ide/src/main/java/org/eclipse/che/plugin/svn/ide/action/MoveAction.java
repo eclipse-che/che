@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.move.MovePresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn move" command.
@@ -34,10 +33,8 @@ public class MoveAction extends SubversionAction {
     public MoveAction(AppContext appContext,
                       SubversionExtensionLocalizationConstants constants,
                       SubversionExtensionResources resources,
-                      final ProjectExplorerPresenter projectExplorerPresenter,
                       MovePresenter presenter) {
-        super(constants.moveActionTitle(), constants.moveActionDescription(), resources.move(), appContext, constants,
-              resources, projectExplorerPresenter);
+        super(constants.moveActionTitle(), constants.moveActionDescription(), resources.move(), appContext, constants, resources);
         this.presenter = presenter;
     }
 
@@ -45,11 +42,5 @@ public class MoveAction extends SubversionAction {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         presenter.showMove();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected boolean isSelectionRequired() {
-        return true;
     }
 }

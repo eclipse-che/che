@@ -15,11 +15,9 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.export.ExportPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn export" command.
@@ -27,34 +25,19 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 @Singleton
 public class ExportAction extends SubversionAction {
 
-    private ProjectExplorerPresenter projectExplorerPresenter;
-    private ExportPresenter          presenter;
+    private ExportPresenter presenter;
 
     @Inject
-    public ExportAction(final AppContext appContext,
-                        final ProjectExplorerPresenter projectExplorerPresenter,
-                        final SubversionExtensionLocalizationConstants constants,
-                        final SubversionExtensionResources resources,
-                        final ExportPresenter presenter) {
-        super(constants.exportTitle(), constants.exportDescription(), resources.export(), appContext,
-              constants, resources, projectExplorerPresenter);
-        this.projectExplorerPresenter = projectExplorerPresenter;
+    public ExportAction(AppContext appContext,
+                        SubversionExtensionLocalizationConstants constants,
+                        SubversionExtensionResources resources,
+                        ExportPresenter presenter) {
+        super(constants.exportTitle(), constants.exportDescription(), resources.export(), appContext, constants, resources);
         this.presenter = presenter;
     }
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        presenter.showExport(getSelectedNode());
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected boolean isSelectionRequired() {
-        return true;
-    }
-
-    private HasStorablePath getSelectedNode() {
-        Object selectedNode = projectExplorerPresenter.getSelection().getHeadElement();
-        return selectedNode != null && selectedNode instanceof HasStorablePath ? (HasStorablePath)selectedNode : null;
+        presenter.showExport();
     }
 }

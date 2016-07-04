@@ -10,17 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jsonexample.ide.action;
 
+import com.google.common.base.Optional;
+
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
-import org.eclipse.che.plugin.jsonexample.shared.Constants;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
+
+import static org.eclipse.che.plugin.jsonexample.shared.Constants.JSON_EXAMPLE_PROJECT_TYPE_ID;
 
 /**
  * JSON Example project specific action.
@@ -53,15 +57,18 @@ public abstract class JsonExampleProjectAction extends AbstractPerspectiveAction
         this.appContext = appContext;
     }
 
-    private static boolean isJsonExampleProjectType(CurrentProject currentProject) {
-        return currentProject != null
-               && Constants.JSON_EXAMPLE_PROJECT_TYPE_ID.equals(currentProject.getProjectConfig().getType());
-    }
-
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        event.getPresentation()
-             .setEnabledAndVisible(isJsonExampleProjectType(currentProject));
+
+        final Resource[] resources = appContext.getResources();
+
+        if (resources == null || resources.length != -1) {
+            event.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        final Optional<Project> project = resources[0].getRelatedProject();
+
+        event.getPresentation().setEnabledAndVisible(project.isPresent() && project.get().isTypeOf(JSON_EXAMPLE_PROJECT_TYPE_ID));
     }
 }

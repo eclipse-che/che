@@ -17,7 +17,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn mv" (rename) command.
@@ -26,12 +25,10 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 public class RenameAction extends SubversionAction {
 
     @Inject
-    public RenameAction(final AppContext appContext,
-                        final ProjectExplorerPresenter projectExplorerPresenter,
-                        final SubversionExtensionLocalizationConstants constants,
-                        final SubversionExtensionResources resources) {
-        super(constants.renameTitle(), constants.renameDescription(), resources.rename(), appContext,
-              constants, resources, projectExplorerPresenter);
+    public RenameAction(AppContext appContext,
+                        SubversionExtensionLocalizationConstants constants,
+                        SubversionExtensionResources resources) {
+        super(constants.renameTitle(), constants.renameDescription(), resources.rename(), appContext, constants, resources);
     }
 
     @Override

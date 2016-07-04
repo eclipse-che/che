@@ -61,7 +61,7 @@ public class ShowHiddenFilesAction extends AbstractPerspectiveAction implements 
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setVisible(appContext.getCurrentProject() != null);
+        event.getPresentation().setVisible(appContext.getRootProject() != null);
     }
 
     @Override

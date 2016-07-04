@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.command;
 
+import com.google.common.base.Optional;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.command.mainclass.SelectNodePresenter;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage;
+import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
 
@@ -29,7 +32,6 @@ import javax.validation.constraints.NotNull;
 public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDelegate, CommandConfigurationPage<JavaCommandConfiguration> {
     private final JavaCommandPageView view;
     private final SelectNodePresenter selectNodePresenter;
-    private final AppContext          appContext;
 
     private JavaCommandConfiguration editedConfiguration;
     private String                   originCommandLine;
@@ -39,11 +41,9 @@ public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDeleg
 
     @Inject
     public JavaCommandPagePresenter(JavaCommandPageView view,
-                                    SelectNodePresenter selectNodePresenter,
-                                    AppContext appContext) {
+                                    SelectNodePresenter selectNodePresenter) {
         this.view = view;
         this.selectNodePresenter = selectNodePresenter;
-        this.appContext = appContext;
         view.setDelegate(this);
     }
 
@@ -91,22 +91,27 @@ public class JavaCommandPagePresenter implements JavaCommandPageView.ActionDeleg
         listener.onDirtyStateChanged();
     }
 
-    public void setMainClass(String path, String fqn) {
-        if (editedConfiguration.getMainClass().equals(path)) {
+    public void setMainClass(Resource resource, String fqn) {
+        if (editedConfiguration.getMainClass().equals(resource.getLocation().toString())) {
             return;
         }
 
-        String projectPath = appContext.getCurrentProject().getProjectConfig().getPath();
-        String relativePath = path.substring(path.indexOf(projectPath) + projectPath.length() + 1);
+        final Optional<Project> project = resource.getRelatedProject();
 
-        view.setMainClass(relativePath);
+        if (!project.isPresent()) {
+            return;
+        }
+
+        final Path relPath = resource.getLocation().removeFirstSegments(project.get().getLocation().segmentCount());
+
+        view.setMainClass(relPath.toString());
 
         String commandLine = editedConfiguration.getCommandLine();
-        commandLine = commandLine.replace(editedConfiguration.getMainClass(), relativePath);
+        commandLine = commandLine.replace(editedConfiguration.getMainClass(), relPath.toString());
         commandLine = commandLine.replace(' ' + editedConfiguration.getMainClassFqn(),' ' + fqn);
         editedConfiguration.setCommandLine(commandLine);
 
-        editedConfiguration.setMainClass(relativePath);
+        editedConfiguration.setMainClass(relPath.toString());
         listener.onDirtyStateChanged();
     }
 

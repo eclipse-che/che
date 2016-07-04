@@ -13,11 +13,11 @@ package org.eclipse.che.ide.ext.java.client.reference;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.reference.FqnProvider;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
-import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 
 /**
- * The class contains business logic which allows extract fqn for {@link PackageNode} and {@link JavaFileNode}.
+ * The class contains business logic which allows extract fqn for given resource.
  *
  * @author Dmitry Shnurenko
  */
@@ -26,12 +26,9 @@ public class JavaFqnProvider implements FqnProvider {
 
     @Override
     public String getFqn(Object object) {
-        if (object instanceof PackageNode) {
-            return ((PackageNode)object).getPackage();
-        }
 
-        if (object instanceof JavaFileNode) {
-            return ((JavaFileNode)object).getFqn();
+        if (object instanceof Resource) {
+            return JavaUtil.resolveFQN((Resource)object);
         }
 
         return "";

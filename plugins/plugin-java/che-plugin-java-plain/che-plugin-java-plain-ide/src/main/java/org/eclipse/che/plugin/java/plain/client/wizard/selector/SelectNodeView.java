@@ -12,9 +12,8 @@ package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.data.tree.Node;
-
+import org.eclipse.che.ide.api.mvp.View;
 import java.util.List;
 
 /**

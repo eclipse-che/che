@@ -15,28 +15,36 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.reset.files.ResetFilesPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.ui.FontAwesome;
 
-/** @author Andrey Plotnikov */
+import static com.google.common.base.Preconditions.checkState;
+
+/**
+ * @author Andrey Plotnikov
+ * @author Vlad Zhukovskyi
+ */
 @Singleton
 public class ResetFilesAction extends GitAction {
-    private final ResetFilesPresenter  presenter;
+    private final ResetFilesPresenter presenter;
 
     @Inject
     public ResetFilesAction(ResetFilesPresenter presenter,
                             AppContext appContext,
-                            GitLocalizationConstant constant,
-                            ProjectExplorerPresenter projectExplorer) {
-        super(constant.resetFilesControlTitle(), constant.resetFilesControlPrompt(), FontAwesome.UNDO, appContext, projectExplorer);
+                            GitLocalizationConstant constant) {
+        super(constant.resetFilesControlTitle(), constant.resetFilesControlPrompt(), FontAwesome.UNDO, appContext);
         this.presenter = presenter;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        presenter.showDialog();
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null, "Null project occurred");
+
+        presenter.showDialog(project);
     }
 }

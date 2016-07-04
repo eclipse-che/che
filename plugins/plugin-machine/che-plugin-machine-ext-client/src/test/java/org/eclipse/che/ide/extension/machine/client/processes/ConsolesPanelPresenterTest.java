@@ -16,6 +16,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -146,7 +147,9 @@ public class ConsolesPanelPresenterTest {
 
     @Before
     public void setUp() {
-        when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        DevMachine devMachine = mock(DevMachine.class);
+        when(devMachine.getId()).thenReturn(WORKSPACE_ID);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
 
         when(machineService.getMachines(anyString())).thenReturn(machinesPromise);
         when(machineService.getMachine(anyString())).thenReturn(machinePromise);
@@ -155,6 +158,8 @@ public class ConsolesPanelPresenterTest {
         when(machineService.getProcesses(anyString())).thenReturn(processesPromise);
         when(processesPromise.then(Matchers.<Operation<List<MachineProcessDto>>>anyObject())).thenReturn(processesPromise);
         when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
+
+        when(appContext.getWorkspaceId()).thenReturn("workspaceID");
 
         presenter =
                 new ConsolesPanelPresenter(view, eventBus, dtoFactory, dialogFactory, entityFactory, terminalFactory, commandConsoleFactory,
@@ -215,14 +220,13 @@ public class ConsolesPanelPresenterTest {
         List<MachineDto> machines = new ArrayList<>(2);
         machines.add(machineDto);
 
-        when(appContext.getWorkspace()).thenReturn(workspace);
+        when(appContext.getWorkspaceId()).thenReturn("workspaceID");
         DevMachineStateEvent devMachineStateEvent = mock(DevMachineStateEvent.class);
         verify(eventBus, times(5)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
 
         DevMachineStateEvent.Handler devMachineStateHandler = devMachineStateHandlerCaptor.getAllValues().get(0);
         devMachineStateHandler.onDevMachineStarted(devMachineStateEvent);
 
-        verify(appContext).getWorkspaceId();
         verify(machineService).getMachines(eq(WORKSPACE_ID));
         verify(machinesPromise).then(machinesCaptor.capture());
         machinesCaptor.getValue().apply(machines);

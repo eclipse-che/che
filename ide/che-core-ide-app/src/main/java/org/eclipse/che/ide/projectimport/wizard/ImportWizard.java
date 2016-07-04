@@ -13,7 +13,7 @@ package org.eclipse.che.ide.projectimport.wizard;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizard;
 
 import javax.validation.constraints.NotNull;
@@ -23,12 +23,12 @@ import javax.validation.constraints.NotNull;
  *
  * @author Artem Zatsarynnyi
  */
-public class ImportWizard extends AbstractWizard<ProjectConfigDto> {
+public class ImportWizard extends AbstractWizard<MutableProjectConfig> {
 
     private final ProjectImporter projectImporter;
 
     @Inject
-    public ImportWizard(@Assisted ProjectConfigDto projectConfig, ProjectImporter projectImporter) {
+    public ImportWizard(@Assisted MutableProjectConfig projectConfig, ProjectImporter projectImporter) {
         super(projectConfig);
 
         this.projectImporter = projectImporter;

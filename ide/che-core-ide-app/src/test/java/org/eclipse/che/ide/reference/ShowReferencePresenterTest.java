@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.reference;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
+import com.google.common.base.Optional;
+
 import org.eclipse.che.ide.api.reference.FqnProvider;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,24 +35,21 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class ShowReferencePresenterTest {
 
-    private static final String PATH         = "path";
+    private static final Path   PATH         = Path.valueOf("path");
     private static final String PROJECT_TYPE = "type";
 
     //constructor mocks
     @Mock
     private ShowReferenceView view;
-    @Mock
-    private AppContext        appContext;
 
     //additional mocks
     @Mock
-    private CurrentProject   currentProject;
-    @Mock
-    private ProjectConfigDto projectConfig;
-    @Mock
     private FqnProvider      provider;
+
     @Mock
-    private HasStorablePath  hasStorablePathNode;
+    private Resource resource;
+    @Mock
+    private Project project;
 
     private ShowReferencePresenter presenter;
 
@@ -60,32 +58,32 @@ public class ShowReferencePresenterTest {
         Map<String, FqnProvider> providers = new HashMap<>();
         providers.put(PROJECT_TYPE, provider);
 
-        presenter = new ShowReferencePresenter(view, providers, appContext);
+        presenter = new ShowReferencePresenter(view, providers);
 
-        when(hasStorablePathNode.getStorablePath()).thenReturn(PATH);
-        when(appContext.getCurrentProject()).thenReturn(currentProject);
-        when(currentProject.getProjectConfig()).thenReturn(projectConfig);
-        when(projectConfig.getType()).thenReturn(PROJECT_TYPE);
+        when(resource.getLocation()).thenReturn(PATH);
+        when(resource.getRelatedProject()).thenReturn(Optional.of(project));
+        when(project.getType()).thenReturn(PROJECT_TYPE);
     }
 
     @Test
     public void pathShouldBeShownForNodeWhichDoesNotHaveFqn() {
+
         Map<String, FqnProvider> providers = new HashMap<>();
-        presenter = new ShowReferencePresenter(view, providers, appContext);
+        presenter = new ShowReferencePresenter(view, providers);
 
-        presenter.show(hasStorablePathNode);
+        presenter.show(resource);
 
-        verify(provider, never()).getFqn(hasStorablePathNode);
+        verify(provider, never()).getFqn(resource);
         verify(view).show("", PATH);
     }
 
     @Test
     public void pathAndFqnShouldBeShownForNode() {
-        when(provider.getFqn(hasStorablePathNode)).thenReturn("fqn");
+        when(provider.getFqn(resource)).thenReturn("fqn");
 
-        presenter.show(hasStorablePathNode);
+        presenter.show(resource);
 
-        verify(provider).getFqn(hasStorablePathNode);
+        verify(provider).getFqn(resource);
         verify(view).show("fqn", PATH);
     }
 }

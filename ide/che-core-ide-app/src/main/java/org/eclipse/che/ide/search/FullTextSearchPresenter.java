@@ -10,26 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.ide.search;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.ide.api.project.QueryExpression;
-import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.search.presentation.FindResultPresenter;
 
-import java.util.List;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Presenter for full text search.
  *
  * @author Valeriy Svydenko
+ * @author Vlad Zhukovskyi
  * @author Roman Nikitenko
  */
 @Singleton
@@ -37,63 +36,56 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
     private static final String URL_ENCODED_BACKSLASH = "%5C";
     private static final String AND_OPERATOR          = "AND";
 
-    private final FullTextSearchView   view;
-    private final FindResultPresenter  findResultPresenter;
-    private final DtoFactory           dtoFactory;
-    private final AppContext           appContext;
-    private final ProjectServiceClient projectServiceClient;
+    private final FullTextSearchView  view;
+    private final FindResultPresenter findResultPresenter;
+    private final AppContext          appContext;
+    private       Path                defaultStartPoint;
 
     @Inject
     public FullTextSearchPresenter(FullTextSearchView view,
                                    FindResultPresenter findResultPresenter,
-                                   DtoFactory dtoFactory,
-                                   AppContext appContext,
-                                   ProjectServiceClient projectServiceClient) {
+                                   AppContext appContext) {
         this.view = view;
         this.findResultPresenter = findResultPresenter;
-        this.dtoFactory = dtoFactory;
         this.appContext = appContext;
-        this.projectServiceClient = projectServiceClient;
 
         this.view.setDelegate(this);
     }
 
     /** Show dialog with view for searching. */
-    public void showDialog() {
+    public void showDialog(Path path) {
+        this.defaultStartPoint = path;
+
         view.showDialog();
         view.clearInput();
-        if (appContext.getCurrentProject() != null) {
-            view.setPathDirectory(appContext.getCurrentProject().getProjectConfig().getPath());
-        } else {
-            view.setPathDirectory("/");
-        }
+        view.setPathDirectory(path.toString());
     }
 
     @Override
     public void search(final String text) {
-        QueryExpression queryExpression = new QueryExpression();
-        queryExpression.setText(prepareQuery(text));
-        if (!view.getFileMask().isEmpty()) {
-            queryExpression.setName(view.getFileMask());
-        }
-        if (!view.getPathToSearch().isEmpty()) {
-            queryExpression.setPath(view.getPathToSearch());
-        }
+        final Path startPoint = isNullOrEmpty(view.getPathToSearch()) ? defaultStartPoint : Path.valueOf(view.getPathToSearch());
 
-        projectServiceClient.search(appContext.getDevMachine(), queryExpression).then(new Operation<List<ItemReference>>() {
+        appContext.getWorkspaceRoot().getContainer(startPoint).then(new Operation<Optional<Container>>() {
             @Override
-            public void apply(List<ItemReference> result) throws OperationException {
-                view.close();
-                findResultPresenter.handleResponse(result, text);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                view.showErrorMessage(dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class).getMessage());
+            public void apply(Optional<Container> optionalContainer) throws OperationException {
+                if (!optionalContainer.isPresent()) {
+                    view.showErrorMessage("Path '" + startPoint + "' doesn't exists");
+                    return;
+                }
+
+                final Container container = optionalContainer.get();
+                container.search(view.getFileMask(), prepareQuery(text)).then(new Operation<Resource[]>() {
+                    @Override
+                    public void apply(Resource[] result) throws OperationException {
+                        view.close();
+                        findResultPresenter.handleResponse(result, text);
+                    }
+                });
             }
         });
     }
 
+    //todo move this to the core part of resource manager
     private String prepareQuery(String text) {
         StringBuilder sb = new StringBuilder();
         for (char character : text.toCharArray()) {

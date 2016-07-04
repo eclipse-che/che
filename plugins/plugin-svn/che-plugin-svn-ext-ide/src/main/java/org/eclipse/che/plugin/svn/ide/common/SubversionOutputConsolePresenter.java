@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
@@ -47,9 +48,11 @@ public class SubversionOutputConsolePresenter implements SubversionOutputConsole
         this.title = title;
         this.resources = resources;
 
-        String projectName = appContext.getCurrentProject().getRootProject().getName();
+        final Project project = appContext.getRootProject();
 
-        view.print(constants.consoleProjectName(projectName) + "\n");
+        if (project != null) {
+            view.print(constants.consoleProjectName(project.getName()) + "\n");
+        }
     }
 
     @Override

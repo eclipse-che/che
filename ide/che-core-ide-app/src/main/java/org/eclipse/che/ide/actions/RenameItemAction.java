@@ -19,49 +19,46 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.project.node.resource.SupportRename;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.api.selection.SelectionAgent;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
-import org.eclipse.che.ide.project.node.FolderReferenceNode;
-import org.eclipse.che.ide.project.node.ProjectNode;
-import org.eclipse.che.ide.project.node.ResourceBasedNode;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.InputValidator;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.api.resources.Resource.FILE;
+import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
+import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
- * Action for renaming an item which is selected in 'Project Explorer'.
+ * Rename selected resource in the application context.
  *
  * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskyi
+ * @see AppContext#getResource()
  */
 @Singleton
 public class RenameItemAction extends AbstractPerspectiveAction {
     private final CoreLocalizationConstant localization;
     private final DialogFactory            dialogFactory;
     private final AppContext               appContext;
-    private final SelectionAgent           selectionAgent;
 
     @Inject
     public RenameItemAction(Resources resources,
-                                  SelectionAgent selectionAgent,
                             CoreLocalizationConstant localization,
                             DialogFactory dialogFactory,
                             AppContext appContext) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
+        super(singletonList(PROJECT_PERSPECTIVE_ID),
               localization.renameItemActionText(),
               localization.renameItemActionDescription(),
               null,
               resources.rename());
-        this.selectionAgent = selectionAgent;
         this.localization = localization;
         this.dialogFactory = dialogFactory;
         this.appContext = appContext;
@@ -72,105 +69,53 @@ public class RenameItemAction extends AbstractPerspectiveAction {
     public void actionPerformed(ActionEvent e) {
 
 
-        final Selection<?> selection = selectionAgent.getSelection();
-        if (selection == null || selection.isEmpty()) {
-            return;
+        final Resource resource = appContext.getResource();
+
+        checkState(resource != null, "Null resource occurred");
+
+        final String resourceName = resource.getName();
+        final int selectionLength = resourceName.indexOf('.') >= 0 ? resourceName.lastIndexOf('.') : resourceName.length();
+        final InputValidator validator;
+        final String dialogTitle;
+
+        if (resource.getResourceType() == FILE) {
+            validator = new FileNameValidator(resourceName);
+            dialogTitle = localization.renameFileDialogTitle(resourceName);
+        } else if (resource.getResourceType() == FOLDER) {
+            validator = new FolderNameValidator(resourceName);
+            dialogTitle = localization.renameFolderDialogTitle(resourceName);
+        } else if (resource.getResourceType() == PROJECT) {
+            validator = new ProjectNameValidator(resourceName);
+            dialogTitle = localization.renameProjectDialogTitle(resourceName);
+        } else {
+            throw new IllegalStateException("Not a resource");
         }
 
-        final ResourceBasedNode<?> selectedNode = (ResourceBasedNode<?>)selection.getHeadElement();
+        final InputCallback inputCallback = new InputCallback() {
+            @Override
+            public void accepted(final String value) {
+                //we shouldn't perform renaming file with the same name
+                if (!value.trim().equals(resourceName)) {
+                    final Path destination = resource.getLocation().parent().append(value);
+                    resource.move(destination);
+                }
+            }
+        };
 
-        if (selectedNode == null) {
-            return;
-        }
-
-        renameNode(selectedNode);
+        InputDialog inputDialog = dialogFactory.createInputDialog(dialogTitle,
+                                                                  localization.renameDialogNewNameLabel(),
+                                                                  resource.getName(), 0, selectionLength, inputCallback, null);
+        inputDialog.withValidator(validator);
+        inputDialog.show();
     }
 
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
-        if ((appContext.getCurrentProject() == null && !appContext.getCurrentUser().isUserPermanent())) {
-            e.getPresentation().setVisible(true);
-            e.getPresentation().setEnabled(false);
-            return;
-        }
+        final Resource[] resources = appContext.getResources();
 
-        final Selection<?> selection = selectionAgent.getSelection();
-
-        if (selection == null || selection.isEmpty()) {
-            e.getPresentation().setEnabled(false);
-            return;
-        }
-
-        if (selection.isMultiSelection()) {
-            //this is temporary commented
-            e.getPresentation().setEnabled(false);
-            return;
-        }
-
-        final Object possibleNode = selection.getHeadElement();
-
-        boolean isSupportRename = possibleNode instanceof SupportRename;
-
-        boolean enable = isSupportRename && ((SupportRename)possibleNode).getRenameProcessor() != null;
-
-        e.getPresentation().setEnabled(enable);
-    }
-
-    /**
-     * Asks the user for new name and renames the node.
-     *
-     * @param node
-     *         node to rename
-     */
-    private void renameNode(final ResourceBasedNode<?> node) {
-        final InputCallback inputCallback = new InputCallback() {
-            @Override
-            public void accepted(final String value) {
-                //we shouldn't perform renaming file with the same name
-                if (!value.trim().equals(node.getName())) {
-                    node.rename(value);
-                }
-            }
-        };
-
-        askForNewName(node, inputCallback, null);
-    }
-
-    /**
-     * Asks the user for new node name.
-     *
-     * @param node
-     * @param inputCallback
-     * @param cancelCallback
-     */
-    public void askForNewName(final ResourceBasedNode<?> node, final InputCallback inputCallback, final CancelCallback cancelCallback) {
-        final int selectionLength = node.getName().indexOf('.') >= 0
-                                    ? node.getName().lastIndexOf('.')
-                                    : node.getName().length();
-
-        InputDialog inputDialog = dialogFactory.createInputDialog(getDialogTitle(node),
-                                                                  localization.renameDialogNewNameLabel(),
-                                                                  node.getName(), 0, selectionLength, inputCallback, null);
-        if (node instanceof FileReferenceNode) {
-            inputDialog.withValidator(new FileNameValidator(node.getName()));
-        } else if (node instanceof FolderReferenceNode) {
-            inputDialog.withValidator(new FolderNameValidator(node.getName()));
-        } else if (node instanceof ProjectNode) {
-            inputDialog.withValidator(new ProjectNameValidator(node.getName()));
-        }
-        inputDialog.show();
-    }
-
-    private String getDialogTitle(ResourceBasedNode<?> node) {
-        if (node instanceof FileReferenceNode) {
-            return localization.renameFileDialogTitle(node.getName());
-        } else if (node instanceof FolderReferenceNode) {
-            return localization.renameFolderDialogTitle(node.getName());
-        } else if (node instanceof ProjectNode) {
-            return localization.renameProjectDialogTitle(node.getName());
-        }
-        return localization.renameNodeDialogTitle();
+        e.getPresentation().setVisible(true);
+        e.getPresentation().setEnabled(resources != null && resources.length == 1);
     }
 
     private abstract class AbstractNameValidator implements InputValidator {

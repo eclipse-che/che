@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.merge;
 
-import elemental.events.KeyboardEvent;
-import elemental.events.MouseEvent;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -22,7 +19,6 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DeckPanel;
@@ -33,21 +29,19 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.tree.AbstractTreeNode;
-import org.eclipse.che.ide.api.project.tree.TreeNode;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
-import org.eclipse.che.plugin.svn.ide.common.filteredtree.ProjectTreeNodeDataAdapter;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.menu.PositionController;
-import org.eclipse.che.ide.ui.tree.Tree;
-import org.eclipse.che.ide.ui.tree.TreeNodeElement;
+import org.eclipse.che.ide.ui.smartTree.NodeLoader;
+import org.eclipse.che.ide.ui.smartTree.NodeStorage;
+import org.eclipse.che.ide.ui.smartTree.SelectionModel;
+import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.window.Window;
-import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -89,14 +83,7 @@ public class MergeViewImpl extends Window implements MergeView {
     @UiField
     TextBox sourceUrlTextBox;
 
-    /** Root node for subversion item tree. */
-    private AbstractTreeNode<?> rootNode;
-
-    /** Subversion item tree. */
-    private Tree<TreeNode<?>> tree;
-
-    /** Tree node renderer. */
-    private ProjectTreeNodeRenderer projectTreeNodeRenderer;
+    private Tree tree;
 
     @UiField
     DockLayoutPanel treeContainer;
@@ -113,13 +100,10 @@ public class MergeViewImpl extends Window implements MergeView {
     /* Default constructor creating an instance of this MergeViewImpl */
     @Inject
     public MergeViewImpl(SubversionExtensionLocalizationConstants constants,
-                         SubversionExtensionResources resources,
-                         org.eclipse.che.ide.Resources coreResources,
-                         ProjectTreeNodeRenderer projectTreeNodeRenderer) {
+                         SubversionExtensionResources resources) {
         this.constants = constants;
         this.resources = resources;
 
-        this.projectTreeNodeRenderer = projectTreeNodeRenderer;
 
         ensureDebugId("plugin-svn merge-dialog");
         setWidget(uiBinder.createAndBindUi(this));
@@ -147,121 +131,29 @@ public class MergeViewImpl extends Window implements MergeView {
 
         targetTextBox.setEnabled(false);
 
-        rootNode = new AbstractTreeNode<Void>(null, null, null, null) {
-            /** {@inheritDoc} */
-            @NotNull
+        tree = new Tree(new NodeStorage(), new NodeLoader());
+        tree.getSelectionModel().setSelectionMode(SelectionModel.Mode.SINGLE);
+        tree.getSelectionModel().addSelectionChangedHandler(new SelectionChangedEvent.SelectionChangedHandler() {
             @Override
-            public String getId() {
-                return "ROOT";
-            }
+            public void onSelectionChanged(SelectionChangedEvent event) {
+                final List<Node> selection = event.getSelection();
 
-            /** {@inheritDoc} */
-            @NotNull
-            @Override
-            public String getDisplayName() {
-                return "ROOT";
-            }
+                if (selection == null || selection.isEmpty()) {
+                    return;
+                }
 
-            /** {@inheritDoc} */
-            @Override
-            public boolean isLeaf() {
-                return false;
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void refreshChildren(AsyncCallback<TreeNode<?>> callback) {
-            }
-        };
-
-        tree = Tree.create(coreResources, new ProjectTreeNodeDataAdapter(), projectTreeNodeRenderer);
-        tree.setTreeEventHandler(new Tree.Listener<TreeNode<?>>() {
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeAction(TreeNodeElement<TreeNode<?>> treeNodeElement) {
-                treeNodeElement.getData().processNodeAction();
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeClosed(TreeNodeElement<TreeNode<?>> treeNodeElement) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeContextMenu(int i, int i1, TreeNodeElement<TreeNode<?>> treeNodeElement) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeDragStart(TreeNodeElement<TreeNode<?>> treeNodeElement, MouseEvent mouseEvent) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeDragDrop(TreeNodeElement<TreeNode<?>> treeNodeElement, MouseEvent mouseEvent) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeExpanded(TreeNodeElement<TreeNode<?>> treeNodeElement) {
-                delegate.onNodeExpanded(treeNodeElement.getData());
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeSelected(TreeNodeElement<TreeNode<?>> treeNodeElement, SignalEvent signalEvent) {
-                delegate.onNodeSelected(treeNodeElement.getData());
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onRootContextMenu(int i, int i1) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onRootDragDrop(MouseEvent mouseEvent) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onKeyboard(KeyboardEvent keyboardEvent) {
+                delegate.onNodeSelected(selection.get(0));
             }
         });
 
-        treeContainer.add(tree.asWidget());
+        treeContainer.add(tree);
 
     }
 
     @Override
-    public void setRootNode(TreeNode<?> node) {
-        List<TreeNode<?>> children = new ArrayList<>();
-        children.add(node);
-        rootNode.setChildren(children);
-        node.setParent(rootNode);
-
-        tree.getSelectionModel().clearSelections();
-        tree.getModel().setRoot(rootNode);
-        tree.renderTree(0);
-
-        tree.getSelectionModel().selectSingleNode(node);
-
-        if (!node.isLeaf()) {
-            tree.autoExpandAndSelectNode(node, false);
-            delegate.onNodeExpanded(node);
-        }
-    }
-
-    @Override
-    public void render(TreeNode<?> node) {
-        TreeNodeElement<TreeNode<?>> treeNodeElement = tree.getNode(node);
-        if (node.isLeaf()) {
-            Tree.Css css = tree.getResources().treeCss();
-            treeNodeElement.makeLeafNode(css);
-        }
-
-        projectTreeNodeRenderer.renderNodeContents(node);
+    public void setRootNode(Node node) {
+        tree.getNodeStorage().clear();
+        tree.getNodeStorage().add(node);
     }
 
     @Override
@@ -286,7 +178,7 @@ public class MergeViewImpl extends Window implements MergeView {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                Tooltip tooltip = Tooltip.create((elemental.dom.Element) alertMarker.getElement(),
+                Tooltip.create((elemental.dom.Element) alertMarker.getElement(),
                         PositionController.VerticalAlign.TOP,
                         PositionController.HorizontalAlign.MIDDLE,
                         message);

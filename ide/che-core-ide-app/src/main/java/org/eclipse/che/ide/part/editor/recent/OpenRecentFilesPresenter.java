@@ -13,9 +13,14 @@ package org.eclipse.che.ide.part.editor.recent;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.resources.tree.FileNode;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
 
 import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 /**
  * Presenter for showing recently opened files.
@@ -25,11 +30,17 @@ import java.util.List;
 @Singleton
 public class OpenRecentFilesPresenter implements OpenRecentFilesView.ActionDelegate {
 
-    private final OpenRecentFilesView view;
+    private final OpenRecentFilesView      view;
+    private final ResourceNode.NodeFactory nodeFactory;
+    private final SettingsProvider         settingsProvider;
 
     @Inject
-    public OpenRecentFilesPresenter(OpenRecentFilesView view) {
+    public OpenRecentFilesPresenter(OpenRecentFilesView view,
+                                    ResourceNode.NodeFactory nodeFactory,
+                                    SettingsProvider settingsProvider) {
         this.view = view;
+        this.nodeFactory = nodeFactory;
+        this.settingsProvider = settingsProvider;
 
         view.setDelegate(this);
     }
@@ -47,8 +58,14 @@ public class OpenRecentFilesPresenter implements OpenRecentFilesView.ActionDeleg
      * @param recentFiles
      *         recent file list
      */
-    public void setRecentFiles(List<FileReferenceNode> recentFiles) {
-        view.setRecentFiles(recentFiles);
+    public void setRecentFiles(List<File> recentFiles) {
+        final List<FileNode> nodes = newArrayListWithCapacity(recentFiles.size());
+
+        for (File recentFile : recentFiles) {
+            nodes.add(nodeFactory.newFileNode(recentFile, settingsProvider.getSettings()));
+        }
+
+        view.setRecentFiles(nodes);
     }
 
     /**

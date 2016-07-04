@@ -12,9 +12,8 @@ package org.eclipse.che.ide.projectimport.zip;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,19 +43,19 @@ public class ZipImporterPagePresenterTest {
     private static final String SKIP_FIRST_LEVEL_PARAM_NAME = "skipFirstLevel";
 
     @Mock
-    private ZipImporterPageView      view;
+    private ZipImporterPageView                       view;
     @Mock
-    private CoreLocalizationConstant locale;
+    private CoreLocalizationConstant                  locale;
     @Mock
-    private ProjectConfigDto         dataObject;
+    private MutableProjectConfig                      dataObject;
     @Mock
-    private SourceStorageDto         sourceStorageDto;
+    private MutableProjectConfig.MutableSourceStorage sourceStorageDto;
     @Mock
-    private Wizard.UpdateDelegate    delegate;
+    private Wizard.UpdateDelegate                     delegate;
     @Mock
-    private Map<String, String>      parameters;
+    private Map<String, String>                       parameters;
     @InjectMocks
-    private ZipImporterPagePresenter presenter;
+    private ZipImporterPagePresenter                  presenter;
 
     @Before
     public void setUp() {

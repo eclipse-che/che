@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.log.ShowLogPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn log" command.
@@ -29,13 +28,11 @@ public class LogAction extends SubversionAction {
     private final ShowLogPresenter presenter;
 
     @Inject
-    public LogAction(final ShowLogPresenter presenter,
-                     final AppContext appContext,
-                     final SubversionExtensionLocalizationConstants constants,
-                     final SubversionExtensionResources resources,
-                     final ProjectExplorerPresenter projectExplorerPresenter) {
-        super(constants.logTitle(), constants.logDescription(), resources.log(), appContext,
-              constants, resources, projectExplorerPresenter);
+    public LogAction(ShowLogPresenter presenter,
+                     AppContext appContext,
+                     SubversionExtensionLocalizationConstants constants,
+                     SubversionExtensionResources resources) {
+        super(constants.logTitle(), constants.logDescription(), resources.log(), appContext, constants, resources);
 
         this.presenter = presenter;
     }

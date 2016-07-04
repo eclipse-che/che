@@ -12,19 +12,17 @@ package org.eclipse.che.plugin.python.ide.action;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 import org.eclipse.che.plugin.python.ide.PythonLocalizationConstant;
 import org.eclipse.che.plugin.python.ide.PythonResources;
 
-import javax.validation.constraints.NotNull;
-
 import static org.eclipse.che.plugin.python.shared.ProjectAttributes.PYTHON_EXT;
-import static org.eclipse.che.plugin.python.shared.ProjectAttributes.PYTHON_ID;
 
 /**
  * Action to create new Python source file.
@@ -33,27 +31,18 @@ import static org.eclipse.che.plugin.python.shared.ProjectAttributes.PYTHON_ID;
  */
 @Singleton
 public class CreatePythonFileAction extends AbstractNewResourceAction {
-    private final AppContext appContext;
 
     @Inject
     public CreatePythonFileAction(PythonLocalizationConstant localizationConstant,
                                   PythonResources pythonResources,
-                                  AppContext appContext) {
+                                  DialogFactory dialogFactory,
+                                  CoreLocalizationConstant coreLocalizationConstant,
+                                  EventBus eventBus,
+                                  AppContext appContext,
+                                  NotificationManager notificationManager) {
         super(localizationConstant.createPythonFileActionTitle(),
               localizationConstant.createPythonFileActionDescription(),
-              pythonResources.pythonFile());
-        this.appContext = appContext;
-    }
-
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
-            return;
-        }
-        ProjectConfigDto projectConfig = currentProject.getProjectConfig();
-        String type = projectConfig.getType();
-        event.getPresentation().setEnabledAndVisible(PYTHON_ID.equals(type));
+              pythonResources.pythonFile(), dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
     }
 
     @Override

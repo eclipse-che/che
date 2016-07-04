@@ -10,17 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
+import com.google.common.base.Optional;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.editor.text.Region;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEvent;
 import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEventHandler;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ReconcileResult;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
@@ -42,7 +45,6 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy {
     private final HandlerRegistration       handlerRegistration;
     private       SemanticHighlightRenderer highlighter;
     private       JavaReconcileClient       client;
-    private       VirtualFile               file;
     private boolean first = true;
 
     @AssistedInject
@@ -68,7 +70,6 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy {
 
     @Override
     public void setDocument(final Document document) {
-        file = editor.getEditorInput().getFile();
         highlighter.init(editor.getHasTextMarkers(), document);
     }
 
@@ -77,24 +78,37 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy {
         parse();
     }
 
-    public void parse() {
+    void parse() {
         if (first) {
             codeAssistProcessor.disableCodeAssistant();
             first = false;
         }
 
+        if (getFile() instanceof Resource) {
+            final Optional<Project> project = ((Resource)getFile()).getRelatedProject();
 
-        String fqn = JavaSourceFolderUtil.getFQNForFile(file);
-        client.reconcile(file.getProject().getProjectConfig().getPath(), fqn, new JavaReconcileClient.ReconcileCallback() {
-            @Override
-            public void onReconcile(ReconcileResult result) {
-                if (result == null) {
-                    return;
-                }
-                doReconcile(result.getProblems());
-                highlighter.reconcile(result.getHighlightedPositions());
+            if (!project.isPresent()) {
+                return;
             }
-        });
+
+            try {
+                client.reconcile(project.get().getLocation().toString(), JavaUtil.resolveFQN(getFile()),
+                                 new JavaReconcileClient.ReconcileCallback() {
+                                     @Override
+                                     public void onReconcile(ReconcileResult result) {
+                                         if (result == null) {
+                                             return;
+                                         }
+                                         doReconcile(result.getProblems());
+                                         highlighter.reconcile(result.getHighlightedPositions());
+                                     }
+                                 });
+            } catch (RuntimeException e) {
+                Log.info(getClass(), e.getMessage());
+            }
+        }
+
+
     }
 
 
@@ -104,7 +118,7 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy {
     }
 
     public VirtualFile getFile() {
-        return file;
+        return editor.getEditorInput().getFile();
     }
 
     private void doReconcile(final List<Problem> problems) {

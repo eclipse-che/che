@@ -14,11 +14,12 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,13 +49,13 @@ public class StopWorkspaceActionTest {
     private WorkspaceServiceClient   workspaceService;
     @Mock
     private NotificationManager      notificationManager;
+    @Mock
+    private WorkspaceDto workspaceDto;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ActionEvent   actionEvent;
     @Mock
-    private WorkspaceDto  workspace;
-    @Mock
-    private Promise<Void> voidPromise;
+    private Promise<Void>     voidPromise;
 
     @Captor
     private ArgumentCaptor<Operation<Void>> operationCaptor;
@@ -70,20 +73,19 @@ public class StopWorkspaceActionTest {
     public void actionShouldBeUpdated() {
         action.updateInPerspective(actionEvent);
 
-        verify(appContext).getWorkspace();
-        verify(actionEvent).getPresentation();
+        verify(actionEvent, times(2)).getPresentation();
     }
 
     @Test
     public void actionShouldBePerformed() throws Exception {
-        when(appContext.getWorkspace()).thenReturn(workspace);
-        when(workspace.getId()).thenReturn("id");
         when(workspaceService.stop(anyString())).thenReturn(voidPromise);
+        DevMachine devMachine = mock(DevMachine.class);
+        when(devMachine.getId()).thenReturn("id");
+        when(appContext.getWorkspace()).thenReturn(workspaceDto);
+        when(workspaceDto.getId()).thenReturn("id");
 
         action.actionPerformed(actionEvent);
 
-        verify(appContext).getWorkspace();
         verify(workspaceService).stop("id");
-        verify(workspace).getId();
     }
 }

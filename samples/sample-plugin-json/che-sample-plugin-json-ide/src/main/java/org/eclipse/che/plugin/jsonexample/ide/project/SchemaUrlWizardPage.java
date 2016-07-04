@@ -14,12 +14,13 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 
 /**
  * Simple wizard page that contains the {@link SchemaUrlPageView}.
  */
-public class SchemaUrlWizardPage extends AbstractWizardPage<ProjectConfigDto> {
+public class SchemaUrlWizardPage extends AbstractWizardPage<MutableProjectConfig> {
 
     private final SchemaUrlPageViewImpl view;
 

@@ -10,56 +10,54 @@
  *******************************************************************************/
 package org.eclipse.che.ide.reference;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.reference.FqnProvider;
-import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 
 import java.util.Map;
 
 /**
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class ShowReferencePresenter implements ShowReferenceView.ActionDelegate {
 
     private final ShowReferenceView        view;
     private final Map<String, FqnProvider> providers;
-    private final AppContext               appContext;
 
     @Inject
     public ShowReferencePresenter(ShowReferenceView view,
-                                  Map<String, FqnProvider> providers,
-                                  AppContext appContext) {
+                                  Map<String, FqnProvider> providers) {
         this.view = view;
         this.view.setDelegate(this);
 
         this.providers = providers;
-        this.appContext = appContext;
     }
 
     /**
      * Shows dialog which contains information about file fqn and path calculated from passed element.
      *
-     * @param selectedElement
+     * @param resource
      *         element for which fqn and path will be calculated
      */
-    public void show(HasStorablePath selectedElement) {
-        String projectType = appContext.getCurrentProject().getProjectConfig().getType();
+    public void show(Resource resource) {
+        final Optional<Project> project = resource.getRelatedProject();
 
-        FqnProvider provider = providers.get(projectType);
+        if (project.isPresent()) {
+            final FqnProvider provider = providers.get(project.get().getType());
 
-        String fqn = "";
+            try {
+                view.show(provider.getFqn(resource), resource.getLocation());
+            } catch (RuntimeException e) {
+                view.show("", resource.getLocation());
+            }
 
-        if (provider != null) {
-            fqn = provider.getFqn(selectedElement);
-        } else {
-            Log.error(ShowReferencePresenter.class, "Fqn provider does not defined for " + projectType + " project type.");
         }
 
-        view.show(fqn, selectedElement.getStorablePath());
     }
 }

@@ -16,50 +16,48 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.reference.ShowReferencePresenter;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class ShowReferenceAction extends Action {
 
     private final ShowReferencePresenter showReferencePresenter;
-    private final SelectionAgent         selectionAgent;
-
-    private Object selectedElement;
+    private final AppContext             appContext;
 
     @Inject
     public ShowReferenceAction(CoreLocalizationConstant locale,
                                ShowReferencePresenter showReferencePresenter,
-                               SelectionAgent selectionAgent) {
+                               AppContext appContext) {
         super(locale.showReference());
 
         this.showReferencePresenter = showReferencePresenter;
-        this.selectionAgent = selectionAgent;
+        this.appContext = appContext;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void update(ActionEvent event) {
-        Selection<?> selection = selectionAgent.getSelection();
+        final Resource[] resources = appContext.getResources();
 
-        if (selection == null || selection.isEmpty()) {
-            return;
-        }
-
-        selectedElement = selection.getHeadElement();
-
-
-        event.getPresentation().setEnabledAndVisible(selectedElement != null && (selectedElement instanceof HasStorablePath));
+        event.getPresentation().setVisible(true);
+        event.getPresentation().setEnabled(resources != null && resources.length == 1);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent event) {
-        if (selectedElement instanceof HasStorablePath) {
-            showReferencePresenter.show((HasStorablePath)selectedElement);
-        }
+        final Resource resource = appContext.getResource();
+
+        checkState(resource != null, "Null resource occurred");
+
+        showReferencePresenter.show(resource);
     }
 }

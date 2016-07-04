@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projecttype;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import com.google.inject.Provider;
@@ -30,7 +30,7 @@ public class BlankProjectWizardRegistrar implements ProjectWizardRegistrar {
     public static final String BLANK_CATEGORY = "Blank";
     public static final String BLANK_ID       = "blank";
 
-    private final List<Provider<? extends WizardPage<ProjectConfigDto>>> wizardPages;
+    private final List<Provider<? extends WizardPage<MutableProjectConfig>>> wizardPages;
 
     public BlankProjectWizardRegistrar() {
         wizardPages = new ArrayList<>();
@@ -47,7 +47,7 @@ public class BlankProjectWizardRegistrar implements ProjectWizardRegistrar {
     }
 
     @NotNull
-    public List<Provider<? extends WizardPage<ProjectConfigDto>>> getWizardPages() {
+    public List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages() {
         return wizardPages;
     }
 }
