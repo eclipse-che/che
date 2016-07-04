@@ -37,11 +37,11 @@ public class CheAsynchronousJobPool extends AsynchronousJobPool implements Conte
 
     @Override
     protected UriBuilder getAsynchronousJobUriBuilder(AsynchronousJob job) {
-        final String wsId = EnvironmentContext.getCurrent().getWorkspaceId();
-        if (wsId == null) {
+//        final String wsId = EnvironmentContext.getCurrent().getWorkspaceId();
+//        if (wsId == null) {
             return super.getAsynchronousJobUriBuilder(job);
-        }
-        return UriBuilder.fromPath(asynchronousServicePath).path(wsId).path(Long.toString(job.getJobId()));
+//        }
+//        return UriBuilder.fromPath(asynchronousServicePath).path(wsId).path(Long.toString(job.getJobId()));
     }
 
     @Override

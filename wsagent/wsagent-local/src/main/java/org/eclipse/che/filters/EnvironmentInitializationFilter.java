@@ -32,7 +32,7 @@ import java.security.Principal;
  *
  * @author Dmitry Shnurenko
  */
-public abstract class AbstractEnvironmentInitializationFilter implements Filter {
+public abstract class EnvironmentInitializationFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -50,22 +50,11 @@ public abstract class AbstractEnvironmentInitializationFilter implements Filter 
 
         try {
             environmentContext.setSubject(subject);
-            environmentContext.setWorkspaceId(getWorkspaceId(request));
-
             filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
         } finally {
             EnvironmentContext.reset();
         }
     }
-
-    /**
-     * Extracts workspace id from request.
-     *
-     * @param request
-     *         request which contains workspace id
-     * @return workspace id
-     */
-    protected abstract String getWorkspaceId(ServletRequest request);
 
     private HttpServletRequest addUserInRequest(final HttpServletRequest httpRequest, final Subject subject) {
         return new HttpServletRequestWrapper(httpRequest) {
