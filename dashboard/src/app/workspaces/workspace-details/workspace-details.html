@@ -1,7 +1,7 @@
 <che-toolbar che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
              che-title-icons-controller="workspaceDetailsCtrl"
              che-button-name="Open"
-             che-button-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
+             che-button-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.namespace}}/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
              che-breadcrumb-title="All workspaces"
              che-breadcrumb-href="#/workspaces">
 </che-toolbar>
@@ -49,7 +49,7 @@
                 <workspace-status che-status="workspaceDetailsCtrl.getWorkspaceStatus()"
                                             layout-align="start start"></workspace-status>
                 <che-link che-link-text="Show more"
-                          ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
+                          ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.namespace}}/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
                           layout-align="end start"
                           ng-show="(workspaceDetailsCtrl.showShowMore === true && (workspaceDetailsCtrl.getWorkspaceStatus() === 'STARTING' || workspaceDetailsCtrl.getWorkspaceStatus() === 'ERROR'))"></che-link>
               </div>

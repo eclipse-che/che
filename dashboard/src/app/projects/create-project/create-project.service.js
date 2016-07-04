@@ -114,6 +114,14 @@ export class CreateProjectSvc {
         return this.workspaceOfProject;
     }
 
+    setWorkspaceNamespace(namespace) {
+      this.namespace = namespace;
+    }
+
+    getWorkspaceNamespace() {
+      return this.namespace;
+    }
+
     setProject(project) {
         this.project = project;
     }
@@ -152,7 +160,7 @@ export class CreateProjectSvc {
   }
 
   getIDELink() {
-    let link = '#/ide/' + this.getWorkspaceOfProject();
+    let link = '#/ide/' + this.getWorkspaceNamespace() + '/' + this.getWorkspaceOfProject();
     if (this.hasIdeAction()) {
      link = link + '?action=' + this.ideAction;
     }

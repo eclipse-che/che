@@ -36,6 +36,7 @@ export class IdeConfig {
     register.directive('ideIframeButtonLink', IdeIFrameButtonLink);
 
     let ideProvider = {
+      title: (params) => {return params.workspaceName},
       templateUrl: 'app/ide/ide.html',
       controller: 'IdeCtrl',
       controllerAs: 'ideCtrl'
@@ -44,7 +45,7 @@ export class IdeConfig {
     // config routes
     register.app.config(function ($routeProvider) {
       $routeProvider.accessWhen('/ide', ideProvider)
-        .accessWhen('/ide/:workspaceName', ideProvider);
+        .accessWhen('/ide/:namespace/:workspaceName', ideProvider);
 
     });
   }
