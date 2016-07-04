@@ -26,7 +26,9 @@ import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -38,9 +40,6 @@ import java.io.IOException;
 
 import static java.lang.String.format;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -60,7 +59,8 @@ public class DockerInstanceTest {
     private static final String        FILE_PATH    = "/tmp";
     private static final String        CONTAINER    = "container144";
     private static final String        OWNER        = "owner12";
-    private static final String        IMAGE        = "iamage12";
+    private static final String        IMAGE        = "image12";
+    private static final String        EXEC_ID      = "exec_id12";
     private static final String        MACHINE_ID   = "machine12";
     private static final String        WORKSPACE_ID = "workspace12";
     private static final String        NAME         = "suse-jdk";
@@ -87,16 +87,15 @@ public class DockerInstanceTest {
     @BeforeMethod
     public void setUp() throws IOException {
         dockerInstance = getDockerInstance();
-        when(dockerConnectorMock.createExec(anyString(),
-                                            anyBoolean(),
-                                            anyVararg())).thenReturn(execMock);
+        when(dockerConnectorMock.createExec(any(CreateExecParams.class))).thenReturn(execMock);
+        when(execMock.getId()).thenReturn(EXEC_ID);
         doAnswer(invoke -> {
             @SuppressWarnings("unchecked")
             MessageProcessor<LogMessage> msgProc = (MessageProcessor<LogMessage>)invoke.getArguments()[1];
             msgProc.process(logMessageMock);
             return msgProc;
         }).when(dockerConnectorMock)
-          .startExec(anyString(), any());
+          .startExec(any(StartExecParams.class), any());
     }
 
     @Test(expectedExceptions = MachineException.class)
@@ -106,9 +105,7 @@ public class DockerInstanceTest {
 
     @Test(expectedExceptions = MachineException.class)
     public void shouldThrowMachineExceptionWhenExecProblemOccurs() throws Exception {
-        when(dockerConnectorMock.createExec(anyString(),
-                                            anyBoolean(),
-                                            anyVararg())).thenThrow(new IOException("File not found"));
+        when(dockerConnectorMock.createExec(any(CreateExecParams.class))).thenThrow(new IOException("File not found"));
 
         dockerInstance.readFileContent(FILE_PATH, -1, 10);
     }
@@ -146,7 +143,8 @@ public class DockerInstanceTest {
 
         dockerInstance.commitContainer(OWNER, REPOSITORY, TAG);
 
-        verify(dockerConnectorMock, times(1)).commit(CommitParams.create(CONTAINER, REPOSITORY)
+        verify(dockerConnectorMock, times(1)).commit(CommitParams.create(CONTAINER)
+                                                                 .withRepository(REPOSITORY)
                                                                  .withTag(TAG)
                                                                  .withComment(comment));
     }
