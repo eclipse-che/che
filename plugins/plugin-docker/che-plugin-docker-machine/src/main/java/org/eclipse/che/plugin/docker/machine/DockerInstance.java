@@ -32,8 +32,13 @@ import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
+import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,8 +173,12 @@ public class DockerInstance extends AbstractInstance {
     public List<InstanceProcess> getProcesses() throws MachineException {
         List<InstanceProcess> processes = new LinkedList<>();
         try {
-            final Exec exec = docker.createExec(container, false, "/bin/bash", "-c", GET_ALIVE_PROCESSES_COMMAND);
-            docker.startExec(exec.getId(), logMessage -> {
+            final Exec exec = docker.createExec(CreateExecParams.create(container,
+                                                                        new String[] {"/bin/bash",
+                                                                                      "-c",
+                                                                                      GET_ALIVE_PROCESSES_COMMAND})
+                                                                .withDetach(false));
+            docker.startExec(StartExecParams.create(exec.getId()), logMessage -> {
                 final String pidFilePath = logMessage.getContent().trim();
                 final Matcher matcher = PID_FILE_PATH_PATTERN.matcher(pidFilePath);
                 if (matcher.matches()) {
@@ -243,7 +252,8 @@ public class DockerInstance extends AbstractInstance {
         // !! We SHOULD NOT pause container before commit because all execs will fail
         // to push image to private registry it should be tagged with registry in repo name
         // https://docs.docker.com/reference/api/docker_remote_api_v1.16/#push-an-image-on-the-registry
-        docker.commit(CommitParams.create(container, repository)
+        docker.commit(CommitParams.create(container)
+                                  .withRepository(repository)
                                   .withTag(tag)
                                   .withComment(comment));
     }
@@ -272,13 +282,15 @@ public class DockerInstance extends AbstractInstance {
 
             docker.killContainer(container);
 
-            docker.removeContainer(container, true, true);
+            docker.removeContainer(RemoveContainerParams.create(container)
+                                                        .withRemoveVolumes(true)
+                                                        .withForce(true));
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage());
         }
 
         try {
-            docker.removeImage(image, false);
+            docker.removeImage(RemoveImageParams.create(image).withForce(false));
         } catch (IOException ignore) {
         }
     }
@@ -322,8 +334,8 @@ public class DockerInstance extends AbstractInstance {
 
         ListLineConsumer lines = new ListLineConsumer();
         try {
-            Exec exec = docker.createExec(container, false, command);
-            docker.startExec(exec.getId(), new LogMessagePrinter(lines, LogMessage::getContent));
+            Exec exec = docker.createExec(CreateExecParams.create(container, command).withDetach(false));
+            docker.startExec(StartExecParams.create(exec.getId()), new LogMessagePrinter(lines, LogMessage::getContent));
         } catch (IOException e) {
             throw new MachineException(format("Error occurs while initializing command %s in docker container %s: %s",
                                               Arrays.toString(command), container, e.getLocalizedMessage()), e);
@@ -343,10 +355,11 @@ public class DockerInstance extends AbstractInstance {
             throw new MachineException("Unsupported copying between not docker machines");
         }
         try {
-            docker.putResource(container,
-                               targetPath,
-                               docker.getResource(((DockerInstance)sourceMachine).container, sourcePath),
-                               overwriteDirNonDir);
+            docker.putResource(PutResourceParams.create(container,
+                                                        targetPath,
+                                                        docker.getResource(GetResourceParams.create(
+                                                                ((DockerInstance)sourceMachine).container, sourcePath)))
+                                                .withNoOverwriteDirNonDir(overwriteDirNonDir));
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage());
         }

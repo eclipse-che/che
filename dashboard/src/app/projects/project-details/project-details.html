@@ -1,7 +1,7 @@
 <che-toolbar che-title="{{projectDetailsController.projectName}}"
              che-title-icons-controller="projectDetailsController"
              che-button-name="Open"
-             che-button-href="#/ide/{{projectDetailsController.getWorkspaceName(projectDetailsController.workspaceId)}}"
+             che-button-href="#/ide/{{projectDetailsController.namespace}}/{{projectDetailsController.workspaceName}}"
              che-breadcrumb-title="All projects"
              che-breadcrumb-href="#/projects"
              che-subheader-icon="chefont cheico-type-{{projectDetailsController.projectDetails.type}} cheico-type-blank"
@@ -52,7 +52,7 @@
         </che-panel>
         <che-panel che-title="Workspace">
           <div layout="column" flex layout-align="space-around start">
-            <che-label che-label-text="{{projectDetailsController.getWorkspaceName(projectDetailsController.workspaceId)}}"></che-label>
+            <che-label che-label-text="{{projectDetailsController.workspaceName}}"></che-label>
           </div>
         </che-panel>
         <che-panel che-title="Delete Project">
@@ -112,7 +112,7 @@
     <che-empty-state che-value="This project's workspace is not currently running."
                      che-icon-class="fa fa-folder-open"></che-empty-state>
 
-  <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsController.workspaceId}}" che-link-text="Start workspace"></che-link>
+  <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsController.namespace}}/{{projectDetailsController.workspaceName}}" che-link-text="Start workspace"></che-link>
 
 </md-content>
 

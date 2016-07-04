@@ -22,6 +22,10 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.helper.DefaultNetworkFinder;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
+import org.eclipse.che.plugin.docker.client.params.StopContainerParams;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -51,18 +55,21 @@ public class DockerProcessTest {
                                      new DockerConnectionFactory(dockerConnectorConfiguration),
                                      new DockerRegistryAuthResolver(null));
 
-        final ContainerCreated containerCreated = docker.createContainer(new ContainerConfig().withImage("ubuntu")
-                                                                                              .withCmd("tailf", "/dev/null"),
-                                                                         null);
+        final ContainerCreated containerCreated = docker.createContainer(
+                CreateContainerParams.create(new ContainerConfig().withImage("ubuntu")
+                                                                  .withCmd("tail", "-f", "/dev/null")));
         container = containerCreated.getId();
-        docker.startContainer(containerCreated.getId(), null);
+        docker.startContainer(StartContainerParams.create(containerCreated.getId()));
     }
 
     @AfterMethod
     public void tearDown() throws Exception {
         if (container != null) {
-            docker.stopContainer(container, 2, TimeUnit.SECONDS);
-            docker.removeContainer(container, true, true);
+            docker.stopContainer(StopContainerParams.create(container)
+                                                    .withTimeout(2, TimeUnit.SECONDS));
+            docker.removeContainer(RemoveContainerParams.create(container)
+                                                        .withForce(true)
+                                                        .withRemoveVolumes(true));
         }
     }
 
@@ -86,7 +93,7 @@ public class DockerProcessTest {
                                          new DockerConnectionFactory(dockerConnectorConfiguration),
                                          new DockerRegistryAuthResolver(null));
         }
-        Command command = new CommandImpl("tailf", "tailf /dev/null", "mvn");
+        Command command = new CommandImpl("tailf", "tail -f /dev/null", "mvn");
         final DockerProcess dockerProcess = new DockerProcess(docker,
                                                               command,
                                                               container,

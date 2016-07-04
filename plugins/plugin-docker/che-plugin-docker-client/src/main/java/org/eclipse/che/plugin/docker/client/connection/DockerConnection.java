@@ -99,7 +99,7 @@ public abstract class DockerConnection implements Closeable {
                                               String path,
                                               String query,
                                               List<Pair<String, ?>> headers,
-                                              Entity entity) throws IOException;
+                                              Entity<?> entity) throws IOException;
 
     public abstract void close();
 

@@ -11,7 +11,7 @@
 $http_proxy    = ENV['HTTP_PROXY'] || ""
 $https_proxy   = ENV['HTTPS_PROXY'] || ""
 $no_proxy      = ENV['NO_PROXY'] || "localhost,127.0.0.1"
-$che_version   = ENV['CHE_VERSION'] || "nightly"
+$che_version   = ENV['CHE_VERSION'] || "latest"
 $ip            = ENV['CHE_IP'] || "192.168.28.100"
 $hostPort      = (ENV['CHE_PORT'] || 8080).to_i
 $containerPort = (ENV['CHE_CONTAINER_PORT'] || ($hostPort == -1 ? 8080 : $hostPort)).to_i

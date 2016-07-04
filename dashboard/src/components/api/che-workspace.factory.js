@@ -48,7 +48,7 @@ export class CheWorkspace {
 
     // remote call
     this.remoteWorkspaceAPI = this.$resource('/api/workspace', {}, {
-        getDetails: {method: 'GET', url: '/api/workspace/:workspaceId'},
+        getDetails: {method: 'GET', url: '/api/workspace/:workspaceKey'},
         create: {method: 'POST', url: '/api/workspace?account=:accountId'},
         deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
         updateWorkspace: {method: 'PUT', url : '/api/workspace/:workspaceId'},
@@ -118,6 +118,12 @@ export class CheWorkspace {
     return this.workspacesById;
   }
 
+  getWorkspaceByName(namespace, name) {
+    return this.lodash.find(this.workspaces, (workspace) => {
+      return workspace.namespace === namespace && workspace.config.name === name;
+    });
+  }
+
   /**
    * Gets the workspace by id
    * @param workspace id
@@ -126,6 +132,8 @@ export class CheWorkspace {
   getWorkspaceById(id) {
     return this.workspacesById.get(id);
   }
+
+
 
   /**
    * Ask for loading the workspaces in asynchronous way
@@ -170,13 +178,25 @@ export class CheWorkspace {
     return callbackPromises;
   }
 
-  fetchWorkspaceDetails(workspaceId) {
+  /**
+   * Fetch workspace details by workspace's key.
+   *
+   * @param workspaceKey workspace key: can be just id or namespace:workspaceName pair
+   * @returns {Promise}
+   */
+  fetchWorkspaceDetails(workspaceKey) {
     var defer = this.$q.defer();
 
-    let promise = this.remoteWorkspaceAPI.getDetails({workspaceId : workspaceId}).$promise;
+    let promise = this.remoteWorkspaceAPI.getDetails({workspaceKey : workspaceKey}).$promise;
     promise.then((data) => {
-      this.workspacesById.set(workspaceId, data);
-      this.startUpdateWorkspaceStatus(workspaceId);
+      this.workspacesById.set(data.id, data);
+      this.lodash.remove(this.workspaces, (workspace) => {
+        return workspace.id === data.id;
+      });
+
+     this.workspaces.push(data);
+
+      this.startUpdateWorkspaceStatus(data.id);
       defer.resolve();
     }, (error) => {
       if (error.status !== 304) {
@@ -316,9 +336,22 @@ export class CheWorkspace {
    * @returns {*|promise|n|N}
    */
   updateWorkspace(workspaceId, data) {
+    var defer = this.$q.defer();
+
     let promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId : workspaceId}, data).$promise;
-    promise.then(() => {this.fetchWorkspaceDetails(workspaceId);});
-    return promise;
+    promise.then((data) => {
+      this.workspacesById.set(data.id, data);
+      this.lodash.remove(this.workspaces, (workspace) => {
+        return workspace.id === data.id;
+      });
+      this.workspaces.push(data);
+      this.startUpdateWorkspaceStatus(data.id);
+      defer.resolve(data);
+    }, (error) => {
+      defer.reject(error);
+    });
+
+    return defer.promise;
   }
 
   /**
@@ -379,8 +412,8 @@ export class CheWorkspace {
     return websocketLink ? websocketLink.href : '';
   }
 
-  getIdeUrl(workspaceName) {
-    return '/ide/' + workspaceName;
+  getIdeUrl(namespace, workspaceName) {
+    return '/ide/' + namespace + '/' + workspaceName;
   }
 
   /**

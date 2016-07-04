@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.machine;
 
 import com.google.common.base.Strings;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -138,5 +139,10 @@ public class DevMachine {
     public String getAddress() {
         final DevMachineServer server = getServer(Constants.WSAGENT_REFERENCE);
         return server.getProtocol() + "://" + server.getAddress();
+    }
+
+    /** Returns {@link Machine descriptor} of the Workspace Agent. */
+    public Machine getDescriptor() {
+        return devMachineDescriptor;
     }
 }

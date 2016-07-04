@@ -33,6 +33,7 @@ export class AdministrationConfig {
     // config routes
     register.app.config(($routeProvider) => {
       $routeProvider.accessWhen('/administration', {
+        title: 'Administration',
         templateUrl: 'app/administration/administration.html',
         controller: 'AdministrationController',
         controllerAs: 'administrationController'
