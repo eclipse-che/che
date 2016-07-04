@@ -29,7 +29,7 @@ import static org.eclipse.che.api.vfs.impl.file.event.EventTreeNode.newInstance;
  * @since 4.5
  */
 @Beta
-class EventTreeHelper {
+public class EventTreeHelper {
 
     /**
      * Adds corresponding event to an event tree.
@@ -42,7 +42,7 @@ class EventTreeHelper {
      *
      * @param loEvent event to be added
      */
-    static void addEventAndCreatePrecedingNodes(EventTreeNode root, LoEvent loEvent) {
+    public static void addEventAndCreatePrecedingNodes(EventTreeNode root, LoEvent loEvent) {
         traverseAndCreate(root, Path.of(loEvent.getPath()))
                 .withEvent(loEvent)
                 .withPath(loEvent.getPath())
@@ -57,7 +57,7 @@ class EventTreeHelper {
      *
      * @return node if node with such path exists otherwise {@code null}
      */
-    static Optional<EventTreeNode> getTreeNode(EventTreeNode root, String relativePath) {
+    public static Optional<EventTreeNode> getTreeNode(EventTreeNode root, String relativePath) {
         Optional<EventTreeNode> current = Optional.of(root);
 
         if (relativePath.startsWith(separator)) {

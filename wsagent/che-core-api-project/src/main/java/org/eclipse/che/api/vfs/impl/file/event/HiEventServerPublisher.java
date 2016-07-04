@@ -34,7 +34,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @Beta
 @Singleton
-class HiEventServerPublisher implements HiEventBroadcaster {
+public class HiEventServerPublisher implements HiEventBroadcaster {
     private static final Logger LOG = getLogger(HiEventClientBroadcaster.class);
 
     private final EventService eventService;
