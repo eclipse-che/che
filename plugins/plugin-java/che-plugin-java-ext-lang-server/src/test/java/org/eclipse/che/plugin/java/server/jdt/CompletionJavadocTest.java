@@ -82,7 +82,6 @@ public class CompletionJavadocTest extends QuickFixTest {
     public void setUp() throws Exception {
         super.setUp();
         EnvironmentContext customEnvironment = mock(EnvironmentContext.class);
-        doReturn("1q2w3e").when(customEnvironment).getWorkspaceId();
         doReturn(new SubjectImpl(vfsUser, "", "", false)).when(customEnvironment).getSubject();
         EnvironmentContext.setCurrent(customEnvironment);
         fJProject1 = Java18ProjectTestSetup.getProject();

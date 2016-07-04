@@ -872,7 +872,7 @@ public class ProjectService extends Service {
         LOG.info("EVENT#project-created# PROJECT#{}# TYPE#{}# WS#{}# USER#{}# PAAS#default#",
                  projectName,
                  projectType,
-                 EnvironmentContext.getCurrent().getWorkspaceId(),
+                 workspace,
                  EnvironmentContext.getCurrent().getSubject().getUserId());
     }
 

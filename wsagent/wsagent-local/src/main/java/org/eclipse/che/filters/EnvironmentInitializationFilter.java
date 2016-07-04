@@ -32,7 +32,7 @@ import java.security.Principal;
  *
  * @author Dmitry Shnurenko
  */
-public abstract class EnvironmentInitializationFilter implements Filter {
+public class EnvironmentInitializationFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
