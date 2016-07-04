@@ -436,7 +436,7 @@ class JGitConnection implements GitConnection {
     }
 
     public void clone(CloneRequest request) throws GitException, UnauthorizedException {
-        String remoteUri;
+        String remoteUri = request.getRemoteUri();
         boolean removeIfFailed = false;
         try {
             if (request.getRemoteName() == null) {
@@ -450,7 +450,6 @@ class JGitConnection implements GitConnection {
             // We have to do this here because the clone command doesn't revert its own changes in case of failure.
             removeIfFailed = !repository.getDirectory().exists();
 
-            remoteUri = request.getRemoteUri();
             CloneCommand cloneCommand = Git.cloneRepository()
                                            .setDirectory(new File(request.getWorkingDir()))
                                            .setRemote(request.getRemoteName())
@@ -504,6 +503,17 @@ class JGitConnection implements GitConnection {
             // Delete .git directory in case it was created
             if (removeIfFailed) {
                 deleteRepositoryFolder();
+            }
+            //TODO remove this when JGit will support HTTP 301 redirects, https://bugs.eclipse.org/bugs/show_bug.cgi?id=465167
+            //try to clone repository by replacing http to https in the url if HTTP 301 redirect happened
+            if (exception.getMessage().contains(": 301 Moved Permanently")) {
+                remoteUri = "https" + remoteUri.substring(4);
+                try {
+                    clone(request.withRemoteUri(remoteUri));
+                } catch (UnauthorizedException | GitException e) {
+                    throw new GitException("Failed to clone the repository", e);
+                }
+                return;
             }
             throw new GitException(exception.getMessage(), exception);
         }
@@ -1620,7 +1630,7 @@ class JGitConnection implements GitConnection {
         } catch (IOException | ServerException exception) {
             String errorMessage = "Can't store ssh key. ".concat(exception.getMessage());
             LOG.error(errorMessage, exception);
-            throw new GitException(errorMessage, exception);
+            throw new GitException(errorMessage, ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY);
         }
         Set<PosixFilePermission> permissions = EnumSet.of(OWNER_READ, OWNER_WRITE);
         try {
