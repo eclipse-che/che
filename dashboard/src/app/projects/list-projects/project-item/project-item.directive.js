@@ -29,8 +29,7 @@ export class CheProjectItem {
 
     // scope values
     this.scope = {
-      workspaceId: '=cheProjectItemWorkspaceId',
-      workspaceName: '=cheProjectItemWorkspaceName',
+      workspace: '=cheProjectItemWorkspace',
       project: '=cheProjectItemProject',
       profileCreationDate: '=cheProfileCreationDate',
       isDisplayWorkspace: '=cheDisplayWorkspace',

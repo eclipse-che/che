@@ -20,6 +20,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.Filters;
+import org.eclipse.che.plugin.docker.client.params.GetEventsParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,9 +105,10 @@ public class DockerInstanceStopDetector {
             //noinspection InfiniteLoopStatement
             while (true) {
                 try {
-                    dockerConnector.getEvents(lastProcessedEventDate,
-                                              0,
-                                              new Filters().withFilter("event", "die", "oom"),
+                    dockerConnector.getEvents(GetEventsParams.create()
+                                                             .withSinceSecond(lastProcessedEventDate)
+                                                             .withUntilSecond(0)
+                                                             .withFilters(new Filters().withFilter("event", "die", "oom")),
                                               new EventsProcessor());
                 } catch (IOException e) {
                     // usually connection timeout
@@ -119,6 +121,12 @@ public class DockerInstanceStopDetector {
     private class EventsProcessor implements MessageProcessor<Event> {
         @Override
         public void process(Event message) {
+            if (message.getType() != null && !"container".equals(message.getType())) {
+                // this check is added because of bug in the docker swarm which do not filter events
+                // in case of new response format of 'get events' we should skip all not filtered by swarm event types
+                return;
+            }
+
             switch (message.getStatus()) {
                 case "oom":
                     containersOomTimestamps.put(message.getId(), message.getId());

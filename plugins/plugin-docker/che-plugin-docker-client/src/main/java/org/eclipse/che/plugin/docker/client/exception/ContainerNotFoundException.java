@@ -8,24 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.java.plain.client.wizard.selector;
-
-import org.eclipse.che.ide.api.data.tree.Node;
-
-import java.util.List;
+package org.eclipse.che.plugin.docker.client.exception;
 
 /**
- * Delegate which handles result of the node selection.
+ * Occurs when docker container is not found.
  *
- * @author Valeriy Svydenko
+ * @author Mykola Morhun
  */
-public interface SelectionDelegate {
+public class ContainerNotFoundException extends DockerException {
 
-    /**
-     * Fires when some nodes was selected.
-     *
-     * @param selectedNodes
-     *         list of the selected nodes
-     */
-    void onNodeSelected(List<Node> selectedNodes);
+    public ContainerNotFoundException(String message) {
+        super(message, 404);
+    }
+
 }

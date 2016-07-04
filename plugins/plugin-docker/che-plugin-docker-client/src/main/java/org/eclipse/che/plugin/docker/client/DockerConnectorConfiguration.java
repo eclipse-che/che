@@ -37,9 +37,14 @@ import static java.io.File.separatorChar;
  */
 public class DockerConnectorConfiguration {
     /**
-     * Docker bridge name on Linux.
+     * Default Docker bridge name on Linux.
      */
     protected static final String BRIDGE_LINUX_INTERFACE_NAME = "docker0";
+
+    /**
+     * Default network interface name (Linux system).
+     */
+    protected static final String DEFAULT_LINUX_INTERFACE_NAME = "eth0";
 
     /**
      * Default ip of docker host (Linux system).
@@ -249,9 +254,14 @@ public class DockerConnectorConfiguration {
     protected String getDockerHostIp(final boolean isLinux, @NotNull final Map<String, String> env) {
         if (isLinux) {
             // search "docker0" bridge
-            Optional<InetAddress> dockerHostInetAddress = networkFinder.getIPAddress(BRIDGE_LINUX_INTERFACE_NAME);
-            if (dockerHostInetAddress.isPresent()) {
-                return dockerHostInetAddress.get().getHostAddress();
+            Optional<InetAddress> dockerBridgeInetAddress = networkFinder.getIPAddress(BRIDGE_LINUX_INTERFACE_NAME);
+            if (dockerBridgeInetAddress.isPresent()) {
+                return dockerBridgeInetAddress.get().getHostAddress();
+            }
+            // Che server is probably running in a Docker container: get its internal IP
+            Optional<InetAddress> cheServerInetAddress = networkFinder.getIPAddress(DEFAULT_LINUX_INTERFACE_NAME);
+            if (cheServerInetAddress.isPresent()) {
+                return cheServerInetAddress.get().getHostAddress();
             }
             // return default Docker host ip address
             return DEFAULT_LINUX_DOCKER_HOST_IP;

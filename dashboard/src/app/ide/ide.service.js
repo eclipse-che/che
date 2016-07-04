@@ -228,14 +228,6 @@ class IdeSvc {
 
     this.updateRecentWorkspace(workspaceId);
 
-    if (this.openedWorkspace && this.openedWorkspace.id === workspaceId) {
-      let openedWorkspaceStatus = this.cheWorkspace.getWorkspaceById(this.openedWorkspace.id).status;
-      if (openedWorkspaceStatus === 'STARTING' || openedWorkspaceStatus === 'RUNNING') {
-        this.restoreIDE();
-        return;
-      }
-    }
-
     let inDevMode = this.userDashboardConfig.developmentMode;
     let randVal = Math.floor((Math.random() * 1000000) + 1);
     let appendUrl = '?uid=' + randVal;

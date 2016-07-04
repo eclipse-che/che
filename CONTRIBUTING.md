@@ -41,19 +41,19 @@ replace those parts with "REDACTED").
 **Issue Report Template**:
 
 ```
-Description of problem:
-Che version:
-Che install directory:
-Docker version: 
-Java version: 
-Environment details (AWS, VirtualBox, physical, etc.):
-How reproducible:
-Steps to Reproduce:
+Short Description:
+Reproduction Steps:
 1.
 2.
 3.
-Actual Results:
-Expected Results:
+Expected behavior: 
+Observed behavior:
+Che version: 
+OS and version: 
+Docker version: 
+Che install: 
+Problem started happening recently, didn't happen in an older version of Che:
+Problem can be reliably reproduced, doesn't happen randomly:
 ```
 
 Contributor License Agreement

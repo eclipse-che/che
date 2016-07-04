@@ -854,6 +854,7 @@ export class CreateProjectCtrl {
       }
     } else {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
+      this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
     }
     // do we have projects ?
@@ -960,6 +961,7 @@ export class CreateProjectCtrl {
     //TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     creationPromise.then((workspace) => {
+      this.createProjectSvc.setWorkspaceNamespace(workspace.namespace);
       this.updateRecentWorkspace(workspace.id);
 
       // init message bus if not there

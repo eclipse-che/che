@@ -102,6 +102,15 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
     }
 
     @Override
+    public void onRecursiveSelected(boolean recursiveSelected) {
+        if (recursiveSelected) {
+            projectParameters().put("recursive", null);
+        } else {
+            projectParameters().remove("recursive");
+        }
+    }
+
+    @Override
     public void projectDescriptionChanged(@NotNull String projectDescription) {
         dataObject.setDescription(projectDescription);
         updateDelegate.updateControls();
@@ -130,7 +139,7 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
             projectParameters().put("keepDir", view.getDirectoryName());
             dataObject.withType("blank");
             view.highlightDirectoryNameField(!NameUtils.checkProjectName(view.getDirectoryName()));
-            view.focusDirectoryNameFiend();
+            view.focusDirectoryNameField();
         } else {
             projectParameters().remove("keepDir");
             dataObject.withType(null);
@@ -157,6 +166,7 @@ public class GitImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
 
         if (view.isBranchName()) {
             projectParameters().put("branch", view.getBranchName());
+            view.focusBranchNameField();
         } else {
             projectParameters().remove("branch");
         }

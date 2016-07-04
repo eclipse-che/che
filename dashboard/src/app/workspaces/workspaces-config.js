@@ -96,16 +96,19 @@ export class WorkspacesConfig {
     // config routes
     register.app.config(function ($routeProvider) {
       $routeProvider.accessWhen('/workspaces', {
+        title: 'Workspaces',
         templateUrl: 'app/workspaces/list-workspaces/list-workspaces.html',
         controller: 'ListWorkspacesCtrl',
         controllerAs: 'listWorkspacesCtrl'
       })
-      .accessWhen('/workspace/:workspaceId', {
+      .accessWhen('/workspace/:namespace/:workspaceName', {
+          title: (params) => { return params.workspaceName;},
           templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
           controller: 'WorkspaceDetailsCtrl',
           controllerAs: 'workspaceDetailsCtrl'
         })
       .accessWhen('/create-workspace', {
+          title: 'New Workspace',
           templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
           controller: 'CreateWorkspaceCtrl',
           controllerAs: 'createWorkspaceCtrl'

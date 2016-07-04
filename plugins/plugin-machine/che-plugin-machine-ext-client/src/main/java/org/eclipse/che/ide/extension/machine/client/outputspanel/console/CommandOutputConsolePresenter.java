@@ -15,12 +15,13 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.CommandOutputMessageUnmarshaller;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
@@ -54,7 +55,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private final MachineResources       resources;
     private final CommandConfiguration   commandConfiguration;
     private final EventBus               eventBus;
-    private final String                 machineId;
+    private final Machine                machine;
     private final CommandManager         commandManager;
 
     private MessageBus                   messageBus;
@@ -80,13 +81,13 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                                          CommandManager commandManager,
                                          EventBus eventBus,
                                          @Assisted CommandConfiguration commandConfiguration,
-                                         @Assisted String machineId) {
+                                         @Assisted Machine machine) {
         this.view = view;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.machineServiceClient = machineServiceClient;
         this.resources = resources;
         this.commandConfiguration = commandConfiguration;
-        this.machineId = machineId;
+        this.machine = machine;
         this.messageBus = messageBusProvider.getMessageBus();
         this.eventBus = eventBus;
         this.commandManager = commandManager;
@@ -132,7 +133,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         view.toggleScrollToEndButton(true);
 
         outputChannel = wsChannel;
-        outputHandler = new SubscriptionHandler<String>(new OutputMessageUnmarshaller()) {
+        outputHandler = new SubscriptionHandler<String>(new CommandOutputMessageUnmarshaller(machine.getConfig().getName())) {
             @Override
             protected void onMessageReceived(String result) {
                 view.print(result, result.endsWith("\r"));
@@ -158,7 +159,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         view.showCommandLine(process.getCommandLine());
 
         final Unmarshallable<MachineProcessEvent> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(MachineProcessEvent.class);
-        final String processStateChannel = "machine:process:" + machineId;
+        final String processStateChannel = "machine:process:" + machine.getId();
         final MessageHandler handler = new SubscriptionHandler<MachineProcessEvent>(unmarshaller) {
             @Override
             protected void onMessageReceived(MachineProcessEvent result) {
@@ -230,7 +231,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void stop() {
-        machineServiceClient.stopProcess(machineId, pid);
+        machineServiceClient.stopProcess(machine.getId(), pid);
     }
 
     @Override
@@ -246,12 +247,12 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Override
     public void reRunProcessButtonClicked() {
         if (isFinished()) {
-            commandManager.executeCommand(commandConfiguration, machineId);
+            commandManager.executeCommand(commandConfiguration, machine);
         } else {
-            machineServiceClient.stopProcess(machineId, pid).then(new Operation<Void>() {
+            machineServiceClient.stopProcess(machine.getId(), pid).then(new Operation<Void>() {
                 @Override
                 public void apply(Void arg) throws OperationException {
-                    commandManager.executeCommand(commandConfiguration, machineId);
+                    commandManager.executeCommand(commandConfiguration, machine);
                 }
             });
         }

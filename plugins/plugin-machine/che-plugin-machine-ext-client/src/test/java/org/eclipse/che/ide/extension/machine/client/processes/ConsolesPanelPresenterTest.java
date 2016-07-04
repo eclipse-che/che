@@ -171,7 +171,7 @@ public class ConsolesPanelPresenterTest {
         when(commandTypeRegistry.getCommandTypeById(anyString())).thenReturn(commandType);
         when(commandType.getConfigurationFactory()).thenReturn(commandConfigurationFactory);
         when(commandConfigurationFactory.createFromDto(anyObject())).thenReturn(commandConfiguration);
-        when(commandConsoleFactory.create(anyObject(), anyString())).thenReturn(outputConsole);
+        when(commandConsoleFactory.create(anyObject(), any(org.eclipse.che.api.core.model.machine.Machine.class))).thenReturn(outputConsole);
 
         CommandDto commandDto = mock(CommandDto.class);
         when(dtoFactory.createDto(anyObject())).thenReturn(commandDto);

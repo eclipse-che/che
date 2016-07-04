@@ -70,6 +70,9 @@ public interface GitHubLocalizationConstant extends Messages {
     @Key("view.import.githubImporterPage.projectUrl")
     String githubImporterPageProjectUrl();
 
+    @Key("view.import.githubImporterPage.recursive")
+    String githubImporterPageRecursive();
+
     @Key("view.import.githubImporterPage.projectInfo")
     String githubImporterPageProjectInfo();
 
@@ -90,4 +93,10 @@ public interface GitHubLocalizationConstant extends Messages {
 
     @Key("view.import.githubImporterPage.keepDirectoryField")
     String githubImporterPageKeepDirectoryField();
+
+    @Key("view.import.githubImporterPage.branchField")
+    String githubImporterPageBranchField();
+
+    @Key("view.import.githubImporterPage.branch")
+    String githubImporterPageBranch();
 }

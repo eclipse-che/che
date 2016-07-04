@@ -90,6 +90,7 @@ initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipPr
   // config routes (add demo page)
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
+      title: 'Demo Components',
       templateUrl: 'app/demo-components/demo-components.html',
       controller: 'DemoComponentsCtrl',
       controllerAs: 'demoComponentsCtrl'
@@ -104,9 +105,8 @@ initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipPr
 /**
  * Setup route redirect module
  */
-initModule.run(['$rootScope', '$location', 'routingRedirect', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope, $location, routingRedirect, $timeout, ideIFrameSvc, cheIdeFetcher, routeHistory, cheUIElementsInjectorService, workspaceDetailsService) => {
-
+initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
+  ($rootScope, $location, $routeParams, routingRedirect, $timeout, ideIFrameSvc, cheIdeFetcher, routeHistory, cheUIElementsInjectorService, workspaceDetailsService) => {
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
@@ -138,8 +138,15 @@ initModule.run(['$rootScope', '$location', 'routingRedirect', '$timeout', 'ideIF
       }
     });
 
-    // When a route is about to change, notify the routing redirect node
+
     $rootScope.$on('$routeChangeSuccess', (event, next) => {
+      if (next.$$route.title && angular.isFunction(next.$$route.title)) {
+        $rootScope.currentPage = next.$$route.title($routeParams);
+      } else {
+        $rootScope.currentPage = next.$$route.title || 'Dashboard';
+      }
+
+      // When a route is about to change, notify the routing redirect node
       if (next.resolve) {
         if (DEV) {
           console.log('$routeChangeSuccess event with route', next);
