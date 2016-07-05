@@ -116,26 +116,17 @@ class IdeSvc {
   }
 
   startWorkspace(bus, data) {
-
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config.defaultEnv);
 
     startWorkspacePromise.then((data) => {
-      // get channels
-      let environments = data.config.environments;
-      let defaultEnvName = data.config.defaultEnv;
-      let defaultEnvironment = this.lodash.find(environments, (environment) => {
-        return environment.name === defaultEnvName;
-      });
-
-      let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
-      let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-        return machineConfigsLink.rel === 'get machine status channel';
+      let statusLink = this.lodash.find(data.links, (link) => {
+        return link.rel === 'environment.status_channel';
       });
 
       let workspaceId = data.id;
 
       let agentChannel = 'workspace:' + data.id + ':ext-server:output';
-      let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
+      let statusChannel = statusLink ? statusLink.parameters[0].defaultValue : null;
 
       this.listeningChannels.push(statusChannel);
       // for now, display log of status channel in case of errors

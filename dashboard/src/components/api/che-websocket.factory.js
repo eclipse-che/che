@@ -283,7 +283,11 @@ class MessageBus { // jshint ignore:line
       var subscribers = this.subscribersByChannel.get(channelHeader.value);
       if (subscribers) {
         subscribers.forEach((subscriber) => {
-          subscriber(JSON.parse(jsonMessage.body));
+          try {
+            subscriber(JSON.parse(jsonMessage.body));
+          } catch (e) {
+            subscriber(jsonMessage.body);
+          }
         });
       }
     }

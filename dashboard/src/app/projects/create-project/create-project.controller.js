@@ -328,28 +328,20 @@ export class CreateProjectCtrl {
   startWorkspace(bus, workspace) {
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
-    // get channels
-    let environments = workspace.config.environments;
-    let envName = workspace.config.defaultEnv;
-    let defaultEnvironment = this.lodash.find(environments, (environment) => {
-      return environment.name === envName;
+
+    let statusLink = this.lodash.find(workspace.links, (link) => {
+      return link.rel === 'environment.status_channel';
     });
 
-    let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
-
-    let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-      return machineConfigsLink.rel === 'get machine status channel';
-    });
-
-    let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-      return machineConfigsLink.rel === 'get machine logs channel';
+    let outputLink = this.lodash.find(workspace.links, (link) => {
+      return link.rel === 'environment.output_channel';
     });
 
     let workspaceId = workspace.id;
 
     let agentChannel = 'workspace:' + workspace.id + ':ext-server:output';
-    let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
-    let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
+    let statusChannel = statusLink ? statusLink.parameters[0].defaultValue : null;
+    let outputChannel = outputLink ? outputLink.parameters[0].defaultValue : null;
 
     this.listeningChannels.push(agentChannel);
     bus.subscribe(agentChannel, (message) => {
@@ -368,6 +360,7 @@ export class CreateProjectCtrl {
       // for now, display log of status channel in case of errors
       this.listeningChannels.push(statusChannel);
       bus.subscribe(statusChannel, (message) => {
+        message = this.getDisplayMachineLog(message);
         if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
           this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
 
@@ -398,6 +391,7 @@ export class CreateProjectCtrl {
     if (outputChannel) {
       this.listeningChannels.push(outputChannel);
       bus.subscribe(outputChannel, (message) => {
+        message = this.getDisplayMachineLog(message);
         if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
           this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
         } else {
@@ -435,6 +429,21 @@ export class CreateProjectCtrl {
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
     });
     return  startWorkspacePromise;
+  }
+
+  /**
+   * Gets the log to be displayed per machine.
+   *
+   * @param log origin log content
+   * @returns {*} parsed log
+   */
+  getDisplayMachineLog(log) {
+    log = angular.fromJson(log);
+    if (angular.isObject(log)) {
+      return '[' + log.machine + '] ' + log.content;
+    } else {
+      return log;
+    }
   }
 
   createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
