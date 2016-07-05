@@ -120,7 +120,9 @@ public class MachineExtension {
                 /* Add Consoles to Project perspective */
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
                 workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
-                workspaceAgent.setActivePart(consolesPanelPresenter);
+                if (appContext.getFactory() == null) {
+                     workspaceAgent.setActivePart(consolesPanelPresenter);
+                }
             }
         });
 
