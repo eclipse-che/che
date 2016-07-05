@@ -24,6 +24,7 @@ import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
+import org.eclipse.che.plugin.languageserver.server.json.JsonLanguageServerFactory;
 import org.eclipse.che.plugin.languageserver.server.lsapi.PublishDiagnosticsParamsMessenger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
     @PreDestroy
     public void shutdown() {
-        for (LanguageServer server : projectToServer.values()) {
+        for (LanguageServer server : serverToInitResult.keySet()) {
             server.shutdown();
             server.exit();
         }
@@ -101,31 +102,49 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         String path = URI.create(uri).getPath();
         String extension = extractExtension(path);
 
-        String project;
+        String projectPath;
         try {
-            project = findProject(path);
+            projectPath = findProject(path);
         } catch (ServerException e) {
             return null;
         }
 
-        return findOrInitializeServer(extension, project);
+        return findOrInitializeServer(extension, projectPath);
     }
 
     @Nullable
     protected LanguageServer findOrInitializeServer(String extension, String projectPath) {
+        ProjectExtensionKey allProjectKey = new ProjectExtensionKey("*", extension);
+        ProjectExtensionKey projectKey = new ProjectExtensionKey(projectPath, extension);
+
         for (LanguageServerFactory factory : extensionToFactory.get(extension)) {
-            ProjectExtensionKey projectKey = new ProjectExtensionKey(projectPath, extension);
 
             if (!projectToServer.containsKey(projectKey)) {
                 synchronized (factory) {
+
                     if (!projectToServer.containsKey(projectKey)) {
-                        LanguageServer server = initialize(factory, projectPath);
-                        projectToServer.put(projectKey, server);
+                        LanguageServer server = projectToServer.get(allProjectKey);
+
+                        if (server != null) {
+                            projectToServer.put(projectKey, server);
+                        } else {
+                            server = initialize(factory, projectPath);
+                            projectToServer.put(projectKey, server);
+
+                            // ############################################
+                            // TODO: We have to check capabilities here
+                            // If server supports multiply projects binding then register server for all projects.
+                            // InitializeResult initializeResult = serverToInitResult.get(server);
+                            // initializeResult.getCapabilities()
+                            // ############################################
+                            if (JsonLanguageServerFactory.LANGUAGE_ID.equals(factory.getLanguageDescription().getLanguageId())) {
+                                projectToServer.put(allProjectKey, server);
+                            }
+                        }
+                        return server;
                     }
                 }
             }
-
-            return projectToServer.get(projectKey);
         }
 
         return null;
@@ -133,7 +152,6 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
     protected LanguageServer initialize(LanguageServerFactory factory, String projectPath) {
         String languageId = factory.getLanguageDescription().getLanguageId();
-        LOG.info("Initializing Language Server {} on {}", languageId, projectPath);
 
         InitializeParamsImpl initializeParams = new InitializeParamsImpl();
         initializeParams.setProcessId(PROCESS_ID);
@@ -162,6 +180,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
             LOG.error(errMsg, e);
         }
 
+        LOG.info("Initialized Language Server {} on project {}", languageId, projectPath);
         return server;
     }
 
@@ -174,7 +193,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                                  .collect(Collectors.toList());
     }
 
-    private String findProject(String path) throws ServerException {
+    protected String findProject(String path) throws ServerException {
         FolderEntry root = projectManager.getProjectsRoot();
         if (!path.startsWith(PROJECT_FOLDER_PATH)) {
             return PROJECT_FOLDER_PATH;
@@ -202,6 +221,9 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         return -1;
     }
 
+    /**
+     * Is used to register {@link LanguageServer} by project.
+     */
     private class ProjectExtensionKey {
         private final String extension;
         private final String project;

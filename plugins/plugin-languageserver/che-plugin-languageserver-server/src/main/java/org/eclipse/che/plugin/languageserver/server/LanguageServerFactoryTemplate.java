@@ -23,7 +23,7 @@ import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerExce
 public abstract class LanguageServerFactoryTemplate implements LanguageServerFactory {
 
     @Override
-    public final LanguageServer create(String projectPath) throws LanguageServerException {
+    public LanguageServer create(String projectPath) throws LanguageServerException {
         Process languageServerProcess = startLanguageServerProcess(projectPath);
         return connectToLanguageServer(languageServerProcess);
     }
