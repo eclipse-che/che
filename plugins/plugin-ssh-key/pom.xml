@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.4.1-SNAPSHOT</version>
+        <version>4.4.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-ssh-key-parent</artifactId>
