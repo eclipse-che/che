@@ -14,6 +14,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 
+import javax.inject.Singleton;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -32,6 +33,7 @@ import java.security.Principal;
  *
  * @author Dmitry Shnurenko
  */
+@Singleton
 public class EnvironmentInitializationFilter implements Filter {
 
     @Override
