@@ -12,6 +12,7 @@ package org.eclipse.che.api.user.server;
 
 import com.google.common.collect.Sets;
 
+import com.google.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -20,12 +21,13 @@ import org.eclipse.che.api.user.server.dao.Profile;
 import org.eclipse.che.api.user.server.dao.User;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,19 +51,22 @@ public class UserManager {
     private final UserDao        userDao;
     private final UserProfileDao profileDao;
     private final PreferenceDao  preferenceDao;
-    private final Set<String>    reservedNames;
+
+    private Set<String>    reservedNames;
 
     @Inject
     public UserManager(UserDao userDao,
                        UserProfileDao profileDao,
-                       PreferenceDao preferenceDao,
-                       @Named("user.reserved_names") String[] reservedNames) {
+                       PreferenceDao preferenceDao) {
         this.userDao = userDao;
         this.profileDao = profileDao;
         this.preferenceDao = preferenceDao;
-        this.reservedNames = Sets.newHashSet(reservedNames);
     }
 
+    @Inject(optional = true)
+    public void setReservedNames(@Named("user.reserved_names") String[] reservedNames) {
+        this.reservedNames = reservedNames == null ? Collections.emptySet() : Sets.newHashSet(reservedNames);
+    }
 
     /**
      * Creates new user.
