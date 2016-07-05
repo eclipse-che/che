@@ -18,13 +18,14 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFilePresenter;
-import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker.ID;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
 /**
@@ -54,7 +55,7 @@ public class NewJavaSourceFileAction extends ProjectAction {
         final Resource[] resources = appContext.getResources();
         final boolean inJavaProject = resources != null && resources.length == 1 && isJavaProject(resources[0].getRelatedProject().get());
 
-        checkState(inJavaProject && resources[0].getParentWithMarker(SourceFolderMarker.ID).isPresent());
+        checkState(inJavaProject && resources[0].getParentWithMarker(ID).isPresent());
 
         final Resource resource = resources[0];
 
@@ -73,9 +74,18 @@ public class NewJavaSourceFileAction extends ProjectAction {
 
     @Override
     public void updateProjectAction(ActionEvent e) {
-        final Resource[] resources = appContext.getResources();
-        final boolean inJavaProject = resources != null && resources.length == 1 && isJavaProject(resources[0].getRelatedProject().get());
+        final Resource resource = appContext.getResource();
+        if (resource == null) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
 
-        e.getPresentation().setEnabledAndVisible(inJavaProject && resources[0].getParentWithMarker(SourceFolderMarker.ID).isPresent());
+        final Optional<Project> project = resource.getRelatedProject();
+        if (!project.isPresent()) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        e.getPresentation().setEnabledAndVisible(isJavaProject(project.get()) && resource.getParentWithMarker(ID).isPresent());
     }
 }
