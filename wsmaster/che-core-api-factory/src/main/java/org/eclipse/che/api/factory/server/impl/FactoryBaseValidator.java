@@ -20,7 +20,7 @@ import org.eclipse.che.api.factory.shared.dto.Ide;
 import org.eclipse.che.api.factory.shared.dto.OnAppLoaded;
 import org.eclipse.che.api.factory.shared.dto.OnProjectsLoaded;
 import org.eclipse.che.api.factory.shared.dto.Policies;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 import java.io.UnsupportedEncodingException;
@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;

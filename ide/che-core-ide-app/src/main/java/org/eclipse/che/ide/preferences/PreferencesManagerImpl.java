@@ -17,7 +17,7 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.api.user.UserProfileServiceClient;
+import org.eclipse.che.ide.api.user.PreferencesServiceClient;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 
@@ -31,22 +31,22 @@ import java.util.Map;
  */
 @Singleton
 public class PreferencesManagerImpl implements PreferencesManager {
-    private final UserProfileServiceClient      userProfileService;
-    private final Map<String, String>           changedPreferences;
+    private final Map<String, String>      changedPreferences;
+    private final PreferencesServiceClient preferencesService;
 
     private Map<String, String> persistedPreferences;
 
     /**
      * Create preferences manager
      *
-     * @param userProfileService
+     * @param preferencesService
      *         user preference service client
      */
     @Inject
-    protected PreferencesManagerImpl(UserProfileServiceClient userProfileService) {
+    protected PreferencesManagerImpl(PreferencesServiceClient preferencesService) {
         this.persistedPreferences = new HashMap<>();
         this.changedPreferences = new HashMap<>();
-        this.userProfileService = userProfileService;
+        this.preferencesService = preferencesService;
     }
 
     /** {@inheritDoc} */
@@ -72,9 +72,9 @@ public class PreferencesManagerImpl implements PreferencesManager {
             return Promises.resolve(null);
         }
 
-        return userProfileService.updatePreferences(changedPreferences).thenPromise(new Function<Map<String,String>, Promise<Void>>() {
+        return preferencesService.updatePreferences(changedPreferences).thenPromise(new Function<Map<String, String>, Promise<Void>>() {
             @Override
-            public Promise<Void> apply(Map<String,String> result) throws FunctionException {
+            public Promise<Void> apply(Map<String, String> result) throws FunctionException {
                 persistedPreferences.putAll(changedPreferences);
                 changedPreferences.clear();
                 return Promises.resolve(null);
@@ -85,7 +85,7 @@ public class PreferencesManagerImpl implements PreferencesManager {
     /** {@inheritDoc} */
     @Override
     public Promise<Map<String, String>> loadPreferences() {
-        return userProfileService.getPreferences().then(new Function<Map<String, String>, Map<String, String>>() {
+        return preferencesService.getPreferences().then(new Function<Map<String, String>, Map<String, String>>() {
             @Override
             public Map<String, String> apply(Map<String, String> preferences) throws FunctionException {
                 persistedPreferences = preferences;

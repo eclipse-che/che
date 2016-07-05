@@ -12,7 +12,7 @@ package org.eclipse.che.ide.api.user;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
@@ -52,7 +52,7 @@ public class UserServiceClientImpl implements UserServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public void createUser(@NotNull String token, boolean isTemporary, AsyncRequestCallback<UserDescriptor> callback) {
+    public void createUser(@NotNull String token, boolean isTemporary, AsyncRequestCallback<UserDto> callback) {
         StringBuilder requestUrl = new StringBuilder(CREATE);
         requestUrl.append("?token=").append(token).append("&temporary=").append(isTemporary);
 
@@ -64,7 +64,7 @@ public class UserServiceClientImpl implements UserServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public void getCurrentUser(AsyncRequestCallback<UserDescriptor> callback) {
+    public void getCurrentUser(AsyncRequestCallback<UserDto> callback) {
 
         asyncRequestFactory.createGetRequest(USER)
                            .header(ACCEPT, MimeType.APPLICATION_JSON)
@@ -86,7 +86,7 @@ public class UserServiceClientImpl implements UserServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public void getUserById(@NotNull String id, AsyncRequestCallback<UserDescriptor> callback) {
+    public void getUserById(@NotNull String id, AsyncRequestCallback<UserDto> callback) {
         String requestUrl = USER + id;
 
         asyncRequestFactory.createGetRequest(requestUrl)
@@ -97,7 +97,7 @@ public class UserServiceClientImpl implements UserServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public void getUserByAlias(@NotNull String alias, AsyncRequestCallback<UserDescriptor> callback) {
+    public void getUserByAlias(@NotNull String alias, AsyncRequestCallback<UserDto> callback) {
         String requestUrl = FIND + "?alias=" + alias;
 
         asyncRequestFactory.createGetRequest(requestUrl)

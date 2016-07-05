@@ -11,9 +11,9 @@
 package org.eclipse.che.api.local;
 
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.TokenValidator;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.inject.Singleton;
 
@@ -28,6 +28,6 @@ public class DummyTokenValidator implements TokenValidator {
 
     @Override
     public User validateToken(String token) throws ConflictException {
-        return new User().withName("che").withEmail("che@eclipse.org");
+        return new UserImpl("che", "che", "che@eclipse.org");
     }
 }

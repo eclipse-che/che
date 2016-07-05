@@ -22,16 +22,16 @@ export class DockerRegistryListController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, $document, cheProfile, cheNotification) {
+  constructor($mdDialog, $document, chePreferences, cheNotification) {
     this.$mdDialog = $mdDialog;
     this.$document = $document;
-    this.cheProfile = cheProfile;
+    this.chePreferences = chePreferences;
     this.cheNotification = cheNotification;
 
-    this.registries = cheProfile.getRegistries();
+    this.registries = chePreferences.getRegistries();
     this.isLoading = true;
 
-    let promise = cheProfile.fetchPreferences();
+    let promise = chePreferences.fetchPreferences();
     promise.then(() => {
       this.isLoading = false;
     }, (error) => {
@@ -91,7 +91,7 @@ export class DockerRegistryListController {
       .targetEvent(event);
     this.$mdDialog.show(confirm).then(() => {
       this.isLoading = true;
-      let promise = this.cheProfile.removeRegistry(registry.url);
+      let promise = this.chePreferences.removeRegistry(registry.url);
       promise.then(() => {
         this.isLoading = false;
       }, (error) => {

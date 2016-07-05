@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.user;
 
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import javax.validation.constraints.NotNull;
@@ -31,14 +31,14 @@ public interface UserServiceClient {
      *         if <code>true</code> - is temporary user
      * @param callback
      */
-    void createUser(@NotNull String token, boolean isTemporary, AsyncRequestCallback<UserDescriptor> callback);
+    void createUser(@NotNull String token, boolean isTemporary, AsyncRequestCallback<UserDto> callback);
 
     /**
      * Get current user's information.
      *
      * @param callback
      */
-    void getCurrentUser(AsyncRequestCallback<UserDescriptor> callback);
+    void getCurrentUser(AsyncRequestCallback<UserDto> callback);
 
     /**
      * Update user's password.
@@ -56,7 +56,7 @@ public interface UserServiceClient {
      *         user's id
      * @param callback
      */
-    void getUserById(@NotNull String id, AsyncRequestCallback<UserDescriptor> callback);
+    void getUserById(@NotNull String id, AsyncRequestCallback<UserDto> callback);
 
     /**
      * Get user's information by its alias.
@@ -65,7 +65,7 @@ public interface UserServiceClient {
      *         user's alias
      * @param callback
      */
-    void getUserByAlias(@NotNull String alias, AsyncRequestCallback<UserDescriptor> callback);
+    void getUserByAlias(@NotNull String alias, AsyncRequestCallback<UserDto> callback);
 
     /**
      * Remove user.

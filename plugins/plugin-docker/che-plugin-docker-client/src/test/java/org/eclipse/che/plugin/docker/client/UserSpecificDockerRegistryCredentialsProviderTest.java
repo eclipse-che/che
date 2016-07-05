@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.docker.client;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -41,13 +41,13 @@ public class UserSpecificDockerRegistryCredentialsProviderTest {
     private static final String DOCKER_REGISTRY_CREDENTIALS_KEY = "dockerCredentials";
 
     @Mock
-    private PreferenceDao preferenceDao;
+    private PreferenceManager preferenceManager;
 
     private UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
 
     @BeforeClass
     private void before() {
-        dockerCredentials = new UserSpecificDockerRegistryCredentialsProvider(preferenceDao);
+        dockerCredentials = new UserSpecificDockerRegistryCredentialsProvider(preferenceManager);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class UserSpecificDockerRegistryCredentialsProviderTest {
         preferences.put(DOCKER_REGISTRY_CREDENTIALS_KEY, base64encodedCredentials);
 
         EnvironmentContext.getCurrent().setSubject(new SubjectImpl("name", "id", "token1234", false));
-        when(preferenceDao.getPreferences(anyObject(), anyObject())).thenReturn(preferences);
+        when(preferenceManager.find(anyObject(), anyObject())).thenReturn(preferences);
     }
 
 }
