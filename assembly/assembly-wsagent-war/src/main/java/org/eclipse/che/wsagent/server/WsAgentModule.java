@@ -31,15 +31,11 @@ import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
 import org.eclipse.che.api.user.server.dao.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.api.git.LocalGitUserResolver;
 import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.java.server.rest.WsAgentURLProvider;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
-import org.everrest.core.impl.async.AsynchronousJobPool;
-import org.everrest.core.impl.async.AsynchronousJobService;
-import org.everrest.guice.ServiceBindingHelper;
 
 import javax.inject.Named;
 import java.net.URI;
@@ -69,9 +65,6 @@ public class WsAgentModule extends AbstractModule {
 
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(JGitConnectionFactory.class);
-
-        bind(AsynchronousJobPool.class).to(CheAsynchronousJobPool.class);
-        bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
 
         bind(String.class).annotatedWith(Names.named("api.endpoint")).toProvider(ApiEndpointProvider.class);
         bind(URI.class).annotatedWith(Names.named("api.endpoint")).toProvider(UriApiEndpointProvider.class);
