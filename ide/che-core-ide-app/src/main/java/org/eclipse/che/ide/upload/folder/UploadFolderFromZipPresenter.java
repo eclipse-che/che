@@ -17,7 +17,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -35,9 +34,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.ActionDelegate {
 
     private final UploadFolderFromZipView  view;
+    private final AppContext               appContext;
     private final CoreLocalizationConstant locale;
     private final NotificationManager      notificationManager;
-    private final DevMachine               devMachine;
     private       Container                container;
 
     @Inject
@@ -45,8 +44,8 @@ public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.Act
                                         AppContext appContext,
                                         NotificationManager notificationManager,
                                         CoreLocalizationConstant locale) {
-        devMachine = appContext.getDevMachine();
         this.view = view;
+        this.appContext = appContext;
         this.locale = locale;
         this.view.setDelegate(this);
         this.view.setEnabledUploadButton(false);
@@ -59,7 +58,7 @@ public class UploadFolderFromZipPresenter implements UploadFolderFromZipView.Act
     public void showDialog(Container container) {
         this.container = container;
         view.showDialog();
-        view.setAction(devMachine.getWsAgentBaseUrl() + "/project/upload/zipfolder" + container.getLocation());
+        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/upload/zipfolder" + container.getLocation());
     }
 
     /** {@inheritDoc} */
