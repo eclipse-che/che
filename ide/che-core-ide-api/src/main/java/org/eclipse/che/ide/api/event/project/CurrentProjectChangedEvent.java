@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.event.project;
 
 import com.google.gwt.event.shared.GwtEvent;
 
+import org.eclipse.che.api.core.model.project.Project;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 import javax.validation.constraints.NotNull;
@@ -26,16 +27,16 @@ public class CurrentProjectChangedEvent extends GwtEvent<CurrentProjectChangedHa
     /** Type class used to register this event. */
     public static Type<CurrentProjectChangedHandler> TYPE = new Type<>();
 
-    private final ProjectConfigDto configDto;
+    private final Project project;
 
     /**
      * Creates an event to initiate changing of current project.
      *
-     * @param configDto
+     * @param project
      *         selected project
      */
-    public CurrentProjectChangedEvent(@NotNull ProjectConfigDto configDto) {
-        this.configDto = configDto;
+    public CurrentProjectChangedEvent(Project project) {
+        this.project = project;
     }
 
     @Override
@@ -44,9 +45,8 @@ public class CurrentProjectChangedEvent extends GwtEvent<CurrentProjectChangedHa
     }
 
     /** Returns descriptor of the project. */
-    @NotNull
-    public ProjectConfigDto getProjectConfig() {
-        return configDto;
+    public Project getProject() {
+        return project;
     }
 
     @Override

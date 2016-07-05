@@ -15,14 +15,17 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.branchList.BranchListPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Action for comparing with branch.
  *
  * @author Igor Vinokur
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class CompareWithBranchAction extends GitAction {
@@ -31,15 +34,18 @@ public class CompareWithBranchAction extends GitAction {
     @Inject
     public CompareWithBranchAction(BranchListPresenter presenter,
                                    AppContext appContext,
-                                   GitLocalizationConstant locale,
-                                   ProjectExplorerPresenter projectExplorer) {
-        super(locale.compareWithBranchTitle(), locale.compareWithBranchTitle(), appContext, projectExplorer);
+                                   GitLocalizationConstant locale) {
+        super(locale.compareWithBranchTitle(), locale.compareWithBranchTitle(), null, appContext);
         this.presenter = presenter;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        presenter.showBranches();
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null, "Null project occurred");
+
+        presenter.showBranches(project);
     }
 }

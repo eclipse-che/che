@@ -12,8 +12,13 @@ package org.eclipse.che.ide.newresource;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * Action to create new file.
@@ -23,9 +28,14 @@ import com.google.inject.Singleton;
 @Singleton
 public class NewFileAction extends AbstractNewResourceAction {
     @Inject
-    public NewFileAction(CoreLocalizationConstant localizationConstant, Resources resources) {
+    public NewFileAction(CoreLocalizationConstant localizationConstant,
+                         Resources resources,
+                         DialogFactory dialogFactory,
+                         EventBus eventBus,
+                         AppContext appContext,
+                         NotificationManager notificationManager) {
         super(localizationConstant.actionNewFileTitle(),
               localizationConstant.actionNewFileDescription(),
-              resources.defaultFile());
+              resources.defaultFile(), dialogFactory, localizationConstant, eventBus, appContext, notificationManager);
     }
 }

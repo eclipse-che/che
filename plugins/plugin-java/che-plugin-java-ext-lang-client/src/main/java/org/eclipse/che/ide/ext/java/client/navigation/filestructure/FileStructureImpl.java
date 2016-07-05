@@ -88,7 +88,7 @@ final class FileStructureImpl extends Window implements FileStructure {
         });
         NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
         tree = new Tree(storage, loader);
-        tree.setAutoExpand(true);
+        tree.setAutoExpand(false);
         tree.getSelectionModel().setSelectionMode(SINGLE);
 
         KeyboardNavigationHandler handler = new KeyboardNavigationHandler() {

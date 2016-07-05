@@ -97,7 +97,6 @@ public class EditCommandsPresenterTest {
     public void setUp() {
         presenter.editedCommandOriginName = COMMAND_NAME;
         presenter.workspaceId = WORKSPACE_ID;
-        when(appContext.getWorkspace()).thenReturn(workspace);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(workspaceServiceClient.getCommands(anyString())).thenReturn(commandsPromise);
         when(commandsPromise.then((Function<List<CommandDto>, List<CommandConfiguration>>)anyObject()))

@@ -27,27 +27,21 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.data.tree.HasAttributes;
-import org.eclipse.che.ide.api.project.node.HasProjectConfig;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.resources.tree.FileNode;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
-import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
-import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
+import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
 import org.eclipse.che.ide.ui.window.Window;
 
-import javax.validation.constraints.NotNull;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.gwt.dom.client.Style.Overflow.AUTO;
 import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.getShortPath;
-import static org.eclipse.che.ide.project.node.AbstractProjectBasedNode.CUSTOM_BACKGROUND_FILL;
 import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 
 /**
@@ -57,6 +51,8 @@ import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
  */
 @Singleton
 public class OpenRecentFileViewImpl extends Window implements OpenRecentFilesView {
+
+    public static final String CUSTOM_BACKGROUND_FILL = "background";
 
     interface OpenRecentFileViewImplUiBinder extends UiBinder<Widget, OpenRecentFileViewImpl> {
     }
@@ -79,17 +75,8 @@ public class OpenRecentFileViewImpl extends Window implements OpenRecentFilesVie
         pathLabel = new Label();
         pathLabel.setStyleName(styles.css().label());
 
-        NodeStorage storage = new NodeStorage(new NodeUniqueKeyProvider() {
-            @Override
-            public String getKey(@NotNull Node item) {
-                if (item instanceof HasStorablePath) {
-                    return ((HasStorablePath)item).getStorablePath();
-                } else {
-                    return String.valueOf(item.hashCode());
-                }
-            }
-        });
-        NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
+        final NodeStorage storage = new NodeStorage();
+        final NodeLoader loader = new NodeLoader();
         tree = new Tree(storage, loader);
         tree.setPresentationRenderer(new DefaultPresentationRenderer<Node>(tree.getTreeStyles()) {
             @Override
@@ -98,12 +85,9 @@ public class OpenRecentFileViewImpl extends Window implements OpenRecentFilesVie
 
                 element.setAttribute("name", node.getName());
 
-                if (node instanceof HasStorablePath) {
-                    element.setAttribute("path", ((HasStorablePath)node).getStorablePath());
-                }
-
-                if (node instanceof HasProjectConfig) {
-                    element.setAttribute("project", ((HasProjectConfig)node).getProjectConfig().getPath());
+                if (node instanceof ResourceNode) {
+                    element.setAttribute("path", ((ResourceNode)node).getData().getLocation().toString());
+                    element.setAttribute("project", ((ResourceNode)node).getData().getRelatedProject().get().getLocation().toString());
                 }
 
                 if (node instanceof HasAttributes && ((HasAttributes)node).getAttributes().containsKey(CUSTOM_BACKGROUND_FILL)) {
@@ -128,8 +112,8 @@ public class OpenRecentFileViewImpl extends Window implements OpenRecentFilesVie
 
                 Node head = selection.get(0);
 
-                if (head instanceof HasStorablePath) {
-                    String path = getShortPath(((HasStorablePath)head).getStorablePath());
+                if (head instanceof ResourceNode) {
+                    String path = getShortPath(((ResourceNode)head).getData().getLocation().toString());
                     pathLabel.setText(path);
                     pathLabel.setTitle(path);
                     return;
@@ -180,9 +164,9 @@ public class OpenRecentFileViewImpl extends Window implements OpenRecentFilesVie
 
     /** {@inheritDoc} */
     @Override
-    public void setRecentFiles(List<FileReferenceNode> recentFiles) {
+    public void setRecentFiles(List<FileNode> recentFiles) {
         tree.getNodeStorage().clear();
-        for (FileReferenceNode recentFile : recentFiles) {
+        for (FileNode recentFile : recentFiles) {
             tree.getNodeStorage().add(recentFile);
         }
     }

@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.cpp.ide.project;
 
 import com.google.inject.Provider;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.plugin.cpp.ide.CppExtension;
@@ -31,7 +31,7 @@ import static org.eclipse.che.plugin.cpp.shared.Constants.C_PROJECT_TYPE_ID;
 public class CProjectWizardRegistrar implements ProjectWizardRegistrar {
 
 
-    private final List<Provider<? extends WizardPage<ProjectConfigDto>>> wizardPages;
+    private final List<Provider<? extends WizardPage<MutableProjectConfig>>> wizardPages;
 
     public CProjectWizardRegistrar() {
         wizardPages = new ArrayList<>();
@@ -48,7 +48,7 @@ public class CProjectWizardRegistrar implements ProjectWizardRegistrar {
     }
 
     @NotNull
-    public List<Provider<? extends WizardPage<ProjectConfigDto>>> getWizardPages() {
+    public List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages() {
         return wizardPages;
     }
 }

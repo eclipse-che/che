@@ -56,11 +56,6 @@
                         <g:ListBox ui:field="localBranch" width="100%" debugId="git-remotes-push-localBranch"/>
                     </g:FlowPanel>
                 </g:west>
-                <g:center>
-                    <g:FlowPanel>
-                        <svg:SVGImage resource="{res.arrow}" classNameBaseVal="{style.image}"/>
-                    </g:FlowPanel>
-                </g:center>
             </g:DockLayoutPanel>
         </g:center>
     </g:DockLayoutPanel>

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.ide;
 
+import com.google.common.base.Optional;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -20,19 +21,20 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+
+import java.util.List;
 
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 
@@ -43,36 +45,40 @@ import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
  */
 public class GdbDebuggerFileHandler implements ActiveFileHandler {
 
-    private final EditorAgent              editorAgent;
-    private final EventBus                 eventBus;
-    private final ProjectExplorerPresenter projectExplorer;
-    private final AppContext               appContext;
+    private final EditorAgent editorAgent;
+    private final EventBus    eventBus;
+    private final AppContext  appContext;
 
     @Inject
     public GdbDebuggerFileHandler(EditorAgent editorAgent,
-                                  ProjectExplorerPresenter projectExplorer,
                                   EventBus eventBus,
                                   AppContext appContext) {
         this.editorAgent = editorAgent;
         this.eventBus = eventBus;
-        this.projectExplorer = projectExplorer;
         this.appContext = appContext;
     }
 
     @Override
     public void openFile(final Location location, final AsyncCallback<VirtualFile> callback) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
+        final Resource resource = appContext.getResource();
+        if (resource == null) {
+            callback.onFailure(new IllegalStateException("Resource is undefined"));
             return;
         }
-        String filePath = currentProject.getProjectConfig().getPath() + "/" + location.getTarget();
+        final Optional<Project> project = resource.getRelatedProject();
+        if (!project.isPresent()) {
+            callback.onFailure(new IllegalStateException("Project is undefined"));
+            return;
+        }
+
+        final Path filePath = project.get().getLocation().append(location.getTarget());
         VirtualFile activeFile = null;
         final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
         if (activeEditor != null) {
             activeFile = activeEditor.getEditorInput().getFile();
         }
 
-        if (activeEditor == null || !activeFile.getPath().equals(filePath)) {
+        if (activeEditor == null || !activeFile.getLocation().equals(filePath)) {
             doOpenFile(filePath, location.getLineNumber(), callback);
         } else {
             scrollEditorToExecutionPoint((TextEditor)activeEditor, location.getLineNumber());
@@ -80,15 +86,16 @@ public class GdbDebuggerFileHandler implements ActiveFileHandler {
         }
     }
 
-    private void doOpenFile(final String filePath, final int lineNumber, final AsyncCallback<VirtualFile> callback) {
-        projectExplorer.getNodeByPath(new HasStorablePath.StorablePath(filePath)).then(new Operation<Node>() {
+    private void doOpenFile(final Path filePath, final int lineNumber, final AsyncCallback<VirtualFile> callback) {
+        appContext.getWorkspaceRoot().getFile(filePath).then(new Operation<Optional<File>>() {
             @Override
-            public void apply(final Node node) throws OperationException {
-                if (!(node instanceof FileReferenceNode)) {
-                    return;
+            public void apply(Optional<File> file) throws OperationException {
+                if (file.isPresent()) {
+                    handleActivatedFile(file.get(), callback, lineNumber);
+                    eventBus.fireEvent(new FileEvent(file.get(), OPEN));
+                } else {
+                    callback.onFailure(new IllegalStateException("File is undefined"));
                 }
-                handleActivatedFile((VirtualFile)node, callback, lineNumber);
-                eventBus.fireEvent(new FileEvent((VirtualFile)node, OPEN));
             }
         }).catchError(new Operation<PromiseError>() {
             @Override

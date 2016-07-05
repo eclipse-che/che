@@ -14,11 +14,11 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.plugin.java.plain.client.wizard.selector.SelectNodePresenter;
 import org.eclipse.che.plugin.java.plain.client.wizard.selector.SelectionDelegate;
 
@@ -40,7 +40,7 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
  * @author Valeriy Svydenko
  */
 @Singleton
-class PlainJavaPagePresenter extends AbstractWizardPage<ProjectConfigDto> implements PlainJavaPageView.ActionDelegate,
+class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig> implements PlainJavaPageView.ActionDelegate,
                                                                                      SelectionDelegate {
     private static final String ATTRIBUTE_VALUE_SEPARATOR = ",   ";
 
@@ -59,7 +59,7 @@ class PlainJavaPagePresenter extends AbstractWizardPage<ProjectConfigDto> implem
     }
 
     @Override
-    public void init(ProjectConfigDto dataObject) {
+    public void init(MutableProjectConfig dataObject) {
         super.init(dataObject);
 
         final ProjectWizardMode wizardMode = ProjectWizardMode.parse(context.get(WIZARD_MODE_KEY));
@@ -116,7 +116,7 @@ class PlainJavaPagePresenter extends AbstractWizardPage<ProjectConfigDto> implem
         List<String> nodeRelativePath = new LinkedList<>();
 
         for (Node node : nodes) {
-            nodeRelativePath.add(((HasStorablePath)node).getStorablePath().substring(projectNameLength + 1));
+            nodeRelativePath.add(((ResourceNode)node).getData().getLocation().toString().substring(projectNameLength + 1));
         }
 
         if (isSourceSelected) {

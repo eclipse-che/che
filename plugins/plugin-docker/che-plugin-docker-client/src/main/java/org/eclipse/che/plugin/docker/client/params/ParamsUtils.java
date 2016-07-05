@@ -12,6 +12,9 @@ package org.eclipse.che.plugin.docker.client.params;
 
 /**
  * Contains util methods for {@code *Params} classes.
+ *
+ * @author Mykola Morhun
+ * @author Alexander Garagatyi
  */
 public class ParamsUtils {
 
@@ -30,4 +33,22 @@ public class ParamsUtils {
         }
     }
 
+    /**
+     * Checks whether provided string is NULL or empty.
+     *
+     * @throws NullPointerException
+     *         if provided argument is null
+     * @throws IllegalArgumentException
+     *         if provided argument is empty
+     */
+    public static void requireNonNullNorEmpty(String s) {
+        if (s == null) {
+            throw new NullPointerException();
+        }
+        if (s.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private ParamsUtils() {}
 }

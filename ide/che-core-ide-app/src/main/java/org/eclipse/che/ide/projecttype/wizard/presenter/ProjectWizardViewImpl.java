@@ -28,7 +28,6 @@ import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.ui.window.Window;
 
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE_MODULE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
 
 /**
@@ -114,9 +113,6 @@ public class ProjectWizardViewImpl extends Window implements ProjectWizardView {
         } else if (wizardMode == UPDATE) {
             setTitle(locale.projectWizardTitleText());
             saveButton.setText(locale.projectWizardSaveButtonText());
-        } else if (wizardMode == CREATE_MODULE) {
-            setTitle(locale.projectWizardCreateModuleTitleText());
-            saveButton.setText(locale.projectWizardDefaultSaveButtonText());
         }
 
         show();
@@ -153,13 +149,6 @@ public class ProjectWizardViewImpl extends Window implements ProjectWizardView {
     public void close() {
         hide();
         setLoaderVisibility(false);
-    }
-
-    @Override
-    public void closeAndRevertChanges() {
-        close();
-
-        delegate.onChangesRevert();
     }
 
     @Override

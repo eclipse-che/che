@@ -17,7 +17,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn diff" (create patch) command.
@@ -26,12 +25,10 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 public class CreatePatchAction extends SubversionAction {
 
     @Inject
-    public CreatePatchAction(final AppContext appContext,
-                             final ProjectExplorerPresenter projectExplorerPresenter,
-                             final SubversionExtensionLocalizationConstants constants,
-                             final SubversionExtensionResources resources) {
-        super(constants.createPatchTitle(), constants.createPatchDescription(), resources.createPatch(), appContext, constants, resources,
-              projectExplorerPresenter);
+    public CreatePatchAction(AppContext appContext,
+                             SubversionExtensionLocalizationConstants constants,
+                             SubversionExtensionResources resources) {
+        super(constants.createPatchTitle(), constants.createPatchDescription(), resources.createPatch(), appContext, constants, resources);
     }
 
     @Override

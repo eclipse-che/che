@@ -14,6 +14,7 @@ import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
 
@@ -32,7 +33,7 @@ interface ShowReferenceView extends View<ShowReferenceView.ActionDelegate> {
      * @param path
      *         location of node
      */
-    void show(@Nullable String reference, @NotNull String path);
+    void show(@Nullable String reference, @NotNull Path path);
 
     interface ActionDelegate {
     }

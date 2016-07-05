@@ -52,6 +52,8 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
+import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
@@ -360,7 +362,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         }
         try {
             // remove unneeded tag
-            docker.removeImage(fullNameOfPulledImage, false);
+            docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
@@ -421,13 +423,13 @@ public class DockerInstanceProvider implements InstanceProvider {
                     LOG.error(e.getLocalizedMessage(), e);
                 }
             };
-            docker.buildImage(imageName,
-                              progressMonitor,
-                              dockerCredentials.getCredentials(),
-                              doForcePullOnBuild,
-                              memoryLimit,
-                              memorySwapLimit,
-                              files.toArray(new File[files.size()]));
+            docker.buildImage(BuildImageParams.create(files.toArray(new File[files.size()]))
+                                              .withRepository(imageName)
+                                              .withAuthConfigs(dockerCredentials.getCredentials())
+                                              .withDoForcePull(doForcePullOnBuild)
+                                              .withMemoryLimit(memoryLimit)
+                                              .withMemorySwapLimit(memorySwapLimit),
+                              progressMonitor);
         } catch (IOException | InterruptedException e) {
             throw new MachineException(e.getMessage(), e);
         } finally {

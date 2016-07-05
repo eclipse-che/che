@@ -29,15 +29,6 @@
             margin: 5px;
         }
 
-        .image {
-            position: relative;
-            float: left;
-            top: 31px;
-            left: 2px;
-            width: 14px;
-            height: 14px;
-        }
-
         .textAlignMiddle {
             line-height: 20px;
         }
@@ -73,11 +64,6 @@
                         <g:ListBox ui:field="remoteBranch" width="100%" debugId="git-remotes-fetch-remoteBranch"/>
                     </g:FlowPanel>
                 </g:west>
-                <g:center>
-                    <g:FlowPanel>
-                        <svg:SVGImage resource="{res.arrow}" classNameBaseVal="{style.image}"/>
-                    </g:FlowPanel>
-                </g:center>
             </g:DockLayoutPanel>
         </g:center>
     </g:DockLayoutPanel>

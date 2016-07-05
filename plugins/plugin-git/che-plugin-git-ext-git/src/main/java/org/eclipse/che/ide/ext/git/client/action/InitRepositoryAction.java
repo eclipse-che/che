@@ -15,16 +15,22 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
+import org.eclipse.che.ide.ext.git.client.GitUtil;
 import org.eclipse.che.ide.ext.git.client.init.InitRepositoryPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
 import javax.validation.constraints.NotNull;
 
-/** @author Andrey Plotnikov */
+import static com.google.common.base.Preconditions.checkState;
+
+/**
+ * @author Andrey Plotnikov
+ * @author Vlad Zhukovskyi
+ */
 @Singleton
 public class InitRepositoryAction extends GitAction {
     private final InitRepositoryPresenter presenter;
@@ -36,9 +42,8 @@ public class InitRepositoryAction extends GitAction {
                                 GitResources resources,
                                 GitLocalizationConstant constant,
                                 AppContext appContext,
-                                ProjectExplorerPresenter projectExplorer,
                                 DialogFactory dialogFactory) {
-        super(constant.initControlTitle(), constant.initControlPrompt(), resources.initRepo(), appContext, projectExplorer);
+        super(constant.initControlTitle(), constant.initControlPrompt(), resources.initRepo(), appContext);
         this.presenter = presenter;
         this.constant = constant;
         this.dialogFactory = dialogFactory;
@@ -47,21 +52,26 @@ public class InitRepositoryAction extends GitAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
+        final Project project = appContext.getRootProject();
 
+        checkState(project != null, "Null project occurred");
 
         dialogFactory.createConfirmDialog(constant.createTitle(),
-                                          constant.messagesInitRepoQuestion(appContext.getCurrentProject().getRootProject().getName()),
+                                          constant.messagesInitRepoQuestion(project.getName()),
                                           new ConfirmCallback() {
                                               @Override
                                               public void accepted() {
-                                                  presenter.initRepository();
+                                                  presenter.initRepository(project);
                                               }
                                           }, null).show();
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setVisible(getActiveProject() != null);
-        event.getPresentation().setEnabled(!isGitRepository());
+        super.updateInPerspective(event);
+
+        final Project project = appContext.getRootProject();
+
+        event.getPresentation().setEnabled(project != null && !GitUtil.isUnderGit(project));
     }
 }

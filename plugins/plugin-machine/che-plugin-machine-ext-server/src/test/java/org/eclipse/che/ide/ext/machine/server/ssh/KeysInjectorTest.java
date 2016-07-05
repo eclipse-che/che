@@ -23,6 +23,8 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -38,13 +40,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Test for {@link KeysInjector}
@@ -103,9 +106,7 @@ public class KeysInjectorTest {
         verify(eventService).subscribe(subscriberCaptor.capture());
         subscriber = subscriberCaptor.getValue();
 
-        when(docker.createExec(anyString(), anyBoolean(), anyString())).thenReturn(exec);
-        when(docker.createExec(anyString(), anyBoolean(), anyString(), anyString(), anyString())).thenReturn(exec);
-        when(docker.createExec(anyString(), anyBoolean(), anyString())).thenReturn(exec);
+        when(docker.createExec(any(CreateExecParams.class))).thenReturn(exec);
         when(exec.getId()).thenReturn(EXEC_ID);
     }
 
@@ -153,10 +154,12 @@ public class KeysInjectorTest {
         verify(machineManager).getInstance(eq(MACHINE_ID));
         verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
 
-        verify(docker).createExec(anyString(), anyBoolean(), eq("/bin/bash"), eq("-c"), eq("mkdir ~/.ssh/ -p" +
-                                                                                           "&& echo 'publicKey1' >> ~/.ssh/authorized_keys" +
-                                                                                           "&& echo 'publicKey2' >> ~/.ssh/authorized_keys"));
-        verify(docker).startExec(eq(EXEC_ID), anyObject());
+        ArgumentCaptor<CreateExecParams> argumentCaptor = ArgumentCaptor.forClass(CreateExecParams.class);
+        verify(docker).createExec(argumentCaptor.capture());
+        assertEquals(argumentCaptor.getValue().getCmd(), new String[] {"/bin/bash", "-c", "mkdir ~/.ssh/ -p" +
+                                                                                          "&& echo 'publicKey1' >> ~/.ssh/authorized_keys" +
+                                                                                          "&& echo 'publicKey2' >> ~/.ssh/authorized_keys"});
+        verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), anyObject());
         verifyZeroInteractions(docker, machineManager, sshManager);
     }
 
@@ -170,7 +173,7 @@ public class KeysInjectorTest {
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
                                                            .withMachineId(MACHINE_ID));
 
-        verify(docker).startExec(eq(EXEC_ID), messageProcessorCaptor.capture());
+        verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), messageProcessorCaptor.capture());
         final MessageProcessor<LogMessage> value = messageProcessorCaptor.getValue();
         value.process(logMessage);
 

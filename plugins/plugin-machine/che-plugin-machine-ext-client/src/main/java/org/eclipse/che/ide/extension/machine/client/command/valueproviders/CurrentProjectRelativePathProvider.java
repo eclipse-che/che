@@ -14,9 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.ide.api.resources.Resource;
 
 /**
  * Provides relative path to specific project. Path to project resolves from current workspace root.
@@ -31,11 +31,13 @@ public class CurrentProjectRelativePathProvider implements CommandPropertyValueP
 
     private static final String KEY = "${current.project.relpath}";
 
-    private AppContext appContext;
+    private       AppContext      appContext;
+    private final PromiseProvider promises;
 
     @Inject
-    public CurrentProjectRelativePathProvider(AppContext appContext) {
+    public CurrentProjectRelativePathProvider(AppContext appContext, PromiseProvider promises) {
         this.appContext = appContext;
+        this.promises = promises;
     }
 
     @Override
@@ -45,10 +47,12 @@ public class CurrentProjectRelativePathProvider implements CommandPropertyValueP
 
     @Override
     public Promise<String> getValue() {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
-            return Promises.resolve("");
+        final Resource[] resources = appContext.getResources();
+
+        if (resources != null && resources.length == 1) {
+            return promises.resolve(resources[0].getLocation().toString());
         }
-        return Promises.resolve(appContext.getCurrentProject().getProjectConfig().getPath().substring(1));
+
+        return promises.resolve("");
     }
 }

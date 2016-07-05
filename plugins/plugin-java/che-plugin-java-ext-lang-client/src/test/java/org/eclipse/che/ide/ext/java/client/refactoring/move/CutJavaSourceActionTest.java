@@ -10,27 +10,40 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.refactoring.move;
 
+import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
-import org.eclipse.che.ide.api.parts.PartPresenter;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.filetypes.FileType;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.never;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Valeriy Svydenko
+ * @author Vlad Zhukovskyi
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class CutJavaSourceActionTest {
@@ -40,109 +53,54 @@ public class CutJavaSourceActionTest {
     private MoveAction               moveAction;
     @Mock
     private EventBus                 eventBus;
+    @Mock
+    private FileTypeRegistry fileTypeRegistry;
+    @Mock
+    private AppContext appContext;
 
     @Mock
-    private ActivePartChangedEvent event;
+    private ActionEvent updateActionEvent;
     @Mock
-    private ActionEvent            updateActionEvent;
+    private Presentation presentation;
     @Mock
-    private EditorPartPresenter    editorPartPresenter;
+    private File        resource;
     @Mock
-    private PartPresenter          partPresenter;
+    private Project     project;
     @Mock
-    private Presentation           presentation;
+    private Resource    srcFolder;
+    @Mock
+    private FileType fileType;
 
     private CutJavaSourceAction action;
 
     @Before
     public void setUp() throws Exception {
-        action = new CutJavaSourceAction(locale, moveAction, eventBus);
+        action = new CutJavaSourceAction(locale, moveAction, eventBus, fileTypeRegistry, appContext);
+
     }
 
     @Test
-    public void constructorShouldPerform() throws Exception {
-        verify(locale).moveActionName();
-        verify(locale).moveActionDescription();
-
-        verify(eventBus).addHandler(ActivePartChangedEvent.TYPE, action);
-    }
-
-    @Test
-    public void actionShouldBeEnabledIfEditorPartIsNotActiveAndMoveActionIsEnable() throws Exception {
+    public void actionShouldBeEnabledWhenFolderInContext() throws Exception {
+        final Container container = mock(Container.class);
         when(updateActionEvent.getPresentation()).thenReturn(presentation);
-        when(event.getActivePart()).thenReturn(partPresenter);
-        when(moveAction.isActionEnable()).thenReturn(true);
+        when(appContext.getResources()).thenReturn(new Resource[]{container});
+        when(container.getRelatedProject()).thenReturn(Optional.of(project));
+        when(container.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
 
-        action.onActivePartChanged(event);
+        final Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put(Constants.LANGUAGE, Collections.singletonList("java"));
+
+        when(project.getAttributes()).thenReturn(attributes);
+
         action.update(updateActionEvent);
 
-        verify(presentation).setEnabled(true);
+        verify(presentation).setEnabled(eq(true));
     }
 
     @Test
-    public void actionShouldBeDisabledIfEditorPartIsNotActiveAndMoveActionIsNotEnable() throws Exception {
-        when(updateActionEvent.getPresentation()).thenReturn(presentation);
-        when(event.getActivePart()).thenReturn(partPresenter);
-        when(moveAction.isActionEnable()).thenReturn(false);
-
-        action.onActivePartChanged(event);
-        action.update(updateActionEvent);
-
-        verify(presentation).setEnabled(false);
-    }
-
-    @Test
-    public void actionShouldBeDisabledIfEditorPartIsActive() throws Exception {
-        when(updateActionEvent.getPresentation()).thenReturn(presentation);
-        when(event.getActivePart()).thenReturn(editorPartPresenter);
-
-        action.onActivePartChanged(event);
-        action.update(updateActionEvent);
-
-        verify(presentation).setEnabled(false);
-    }
-
-    @Test
-    public void actionPerformsIfEditorPartIsNotActiveAndMoveActionIsEnable() throws Exception {
-        when(updateActionEvent.getPresentation()).thenReturn(presentation);
-        when(event.getActivePart()).thenReturn(partPresenter);
-        when(moveAction.isActionEnable()).thenReturn(true);
-
-        action.onActivePartChanged(event);
+    public void actionShouldPerformAction() throws Exception {
         action.actionPerformed(updateActionEvent);
 
-        verify(moveAction).actionPerformed(updateActionEvent);
-    }
-
-    @Test
-    public void actionDoesNotPerformIfEditorPartIsNotActiveAndMoveActionIsNotEnable() throws Exception {
-        when(updateActionEvent.getPresentation()).thenReturn(presentation);
-        when(event.getActivePart()).thenReturn(partPresenter);
-        when(moveAction.isActionEnable()).thenReturn(false);
-
-        action.onActivePartChanged(event);
-        action.actionPerformed(updateActionEvent);
-
-        verify(moveAction, never()).actionPerformed(updateActionEvent);
-    }
-
-    @Test
-    public void actionDoesPerformIfEditorPartIsActive() throws Exception {
-        when(updateActionEvent.getPresentation()).thenReturn(presentation);
-        when(event.getActivePart()).thenReturn(editorPartPresenter);
-
-        action.onActivePartChanged(event);
-        action.actionPerformed(updateActionEvent);
-
-        verify(moveAction, never()).actionPerformed(updateActionEvent);
-    }
-
-    @Test
-    public void partShouldBeChanged() throws Exception {
-        when(event.getActivePart()).thenReturn(editorPartPresenter);
-
-        action.onActivePartChanged(event);
-
-        assertTrue(event.getActivePart() instanceof EditorPartPresenter);
+        verify(moveAction).actionPerformed(eq(updateActionEvent));
     }
 }

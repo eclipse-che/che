@@ -107,7 +107,6 @@ public class DockerInstanceStopDetector {
                 try {
                     dockerConnector.getEvents(GetEventsParams.create()
                                                              .withSinceSecond(lastProcessedEventDate)
-                                                             .withUntilSecond(0)
                                                              .withFilters(new Filters().withFilter("event", "die", "oom")),
                                               new EventsProcessor());
                 } catch (IOException e) {

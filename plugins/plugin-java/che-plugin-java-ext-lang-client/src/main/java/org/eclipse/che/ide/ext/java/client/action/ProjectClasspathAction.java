@@ -16,17 +16,14 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathPresenter;
-import org.eclipse.che.ide.ext.java.shared.Constants;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
-import static org.eclipse.che.ide.ext.java.shared.Constants.JAVA_ID;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -55,27 +52,13 @@ public class ProjectClasspathAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (appContext.getCurrentProject() == null) {
-            return;
-        }
         projectClasspathPresenter.show();
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
-            event.getPresentation().setVisible(false);
-            return;
-        }
+        final Resource[] resources = appContext.getResources();
 
-        event.getPresentation().setEnabledAndVisible(isJavaProject(currentProject));
-    }
-
-    private boolean isJavaProject(CurrentProject project) {
-        Map<String, List<String>> attributes = project.getProjectConfig().getAttributes();
-        return attributes.containsKey(Constants.LANGUAGE)
-               && attributes.get(Constants.LANGUAGE) != null
-               && JAVA_ID.equals(attributes.get(Constants.LANGUAGE).get(0));
+        event.getPresentation().setEnabledAndVisible(resources != null && resources.length == 1 && isJavaProject(resources[0].getRelatedProject().get()));
     }
 }

@@ -34,7 +34,6 @@ public class MavenCommandPagePresenter implements MavenCommandPageView.ActionDel
     /** Command line value before any editing. */
     private String                    originCommandLine;
     private DirtyStateListener        listener;
-    private FieldStateActionDelegate  delegate;
 
     @Inject
     public MavenCommandPagePresenter(MavenCommandPageView view) {
@@ -70,7 +69,6 @@ public class MavenCommandPagePresenter implements MavenCommandPageView.ActionDel
 
     @Override
     public void setFieldStateActionDelegate(FieldStateActionDelegate delegate) {
-        this.delegate = delegate;
     }
 
     @Override

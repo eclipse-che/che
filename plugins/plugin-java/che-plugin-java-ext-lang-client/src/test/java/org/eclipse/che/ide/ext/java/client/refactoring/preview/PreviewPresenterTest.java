@@ -34,7 +34,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringPreview;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSession;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,8 +71,6 @@ public class PreviewPresenterTest {
     private RefactoringServiceClient  refactoringService;
     @Mock
     private EditorAgent               editorAgent;
-    @Mock
-    private ProjectExplorerPresenter  projectExplorerPresenter;
     @Mock
     private RefactoringUpdater        refactoringUpdater;
 
@@ -170,7 +167,7 @@ public class PreviewPresenterTest {
         verify(refactoringStatusPromise).then(refactoringStatusOperation.capture());
         refactoringStatusOperation.getValue().apply(refactoringStatus);
         verify(view).hide();
-        verify(refactoringUpdater).updateAfterRefactoring(null, changes);
+//        verify(refactoringUpdater).updateAfterRefactoring(null, changes);
     }
 
     @Test

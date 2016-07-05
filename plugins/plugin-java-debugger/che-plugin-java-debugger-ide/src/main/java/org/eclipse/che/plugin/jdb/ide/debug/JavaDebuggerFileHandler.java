@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jdb.ide.debug;
 
+import com.google.common.base.Optional;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -17,14 +18,10 @@ import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -33,18 +30,16 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.EditorDirtyStateChangedEvent;
 import org.eclipse.che.ide.api.event.EditorDirtyStateChangedHandler;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.SyntheticFile;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeFactory;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
-import org.eclipse.che.ide.ext.java.client.project.node.jar.JarFileNode;
-import org.eclipse.che.ide.ext.java.shared.JarEntry;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
+import org.eclipse.che.ide.ext.java.shared.JarEntry;
+import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.ext.java.shared.JarEntry.JarEntryType.CLASS_FILE;
@@ -56,13 +51,11 @@ import static org.eclipse.che.ide.ext.java.shared.JarEntry.JarEntryType.CLASS_FI
  */
 public class JavaDebuggerFileHandler implements ActiveFileHandler {
 
-    private final EditorAgent              editorAgent;
-    private final DtoFactory               dtoFactory;
-    private final AppContext               appContext;
-    private final EventBus                 eventBus;
-    private final JavaNodeManager          javaNodeManager;
-    private final ProjectExplorerPresenter projectExplorer;
-    private final ProjectServiceClient     projectService;
+    private final EditorAgent           editorAgent;
+    private final DtoFactory            dtoFactory;
+    private final EventBus              eventBus;
+    private final JavaNavigationService service;
+    private final AppContext            appContext;
 
     private HandlerRegistration handler;
 
@@ -71,16 +64,12 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
                                    DtoFactory dtoFactory,
                                    AppContext appContext,
                                    EventBus eventBus,
-                                   JavaNodeManager javaNodeManager,
-                                   ProjectExplorerPresenter projectExplorer,
-                                   ProjectServiceClient projectService) {
+                                   JavaNavigationService service) {
         this.editorAgent = editorAgent;
         this.dtoFactory = dtoFactory;
         this.appContext = appContext;
         this.eventBus = eventBus;
-        this.javaNodeManager = javaNodeManager;
-        this.projectExplorer = projectExplorer;
-        this.projectService = projectService;
+        this.service = service;
     }
 
     @Override
@@ -105,15 +94,15 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
     }
 
     private void doOpenFile(final Location location, final AsyncCallback<VirtualFile> callback) {
-        projectExplorer.getNodeByPath(new HasStorablePath.StorablePath(location.getResourcePath())).then(new Operation<Node>() {
+        appContext.getWorkspaceRoot().getFile(location.getResourcePath()).then(new Operation<Optional<File>>() {
             @Override
-            public void apply(final Node node) throws OperationException {
-                if (!(node instanceof FileReferenceNode)) {
-                    return;
+            public void apply(Optional<File> file) throws OperationException {
+                if (file.isPresent()) {
+                    handleActivatedFile(file.get(), callback, location.getLineNumber());
+                    eventBus.fireEvent(new FileEvent(file.get(), OPEN));
+                } else {
+                    callback.onFailure(new IllegalStateException("File is undefined"));
                 }
-
-                handleActivatedFile((VirtualFile)node, callback, location.getLineNumber());
-                eventBus.fireEvent(new FileEvent((VirtualFile)node, OPEN));
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -124,50 +113,48 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
     }
 
     private void openExternalResource(final Location location, final AsyncCallback<VirtualFile> callback) {
-        final NodeSettings nodeSettings = javaNodeManager.getJavaSettingsProvider().getSettings();
-        final JavaNodeFactory javaNodeFactory = javaNodeManager.getJavaNodeFactory();
+        JarEntry jarEntry = dtoFactory.createDto(JarEntry.class);
 
-        String className = extractOuterClassFqn(location.getTarget());
-        final JarEntry jarEntry = dtoFactory.createDto(JarEntry.class);
+        final String className = extractOuterClassFqn(location.getTarget());
         jarEntry.setPath(className);
         jarEntry.setName(className.substring(className.lastIndexOf(".") + 1) + ".class");
         jarEntry.setType(CLASS_FILE);
 
-        final String projectPath = location.getResourceProjectPath();
-        projectService.getProject(appContext.getDevMachine(), projectPath)
-                      .then(new Function<ProjectConfigDto, JarFileNode>() {
-                          @Override
-                          public JarFileNode apply(ProjectConfigDto projectConfigDto) throws FunctionException {
-                              return javaNodeFactory.newJarFileNode(jarEntry, null, projectConfigDto, nodeSettings);
-                          }
-                      })
-                      .then(new Operation<JarFileNode>() {
-                          @Override
-                          public void apply(final JarFileNode jarFileNode) throws OperationException {
-                              AsyncCallback<VirtualFile> downloadSourceCallback = new AsyncCallback<VirtualFile>() {
-                                  @Override
-                                  public void onSuccess(final VirtualFile result) {
-                                      if (jarFileNode.isContentGenerated()) {
-                                          handleContentGeneratedResource(result, location, callback);
-                                      } else {
-                                          handleActivatedFile(jarFileNode, callback, location.getLineNumber());
-                                      }
-                                  }
+        final Resource resource = appContext.getResource();
 
-                                  @Override
-                                  public void onFailure(Throwable caught) {
-                                      callback.onFailure(caught);
-                                  }
-                              };
-                              handleActivatedFile(jarFileNode, downloadSourceCallback, location.getLineNumber());
-                          }
-                      })
-                      .catchError(new Operation<PromiseError>() {
-                          @Override
-                          public void apply(PromiseError arg) throws OperationException {
-                              callback.onFailure(arg.getCause());
-                          }
-                      });
+        if (resource == null) {
+            callback.onFailure(new IllegalStateException());
+            return;
+        }
+
+        final Project project = resource.getRelatedProject().get();
+
+        service.getContent(project.getLocation(), className).then(new Operation<ClassContent>() {
+            @Override
+            public void apply(final ClassContent content) throws OperationException {
+                final VirtualFile file =
+                        new SyntheticFile(className.substring(className.lastIndexOf(".") + 1) + ".class", content.getContent());
+
+                AsyncCallback<VirtualFile> downloadSourceCallback = new AsyncCallback<VirtualFile>() {
+                    @Override
+                    public void onSuccess(final VirtualFile result) {
+                        if (content.isGenerated()) {
+                            handleContentGeneratedResource(result, location, callback);
+                        } else {
+                            handleActivatedFile(file, callback, location.getLineNumber());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure(caught);
+                    }
+                };
+
+                handleActivatedFile(file, downloadSourceCallback, location.getLineNumber());
+                eventBus.fireEvent(new FileEvent(file, OPEN));
+            }
+        });
     }
 
     private String extractOuterClassFqn(String fqn) {

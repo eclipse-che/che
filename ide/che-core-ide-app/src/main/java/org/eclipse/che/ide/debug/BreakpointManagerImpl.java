@@ -10,13 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.debug;
 
+import com.google.common.base.Optional;
 import com.google.gwt.storage.client.Storage;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.Breakpoint.Type;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -33,19 +38,14 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
 import org.eclipse.che.ide.api.event.project.DeleteProjectHandler;
-import org.eclipse.che.ide.api.project.node.HasProjectConfig.ProjectConfig;
-import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
+import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.api.project.tree.VirtualFileImpl;
-import org.eclipse.che.ide.api.project.tree.VirtualFileInfo;
 import org.eclipse.che.ide.debug.dto.BreakpointDto;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.project.event.ProjectExplorerLoadedEvent;
-import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
-import org.eclipse.che.ide.project.node.FolderReferenceNode;
-import org.eclipse.che.ide.project.node.ItemReferenceBasedNode;
-import org.eclipse.che.ide.project.node.ResourceBasedNode;
 import org.eclipse.che.ide.resource.Path;
 
 import java.util.ArrayList;
@@ -76,6 +76,8 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
     private final Map<String, List<Breakpoint>>   breakpoints;
     private final EditorAgent                     editorAgent;
+    private final AppContext                      appContext;
+    private final PromiseProvider                 promises;
     private final DebuggerManager                 debuggerManager;
     private final DtoFactory                      dtoFactory;
     private final List<BreakpointManagerObserver> observers;
@@ -83,11 +85,15 @@ public class BreakpointManagerImpl implements BreakpointManager,
     private Breakpoint currentBreakpoint;
 
     @Inject
-    public BreakpointManagerImpl(final EditorAgent editorAgent,
-                                 final DebuggerManager debuggerManager,
-                                 final EventBus eventBus,
-                                 final DtoFactory dtoFactory) {
+    public BreakpointManagerImpl(EditorAgent editorAgent,
+                                 DebuggerManager debuggerManager,
+                                 EventBus eventBus,
+                                 DtoFactory dtoFactory,
+                                 AppContext appContext,
+                                 PromiseProvider promises) {
         this.editorAgent = editorAgent;
+        this.appContext = appContext;
+        this.promises = promises;
         this.breakpoints = new HashMap<>();
         this.debuggerManager = debuggerManager;
         this.dtoFactory = dtoFactory;
@@ -382,7 +388,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
         eventBus.addHandler(EditorOpenedEvent.TYPE, new EditorOpenedEventHandler() {
             @Override
             public void onEditorOpened(EditorOpenedEvent event) {
-                onOpenEditor(event.getFile().getPath(), event.getEditor());
+                onOpenEditor(event.getFile().getLocation().toString(), event.getEditor());
             }
         });
 
@@ -399,53 +405,29 @@ public class BreakpointManagerImpl implements BreakpointManager,
             }
         });
 
-        eventBus.addHandler(ResourceNodeDeletedEvent.getType(), new ResourceNodeDeletedEvent.ResourceNodeDeletedHandler() {
+        eventBus.addHandler(ResourceChangedEvent.getType(), new ResourceChangedEvent.ResourceChangedHandler() {
             @Override
-            public void onResourceEvent(ResourceNodeDeletedEvent event) {
-                if (breakpoints.isEmpty()) {
-                    return;
-                }
+            public void onResourceChanged(ResourceChangedEvent event) {
+                if (event.getDelta().getKind() == ResourceDelta.REMOVED) {
+                    if (breakpoints.isEmpty()) {
+                        return;
+                    }
 
-                ResourceBasedNode node = event.getNode();
-                if (node instanceof ItemReferenceBasedNode) {
-                    String path = ((ItemReferenceBasedNode)node).getStorablePath();
+                    final Resource resource = event.getDelta().getResource();
 
-                    if (node instanceof FolderReferenceNode) {
-                        path += "/";
-                        deleteBreakpoints(getBreakpointPaths(path));
+                    Path path = resource.getLocation();
 
-                    } else if (node instanceof FileReferenceNode) {
-                        deleteBreakpoints(Collections.singleton(path));
+                    if (resource.isFolder()) {
+                        path.addTrailingSeparator();
+
+                        deleteBreakpoints(getBreakpointPaths(path.toString()));
+                    } else if (resource.isFile()) {
+                        deleteBreakpoints(Collections.singleton(path.toString()));
                     }
                 }
             }
         });
-
-        eventBus.addHandler(ProjectExplorerLoadedEvent.getType(), new ProjectExplorerLoadedEvent.ProjectExplorerLoadedHandler() {
-            @Override
-            public void onProjectsLoaded(ProjectExplorerLoadedEvent event) {
-                if (breakpoints.isEmpty()) {
-                    return;
-                }
-
-                // remove breakpoints which refer to un-existed projects
-                List<Node> projects = event.getNodes();
-                Set<String> pathsToDelete = new HashSet<>(breakpoints.keySet());
-
-                for (String breakpointPath : breakpoints.keySet()) {
-                    for (Node project : projects) {
-                        String projectName = project.getName();
-                        if (breakpointPath.startsWith("/" + projectName + "/")) {
-                            pathsToDelete.remove(breakpointPath);
-                            break;
-                        }
-                    }
-                }
-
-                deleteBreakpoints(pathsToDelete);
-            }
-        });
-    }
+     }
 
     /**
      * @param pathToFind
@@ -516,7 +498,21 @@ public class BreakpointManagerImpl implements BreakpointManager,
                 dto.setType(breakpoint.getType());
                 dto.setPath(breakpoint.getPath());
                 dto.setLineNumber(breakpoint.getLineNumber());
-                dto.setFileProjectConfig(breakpoint.getFile().getProject().getProjectConfig());
+
+                if (breakpoint.getFile() instanceof Resource) {
+                    final Optional<Project> project = ((Resource)breakpoint.getFile()).getRelatedProject();
+                    if (project.isPresent()) {
+                        final ProjectConfigDto projectDto = dtoFactory.createDto(ProjectConfigDto.class)
+                                                                      .withPath(project.get().getName())
+                                                                      .withPath(project.get().getPath())
+                                                                      .withType(project.get().getType())
+                                                                      .withDescription(project.get().getDescription())
+                                                                      .withAttributes(project.get().getAttributes())
+                                                                      .withMixins(project.get().getMixins());
+                        dto.setFileProjectConfig(projectDto); //TODO need to think to change argument type from dto to model interface
+                    }
+                }
+
                 dto.setActive(breakpoint.isActive());
 
                 allDtoBreakpoints.add(dto);
@@ -540,29 +536,38 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
         List<BreakpointDto> allDtoBreakpoints = dtoFactory.createListDtoFromJson(data, BreakpointDto.class);
 
-        for (final BreakpointDto dto : allDtoBreakpoints) {
-            VirtualFileInfo virtualFileInfo = VirtualFileInfo.newBuilder()
-                                                             .setPath(dto.getPath())
-                                                             .setProject(new ProjectConfig(dto.getFileProjectConfig()))
-                                                             .build();
+        Promise<Void> bpPromise = promises.resolve(null);
 
-            VirtualFile file = new VirtualFileImpl(virtualFileInfo);
-            if (dto.getType() == Type.CURRENT) {
-                doSetCurrentBreakpoint(file, dto.getLineNumber());
-            } else {
-                addBreakpoint(new Breakpoint(dto.getType(),
-                                             dto.getLineNumber(),
-                                             dto.getPath(),
-                                             file,
-                                             dto.isActive()));
-            }
+        for (final BreakpointDto dto : allDtoBreakpoints) {
+            bpPromise.thenPromise(new Function<Void, Promise<Void>>() {
+                @Override
+                public Promise<Void> apply(Void ignored) throws FunctionException {
+                    return appContext.getWorkspaceRoot().getFile(dto.getPath()).then(new Function<Optional<File>, Void>() {
+                        @Override
+                        public Void apply(Optional<File> file) throws FunctionException {
+                            if (dto.getType() == Type.CURRENT) {
+                                doSetCurrentBreakpoint(file.get(), dto.getLineNumber());
+                            } else {
+                                addBreakpoint(new Breakpoint(dto.getType(),
+                                                             dto.getLineNumber(),
+                                                             dto.getPath(),
+                                                             file.get(),
+                                                             dto.isActive()));
+                            }
+
+                            return null;
+                        }
+                    });
+                }
+            });
         }
     }
 
     // Debugger events
 
     @Override
-    public void onActiveDebuggerChanged(@Nullable Debugger activeDebugger) {}
+    public void onActiveDebuggerChanged(@Nullable Debugger activeDebugger) {
+    }
 
     @Override
     public void onDebuggerAttached(DebuggerDescriptor debuggerDescriptor, Promise<Void> connect) { }
@@ -646,10 +651,12 @@ public class BreakpointManagerImpl implements BreakpointManager,
     }
 
     @Override
-    public void onBreakpointDeleted(Breakpoint breakpoint) { }
+    public void onBreakpointDeleted(Breakpoint breakpoint) {
+    }
 
     @Override
-    public void onAllBreakpointsDeleted() {}
+    public void onAllBreakpointsDeleted() {
+    }
 
     @Override
     public void onPreStepInto() {
@@ -677,7 +684,8 @@ public class BreakpointManagerImpl implements BreakpointManager,
     }
 
     @Override
-    public void onValueChanged(List<String> path, String newValue) { }
+    public void onValueChanged(List<String> path, String newValue) {
+    }
 
     @Override
     public void addObserver(BreakpointManagerObserver observer) {

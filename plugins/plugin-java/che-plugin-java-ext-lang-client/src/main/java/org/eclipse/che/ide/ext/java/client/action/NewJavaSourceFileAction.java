@@ -10,24 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.action;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ProjectAction;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFilePresenter;
-import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
-import org.eclipse.che.ide.ext.java.client.project.node.SourceFolderNode;
-import org.eclipse.che.ide.ext.java.shared.Constants;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 
-import java.util.List;
-import java.util.Map;
+import static com.google.common.base.Preconditions.checkState;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
 /**
  * Action to create new Java source file.
@@ -36,52 +34,48 @@ import java.util.Map;
  */
 @Singleton
 public class NewJavaSourceFileAction extends ProjectAction {
+
+
     private final AppContext                 appContext;
-    private       ProjectExplorerPresenter   projectExplorer;
     private       NewJavaSourceFilePresenter newJavaSourceFilePresenter;
 
     @Inject
-    public NewJavaSourceFileAction(ProjectExplorerPresenter projectExplorer,
-                                   NewJavaSourceFilePresenter newJavaSourceFilePresenter,
+    public NewJavaSourceFileAction(NewJavaSourceFilePresenter newJavaSourceFilePresenter,
                                    JavaLocalizationConstant constant,
                                    JavaResources resources,
                                    AppContext appContext) {
         super(constant.actionNewClassTitle(), constant.actionNewClassDescription(), resources.javaFile());
         this.newJavaSourceFilePresenter = newJavaSourceFilePresenter;
-        this.projectExplorer = projectExplorer;
         this.appContext = appContext;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        final Resource[] resources = appContext.getResources();
+        final boolean inJavaProject = resources != null && resources.length == 1 && isJavaProject(resources[0].getRelatedProject().get());
 
-        newJavaSourceFilePresenter.showDialog();
+        checkState(inJavaProject && resources[0].getParentWithMarker(SourceFolderMarker.ID).isPresent());
+
+        final Resource resource = resources[0];
+
+        if (resource instanceof Container) {
+            newJavaSourceFilePresenter.showDialog((Container)resource);
+        } else {
+            final Optional<Container> parent = resource.getParent();
+            if (parent.isPresent()) {
+                newJavaSourceFilePresenter.showDialog(parent.get());
+            } else {
+                throw new IllegalStateException("Failed to get parent container");
+            }
+        }
+
     }
 
     @Override
     public void updateProjectAction(ActionEvent e) {
-        CurrentProject project = appContext.getCurrentProject();
+        final Resource[] resources = appContext.getResources();
+        final boolean inJavaProject = resources != null && resources.length == 1 && isJavaProject(resources[0].getRelatedProject().get());
 
-        if ((project == null) || !isJavaProject(project)) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
-        }
-
-        Selection<?> selection = projectExplorer.getSelection();
-        if (selection == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
-        }
-
-        e.getPresentation().setVisible(true);
-        e.getPresentation().setEnabled(selection.isSingleSelection() &&
-                (selection.getHeadElement() instanceof SourceFolderNode || selection.getHeadElement() instanceof PackageNode));
-    }
-
-    private boolean isJavaProject(CurrentProject project) {
-        Map<String, List<String>> attributes = project.getProjectConfig().getAttributes();
-        return attributes.containsKey(Constants.LANGUAGE)
-               && attributes.get(Constants.LANGUAGE) != null
-               && "java".equals(attributes.get(Constants.LANGUAGE).get(0));
+        e.getPresentation().setEnabledAndVisible(inJavaProject && resources[0].getParentWithMarker(SourceFolderMarker.ID).isPresent());
     }
 }

@@ -21,10 +21,6 @@ import org.eclipse.che.plugin.svn.ide.importer.SubversionProjectImporterView;
 import org.eclipse.che.plugin.svn.ide.importer.SubversionProjectImporterViewImpl;
 import org.eclipse.che.plugin.svn.ide.log.ShowLogsView;
 import org.eclipse.che.plugin.svn.ide.log.ShowLogsViewImpl;
-import org.eclipse.che.plugin.svn.ide.merge.MergeView;
-import org.eclipse.che.plugin.svn.ide.merge.MergeViewImpl;
-import org.eclipse.che.plugin.svn.ide.move.MoveView;
-import org.eclipse.che.plugin.svn.ide.move.MoveViewImpl;
 import org.eclipse.che.plugin.svn.ide.property.PropertyEditorView;
 import org.eclipse.che.plugin.svn.ide.property.PropertyEditorViewImpl;
 import org.eclipse.che.plugin.svn.ide.resolve.ResolveView;
@@ -41,10 +37,6 @@ import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogFactory;
 import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogPresenter;
 import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogView;
 import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogViewImpl;
-import org.eclipse.che.plugin.svn.ide.copy.CopyView;
-import org.eclipse.che.plugin.svn.ide.copy.CopyViewImpl;
-import org.eclipse.che.plugin.svn.ide.common.filteredtree.FilteredNodeFactory;
-import org.eclipse.che.plugin.svn.ide.common.filteredtree.FilteredTreeStructureProvider;
 import org.eclipse.che.plugin.svn.ide.export.ExportView;
 import org.eclipse.che.plugin.svn.ide.export.ExportViewImpl;
 import org.eclipse.che.plugin.svn.ide.importer.SubversionImportWizardRegistrar;
@@ -52,7 +44,6 @@ import org.eclipse.che.plugin.svn.ide.update.UpdateToRevisionView;
 import org.eclipse.che.plugin.svn.ide.update.UpdateToRevisionViewImpl;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
-import org.eclipse.che.ide.api.project.tree.TreeStructureProvider;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
@@ -82,15 +73,9 @@ public class SubversionGinModule extends AbstractGinModule {
         bind(SubversionOutputConsoleView.class).to(SubversionOutputConsoleViewImpl.class);
         bind(UpdateToRevisionView.class).to(UpdateToRevisionViewImpl.class).in(Singleton.class);
         bind(ResolveView.class).to(ResolveViewImpl.class).in(Singleton.class);
-        bind(CopyView.class).to(CopyViewImpl.class).in(Singleton.class);
-        bind(MergeView.class).to(MergeViewImpl.class).in(Singleton.class);
-        bind(MoveView.class).to(MoveViewImpl.class).in(Singleton.class);
         bind(ExportView.class).to(ExportViewImpl.class).in(Singleton.class);
         bind(ShowLogsView.class).to(ShowLogsViewImpl.class).in(Singleton.class);
         bind(PropertyEditorView.class).to(PropertyEditorViewImpl.class).in(Singleton.class);
-
-        install(new GinFactoryModuleBuilder().build(FilteredNodeFactory.class));
-        GinMultibinder.newSetBinder(binder(), TreeStructureProvider.class).addBinding().to(FilteredTreeStructureProvider.class);
 
         bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);
         bind(DiffViewerView.class).to(DiffViewerViewImpl.class).in(Singleton.class);

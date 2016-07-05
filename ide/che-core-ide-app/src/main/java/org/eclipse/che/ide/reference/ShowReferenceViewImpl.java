@@ -15,7 +15,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -23,12 +22,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilder;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * The class contains business logic which allows us display fqn and path for files, folders, packages nodes etc., and construct the
@@ -64,6 +61,8 @@ final class ShowReferenceViewImpl extends Window implements ShowReferenceView {
         setWidget(binder.createAndBindUi(this));
         setHideOnEscapeEnabled(true);
 
+        reference.setReadOnly(true);
+
         clipBoardBtnBuilder.withResourceWidget(reference).build();
         clipBoardBtnBuilder.withResourceWidget(path).build();
 
@@ -82,21 +81,14 @@ final class ShowReferenceViewImpl extends Window implements ShowReferenceView {
     }
 
     @Override
-    public void show(@Nullable String reference, @NotNull String path) {
+    public void show(String reference, Path path) {
         boolean hasReference = !Strings.isNullOrEmpty(reference);
 
         this.reference.setText(hasReference ? reference : "");
         this.referencePanel.setVisible(hasReference);
-        this.path.setText(path);
+        this.path.setText(path.toString());
 
-        super.show();
-
-        new Timer() {
-            @Override
-            public void run() {
-                ShowReferenceViewImpl.this.reference.setFocus(true);
-            }
-        }.schedule(100);
+        super.show(this.reference);
     }
 
     @Override

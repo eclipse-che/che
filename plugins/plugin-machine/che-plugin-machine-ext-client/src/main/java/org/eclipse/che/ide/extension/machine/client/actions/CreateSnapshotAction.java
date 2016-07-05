@@ -25,19 +25,19 @@ import static org.eclipse.che.ide.extension.machine.client.perspective.Operation
 
 /**
  * @author Yevhenii Voevodin
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class CreateSnapshotAction extends AbstractPerspectiveAction {
 
-
-    private final AppContext               appContext;
     private final WorkspaceSnapshotCreator snapshotCreator;
+    private final AppContext               appContext;
 
     @Inject
-    public CreateSnapshotAction(CoreLocalizationConstant locale, AppContext appContext, WorkspaceSnapshotCreator snapshotCreator) {
+    public CreateSnapshotAction(CoreLocalizationConstant locale, WorkspaceSnapshotCreator snapshotCreator, AppContext appContext) {
         super(singletonList(OPERATIONS_PERSPECTIVE_ID), locale.createSnapshotTitle(), locale.createSnapshotDescription(), null, null);
-        this.appContext = appContext;
         this.snapshotCreator = snapshotCreator;
+        this.appContext = appContext;
     }
 
     @Override

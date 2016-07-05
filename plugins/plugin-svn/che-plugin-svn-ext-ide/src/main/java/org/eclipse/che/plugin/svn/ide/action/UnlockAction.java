@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.lockunlock.LockUnlockPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn unlock" command.
@@ -29,23 +28,16 @@ public class UnlockAction extends SubversionAction {
     private final LockUnlockPresenter presenter;
 
     @Inject
-    public UnlockAction(final AppContext appContext,
-                        final LockUnlockPresenter presenter,
-                        final ProjectExplorerPresenter projectExplorerPresenter,
-                        final SubversionExtensionLocalizationConstants constants,
-                        final SubversionExtensionResources resources) {
-        super(constants.unlockTitle(), constants.unlockDescription(), resources.unlock(), appContext,
-              constants, resources, projectExplorerPresenter);
+    public UnlockAction(AppContext appContext,
+                        LockUnlockPresenter presenter,
+                        SubversionExtensionLocalizationConstants constants,
+                        SubversionExtensionResources resources) {
+        super(constants.unlockTitle(), constants.unlockDescription(), resources.unlock(), appContext, constants, resources);
         this.presenter = presenter;
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        this.presenter.showUnlockDialog();
-    }
-
-    @Override
-    protected boolean isSelectionRequired() {
-        return false;
+        presenter.showUnlockDialog();
     }
 }

@@ -10,15 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.gdb.ide;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
@@ -69,11 +71,19 @@ public class GdbDebugger extends AbstractDebugger {
 
     @Override
     protected String fqnToPath(@NotNull Location location) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
+        final Resource resource = appContext.getResource();
+
+        if (resource == null) {
             return location.getTarget();
         }
-        return currentProject.getProjectConfig().getPath() + "/" + location.getTarget();
+
+        final Optional<Project> project = resource.getRelatedProject();
+
+        if (project.isPresent()) {
+            return project.get().getLocation().append(location.getTarget()).toString();
+        }
+
+        return location.getTarget();
     }
 
     @Nullable

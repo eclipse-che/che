@@ -10,22 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.copy;
 
+import com.google.inject.ImplementedBy;
+
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
-import org.eclipse.che.ide.project.node.ResourceBasedNode;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 
 /**
  * View for {@link CopyPresenter}.
  *
  * @author Vladyslav Zhukovskyi
  */
+@ImplementedBy(CopyViewImpl.class)
 public interface CopyView extends View<CopyView.ActionDelegate> {
 
     /** Action handler for the view actions/controls. */
-    public interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate extends BaseActionDelegate {
         /** Perform actions when copy button clicked. */
         void onCopyClicked();
 
@@ -33,10 +34,7 @@ public interface CopyView extends View<CopyView.ActionDelegate> {
         void onCancelClicked();
 
         /** Perform actions when node selected in project explorer. */
-        void onNodeSelected(ResourceBasedNode<?> destinationNode);
-
-        /** Perform actions when node expanded in project explorer. */
-        void onNodeExpanded(ResourceBasedNode<?> node);
+        void onNodeSelected(Resource target);
 
         /** Perform actions when new item name field changed. */
         void onNewNameChanged(String newName);
@@ -58,10 +56,7 @@ public interface CopyView extends View<CopyView.ActionDelegate> {
     void setDialogTitle(String title);
 
     /** Set project tree nodes. */
-    void setProjectNodes(List<ResourceBasedNode<?>> rootNodes);
-
-    /** Update project tree node. */
-    void updateProjectNode(@NotNull ResourceBasedNode<?> oldNode, @NotNull ResourceBasedNode<?> newNode);
+    void setProjectNode(Project project);
 
     /** Show error marker with specified message. */
     void showErrorMarker(String message);
@@ -73,7 +68,7 @@ public interface CopyView extends View<CopyView.ActionDelegate> {
     void setNewName(String name);
 
     /** Get new item name value. */
-    public String getNewName();
+    String getNewName();
 
     /** Return true if url check box activated. */
     boolean isSourceCheckBoxSelected();

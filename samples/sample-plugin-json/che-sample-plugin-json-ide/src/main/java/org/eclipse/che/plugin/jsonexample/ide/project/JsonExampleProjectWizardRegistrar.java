@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.plugin.jsonexample.shared.Constants;
@@ -28,7 +29,7 @@ import java.util.List;
  */
 public class JsonExampleProjectWizardRegistrar implements ProjectWizardRegistrar {
 
-    private final List<Provider<? extends WizardPage<ProjectConfigDto>>> wizardPagesProviders;
+    private final List<Provider<? extends WizardPage<MutableProjectConfig>>> wizardPagesProviders;
 
     /**
      * Constructor for JSON Example project wizard.
@@ -53,7 +54,7 @@ public class JsonExampleProjectWizardRegistrar implements ProjectWizardRegistrar
     }
 
     @NotNull
-    public List<Provider<? extends WizardPage<ProjectConfigDto>>> getWizardPages() {
+    public List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages() {
         return wizardPagesProviders;
     }
 

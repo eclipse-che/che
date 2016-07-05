@@ -12,48 +12,51 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * The class contains business logic to stop workspace.
+ *
+ * TODO combine with StopMachineAction or remove it. These two actions duplicate own logic
  *
  * @author Dmitry Shnurenko
  */
 public class StopWorkspaceAction extends AbstractPerspectiveAction {
 
-    private final AppContext             appContext;
     private final WorkspaceServiceClient workspaceService;
+    private final AppContext             appContext;
 
     @Inject
     public StopWorkspaceAction(CoreLocalizationConstant locale,
-                               AppContext appContext,
-                               WorkspaceServiceClient workspaceService) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), locale.stopWsTitle(), locale.stopWsDescription(), null, null);
-
+                               WorkspaceServiceClient workspaceService,
+                               AppContext appContext) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID), locale.stopWsTitle(), locale.stopWsDescription(), null, null);
         this.appContext = appContext;
         this.workspaceService = workspaceService;
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setEnabled(appContext.getWorkspace() != null);
+        event.getPresentation().setVisible(true);
+        event.getPresentation().setEnabled(appContext.getDevMachine() != null);
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent event) {
-        WorkspaceDto workspace = appContext.getWorkspace();
-        if (workspace != null) {
-            workspaceService.stop(workspace.getId());
-        }
+        checkNotNull(appContext.getWorkspace().getId(), "Workspace id should not be null");
+
+        workspaceService.stop(appContext.getWorkspace().getId());
     }
 }

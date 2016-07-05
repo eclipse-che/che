@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.action;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -17,7 +18,8 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
@@ -40,10 +42,15 @@ public class MarkDirectoryAsGroup extends DefaultActionGroup {
 
     @Override
     public void update(ActionEvent e) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
-            e.getPresentation().setVisible(false);
+        final Resource resource = appContext.getResource();
+
+        if (resource == null) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
         }
-        e.getPresentation().setVisible(JAVAC.equals(currentProject.getProjectConfig().getType()));
+
+        final Optional<Project> project = resource.getRelatedProject();
+
+        e.getPresentation().setEnabledAndVisible(project.isPresent() && project.get().isTypeOf(JAVAC));
     }
 }
