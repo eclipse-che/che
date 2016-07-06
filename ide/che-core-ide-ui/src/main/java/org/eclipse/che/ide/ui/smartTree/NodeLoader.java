@@ -26,6 +26,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.DelayedTask;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeLoadEvent;
@@ -60,6 +61,31 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      * Temporary storage for current requested nodes. When children have been loaded requested node removes from temporary set.
      */
     Map<Node, Boolean> childRequested = new HashMap<>();
+
+    /**
+     * Load queue need to load nodes in batch mode.
+     */
+    Map<Node, Boolean> loadQueue = new HashMap<>();
+
+    /**
+     * Load task takes nodes from {@link #loadQueue} and load them in specific time frame.
+     */
+    DelayedTask loadTask = new DelayedTask() {
+        @Override
+        public void onExecute() {
+            for (Map.Entry<Node, Boolean> entry : loadQueue.entrySet()) {
+                if (childRequested.containsKey(entry.getKey())) {
+                    continue;
+                }
+
+                childRequested.put(entry.getKey(), entry.getValue());
+
+                _load(entry.getKey());
+            }
+
+            loadQueue.clear();
+        }
+    };
 
     /**
      * Last processed node. Maybe used in general purpose.
@@ -289,12 +315,10 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
             return false;
         }
 
-        if (childRequested.containsKey(parent)) {
-            return false;
-        }
+        loadQueue.put(parent, reloadExpandedChild);
+        loadTask.delay(100);
 
-        childRequested.put(parent, reloadExpandedChild);
-        return _load(parent);
+        return true;
     }
 
     /**
