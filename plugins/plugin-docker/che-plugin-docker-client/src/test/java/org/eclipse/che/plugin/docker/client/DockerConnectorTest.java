@@ -113,6 +113,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -131,7 +132,8 @@ public class DockerConnectorTest {
                                                       .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
                                                       .create();
 
-    private static final String EXCEPTION_ERROR_MESSAGE  = "Error response from docker API, status: 500, message: Error";
+    private static final String ERROR_MESSAGE            = "some error occurs";
+    private static final String EXCEPTION_ERROR_MESSAGE  = "Error response from docker API, status: 500, message: " + ERROR_MESSAGE;
     private static final int    RESPONSE_ERROR_CODE      = 500;
     private static final int    RESPONSE_NOT_FOUND_CODE  = 404;
     private static final int    RESPONSE_SUCCESS_CODE    = 200;
@@ -153,7 +155,6 @@ public class DockerConnectorTest {
     private static final String   PATH_TO_FILE          = "/home/user/path/file.ext";
     private static final String   STREAM_DATA           = "stream data";
     private static final String   DOCKER_RESPONSE       = "stream";
-    private static final String   ERROR_MESSAGE         = "some error occurs";
     private static final String   API_VERSION_PREFIX    = "";
     private static final String[] CMD_WITH_ARGS         = {"command", "arg1", "arg2"};
     private static final String[] CMD_ARGS              = {"arg1", "arg2"};
@@ -162,9 +163,6 @@ public class DockerConnectorTest {
 
     private static final int CONTAINER_EXIT_CODE = 0;
 
-    private DockerConnector dockerConnector;
-
-    private DockerConnection             dockerConnection;
     @Mock
     private DockerConnectorConfiguration dockerConnectorConfiguration;
     @Mock
@@ -177,8 +175,6 @@ public class DockerConnectorTest {
     private InitialAuthConfig                  initialAuthConfig;
     @Mock
     private AuthConfigs                        authConfigs;
-    @Mock
-    private InputStream                        inputStream;
     @Mock
     private MessageProcessor<LogMessage>       logMessageProcessor;
     @Mock
@@ -193,6 +189,10 @@ public class DockerConnectorTest {
     @Captor
     private ArgumentCaptor<Object> captor;
 
+    private InputStream      inputStream;
+    private DockerConnector  dockerConnector;
+    private DockerConnection dockerConnection;
+
     @BeforeMethod
     public void setup() throws IOException, URISyntaxException {
         dockerConnection = mock(DockerConnection.class, new SelfReturningAnswer());
@@ -200,7 +200,6 @@ public class DockerConnectorTest {
         when(dockerConnection.request()).thenReturn(dockerResponse);
         when(dockerConnectorConfiguration.getAuthConfigs()).thenReturn(initialAuthConfig);
         when(dockerResponse.getStatus()).thenReturn(RESPONSE_SUCCESS_CODE);
-        when(dockerResponse.getInputStream()).thenReturn(inputStream);
         when(initialAuthConfig.getAuthConfigs()).thenReturn(authConfigs);
         when(authConfigs.getConfigs()).thenReturn(new HashMap<>());
         when(dockerApiVersionPathPrefixProvider.get()).thenReturn(API_VERSION_PREFIX);
@@ -210,10 +209,8 @@ public class DockerConnectorTest {
                                                   authManager,
                                                   dockerApiVersionPathPrefixProvider));
 
-        //noinspection ThrowableResultOfMethodCallIgnored
-        doReturn(new DockerException(EXCEPTION_ERROR_MESSAGE, RESPONSE_ERROR_CODE))
-                .when(dockerConnector).getDockerException(any(DockerResponse.class));
-
+        inputStream = spy(new ByteArrayInputStream(ERROR_MESSAGE.getBytes()));
+        when(dockerResponse.getInputStream()).thenReturn(inputStream);
     }
 
     @Test
@@ -260,8 +257,6 @@ public class DockerConnectorTest {
         dockerConnector.getSystemInfo();
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -290,8 +285,6 @@ public class DockerConnectorTest {
         dockerConnector.getVersion();
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -321,8 +314,6 @@ public class DockerConnectorTest {
         dockerConnector.listImages();
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -331,7 +322,6 @@ public class DockerConnectorTest {
         ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
         List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
 
-        //noinspection ThrowableResultOfMethodCallIgnored
         doReturn(expectedListContainers).when(dockerConnector)
                                         .parseResponseStreamAndClose(eq(inputStream),
                                                                      Matchers.<TypeToken<List<ContainerListEntry>>>any());
@@ -346,7 +336,6 @@ public class DockerConnectorTest {
         verify(dockerConnection).request();
         verify(dockerResponse).getStatus();
         verify(dockerResponse).getInputStream();
-        //noinspection ThrowableResultOfMethodCallIgnored
         verify(dockerConnector).parseResponseStreamAndClose(eq(inputStream), Matchers.<TypeToken<List<ContainerListEntry>>>any());
 
         assertEquals(containers, expectedListContainers);
@@ -359,7 +348,6 @@ public class DockerConnectorTest {
         ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
         List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
 
-        //noinspection ThrowableResultOfMethodCallIgnored
         doReturn(expectedListContainers).when(dockerConnector)
                                         .parseResponseStreamAndClose(eq(inputStream),
                                                                      Matchers.<TypeToken<List<ContainerListEntry>>>any());
@@ -380,8 +368,6 @@ public class DockerConnectorTest {
         dockerConnector.listContainers(listContainersParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -449,8 +435,6 @@ public class DockerConnectorTest {
         dockerConnector.inspectImage(inspectImageParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -475,8 +459,6 @@ public class DockerConnectorTest {
         dockerConnector.stopContainer(stopContainerParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -516,8 +498,6 @@ public class DockerConnectorTest {
         dockerConnector.killContainer(killContainerParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -544,8 +524,6 @@ public class DockerConnectorTest {
         dockerConnector.removeContainer(removeContainerParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -594,8 +572,6 @@ public class DockerConnectorTest {
         dockerConnector.waitContainer(waitContainerParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -645,8 +621,6 @@ public class DockerConnectorTest {
         dockerConnector.inspectContainer(inspectContainerParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -675,8 +649,6 @@ public class DockerConnectorTest {
         dockerConnector.attachContainer(attachContainerParams, logMessageProcessor);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -706,8 +678,6 @@ public class DockerConnectorTest {
         dockerConnector.getContainerLogs(getContainerLogsParams, logMessageProcessor);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test(expectedExceptions = ContainerNotFoundException.class)
@@ -720,8 +690,6 @@ public class DockerConnectorTest {
         dockerConnector.getContainerLogs(getContainerLogsParams, logMessageProcessor);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -759,8 +727,6 @@ public class DockerConnectorTest {
         dockerConnector.createExec(inspectContainerParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -791,8 +757,6 @@ public class DockerConnectorTest {
         dockerConnector.startExec(startExecParams, logMessageProcessor);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -840,8 +804,6 @@ public class DockerConnectorTest {
         dockerConnector.getExecInfo(getExecInfoParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -897,8 +859,6 @@ public class DockerConnectorTest {
         dockerConnector.top(topParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -932,8 +892,6 @@ public class DockerConnectorTest {
         dockerConnector.getResource(getResourceParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -966,8 +924,6 @@ public class DockerConnectorTest {
         dockerConnector.putResource(putResourceParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -995,8 +951,6 @@ public class DockerConnectorTest {
         dockerConnector.getEvents(getExecInfoParams, eventMessageProcessor);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -1049,8 +1003,6 @@ public class DockerConnectorTest {
         dockerConnector.buildImage(getExecInfoParams, progressMonitor);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test(expectedExceptions = IOException.class,
@@ -1107,8 +1059,6 @@ public class DockerConnectorTest {
         dockerConnector.removeImage(removeImageParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -1134,8 +1084,6 @@ public class DockerConnectorTest {
         dockerConnector.tag(tagParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -1184,8 +1132,6 @@ public class DockerConnectorTest {
         dockerConnector.push(pushParams, progressMonitor);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test(expectedExceptions = DockerException.class,
@@ -1247,8 +1193,7 @@ public class DockerConnectorTest {
         when(containerCommitted.getId()).thenReturn(IMAGE);
         doReturn(containerCommitted).when(dockerConnector).parseResponseStreamAndClose(inputStream, ContainerCommitted.class);
 
-        String returnedImage =
-                dockerConnector.commit(commitParams);
+        String returnedImage = dockerConnector.commit(commitParams);
 
         verify(dockerConnectionFactory).openConnection(any(URI.class));
         verify(dockerConnection).method(REQUEST_METHOD_POST);
@@ -1271,8 +1216,6 @@ public class DockerConnectorTest {
         dockerConnector.commit(commitParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -1321,8 +1264,6 @@ public class DockerConnectorTest {
         dockerConnector.pull(pullParams, progressMonitor);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -1359,8 +1300,6 @@ public class DockerConnectorTest {
         dockerConnector.createContainer(createContainerParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -1373,7 +1312,7 @@ public class DockerConnectorTest {
         verify(dockerConnection).method(REQUEST_METHOD_POST);
         verify(dockerConnection).path("/containers/" + startContainerParams.getContainer() + "/start");
         verify(dockerConnection).request();
-        verify(dockerResponse).getStatus();
+        verify(dockerResponse, atLeastOnce()).getStatus();
     }
 
     @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = EXCEPTION_ERROR_MESSAGE)
@@ -1385,8 +1324,6 @@ public class DockerConnectorTest {
         dockerConnector.startContainer(startContainerParams);
 
         verify(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        verify(dockerConnector).getDockerException(dockerResponse);
     }
 
     @Test
@@ -1543,12 +1480,13 @@ public class DockerConnectorTest {
         verify(dockerResponse).getInputStream();
     }
 
-    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "exc_message")
+    @Test(expectedExceptions = DockerException.class,
+          expectedExceptionsMessageRegExp = "Error response from docker API, status: 404, message: exc_message")
     public void shouldThrowExceptionOnGetNetworksIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
-        doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream("exc_message".getBytes());
+        doReturn(inputStream).when(dockerResponse).getInputStream();
 
         // when
         dockerConnector.getNetworks();
@@ -1591,7 +1529,6 @@ public class DockerConnectorTest {
     public void shouldThrowExceptionOnInspectNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
         doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
 
         // when
@@ -1628,7 +1565,6 @@ public class DockerConnectorTest {
     public void shouldThrowExceptionOnCreateNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
         doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
         CreateNetworkParams createNetworkParams = CreateNetworkParams.create(createNewNetwork());
 
@@ -1678,7 +1614,6 @@ public class DockerConnectorTest {
     public void shouldThrowExceptionOnConnectToNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
         doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
         ConnectContainerToNetworkParams connectToNetworkParams =
                 ConnectContainerToNetworkParams.create("net_id", createConnectContainer());
@@ -1730,7 +1665,6 @@ public class DockerConnectorTest {
     public void shouldThrowExceptionOnDisconnectFromNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
         doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
         DisconnectContainerFromNetworkParams disconnectFromNetworkParams =
                 DisconnectContainerFromNetworkParams.create("net_id", new DisconnectContainer().withContainer("container_id")
@@ -1774,7 +1708,6 @@ public class DockerConnectorTest {
     public void shouldThrowExceptionOnRemoveNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        //noinspection ThrowableResultOfMethodCallIgnored
         doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
         RemoveNetworkParams removeNetworkParams = RemoveNetworkParams.create("net_id");
 
