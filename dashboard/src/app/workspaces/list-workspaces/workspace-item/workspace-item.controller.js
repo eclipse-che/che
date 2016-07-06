@@ -29,7 +29,7 @@ export class WorkspaceItemCtrl {
   }
 
   redirectToWorkspaceDetails() {
-    this.$location.path('/workspace/' + this.workspace.id);
+    this.$location.path('/workspace/' + this.workspace.namespace +'/' + this.workspace.config.name);
   }
 
   getDefaultEnvironment(workspace) {

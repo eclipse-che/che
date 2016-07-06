@@ -254,6 +254,7 @@ public class MavenProject {
     private MavenProjectModifications setInfo(Info newInfo) {
         MavenProjectModifications modifications = info.generateChanges(newInfo);
         info = newInfo;
+        info.problemsCache = null; //info has been changed, so we must to clean cache
         return modifications;
     }
 

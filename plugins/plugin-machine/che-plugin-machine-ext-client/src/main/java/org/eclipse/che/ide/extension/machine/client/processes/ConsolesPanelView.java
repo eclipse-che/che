@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.machine.client.processes;
 import com.google.gwt.user.client.ui.IsWidget;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 
 import javax.validation.constraints.NotNull;
 
@@ -24,16 +23,13 @@ import javax.validation.constraints.NotNull;
  * @author Roman Nikitenko
  */
 public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate> {
-
     /**
-     * Set view's title.
+     * Sets whether this view is visible.
      *
-     * @param title
-     *         new title
+     * @param visible
+     *         <code>true</code> to show the view, <code>false</code> to
+     *         hide it
      */
-    void setTitle(String title);
-
-    /** Shows or hides the given view. */
     void setVisible(boolean visible);
 
     /** Add process widget */
@@ -85,7 +81,7 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
      */
     void setStopButtonVisibility(String nodeId, boolean visible);
 
-    interface ActionDelegate extends BaseActionDelegate {
+    interface ActionDelegate {
 
         /**
          * Will be called when user clicks 'Add new terminal' button
@@ -134,5 +130,18 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
          *         node of process to stop with closing output
          */
         void onCloseCommandOutputClick(@NotNull ProcessTreeNode node);
+
+        /**
+         * Is called when user clicked right mouse button.
+         *
+         * @param mouseX
+         *          mouse x coordinate
+         * @param mouseY
+         *          mouse y coordinate
+         * @param node
+         *          process tree node
+         */
+        void onContextMenu(int mouseX, int mouseY, ProcessTreeNode node);
     }
+
 }

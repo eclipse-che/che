@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.nodejs.ide.project;
 
 import com.google.inject.Provider;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 
@@ -29,7 +29,7 @@ import static org.eclipse.che.plugin.nodejs.shared.Constants.NODE_JS_PROJECT_TYP
  */
 public class NodeJsProjectWizardRegistrar implements ProjectWizardRegistrar {
 
-    private final List<Provider<? extends WizardPage<ProjectConfigDto>>> wizardPages;
+    private final List<Provider<? extends WizardPage<MutableProjectConfig>>> wizardPages;
 
     public NodeJsProjectWizardRegistrar() {
         wizardPages = new ArrayList<>();
@@ -46,7 +46,7 @@ public class NodeJsProjectWizardRegistrar implements ProjectWizardRegistrar {
     }
 
     @Override
-    public List<Provider<? extends WizardPage<ProjectConfigDto>>> getWizardPages() {
+    public List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages() {
         return wizardPages;
     }
 }

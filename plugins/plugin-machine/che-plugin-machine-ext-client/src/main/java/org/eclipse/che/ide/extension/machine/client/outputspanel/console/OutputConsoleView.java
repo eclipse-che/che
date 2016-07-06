@@ -91,6 +91,22 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
     void toggleScrollToEndButton(boolean toggle);
 
     /**
+     * Sets visibility for Re-Run button.
+     *
+     * @param visible
+     *          use <code>true</code> to show the button
+     */
+    void setReRunButtonVisible(boolean visible);
+
+    /**
+     * Sets visibility for Stop button.
+     *
+     * @param visible
+     *          use <code>true</code> to show the button
+     */
+    void setStopButtonVisible(boolean visible);
+
+    /**
      * Enables or disables Stop process button.
      *
      * @param enable

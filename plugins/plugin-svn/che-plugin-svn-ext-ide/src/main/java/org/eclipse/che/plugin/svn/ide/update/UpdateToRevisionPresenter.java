@@ -12,13 +12,10 @@ package org.eclipse.che.plugin.svn.ide.update;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -33,19 +30,15 @@ public class UpdateToRevisionPresenter extends UpdatePresenter implements Update
     private final UpdateToRevisionView view;
 
     @Inject
-    public UpdateToRevisionPresenter(final AppContext appContext,
-                                     final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                                     final EventBus eventBus,
-                                     final NotificationManager notificationManager,
-                                     final SubversionOutputConsoleFactory consoleFactory,
-                                     final SubversionClientService service,
-                                     final SubversionExtensionLocalizationConstants constants,
-                                     final ConsolesPanelPresenter consolesPanelPresenter,
-                                     final UpdateToRevisionView view,
-                                     final ProjectExplorerPresenter projectExplorerPart,
-                                     final StatusColors statusColors) {
-        super(appContext, dtoUnmarshallerFactory, eventBus, consoleFactory, service, consolesPanelPresenter, constants,
-              notificationManager, projectExplorerPart, statusColors);
+    public UpdateToRevisionPresenter(AppContext appContext,
+                                     NotificationManager notificationManager,
+                                     SubversionOutputConsoleFactory consoleFactory,
+                                     SubversionClientService service,
+                                     SubversionExtensionLocalizationConstants constants,
+                                     ConsolesPanelPresenter consolesPanelPresenter,
+                                     UpdateToRevisionView view,
+                                     StatusColors statusColors) {
+        super(appContext, consoleFactory, service, consolesPanelPresenter, constants, notificationManager, statusColors);
 
         this.view = view;
 

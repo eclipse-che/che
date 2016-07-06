@@ -17,6 +17,8 @@ import org.eclipse.che.plugin.docker.client.DockerFileException;
 import org.eclipse.che.plugin.docker.client.parser.DockerImageIdentifier;
 import org.eclipse.che.plugin.docker.client.parser.DockerImageIdentifierParser;
 
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY;
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_IMAGE_TYPE;
 
 /**
@@ -99,7 +101,6 @@ public class DockerMachineSource extends MachineSourceImpl {
     /**
      * Defines optional tag attribute
      * @param tag as for example latest
-     * @return current instance
      */
     public void setTag(String tag) {
         this.tag = tag;
@@ -182,13 +183,16 @@ public class DockerMachineSource extends MachineSourceImpl {
      * It consists of registry, repository name, tag, digest.
      * E.g. docker-registry.company.com:5000/my-repository:some-tag
      * E.g. docker-registry.company.com:5000/my-repository@some-digest
-     * @param includeDigest if digest needs to be included or not
+     * But in case of default registry it will be omitted.
+     * @param includeDigest
+     *         whether digest should to be included or not
      */
     public String getLocation(boolean includeDigest) {
         final StringBuilder fullRepoId = new StringBuilder();
 
         // optional registry is followed by /
-        if (getRegistry() != null) {
+        // should be excluded in case of default registry because of problems with swarm
+        if (getRegistry() != null && !DEFAULT_REGISTRY_SYNONYMS.contains(getRegistry())) {
             fullRepoId.append(getRegistry()).append('/');
         }
 

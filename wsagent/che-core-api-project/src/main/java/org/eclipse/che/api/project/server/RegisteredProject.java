@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
+import com.google.common.collect.ImmutableList;
+
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
@@ -17,6 +19,7 @@ import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.project.server.type.AttributeValue;
+import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
@@ -94,6 +97,39 @@ public class RegisteredProject implements ProjectConfig {
         // 3. initialize attributes
         initAttributes();
     }
+
+
+    /**
+     * Either root folder in this case Project not configure well.
+     * Use it if can't initialize project correct, project type will be BLANK
+     *
+     * @param folder
+     *         root local folder or null
+     * @param updated
+     *         if this object was updated, i.e. no more synchronized with workspace master
+     * @param detected
+     *         if this project was detected, initialized when "parent" project initialized
+     * @param problem
+     *         project problem
+     */
+    RegisteredProject(FolderEntry folder,
+                      boolean updated,
+                      boolean detected,
+                      ProjectTypeRegistry projectTypeRegistry,
+                      Problem problem) throws NotFoundException,
+                                                                      ProjectTypeConstraintException,
+                                                                      ServerException,
+                                                                      ValueStorageException {
+        attributes = new HashMap<>();
+
+        this.folder = folder;
+        this.config = new NewProjectConfig(folder.getPath());
+        this.updated = updated;
+        this.detected = detected;
+        types = new ProjectTypes(folder.getPath().toString(), BaseProjectType.ID, null, projectTypeRegistry);
+        problems = ImmutableList.of(problem);
+    }
+
 
     /**
      * Initialize project attributes.
@@ -275,8 +311,8 @@ public class RegisteredProject implements ProjectConfig {
         return attrs;
     }
 
-    public class Problem {
-        private Problem(int code, String message) {
+    public static class Problem {
+        Problem(int code, String message) {
             this.code = code;
             this.message = message;
         }

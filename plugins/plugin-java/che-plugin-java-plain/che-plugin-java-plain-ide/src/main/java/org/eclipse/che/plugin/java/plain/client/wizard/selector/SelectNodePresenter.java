@@ -10,13 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Presenter for choosing source directory.
@@ -26,14 +33,21 @@ import java.util.Collections;
 @Singleton
 public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
 
-    private final SelectNodeView view;
-    private final ProjectExplorerPresenter projectExplorerPresenter;
-    private SelectionDelegate selectionDelegate;
+    private final SelectNodeView           view;
+    private final AppContext               appContext;
+    private final ResourceNode.NodeFactory nodeFactory;
+    private final SettingsProvider         settingsProvider;
+    private       SelectionDelegate        selectionDelegate;
 
     @Inject
-    public SelectNodePresenter(SelectNodeView view, ProjectExplorerPresenter projectExplorerPresenter) {
+    public SelectNodePresenter(SelectNodeView view,
+                               AppContext appContext,
+                               ResourceNode.NodeFactory nodeFactory,
+                               SettingsProvider settingsProvider) {
         this.view = view;
-        this.projectExplorerPresenter = projectExplorerPresenter;
+        this.appContext = appContext;
+        this.nodeFactory = nodeFactory;
+        this.settingsProvider = settingsProvider;
         this.view.setDelegate(this);
     }
 
@@ -45,19 +59,21 @@ public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
     public void show(SelectionDelegate selectionDelegate, String projectName) {
         this.selectionDelegate = selectionDelegate;
 
-        for (Node node : projectExplorerPresenter.getRootNodes()) {
-            if (node.getName().equals(projectName)) {
-                view.setStructure(Collections.singletonList(node));
-                break;
-            }
-        }
+        appContext.getWorkspaceRoot().getContainer(projectName).then(new Operation<Optional<Container>>() {
+            @Override
+            public void apply(Optional<Container> container) throws OperationException {
+                if (container.isPresent()) {
+                    view.setStructure(Collections.<Node>singletonList(nodeFactory.newContainerNode(container.get(), settingsProvider.getSettings())));
 
-        view.show();
+                    view.show();
+                }
+            }
+        });
     }
 
     /** {@inheritDoc} */
     @Override
-    public void setSelectedNode(String path) {
-        selectionDelegate.onNodeSelected(path);
+    public void setSelectedNode(List<Node> selectedNodes) {
+        selectionDelegate.onNodeSelected(selectedNodes);
     }
 }

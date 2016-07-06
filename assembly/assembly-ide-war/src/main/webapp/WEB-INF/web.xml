@@ -22,6 +22,15 @@
         <jsp-file>/IDE.jsp</jsp-file>
     </servlet>
 
+    <filter>
+        <filter-name>dashboardFilter</filter-name>
+        <filter-class>org.eclipse.che.DashboardRedirectionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>dashboardFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <servlet-mapping>
         <servlet-name>IDE</servlet-name>
         <url-pattern>/*</url-pattern>

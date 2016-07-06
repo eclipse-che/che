@@ -142,7 +142,7 @@ public class GitHubAuthenticatorImpl implements OAuth2Authenticator, OAuthCallba
     private void generateSshKeys(final OAuthStatus authStatus) {
         final SshKeyUploader githubKeyUploader = registry.getUploader(GITHUB_HOST);
         if (githubKeyUploader != null) {
-            String userId = appContext.getCurrentUser().getProfile().getId();
+            String userId = appContext.getCurrentUser().getProfile().getUserId();
             githubKeyUploader.uploadKey(userId, new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {

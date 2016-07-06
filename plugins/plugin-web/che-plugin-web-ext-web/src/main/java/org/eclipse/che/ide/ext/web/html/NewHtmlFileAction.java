@@ -10,15 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web.html;
 
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.ext.web.WebLocalizationConstant;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 /**
  * Action to create new HTML file.
  *
  * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class NewHtmlFileAction extends AbstractNewResourceAction {
@@ -33,10 +40,15 @@ public class NewHtmlFileAction extends AbstractNewResourceAction {
                                                   "</html>";
 
     @Inject
-    public NewHtmlFileAction(WebLocalizationConstant localizationConstant) {
+    public NewHtmlFileAction(WebLocalizationConstant localizationConstant,
+                             DialogFactory dialogFactory,
+                             CoreLocalizationConstant coreLocalizationConstant,
+                             EventBus eventBus,
+                             AppContext appContext,
+                             NotificationManager notificationManager) {
         super(localizationConstant.newHtmlFileActionTitle(),
               localizationConstant.newHtmlFileActionDescription(),
-              null);
+              null, dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
     }
 
     @Override

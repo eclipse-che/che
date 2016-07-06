@@ -11,45 +11,69 @@
 package org.eclipse.che.plugin.java.server.rest;
 
 import org.eclipse.che.jdt.JavadocFinder;
-import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JavaModelManager;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriInfo;
 
 /**
+ * Provides Javadoc API.
+ *
  * @author Evgen Vidolob
  */
 @Path("java/javadoc")
 public class JavadocService {
 
-    @Path("find")
+    private final String agentEndpoint;
+
+    @Inject
+    public JavadocService(@Named("wsagent.endpoint") String agentEndpoint) {
+        this.agentEndpoint = agentEndpoint;
+    }
+
     @GET
+    @Path("find")
     @Produces("text/html")
-    public String findJavadoc(@QueryParam("fqn") String fqn, @QueryParam("projectpath") String projectPath,
-                              @QueryParam("offset") int offset, @Context UriInfo uriInfo) throws JavaModelException {
-        IJavaProject project = JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject(projectPath);
-        String urlPart = getUrlPart(projectPath, uriInfo.getBaseUriBuilder());
+    public String findJavadoc(@QueryParam("fqn")
+                              String fqn,
+                              @QueryParam("projectpath")
+                              String projectPath,
+                              @QueryParam("offset")
+                              int offset) throws JavaModelException {
+        final IJavaProject project = JavaModelManager.getJavaModelManager()
+                                                     .getJavaModel()
+                                                     .getJavaProject(projectPath);
+        final String urlPart = getUrlPart(projectPath);
         return new JavadocFinder(urlPart).findJavadoc(project, fqn, offset);
     }
 
+    @GET
     @Path("get")
     @Produces("text/html")
-    @GET
-    public String get(@QueryParam("handle") String handle, @QueryParam("projectpath") String projectPath, @Context UriInfo uriInfo) {
-        IJavaProject project = JavaModelManager.getJavaModelManager().getJavaModel().getJavaProject(projectPath);
-        String urlPart = getUrlPart(projectPath, uriInfo.getBaseUriBuilder());
+    public String get(@QueryParam("handle")
+                      String handle,
+                      @QueryParam("projectpath")
+                      String projectPath) {
+        final IJavaProject project = JavaModelManager.getJavaModelManager()
+                                                     .getJavaModel()
+                                                     .getJavaProject(projectPath);
+        final String urlPart = getUrlPart(projectPath);
         return new JavadocFinder(urlPart).findJavadoc4Handle(project, handle);
     }
 
-    private String getUrlPart(String projectPath, UriBuilder uriBuilder) {
-        return uriBuilder.clone().path(JavadocService.class).path(JavadocService.class, "get").build().toString() + "?projectpath=" + projectPath + "&handle=";
+    private String getUrlPart(String projectPath) {
+        return UriBuilder.fromUri(agentEndpoint)
+                         .queryParam("projectpath", projectPath)
+                         .path(JavadocService.class)
+                         .path(JavadocService.class, "get")
+                         .build()
+                         .toString() + "&handle=";
     }
-
 }

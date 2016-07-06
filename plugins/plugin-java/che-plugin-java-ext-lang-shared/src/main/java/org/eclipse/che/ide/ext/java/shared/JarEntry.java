@@ -17,7 +17,7 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface JarEntry {
-    public enum JarEntryType {
+    enum JarEntryType {
         PACKAGE, FOLDER, CLASS_FILE, FILE
     }
 

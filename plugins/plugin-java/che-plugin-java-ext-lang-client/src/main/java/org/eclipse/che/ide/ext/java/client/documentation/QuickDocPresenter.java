@@ -10,15 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.documentation;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.util.loging.Log;
 
 /**
@@ -27,18 +34,20 @@ import org.eclipse.che.ide.util.loging.Log;
 @Singleton
 public class QuickDocPresenter implements QuickDocumentation, QuickDocView.ActionDelegate {
 
-
     private final QuickDocView       view;
     private final AppContext         appContext;
     private final EditorAgent        editorAgent;
+    private final WsAgentURLModifier agentURLDecorator;
 
     @Inject
     public QuickDocPresenter(QuickDocView view,
                              AppContext appContext,
-                             EditorAgent editorAgent) {
+                             EditorAgent editorAgent,
+                             WsAgentURLModifier linksDecorator) {
         this.view = view;
         this.appContext = appContext;
         this.editorAgent = editorAgent;
+        this.agentURLDecorator = linksDecorator;
     }
 
     @Override
@@ -56,10 +65,26 @@ public class QuickDocPresenter implements QuickDocumentation, QuickDocView.Actio
         TextEditorPresenter editor = ((TextEditorPresenter)activeEditor);
         int offset = editor.getCursorOffset();
         final PositionConverter.PixelCoordinates coordinates = editor.getPositionConverter().offsetToPixel(offset);
-        view.show(appContext.getDevMachine().getWsAgentBaseUrl() + "/java/javadoc/find?fqn=" +
-                  JavaSourceFolderUtil.getFQNForFile(editor.getEditorInput().getFile()) + "&projectpath=" +
-                  appContext.getCurrentProject().getProjectConfig().getPath() + "&offset=" + offset, coordinates.getX(),
-                  coordinates.getY());
+
+        final Resource resource = appContext.getResource();
+
+        if (resource != null) {
+            final Optional<Project> project = resource.getRelatedProject();
+
+            final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+
+            if (!srcFolder.isPresent()) {
+                return;
+            }
+
+            final String fqn = JavaUtil.resolveFQN((Container)srcFolder.get(), resource);
+
+            final String docUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/javadoc/find?fqn=" + fqn + "&projectpath=" + project.get().getLocation() + "&offset=" + offset;
+
+            view.show(agentURLDecorator.modify(docUrl), coordinates.getX(), coordinates.getY());
+        }
+
+
     }
 
     @Override

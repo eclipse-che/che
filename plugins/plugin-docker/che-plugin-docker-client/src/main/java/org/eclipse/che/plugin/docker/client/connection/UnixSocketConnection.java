@@ -44,7 +44,7 @@ public class UnixSocketConnection extends DockerConnection {
     }
 
     @Override
-    protected DockerResponse request(String method, String path, String query, List<Pair<String, ?>> headers, Entity entity)
+    protected DockerResponse request(String method, String path, String query, List<Pair<String, ?>> headers, Entity<?> entity)
             throws IOException {
         fd = connect();
         final OutputStream output = new BufferedOutputStream(openOutputStream(fd));
@@ -94,7 +94,8 @@ public class UnixSocketConnection extends DockerConnection {
             writer.write(String.valueOf(header.second));
             writer.write("\r\n");
         }
-        writer.write("\r\n");
+        // Host header is mandatory in HTTP 1.1
+        writer.write("Host: \r\n\r\n");
         writer.flush();
     }
 

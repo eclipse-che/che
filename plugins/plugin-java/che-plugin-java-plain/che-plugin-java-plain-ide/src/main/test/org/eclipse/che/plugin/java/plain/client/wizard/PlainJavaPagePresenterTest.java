@@ -29,8 +29,11 @@ import java.util.Map;
 
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -115,6 +118,8 @@ public class PlainJavaPagePresenterTest {
 
     @Test
     public void pageStateShouldBeUpdateIfAttributeWasChanged() throws Exception {
+        when(view.getLibraryFolder()).thenReturn("lib1,   lib2");
+
         page.setUpdateDelegate(updateDelegate);
         page.init(dataObject);
         page.onCoordinatesChanged();
@@ -122,6 +127,26 @@ public class PlainJavaPagePresenterTest {
         verify(view, times(2)).getSourceFolder();
         verify(updateDelegate).updateControls();
         verify(view).showSourceFolderMissingIndicator(false);
+    }
+
+    @Test
+    public void severalSourceFoldersShouldBeSet() throws Exception {
+        when(view.getLibraryFolder()).thenReturn("lib1,   lib2");
+        when(view.getSourceFolder()).thenReturn("src1,   src2");
+
+        page.setUpdateDelegate(updateDelegate);
+        page.init(dataObject);
+        page.onCoordinatesChanged();
+
+        verify(view, times(2)).getSourceFolder();
+        verify(updateDelegate).updateControls();
+        verify(view).showSourceFolderMissingIndicator(false);
+
+        assertEquals(2, dataObject.getAttributes().get(LIBRARY_FOLDER).size());
+        assertEquals(2, dataObject.getAttributes().get(SOURCE_FOLDER).size());
+
+        assertThat(dataObject.getAttributes().get(LIBRARY_FOLDER), hasItems("lib1", "lib2"));
+        assertThat(dataObject.getAttributes().get(SOURCE_FOLDER), hasItems("src1", "src2"));
     }
 
     @Test

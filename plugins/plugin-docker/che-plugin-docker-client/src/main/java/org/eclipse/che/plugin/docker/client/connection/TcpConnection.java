@@ -50,7 +50,7 @@ public class TcpConnection extends DockerConnection {
     }
 
     @Override
-    protected DockerResponse request(String method, String path, String query, List<Pair<String, ?>> headers, Entity entity)
+    protected DockerResponse request(String method, String path, String query, List<Pair<String, ?>> headers, Entity<?> entity)
             throws IOException {
         final String requestUri = path + (Strings.isNullOrEmpty(query) ? "" : "?" + query);
         final URL url = baseUri.resolve(requestUri).toURL();
@@ -67,6 +67,12 @@ public class TcpConnection extends DockerConnection {
         for (Pair<String, ?> header : headers) {
             connection.setRequestProperty(header.first, String.valueOf(header.second));
         }
+        String host = url.getHost();
+        if (url.getPort() != -1) {
+            host += ":" + Integer.toString(url.getPort());
+        }
+        // Host header is mandatory in HTTP 1.1
+        connection.setRequestProperty("Host", host);
         if (entity != null) {
             connection.setDoOutput(true);
             try (OutputStream output = connection.getOutputStream()) {

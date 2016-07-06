@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Function;
@@ -24,8 +23,8 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
@@ -56,7 +55,6 @@ public class CommandManager {
     private final CommandConsoleFactory                commandConsoleFactory;
     private final NotificationManager                  notificationManager;
     private final MachineLocalizationConstant          localizationConstant;
-    private final WorkspaceAgent                       workspaceAgent;
     private final AppContext                           appContext;
     private final CommandPropertyValueProviderRegistry commandPropertyValueProviderRegistry;
 
@@ -67,7 +65,6 @@ public class CommandManager {
                           CommandConsoleFactory commandConsoleFactory,
                           NotificationManager notificationManager,
                           MachineLocalizationConstant localizationConstant,
-                          WorkspaceAgent workspaceAgent,
                           AppContext appContext,
                           CommandPropertyValueProviderRegistry commandPropertyValueProviderRegistry) {
         this.dtoFactory = dtoFactory;
@@ -76,7 +73,6 @@ public class CommandManager {
         this.commandConsoleFactory = commandConsoleFactory;
         this.notificationManager = notificationManager;
         this.localizationConstant = localizationConstant;
-        this.workspaceAgent = workspaceAgent;
         this.appContext = appContext;
         this.commandPropertyValueProviderRegistry = commandPropertyValueProviderRegistry;
     }
@@ -90,17 +86,17 @@ public class CommandManager {
      *         machine in which command will be executed
      */
     public void execute(@NotNull CommandConfiguration command, @NotNull Machine machine) {
-        executeCommand(command, machine.getId());
+        executeCommand(command, machine);
     }
 
     /** Execute the the given command configuration on the developer machine. */
     public void execute(@NotNull CommandConfiguration configuration) {
-        final String devMachineId = appContext.getDevMachine().getId();
-        executeCommand(configuration, devMachineId);
+        final Machine devMachine = appContext.getDevMachine().getDescriptor();
+        executeCommand(configuration, devMachine);
     }
 
-    private void executeCommand(@NotNull final CommandConfiguration configuration, @NotNull final String machineId) {
-        if (machineId == null) {
+    public void executeCommand(@NotNull final CommandConfiguration configuration, @NotNull final Machine machine) {
+        if (machine == null) {
             notificationManager.notify(localizationConstant.failedToExecuteCommand(),
                                        localizationConstant.noDevMachine(),
                                        FAIL,
@@ -110,10 +106,9 @@ public class CommandManager {
 
         final String outputChannel = "process:output:" + UUID.uuid();
 
-        final CommandOutputConsole console = commandConsoleFactory.create(configuration, machineId);
+        final CommandOutputConsole console = commandConsoleFactory.create(configuration, machine);
         console.listenToOutput(outputChannel);
-        consolesPanelPresenter.addCommandOutput(machineId, console);
-        workspaceAgent.setActivePart(consolesPanelPresenter);
+        consolesPanelPresenter.addCommandOutput(machine.getId(), console);
 
         substituteProperties(configuration.toCommandLine()).then(new Operation<String>() {
             @Override
@@ -123,7 +118,7 @@ public class CommandManager {
                                                      .withCommandLine(arg)
                                                      .withType(configuration.getType().getId());
 
-                final Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machineId, command, outputChannel);
+                final Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machine.getId(), command, outputChannel);
                 processPromise.then(new Operation<MachineProcessDto>() {
                     @Override
                     public void apply(MachineProcessDto process) throws OperationException {

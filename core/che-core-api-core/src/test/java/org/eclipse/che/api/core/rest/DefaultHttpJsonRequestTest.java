@@ -74,7 +74,7 @@ public class DefaultHttpJsonRequestTest {
     private static final ApiExceptionMapper EXCEPTION_MAPPER = new ApiExceptionMapper();
     @SuppressWarnings("unused") // used by EverrestJetty
     private static final TestService        TEST_SERVICE     = new TestService();
-    private static final Subject            TEST_SUBJECT     = new SubjectImpl("name", "id", "token", null, false);
+    private static final Subject            TEST_SUBJECT     = new SubjectImpl("name", "id", "token", false);
     private static final String             DEFAULT_URL      = "http://localhost:8080";
 
     @Captor

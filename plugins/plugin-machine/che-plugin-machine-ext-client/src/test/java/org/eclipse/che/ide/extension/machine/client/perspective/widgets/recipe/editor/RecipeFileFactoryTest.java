@@ -14,12 +14,10 @@ import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.junit.Before;
@@ -55,8 +53,6 @@ public class RecipeFileFactoryTest {
     @Mock
     private EventBus               eventBus;
     @Mock
-    private ProjectServiceClient   projectServiceClient;
-    @Mock
     private DtoUnmarshallerFactory dtoUnmarshallerFactory;
     @Mock
     private DtoFactory             dtoFactory;
@@ -67,8 +63,6 @@ public class RecipeFileFactoryTest {
 
     //additional mocks
     @Mock
-    private CurrentProject currentProject;
-    @Mock
     private ItemReference  itemReference;
 
     @InjectMocks
@@ -76,8 +70,6 @@ public class RecipeFileFactoryTest {
 
     @Before
     public void setUp() throws Exception {
-        when(appContext.getCurrentProject()).thenReturn(currentProject);
-
         when(dtoFactory.createDto(ItemReference.class)).thenReturn(itemReference);
         when(itemReference.withName(NAME)).thenReturn(itemReference);
         when(itemReference.withPath(PATH)).thenReturn(itemReference);

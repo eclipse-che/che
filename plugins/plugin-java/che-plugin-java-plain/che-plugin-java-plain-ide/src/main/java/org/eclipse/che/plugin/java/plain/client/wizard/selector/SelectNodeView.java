@@ -12,9 +12,8 @@ package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 
 import com.google.inject.ImplementedBy;
 
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.project.node.Node;
-
 import java.util.List;
 
 /**
@@ -26,8 +25,8 @@ import java.util.List;
 public interface SelectNodeView extends View<SelectNodeView.ActionDelegate> {
     /** Needs for delegate some function into SelectPath view. */
     interface ActionDelegate {
-        /** Sets selected node. */
-        void setSelectedNode(String path);
+        /** Sets selected nodes. */
+        void setSelectedNode(List<Node> selectedNodes);
     }
 
     /**

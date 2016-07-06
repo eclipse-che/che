@@ -23,7 +23,6 @@ import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -43,7 +42,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -80,7 +78,8 @@ import static org.testng.AssertJUnit.assertTrue;
 @Listeners(value = {MockitoTestNGListener.class})
 public class WorkspaceManagerTest {
 
-    private static final String USER_ID = "user123";
+    private static final String USER_ID   = "user123";
+    private static final String NAMESPACE = "userNS";
 
     @Mock
     private EventService                  eventService;
@@ -96,8 +95,6 @@ public class WorkspaceManagerTest {
     private MachineManager                machineManager;
     @Mock
     private WorkspaceRuntimes             runtimes;
-    @Mock
-    private UserManager                   userManager;
     @Captor
     private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -109,7 +106,6 @@ public class WorkspaceManagerTest {
                                                     runtimes,
                                                     eventService,
                                                     machineManager,
-                                                    userManager,
                                                     false,
                                                     false));
         workspaceManager.setHooks(workspaceHooks);
@@ -120,7 +116,7 @@ public class WorkspaceManagerTest {
         EnvironmentContext.setCurrent(new EnvironmentContext() {
             @Override
             public Subject getSubject() {
-                return new SubjectImpl("Test User", USER_ID, "token", new ArrayList<>(), false);
+                return new SubjectImpl(NAMESPACE, USER_ID, "token", false);
             }
         });
     }
@@ -187,11 +183,9 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToGetWorkspaceByKey() throws Exception {
-        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE, "account");
         when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
-        when(userManager.getByName(anyString())).thenReturn(new org.eclipse.che.api.user.server.dao.User()
-                                                                    .withId(workspace.getNamespace()));
 
         final WorkspaceImpl result = workspaceManager.getWorkspace(workspace.getNamespace() + ":" + workspace.getConfig().getName());
         assertEquals(result, workspace);
@@ -199,7 +193,7 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToGetWorkspaceByKeyWithoutOwner() throws Exception {
-        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE, "account");
         when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
 
@@ -238,6 +232,34 @@ public class WorkspaceManagerTest {
         assertEquals(res2.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
         assertFalse(res2.isTemporary(), "Workspace must be permanent");
         assertNotNull(res2.getConfig()
+                          .getEnvironments()
+                          .get(0)
+                          .getMachineConfigs()
+                          .get(0));
+    }
+
+    @Test
+    public void shouldBeAbleToGetWorkspacesByNamespace() throws Exception {
+        // given
+        final WorkspaceConfig config = createConfig();
+
+        final WorkspaceImpl workspace1 = workspaceManager.createWorkspace(config, "user123", null);
+        final WorkspaceImpl workspace2 = workspaceManager.createWorkspace(config, "user321", null);
+
+        when(workspaceDao.getByNamespace("user321")).thenReturn(asList(workspace2));
+        final RuntimeDescriptor descriptor = createDescriptor(workspace2, RUNNING);
+        when(runtimes.get(workspace2.getId())).thenReturn(descriptor);
+
+        // when
+        final List<WorkspaceImpl> result = workspaceManager.getByNamespace("user321");
+
+        // then
+        assertEquals(result.size(), 1);
+
+        final WorkspaceImpl res1 = result.get(0);
+        assertEquals(res1.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
+        assertFalse(res1.isTemporary(), "Workspace must be permanent");
+        assertNotNull(res1.getConfig()
                           .getEnvironments()
                           .get(0)
                           .getMachineConfigs()
@@ -530,7 +552,10 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToGetSnapshots() throws Exception {
-        when(machineManager.getSnapshots("user123", "workspace123")).thenReturn(singletonList(any()));
+        final String wsId = "workspace123";
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE, "account");
+        when(workspaceDao.get(wsId)).thenReturn(workspace);
+        when(machineManager.getSnapshots(NAMESPACE, wsId)).thenReturn(singletonList(any()));
 
         final List<SnapshotImpl> snapshots = workspaceManager.getSnapshot("workspace123");
 
@@ -543,7 +568,6 @@ public class WorkspaceManagerTest {
                                                     runtimes,
                                                     eventService,
                                                     machineManager,
-                                                    userManager,
                                                     true,
                                                     false));
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
@@ -563,7 +587,6 @@ public class WorkspaceManagerTest {
                                                     runtimes,
                                                     eventService,
                                                     machineManager,
-                                                    userManager,
                                                     false,
                                                     true));
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");

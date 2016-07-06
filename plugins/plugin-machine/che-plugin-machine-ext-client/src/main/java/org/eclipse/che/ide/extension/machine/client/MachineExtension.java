@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -17,7 +18,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.actions.StopMachineAction;
 import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
@@ -43,14 +43,14 @@ import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBo
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
-import org.eclipse.che.ide.extension.machine.client.machine.console.ClearConsoleAction;
-import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsoleToolbar;
-import org.eclipse.che.ide.extension.machine.client.outputspanel.OutputsContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
+import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
+import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
+import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
+import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
+import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
-import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
@@ -84,9 +84,9 @@ public class MachineExtension {
                             final EventBus eventBus,
                             final WorkspaceAgent workspaceAgent,
                             final AppContext   appContext,
+                            final ConsolesContainerPresenter consolesContainerPresenter,
                             final ConsolesPanelPresenter consolesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
-                            final OutputsContainerPresenter outputsContainerPresenter,
                             final PerspectiveManager perspectiveManager,
                             IconRegistry iconRegistry,
                             CustomCommandType arbitraryCommandType) {
@@ -96,29 +96,35 @@ public class MachineExtension {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 machinePortProvider.get();
-
-                /**
-                 * There is a bug in perspective management and it's unable to add Consoles part in
-                 * OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
-                 */
-
-                /* Add Outputs and Consoles to Operation perspective */
-                perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
-                workspaceAgent.openPart(outputsContainerPresenter, PartStackType.INFORMATION);
-                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
-
-                /* Add Outputs and Consoles to Project perspective */
-                perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
-                workspaceAgent.openPart(outputsContainerPresenter, PartStackType.INFORMATION);
-                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
-
+                /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
                     consolesPanelPresenter.newTerminal();
+                    workspaceAgent.setActivePart(consolesContainerPresenter);
                 }
             }
 
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
+            }
+        });
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                /* There is a bug in perspective management and it's unable to add Consoles part in
+                 * OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
+                 */
+
+                /* Add Consoles to Operation perspective */
+                perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
+                workspaceAgent.openPart(consolesContainerPresenter, PartStackType.INFORMATION);
+
+                /* Add Consoles to Project perspective */
+                perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
+                workspaceAgent.openPart(consolesContainerPresenter, PartStackType.INFORMATION);
+                if (appContext.getFactory() == null) {
+                     workspaceAgent.setActivePart(consolesContainerPresenter);
+                }
             }
         });
 
@@ -136,14 +142,16 @@ public class MachineExtension {
                                 RestartMachineAction restartMachine,
                                 DestroyMachineAction destroyMachineAction,
                                 StopWorkspaceAction stopWorkspaceAction,
-                                StopMachineAction stopMachineAction,
                                 SwitchPerspectiveAction switchPerspectiveAction,
                                 CreateSnapshotAction createSnapshotAction,
                                 RunCommandAction runCommandAction,
                                 NewTerminalAction newTerminalAction,
                                 EditTargetsAction editTargetsAction,
                                 IconRegistry iconRegistry,
-                                MachineResources machineResources) {
+                                MachineResources machineResources,
+                                ReRunProcessAction reRunProcessAction,
+                                StopProcessAction stopProcessAction,
+                                CloseConsoleAction closeConsoleAction) {
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
 
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
@@ -164,7 +172,6 @@ public class MachineExtension {
         actionManager.registerAction("destroyMachine", destroyMachineAction);
         actionManager.registerAction("restartMachine", restartMachine);
         actionManager.registerAction("stopWorkspace", stopWorkspaceAction);
-        actionManager.registerAction("stopMachine", stopMachineAction);
         actionManager.registerAction("createSnapshot", createSnapshotAction);
         actionManager.registerAction("runCommand", runCommandAction);
         actionManager.registerAction("newTerminal", newTerminalAction);
@@ -181,7 +188,6 @@ public class MachineExtension {
         machineMenu.add(createMachine);
         machineMenu.add(restartMachine);
         machineMenu.add(destroyMachineAction);
-        machineMenu.add(stopMachineAction);
         machineMenu.add(createSnapshotAction);
 
         // add actions on center part of toolbar
@@ -208,22 +214,18 @@ public class MachineExtension {
         actionManager.registerAction(GROUP_COMMANDS_LIST, commandList);
         commandList.add(editCommandsAction, FIRST);
 
+        // Consoles tree context menu group
+        DefaultActionGroup consolesTreeContextMenu =
+                (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU);
+
+        consolesTreeContextMenu.add(reRunProcessAction);
+        consolesTreeContextMenu.add(stopProcessAction);
+        consolesTreeContextMenu.add(closeConsoleAction);
+
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");
 
         iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
-    }
-
-    @Inject
-    private void setUpMachineConsole(ActionManager actionManager,
-                                     ClearConsoleAction clearConsoleAction,
-                                     @MachineConsoleToolbar ToolbarPresenter machineConsoleToolbar) {
-
-        // add toolbar to Machine console
-        final DefaultActionGroup consoleToolbarActionGroup = new DefaultActionGroup(GROUP_MACHINE_CONSOLE_TOOLBAR, false, actionManager);
-        consoleToolbarActionGroup.add(clearConsoleAction);
-        consoleToolbarActionGroup.addSeparator();
-        machineConsoleToolbar.bindMainGroup(consoleToolbarActionGroup);
     }
 
 }

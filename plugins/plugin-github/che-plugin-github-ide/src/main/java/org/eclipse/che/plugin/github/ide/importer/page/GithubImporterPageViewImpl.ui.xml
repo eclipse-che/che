@@ -18,7 +18,7 @@
     <ui:with field='resources' type='org.eclipse.che.plugin.github.ide.GitHubResources'/>
     <ui:with field="style" type="org.eclipse.che.plugin.github.ide.importer.page.GithubImporterPageViewImpl.GithubStyle"/>
     <g:DockLayoutPanel unit="PX" addStyleNames="{style.mainPanel}">
-        <g:north size="325">
+        <g:north size="394">
             <g:FlowPanel ui:field="importerPanel">
                 <g:FlowPanel height="65px" addStyleNames="{style.namePanel}">
                     <g:Label text="{locale.githubImporterPageProjectUrl}"
@@ -28,8 +28,12 @@
                                debugId="file-importProject-projectUrl"/>
                     <g:Label ui:field="labelUrlError" width="100%" wordWrap="true" addStyleNames="{style.labelErrorPosition}"/>
                 </g:FlowPanel>
+                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
+                    <g:CheckBox ui:field="recursive" text="{locale.githubImporterPageRecursive}"
+                                debugId="file-importProject-recursive" addStyleNames="{style.alignLeft}" />
+                </g:FlowPanel>
                 <g:FlowPanel height="0" addStyleNames="{style.horizontalLine}"/>
-                <g:FlowPanel height="35px" addStyleNames="{style.namePanel}">
+                <g:FlowPanel height="30px" addStyleNames="{style.namePanel}">
                     <g:Label text="{locale.githubImporterPageProjectInfo}" addStyleNames="{style.label}"/>
                 </g:FlowPanel>
                 <g:FlowPanel height="50px" addStyleNames="{style.namePanel}">
@@ -39,22 +43,33 @@
                                tabIndex="4"
                                debugId="file-importProject-projectName" title="{locale.githubImporterPageProjectNamePrompt}"/>
                 </g:FlowPanel>
-                <g:FlowPanel height="87px" addStyleNames="{style.namePanel}">
+                <g:FlowPanel height="80px" addStyleNames="{style.namePanel}">
                     <g:Label text="{locale.githubImporterPageProjectDescription}"
                              addStyleNames="{style.labelPosition}"/>
-                    <g:TextArea height="42px" ui:field="projectDescription"
+                    <g:TextArea height="40px" ui:field="projectDescription"
                                 addStyleNames="{style.inputField} {style.alignRight}"
                                 debugId="file-importProject-projectDescription" title="{locale.githubImporterPageProjectDescriptionPrompt}"
                                 tabIndex="5"/>
                 </g:FlowPanel>
-                <g:FlowPanel height="25px" addStyleNames="{style.namePanel}">
+                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
                     <g:CheckBox ui:field="keepDirectory" text="{locale.githubImporterPageKeepDirectory}"
                                 debugId="file-importProject-keepDirectory" addStyleNames="{style.alignLeft}" />
                 </g:FlowPanel>
-                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
+                <g:FlowPanel height="55px" addStyleNames="{style.namePanel}">
                     <g:Label text="{locale.githubImporterPageKeepDirectoryField}" addStyleNames="{style.labelPosition}"/>
                     <ide:TextBox ui:field="directoryName" addStyleNames="{style.inputField} {style.alignRight}"
                                tabIndex="9" debugId="file-importProject-keepDirectoryName" title="{locale.githubImporterPageProjectNamePrompt}"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
+                    <g:CheckBox ui:field="branchSelection" text="{locale.githubImporterPageBranch}"
+                                debugId="file-importProject-branch" addStyleNames="{style.alignLeft}" />
+                </g:FlowPanel>
+
+                <g:FlowPanel height="20px" addStyleNames="{style.namePanel}">
+                    <g:Label text="{locale.githubImporterPageBranchField}" addStyleNames="{style.labelPosition}"/>
+                    <ide:TextBox ui:field="branch" addStyleNames="{style.inputField} {style.alignRight}"
+                                 tabIndex="10" debugId="file-importProject-branchName" title="{locale.githubImporterPageBranchField}"/>
                 </g:FlowPanel>
 
             </g:FlowPanel>
@@ -68,7 +83,7 @@
         <g:north size="205">
             <g:FlowPanel ui:field="bottomPanel">
                 <g:DockLayoutPanel ui:field="githubPanel" debugId="file-importProject-githubPanel">
-                    <g:north size="36.0">
+                    <g:north size="25">
                         <g:FlowPanel addStyleNames="{style.bottomSpace}">
                             <g:Label text="{locale.importFromGithubAccount}"
                                      addStyleNames="{style.alignLeft} {style.textPosition} {style.rightSpace}"/>

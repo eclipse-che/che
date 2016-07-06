@@ -23,4 +23,24 @@ public interface Location {
      * The line number in a file or in a class.
      */
     int getLineNumber();
+
+    /**
+     * Returns path to the resource.
+     */
+    String getResourcePath();
+
+    /**
+     * Returns true if breakpoint resource is external resource, or false otherwise.
+     */
+    boolean isExternalResource();
+
+    /**
+     * Returns external resource id in case if {@link #isExternalResource()} return true.
+     */
+    int getExternalResourceId();
+
+    /**
+     * Returns project path, for resource which we are debugging now.
+     */
+    String getResourceProjectPath();
 }

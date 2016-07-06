@@ -16,6 +16,8 @@ import org.eclipse.che.api.machine.server.terminal.MachineImplSpecificTerminalLa
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -52,9 +54,13 @@ public class DockerMachineImplTerminalLauncher implements MachineImplSpecificTer
         try {
             final String container = ((DockerInstance)machine).getContainer();
 
-            final Exec exec = docker.createExec(container, true, "/bin/bash", "-c", terminalStartCommand);
+            final Exec exec = docker.createExec(CreateExecParams.create(container,
+                                                                        new String[] {"/bin/bash",
+                                                                                      "-c",
+                                                                                      terminalStartCommand})
+                                                                .withDetach(true));
 
-            docker.startExec(exec.getId(), logMessage -> {
+            docker.startExec(StartExecParams.create(exec.getId()), logMessage -> {
                 if (logMessage.getType() == LogMessage.Type.STDERR) {
                     try {
                         machine.getLogger().writeLine("Terminal error. %s" + logMessage.getContent());

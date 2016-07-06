@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsagent-war</artifactId>
     <packaging>war</packaging>
@@ -84,7 +84,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-git-impl-native</artifactId>
+            <artifactId>che-core-git-impl-jgit</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -171,10 +171,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-svn-ext-server</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-svn-ext-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>

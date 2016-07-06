@@ -15,8 +15,8 @@ import com.google.common.io.Files;
 
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
-import org.eclipse.che.api.user.server.dao.Profile;
-import org.eclipse.che.api.user.server.dao.UserProfileDao;
+import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -164,10 +163,9 @@ public class TestUtils {
      * @throws Exception
      *         if anything goes wrong
      */
-    public static void createTestUser(final UserProfileDao userProfileDao) throws Exception {
+    public static void createTestUser(final ProfileDao userProfileDao) throws Exception {
         // set current user
-        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("codenvy", "codenvy", null,
-                                                                   Arrays.asList("workspace/developer"), false));
+        EnvironmentContext.getCurrent().setSubject(new SubjectImpl("codenvy", "codenvy", null, false));
 
         // rules for mock
         final Map<String, String> profileAttributes = new HashMap<>();
@@ -177,7 +175,7 @@ public class TestUtils {
         profileAttributes.put("email", "che@eclipse.org");
 
         Mockito.when(userProfileDao.getById("codenvy"))
-               .thenReturn(new Profile().withId("codenvy").withUserId("codenvy").withAttributes(profileAttributes));
+               .thenReturn(new ProfileImpl("codenvy", profileAttributes));
     }
 
     /**
@@ -196,7 +194,7 @@ public class TestUtils {
         wcRoot.deleteOnExit();
 
         // Create the repository
-        final CommandLineResult result = UpstreamUtils.executeCommandLine(null, "svnadmin", new String[]{
+        final CommandLineResult result = UpstreamUtils.executeCommandLine(null, "svnadmin", new String[] {
                 "create",
                 repoRoot.getAbsolutePath()
         }, -1, repoRoot);

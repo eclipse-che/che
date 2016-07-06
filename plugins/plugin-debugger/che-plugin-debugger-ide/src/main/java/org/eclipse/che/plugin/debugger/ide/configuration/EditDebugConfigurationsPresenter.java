@@ -123,6 +123,16 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
     }
 
     @Override
+    public void onDebugClicked() {
+        DebugConfiguration selectedConfiguration = view.getSelectedConfiguration();
+        if (selectedConfiguration != null) {
+            debugConfigurationsManager.setCurrentDebugConfiguration(selectedConfiguration);
+            debugConfigurationsManager.apply(selectedConfiguration);
+            onCloseClicked();
+        }
+    }
+
+    @Override
     public void onDuplicateClicked() {
         final DebugConfiguration selectedConfiguration = view.getSelectedConfiguration();
         if (selectedConfiguration != null) {
@@ -278,6 +288,7 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
         editedConfigurationOriginName = configuration.getName();
 
         view.setConfigurationName(configuration.getName());
+        view.setDebugButtonState(true);
 
         final DebugConfigurationPage<? extends DebugConfiguration> page = configuration.getType().getConfigurationPage();
         final DebugConfigurationPage<DebugConfiguration> p = ((DebugConfigurationPage<DebugConfiguration>)page);
@@ -289,6 +300,7 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
             public void onDirtyStateChanged() {
                 view.setCancelButtonState(isViewModified());
                 view.setSaveButtonState(isViewModified());
+                view.setDebugButtonState(!isViewModified());
             }
         });
         p.resetFrom(configuration);
@@ -304,6 +316,7 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
         selectedConfiguration.setName(view.getConfigurationName());
         view.setCancelButtonState(isViewModified());
         view.setSaveButtonState(isViewModified());
+        view.setDebugButtonState(!isViewModified());
     }
 
     /** Show dialog. */
@@ -319,6 +332,7 @@ public class EditDebugConfigurationsPresenter implements EditDebugConfigurations
         reset();
         view.setCancelButtonState(false);
         view.setSaveButtonState(false);
+        view.setDebugButtonState(view.getSelectedConfiguration() != null);
 
         final List<DebugConfiguration> configurationsList = debugConfigurationsManager.getConfigurations();
 

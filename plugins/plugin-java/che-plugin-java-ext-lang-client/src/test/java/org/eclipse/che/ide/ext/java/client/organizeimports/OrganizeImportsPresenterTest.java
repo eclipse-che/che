@@ -10,23 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.organizeimports;
 
+import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.project.node.HasProjectConfig;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.editor.JavaCodeAssistClient;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,24 +44,19 @@ import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Valeriy Svydenko
+ * @author Vlad Zhukovskyi
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class OrganizeImportsPresenterTest {
-    private final static String PATH  = "/project/a/b/A.java";
-    private final static String WS_ID = "wsId";
-
     @Mock
     private OrganizeImportsView      view;
-    @Mock
-    private AppContext               appContext;
-    @Mock
-    private ProjectServiceClient     projectService;
     @Mock
     private JavaCodeAssistClient     javaCodeAssistClient;
     @Mock
@@ -72,27 +69,31 @@ public class OrganizeImportsPresenterTest {
     private OrganizeImportsPresenter presenter;
 
     @Mock
-    private VirtualFile      file;
+    private File        file;
     @Mock
-    private EditorInput      editorInput;
+    private Project     relatedProject;
     @Mock
-    private HasProjectConfig hasProjectConfig;
+    private Container   srcFolder;
     @Mock
-    private ProjectConfigDto projectConfigDto;
+    private EditorInput editorInput;
     @Mock
-    private TextEditor       editor;
+    private TextEditor  editor;
     @Mock
-    private Document         document;
+    private Document    document;
 
     @Mock
     private Promise<List<ConflictImportDTO>> importsPromise;
     @Mock
     private Promise<Void>                    resolveConflictsPromise;
+    @Mock
+    private Promise<String>                  contentPromise;
 
     @Captor
     private ArgumentCaptor<Operation<List<ConflictImportDTO>>> importsOperation;
     @Captor
     private ArgumentCaptor<Operation<Void>>                    resolveConflictsOperation;
+    @Captor
+    private ArgumentCaptor<Operation<String>>                  contentCaptor;
 
     private ConflictImportDTO conflict1;
     private ConflictImportDTO conflict2;
@@ -102,17 +103,21 @@ public class OrganizeImportsPresenterTest {
     public void setUp() throws Exception {
         when(editor.getEditorInput()).thenReturn(editorInput);
         when(editorInput.getFile()).thenReturn(file);
-        when(file.getProject()).thenReturn(hasProjectConfig);
-        when(hasProjectConfig.getProjectConfig()).thenReturn(projectConfigDto);
-        when(projectConfigDto.getPath()).thenReturn(PATH);
+        when(editor.getDocument()).thenReturn(document);
+        when(document.getContents()).thenReturn("content");
+        when(file.getRelatedProject()).thenReturn(Optional.of(relatedProject));
+        when(file.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
         when(file.getName()).thenReturn("A.java");
-        when(file.getPath()).thenReturn(PATH);
+        when(file.getLocation()).thenReturn(Path.valueOf("/project/src/a/b/A.java"));
+        when(file.getExtension()).thenReturn("java");
+        when(file.getResourceType()).thenReturn(Resource.FILE);
+        when(srcFolder.getLocation()).thenReturn(Path.valueOf("/project/src"));
+        when(relatedProject.getLocation()).thenReturn(Path.valueOf("/project"));
+
         when(javaCodeAssistClient.organizeImports(anyString(), anyString())).thenReturn(importsPromise);
         when(importsPromise.then(Matchers.<Operation<List<ConflictImportDTO>>>anyObject())).thenReturn(importsPromise);
 
         presenter = new OrganizeImportsPresenter(view,
-                                                 appContext,
-                                                 projectService,
                                                  javaCodeAssistClient,
                                                  dtoFactory,
                                                  locale,
@@ -124,11 +129,19 @@ public class OrganizeImportsPresenterTest {
 
     @Test
     public void organizeImportsShouldBeDoneWithoutConflicts() throws Exception {
+        when(file.getContent()).thenReturn(contentPromise);
+        when(contentPromise.then(any(Operation.class))).thenReturn(contentPromise);
+
         presenter.organizeImports(editor);
 
-        verify(javaCodeAssistClient).organizeImports(PATH, "A");
+        verify(javaCodeAssistClient).organizeImports(eq("/project"), eq("a.b.A"));
         verify(importsPromise).then(importsOperation.capture());
         importsOperation.getValue().apply(Collections.emptyList());
+
+        verify(file.getContent()).then(contentCaptor.capture());
+        contentCaptor.getValue().apply("content");
+
+        verify(document).replace(eq(0), eq("content".length()), eq("content"));
     }
 
     private void prepareConflicts() {
@@ -161,7 +174,7 @@ public class OrganizeImportsPresenterTest {
 
         List<ConflictImportDTO> result = Arrays.asList(conflict1, conflict2);
 
-        verify(javaCodeAssistClient).organizeImports(PATH, "A");
+        verify(javaCodeAssistClient).organizeImports(eq("/project"), eq("a.b.A"));
         verify(importsPromise).then(importsOperation.capture());
         importsOperation.getValue().apply(result);
     }

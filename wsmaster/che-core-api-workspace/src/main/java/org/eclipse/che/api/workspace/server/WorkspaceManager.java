@@ -26,7 +26,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
 import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
@@ -63,6 +62,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.AUTO_CREATE_SNAPSHO
 import static org.eclipse.che.api.workspace.shared.Constants.AUTO_RESTORE_FROM_SNAPSHOT;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATED;
+import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATING;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATION_ERROR;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -88,7 +88,6 @@ public class WorkspaceManager {
     private final EventService      eventService;
     private final ExecutorService   executor;
     private final MachineManager    machineManager;
-    private final UserManager       userManager;
     private final boolean           defaultAutoSnapshot;
     private final boolean           defaultAutoRestore;
 
@@ -99,14 +98,12 @@ public class WorkspaceManager {
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
                             MachineManager machineManager,
-                            UserManager userManager,
                             @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
                             @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
         this.eventService = eventService;
         this.machineManager = machineManager;
-        this.userManager = userManager;
         this.defaultAutoSnapshot = defaultAutoSnapshot;
         this.defaultAutoRestore = defaultAutoRestore;
 
@@ -255,13 +252,34 @@ public class WorkspaceManager {
      *         the id of the user
      * @return the list of workspaces or empty list if user can't read any workspace
      * @throws NullPointerException
-     *         when {@code owner} is null
+     *         when {@code user} is null
      * @throws ServerException
      *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getWorkspaces(String)}
      */
     public List<WorkspaceImpl> getWorkspaces(String user) throws ServerException {
         requireNonNull(user, "Required non-null user id");
         final List<WorkspaceImpl> workspaces = workspaceDao.getWorkspaces(user);
+        workspaces.forEach(this::normalizeState);
+        return workspaces;
+    }
+
+    /**
+     * Gets list of workspaces which has given namespace
+     *
+     * <p>Returned workspaces have either {@link WorkspaceStatus#STOPPED} status
+     * or status defined by their runtime instances(if those exist).
+     *
+     * @param namespace
+     *         the namespace to find workspaces
+     * @return the list of workspaces or empty list if no matches
+     * @throws NullPointerException
+     *         when {@code namespace} is null
+     * @throws ServerException
+     *         when any server error occurs while getting workspaces with {@link WorkspaceDao#getByNamespace(String)}
+     */
+    public List<WorkspaceImpl> getByNamespace(String namespace) throws ServerException {
+        requireNonNull(namespace, "Required non-null namespace");
+        final List<WorkspaceImpl> workspaces = workspaceDao.getByNamespace(namespace);
         workspaces.forEach(this::normalizeState);
         return workspaces;
     }
@@ -491,8 +509,8 @@ public class WorkspaceManager {
     public List<SnapshotImpl> getSnapshot(String workspaceId) throws ServerException, NotFoundException {
         requireNonNull(workspaceId, "Required non-null workspace id");
         // check if workspace exists
-        workspaceDao.get(workspaceId);
-        return machineManager.getSnapshots(sessionUser().getUserId(), workspaceId);
+        final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
+        return machineManager.getSnapshots(workspace.getNamespace(), workspaceId);
     }
 
     /** Asynchronously starts given workspace. */
@@ -601,6 +619,9 @@ public class WorkspaceManager {
      */
     @VisibleForTesting
     boolean createSnapshotSync(WorkspaceRuntimeImpl runtime, String namespace, String workspaceId) {
+        eventService.publish(newDto(WorkspaceStatusEvent.class)
+                                     .withEventType(SNAPSHOT_CREATING)
+                                     .withWorkspaceId(workspaceId));
         String devMachineSnapshotFailMessage = null;
         for (MachineImpl machine : runtime.getMachines()) {
             try {
@@ -701,10 +722,10 @@ public class WorkspaceManager {
         if (parts.length == 1) {
             return workspaceDao.get(key);
         }
-        final String userId = parts[0];
+        final String nsPart = parts[0];
         final String wsName = parts[1];
-        final String ownerId = userId.isEmpty() ? sessionUser().getUserId() : userManager.getByName(userId).getId();
-        return workspaceDao.get(wsName, ownerId);
+        final String namespace = nsPart.isEmpty() ? sessionUser().getUserName() : nsPart;
+        return workspaceDao.get(wsName, namespace);
     }
 
     /** No-operations workspace hooks. Each method does nothing */

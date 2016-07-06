@@ -14,6 +14,7 @@ import junit.framework.TestCase;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationType;
@@ -23,6 +24,7 @@ import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.debug.Debugger;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.junit.Test;
@@ -67,6 +69,8 @@ public class DebugConfigurationsManagerImplTest extends TestCase {
     @Mock
     private DebugConfigurationType         debugConfigurationType;
     @Mock
+    private CurrentProjectPathProvider currentProjectPathProvider;
+    @Mock
     private Debugger                       debugger;
 
     @InjectMocks
@@ -95,12 +99,18 @@ public class DebugConfigurationsManagerImplTest extends TestCase {
         when(debugConfiguration.getType()).thenReturn(debugConfigurationType);
         when(debuggerManager.getDebugger(debugId)).thenReturn(debugger);
         when(debugger.connect(anyMap())).thenReturn(mock(Promise.class));
-
-        ArgumentCaptor<Map> properties = ArgumentCaptor.forClass(Map.class);
+        when(currentProjectPathProvider.getValue()).thenReturn(mock(Promise.class));
+        when(currentProjectPathProvider.getKey()).thenReturn("key");
 
         debugConfigurationsManager.apply(debugConfiguration);
 
+        ArgumentCaptor<Operation> operationArgumentCaptor = ArgumentCaptor.forClass(Operation.class);
+        verify(currentProjectPathProvider.getValue()).then(operationArgumentCaptor.capture());
+        operationArgumentCaptor.getValue().apply("project path");
+
         verify(debuggerManager).setActiveDebugger(debugger);
+
+        ArgumentCaptor<Map> properties = ArgumentCaptor.forClass(Map.class);
         verify(debugger).connect(properties.capture());
 
         Map<String, String> m = properties.getValue();

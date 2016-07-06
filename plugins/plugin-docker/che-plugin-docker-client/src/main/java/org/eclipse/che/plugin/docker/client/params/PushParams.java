@@ -11,12 +11,15 @@
 package org.eclipse.che.plugin.docker.client.params;
 
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
+import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 
 import javax.validation.constraints.NotNull;
 
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY;
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#push(PushParams, ProgressMonitor)}.
@@ -25,9 +28,10 @@ import static java.util.Objects.requireNonNull;
  */
 public class PushParams {
 
-    private String repository;
-    private String tag;
-    private String registry;
+    private String      repository;
+    private String      tag;
+    private String      registry;
+    private AuthConfigs authConfigs;
 
     /**
      * Creates arguments holder with required parameters.
@@ -36,7 +40,7 @@ public class PushParams {
      *         repository name
      * @return arguments holder with required parameters
      * @throws NullPointerException
-     *         if {@code registry} is null
+     *         if {@code repository} null
      */
     public static PushParams create(@NotNull String repository) {
         return new PushParams().withRepository(repository);
@@ -51,7 +55,7 @@ public class PushParams {
      *         repository name
      * @return this params instance
      * @throws NullPointerException
-     *         if {@code repository} is null
+     *         if {@code repository} null
      */
     public PushParams withRepository(@NotNull String repository) {
         requireNonNull(repository);
@@ -83,6 +87,18 @@ public class PushParams {
         return this;
     }
 
+    /**
+     * Adds auth configuration to this parameters.
+     *
+     * @param authConfigs
+     *         authentication configuration for registries
+     * @return this params instance
+     */
+    public PushParams withAuthConfigs(AuthConfigs authConfigs) {
+        this.authConfigs = authConfigs;
+        return this;
+    }
+
     public String getRepository() {
         return repository;
     }
@@ -95,6 +111,24 @@ public class PushParams {
         return registry;
     }
 
+    public AuthConfigs getAuthConfigs() {
+        return authConfigs;
+    }
+
+    /**
+     * Returns full repo.
+     * It has following format: [registry/]image
+     * In case of docker.io registry is omitted,
+     *  otherwise it may cause some troubles with swarm
+     */
+    public String getFullRepo() {
+        if (registry == null || DEFAULT_REGISTRY_SYNONYMS.contains(registry)) {
+            return repository;
+        } else {
+            return registry + '/' + repository;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -102,12 +136,13 @@ public class PushParams {
         PushParams that = (PushParams)o;
         return Objects.equals(repository, that.repository) &&
                Objects.equals(tag, that.tag) &&
-               Objects.equals(registry, that.registry);
+               Objects.equals(registry, that.registry) &&
+               Objects.equals(authConfigs, that.authConfigs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(repository, tag, registry);
+        return Objects.hash(repository, tag, registry, authConfigs);
     }
 
 }

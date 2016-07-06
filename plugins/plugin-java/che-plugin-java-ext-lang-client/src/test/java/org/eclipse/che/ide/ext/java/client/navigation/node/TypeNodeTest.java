@@ -14,7 +14,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory;
 import org.eclipse.che.ide.ext.java.client.navigation.filestructure.FileStructurePresenter;

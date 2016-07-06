@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
@@ -49,9 +50,12 @@ public class GitOutputConsolePresenter implements GitOutputPartView.ActionDelega
         this.title = title;
         this.resources = resources;
 
-        String projectName = appContext.getCurrentProject().getRootProject().getName();
+        final Project project = appContext.getRootProject();
 
-        view.print(locale.consoleProjectName(projectName) + "\n");
+        if (project != null) {
+            view.print(locale.consoleProjectName(project.getName()) + "\n");
+        }
+
     }
 
     /** {@inheritDoc} */

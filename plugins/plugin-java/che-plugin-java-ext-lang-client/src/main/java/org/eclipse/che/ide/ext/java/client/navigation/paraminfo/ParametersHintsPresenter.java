@@ -10,16 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.navigation.paraminfo;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
@@ -61,29 +63,33 @@ public class ParametersHintsPresenter {
 
         VirtualFile file = activeEditor.getEditorInput().getFile();
 
-        String projectPath = file.getProject().getProjectConfig().getPath();
-        String fqn = JavaSourceFolderUtil.getFQNForFile(file);
+        if (file instanceof Resource) {
+            final Optional<Project> project = ((Resource)file).getRelatedProject();
+            final int lineStartOffset = getLineStartOffset(activeEditor, offset);
 
-        int lineStartOffset = getLineStartOffset(activeEditor, offset);
+            navigationService.getMethodParametersHints(project.get().getLocation(), JavaUtil.resolveFQN(file), offset, lineStartOffset)
+                             .then(new Operation<List<MethodParameters>>() {
+                                 @Override
+                                 public void apply(List<MethodParameters> parameters) throws OperationException {
+                                     if (parameters.isEmpty()) {
+                                         return;
+                                     }
 
-        Promise<List<MethodParameters>> promise = navigationService.getMethodParametersHints(projectPath, fqn, offset, lineStartOffset);
-        promise.then(new Operation<List<MethodParameters>>() {
-            @Override
-            public void apply(List<MethodParameters> parameters) throws OperationException {
-                if (parameters.isEmpty()) {
-                    return;
-                }
+                                     PositionConverter.PixelCoordinates coordinates =
+                                             activeEditor.getPositionConverter().offsetToPixel(offset);
 
-                PositionConverter.PixelCoordinates coordinates = activeEditor.getPositionConverter().offsetToPixel(offset);
+                                     view.show(parameters, coordinates.getX(), coordinates.getY());
+                                 }
+                             })
+                             .catchError(new Operation<PromiseError>() {
+                                 @Override
+                                 public void apply(PromiseError error) throws OperationException {
+                                     Log.error(getClass(), error.getMessage());
+                                 }
+                             });
+        }
 
-                view.show(parameters, coordinates.getX(), coordinates.getY());
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                Log.error(getClass(), error.getMessage());
-            }
-        });
+
     }
 
     private boolean isCursorInRightPlace(TextEditorPresenter activeEditor, int offset) {

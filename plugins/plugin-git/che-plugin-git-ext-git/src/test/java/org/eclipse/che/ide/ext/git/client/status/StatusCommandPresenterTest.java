@@ -10,37 +10,32 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.status;
 
-import com.googlecode.gwt.test.utils.GwtReflectionUtils;
-
 import org.eclipse.che.api.git.shared.StatusFormat;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import java.lang.reflect.Method;
-
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link StatusCommandPresenter} functionality.
  *
  * @author Andrey Plotnikov
+ * @author Vlad Zhukovskyi
  */
 public class StatusCommandPresenterTest extends BaseTest {
-    public static final StatusFormat IS_NOT_FORMATTED = StatusFormat.LONG;
     @InjectMocks
     private StatusCommandPresenter presenter;
 
@@ -63,55 +58,33 @@ public class StatusCommandPresenterTest extends BaseTest {
                                                consolesPanelPresenter,
                                                constant,
                                                notificationManager);
+
+        when(service.statusText(anyObject(), any(Path.class), any(StatusFormat.class))).thenReturn(stringPromise);
+        when(stringPromise.then(any(Operation.class))).thenReturn(stringPromise);
+        when(stringPromise.catchError(any(Operation.class))).thenReturn(stringPromise);
     }
 
     @Test
     public void testShowStatusWhenStatusTextRequestIsSuccessful() throws Exception {
-        doAnswer(new Answer<AsyncRequestCallback<String>>() {
-            @Override
-            public AsyncRequestCallback<String> answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<String> callback = (AsyncRequestCallback<String>)arguments[2];
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, EMPTY_TEXT);
-                return callback;
-            }
-        }).when(service).statusText(devMachine,
-                                    Matchers.<ProjectConfigDto>anyObject(),
-                                    Matchers.<StatusFormat>anyObject(),
-                                    Matchers.<AsyncRequestCallback<String>>anyObject());
+        when(gitOutputConsoleFactory.create(anyString())).thenReturn(console);
 
-        presenter.showStatus();
+        presenter.showStatus(project);
 
-        verify(appContext).getCurrentProject();
-        verify(service).statusText(eq(devMachine),
-                                   eq(rootProjectConfig),
-                                   eq(IS_NOT_FORMATTED),
-                                   Matchers.<AsyncRequestCallback<String>>anyObject());
+        verify(stringPromise).then(stringCaptor.capture());
+        stringCaptor.getValue().apply("");
+
+        verify(console, times(2)).print(anyString());
+        verify(consolesPanelPresenter).addCommandOutput(anyString(), anyObject());
     }
 
     @Test
     public void testShowStatusWhenStatusTextRequestIsFailed() throws Exception {
-        doAnswer(new Answer<AsyncRequestCallback<String>>() {
-            @Override
-            public AsyncRequestCallback<String> answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<String> callback = (AsyncRequestCallback<String>)arguments[2];
-                Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
-                onFailure.invoke(callback, mock(Throwable.class));
-                return callback;
-            }
-        }).when(service).statusText(devMachine,
-                                    Matchers.<ProjectConfigDto>anyObject(),
-                                    Matchers.<StatusFormat>anyObject(),
-                                    Matchers.<AsyncRequestCallback<String>>anyObject());
+        presenter.showStatus(project);
 
-        presenter.showStatus();
+        verify(stringPromise).catchError(promiseErrorCaptor.capture());
+        promiseErrorCaptor.getValue().apply(promiseError);
 
-        verify(appContext).getCurrentProject();
-        verify(service).statusText(eq(devMachine), eq(rootProjectConfig), eq(IS_NOT_FORMATTED), Matchers.<AsyncRequestCallback<String>>anyObject());
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
+        verify(notificationManager).notify(anyString(), any(StatusNotification.Status.class), anyObject());
         verify(constant).statusFailed();
     }
-
 }

@@ -30,10 +30,11 @@
         <span class="workspace-list-empty">- No workspaces found</span>
       </che-list-title>
       <che-list ng-show="(listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter).length > 0">
-        <che-workspace-item ng-repeat="workspace in listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter"
-                            ng-model="listWorkspacesCtrl.workspacesSelectedStatus[workspace.id]"
-                            che-selectable="true"
-                            che-workspace-item="workspace"></che-workspace-item>
+        <che-workspace-item
+                ng-repeat="workspace in listWorkspacesCtrl.userWorkspaces | orderBy:'config.name' | filter:listWorkspacesCtrl.workspaceFilter"
+                ng-model="listWorkspacesCtrl.workspacesSelectedStatus[workspace.id]"
+                che-selectable="true"
+                che-workspace-item="workspace"></che-workspace-item>
       </che-list>
     </div>
   </md-content>

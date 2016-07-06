@@ -24,15 +24,6 @@
         .emptyBorder {
             margin: 6px;
         }
-
-        .image {
-            position: relative;
-            float: left;
-            top: 31px;
-            left: 2px;
-            width: 14px;
-            height: 14px;
-        }
     </ui:style>
     <g:DockLayoutPanel unit="PX" width="450px" height="90px" addStyleNames="{style.emptyBorder}" debugId="git-remotes-pull-mainForm">
         <g:north size="26.0">
@@ -56,11 +47,6 @@
                         <g:ListBox ui:field="remoteBranch" width="100%" debugId="git-remotes-pull-remoteBranch"/>
                     </g:FlowPanel>
                 </g:west>
-                <g:center>
-                    <g:FlowPanel>
-                        <svg:SVGImage resource="{res.arrow}" classNameBaseVal="{style.image}"/>
-                    </g:FlowPanel>
-                </g:center>
             </g:DockLayoutPanel>
         </g:center>
     </g:DockLayoutPanel>

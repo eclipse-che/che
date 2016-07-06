@@ -4,7 +4,9 @@ RUN apt-get update && apt-get -y install curl sudo procps wget && \
     useradd -u 1000 -G users,sudo -d /home/user --shell /bin/bash -m user && \
     echo "secret\nsecret" | passwd user && \
     curl -sSL https://get.docker.com/ | sh && \
-    usermod -aG docker user && sudo apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    # Add user to docker group: 100 and 50 are this gIDs in boot2docker and Docker for Mac
+    usermod -aG docker,100,50 user && \
+    sudo apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 USER user
 

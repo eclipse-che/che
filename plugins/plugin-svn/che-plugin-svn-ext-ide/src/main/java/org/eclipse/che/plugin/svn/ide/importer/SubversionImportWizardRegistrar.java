@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 
@@ -26,10 +27,10 @@ import java.util.List;
  */
 public class SubversionImportWizardRegistrar implements ImportWizardRegistrar {
     private final static String ID = "subversion";
-    private final List<Provider<? extends WizardPage<ProjectConfigDto>>> wizardPages;
+    private final List<Provider<? extends WizardPage<MutableProjectConfig>>> wizardPages;
 
     @Inject
-    public SubversionImportWizardRegistrar(final Provider<SubversionProjectImporterPresenter> provider) {
+    public SubversionImportWizardRegistrar(Provider<SubversionProjectImporterPresenter> provider) {
         wizardPages = new ArrayList<>();
         wizardPages.add(provider);
     }
@@ -40,7 +41,7 @@ public class SubversionImportWizardRegistrar implements ImportWizardRegistrar {
     }
 
     @NotNull
-    public List<Provider<? extends WizardPage<ProjectConfigDto>>> getWizardPages() {
+    public List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages() {
         return wizardPages;
     }
 }

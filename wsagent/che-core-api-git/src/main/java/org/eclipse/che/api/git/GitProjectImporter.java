@@ -19,7 +19,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListRequest;
@@ -36,12 +35,9 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +119,7 @@ public class GitProjectImporter implements ProjectImporter {
             // Delete vcs info if false.
             String branchMerge = null;
             boolean keepVcs = true;
+            boolean recursiveEnabled = false;
 
             Map<String, String> parameters = storage.getParameters();
             if (parameters != null) {
@@ -133,6 +130,9 @@ public class GitProjectImporter implements ProjectImporter {
                 keepDir = parameters.get("keepDir");
                 if (parameters.containsKey("keepVcs")) {
                     keepVcs = Boolean.parseBoolean(parameters.get("keepVcs"));
+                }
+                if (parameters.containsKey("recursive")) {
+                    recursiveEnabled = true;
                 }
                 branchMerge = parameters.get("branchMerge");
             }
@@ -146,7 +146,7 @@ public class GitProjectImporter implements ProjectImporter {
                 git.cloneWithSparseCheckout(keepDir, location, branch == null ? "master" : branch);
             } else {
                 if (baseFolder.getChildren().size() == 0) {
-                    cloneRepository(git, "origin", location, dtoFactory);
+                    cloneRepository(git, "origin", location, dtoFactory, recursiveEnabled);
                     if (commitId != null) {
                         checkoutCommit(git, commitId, dtoFactory);
                     } else if (fetch != null) {
@@ -198,9 +198,12 @@ public class GitProjectImporter implements ProjectImporter {
         }
     }
 
-    private void cloneRepository(GitConnection git, String remoteName, String url, DtoFactory dtoFactory)
+    private void cloneRepository(GitConnection git, String remoteName, String url, DtoFactory dtoFactory, boolean recursiveEnabled)
             throws ServerException, UnauthorizedException, URISyntaxException {
-        final CloneRequest request = dtoFactory.createDto(CloneRequest.class).withRemoteName(remoteName).withRemoteUri(url);
+        final CloneRequest request = dtoFactory.createDto(CloneRequest.class)
+                                               .withRemoteName(remoteName)
+                                               .withRemoteUri(url)
+                                               .withRecursive(recursiveEnabled);
         git.clone(request);
     }
 

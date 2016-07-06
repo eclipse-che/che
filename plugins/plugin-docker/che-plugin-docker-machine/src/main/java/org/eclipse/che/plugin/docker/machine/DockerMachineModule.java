@@ -26,7 +26,7 @@ public class DockerMachineModule extends AbstractModule {
     protected void configure() {
         bind(org.eclipse.che.plugin.docker.machine.cleaner.DockerContainerCleaner.class);
 
-        Multibinder<String> debMachineEnvVars = Multibinder.newSetBinder(binder(),
+        Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
                                                                          String.class,
                                                                          Names.named("machine.docker.dev_machine.machine_env"))
                                                            .permitDuplicates();

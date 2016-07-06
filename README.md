@@ -58,28 +58,48 @@ Che will be available at ```localhost:8080```.
 ### Build Submodules
 Building `/assembly` pulls already-built libraries for `/core`, `/plugins`, and `/dashboard` from our Nexus repository.
 
-To build core:
+To build the Che core:
 ```sh
 # Install maven-patch-plugin as an additional dependency.
 cd che/core
 
 # Windows: maven-patch-plugin does not work, so skip tests when building:
 # See: https://maven.apache.org/plugins/maven-patch-plugin/faq.html#Why_doesnt_this_work_on_Windows
-mvn -DskipTests=true -Dfindbugs.skip=true  -Dskip-validate-sources clean install
+mvn -DskipTests=true -Dfindbugs.skip=true -Dskip-validate-sources clean install
 ```
 
-To build plugins:
+To build Che plugins:
 ```sh
 cd che/plugins
 mvn clean install
 ```
 
-To build dashboard:
+To build the Che dashboard:
 ```sh
 # You need NPM, Bower, and Gulp installed.
 # See setup in /dashboard
 cd che/dashboard
 mvn clean install
+```
+
+### Build Che Using Docker
+If you want to avoid setting up the dependencies to compile Che core, plugins and the dashboard, we provide a Docker image that has all dependencies necessary to compile Che. You can have Che source code on your host and compile it within the container.
+
+```sh
+# For Mac + Linux:
+docker run -it --rm --name build-che 
+           -v "$HOME/.m2:/home/user/.m2" 
+           -v "$PWD":/home/user/che-build 
+           -w /home/user/che-build 
+           codenvy/che-dev 
+           mvn -DskipTests=true 
+               -Dfindbugs.skip=true 
+               -Dgwt.compiler.localWorkers=2 -T 1C 
+               -Dskip-validate-sources 
+               clean install
+               
+# For Windows, replace $HOME with maven repo directory.
+# For Windows, replace $PWD with Che source code directory.
 ```
 
 ### Run Che as a Server
@@ -119,6 +139,7 @@ These repositories are for the core project hosted at `http://github.com/eclipse
 ### Other Repositories
 These are external repositories that provide additional tools for Eclipse Che.
 ```
+http://github.com/codenvy/Dockerfiles                      # Defines the images referenced by stacks in Che
 http://github.com/codenvy/che-installer                    # Creates the Windows and JAR installer packages
 http://github.com/codenvy/che-tutorials                    # SDK examples and tutorials (needs updating)
 http://github.com/che-samples                              # GitHub organization with sample repos used in Che

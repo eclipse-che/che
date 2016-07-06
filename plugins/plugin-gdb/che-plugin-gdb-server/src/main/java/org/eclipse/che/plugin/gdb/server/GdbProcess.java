@@ -21,13 +21,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import static java.lang.Math.min;
+
 /**
  * @author Anatoliy Bazko
  */
 public abstract class GdbProcess {
     private static final Logger LOG          = LoggerFactory.getLogger(GdbProcess.class);
     private static final int    MAX_CAPACITY = 1000;
-    private static final int    MAX_OUTPUT   = 10000;
+    private static final int    MAX_OUTPUT   = 4096;
 
     protected final Process                  process;
     protected final String                   outputSeparator;
@@ -42,6 +44,7 @@ public abstract class GdbProcess {
         process = processBuilder.start();
 
         outputReader = new OutputReader(commands[0] + " output reader");
+        outputReader.setDaemon(true);
         outputReader.start();
     }
 
@@ -68,14 +71,19 @@ public abstract class GdbProcess {
             StringBuilder buf = new StringBuilder();
 
             while (!isInterrupted()) {
+                if (!process.isAlive()) {
+                    outputs.add(GdbOutput.of(buf.toString(), true));
+                    break;
+                }
+
                 try {
-                    InputStream in = getInputStream();
+                    InputStream in = getInput();
                     if (in != null) {
                         String data = read(in);
                         if (!data.isEmpty()) {
                             buf.append(data);
                             if (buf.length() > MAX_OUTPUT) {
-                                buf.delete(0, MAX_OUTPUT - buf.length());
+                                buf.delete(0, buf.length() - MAX_OUTPUT);
                             }
                         }
                     }
@@ -94,10 +102,10 @@ public abstract class GdbProcess {
                 }
             }
 
-            LOG.warn(getName() + " has been stopped");
+            LOG.debug(getName() + " has been stopped");
         }
 
-        private InputStream getInputStream() throws IOException {
+        private InputStream getInput() throws IOException {
             return hasError() ? process.getErrorStream()
                               : (hasInput() ? (hasError() ? process.getErrorStream() : process.getInputStream())
                                             : null);
@@ -125,7 +133,7 @@ public abstract class GdbProcess {
 
         @Nullable
         private String read(InputStream in) throws IOException {
-            int available = in.available();
+            int available = min(in.available(), MAX_OUTPUT);
             byte[] buf = new byte[available];
             int read = in.read(buf, 0, available);
 

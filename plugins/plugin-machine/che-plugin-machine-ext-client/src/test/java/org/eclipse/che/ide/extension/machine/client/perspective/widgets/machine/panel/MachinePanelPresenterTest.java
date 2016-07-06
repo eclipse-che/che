@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -93,8 +92,6 @@ public class MachinePanelPresenterTest {
     private Promise<List<MachineDto>> machinesPromise;
     @Mock
     private Promise<MachineDto>       machinePromise;
-    @Mock
-    private CurrentProject            currentProject;
     @Mock
     private ProjectConfigDto          projectConfig;
     @Mock

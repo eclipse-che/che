@@ -30,12 +30,12 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.ext.java.client.project.node.jar.JarFileNode;
 import org.eclipse.che.ide.api.editor.texteditor.HasNotificationPanel;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.util.dom.Elements;
+import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
@@ -108,12 +108,11 @@ public class ClassFileSourcesDownloader implements EditorOpenedEventHandler {
 
     private void downloadSources(JarFileNode jarFileNode, final HasNotificationPanel.NotificationRemover remover) {
         final String path = jarFileNode.getPath();
-        Promise<Boolean> promise =
-                client.downloadSources(jarFileNode.getProject().getProjectConfig().getPath(), path);
+        Promise<Boolean> promise = client.downloadSources(jarFileNode.getProjectLocation().toString(), path);
         promise.then(new Operation<Boolean>() {
             @Override
             public void apply(Boolean arg) throws OperationException {
-                if(arg){
+                if (arg) {
                     eventBus.fireEvent(new FileContentUpdateEvent(path));
                 } else {
                     notificationManager.notify(constant.mavenClassDownloadFailed(path), StatusNotification.Status.FAIL, EMERGE_MODE);

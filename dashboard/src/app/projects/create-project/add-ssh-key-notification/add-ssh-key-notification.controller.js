@@ -44,7 +44,7 @@ export class AddSecretKeyNotificationCtrl {
     if (!this.workspace) {
       return false;
     }
-    this.$location.path('ide/' + this.workspace.config.name).search({action: 'showPreferences'});
+    this.$location.path('ide/' + this.workspace.namespace + '/' + this.workspace.config.name).search({action: 'showPreferences'});
     this.$mdDialog.hide();
     return true;
   }

@@ -52,6 +52,9 @@ public class GitImporterPageViewImpl extends Composite implements GitImporterPag
     TextBox     projectUrl;
 
     @UiField
+    CheckBox    recursive;
+
+    @UiField
     FlowPanel   importerPanel;
 
     @UiField
@@ -98,6 +101,11 @@ public class GitImporterPageViewImpl extends Composite implements GitImporterPag
     @UiHandler("projectUrl")
     void onProjectUrlChanged(KeyUpEvent event) {
         delegate.projectUrlChanged(projectUrl.getValue());
+    }
+
+    @UiHandler("recursive")
+    void recursiveHandler(ValueChangeEvent<Boolean> event) {
+        delegate.onRecursiveSelected(event.getValue());
     }
 
     @UiHandler("projectDescription")
@@ -256,6 +264,17 @@ public class GitImporterPageViewImpl extends Composite implements GitImporterPag
     }
 
     @Override
+    public void focusBranchNameField() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                branch.setFocus(true);
+                branch.selectAll();
+            }
+        });
+    }
+
+    @Override
     public String getBranchName() {
         return branch.getValue();
     }
@@ -270,7 +289,7 @@ public class GitImporterPageViewImpl extends Composite implements GitImporterPag
     }
 
     @Override
-    public void focusDirectoryNameFiend() {
+    public void focusDirectoryNameField() {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {

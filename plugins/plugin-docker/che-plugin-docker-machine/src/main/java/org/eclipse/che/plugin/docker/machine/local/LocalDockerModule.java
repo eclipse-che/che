@@ -60,11 +60,11 @@ public class LocalDockerModule extends AbstractModule {
 
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryChecker.class).asEagerSingleton();
 
-        Multibinder<String> debMachineEnvVars = Multibinder.newSetBinder(binder(),
+        Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
                                                                          String.class,
                                                                          Names.named("machine.docker.dev_machine.machine_env"))
                                                            .permitDuplicates();
-        debMachineEnvVars.addBinding()
+        devMachineEnvVars.addBinding()
                          .toProvider(org.eclipse.che.plugin.docker.machine.local.provider.DockerApiHostEnvVariableProvider.class);
 
         install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());

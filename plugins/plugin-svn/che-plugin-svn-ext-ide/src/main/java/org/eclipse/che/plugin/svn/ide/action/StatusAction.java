@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.status.StatusPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn status" command.
@@ -29,13 +28,11 @@ public class StatusAction extends SubversionAction {
     private final StatusPresenter presenter;
 
     @Inject
-    public StatusAction(final AppContext appContext,
-                        final ProjectExplorerPresenter projectExplorerPresenter,
-                        final SubversionExtensionLocalizationConstants constants,
-                        final SubversionExtensionResources resources,
-                        final StatusPresenter presenter) {
-        super(constants.statusTitle(), constants.statusDescription(), resources.status(),
-              appContext, constants, resources, projectExplorerPresenter);
+    public StatusAction(AppContext appContext,
+                        SubversionExtensionLocalizationConstants constants,
+                        SubversionExtensionResources resources,
+                        StatusPresenter presenter) {
+        super(constants.statusTitle(), constants.statusDescription(), resources.status(), appContext, constants, resources);
 
         this.presenter = presenter;
     }

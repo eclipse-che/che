@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
+import com.google.common.base.Strings;
+import com.google.common.base.Optional;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -17,9 +19,11 @@ import com.google.inject.assistedinject.AssistedInject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.icon.Icon;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalPresentation;
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
@@ -39,18 +43,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.resolveFQN;
+
 public class JavaCodeAssistProcessor implements CodeAssistProcessor {
 
     private static Map<String, ImageResource> images;
     private static Map<String, SVGResource>   svgs;
 
-    private final EditorPartPresenter  editor;
-    private final JavaResources        resources;
-    private final RefactoringUpdater   refactoringUpdater;
+    private final EditorPartPresenter editor;
+    private final JavaResources       resources;
+    private final RefactoringUpdater  refactoringUpdater;
 
-    private       JavaCodeAssistClient   client;
-    private final EditorAgent            editorAgent;
-    private DtoUnmarshallerFactory unmarshallerFactory;
+    private final JavaCodeAssistClient     client;
+    private final EditorAgent              editorAgent;
+    private final DtoUnmarshallerFactory   unmarshallerFactory;
+    private final JavaLocalizationConstant localizationConstant;
 
     private String errorMessage;
 
@@ -60,13 +67,15 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
                                    final JavaResources javaResources,
                                    RefactoringUpdater refactoringUpdater,
                                    EditorAgent editorAgent,
-                                   DtoUnmarshallerFactory unmarshallerFactory) {
+                                   DtoUnmarshallerFactory unmarshallerFactory,
+                                   JavaLocalizationConstant localizationConstant) {
         this.editor = editor;
         this.client = client;
         this.resources = javaResources;
         this.refactoringUpdater = refactoringUpdater;
         this.editorAgent = editorAgent;
         this.unmarshallerFactory = unmarshallerFactory;
+        this.localizationConstant = localizationConstant;
         if (images == null) {
             initImages(javaResources);
         }
@@ -152,21 +161,23 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
             return;
         }
         final VirtualFile file = editor.getEditorInput().getFile();
-        final String projectPath = file.getProject().getProjectConfig().getPath();
-        String fqn = JavaSourceFolderUtil.getFQNForFile(file);
-        Unmarshallable<Proposals> unmarshaller = unmarshallerFactory.newUnmarshaller(Proposals.class);
-        client.computeProposals(projectPath, fqn, offset, textEditor.getDocument().getContents(),
-                                new AsyncRequestCallback<Proposals>(unmarshaller) {
-                                    @Override
-                                    protected void onSuccess(Proposals proposals) {
-                                        showProposals(callback, proposals);
-                                    }
 
-            @Override
-            protected void onFailure(Throwable throwable) {
-                Log.error(JavaCodeAssistProcessor.class, throwable);
-            }
-        });
+        if (file instanceof Resource) {
+            final Optional<Project> project = ((Resource)file).getRelatedProject();
+            Unmarshallable<Proposals> unmarshaller = unmarshallerFactory.newUnmarshaller(Proposals.class);
+            client.computeProposals(project.get().getLocation().toString(), resolveFQN(file), offset, textEditor.getDocument().getContents(),
+                                    new AsyncRequestCallback<Proposals>(unmarshaller) {
+                                        @Override
+                                        protected void onSuccess(Proposals proposals) {
+                                            showProposals(callback, proposals);
+                                        }
+
+                                        @Override
+                                        protected void onFailure(Throwable throwable) {
+                                            Log.error(JavaCodeAssistProcessor.class, throwable);
+                                        }
+                                    });
+        }
     }
 
     private void showProposals(final CodeAssistCallback callback, final Proposals respons) {
@@ -194,8 +205,8 @@ public class JavaCodeAssistProcessor implements CodeAssistProcessor {
         return this.errorMessage;
     }
 
-    public void disableCodeAssistant() {
-        this.errorMessage = "Code Assistant currently unavailable due to file parsing. Try again in a moment.";
+    public void disableCodeAssistant(String errorMessage) {
+        this.errorMessage = Strings.isNullOrEmpty(errorMessage) ? localizationConstant.codeAssistDefaultErrorMessage() : errorMessage;
     }
 
     public void enableCodeAssistant() {

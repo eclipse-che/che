@@ -13,11 +13,11 @@
 import {ListWorkspacesCtrl} from './list-workspaces/list-workspaces.controller';
 import {CheWorkspaceItem} from './list-workspaces/workspace-item/workspace-item.directive';
 import {CreateWorkspaceCtrl} from './create-workspace/create-workspace.controller';
-import {CreateWorkspaceAddMemberCtrl} from './create-workspace/create-workspace-add-member.controller';
 import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive';
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceDetailsCtrl} from './workspace-details/workspace-details.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
+import {WorkspaceDetailsService} from './workspace-details/workspace-details.service.js';
 import {ExportWorkspaceController} from './workspace-details/export-workspace/export-workspace.controller';
 import {ExportWorkspace} from './workspace-details/export-workspace/export-workspace.directive';
 import {ExportWorkspaceDialogController} from  './workspace-details/export-workspace/dialog/export-workspace-dialog.controller';
@@ -34,11 +34,13 @@ import {WorkspaceSelectStack} from './create-workspace/select-stack/workspace-se
 
 import {CheWorkspaceRamAllocationSliderCtrl} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
-import {WorkspaceStatusIndicator} from './workspace-status-indicator/workspace-status-indicator.directive';
+import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
+import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indicator.directive';
 
 import {CheStackLibraryFilterCtrl} from './create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.controller';
 import {CheStackLibraryFilter}     from './create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.directive';
 import {CreateProjectStackLibrarySelectedStackFilter} from './create-workspace/select-stack/stack-library/create-project-stack-library-selected-stack.filter.js';
+
 /**
  * @ngdoc controller
  * @name workspaces:WorkspacesConfig
@@ -53,7 +55,6 @@ export class WorkspacesConfig {
 
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
     register.controller('CreateWorkspaceCtrl', CreateWorkspaceCtrl);
-    register.controller('CreateWorkspaceAddMemberCtrl', CreateWorkspaceAddMemberCtrl);
 
     register.directive('cheWorkspaceItem', CheWorkspaceItem);
     register.controller('WorkspaceItemCtrl', WorkspaceItemCtrl);
@@ -63,6 +64,7 @@ export class WorkspacesConfig {
 
     register.controller('WorkspaceDetailsProjectsCtrl', WorkspaceDetailsProjectsCtrl);
     register.directive('workspaceDetailsProjects', WorkspaceDetailsProjects);
+    register.service('workspaceDetailsService', WorkspaceDetailsService);
 
     register.controller('ExportWorkspaceDialogController', ExportWorkspaceDialogController);
     register.controller('ExportWorkspaceController', ExportWorkspaceController);
@@ -74,6 +76,7 @@ export class WorkspacesConfig {
     register.controller('CheWorkspaceRamAllocationSliderCtrl', CheWorkspaceRamAllocationSliderCtrl);
     register.directive('cheWorkspaceRamAllocationSlider', CheWorkspaceRamAllocationSlider);
 
+    register.directive('workspaceStatus', WorkspaceStatus);
     register.directive('workspaceStatusIndicator', WorkspaceStatusIndicator);
 
     register.controller('ReadyToGoStacksCtrl', ReadyToGoStacksCtrl);
@@ -93,16 +96,19 @@ export class WorkspacesConfig {
     // config routes
     register.app.config(function ($routeProvider) {
       $routeProvider.accessWhen('/workspaces', {
+        title: 'Workspaces',
         templateUrl: 'app/workspaces/list-workspaces/list-workspaces.html',
         controller: 'ListWorkspacesCtrl',
         controllerAs: 'listWorkspacesCtrl'
       })
-      .accessWhen('/workspace/:workspaceId', {
+      .accessWhen('/workspace/:namespace/:workspaceName', {
+          title: (params) => { return params.workspaceName;},
           templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
           controller: 'WorkspaceDetailsCtrl',
           controllerAs: 'workspaceDetailsCtrl'
         })
       .accessWhen('/create-workspace', {
+          title: 'New Workspace',
           templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
           controller: 'CreateWorkspaceCtrl',
           controllerAs: 'createWorkspaceCtrl'

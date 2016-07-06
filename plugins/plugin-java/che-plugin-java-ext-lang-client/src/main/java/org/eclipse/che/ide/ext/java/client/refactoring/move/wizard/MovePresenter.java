@@ -19,24 +19,21 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
-import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
 import org.eclipse.che.ide.ext.java.client.refactoring.preview.PreviewPresenter;
 import org.eclipse.che.ide.ext.java.client.refactoring.service.RefactoringServiceClient;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeCreationResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateMoveRefactoring;
@@ -69,7 +66,6 @@ public class MovePresenter implements MoveView.ActionDelegate {
     private final MoveView                 view;
     private final RefactoringUpdater       refactoringUpdater;
     private final EditorAgent              editorAgent;
-    private final AppContext               appContext;
     private final PreviewPresenter         previewPresenter;
     private final DtoFactory               dtoFactory;
     private final RefactoringServiceClient refactorService;
@@ -77,13 +73,12 @@ public class MovePresenter implements MoveView.ActionDelegate {
     private final JavaLocalizationConstant locale;
     private final NotificationManager      notificationManager;
 
-    private RefactorInfo refactorInfo;
-    private String       refactoringSessionId;
+    protected RefactorInfo refactorInfo;
+    private   String       refactoringSessionId;
 
     @Inject
     public MovePresenter(MoveView view,
                          RefactoringUpdater refactoringUpdater,
-                         AppContext appContext,
                          EditorAgent editorAgent,
                          PreviewPresenter previewPresenter,
                          RefactoringServiceClient refactorService,
@@ -96,7 +91,6 @@ public class MovePresenter implements MoveView.ActionDelegate {
         this.editorAgent = editorAgent;
         this.view.setDelegate(this);
 
-        this.appContext = appContext;
         this.previewPresenter = previewPresenter;
         this.refactorService = refactorService;
         this.navigationService = navigationService;
@@ -139,42 +133,35 @@ public class MovePresenter implements MoveView.ActionDelegate {
     private CreateMoveRefactoring createMoveDto() {
         List<ElementToMove> elements = new ArrayList<>();
 
-        for (Object node : refactorInfo.getSelectedItems()) {
-            HasStorablePath storableNode = (HasStorablePath)node;
+        Project project = null;
 
+        for (Resource resource : refactorInfo.getResources()) {
             ElementToMove element = dtoFactory.createDto(ElementToMove.class);
 
-            if (storableNode instanceof PackageNode) {
-                element.setPath(storableNode.getStorablePath());
+            if (resource instanceof Container) {
+                element.setPath(resource.getLocation().toString());
                 element.setPack(true);
-            }
-
-            if (storableNode instanceof JavaFileNode) {
-                element.setPath(JavaSourceFolderUtil.getFQNForFile((VirtualFile)storableNode));
+            } else {
+                element.setPath(JavaUtil.resolveFQN(resource));
                 element.setPack(false);
             }
 
             elements.add(element);
-        }
 
-        String pathToProject = getPathToProject();
+            if (project == null) {
+                project = resource.getRelatedProject().get();
+            }
+        }
 
         CreateMoveRefactoring moveRefactoring = dtoFactory.createDto(CreateMoveRefactoring.class);
 
         moveRefactoring.setElements(elements);
-        moveRefactoring.setProjectPath(pathToProject);
 
-        return moveRefactoring;
-    }
-
-    private String getPathToProject() {
-        CurrentProject currentProject = appContext.getCurrentProject();
-
-        if (currentProject == null) {
-            throw new IllegalArgumentException(getClass() + " Current project undefined...");
+        if (project != null) {
+            moveRefactoring.setProjectPath(project.getLocation().toString());
         }
 
-        return currentProject.getProjectConfig().getPath();
+        return moveRefactoring;
     }
 
     private void showProjectsAndPackages() {
@@ -185,7 +172,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
             public void apply(List<JavaProject> projects) throws OperationException {
                 List<JavaProject> currentProject = new ArrayList<>();
                 for (JavaProject project : projects) {
-                        currentProject.add(project);
+                    currentProject.add(project);
                 }
                 view.setTreeOfDestinations(currentProject);
                 view.show(refactorInfo);
@@ -236,8 +223,14 @@ public class MovePresenter implements MoveView.ActionDelegate {
                         public void apply(RefactoringResult arg) throws OperationException {
                             if (arg.getSeverity() == OK) {
                                 view.hide();
-                                refactoringUpdater.updateAfterRefactoring(refactorInfo, arg.getChanges());
-                                refactorService.reindexProject(getPathToProject());
+                                refactoringUpdater.updateAfterRefactoring(arg.getChanges());
+
+                                final Resource[] resources = refactorInfo.getResources();
+
+                                if (resources != null && resources.length == 1) {
+                                    refactorService.reindexProject(resources[0].getRelatedProject().get().getLocation().toString());
+                                }
+
                             } else {
                                 view.showErrorMessage(arg);
                             }

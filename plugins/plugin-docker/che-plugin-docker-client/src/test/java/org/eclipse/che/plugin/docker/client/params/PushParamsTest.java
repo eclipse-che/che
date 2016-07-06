@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
+import org.mockito.Mock;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -24,54 +26,97 @@ public class PushParamsTest {
     private static final String TAG        = "tag";
     private static final String REGISTRY   = "registry";
 
-    private PullParams pullParams;
+    @Mock
+    private AuthConfigs authConfigs;
+
+    private PushParams pushParams;
 
     @Test
     public void shouldCreateParamsObjectWithRequiredParameters() {
-        pullParams = PullParams.create(REPOSITORY);
+        pushParams = PushParams.create(REPOSITORY);
 
-        assertEquals(pullParams.getImage(), REPOSITORY);
+        assertEquals(pushParams.getRepository(), REPOSITORY);
 
-        assertNull(pullParams.getTag());
-        assertNull(pullParams.getRegistry());
+        assertNull(pushParams.getTag());
+        assertNull(pushParams.getRegistry());
+        assertNull(pushParams.getAuthConfigs());
     }
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
-        pullParams = PullParams.create(REPOSITORY)
+        pushParams = PushParams.create(REPOSITORY)
                                .withTag(TAG)
-                               .withRegistry(REGISTRY);
+                               .withRegistry(REGISTRY)
+                               .withAuthConfigs(authConfigs);
 
-        assertEquals(pullParams.getImage(), REPOSITORY);
-        assertEquals(pullParams.getTag(), TAG);
-        assertEquals(pullParams.getRegistry(), REGISTRY);
+        assertEquals(pushParams.getRepository(), REPOSITORY);
+        assertEquals(pushParams.getTag(), TAG);
+        assertEquals(pushParams.getRegistry(), REGISTRY);
+        assertEquals(pushParams.getAuthConfigs(), authConfigs);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfRepositoryRequiredParameterIsNull() {
-        pullParams = PullParams.create(null);
+        pushParams = PushParams.create(null);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfRepositoryRequiredParameterResetWithNull() {
-        pullParams = PullParams.create(REPOSITORY)
-                               .withImage(null);
+        pushParams = PushParams.create(REPOSITORY)
+                               .withRepository(null);
     }
 
     @Test
     public void tagParameterShouldEqualsNullIfItNotSet() {
-        pullParams = PullParams.create(REPOSITORY)
-                               .withRegistry(REGISTRY);
+        pushParams = PushParams.create(REPOSITORY)
+                               .withRegistry(REGISTRY)
+                               .withAuthConfigs(authConfigs);
 
-        assertNull(pullParams.getTag());
+        assertNull(pushParams.getTag());
     }
 
     @Test
     public void registryParameterShouldEqualsNullIfItNotSet() {
-        pullParams = PullParams.create(REPOSITORY)
+        pushParams = PushParams.create(REPOSITORY)
+                               .withTag(TAG)
+                               .withAuthConfigs(authConfigs);
+
+        assertNull(pushParams.getRegistry());
+    }
+
+    @Test
+    public void authConfigsParameterShouldEqualsNullIfItNotSet() {
+        pushParams = PushParams.create(REPOSITORY)
+                               .withTag(TAG)
+                               .withRegistry(REGISTRY);
+
+        assertNull(pushParams.getAuthConfigs());
+    }
+
+    @Test
+    public void getFullRepoShouldReturnRegistryAndRepository() {
+        pushParams = PushParams.create(REPOSITORY)
+                               .withRegistry(REGISTRY)
                                .withTag(TAG);
 
-        assertNull(pullParams.getRegistry());
+        assertEquals(pushParams.getFullRepo(), REGISTRY + '/' + REPOSITORY);
+    }
+
+    @Test
+    public void getFullRepoShouldReturnRepositoryOnlyIfRegistryIsNotSet() {
+        pushParams = PushParams.create(REPOSITORY)
+                               .withTag(TAG);
+
+        assertEquals(pushParams.getFullRepo(), REPOSITORY);
+    }
+
+    @Test
+    public void getFullRepoShouldReturnRepositoryOnlyIfRegistryIsDockerHub() {
+        pushParams = PushParams.create(REPOSITORY)
+                               .withRegistry("docker.io")
+                               .withTag(TAG);
+
+        assertEquals(pushParams.getFullRepo(), REPOSITORY);
     }
 
 }

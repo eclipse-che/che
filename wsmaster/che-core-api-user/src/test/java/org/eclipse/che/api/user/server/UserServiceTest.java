@@ -10,58 +10,48 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.jayway.restassured.response.Response;
+
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
-import org.eclipse.che.api.user.shared.dto.UserInRoleDescriptor;
-import org.eclipse.che.commons.json.JsonHelper;
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.user.shared.dto.UserDto;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.everrest.core.impl.ApplicationContextImpl;
-import org.everrest.core.impl.ApplicationProviderBinder;
-import org.everrest.core.impl.ContainerResponse;
-import org.everrest.core.impl.EnvironmentContext;
-import org.everrest.core.impl.EverrestConfiguration;
-import org.everrest.core.impl.EverrestProcessor;
-import org.everrest.core.impl.ProviderBinder;
-import org.everrest.core.impl.ResourceBinderImpl;
-import org.everrest.core.impl.uri.UriBuilderImpl;
-import org.everrest.core.tools.DependencySupplierImpl;
-import org.everrest.core.tools.ResourceLauncher;
+import org.everrest.assured.EverrestJetty;
+import org.everrest.core.Filter;
+import org.everrest.core.GenericContainerRequest;
+import org.everrest.core.RequestFilter;
+import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.singletonList;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.CREATED;
-import static javax.ws.rs.core.Response.Status.FORBIDDEN;
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-import static javax.ws.rs.core.Response.Status.OK;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static com.jayway.restassured.RestAssured.given;
+import static java.util.Collections.emptyList;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
+import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
+import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * Tests for {@link UserService}
@@ -69,516 +59,364 @@ import static org.testng.Assert.assertNotNull;
  * @author Eugene Veovodin
  * @author Max Shaposhnik
  */
-@Listeners(value = {MockitoTestNGListener.class})
+@Listeners({EverrestJetty.class, MockitoTestNGListener.class})
 public class UserServiceTest {
+    @SuppressWarnings("unused")
+    private static final ApiExceptionMapper MAPPER  = new ApiExceptionMapper();
+    @SuppressWarnings("unused")
+    private static final EnvironmentFilter  FILTER  = new EnvironmentFilter();
+    private static final Subject            SUBJECT = new SubjectImpl("user", "user123", "token", false);
 
-    private final String BASE_URI     = "http://localhost/service";
-    private final String SERVICE_PATH = BASE_URI + "/user";
-
+    @Mock(answer = Answers.RETURNS_MOCKS)
+    private UserManager          userManager;
     @Mock
-    TokenValidator     tokenValidator;
+    private TokenValidator       tokenValidator;
     @Mock
-    UriInfo            uriInfo;
-    @Mock
-    EnvironmentContext environmentContext;
-    @Mock
-    SecurityContext    securityContext;
-    @Mock
-    UserManager        userManager;
-
-    UserService userService;
-
-    ResourceLauncher launcher;
+    private UserLinksInjector    linksInjector;
+    private UserValidator        userValidator;
+    @Captor
+    private ArgumentCaptor<User> userCaptor;
+    private UserService          userService;
 
     @BeforeMethod
-    public void setUp() throws Exception {
-        ResourceBinderImpl resources = new ResourceBinderImpl();
-        DependencySupplierImpl dependencies = new DependencySupplierImpl();
-        dependencies.addComponent(UserManager.class, userManager);
-        dependencies.addComponent(TokenValidator.class, tokenValidator);
+    public void initService() {
+        initMocks(this);
 
-        userService = new UserService(userManager, tokenValidator, true);
-        final Field uriField = userService.getClass()
-                                          .getSuperclass()
-                                          .getDeclaredField("uriInfo");
-        uriField.setAccessible(true);
-        uriField.set(userService, uriInfo);
+        userValidator = new UserValidator(userManager);
 
-        resources.addResource(userService, null);
+        // Return the incoming instance when injectLinks is called
+        when(linksInjector.injectLinks(any(), any())).thenAnswer(inv -> inv.getArguments()[0]);
 
-        EverrestProcessor processor = new EverrestProcessor(resources,
-                                                            new ApplicationProviderBinder(),
-                                                            dependencies,
-                                                            new EverrestConfiguration(),
-                                                            null);
-        launcher = new ResourceLauncher(processor);
-        ProviderBinder providerBinder = ProviderBinder.getInstance();
-        providerBinder.addExceptionMapper(ApiExceptionMapper.class);
-        ApplicationContextImpl.setCurrent(new ApplicationContextImpl(null, null, providerBinder));
-        //set up user
-        final User user = createUser();
-        when(environmentContext.get(SecurityContext.class)).thenReturn(securityContext);
-
-        when(uriInfo.getBaseUriBuilder()).thenReturn(new UriBuilderImpl());
-
-        org.eclipse.che.commons.env.EnvironmentContext.getCurrent().setSubject(new Subject() {
-
-            @Override
-            public String getUserName() {
-                return user.getEmail();
-            }
-
-            @Override
-            public boolean isMemberOf(String s) {
-                return false;
-            }
-
-            @Override
-            public boolean hasPermission(String domain, String instance, String action) {
-                return false;
-            }
-
-            @Override
-            public void checkPermission(String domain, String instance, String action) throws ForbiddenException {
-            }
-
-            @Override
-            public String getToken() {
-                return null;
-            }
-
-            @Override
-            public String getUserId() {
-                return user.getId();
-            }
-
-            @Override
-            public boolean isTemporary() {
-                return false;
-            }
-        });
+        userService = new UserService(userManager, tokenValidator, userValidator, linksInjector, true);
     }
 
     @Test
-    public void shouldBeAbleToCreateNewUser() throws Exception {
-        final String userEmail = "test@email.com";
-        final String token = "test_token";
-        when(tokenValidator.validateToken(token)).thenReturn(userEmail);
+    public void shouldCreateUserFromToken() throws Exception {
+        when(tokenValidator.validateToken("token_value")).thenReturn(new UserImpl("id", "test@eclipse.org", "test"));
 
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create?token=" + token, null);
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user?token=token_value");
 
-        assertEquals(response.getStatus(), CREATED.getStatusCode());
-        final UserDescriptor user = (UserDescriptor)response.getEntity();
-        assertEquals(user.getEmail(), userEmail);
-        assertEquals(user.getPassword(), "<none>");
-        verify(userManager).create(any(User.class), eq(false));
-
+        assertEquals(response.statusCode(), 201);
+        verify(userManager).create(userCaptor.capture(), anyBoolean());
+        final User user = userCaptor.getValue();
+        assertEquals(user.getEmail(), "test@eclipse.org");
+        assertEquals(user.getName(), "test");
     }
 
     @Test
-    public void shouldBeAbleToCreateNewUserWithEmail() throws Exception {
-        final String name = "name";
-        final String email = "test_user@email.com";
-        final UserDescriptor newUser = DtoFactory.getInstance()
-                                                 .createDto(UserDescriptor.class)
-                                                 .withName(name)
-                                                 .withEmail(email);
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+    public void shouldCreateUserFromEntity() throws Exception {
+        final UserDto newUser = newDto(UserDto.class).withName("test")
+                                                     .withEmail("test@codenvy.com")
+                                                     .withPassword("password12345");
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .body(newUser)
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user");
 
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
-
-        assertEquals(response.getStatus(), CREATED.getStatusCode());
-        final UserDescriptor descriptor = (UserDescriptor)response.getEntity();
-        assertEquals(descriptor.getName(), name);
-        assertEquals(descriptor.getEmail(), email);
+        assertEquals(response.statusCode(), 201);
+        verify(userManager).create(userCaptor.capture(), anyBoolean());
+        final User user = userCaptor.getValue();
+        assertEquals(user.getEmail(), "test@codenvy.com");
+        assertEquals(user.getName(), "test");
+        assertEquals(user.getPassword(), "password12345");
     }
 
     @Test
-    public void shouldBeAbleToCreateNewUserForSystemAdmin() throws Exception {
-        final UserDescriptor newUser = DtoFactory.getInstance()
-                                                 .createDto(UserDescriptor.class)
-                                                 .withName("test")
-                                                 .withPassword("password123")
-                                                 .withEmail("test@mail.com");
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+    public void shouldNotCreateUserFromEntityWhenPasswordIsNotValid() throws Exception {
+        final UserDto newUser = newDto(UserDto.class).withName("test")
+                                                     .withEmail("test@codenvy.com")
+                                                     .withPassword("1");
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .body(newUser)
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user");
 
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
-
-        assertEquals(response.getStatus(), CREATED.getStatusCode());
-        final UserDescriptor descriptor = (UserDescriptor)response.getEntity();
-        assertEquals(descriptor.getName(), newUser.getName());
-        assertEquals(descriptor.getPassword(), "<none>");
-        verify(userManager).create(any(User.class), eq(false));
+        assertEquals(response.statusCode(), 400);
+        assertEquals(unwrapError(response), "Password should contain at least 8 characters");
     }
 
     @Test
-    public void shouldNotBeAbleToCreateNewUserWithoutSystemAdminRoleIfDeniedUserSelfCreation() throws Exception {
-        when(securityContext.isUserInRole("system/admin")).thenReturn(false);
-        final Field uriField = userService.getClass()
-                                          .getDeclaredField("userSelfCreationAllowed");
-        uriField.setAccessible(true);
-        uriField.set(userService, false);
+    public void shouldNotCreateUserIfTokenIsNotValid() throws Exception {
+        when(tokenValidator.validateToken("token_value")).thenThrow(new ConflictException("error"));
 
-        final String userEmail = "test@email.com";
-        final String token = "test_token";
-        when(tokenValidator.validateToken(token)).thenReturn(userEmail);
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user?token=token_value");
 
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create?token=" + token, null);
-
-        assertEquals(response.getStatus(), FORBIDDEN.getStatusCode());
-        verify(userManager, never()).create(any(User.class), eq(false));
+        assertEquals(response.statusCode(), 409);
+        assertEquals(unwrapError(response), "error");
     }
 
     @Test
-    public void shouldBeAbleToCreateNewUserWithSystemAdminRoleIfDeniedUserSelfCreation() throws Exception {
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
-        final Field uriField = userService.getClass()
-                                          .getDeclaredField("userSelfCreationAllowed");
-        uriField.setAccessible(true);
-        uriField.set(userService, false);
+    public void shouldNotCreateUserFromEntityIfEntityIsNull() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user");
 
-        final UserDescriptor newUser = DtoFactory.getInstance()
-                                                 .createDto(UserDescriptor.class)
-                                                 .withName("test")
-                                                 .withEmail("test@mail.com");
-
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
-
-        assertEquals(response.getStatus(), CREATED.getStatusCode());
-        final UserDescriptor user = (UserDescriptor)response.getEntity();
-        assertEquals(user.getName(), newUser.getName());
-        assertEquals(user.getPassword(), "<none>");
-        verify(userManager).create(any(User.class), eq(false));
+        assertEquals(response.statusCode(), 400);
+        assertEquals(unwrapError(response), "User required");
     }
 
     @Test
-    public void shouldThrowForbiddenExceptionWhenCreatingUserWithInvalidPassword() throws Exception {
-        final UserDescriptor newUser = DtoFactory.getInstance()
-                                                 .createDto(UserDescriptor.class)
-                                                 .withName("test")
-                                                 .withPassword("password");
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+    public void shouldNotCreateUserFromEntityIfEmailIsNull() throws Exception {
+        final UserDto newUser = newDto(UserDto.class).withName("test")
+                                                     .withPassword("password12345");
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .body(newUser)
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user");
 
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
-
-        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userManager, never()).create(any(User.class), anyBoolean());
-    }
-
-
-    @Test
-    public void shouldThrowUnauthorizedExceptionWhenCreatingUserBasedOnTokenAndItIsNull() throws Exception {
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", null);
-
-        assertEquals(response.getStatus(), UNAUTHORIZED.getStatusCode());
-        verify(userManager, never()).create(any(User.class), anyBoolean());
+        assertEquals(response.statusCode(), 400);
+        assertEquals(unwrapError(response), "User email required");
     }
 
     @Test
-    public void shouldThrowForbiddenExceptionWhenCreatingUserBasedOnEntityWhichIsNull() throws Exception {
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+    public void shouldNotCreateUserFromEntityIfNameIsNull() throws Exception {
+        final UserDto newUser = newDto(UserDto.class).withEmail("test@codenvy.com")
+                                                     .withPassword("password12345");
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .body(newUser)
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user");
 
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", null);
-
-        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userManager, never()).create(any(User.class), anyBoolean());
+        assertEquals(response.statusCode(), 400);
+        assertEquals(unwrapError(response), "User name required");
     }
 
     @Test
-    public void shouldThrowForbiddenExceptionWhenCreatingUserBasedOnEntityWhichContainsNullEmail() throws Exception {
-        final UserDescriptor newUser = DtoFactory.getInstance().createDto(UserDescriptor.class);
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
+    public void shouldNotCreateUserFromEntityIfPasswordIsNotValid() throws Exception {
+        final UserDto newUser = newDto(UserDto.class).withEmail("test@codenvy.com")
+                                                     .withName("test")
+                                                     .withPassword("1");
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .body(newUser)
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user");
 
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
-
-        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userManager, never()).create(any(User.class), anyBoolean());
+        assertEquals(response.statusCode(), 400);
+        assertEquals(unwrapError(response), "Password should contain at least 8 characters");
     }
 
     @Test
     public void shouldBeAbleToGetCurrentUser() throws Exception {
-        final User user = createUser();
+        when(userManager.getById(SUBJECT.getUserId())).thenReturn(copySubject());
 
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH, null);
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/user");
 
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        final UserDescriptor descriptor = (UserDescriptor)response.getEntity();
-        assertEquals(descriptor.getId(), user.getId());
-        assertEquals(descriptor.getEmail(), user.getEmail());
-        assertEquals(descriptor.getAliases(), user.getAliases());
+        assertEquals(response.getStatusCode(), 200);
     }
 
     @Test
     public void shouldBeAbleToGetUserById() throws Exception {
-        final User user = createUser();
+        final UserImpl testUser = copySubject();
+        when(userManager.getById(SUBJECT.getUserId())).thenReturn(testUser);
 
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "/" + user.getId(), null);
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/user/" + SUBJECT.getUserId());
 
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        final UserDescriptor descriptor = (UserDescriptor)response.getEntity();
-        assertEquals(descriptor.getId(), user.getId());
-        assertEquals(descriptor.getEmail(), user.getEmail());
-        assertEquals(descriptor.getAliases(), user.getAliases());
+        assertEquals(response.getStatusCode(), 200);
+        final UserDto fetchedUser = unwrapDto(response, UserDto.class);
+        assertEquals(fetchedUser.getId(), testUser.getId());
+        assertEquals(fetchedUser.getName(), testUser.getName());
+        assertEquals(fetchedUser.getEmail(), testUser.getEmail());
     }
 
     @Test
-    public void shouldBeAbleToGetUserByEmail() throws Exception {
-        final User user = createUser();
+    public void shouldBeAbleToFindUserByEmail() throws Exception {
+        final UserImpl testUser = copySubject();
+        when(userManager.getByEmail(testUser.getEmail())).thenReturn(testUser);
 
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "?alias=" + user.getEmail(), null);
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/user/find?email=" + testUser.getEmail());
 
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        final UserDescriptor descriptor = (UserDescriptor)response.getEntity();
-        assertEquals(descriptor.getId(), user.getId());
-        assertEquals(descriptor.getEmail(), user.getEmail());
-        assertEquals(descriptor.getAliases(), user.getAliases());
+        assertEquals(response.getStatusCode(), 200);
+        final UserDto fetchedUser = unwrapDto(response, UserDto.class);
+        assertEquals(fetchedUser.getId(), testUser.getId());
+        assertEquals(fetchedUser.getName(), testUser.getName());
+        assertEquals(fetchedUser.getEmail(), testUser.getEmail());
     }
 
     @Test
-    public void shouldBeAbleToUpdateUserPassword() throws Exception {
-        final User user = createUser();
-        final String newPassword = "validPass123";
-        final Map<String, List<String>> headers = new HashMap<>();
-        headers.put(HttpHeaders.CONTENT_TYPE, singletonList(MediaType.APPLICATION_FORM_URLENCODED));
+    public void shouldBeAbleToFindUserByName() throws Exception {
+        final UserImpl testUser = copySubject();
+        when(userManager.getByName(testUser.getName())).thenReturn(testUser);
 
-        final ContainerResponse response = launcher.service(HttpMethod.POST,
-                                                            SERVICE_PATH + "/password",
-                                                            BASE_URI,
-                                                            headers,
-                                                            ("password=" + newPassword).getBytes(),
-                                                            null,
-                                                            environmentContext);
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/user/find?name=" + testUser.getName());
 
-        assertEquals(response.getStatus(), NO_CONTENT.getStatusCode());
-        verify(userManager).update(user.withPassword(newPassword));
+        assertEquals(response.getStatusCode(), 200);
+        final UserDto fetchedUser = unwrapDto(response, UserDto.class);
+        assertEquals(fetchedUser.getId(), testUser.getId());
+        assertEquals(fetchedUser.getName(), testUser.getName());
+        assertEquals(fetchedUser.getEmail(), testUser.getEmail());
     }
 
     @Test
-    public void shouldFailUpdatePasswordContainsOnlyLetters() throws Exception {
-        final User user = createUser();
-        final String newPassword = "password";
-        final Map<String, List<String>> headers = new HashMap<>();
-        headers.put(HttpHeaders.CONTENT_TYPE, singletonList(MediaType.APPLICATION_FORM_URLENCODED));
+    public void shouldNotFindUserByNameOrEmailWhenBothSpecified() throws Exception {
+        final UserImpl testUser = copySubject();
+        when(userManager.getByName(testUser.getName())).thenReturn(testUser);
 
-        final ContainerResponse response = launcher.service(HttpMethod.POST,
-                                                            SERVICE_PATH + "/password",
-                                                            BASE_URI,
-                                                            headers,
-                                                            ("password=" + newPassword).getBytes(),
-                                                            null,
-                                                            environmentContext);
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/user/find?" +
+                                              "name=" + testUser.getName() +
+                                              "&email=" + testUser.getEmail());
 
-        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userManager, never()).update(user.withPassword(newPassword));
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "Expected either user's email or name, while both values received");
     }
 
     @Test
-    public void shouldFailUpdatePasswordContainsOnlyDigits() throws Exception {
-        final User user = createUser();
-        final String newPassword = "12345678";
-        final Map<String, List<String>> headers = new HashMap<>();
-        headers.put(HttpHeaders.CONTENT_TYPE, singletonList(MediaType.APPLICATION_FORM_URLENCODED));
+    public void shouldNotFindUserByNameOrEmailWhenBothAreEmpty() throws Exception {
+        final UserImpl testUser = copySubject();
+        when(userManager.getByName(testUser.getName())).thenReturn(testUser);
 
-        final ContainerResponse response = launcher.service(HttpMethod.POST,
-                                                            SERVICE_PATH + "/password",
-                                                            BASE_URI,
-                                                            headers,
-                                                            ("password=" + newPassword).getBytes(),
-                                                            null,
-                                                            environmentContext);
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/user/find");
 
-        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userManager, never()).update(user.withPassword(newPassword));
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "Missed user's email or name");
     }
 
     @Test
-    public void shouldFailUpdatePasswordWhichLessEightChar() throws Exception {
-        final User user = createUser();
-        final String newPassword = "abc123";
-        final Map<String, List<String>> headers = new HashMap<>();
-        headers.put(HttpHeaders.CONTENT_TYPE, singletonList(MediaType.APPLICATION_FORM_URLENCODED));
-
-        final ContainerResponse response = launcher.service(HttpMethod.POST,
-                                                            SERVICE_PATH + "/password",
-                                                            BASE_URI,
-                                                            headers,
-                                                            ("password=" + newPassword).getBytes(),
-                                                            null,
-                                                            environmentContext);
-
-        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-        verify(userManager, never()).update(user.withPassword(newPassword));
-    }
-
-    @Test
-    public void shouldBeAbleToRemoveUser() throws Exception {
-        final User testUser = createUser();
-
-        final ContainerResponse response = makeRequest(HttpMethod.DELETE, SERVICE_PATH + "/" + testUser.getId(), null);
-
-        assertEquals(response.getStatus(), NO_CONTENT.getStatusCode());
-        verify(userManager).remove(testUser.getId());
-    }
-
-
-    /**
-     * Check we have a valid user which has the 'user' role
-     */
-    @Test
-    public void checkUserWithDefaultScope() throws Exception {
-        when(securityContext.isUserInRole("user")).thenReturn(true);
-
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "/inrole?role=user", null);
-
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        final UserInRoleDescriptor userInRoleDescriptor = (UserInRoleDescriptor)response.getEntity();
-
-        assertNotNull(userInRoleDescriptor);
-        assertEquals(userInRoleDescriptor.getIsInRole(), true);
-        assertEquals(userInRoleDescriptor.getScope(), "system");
-        assertEquals(userInRoleDescriptor.getScopeId(), "");
-    }
-
-
-    /**
-     * Check we have a valid user which has the 'user' role with 'system' scope
-     */
-    @Test
-    public void checkUserWithSystemScope() throws Exception {
-        when(securityContext.isUserInRole("user")).thenReturn(true);
-
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "/inrole?role=user&scope=system", null);
-
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        final UserInRoleDescriptor userInRoleDescriptor = (UserInRoleDescriptor)response.getEntity();
-
-        assertNotNull(userInRoleDescriptor);
-        assertEquals(userInRoleDescriptor.getIsInRole(), true);
-        assertEquals(userInRoleDescriptor.getScope(), "system");
-        assertEquals(userInRoleDescriptor.getScopeId(), "");
-    }
-
-    /**
-     * Check the current user has the temp_user role
-     *
-     * @throws Exception
-     */
-    @Test
-    public void checkTempUserWithSystemScope() throws Exception {
-        when(securityContext.isUserInRole("temp_user")).thenReturn(true);
-
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "/inrole?role=temp_user&scope=system", null);
-
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        final UserInRoleDescriptor userInRoleDescriptor = (UserInRoleDescriptor)response.getEntity();
-
-        assertNotNull(userInRoleDescriptor);
-        assertEquals(userInRoleDescriptor.getIsInRole(), true);
-        assertEquals(userInRoleDescriptor.getScope(), "system");
-        assertEquals(userInRoleDescriptor.getScopeId(), "");
-    }
-
-    /**
-     * Check admin user is 'true' for isUserInRole' with admin role
-     *
-     * @throws Exception
-     */
-    @Test
-    public void checkUserIsAdminWithDefaultScope() throws Exception {
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
-
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "/inrole?role=admin", null);
-
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        final UserInRoleDescriptor userInRoleDescriptor = (UserInRoleDescriptor)response.getEntity();
-
-        assertNotNull(userInRoleDescriptor);
-        assertEquals(userInRoleDescriptor.getIsInRole(), true);
-        assertEquals(userInRoleDescriptor.getScope(), "system");
-        assertEquals(userInRoleDescriptor.getScopeId(), "");
-    }
-
-    /**
-     * Check admin user is 'false' for isUserInRole' with admin role
-     *
-     * @throws Exception
-     */
-    @Test
-    public void checkUserIsNotAdmin() throws Exception {
-        when(securityContext.isUserInRole("system/admin")).thenReturn(false);
-
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "/inrole?role=admin", null);
-
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        final UserInRoleDescriptor userInRoleDescriptor = (UserInRoleDescriptor)response.getEntity();
-
-        assertNotNull(userInRoleDescriptor);
-        assertEquals(userInRoleDescriptor.getIsInRole(), false);
-        assertEquals(userInRoleDescriptor.getScope(), "system");
-        assertEquals(userInRoleDescriptor.getScopeId(), "");
-    }
-
-
-    /**
-     * Check admin user is 'true' for isUserInRole' with manager role
-     *
-     * @throws Exception
-     */
-    @Test
-    public void checkUserIsManagerWithProvidedScope() throws Exception {
-        when(securityContext.isUserInRole("system/manager")).thenReturn(true);
-
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "/inrole?role=manager&scope=system", null);
-
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        final UserInRoleDescriptor userInRoleDescriptor = (UserInRoleDescriptor)response.getEntity();
-
-        assertNotNull(userInRoleDescriptor);
-        assertEquals(userInRoleDescriptor.getIsInRole(), true);
-        assertEquals(userInRoleDescriptor.getScope(), "system");
-        assertEquals(userInRoleDescriptor.getScopeId(), "");
-    }
-
-    @Test
-    public void shouldNotBeAbleToCreateUserWithoutEmailBySystemAdmin() throws Exception {
-        final UserDescriptor newUser = DtoFactory.getInstance()
-                                                 .createDto(UserDescriptor.class)
-                                                 .withName("user")
-                                                 .withPassword("password");
-        when(securityContext.isUserInRole("system/admin")).thenReturn(true);
-
-        final ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH + "/create", newUser);
-
-        assertEquals(response.getStatus(), BAD_REQUEST.getStatusCode());
-    }
-
-    @Test
-    public void shouldBeAbleToGetSettingOfUserService() throws Exception {
-        final ContainerResponse response = makeRequest(HttpMethod.GET, SERVICE_PATH + "/settings", null);
-
-        assertEquals(response.getStatus(), OK.getStatusCode());
-        @SuppressWarnings("unchecked")
-        final Map<String, String> settings = (Map<String, String>)response.getEntity();
-        assertEquals(settings.size(), 1);
-        assertEquals(settings.get(UserService.USER_SELF_CREATION_ALLOWED), "true");
-    }
-
-    private User createUser() throws NotFoundException, ServerException {
-        final User testUser = new User().withId("test_id")
-                                        .withEmail("test@email");
+    public void shouldUpdatePassword() throws Exception {
+        final UserImpl testUser = copySubject();
         when(userManager.getById(testUser.getId())).thenReturn(testUser);
-        when(userManager.getByAlias(testUser.getEmail())).thenReturn(testUser);
-        return testUser;
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/x-www-form-urlencoded")
+                                         .body("password=password12345")
+                                         .when()
+                                         .post(SECURE_PATH + "/user/password");
+
+        verify(userManager).update(userCaptor.capture());
+        final User fetchedUser = userCaptor.getValue();
+        assertEquals(fetchedUser.getPassword(), "password12345");
     }
 
-    private ContainerResponse makeRequest(String method, String path, Object entity) throws Exception {
-        Map<String, List<String>> headers = null;
-        byte[] data = null;
-        if (entity != null) {
-            headers = new HashMap<>();
-            headers.put(HttpHeaders.CONTENT_TYPE, singletonList(MediaType.APPLICATION_JSON));
-            data = JsonHelper.toJson(entity).getBytes();
+    @Test
+    public void shouldNotUpdatePasswordIfPasswordContainsOnlyDigits() throws Exception {
+        final UserImpl testUser = copySubject();
+        when(userManager.getById(testUser.getId())).thenReturn(testUser);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/x-www-form-urlencoded")
+                                         .body("password=1234567890")
+                                         .when()
+                                         .post(SECURE_PATH + "/user/password");
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "Password should contain letters and digits");
+    }
+
+    @Test
+    public void shouldNotUpdatePasswordIfPasswordContainsLessThan8Chars() throws Exception {
+        final UserImpl testUser = copySubject();
+        when(userManager.getById(testUser.getId())).thenReturn(testUser);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/x-www-form-urlencoded")
+                                         .body("password=0xf")
+                                         .when()
+                                         .post(SECURE_PATH + "/user/password");
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "Password should contain at least 8 characters");
+    }
+
+    @Test
+    public void shouldNotUpdatePasswordIfPasswordIsNull() throws Exception {
+        final UserImpl testUser = copySubject();
+        when(userManager.getById(testUser.getId())).thenReturn(testUser);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/x-www-form-urlencoded")
+                                         .when()
+                                         .post(SECURE_PATH + "/user/password");
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(unwrapError(response), "Password required");
+    }
+
+    @Test
+    public void shouldRemoveUser() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .delete(SECURE_PATH + "/user/" + SUBJECT.getUserId());
+
+        assertEquals(response.getStatusCode(), 204);
+        verify(userManager).remove(SUBJECT.getUserId());
+    }
+
+    @Test
+    public void shouldBeAbleToGetSettings() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/user/settings");
+
+        assertEquals(response.getStatusCode(), 200);
+        final Map<String, String> settings = new Gson().fromJson(response.print(),
+                                                                 new TypeToken<Map<String, String>>() {}.getType());
+        assertEquals(settings, ImmutableMap.of("user.self.creation.allowed", "true"));
+    }
+
+    @Filter
+    public static class EnvironmentFilter implements RequestFilter {
+
+        public void doFilter(GenericContainerRequest request) {
+            EnvironmentContext.getCurrent().setSubject(SUBJECT);
         }
-        return launcher.service(method, path, BASE_URI, headers, data, null, environmentContext);
+    }
+
+    private static <T> T unwrapDto(Response response, Class<T> dtoClass) {
+        return DtoFactory.getInstance().createDtoFromJson(response.body().print(), dtoClass);
+    }
+
+    private static String unwrapError(Response response) {
+        return unwrapDto(response, ServiceError.class).getMessage();
+    }
+
+    private static UserImpl copySubject() {
+        return new UserImpl(SUBJECT.getUserId(),
+                            SUBJECT.getUserName() + "@codenvy.com",
+                            SUBJECT.getUserName(),
+                            null,
+                            emptyList());
     }
 }

@@ -16,6 +16,7 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -31,6 +32,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -47,6 +49,7 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Command
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,37 +88,39 @@ public class ConsolesPanelPresenterTest {
     private static final int    PID            = 101;
 
     @Mock
-    private DtoFactory                  dtoFactory;
+    private DtoFactory                          dtoFactory;
     @Mock
-    private CommandConsoleFactory       commandConsoleFactory;
+    private CommandConsoleFactory               commandConsoleFactory;
     @Mock
-    private CommandTypeRegistry         commandTypeRegistry;
+    private CommandTypeRegistry                 commandTypeRegistry;
     @Mock
-    private DialogFactory               dialogFactory;
+    private DialogFactory                       dialogFactory;
     @Mock
-    private WorkspaceAgent              workspaceAgent;
+    private WorkspaceAgent                      workspaceAgent;
     @Mock
-    private NotificationManager         notificationManager;
+    private NotificationManager                 notificationManager;
     @Mock
-    private MachineLocalizationConstant localizationConstant;
+    private MachineLocalizationConstant         localizationConstant;
     @Mock
-    private TerminalFactory             terminalFactory;
+    private TerminalFactory                     terminalFactory;
     @Mock
-    private ConsolesPanelView           view;
+    private ConsolesPanelView                   view;
     @Mock
-    private MachineResources            resources;
+    private MachineResources                    resources;
     @Mock
-    private AppContext                  appContext;
+    private AppContext                          appContext;
     @Mock
-    private MachineServiceClient        machineService;
+    private MachineServiceClient                machineService;
     @Mock
-    private EntityFactory               entityFactory;
+    private EntityFactory                       entityFactory;
     @Mock
-    private EventBus                    eventBus;
+    private EventBus                            eventBus;
     @Mock
-    private WorkspaceDto                workspace;
+    private WorkspaceDto                        workspace;
     @Mock
-    private OutputConsole               outputConsole;
+    private OutputConsole                       outputConsole;
+    @Mock
+    private ConsoleTreeContextMenuFactory       consoleTreeContextMenuFactory;
 
     @Mock
     private Promise<List<MachineDto>> machinesPromise;
@@ -143,7 +148,9 @@ public class ConsolesPanelPresenterTest {
 
     @Before
     public void setUp() {
-        when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        DevMachine devMachine = mock(DevMachine.class);
+        when(devMachine.getId()).thenReturn(WORKSPACE_ID);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
 
         when(machineService.getMachines(anyString())).thenReturn(machinesPromise);
         when(machineService.getMachine(anyString())).thenReturn(machinePromise);
@@ -151,11 +158,16 @@ public class ConsolesPanelPresenterTest {
 
         when(machineService.getProcesses(anyString())).thenReturn(processesPromise);
         when(processesPromise.then(Matchers.<Operation<List<MachineProcessDto>>>anyObject())).thenReturn(processesPromise);
+        when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
+
+        when(appContext.getWorkspaceId()).thenReturn("workspaceID");
 
         presenter =
                 new ConsolesPanelPresenter(view, eventBus, dtoFactory, dialogFactory, entityFactory, terminalFactory, commandConsoleFactory,
                                            commandTypeRegistry, workspaceAgent, notificationManager, localizationConstant,
-                                           machineService, resources, appContext);
+                                           machineService, resources, appContext, consoleTreeContextMenuFactory);
+        PartPresenter parent = mock(PartPresenter.class);
+        presenter.setParent(parent);
     }
 
     @Test
@@ -167,7 +179,7 @@ public class ConsolesPanelPresenterTest {
         when(commandTypeRegistry.getCommandTypeById(anyString())).thenReturn(commandType);
         when(commandType.getConfigurationFactory()).thenReturn(commandConfigurationFactory);
         when(commandConfigurationFactory.createFromDto(anyObject())).thenReturn(commandConfiguration);
-        when(commandConsoleFactory.create(anyObject(), anyString())).thenReturn(outputConsole);
+        when(commandConsoleFactory.create(anyObject(), any(org.eclipse.che.api.core.model.machine.Machine.class))).thenReturn(outputConsole);
 
         CommandDto commandDto = mock(CommandDto.class);
         when(dtoFactory.createDto(anyObject())).thenReturn(commandDto);
@@ -198,7 +210,7 @@ public class ConsolesPanelPresenterTest {
 
         verify(outputConsole).listenToOutput(eq(OUTPUT_CHANNEL));
         verify(outputConsole).attachToProcess(machineProcessDto);
-        verify(workspaceAgent).setActivePart(eq(presenter));
+        verify(workspaceAgent, times(2)).setActivePart(eq(presenter.parent));
     }
 
     @Test
@@ -211,16 +223,15 @@ public class ConsolesPanelPresenterTest {
         List<MachineDto> machines = new ArrayList<>(2);
         machines.add(machineDto);
 
-        when(appContext.getWorkspace()).thenReturn(workspace);
+        when(appContext.getWorkspaceId()).thenReturn("workspaceID");
         DevMachineStateEvent devMachineStateEvent = mock(DevMachineStateEvent.class);
-        verify(eventBus, times(4)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
+        verify(eventBus, times(5)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
 
         DevMachineStateEvent.Handler devMachineStateHandler = devMachineStateHandlerCaptor.getAllValues().get(0);
         devMachineStateHandler.onDevMachineStarted(devMachineStateEvent);
 
-        verify(appContext, times(2)).getWorkspaceId();
-        verify(machineService, times(2)).getMachines(eq(WORKSPACE_ID));
-        verify(machinesPromise, times(2)).then(machinesCaptor.capture());
+        verify(machineService).getMachines(eq(WORKSPACE_ID));
+        verify(machinesPromise).then(machinesCaptor.capture());
         machinesCaptor.getValue().apply(machines);
         verify(view).setProcessesData(anyObject());
     }
@@ -258,7 +269,7 @@ public class ConsolesPanelPresenterTest {
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
         verify(view).getNodeById(anyString());
-        verify(view).setStopButtonVisibility(anyString(), anyBoolean());
+        verify(view, times(2)).setStopButtonVisibility(anyString(), anyBoolean());
     }
 
     @Test
@@ -360,7 +371,7 @@ public class ConsolesPanelPresenterTest {
         verify(terminal).setVisible(eq(true));
         verify(terminal).connect();
         verify(terminal).setListener(anyObject());
-        verify(view).setStopButtonVisibility(anyString(), eq(false));
+        verify(view, times(3)).setStopButtonVisibility(anyString(), eq(false));
     }
 
     @Test
@@ -575,16 +586,19 @@ public class ConsolesPanelPresenterTest {
 
     @Test
     public void shouldCloseTerminal() throws Exception {
-        TerminalPresenter terminal = mock(TerminalPresenter.class);
         ProcessTreeNode machineNode = mock(ProcessTreeNode.class);
-        ProcessTreeNode terminalNode = mock(ProcessTreeNode.class);
         when(machineNode.getId()).thenReturn(MACHINE_ID);
+
+        TerminalPresenter terminal = mock(TerminalPresenter.class);
+
+        ProcessTreeNode terminalNode = mock(ProcessTreeNode.class);
+        when(terminalNode.getId()).thenReturn(PROCESS_ID);
+
         List<ProcessTreeNode> children = new ArrayList<>();
         children.add(machineNode);
         presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, children);
         presenter.terminals.put(PROCESS_ID, terminal);
 
-        when(terminalNode.getId()).thenReturn(PROCESS_ID);
         when(view.getNodeIndex(anyString())).thenReturn(0);
         when(machineNode.getChildren()).thenReturn(children);
         when(terminalNode.getParent()).thenReturn(machineNode);
@@ -601,34 +615,6 @@ public class ConsolesPanelPresenterTest {
     }
 
     @Test
-    public void shouldReturnTitle() throws Exception {
-        presenter.getTitle();
-
-        verify(localizationConstant, times(2)).viewConsolesTitle();
-    }
-
-    @Test
-    public void shouldReturnTitleToolTip() throws Exception {
-        presenter.getTitleToolTip();
-
-        verify(localizationConstant).viewProcessesTooltip();
-    }
-
-    @Test
-    public void shouldSetViewVisible() throws Exception {
-        presenter.setVisible(true);
-
-        verify(view).setVisible(eq(true));
-    }
-
-    @Test
-    public void shouldReturnTitleSVGImage() {
-        presenter.getTitleImage();
-
-        verify(resources).terminal();
-    }
-
-    @Test
     public void testGo() throws Exception {
         AcceptsOneWidget container = mock(AcceptsOneWidget.class);
 
@@ -636,5 +622,4 @@ public class ConsolesPanelPresenterTest {
 
         verify(container).setWidget(eq(view));
     }
-
 }

@@ -25,6 +25,7 @@ import java.io.File;
 public class CloneCommand extends RemoteOperationCommand<Void> {
 
     private String remoteName;
+    private boolean recursiveEnabled;
 
     public CloneCommand(File repository, SshScriptProvider sshScriptProvider, CredentialsLoader credentialsLoader, GitAskPassScript gitAskPassScript) {
         super(repository, sshScriptProvider, credentialsLoader, gitAskPassScript);
@@ -38,6 +39,9 @@ public class CloneCommand extends RemoteOperationCommand<Void> {
         if (remoteName != null) {
             commandLine.add("--origin", remoteName);
         } //else default origin name
+        if (recursiveEnabled) {
+            commandLine.add("--recursive");
+        }
         commandLine.add(getRemoteUri(), getRepository().getAbsolutePath());
         // Progress not shown if not a terminal. Activating progress output. See git clone man page.
         commandLine.add("--progress");
@@ -52,6 +56,16 @@ public class CloneCommand extends RemoteOperationCommand<Void> {
      */
     public CloneCommand setRemoteName(String remoteName) {
         this.remoteName = remoteName;
+        return this;
+    }
+
+    /**
+     * @param recursiveEnabled
+     *         returnes true if 'recursive' parameter enabled
+     * @return CloneCommand with established 'recursive' parameter
+     */
+    public CloneCommand setRecursiveEnabled(boolean recursiveEnabled) {
+        this.recursiveEnabled = recursiveEnabled;
         return this;
     }
 }

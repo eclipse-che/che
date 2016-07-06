@@ -105,7 +105,6 @@ public class SimpleGeneratorStrategyTest {
 
     private void prepareProject() throws Exception {
         final String vfsUser = "dev";
-        final Set<String> vfsUserGroups = new LinkedHashSet<>(Collections.singletonList("workspace/developer"));
 
         Set<ProjectTypeDef> pts = new HashSet<>();
         final ProjectTypeDef pt = new ProjectTypeDef("mytype", "mytype type", true, false) {

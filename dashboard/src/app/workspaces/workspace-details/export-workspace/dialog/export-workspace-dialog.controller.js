@@ -22,7 +22,7 @@ export class ExportWorkspaceDialogController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q, $filter, lodash, cheRemote, cheNotification, $http, cheRecipeTemplate, $mdDialog, $log) {
+  constructor($q, $filter, lodash, cheRemote, cheNotification, $http, cheRecipeTemplate, $mdDialog, $log, $window) {
     this.$q = $q;
     this.$filter = $filter;
     this.$http = $http;
@@ -32,6 +32,7 @@ export class ExportWorkspaceDialogController {
     this.cheRecipeTemplate = cheRecipeTemplate;
     this.$mdDialog = $mdDialog;
     this.$log = $log;
+    this.$window = $window;
     this.editorOptions = {
       lineWrapping : true,
       lineNumbers: false,
@@ -42,8 +43,10 @@ export class ExportWorkspaceDialogController {
     this.privateCloudUrl = '';
     this.privateCloudLogin = '';
     this.privateCloudPassword = '';
-    this.retrieveWorkspace();
     this.importInProgress = false;
+
+    this.copyOfConfig = this.getCopyOfConfig();
+    this.exportConfigContent = this.$filter('json')(angular.fromJson(this.copyOfConfig), 2);
   }
 
   /**
@@ -54,15 +57,38 @@ export class ExportWorkspaceDialogController {
   }
 
   /**
-   * Gets the workspace details and links to get download the JSON file
+   * Returns copy of workspace's config without unnecessary properties
+   * @returns {*}
    */
-  retrieveWorkspace() {
-    let copyOfWorkspace = angular.copy(this.workspaceDetails);
-    this.downloadLink = '/api/workspace/' + this.workspaceId + '?downloadAsFile=' + this.workspaceDetails.name + '.json';
+  getCopyOfConfig() {
+    let copyOfConfig = angular.copy(this.workspaceDetails.config);
 
-    //remove links
-    delete copyOfWorkspace.links;
-    this.exportWorkspaceContent = this.$filter('json')(angular.fromJson(copyOfWorkspace), 2);
+    return this.removeLinks(copyOfConfig);
+  }
+
+  /**
+   * Recursively remove 'links' property from object
+   *
+   * @param object {Object} object to iterate
+   * @returns {*}
+   */
+  removeLinks(object) {
+    delete object.links;
+
+    return this.lodash.forEach(object, (value) => {
+      if (angular.isObject(value)) {
+        return this.removeLinks(value);
+      } else {
+        return value;
+      }
+    })
+  }
+
+  /**
+   * Provide ability to download workspace's config
+   */
+  downloadConfig() {
+    this.$window.open('data:text/csv,' + encodeURIComponent(this.exportConfigContent));
   }
 
   /**
@@ -74,58 +100,64 @@ export class ExportWorkspaceDialogController {
     let login = this.cheRemote.newAuth(this.privateCloudUrl, this.privateCloudLogin, this.privateCloudPassword);
 
     login.then((authData) => {
-      let copyOfWorkspace = angular.copy(this.workspaceDetails);
-      copyOfWorkspace.config.name = 'import-' + copyOfWorkspace.config.name;
+      let copyOfConfig = angular.copy(this.copyOfConfig);
+      copyOfConfig.name = 'import-' + copyOfConfig.name;
 
       // get content of the recipe
-      let environments = copyOfWorkspace.config.environments;
-      let defaultEnvName = copyOfWorkspace.config.defaultEnv;
+      let environments = copyOfConfig.environments;
+      let defaultEnvName = copyOfConfig.defaultEnv;
       let defaultEnvironment = this.lodash.find(environments, (environment) => {
         return environment.name === defaultEnvName;
       });
 
-      let recipeLocation = defaultEnvironment.machineConfigs[0].source.location;
+      let machineSource = defaultEnvironment.machineConfigs[0].source;
+      let recipeLocation = machineSource.location;
+      if (recipeLocation) {
 
-      // get content of recipe
-      this.$http.get(recipeLocation).then((response) => {
+        // get content of recipe
+        this.$http.get(recipeLocation).then((response) => {
 
-        let recipeScriptContent = response.data;
-        // now upload the recipe to the remote service
-        let remoteRecipeAPI = this.cheRemote.newRecipe(authData);
+          let recipeScriptContent = response.data;
+          this.exportToPrivateCloudRecipeContent(recipeScriptContent, copyOfConfig, authData);
 
-        let recipeContent = this.cheRecipeTemplate.getDefaultRecipe();
-        recipeContent.name = 'recipe-' + copyOfWorkspace.config.name;
-        recipeContent.script = recipeScriptContent;
-
-        let createRecipePromise = remoteRecipeAPI.create(recipeContent);
-        createRecipePromise.then((recipe) => {
-          let findLink = this.lodash.find(recipe.links, (link) => {
-            return link.rel === 'get recipe script';
-          });
-
-          // update copy of workspace with new recipe link
-          let recipeLink = findLink.href;
-          defaultEnvironment.machineConfigs[0].source.location = recipeLink;
-
-          let remoteWorkspaceAPI = this.cheRemote.newWorkspace(authData);
-          this.exportInCloudSteps += 'Creating remote workspace...';
-          let createWorkspacePromise = remoteWorkspaceAPI.createWorkspaceFromConfig(null, copyOfWorkspace.config);
-          createWorkspacePromise.then((remoteWorkspace) => {
-            this.exportInCloudSteps += 'ok !<br>';
-
-            if (remoteWorkspace.config.projects && remoteWorkspace.config.projects.length > 0) {
-              this.startRemoteWorkspace(remoteWorkspaceAPI, remoteWorkspace, authData);
-            } else {
-              this.finishWorkspaceExporting(remoteWorkspace);
-            }
-          }, (error) => {
-            this.handleError(error);
-          })
+        }, (error) => {
+          this.handleError(error);
         });
-      }, (error) => {
-        this.handleError(error);
-      });
 
+      } else {
+        // use content from machine source
+        this.exportToPrivateCloudRecipeContent(machineSource.content, copyOfConfig, authData);
+      }
+    }, (error) => {
+      this.handleError(error);
+    });
+  }
+
+  /**
+   * Export the given workspace using authentication data provided and using specified recipe content
+   * @param recipeScriptContent the content of the machine configuration
+   * @param workspaceConfig the workspace configuration to use
+   * @param authData the data including token to deal with remote server
+   */
+  exportToPrivateCloudRecipeContent(recipeScriptContent, workspaceConfig, authData) {
+    let environments = workspaceConfig.environments;
+    let defaultEnvName = workspaceConfig.defaultEnv;
+    let defaultEnvironment = this.lodash.find(environments, (environment) => {
+      return environment.name === defaultEnvName;
+    });
+
+    defaultEnvironment.machineConfigs[0].source.content = recipeScriptContent;
+    let remoteWorkspaceAPI = this.cheRemote.newWorkspace(authData);
+    this.exportInCloudSteps += 'Creating remote workspace...';
+    let createWorkspacePromise = remoteWorkspaceAPI.createWorkspaceFromConfig(null, workspaceConfig);
+    createWorkspacePromise.then((remoteWorkspace) => {
+      this.exportInCloudSteps += 'ok !<br>';
+
+      if (remoteWorkspace.config.projects && remoteWorkspace.config.projects.length > 0) {
+        this.startRemoteWorkspace(remoteWorkspaceAPI, remoteWorkspace, authData);
+      } else {
+        this.finishWorkspaceExporting(remoteWorkspace);
+      }
     }, (error) => {
       this.handleError(error);
     });
@@ -153,18 +185,27 @@ export class ExportWorkspaceDialogController {
       });
 
 
-      //TODO when token for wsagent is ready - will need to use it instead of wsmaster one:
-      let agentAuthData = {url: wsAgentLink.href, token: authData.token};
-      let remoteProjectAPI = this.cheRemote.newProject(agentAuthData);
+      // grab token for machine
+      let tokenPromise = remoteWorkspaceAPI.getMachineToken(remoteWorkspace.id);
+      tokenPromise.then((machineTokenResult) => {
+        // ask with machine token
+        let agentAuthData = {url: wsAgentLink.href, token: machineTokenResult.machineToken};
+        let remoteProjectAPI = this.cheRemote.newProject(agentAuthData);
 
-      this.exportInCloudSteps += 'ok !<br>';
-      // ok now we've to import each project with a location into the remote workspace
-      let importProjectsPromise = this.importProjectsIntoWorkspace(remoteProjectAPI, remoteWorkspace);
-      importProjectsPromise.then(() => {
-        this.finishWorkspaceExporting(remoteWorkspace);
+        this.exportInCloudSteps += 'ok !<br>';
+        // ok now we've to import each project with a location into the remote workspace
+        let importProjectsPromise = this.importProjectsIntoWorkspace(remoteProjectAPI, remoteWorkspace);
+        importProjectsPromise.then(() => {
+          this.finishWorkspaceExporting(remoteWorkspace);
+        }, (error) => {
+          this.handleError(error);
+        })
       }, (error) => {
         this.handleError(error);
-      })
+      });
+
+
+
     }, (error) => {
       this.handleError(error);
     });
@@ -226,7 +267,7 @@ export class ExportWorkspaceDialogController {
       } else {
         message = error.data;
       }
-    } else {
+    } else if(error.config && error.config.url) {
       message = 'unable to connect to ' + error.config.url;
     }
     this.cheNotification.showError('Exporting workspace failed: ' + message);

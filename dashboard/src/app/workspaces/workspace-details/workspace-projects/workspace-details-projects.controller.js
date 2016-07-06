@@ -25,11 +25,12 @@ export class WorkspaceDetailsProjectsCtrl {
   constructor($route, cheAPI, $mdMedia) {
     this.cheWorkspace = cheAPI.getWorkspace();
     this.$mdMedia = $mdMedia;
-    this.workspaceId = $route.current.params.workspaceId;
+    this.namespace = $route.current.params.namespace;
+    this.workspaceName = $route.current.params.workspaceName;
 
-    let profilePreferences = cheAPI.getProfile().getPreferences();
+    let preferences = cheAPI.getPreferences().getPreferences();
 
-    this.profileCreationDate = profilePreferences['che:created'];
+    this.profileCreationDate = preferences['che:created'];
 
     if (!this.cheWorkspace.getWorkspacesById().get(this.workspaceId)) {
       let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId);
@@ -46,7 +47,7 @@ export class WorkspaceDetailsProjectsCtrl {
   }
 
   updateProjectsData() {
-    this.workspace = this.cheWorkspace.getWorkspacesById().get(this.workspaceId);
+    this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
     this.projects = this.workspace.config.projects;
   }
 

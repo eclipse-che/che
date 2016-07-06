@@ -22,12 +22,13 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
 import org.eclipse.che.plugin.maven.client.actions.GetEffectivePomAction;
-import org.eclipse.che.plugin.maven.client.actions.MavenActionsConstants;
 import org.eclipse.che.plugin.maven.client.actions.ReimportMavenDependenciesAction;
 import org.eclipse.che.plugin.maven.client.comunnication.MavenMessagesHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.DependencyResolverAction;
 import org.eclipse.che.plugin.maven.client.editor.ClassFileSourcesDownloader;
 import org.eclipse.che.plugin.maven.client.editor.PomEditorProvider;
+import org.eclipse.che.plugin.maven.client.project.MavenModelImporter;
+import org.eclipse.che.plugin.maven.client.project.ResolvingMavenProjectStateHolder;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 import java.util.Arrays;
@@ -53,7 +54,9 @@ public class MavenExtension {
     public MavenExtension(PreSelectedProjectTypeManager preSelectedProjectManager,
                           MavenMessagesHandler messagesHandler,
                           ClassFileSourcesDownloader downloader,
-                          MavenResources resources) {
+                          MavenModelImporter importMavenModelHandler,
+                          MavenResources resources,
+                          ResolvingMavenProjectStateHolder resolvingProjectStateHolder) {
         this.resources = resources;
 
         preSelectedProjectManager.setProjectTypeIdToPreselect(MavenAttributes.MAVEN_ID, 100);
@@ -105,7 +108,7 @@ public class MavenExtension {
                                   MavenResources mavenResources,
                                   EditorRegistry editorRegistry,
                                   PomEditorProvider editorProvider) {
-        FileType pomFile = new FileType(mavenResources.maven(), "pom.xml");
+        FileType pomFile = new FileType(mavenResources.maven(), "pom.xml", "pom\\.xml");
         fileTypeRegistry.registerFileType(pomFile);
         editorRegistry.register(pomFile, editorProvider);
     }

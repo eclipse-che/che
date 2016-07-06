@@ -22,8 +22,6 @@ export class CheProfile {
    * @ngInject for Dependency injection
    */
   constructor($resource, $http) {
-
-    // keep resource
     this.$resource = $resource;
 
     // http is used for sending data with DELETE method (angular is not sending any data by default with DELETE)
@@ -32,19 +30,13 @@ export class CheProfile {
     // remote call
     this.remoteProfileAPI = this.$resource('/api/profile', {}, {
       getById: {method: 'GET', url: '/api/profile/:userId'},
-      setAttributes: {method: 'POST', url: '/api/profile'}
+      setAttributes: {method: 'PUT', url: '/api/profile/attributes'}
     });
-
-    // remote call for preferences
-    this.remoteProfilePreferencesAPI = this.$resource('/api/profile/prefs');
 
     this.profileIdMap = new Map();
 
     // fetch the profile when we're initialized
-      this.fetchProfile();
-
-    // fetch the profilePreferences when we're initialized
-      this.fetchPreferences();
+    this.fetchProfile();
   }
 
 
@@ -54,37 +46,6 @@ export class CheProfile {
    */
   getProfile() {
     return this.profile;
-  }
-
-  /**
-   * Gets the preferences
-   * @return preferences
-   */
-  getPreferences() {
-    return this.profilePreferences;
-  }
-
-
-  /**
-   * Update the preferences
-   * @param properties
-   */
-  updatePreferences(properties) {
-    angular.extend(this.profilePreferences, properties);
-    this.profilePreferences.$save();
-  }
-
-  /**
-   * Remove preferences properties
-   * @param properties (list of keys)
-   */
-  removePreferences(properties) {
-    this.$http({
-      url: '/api/profile/prefs',
-      method: 'DELETE',
-      headers: {'Content-Type': 'application/json;charset=utf-8'},
-      data: properties});
-    this.fetchPreferences();
   }
 
   /**
@@ -127,27 +88,6 @@ export class CheProfile {
     });
 
     return profilePromise;
-  }
-
-  /**
-   * Gets the preferences data
-   */
-  fetchPreferences() {
-    let profilePreferences = this.remoteProfilePreferencesAPI.get();
-    // if we don't yet have data
-    if (!this.profilePreferences) {
-      // set profilePreferences for using promise in controllers during first request
-      this.profilePreferences = profilePreferences;
-    }
-
-    let profilePrefsPromise = this.profilePreferences.$promise;
-
-    profilePrefsPromise.then((profilePreferences) => {
-      // update profilePreferences data if we have new value
-      this.profilePreferences = profilePreferences;
-    });
-
-    return profilePrefsPromise;
   }
 
   /**

@@ -34,12 +34,12 @@
          ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
       <div flex-gt-xs="33"
            class="workspace-item-name">
-        <span class="che-hover">{{workspaceItemCtrl.workspace.config.name}}</span>
+        <span class="che-hover">{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}</span>
         <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.temporary"></i>
       </div>
       <div flex-gt-xs="33"
            class="workspace-item-status">
-        <workspace-status-indicator che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status-indicator>
+        <workspace-status che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status>
       </div>
       <div flex-gt-xs="33"
            class="workspace-consumed-value">
@@ -48,7 +48,7 @@
     </div>
 
     <div flex="none" layout="row" layout-align="center center">
-      <a ng-href="#/ide/{{workspaceItemCtrl.workspace.config.name}}">
+      <a ng-href="#/ide/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}">
         <che-button-default class="che-hover workspace-list-item-arrow"
                             che-button-icon="fa fa fa-chevron-circle-right"
                             che-button-title="Open in IDE"></che-button-default>

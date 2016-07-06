@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -36,35 +37,36 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.MockSettings;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.creation.MockSettingsImpl;
 
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -76,11 +78,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link AbstractDebugger} functionality.
@@ -109,13 +113,9 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private EventBus              eventBus;
     @Mock
-    private AppContext            appContext;
-    @Mock
     private ActiveFileHandler     activeFileHandler;
     @Mock
     private DebuggerManager       debuggerManager;
-    @Mock
-    private FileTypeRegistry      fileTypeRegistry;
     @Mock
     private BreakpointManager     breakpointManager;
 
@@ -129,8 +129,6 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private VirtualFile        file;
     @Mock
-    private FqnResolverFactory fqnResolverFactory;
-    @Mock
     private LocalStorage       localStorage;
     @Mock
     private DebuggerObserver   observer;
@@ -139,7 +137,7 @@ public class DebuggerTest extends BaseTest {
     @Mock
     private BreakpointDto      breakpointDto;
     @Mock
-    private FqnResolver        fgnResolver;
+    private Optional<Project>  optional;
 
     @Captor
     private ArgumentCaptor<WsAgentStateHandler>             extServerStateHandlerCaptor;
@@ -178,13 +176,10 @@ public class DebuggerTest extends BaseTest {
         doReturn(DEBUG_INFO).when(localStorage).getItem(AbstractDebugger.LOCAL_STORAGE_DEBUGGER_SESSION_KEY);
         doReturn(debugSessionDto).when(dtoFactory).createDtoFromJson(anyString(), eq(DebugSessionDto.class));
 
-        doReturn(fgnResolver).when(fqnResolverFactory).getResolver(anyString());
-        doReturn(FQN).when(fgnResolver).resolveFqn(file);
-
         doReturn(PATH).when(file).getPath();
 
-        debugger = new TestDebugger(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus, fqnResolverFactory,
-                                    activeFileHandler, debuggerManager, fileTypeRegistry, "id");
+        debugger = new TestDebugger(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus,
+                                    activeFileHandler, debuggerManager, "id");
         doReturn(promiseInfo).when(service).getSessionInfo(SESSION_ID);
         doReturn(promiseInfo).when(promiseInfo).then(any(Operation.class));
 
@@ -196,7 +191,6 @@ public class DebuggerTest extends BaseTest {
 
         FileType fileType = mock(FileType.class);
         doReturn("java").when(fileType).getExtension();
-        doReturn(fileType).when(fileTypeRegistry).getFileTypeByFile(eq(file));
     }
 
     @Test
@@ -378,16 +372,39 @@ public class DebuggerTest extends BaseTest {
 
     @Test
     public void testAddBreakpoint() throws Exception {
+        MockSettings mockSettings = new MockSettingsImpl<>().defaultAnswer(RETURNS_SMART_NULLS)
+                                                            .extraInterfaces(Resource.class);
+        Project project = mock(Project.class);
+        when(optional.isPresent()).thenReturn(true);
+        when(optional.get()).thenReturn(project);
+        when(project.getPath()).thenReturn(PATH);
+
+        VirtualFile virtualFile = mock(VirtualFile.class, mockSettings);
+        Path path = mock(Path.class);
+        when(path.toString()).thenReturn(PATH);
+        when(virtualFile.getLocation()).thenReturn(path);
+        when(virtualFile.toString()).thenReturn(PATH);
+
+        Resource resource = (Resource)virtualFile;
+        when(resource.getRelatedProject()).thenReturn(optional);
         doReturn(promiseVoid).when(service).addBreakpoint(SESSION_ID, breakpointDto);
         doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>)any());
+        when(locationDto.withLineNumber(LINE_NUMBER + 1)).thenReturn(locationDto);
+        when(locationDto.withResourcePath(PATH)).thenReturn(locationDto);
+        when(locationDto.withResourceProjectPath(PATH)).thenReturn(locationDto);
+        when(locationDto.withTarget(anyString())).thenReturn(locationDto);
+        when(breakpointDto.withLocation(locationDto)).thenReturn(breakpointDto);
+        when(breakpointDto.withEnabled(true)).thenReturn(breakpointDto);
 
-        debugger.addBreakpoint(file, LINE_NUMBER);
+        debugger.addBreakpoint(virtualFile, LINE_NUMBER);
 
-        verify(locationDto).setLineNumber(LINE_NUMBER + 1);
-        verify(locationDto).setTarget(FQN);
+        verify(locationDto).withLineNumber(LINE_NUMBER + 1);
+        verify(locationDto).withTarget(FQN);
+        verify(locationDto).withResourcePath(PATH);
+        verify(locationDto).withResourceProjectPath(PATH);
 
-        verify(breakpointDto).setLocation(locationDto);
-        verify(breakpointDto).setEnabled(true);
+        verify(breakpointDto).withLocation(locationDto);
+        verify(breakpointDto).withEnabled(true);
 
         verify(promiseVoid).then(operationVoidCaptor.capture());
         operationVoidCaptor.getValue().apply(null);
@@ -567,29 +584,26 @@ public class DebuggerTest extends BaseTest {
                             LocalStorageProvider localStorageProvider,
                             MessageBusProvider messageBusProvider,
                             EventBus eventBus,
-                            FqnResolverFactory fqnResolverFactory,
                             ActiveFileHandler activeFileHandler,
                             DebuggerManager debuggerManager,
-                            FileTypeRegistry fileTypeRegistry,
                             String id) {
             super(service,
                   dtoFactory,
                   localStorageProvider,
                   messageBusProvider,
                   eventBus,
-                  fqnResolverFactory,
                   activeFileHandler,
                   debuggerManager,
-                  fileTypeRegistry,
                   breakpointManager,
                   id);
         }
 
         @Override
-        protected List<String> fqnToPath(@NotNull Location location) {
-            return Collections.emptyList();
+        protected String fqnToPath(Location location) {
+            return PATH;
         }
 
+        @Nullable
         @Override
         protected String pathToFqn(VirtualFile file) {
             return FQN;

@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXParseException;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -151,12 +151,12 @@ public class MavenServerService {
         return Boolean.toString(classpathManager.downloadSources(projectPath, fqn));
     }
 
-    @PUT
+    @POST
     @Path("reimport")
-    @ApiOperation(value = "Reimport maven dependencies")
+    @ApiOperation(value = "Re-import maven model")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
-    public Response reimportDependencies(@ApiParam(value = "The paths to projects which need to be reimported dependencies")
+    public Response reimportDependencies(@ApiParam(value = "The paths to projects which need to be reimported")
                                          @QueryParam("projectPath") List<String> paths) throws ServerException {
         IWorkspace workspace = eclipseWorkspaceProvider.get();
         List<IProject> projectsList =
@@ -166,9 +166,12 @@ public class MavenServerService {
     }
 
     @GET
-    @Path("pom/reconsile")
+    @Path("pom/reconcile")
+    @ApiOperation(value = "Reconcile pom.xml file")
+    @ApiResponses({@ApiResponse(code = 200, message = "OK")})
     @Produces("application/json")
-    public List<Problem> reconsilePom(@QueryParam("pompath") String pomPath) {
+    public List<Problem> reconcilePom(@ApiParam(value = "The paths to pom.xml file which need to be reconciled")
+                                      @QueryParam("pompath") String pomPath) {
         VirtualFileEntry entry = null;
         List<Problem> result = new ArrayList<>();
         try {
@@ -176,39 +179,27 @@ public class MavenServerService {
             if (entry == null) {
                 return result;
             }
+
             Model.readFrom(entry.getVirtualFile());
             org.eclipse.che.api.vfs.Path path = entry.getPath();
             String pomContent = entry.getVirtualFile().getContentAsString();
             MavenProject mavenProject =
                     mavenProjectManager.findMavenProject(ResourcesPlugin.getWorkspace().getRoot().getProject(path.getParent().toString()));
-            if (mavenProject != null) {
-                List<MavenProjectProblem> problems = mavenProject.getProblems();
-                int start = pomContent.indexOf("<project ") + 1;
-                int end = start + "<project ".length();
-                List<Problem> problemList = problems.stream().map(mavenProjectProblem -> {
-                    Problem problem = DtoFactory.newDto(Problem.class);
-                    problem.setError(true);
-                    problem.setSourceStart(start);
-                    problem.setSourceEnd(end);
-                    problem.setMessage(mavenProjectProblem.getDescription());
-                    return problem;
-                }).collect(Collectors.toList());
-
-                List<Problem> missedArtifacts =
-                        mavenProject.getDependencies().stream()
-                                    .filter(mavenArtifact -> !mavenArtifact.isResolved())
-                                    .map(artifact -> {
-                                        Problem problem = DtoFactory.newDto(Problem.class);
-                                        problem.setError(true);
-                                        problem.setSourceStart(start);
-                                        problem.setSourceEnd(end);
-                                        problem.setMessage("Dependency " + artifact.getDisplayString() + " not found.");
-                                        return problem;
-                                    }).collect(Collectors.toList());
-
-                result.addAll(missedArtifacts);
-                result.addAll(problemList);
+            if (mavenProject == null) {
+                return result;
             }
+
+            List<MavenProjectProblem> problems = mavenProject.getProblems();
+            int start = pomContent.indexOf("<project ") + 1;
+            int end = start + "<project ".length();
+
+            List<Problem> problemList = problems.stream().map(mavenProjectProblem -> DtoFactory.newDto(Problem.class)
+                                                                                               .withError(true)
+                                                                                               .withSourceStart(start)
+                                                                                               .withSourceEnd(end)
+                                                                                               .withMessage(mavenProjectProblem.getDescription()))
+                                                .collect(Collectors.toList());
+            result.addAll(problemList);
         } catch (ServerException | ForbiddenException | IOException e) {
             LOG.error(e.getMessage(), e);
         } catch (XMLTreeException exception) {
@@ -218,7 +209,6 @@ public class MavenServerService {
             }
         }
         return result;
-
     }
 
     private Problem createProblem(VirtualFileEntry entry, SAXParseException spe) {

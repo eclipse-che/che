@@ -10,23 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
-import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEventHandler;
-import org.eclipse.che.ide.api.event.SelectionChangedEvent;
-import org.eclipse.che.ide.api.event.SelectionChangedHandler;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
 
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
+import static org.eclipse.che.ide.api.resources.Resource.FILE;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaFile;
 
 /**
  * Provides FQN of the Java-class which is opened in active editor.
@@ -34,20 +32,14 @@ import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class CurrentClassFQNProvider implements CommandPropertyValueProvider, FileEventHandler, SelectionChangedHandler {
+public class CurrentClassFQNProvider implements CommandPropertyValueProvider {
 
     private static final String KEY = "${current.class.fqn}";
-    private final EditorAgent editorAgent;
-
-    private String value;
+    private final AppContext appContext;
 
     @Inject
-    public CurrentClassFQNProvider(EventBus eventBus, EditorAgent editorAgent) {
-        this.editorAgent = editorAgent;
-        this.value = "";
-
-        eventBus.addHandler(SelectionChangedEvent.TYPE, this);
-        eventBus.addHandler(FileEvent.TYPE, this);
+    public CurrentClassFQNProvider(AppContext appContext) {
+        this.appContext = appContext;
     }
 
     @Override
@@ -57,31 +49,19 @@ public class CurrentClassFQNProvider implements CommandPropertyValueProvider, Fi
 
     @Override
     public Promise<String> getValue() {
-        return Promises.resolve(value);
-    }
+        final Resource[] resources = appContext.getResources();
 
-    @Override
-    public void onFileOperation(FileEvent event) {
-        // the last file was closed
-        if (event.getOperationType() == CLOSE && editorAgent.getOpenedEditors().isEmpty()) {
-            value = "";
-        }
-    }
-
-    @Override
-    public void onSelectionChanged(SelectionChangedEvent event) {
-        final Selection<?> selection = event.getSelection();
-        if (selection == null || selection.isEmpty() || selection.isMultiSelection()) {
-            value = "";
-            return;
+        if (resources == null || resources.length > 1) {
+            return Promises.resolve("");
         }
 
-        final Object selObject = selection.getHeadElement();
+        final Resource resource = resources[0];
+        final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
 
-        if (selObject instanceof VirtualFile) {
-            value = JavaSourceFolderUtil.getFQNForFile((VirtualFile)selObject);
+        if (resource.getResourceType() == FILE && isJavaFile(resource) && srcFolder.isPresent()) {
+            return Promises.resolve(JavaUtil.resolveFQN((Container)srcFolder.get(), resource));
         } else {
-            value = "";
+            return Promises.resolve("");
         }
     }
 }

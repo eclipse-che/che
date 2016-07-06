@@ -14,7 +14,7 @@
 <html class="no-js" ng-app="userDashboard" ng-strict-di>
   <head>
     <meta charset="utf-8">
-    <title ng-bind="branding.title">Loading Dashboard...</title>
+    <title ng-bind="branding.title + ' | ' + currentPage">Loading Dashboard...</title>
     <meta name="description" content="">
     <base href="/">
     <meta name="viewport" content="width=device-width">
@@ -50,13 +50,12 @@
   <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
 
-  <md-sidenav id="chenavmenu" class='ide-show not-visible' ng-hide="showIDE" ng-class="waitingLoaded ? 'md-sidenav-left md-whiteframe-z2 dark-menu-bg sidebar-entry' : 'not-visible'" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')">
-    <che-nav-bar id="chenavbar" ></che-nav-bar>
+  <md-sidenav id="chenavmenu" class='ide-show not-visible' ng-class="waitingLoaded ? 'md-sidenav-left md-whiteframe-z2 dark-menu-bg sidebar-entry' : 'not-visible'" md-component-id="left" md-is-locked-open="!hideNavbar" layout="row">
+    <che-nav-bar id="chenavbar" layout="row" flex></che-nav-bar>
   </md-sidenav>
-  <div class="main-page ide-show" layout="column" flex ng-show="waitingLoaded && !showIDE">
-    <div id="main-content" role="main" ng-view layout="column" flex>
-    </div>
-    <che-footer che-logo="{{branding.logoURL}}" che-support-help-path="{{branding.helpPath}}" che-support-help-title="{{branding.helpTitle}}" che-support-email="{{branding.supportEmail}}" che-product-name="Eclipse Che"></che-footer>
+  <div class="main-page ide-show" layout="column" flex>
+    <div id="main-content" role="main" ng-view layout="column" flex ng-show="waitingLoaded && !showIDE"></div>
+    <che-footer che-support-help-path="{{branding.helpPath}}" che-support-help-title="{{branding.helpTitle}}" che-support-email="{{branding.supportEmail}}" che-product-name="Eclipse Che" ng-show="waitingLoaded && !showIDE"></che-footer>
   </div>
     <!-- Addons are not automatically injected -->
 

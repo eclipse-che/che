@@ -17,17 +17,20 @@
     <div layout="row" flex layout-align="space-around start">
       <label flex="15" hide-sm hide-md>Commonly used stacks: </label>
 
-      <div layout="row" flex="85" layout-wrap ng-if="readyToGoStacksCtrl.stacks.length > 0">
-        <che-simple-selecter ng-repeat="stack in readyToGoStacksCtrl.stacks
-              | orderBy:[readyToGoStacksCtrl.getPrivilegedSortPosition, 'name']
-              | filter:{ scope: 'general' }"
-                             che-value="stack"
-                             che-is-first="$first"
-                             che-name="StackSelectWidget"
-                             che-title="{{stack.name}}"
-                             che-description="{{readyToGoStacksCtrl.tagsToString(stack.tags)}}"
-                             che-icon-src="{{stack.iconSrc}}"
-                             che-callback-controller="readyToGoStacksCtrl"/>
+      <div layout="row" flex="85" layout-wrap>
+        <md-card layout="column" class="che-simple-selector"
+                 ng-repeat="stack in readyToGoStacksCtrl.generalStacks | orderBy:[readyToGoStacksCtrl.getPrivilegedSortPosition, 'name']"
+                 ng-init="readyToGoStacksCtrl.initValue($first, stack)"
+                 ng-click="readyToGoStacksCtrl.select(stack)"
+                 ng-class="{'che-simple-selector-active' : '{{stack.name}}' === readyToGoStacksCtrl.stack.name}">
+          <div layout="row">
+            <div class="selector-icon" ng-class="{'chefont cheico-type-blank' : !stack.iconSrc}">
+              <img ng-if="stack.iconSrc" ng-src="{{stack.iconSrc}}"/>
+            </div>
+            <div flex="70" class="title">{{stack.name}}</div>
+          </div>
+          <div class="description">{{readyToGoStacksCtrl.tagsToString(stack.tags)}}</div>
+        </md-card>
       </div>
     </div>
   </div>

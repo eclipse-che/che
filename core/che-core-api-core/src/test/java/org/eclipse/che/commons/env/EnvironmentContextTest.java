@@ -14,8 +14,6 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -28,7 +26,7 @@ public class EnvironmentContextTest {
         EnvironmentContext expected = EnvironmentContext.getCurrent();
         expected.setWorkspaceId("ws1");
         expected.setWorkspaceTemporary(true);
-        expected.setSubject(new SubjectImpl("user", "id", "token", Collections.singleton("role"), false));
+        expected.setSubject(new SubjectImpl("user", "id", "token", false));
 
         EnvironmentContext actual = EnvironmentContext.getCurrent();
         assertEquals(actual.getWorkspaceId(), "ws1");
@@ -37,7 +35,6 @@ public class EnvironmentContextTest {
         assertEquals(actualSubject.getUserName(), "user");
         assertEquals(actualSubject.getUserId(), "id");
         assertEquals(actualSubject.getToken(), "token");
-        assertTrue(actualSubject.isMemberOf("role"));
         assertFalse(actualSubject.isTemporary());
     }
 
@@ -47,11 +44,10 @@ public class EnvironmentContextTest {
         final EnvironmentContext expected = EnvironmentContext.getCurrent();
         expected.setWorkspaceId("ws1");
         expected.setWorkspaceTemporary(true);
-        expected.setSubject(new SubjectImpl("user", "id", "token", Collections.singleton("role"), false));
+        expected.setSubject(new SubjectImpl("user", "id", "token", false));
 
 
-
-        Thread otherThread = new Thread(){
+        Thread otherThread = new Thread() {
             @Override
             public void run() {
                 EnvironmentContext.getCurrent();

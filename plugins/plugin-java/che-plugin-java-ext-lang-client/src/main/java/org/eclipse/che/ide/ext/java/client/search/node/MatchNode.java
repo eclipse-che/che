@@ -12,35 +12,35 @@ package org.eclipse.che.ide.ext.java.client.search.node;
 
 import elemental.html.SpanElement;
 
+import com.google.common.base.Optional;
 import com.google.gwt.dom.client.Element;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.data.tree.HasAction;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
-import org.eclipse.che.ide.api.project.node.HasAction;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
-import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.SyntheticFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
-import org.eclipse.che.ide.ext.java.client.project.node.jar.JarFileNode;
-import org.eclipse.che.ide.ext.java.shared.JarEntry;
+import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
+import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.ext.java.shared.dto.Region;
 import org.eclipse.che.ide.ext.java.shared.dto.model.ClassFile;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.search.Match;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
@@ -56,38 +56,32 @@ import java.util.List;
  */
 public class MatchNode extends AbstractPresentationNode implements HasAction {
 
-    private TreeStyles      styles;
-    private JavaResources   resources;
-    private EditorAgent     editorAgent;
-    private ProjectExplorerPresenter
-                            projectExplorer;
-    private DtoFactory      dtoFactory;
-    private JavaNodeManager javaNodeManager;
-    private AppContext      appContext;
-    private Match           match;
-    private CompilationUnit compilationUnit;
-    private ClassFile       classFile;
+    private       TreeStyles            styles;
+    private       JavaResources         resources;
+    private       EditorAgent           editorAgent;
+    private       AppContext            appContext;
+    private       Match                 match;
+    private       CompilationUnit       compilationUnit;
+    private       ClassFile             classFile;
+    private final JavaNavigationService service;
 
     @Inject
     public MatchNode(TreeStyles styles,
                      JavaResources resources,
                      EditorAgent editorAgent,
-                     ProjectExplorerPresenter projectExplorer,
-                     DtoFactory dtoFactory,
-                     JavaNodeManager javaNodeManager,
                      AppContext appContext,
                      @Assisted Match match,
-                     @Nullable @Assisted CompilationUnit compilationUnit, @Nullable @Assisted ClassFile classFile) {
+                     @Nullable @Assisted CompilationUnit compilationUnit,
+                     @Nullable @Assisted ClassFile classFile,
+                     JavaNavigationService service) {
         this.styles = styles;
         this.resources = resources;
         this.editorAgent = editorAgent;
-        this.projectExplorer = projectExplorer;
-        this.dtoFactory = dtoFactory;
-        this.javaNodeManager = javaNodeManager;
         this.appContext = appContext;
         this.match = match;
         this.compilationUnit = compilationUnit;
         this.classFile = classFile;
+        this.service = service;
     }
 
     @Override
@@ -148,56 +142,45 @@ public class MatchNode extends AbstractPresentationNode implements HasAction {
                 return;
             }
 
-            projectExplorer.getNodeByPath(new HasStorablePath.StorablePath(compilationUnit.getPath()))
-                           .then(selectNode())
-                           .then(openNode());
-        } else if (classFile != null) {
-            String className = classFile.getElementName();
-
-            JarEntry jarEntry = dtoFactory.createDto(JarEntry.class);
-            jarEntry.setName(className);
-            jarEntry.setType(JarEntry.JarEntryType.CLASS_FILE);
-            jarEntry.setPath(classFile.getPath());
-
-            JarFileNode jarFileNode = javaNodeManager.getJavaNodeFactory()
-                                                     .newJarFileNode(jarEntry,
-                                                                     null,
-                                                                     appContext.getCurrentProject().getProjectConfig(),
-                                                                     javaNodeManager.getJavaSettingsProvider().getSettings());
-            openFile(jarFileNode);
-        }
-    }
-
-    private Function<Node, Node> selectNode() {
-        return new Function<Node, Node>() {
-            @Override
-            public Node apply(Node node) throws FunctionException {
-                projectExplorer.select(node, false);
-                return node;
-            }
-        };
-    }
-
-    private Function<Node, Node> openNode() {
-        return new Function<Node, Node>() {
-            @Override
-            public Node apply(Node node) throws FunctionException {
-                if (node instanceof FileReferenceNode) {
-                    openFile((VirtualFile)node);
+            appContext.getWorkspaceRoot().getFile(compilationUnit.getPath()).then(new Operation<Optional<File>>() {
+                @Override
+                public void apply(Optional<File> file) throws OperationException {
+                    if (file.isPresent()) {
+                        editorAgent.openEditor(file.get(), new OpenEditorCallbackImpl() {
+                            @Override
+                            public void onEditorOpened(EditorPartPresenter editor) {
+                                fileOpened(editor);
+                            }
+                        });
+                    }
                 }
+            });
+        } else if (classFile != null) {
+            final String className = classFile.getElementName();
 
-                return node;
-            }
-        };
-    }
+            final Resource resource = appContext.getResource();
 
-    private void openFile(VirtualFile result) {
-        editorAgent.openEditor(result, new OpenEditorCallbackImpl() {
-            @Override
-            public void onEditorOpened(EditorPartPresenter editor) {
-                fileOpened(editor);
+            if (resource == null) {
+                return;
             }
-        });
+
+            final Project project = resource.getRelatedProject().get();
+
+            service.getContent(project.getLocation(), className)
+                   .then(new Operation<ClassContent>() {
+                       @Override
+                       public void apply(ClassContent content) throws OperationException {
+                           final VirtualFile file = new SyntheticFile(Path.valueOf(className.replace('.', '/')).lastSegment(),
+                                                                      content.getContent());
+                           editorAgent.openEditor(file, new OpenEditorCallbackImpl() {
+                               @Override
+                               public void onEditorOpened(EditorPartPresenter editor) {
+                                   fileOpened(editor);
+                               }
+                           });
+                       }
+                   });
+        }
     }
 
     private void fileOpened(EditorPartPresenter editor) {

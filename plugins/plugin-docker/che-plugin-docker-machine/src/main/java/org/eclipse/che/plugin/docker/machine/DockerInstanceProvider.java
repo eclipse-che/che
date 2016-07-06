@@ -14,7 +14,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ObjectArrays;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -28,6 +30,7 @@ import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
@@ -42,10 +45,17 @@ import org.eclipse.che.plugin.docker.client.Dockerfile;
 import org.eclipse.che.plugin.docker.client.DockerfileParser;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
+import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
+import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
+import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
+import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
@@ -58,6 +68,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -68,6 +79,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -79,7 +92,9 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
  *
  * @author andrew00x
  * @author Alexander Garagatyi
+ * @author Roman Iuvshyn
  */
+@Singleton
 public class DockerInstanceProvider implements InstanceProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceProvider.class);
 
@@ -93,28 +108,32 @@ public class DockerInstanceProvider implements InstanceProvider {
      */
     public static final String DOCKER_IMAGE_TYPE = "image";
 
-    private final DockerConnector                  docker;
-    private final DockerInstanceStopDetector       dockerInstanceStopDetector;
-    private final DockerContainerNameGenerator     containerNameGenerator;
-    private final WorkspaceFolderPathProvider      workspaceFolderPathProvider;
-    private final boolean                          doForcePullOnBuild;
-    private final boolean                          privilegeMode;
-    private final Set<String>                      supportedRecipeTypes;
-    private final DockerMachineFactory             dockerMachineFactory;
-    private final Map<String, Map<String, String>> devMachinePortsToExpose;
-    private final Map<String, Map<String, String>> commonMachinePortsToExpose;
-    private final String[]                         devMachineSystemVolumes;
-    private final String[]                         commonMachineSystemVolumes;
-    private final Set<String>                      devMachineEnvVariables;
-    private final Set<String>                      commonMachineEnvVariables;
-    private final String[]                         allMachinesExtraHosts;
-    private final String                           projectFolderPath;
-    private final boolean                          snapshotUseRegistry;
-    private final RecipeRetriever                  recipeRetriever;
+    private final DockerConnector                               docker;
+    private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
+    private final ExecutorService                               executor;
+    private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
+    private final DockerContainerNameGenerator                  containerNameGenerator;
+    private final WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
+    private final boolean                                       doForcePullOnBuild;
+    private final boolean                                       privilegeMode;
+    private final Set<String>                                   supportedRecipeTypes;
+    private final DockerMachineFactory                          dockerMachineFactory;
+    private final Map<String, Map<String, String>>              devMachinePortsToExpose;
+    private final Map<String, Map<String, String>>              commonMachinePortsToExpose;
+    private final String[]                                      devMachineSystemVolumes;
+    private final String[]                                      commonMachineSystemVolumes;
+    private final Set<String>                                   devMachineEnvVariables;
+    private final Set<String>                                   commonMachineEnvVariables;
+    private final String[]                                      allMachinesExtraHosts;
+    private final String                                        projectFolderPath;
+    private final boolean                                       snapshotUseRegistry;
+    private final RecipeRetriever                               recipeRetriever;
+    private final double                                        memorySwapMultiplier;
 
     @Inject
     public DockerInstanceProvider(DockerConnector docker,
                                   DockerConnectorConfiguration dockerConnectorConfiguration,
+                                  UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
                                   DockerMachineFactory dockerMachineFactory,
                                   DockerInstanceStopDetector dockerInstanceStopDetector,
                                   DockerContainerNameGenerator containerNameGenerator,
@@ -130,8 +149,10 @@ public class DockerInstanceProvider implements InstanceProvider {
                                   @Named("machine.docker.privilege_mode") boolean privilegeMode,
                                   @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                   @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
-                                  @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry) throws IOException {
+                                  @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
+                                  @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier) throws IOException {
         this.docker = docker;
+        this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.containerNameGenerator = containerNameGenerator;
@@ -142,6 +163,15 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.supportedRecipeTypes = Sets.newHashSet(DOCKER_FILE_TYPE, DOCKER_IMAGE_TYPE);
         this.projectFolderPath = projectFolderPath;
         this.snapshotUseRegistry = snapshotUseRegistry;
+        // usecases:
+        //  -1  enable unlimited swap
+        //  0   disable swap
+        //  0.5 enable swap with size equal to half of current memory size
+        //  1   enable swap with size equal to current memory size
+        //
+        //  according to docker docs field  memorySwap should be equal to memory+swap
+        //  we calculate this field as memorySwap=memory * (1+ multiplier) so we just add +1 to multiplier
+        this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
@@ -175,13 +205,18 @@ public class DockerInstanceProvider implements InstanceProvider {
         envVariablesForDevMachine.addAll(devMachineEnvVariables);
         this.devMachineEnvVariables = envVariablesForDevMachine;
 
-        // always add the docker host
-        String dockerHost = DockerInstanceRuntimeInfo.CHE_HOST.concat(":").concat(dockerConnectorConfiguration.getDockerHostIp());
+        // always add Che server to hosts list
+        String cheHost = dockerConnectorConfiguration.getDockerHostIp();
+        String cheHostAlias = DockerInstanceRuntimeInfo.CHE_HOST.concat(":").concat(cheHost);
         if (isNullOrEmpty(allMachinesExtraHosts)) {
-            this.allMachinesExtraHosts = new String[] {dockerHost};
+            this.allMachinesExtraHosts = new String[] {cheHostAlias};
         } else {
-            this.allMachinesExtraHosts = ObjectArrays.concat(allMachinesExtraHosts.split(","), dockerHost);
+            this.allMachinesExtraHosts = ObjectArrays.concat(allMachinesExtraHosts.split(","), cheHostAlias);
         }
+
+        executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineLogsStreamer-%d")
+                                                                           .setDaemon(true)
+                                                                           .build());
     }
 
     /**
@@ -253,8 +288,12 @@ public class DockerInstanceProvider implements InstanceProvider {
      *         if other error occurs
      */
     @Override
-    public Instance createInstance(final Machine machine, final LineConsumer creationLogsOutput)
-            throws UnsupportedRecipeException, InvalidRecipeException, NotFoundException, MachineException {
+    public Instance createInstance(Machine machine,
+                                   LineConsumer creationLogsOutput) throws UnsupportedRecipeException,
+                                                                           InvalidRecipeException,
+                                                                           SourceNotFoundException,
+                                                                           NotFoundException,
+                                                                           MachineException {
 
         // based on machine source, do the right steps
         MachineConfig machineConfig = machine.getConfig();
@@ -298,8 +337,11 @@ public class DockerInstanceProvider implements InstanceProvider {
                               creationLogsOutput);
     }
 
-    protected Instance createInstanceFromImage(final Machine machine, String machineContainerName,
-                                        final LineConsumer creationLogsOutput) throws NotFoundException, MachineException {
+    protected Instance createInstanceFromImage(Machine machine,
+                                               String machineContainerName,
+                                               LineConsumer creationLogsOutput) throws NotFoundException,
+                                                                                       MachineException,
+                                                                                       SourceNotFoundException {
         final DockerMachineSource dockerMachineSource = new DockerMachineSource(machine.getConfig().getSource());
 
         if (snapshotUseRegistry) {
@@ -311,13 +353,15 @@ public class DockerInstanceProvider implements InstanceProvider {
         try {
             // tag image with generated name to allow sysadmin recognize it
             docker.tag(TagParams.create(fullNameOfPulledImage, machineImageName));
-        } catch (IOException e) {
-            LOG.error(e.getLocalizedMessage(), e);
+        } catch (ImageNotFoundException nfEx) {
+            throw new SourceNotFoundException(nfEx.getLocalizedMessage(), nfEx);
+        } catch (IOException ioEx) {
+            LOG.error(ioEx.getLocalizedMessage(), ioEx);
             throw new MachineException("Can't create machine from snapshot.");
         }
         try {
             // remove unneeded tag
-            docker.removeImage(fullNameOfPulledImage, false);
+            docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
@@ -378,15 +422,15 @@ public class DockerInstanceProvider implements InstanceProvider {
                     LOG.error(e.getLocalizedMessage(), e);
                 }
             };
-            docker.buildImage(imageName,
-                              progressMonitor,
-                              null,
-                              doForcePullOnBuild,
-                              memoryLimit,
-                              memorySwapLimit,
-                              files.toArray(new File[files.size()]));
-        } catch (IOException | InterruptedException e) {
-            throw new MachineException(e.getMessage(), e);
+            docker.buildImage(BuildImageParams.create(files.toArray(new File[files.size()]))
+                                              .withRepository(imageName)
+                                              .withAuthConfigs(dockerCredentials.getCredentials())
+                                              .withDoForcePull(doForcePullOnBuild)
+                                              .withMemoryLimit(memoryLimit)
+                                              .withMemorySwapLimit(memorySwapLimit),
+                              progressMonitor);
+        } catch (IOException e) {
+            throw new MachineException(e.getLocalizedMessage(), e);
         } finally {
             if (workDir != null) {
                 FileCleaner.addFile(workDir);
@@ -406,8 +450,9 @@ public class DockerInstanceProvider implements InstanceProvider {
             tag = dockerMachineSource.getTag();
         }
         PullParams pullParams = PullParams.create(dockerMachineSource.getRepository())
-                  .withTag(tag)
-                  .withRegistry(dockerMachineSource.getRegistry());
+                                          .withTag(tag)
+                                          .withRegistry(dockerMachineSource.getRegistry())
+                                          .withAuthConfigs(dockerCredentials.getCredentials());
         try {
             final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
             docker.pull(pullParams,
@@ -422,7 +467,6 @@ public class DockerInstanceProvider implements InstanceProvider {
             throw new MachineException(e.getLocalizedMessage(), e);
         }
     }
-
 
     /**
      * Removes snapshot of the instance in implementation specific way.
@@ -514,6 +558,10 @@ public class DockerInstanceProvider implements InstanceProvider {
                 volumes = commonMachineSystemVolumes;
                 env = new ArrayList<>(commonMachineEnvVariables);
             }
+
+            final long machineMemory = machine.getConfig().getLimits().getRam() * 1024L * 1024L;
+            final long machineMemorySwap = memorySwapMultiplier == -1 ? -1 : (long)(machineMemory * memorySwapMultiplier);
+
             machine.getConfig()
                    .getServers()
                    .stream()
@@ -529,17 +577,43 @@ public class DockerInstanceProvider implements InstanceProvider {
             final HostConfig hostConfig = new HostConfig().withBinds(volumes)
                                                           .withExtraHosts(allMachinesExtraHosts)
                                                           .withPublishAllPorts(true)
-                                                          .withMemorySwap(-1)
-                                                          .withMemory((long)machine.getConfig().getLimits().getRam() * 1024 * 1024)
+                                                          .withMemorySwap(machineMemorySwap)
+                                                          .withMemory(machineMemory)
                                                           .withPrivileged(privilegeMode);
             final ContainerConfig config = new ContainerConfig().withImage(imageName)
                                                                 .withExposedPorts(portsToExpose)
                                                                 .withHostConfig(hostConfig)
                                                                 .withEnv(env.toArray(new String[env.size()]));
 
-            final String containerId = docker.createContainer(config, containerName).getId();
+            final String containerId = docker.createContainer(CreateContainerParams.create(config)
+                                                                                   .withContainerName(containerName))
+                                             .getId();
 
-            docker.startContainer(containerId, null);
+            docker.startContainer(StartContainerParams.create(containerId));
+
+            executor.execute(() -> {
+                long lastProcessedLogDate = 0;
+                boolean isContainerRunning = true;
+                while(isContainerRunning) {
+                    try {
+                        docker.getContainerLogs(GetContainerLogsParams.create(containerId)
+                                                                      .withFollow(true)
+                                                                      .withSince(lastProcessedLogDate),
+                                                new LogMessagePrinter(outputConsumer));
+                        isContainerRunning = false;
+                    } catch (SocketTimeoutException ste) {
+                        lastProcessedLogDate = System.currentTimeMillis() / 1000L;
+                        // reconnect to container
+                    } catch (ContainerNotFoundException e) {
+                        isContainerRunning = false;
+                    } catch (IOException e) {
+                        LOG.error("Failed to get logs from machine {} backed by container {} with {} id",
+                                  machine,
+                                  containerName,
+                                  containerId);
+                    }
+                }
+            });
 
             final DockerNode node = dockerMachineFactory.createNode(machine.getWorkspaceId(), containerId);
             if (machine.getConfig().isDev()) {
@@ -574,4 +648,5 @@ public class DockerInstanceProvider implements InstanceProvider {
                     .filter(path -> !Strings.isNullOrEmpty(path))
                     .collect(Collectors.toSet());
     }
+
 }

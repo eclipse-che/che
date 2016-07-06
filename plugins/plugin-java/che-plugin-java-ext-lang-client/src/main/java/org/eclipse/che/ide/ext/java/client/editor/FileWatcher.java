@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.editor;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -20,14 +21,16 @@ import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
-import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent;
-import org.eclipse.che.ide.project.node.ResourceBasedNode;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.eclipse.che.ide.api.resources.ResourceDelta.DERIVED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 
 /**
  * @author Evgen Vidolob
@@ -43,11 +46,21 @@ public class FileWatcher {
     @Inject
     private void handleFileOperations(EventBus eventBus) {
 
-        eventBus.addHandler(ResourceNodeDeletedEvent.getType(), new ResourceNodeDeletedEvent.ResourceNodeDeletedHandler() {
+        eventBus.addHandler(ResourceChangedEvent.getType(), new ResourceChangedEvent.ResourceChangedHandler() {
             @Override
-            public void onResourceEvent(ResourceNodeDeletedEvent event) {
-                ResourceBasedNode node = event.getNode();
-                if (node instanceof PackageNode || node instanceof JavaFileNode) {
+            public void onResourceChanged(ResourceChangedEvent event) {
+                if (event.getDelta().getKind() != REMOVED) {
+                    return;
+                }
+
+                if ((event.getDelta().getFlags() & DERIVED) == 0) {
+                    return;
+                }
+
+                final Resource resource = event.getDelta().getResource();
+                final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+
+                if (srcFolder.isPresent()) {
                     reparseAllOpenedFiles();
                 }
             }

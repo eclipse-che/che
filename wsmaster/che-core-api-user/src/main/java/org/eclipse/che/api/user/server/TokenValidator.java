@@ -11,6 +11,7 @@
 package org.eclipse.che.api.user.server;
 
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.model.user.User;
 
 /**
  * Validates token.
@@ -21,11 +22,11 @@ import org.eclipse.che.api.core.ConflictException;
 public interface TokenValidator {
 
     /**
-     * Validates {@param token}
+     * Validates {@code token}.
      *
      * @return user email
      * @throws ConflictException
      *         when token is not valid
      */
-    String validateToken(String token) throws ConflictException;
+    User validateToken(String token) throws ConflictException;
 }

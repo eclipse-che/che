@@ -21,20 +21,25 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.plugin.docker.client.params.ParamsUtils.requireNonEmptyArray;
+import static org.eclipse.che.plugin.docker.client.params.ParamsUtils.requireNonNullNorEmpty;
 
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#buildImage(BuildImageParams, ProgressMonitor)}.
  *
  * @author Mykola Morhun
+ * @author Alexander Garagatyi
  */
 public class BuildImageParams {
-
+    // todo add next parameters q, nocache, rm, forcerm
     private String      repository;
+    private String      tag;
     private AuthConfigs authConfigs;
     private Boolean     doForcePull;
     private Long        memoryLimit;
     private Long        memorySwapLimit;
     private List<File>  files;
+    private String      dockerfile;
+    private String      remote;
 
     /**
      * Creates arguments holder with required parameters.
@@ -52,6 +57,21 @@ public class BuildImageParams {
         return new BuildImageParams().withFiles(files);
     }
 
+    /**
+     * Creates arguments holder with required parameters.
+     *
+     * @param remote
+     *         info about this parameter see {@link #withRemote(String)}
+     * @return arguments holder with required parameters
+     * @throws NullPointerException
+     *         if {@code remote} is null
+     * @throws IllegalArgumentException
+     *         if {@code remote} is empty
+     */
+    public static BuildImageParams create(@NotNull String remote) {
+        return new BuildImageParams().withRemote(remote);
+    }
+
     private BuildImageParams() {}
 
     /**
@@ -63,6 +83,18 @@ public class BuildImageParams {
      */
     public BuildImageParams withRepository(String repository) {
         this.repository = repository;
+        return this;
+    }
+
+    /**
+     * Adds tag to this parameters.
+     *
+     * @param tag
+     *         tag of the image
+     * @return this params instance
+     */
+    public BuildImageParams withTag(String tag) {
+        this.tag = tag;
         return this;
     }
 
@@ -126,8 +158,13 @@ public class BuildImageParams {
      *         if {@code files} is null
      * @throws IllegalArgumentException
      *         if {@code files} is empty array
+     * @throws IllegalStateException
+     *         if other parameter incompatible with files is set
      */
     public BuildImageParams withFiles(@NotNull File... files) {
+        if (remote != null) {
+            throw new IllegalStateException("Remote parameter is already set. Remote and files parameters are mutually exclusive.");
+        }
         requireNonNull(files);
         requireNonEmptyArray(files);
         this.files = new ArrayList<>(files.length + 1);
@@ -153,8 +190,47 @@ public class BuildImageParams {
         return this;
     }
 
+    /**
+     * Sets GIT repo or HTTP(S) location of dockerfile or build sources
+     *
+     * @param remote
+     *         URI of build context
+     * @return this params instance
+     * @throws NullPointerException
+     *         if {@code remote} is null
+     * @throws IllegalArgumentException
+     *         if {@code remote} is empty
+     * @throws IllegalStateException
+     *         if other parameter incompatible with remote is set
+     */
+    public BuildImageParams withRemote(@NotNull String remote) {
+        requireNonNullNorEmpty(remote);
+        if (files != null) {
+            throw new IllegalStateException("Files parameter is already set. Remote and files parameters are mutually exclusive.");
+        }
+
+        this.remote = remote;
+        return this;
+    }
+
+    /**
+     * Sets path to alternate dockerfile in build context
+     *
+     * @param dockerfilePath
+     *         path of alternate dockerfile
+     * @return this params instance
+     */
+    public BuildImageParams withDockerfile(String dockerfilePath) {
+        this.dockerfile = dockerfilePath;
+        return this;
+    }
+
     public String getRepository() {
         return repository;
+    }
+
+    public String getTag() {
+        return tag;
     }
 
     public AuthConfigs getAuthConfigs() {
@@ -177,22 +253,61 @@ public class BuildImageParams {
         return files;
     }
 
+    public String getDockerfile() {
+        return dockerfile;
+    }
+
+    public String getRemote() {
+        return remote;
+    }
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BuildImageParams that = (BuildImageParams)o;
-        return Objects.equals(repository, that.repository) &&
-               Objects.equals(authConfigs, that.authConfigs) &&
-               Objects.equals(doForcePull, that.doForcePull) &&
-               Objects.equals(memoryLimit, that.memoryLimit) &&
-               Objects.equals(memorySwapLimit, that.memorySwapLimit) &&
-               Objects.equals(files, that.files);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof BuildImageParams)) {
+            return false;
+        }
+        final BuildImageParams that = (BuildImageParams)obj;
+        return Objects.equals(repository, that.repository)
+               && Objects.equals(tag, that.tag)
+               && Objects.equals(authConfigs, that.authConfigs)
+               && Objects.equals(doForcePull, that.doForcePull)
+               && Objects.equals(memoryLimit, that.memoryLimit)
+               && Objects.equals(memorySwapLimit, that.memorySwapLimit)
+               && getFiles().equals(that.getFiles())
+               && Objects.equals(dockerfile, that.dockerfile)
+               && Objects.equals(remote, that.remote);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(repository, authConfigs, doForcePull, memoryLimit, memorySwapLimit, files);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(repository);
+        hash = 31 * hash + Objects.hashCode(tag);
+        hash = 31 * hash + Objects.hashCode(authConfigs);
+        hash = 31 * hash + Objects.hashCode(doForcePull);
+        hash = 31 * hash + Objects.hashCode(memoryLimit);
+        hash = 31 * hash + Objects.hashCode(memorySwapLimit);
+        hash = 31 * hash + getFiles().hashCode();
+        hash = 31 * hash + Objects.hashCode(dockerfile);
+        hash = 31 * hash + Objects.hashCode(remote);
+        return hash;
     }
 
+    @Override
+    public String toString() {
+        return "BuildImageParams{" +
+               "repository='" + repository + '\'' +
+               ", tag='" + tag + '\'' +
+               ", authConfigs=" + authConfigs +
+               ", doForcePull=" + doForcePull +
+               ", memoryLimit=" + memoryLimit +
+               ", memorySwapLimit=" + memorySwapLimit +
+               ", files=" + files +
+               ", dockerfile='" + dockerfile + '\'' +
+               ", remote='" + remote + '\'' +
+               '}';
+    }
 }

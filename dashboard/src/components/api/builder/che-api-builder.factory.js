@@ -10,7 +10,6 @@
  */
 'use strict';
 
-
 import {CheWorkspaceBuilder} from './che-workspace-builder';
 import {CheProjectReferenceBuilder} from './che-projectreference-builder';
 import {CheProjectDetailsBuilder} from './che-projectdetails-builder';
@@ -18,7 +17,6 @@ import {CheProjectTypeBuilder} from './che-projecttype-builder';
 import {CheProjectTemplateBuilder} from './che-projecttemplate-builder';
 import {CheProjectTypeAttributeDescriptorBuilder} from './che-projecttype-attribute-descriptor-builder';
 import {CheProfileBuilder} from './che-profile-builder.js';
-import {CheUserBuilder} from './che-user-builder.js';
 
 /**
  * This class is providing the entry point for accessing the builders
@@ -89,13 +87,4 @@ export class CheAPIBuilder {
   getProjectTypeAttributeDescriptorBuilder() {
     return new CheProjectTypeAttributeDescriptorBuilder();
   }
-
-  /***
-   * The Che User builder
-   * @returns {CheUserBuilder}
-   */
-  getUserBuilder() {
-    return new CheUserBuilder();
-  }
-
 }

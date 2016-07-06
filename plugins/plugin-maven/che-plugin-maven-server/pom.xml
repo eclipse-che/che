@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-maven-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-maven-server</artifactId>
     <packaging>jar</packaging>
@@ -182,6 +182,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
@@ -286,6 +291,15 @@
                     <excludes>
                         <exclude>**/test-pom.xml</exclude>
                         <exclude>**/multimoduleProject/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/MavenServerManagerTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>

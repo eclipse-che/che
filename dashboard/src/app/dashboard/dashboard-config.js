@@ -34,6 +34,7 @@ export class DashboardConfig {
     // config routes
     register.app.config(($routeProvider) => {
       $routeProvider.accessWhen('/', {
+        title: 'Dashboard',
         templateUrl: 'app/dashboard/dashboard.html',
         controller: 'DashboardController',
         controllerAs: 'dashboardController',

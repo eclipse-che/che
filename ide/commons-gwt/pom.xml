@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-core-ide-parent</artifactId>
+        <groupId>org.eclipse.che.core</groupId>
+        <version>4.5.0-RC1-SNAPSHOT</version>
+    </parent>
+    <artifactId>che-core-commons-gwt</artifactId>
+    <name>Che Core :: Commons :: GWT</name>
+    <properties>
+        <findbugs.failonerror>false</findbugs.failonerror>
+        <generated.test.sources.directory>${project.build.directory}/generated-test-sources/dto</generated.test.sources.directory>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-elemental</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.vectomatic</groupId>
+            <artifactId>lib-gwt-svg</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt.inject</groupId>
+            <artifactId>gin</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-assistedinject</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <outputDirectory>target/classes</outputDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- Apache license -->
+                        <exclude>**/org/eclipse/che/ide/collections/**</exclude>
+                        <exclude>**/org/eclipse/che/ide/dto/JsonSerializable.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/mvp/**</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/list/*.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/menu/**</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/tree/NodeDataAdapter.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/tree/Tree.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/tree/TreeNodeElement.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/tree/TreeNodeLabelRenamer.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/tree/TreeNodeMutator.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/ElementView.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/Popup.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/tree/TreeNodeMutator.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/ElementView.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/Popup.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/ui/Tooltip.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/browser/**</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/dom/**</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/executor/**</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/input/CharCodeWithModifiers.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/input/KeyCodeMap.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/input/ModifierKeys.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/input/SignalEvent.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/input/SignalEventImpl.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/input/SignalEventUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/input/SignalKeyLogic.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/loging/Log.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/loging/LogConfig.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/AbstractTrie.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/AnimationUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/Box.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/CssUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/ExceptionUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/Function.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/HoverController.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/ImageResourceUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/ListenerManager.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/ListenerRegistrar.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/MathUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/Pair.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/PrefixIndex.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/RegExpUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/RelativeClientRect.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/SortedList.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/StringUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/TextUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/TrieNode.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/util/UnicodeUtils.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/websocket/MessageFilter.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/messages/CompactJsonMessage.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/messages/MessageImpl.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/messages/MessageType.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/messages/SerializationIndex.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/AbstractWorker.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/DedicatedWorkerEntryPoint.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/DedicatedWorkerGlobalScope.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/ErrorEvent.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/ErrorHandler.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/MessageEvent.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/MessageHandler.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/MessagePort.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/Worker.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/WorkerGlobalScope.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/client/WorkerLocation.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/dtogen/DtoGenerator.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/dtogen/DtoImplClientTemplate.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/dtogen/DtoTemplate.java</exclude>
+                        <exclude>**/com/google/gwt/webworker/linker/DedicatedWorkerLinker.java</exclude>
+                        <!-- IBM license -->
+                        <exclude>**/org/eclipse/che/ide/runtime/CoreException.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/runtime/Status.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/runtime/IStatus.java</exclude>
+                        <exclude>**/org/eclipse/che/ide/runtime/OperationCanceledException.java</exclude>
+                        <!-- cddl1 license -->
+                        <exclude>**/org/eclipse/che/ide/MimeType.java</exclude>
+                        <!-- Resources -->
+                        <exclude>**/com/google/gwt/webworker/linker/DedicatedWorkerTemplate.js</exclude>
+                        <exclude>**/com/google/gwt/webworker/WebWorker.gwt.xml</exclude>
+                        <exclude>**/org/eclipse/che/ide/runtime/Runtime.gwt.xml</exclude>
+                        <exclude>**/org/eclipse/che/ide/collections/Collections.gwt.xml</exclude>
+                        <exclude>**/com/google/gwt/webworker/WebWorker.gwt.xml</exclude>
+                        <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.min.js</exclude>
+                        <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.min.map</exclude>
+                        <exclude>**/org/eclipse/che/ide/public/ZeroClipboard.swf</exclude>
+                        <exclude>**/*.png</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

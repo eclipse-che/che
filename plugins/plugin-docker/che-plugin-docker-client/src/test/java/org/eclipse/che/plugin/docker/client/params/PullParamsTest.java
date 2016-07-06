@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.params;
 
+import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
+import org.mockito.Mock;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -24,6 +26,9 @@ public class PullParamsTest {
     private static final String TAG      = "tag";
     private static final String REGISTRY = "registry";
 
+    @Mock
+    private AuthConfigs authConfigs;
+
     private PullParams pullParams;
 
     @Test
@@ -34,17 +39,20 @@ public class PullParamsTest {
 
         assertNull(pullParams.getTag());
         assertNull(pullParams.getRegistry());
+        assertNull(pullParams.getAuthConfigs());
     }
 
     @Test
     public void shouldCreateParamsObjectWithAllPossibleParameters() {
         pullParams = PullParams.create(IMAGE)
                                .withTag(TAG)
-                               .withRegistry(REGISTRY);
+                               .withRegistry(REGISTRY)
+                               .withAuthConfigs(authConfigs);
 
         assertEquals(pullParams.getImage(), IMAGE);
         assertEquals(pullParams.getTag(), TAG);
         assertEquals(pullParams.getRegistry(), REGISTRY);
+        assertEquals(pullParams.getAuthConfigs(), authConfigs);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -61,7 +69,8 @@ public class PullParamsTest {
     @Test
     public void tagParameterShouldEqualsNullIfItNotSet() {
         pullParams = PullParams.create(IMAGE)
-                               .withRegistry(REGISTRY);
+                               .withRegistry(REGISTRY)
+                               .withAuthConfigs(authConfigs);
 
         assertNull(pullParams.getTag());
     }
@@ -69,9 +78,45 @@ public class PullParamsTest {
     @Test
     public void registryParameterShouldEqualsNullIfItNotSet() {
         pullParams = PullParams.create(IMAGE)
-                               .withTag(TAG);
+                               .withTag(TAG)
+                               .withAuthConfigs(authConfigs);
 
         assertNull(pullParams.getRegistry());
+    }
+
+    @Test
+    public void AuthConfigsParameterShouldEqualsNullIfItNotSet() {
+        pullParams = PullParams.create(IMAGE)
+                               .withRegistry(REGISTRY)
+                               .withTag(TAG);
+
+        assertNull(pullParams.getAuthConfigs());
+    }
+
+    @Test
+    public void getFullRepoShouldReturnRegistryAndImage() {
+        pullParams = PullParams.create(IMAGE)
+                               .withRegistry(REGISTRY)
+                               .withTag(TAG);
+
+        assertEquals(pullParams.getFullRepo(), REGISTRY + '/' + IMAGE);
+    }
+
+    @Test
+    public void getFullRepoShouldReturnImageOnlyIfRegistryIsNotSet() {
+        pullParams = PullParams.create(IMAGE)
+                               .withTag(TAG);
+
+        assertEquals(pullParams.getFullRepo(), IMAGE);
+    }
+
+    @Test
+    public void getFullRepoShouldReturnImageOnlyIfRegistryIsDockerHub() {
+        pullParams = PullParams.create(IMAGE)
+                               .withRegistry("docker.io")
+                               .withTag(TAG);
+
+        assertEquals(pullParams.getFullRepo(), IMAGE);
     }
 
 }

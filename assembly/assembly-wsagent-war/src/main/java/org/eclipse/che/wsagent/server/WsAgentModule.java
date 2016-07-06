@@ -29,12 +29,13 @@ import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.project.server.ProjectApiModule;
 import org.eclipse.che.api.ssh.server.HttpSshServiceClient;
 import org.eclipse.che.api.ssh.server.SshServiceClient;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.everrest.CheAsynchronousJobPool;
 import org.eclipse.che.api.git.LocalGitUserResolver;
-import org.eclipse.che.git.impl.nativegit.NativeGitConnectionFactory;
+import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.java.server.rest.WsAgentURLProvider;
 import org.eclipse.che.security.oauth.RemoteOAuthTokenProvider;
 import org.everrest.core.impl.async.AsynchronousJobPool;
 import org.everrest.core.impl.async.AsynchronousJobService;
@@ -67,7 +68,7 @@ public class WsAgentModule extends AbstractModule {
         install(new org.eclipse.che.api.debugger.server.DebuggerModule());
 
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
-        bind(GitConnectionFactory.class).to(NativeGitConnectionFactory.class);
+        bind(GitConnectionFactory.class).to(JGitConnectionFactory.class);
 
         bind(AsynchronousJobPool.class).to(CheAsynchronousJobPool.class);
         bind(ServiceBindingHelper.bindingKey(AsynchronousJobService.class, "/async/{ws-id}")).to(AsynchronousJobService.class);
@@ -79,6 +80,9 @@ public class WsAgentModule extends AbstractModule {
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
         bind(ApiEndpointAccessibilityChecker.class);
+
+        bind(String.class).annotatedWith(Names.named("wsagent.endpoint"))
+                          .toProvider(WsAgentURLProvider.class);
     }
 
     //it's need for WSocketEventBusClient and in the future will be replaced with the property

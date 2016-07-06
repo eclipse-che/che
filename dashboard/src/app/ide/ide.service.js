@@ -20,7 +20,7 @@ class IdeSvc {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, ideLoaderSvc, $location, routeHistory, $q, $log, cheWorkspace) {
+  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, $location, routeHistory, $q, $log, cheWorkspace) {
     this.cheAPI = cheAPI;
     this.$rootScope = $rootScope;
     this.lodash = lodash;
@@ -30,7 +30,6 @@ class IdeSvc {
     this.userDashboardConfig = userDashboardConfig;
     this.$sce = $sce;
     this.proxySettings = proxySettings;
-    this.ideLoaderSvc = ideLoaderSvc;
     this.$location = $location;
     this.routeHistory = routeHistory;
     this.$q = $q;
@@ -39,39 +38,10 @@ class IdeSvc {
 
     this.ideParams = new Map();
 
-    this.currentStep = 0;
     this.lastWorkspace = null;
+    this.openedWorkspace = null;
 
     this.listeningChannels = [];
-
-    this.steps = [
-      {text: 'Initializing workspace', inProgressText: 'Provision workspace and associating it with the existing user', logs: '', hasError: false},
-      {text: 'Starting workspace runtime', inProgressText: 'Retrieving the stack\'s image and launching it', logs: '', hasError: false},
-      {text: 'Starting workspace agent', inProgressText: 'Agents provide RESTful services like intellisense and SSH', logs: '', hasError: false},
-      {text: 'Open IDE', inProgressText: 'Opening IDE', logs: '', hasError: false}
-    ];
-
-    this.preventRedirection = false;
-  }
-
-  init() {
-    this.steps.forEach((step) => {
-      step.logs = '';
-      step.hasError = false;
-    });
-
-    if (this.lastWorkspace) {
-      this.cleanupChannels(this.lastWorkspace.id);
-    }
-  }
-
-  getStepText(stepNumber) {
-    let entry = this.steps[stepNumber];
-    if (this.currentStep >= stepNumber) {
-      return entry.inProgressText;
-    } else {
-      return entry.text;
-    }
   }
 
   displayIDE() {
@@ -88,27 +58,29 @@ class IdeSvc {
   }
 
   handleError(error) {
-    if (error.data.message) {
-      this.steps[this.currentStep].logs += '\n' + error.data.message;
-    }
-    this.steps[this.currentStep].hasError = true;
     this.$log.error(error);
   }
 
-  startIde(workspace, noIdeLoader) {
+  startIde(workspace) {
+    if (this.lastWorkspace) {
+      this.cleanupChannels(this.lastWorkspace.id);
+    }
     this.lastWorkspace = workspace;
 
-    let defer = this.$q.defer();
-    if (!noIdeLoader) {
-      this.ideLoaderSvc.addLoader();
+    if (this.openedWorkspace && this.openedWorkspace.id === workspace.id) {
+      this.openedWorkspace = null;
     }
 
-    this.currentStep = 1;
+    this.updateRecentWorkspace(workspace.id);
 
     let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
 
     let startWorkspaceDefer = this.$q.defer();
     this.startWorkspace(bus, workspace).then(() => {
+      // update list of workspaces
+      // for new workspace to show in recent workspaces
+      this.cheAPI.cheWorkspace.fetchWorkspaces();
+
       this.cheWorkspace.fetchStatusChange(workspace.id, 'RUNNING').then(() => {
         return this.cheWorkspace.fetchWorkspaceDetails(workspace.id);
       }).then(() => {
@@ -125,16 +97,18 @@ class IdeSvc {
     });
 
     return startWorkspaceDefer.promise.then(() => {
-      if (workspace.id === this.lastWorkspace.id) {
+      if (this.lastWorkspace && workspace.id === this.lastWorkspace.id) {
         // Now that the container is started, wait for the extension server. For this, needs to get runtime details
         let websocketUrl = this.cheWorkspace.getWebsocketUrl(workspace.id);
         // try to connect
         this.websocketReconnect = 50;
         this.connectToExtensionServer(websocketUrl, workspace.id);
+      } else {
+        this.cleanupChannels(workspace.id);
       }
       return this.$q.resolve();
     }, (error) => {
-      if (workspace.id === this.lastWorkspace.id) {
+      if (this.lastWorkspace && workspace.id === this.lastWorkspace.id) {
         this.cleanupChannels(workspace.id);
       }
       return this.$q.reject(error);
@@ -157,21 +131,16 @@ class IdeSvc {
       let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
         return machineConfigsLink.rel === 'get machine status channel';
       });
-      let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-        return machineConfigsLink.rel === 'get machine logs channel';
-      });
 
       let workspaceId = data.id;
 
       let agentChannel = 'workspace:' + data.id + ':ext-server:output';
       let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
-      let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
 
       this.listeningChannels.push(statusChannel);
       // for now, display log of status channel in case of errors
       bus.subscribe(statusChannel, (message) => {
         if (message.eventType === 'DESTROYED' && message.workspaceId === data.id && !this.$rootScope.showIDE) {
-          this.steps[this.currentStep].hasError = true;
           // need to show the error
           this.$mdDialog.show(
             this.$mdDialog.alert()
@@ -182,7 +151,6 @@ class IdeSvc {
           );
         }
         if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
-          this.steps[this.currentStep].hasError = true;
           // need to show the error
           this.$mdDialog.show(
             this.$mdDialog.alert()
@@ -197,14 +165,7 @@ class IdeSvc {
 
       this.listeningChannels.push(agentChannel);
       bus.subscribe(agentChannel, (message) => {
-        if (this.currentStep < 2) {
-          this.currentStep = 2;
-        }
-
-        let agentStep = 2;
-
         if (message.eventType === 'ERROR' && message.workspaceId === data.id) {
-          this.steps[agentStep].hasError = true;
           // need to show the error
           this.$mdDialog.show(
             this.$mdDialog.alert()
@@ -214,38 +175,21 @@ class IdeSvc {
               .ok('OK')
           );
         }
-
-        if (this.steps[agentStep].logs.length > 0) {
-          this.steps[agentStep].logs = this.steps[agentStep].logs + '\n' + message;
-        } else {
-          this.steps[agentStep].logs = message;
-        }
       });
-
-      this.listeningChannels.push(outputChannel);
-      bus.subscribe(outputChannel, (message) => {
-        if (this.steps[this.currentStep].logs.length > 0) {
-          this.steps[this.currentStep].logs = this.steps[this.currentStep].logs + '\n' + message;
-        } else {
-          this.steps[this.currentStep].logs = message;
-        }
-      });
-
     }, (error) => {
       this.handleError(error);
+      this.$q.reject(error);
     });
 
     return startWorkspacePromise;
   }
 
   connectToExtensionServer(websocketURL, workspaceId) {
-    this.currentStep = 2;
     // try to connect
     let websocketStream = this.$websocket(websocketURL);
 
     // on success, create project
     websocketStream.onOpen(() => {
-      this.openIde(workspaceId);
       this.cleanupChannels(workspaceId, websocketStream);
     });
 
@@ -258,7 +202,6 @@ class IdeSvc {
         }, 1000);
       } else {
         this.cleanupChannels(workspaceId, websocketStream);
-        this.steps[this.currentStep].hasError = true;
         this.$log.error('error when starting remote extension', error);
         // need to show the error
         this.$mdDialog.show(
@@ -280,32 +223,18 @@ class IdeSvc {
     this.ideAction = ideAction;
   }
 
-  openLastStartedIde(skipLoader) {
-    this.openIde(this.lastWorkspace.id, skipLoader);
-  }
+  openIde(workspaceId) {
+    this.$rootScope.hideNavbar = false;
 
-  openIde(workspaceId, skipLoader) {
-    this.$timeout(() => {
-      this.currentStep = 3;
-    }, 0);
-
-    if (this.$rootScope.loadingIDE === false || this.preventRedirection) {
-      return;
-    }
-
-    if (skipLoader) {
-      this.ideLoaderSvc.addLoader();
-      this.$rootScope.hideIdeLoader = true;
-    }
+    this.updateRecentWorkspace(workspaceId);
 
     let inDevMode = this.userDashboardConfig.developmentMode;
     let randVal = Math.floor((Math.random() * 1000000) + 1);
     let appendUrl = '?uid=' + randVal;
 
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
-    this.lastWorkspace = workspace;
+    this.openedWorkspace = workspace;
 
-    let selfLink = this.getHrefLink(workspace, 'self link');
     let ideUrlLink = this.getHrefLink(workspace, 'ide url');
 
     if (this.ideAction != null) {
@@ -327,17 +256,22 @@ class IdeSvc {
     } else {
       this.$rootScope.ideIframeLink = ideUrlLink + appendUrl;
     }
-    if (!skipLoader) {
-      this.$timeout(() => {
-        this.$rootScope.hideIdeLoader = true;
-      }, 4000);
-    }
 
-    this.$timeout(() => {
-      this.$rootScope.showIDE = true;
-      this.$rootScope.hideLoader = true;
-      this.$rootScope.loadingIDE = false;
-    }, 2000);
+    let defer = this.$q.defer();
+    if (workspace.status === 'RUNNING') {
+      defer.resolve();
+    } else {
+      this.cheWorkspace.fetchStatusChange(workspace.id, 'STARTING').then(() => {
+        defer.resolve();
+      }, (error) => {
+        defer.reject(error);
+        this.$log.error('Unable to start workspace: ', error);
+      })
+    }
+    defer.promise.then(() => {
+      // update list of recent workspaces
+      this.cheWorkspace.fetchWorkspaces();
+    });
   }
 
   /**
@@ -377,12 +311,14 @@ class IdeSvc {
     return '';
   }
 
-  setPreventRedirection(preventRedirection) {
-    this.preventRedirection = preventRedirection;
-  }
-
-  getPreventRedirection() {
-    return this.preventRedirection;
+  /**
+   * Emit event to move workspace immediately
+   * to top of the recent workspaces list
+   *
+   * @param workspaceId
+   */
+  updateRecentWorkspace(workspaceId) {
+    this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
 }
 

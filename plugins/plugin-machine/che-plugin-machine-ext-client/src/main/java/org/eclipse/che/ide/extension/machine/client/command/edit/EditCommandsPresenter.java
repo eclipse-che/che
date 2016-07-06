@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.command.edit;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -140,6 +141,11 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, F
                 commandProcessingCallback = getCommandProcessingCallback();
                 fetchCommands();
                 fireConfigurationUpdated(selectedConfiguration);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                dialogFactory.createMessageDialog("Error", arg.getMessage(), null).show();
             }
         });
     }
@@ -302,6 +308,11 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, F
                         fetchCommands();
                         fireConfigurationRemoved(selectedConfiguration);
                     }
+                }).catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError arg) throws OperationException {
+                        dialogFactory.createMessageDialog("Error", arg.getMessage(), null).show();
+                    }
                 });
             }
         };
@@ -396,10 +407,9 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, F
     }
 
     private String getPreviewUrlOrNull(CommandConfiguration configuration) {
-        if (configuration.getAttributes() != null) {
+        if (configuration.getAttributes() != null && configuration.getAttributes().containsKey(PREVIEW_URL_ATTR)) {
             return configuration.getAttributes().get(PREVIEW_URL_ATTR);
         }
-
         return null;
     }
 
@@ -529,7 +539,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, F
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                dialogFactory.createMessageDialog("Error", arg.toString(), null).show();
+                dialogFactory.createMessageDialog("Error", arg.getMessage(), null).show();
             }
         });
     }
@@ -540,7 +550,7 @@ public class EditCommandsPresenter implements EditCommandsView.ActionDelegate, F
         }
         return editedPage.isDirty()
                || !editedCommandOriginName.equals(view.getConfigurationName())
-               || !editedCommandOriginPreviewUrl.equals(view.getConfigurationPreviewUrl());
+               || !Strings.nullToEmpty(editedCommandOriginPreviewUrl).equals(Strings.nullToEmpty(view.getConfigurationPreviewUrl()));
     }
 
     private void fireConfigurationAdded(CommandConfiguration command) {

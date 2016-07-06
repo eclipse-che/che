@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -32,10 +33,12 @@ import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
@@ -91,12 +94,14 @@ public class MachineManager {
     private final SnapshotDao              snapshotDao;
     private final File                     machineLogsDir;
     private final MachineInstanceProviders machineInstanceProviders;
-    private final ExecutorService          executor;
     private final MachineRegistry          machineRegistry;
     private final EventService             eventService;
     private final int                      defaultMachineMemorySizeMB;
     private final MachineCleaner           machineCleaner;
     private final WsAgentLauncher          wsAgentLauncher;
+
+    @VisibleForTesting
+    final ExecutorService executor;
 
     @Inject
     public MachineManager(SnapshotDao snapshotDao,
@@ -274,6 +279,7 @@ public class MachineManager {
                    ConflictException,
                    BadRequestException,
                    MachineException {
+        final MachineSourceImpl sourceCopy = machineConfig.getSource();
         final InstanceProvider instanceProvider = machineInstanceProviders.getProvider(machineConfig.getType());
 
         // Backward compatibility for source type 'Recipe'.
@@ -326,12 +332,31 @@ public class MachineManager {
                 .getOutput());
 
         try {
-            machineRegistry.addMachine(machine);
-
-            instanceCreator.createInstance(instanceProvider, machine, machineLogger);
-
+            try {
+                machineRegistry.addMachine(machine);
+                instanceCreator.createInstance(instanceProvider, machine, machineLogger);
+            } catch (MachineException ex) {
+                if (snapshot == null) {
+                    throw ex;
+                }
+                if (ex.getCause() instanceof SourceNotFoundException) {
+                    final LineConsumer logger = getMachineLogger(machineId,
+                                                                 getMachineChannels(machine.getConfig().getName(),
+                                                                                    machine.getWorkspaceId(),
+                                                                                    machine.getEnvName()).getOutput());
+                    LOG.error("Image of snapshot for machine " + machineConfig.getName() + " not found. " +
+                              "Machine will be created from origin source");
+                    machine.getConfig().setSource(sourceCopy);
+                    machineRegistry.addMachine(machine);
+                    instanceCreator.createInstance(instanceProvider, machine, logger);
+                }
+            }
             return machine;
         } catch (ConflictException e) {
+            try {
+                machineLogger.close();
+            } catch (IOException ignored) {
+            }
             throw new MachineException(e.getLocalizedMessage(), e);
         }
     }
@@ -647,6 +672,11 @@ public class MachineManager {
                     processLogger.writeLine(String.format("[ERROR] %s", error.getMessage()));
                 } catch (IOException ignored) {
                 }
+            } finally {
+                try {
+                    processLogger.close();
+                } catch (IOException ignored) {
+                }
             }
         }));
         return instanceProcess;
@@ -896,11 +926,13 @@ public class MachineManager {
         return NameGenerator.generate("machine", 16);
     }
 
-    private LineConsumer getMachineLogger(String machineId, String outputChannel) throws MachineException {
+    @VisibleForTesting
+    LineConsumer getMachineLogger(String machineId, String outputChannel) throws MachineException {
         return getLogger(getMachineFileLogger(machineId), outputChannel);
     }
 
-    private LineConsumer getProcessLogger(String machineId, int pid, String outputChannel) throws MachineException {
+    @VisibleForTesting
+    LineConsumer getProcessLogger(String machineId, int pid, String outputChannel) throws MachineException {
         return getLogger(getProcessFileLogger(machineId, pid), outputChannel);
     }
 

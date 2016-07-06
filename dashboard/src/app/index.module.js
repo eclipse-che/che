@@ -15,6 +15,7 @@ import {Register} from '../components/utils/register';
 import {ComponentsConfig} from '../components/components-config';
 
 import {AdminsConfig} from './admin/admin-config';
+import {AdministrationConfig} from './administration/administration-config';
 import {CheColorsConfig} from './colors/che-color.constant';
 import {CheOutputColorsConfig} from './colors/che-output-colors.constant';
 import {CheCountriesConfig} from './constants/che-countries.constant';
@@ -39,23 +40,18 @@ let initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngT
 initModule.config(['$routeProvider', ($routeProvider) => {
   $routeProvider.accessWhen = (path, route) => {
     route.resolve || (route.resolve = {});
-    route.resolve.app = ['cheBranding', '$q', 'cheProfile', 'cheUser', (cheBranding, $q, cheProfile, cheUser) => {
+    route.resolve.app = ['cheBranding', '$q', 'chePreferences', (cheBranding, $q, chePreferences) => {
       var deferred = $q.defer();
-
-      cheUser.fetchUser().then(() => {
-        let profilePreferences = cheProfile.getPreferences();
-        if (profilePreferences && profilePreferences.$resolved) {
+        let preferences = chePreferences.getPreferences();
+        if (preferences && preferences.$resolved) {
           deferred.resolve();
         } else {
-          profilePreferences.$promise.then(() => {
+          preferences.$promise.then(() => {
             deferred.resolve();
           }, (error) => {
             deferred.reject(error);
           });
         }
-      }, (error) => {
-        deferred.reject(error);
-      });
 
       return deferred.promise;
     }];
@@ -65,23 +61,18 @@ initModule.config(['$routeProvider', ($routeProvider) => {
 
   $routeProvider.accessOtherWise = (route) => {
     route.resolve || (route.resolve = {});
-    route.resolve.app = ['$q', 'cheProfile', 'cheUser', ($q, cheProfile, cheUser) => {
+    route.resolve.app = ['$q', 'chePreferences', ($q, chePreferences) => {
       var deferred = $q.defer();
-
-      cheUser.fetchUser().then(() => {
-        let profilePreferences = cheProfile.getPreferences();
-        if (profilePreferences && profilePreferences.$resolved) {
+        let preferences = chePreferences.getPreferences();
+        if (preferences && preferences.$resolved) {
           deferred.resolve();
         } else {
-          profilePreferences.$promise.then(() => {
+          preferences.$promise.then(() => {
             deferred.resolve();
           }, (error) => {
             deferred.reject(error);
           });
         }
-      }, (error) => {
-        deferred.reject(error);
-      });
 
       return deferred.promise;
     }];
@@ -94,29 +85,33 @@ initModule.config(['$routeProvider', ($routeProvider) => {
 var DEV = false;
 
 
-// config routes
-initModule.config(['$routeProvider', ($routeProvider) => {
-  // add demo page
+// configs
+initModule.config(['$routeProvider', 'ngClipProvider', ($routeProvider, ngClipProvider) => {
+  // config routes (add demo page)
   if (DEV) {
     $routeProvider.accessWhen('/demo-components', {
+      title: 'Demo Components',
       templateUrl: 'app/demo-components/demo-components.html',
       controller: 'DemoComponentsCtrl',
       controllerAs: 'demoComponentsCtrl'
     });
   }
-
+  //add .swf path location using ngClipProvider
+  let ngClipProviderPath = DEV ? 'bower_components/zeroclipboard/dist/ZeroClipboard.swf' : 'assets/zeroclipboard/ZeroClipboard.swf';
+  ngClipProvider.setPath(ngClipProviderPath);
 }]);
 
 
 /**
  * Setup route redirect module
  */
-initModule.run(['$rootScope', '$location', 'routingRedirect', 'cheUser', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService',
-  ($rootScope, $location, routingRedirect, cheUser, $timeout, ideIFrameSvc, cheIdeFetcher, routeHistory, cheUIElementsInjectorService) => {
-
+initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
+  ($rootScope, $location, $routeParams, routingRedirect, $timeout, ideIFrameSvc, cheIdeFetcher, routeHistory, cheUIElementsInjectorService, workspaceDetailsService) => {
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
+
+    workspaceDetailsService.addSection('Projects', '<workspace-details-projects></workspace-details-projects>', 'icon-ic_inbox_24px');
 
     // here only to create instances of these components
     cheIdeFetcher;
@@ -143,8 +138,15 @@ initModule.run(['$rootScope', '$location', 'routingRedirect', 'cheUser', '$timeo
       }
     });
 
-    // When a route is about to change, notify the routing redirect node
+
     $rootScope.$on('$routeChangeSuccess', (event, next) => {
+      if (next.$$route.title && angular.isFunction(next.$$route.title)) {
+        $rootScope.currentPage = next.$$route.title($routeParams);
+      } else {
+        $rootScope.currentPage = next.$$route.title || 'Dashboard';
+      }
+
+      // When a route is about to change, notify the routing redirect node
       if (next.resolve) {
         if (DEV) {
           console.log('$routeChangeSuccess event with route', next);
@@ -197,7 +199,6 @@ initModule.factory('ETagInterceptor', ($window, $cookies, $q) => {
     }
   };
 });
-
 
 initModule.config(($mdThemingProvider, jsonColors) => {
 
@@ -353,6 +354,7 @@ new CheCountriesConfig(instanceRegister);
 new CheJobsConfig(instanceRegister);
 new ComponentsConfig(instanceRegister);
 new AdminsConfig(instanceRegister);
+new AdministrationConfig(instanceRegister);
 new IdeConfig(instanceRegister);
 
 new NavbarConfig(instanceRegister);

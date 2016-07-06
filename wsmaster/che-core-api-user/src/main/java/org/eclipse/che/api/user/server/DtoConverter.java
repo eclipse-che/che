@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.shared.dto.UserDescriptor;
+import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.shared.dto.UserDto;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -22,10 +22,10 @@ import org.eclipse.che.dto.server.DtoFactory;
 public final class DtoConverter {
 
     /**
-     * Converts {@link User} to {@link UserDescriptor}.
+     * Converts {@link User} to {@link UserDto}.
      */
-    public static UserDescriptor toDescriptor(User user) {
-        return DtoFactory.getInstance().createDto(UserDescriptor.class)
+    public static UserDto asDto(User user) {
+        return DtoFactory.getInstance().createDto(UserDto.class)
                          .withId(user.getId())
                          .withEmail(user.getEmail())
                          .withName(user.getName())

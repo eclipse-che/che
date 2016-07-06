@@ -24,9 +24,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedHandler;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedHandler;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
@@ -55,8 +53,8 @@ import java.util.Map;
 @Singleton
 public class MachinePanelPresenter extends BasePresenter implements MachinePanelView.ActionDelegate,
                                                                     MachineStateEvent.Handler,
-                                                                    WorkspaceStartedHandler,
-                                                                    WorkspaceStoppedHandler,
+                                                                    WorkspaceStartedEvent.Handler,
+                                                                    WorkspaceStoppedEvent.Handler,
                                                                     ActivePartChangedHandler {
     private final MachinePanelView             view;
     private final MachineServiceClient         service;

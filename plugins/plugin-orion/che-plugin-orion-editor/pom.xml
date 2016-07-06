@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-orion-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-orion-editor</artifactId>
@@ -40,6 +40,10 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-elemental</artifactId>

@@ -24,6 +24,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
@@ -31,8 +32,13 @@ import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
+import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +62,7 @@ import static java.lang.String.format;
  * @author andrew00x
  * @author Alexander Garagatyi
  * @author Anton Korneta
+ * @author Mykola Morhun
  */
 public class DockerInstance extends AbstractInstance {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstance.class);
@@ -87,6 +94,7 @@ public class DockerInstance extends AbstractInstance {
     private final String                                      image;
     private final LineConsumer                                outputConsumer;
     private final String                                      registry;
+    private final String                                      registryNamespace;
     private final DockerNode                                  node;
     private final DockerInstanceStopDetector                  dockerInstanceStopDetector;
     private final DockerInstanceProcessesCleaner              processesCleaner;
@@ -98,6 +106,7 @@ public class DockerInstance extends AbstractInstance {
     @Inject
     public DockerInstance(DockerConnector docker,
                           @Named("machine.docker.registry") String registry,
+                          @Named("machine.docker.snapshot.registry_namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
                           @Assisted Machine machine,
                           @Assisted("container") String container,
@@ -114,6 +123,7 @@ public class DockerInstance extends AbstractInstance {
         this.image = image;
         this.outputConsumer = outputConsumer;
         this.registry = registry;
+        this.registryNamespace = registryNamespace;
         this.node = node;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.processesCleaner = processesCleaner;
@@ -163,8 +173,12 @@ public class DockerInstance extends AbstractInstance {
     public List<InstanceProcess> getProcesses() throws MachineException {
         List<InstanceProcess> processes = new LinkedList<>();
         try {
-            final Exec exec = docker.createExec(container, false, "/bin/bash", "-c", GET_ALIVE_PROCESSES_COMMAND);
-            docker.startExec(exec.getId(), logMessage -> {
+            final Exec exec = docker.createExec(CreateExecParams.create(container,
+                                                                        new String[] {"/bin/bash",
+                                                                                      "-c",
+                                                                                      GET_ALIVE_PROCESSES_COMMAND})
+                                                                .withDetach(false));
+            docker.startExec(StartExecParams.create(exec.getId()), logMessage -> {
                 final String pidFilePath = logMessage.getContent().trim();
                 final Matcher matcher = PID_FILE_PATH_PATTERN.matcher(pidFilePath);
                 if (matcher.matches()) {
@@ -198,27 +212,30 @@ public class DockerInstance extends AbstractInstance {
     @Override
     public MachineSource saveToSnapshot(String owner) throws MachineException {
         try {
-            final String repository = generateRepository();
+            String image = generateRepository();
             if(!snapshotUseRegistry) {
-                commitContainer(owner, repository, LATEST_TAG);
-                return new DockerMachineSource(repository).withTag(LATEST_TAG);
+                commitContainer(owner, image, LATEST_TAG);
+                return new DockerMachineSource(image).withTag(LATEST_TAG);
             }
-            final String repositoryName = registry + '/' + repository;
-            commitContainer(owner, repositoryName, LATEST_TAG);
+
+            PushParams pushParams = PushParams.create(image)
+                                              .withRegistry(registry)
+                                              .withTag(LATEST_TAG);
+
+            final String fullRepo = pushParams.getFullRepo();
+            commitContainer(owner, fullRepo, LATEST_TAG);
             //TODO fix this workaround. Docker image is not visible after commit when using swarm
             Thread.sleep(2000);
             final ProgressLineFormatterImpl lineFormatter = new ProgressLineFormatterImpl();
-            final String digest = docker.push(PushParams.create(repository)
-                                                        .withTag(LATEST_TAG)
-                                                        .withRegistry(registry),
+            final String digest = docker.push(pushParams,
                                               progressMonitor -> {
                                                   try {
                                                       outputConsumer.writeLine(lineFormatter.format(progressMonitor));
                                                   } catch (IOException ignored) {
                                                   }
                                               });
-            docker.removeImage(RemoveImageParams.create(repositoryName).withForce(false));
-            return new DockerMachineSource(repository).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
+            docker.removeImage(RemoveImageParams.create(fullRepo).withForce(false));
+            return new DockerMachineSource(image).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
         } catch (IOException ioEx) {
             throw new MachineException(ioEx);
         } catch (InterruptedException e) {
@@ -235,17 +252,26 @@ public class DockerInstance extends AbstractInstance {
         // !! We SHOULD NOT pause container before commit because all execs will fail
         // to push image to private registry it should be tagged with registry in repo name
         // https://docs.docker.com/reference/api/docker_remote_api_v1.16/#push-an-image-on-the-registry
-        docker.commit(CommitParams.create(container, repository)
+        docker.commit(CommitParams.create(container)
+                                  .withRepository(repository)
                                   .withTag(tag)
                                   .withComment(comment));
     }
 
     private String generateRepository() {
+        if (registryNamespace != null) {
+            return registryNamespace + '/' + NameGenerator.generate(null, 16);
+        }
         return NameGenerator.generate(null, 16);
     }
 
     @Override
     public void destroy() throws MachineException {
+        try {
+            outputConsumer.close();
+        } catch (IOException ignored) {
+        }
+
         machineProcesses.clear();
         processesCleaner.untrackProcesses(getId());
         dockerInstanceStopDetector.stopDetection(container);
@@ -256,13 +282,15 @@ public class DockerInstance extends AbstractInstance {
 
             docker.killContainer(container);
 
-            docker.removeContainer(container, true, true);
+            docker.removeContainer(RemoveContainerParams.create(container)
+                                                        .withRemoveVolumes(true)
+                                                        .withForce(true));
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage());
         }
 
         try {
-            docker.removeImage(image, false);
+            docker.removeImage(RemoveImageParams.create(image).withForce(false));
         } catch (IOException ignore) {
         }
     }
@@ -306,8 +334,8 @@ public class DockerInstance extends AbstractInstance {
 
         ListLineConsumer lines = new ListLineConsumer();
         try {
-            Exec exec = docker.createExec(container, false, command);
-            docker.startExec(exec.getId(), new LogMessagePrinter(lines, LogMessage::getContent));
+            Exec exec = docker.createExec(CreateExecParams.create(container, command).withDetach(false));
+            docker.startExec(StartExecParams.create(exec.getId()), new LogMessagePrinter(lines, LogMessage::getContent));
         } catch (IOException e) {
             throw new MachineException(format("Error occurs while initializing command %s in docker container %s: %s",
                                               Arrays.toString(command), container, e.getLocalizedMessage()), e);
@@ -327,10 +355,11 @@ public class DockerInstance extends AbstractInstance {
             throw new MachineException("Unsupported copying between not docker machines");
         }
         try {
-            docker.putResource(container,
-                               targetPath,
-                               docker.getResource(((DockerInstance)sourceMachine).container, sourcePath),
-                               overwriteDirNonDir);
+            docker.putResource(PutResourceParams.create(container,
+                                                        targetPath,
+                                                        docker.getResource(GetResourceParams.create(
+                                                                ((DockerInstance)sourceMachine).container, sourcePath)))
+                                                .withNoOverwriteDirNonDir(overwriteDirNonDir));
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage());
         }

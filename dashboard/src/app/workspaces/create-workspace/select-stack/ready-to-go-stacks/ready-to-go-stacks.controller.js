@@ -13,6 +13,7 @@
 /**
  * This class is handling the controller for the ready-to-go stacks
  * @author Florent Benoit
+ * @author Oleksii Orel
  */
 export class ReadyToGoStacksCtrl {
 
@@ -26,55 +27,33 @@ export class ReadyToGoStacksCtrl {
     this.lodash = lodash;
     this.cheStack = cheStack;
 
-    this.stacks = [];
-    this.stack = null;
-
-    if (cheStack.getStacks().length) {
+    this.generalStacks = [];
+    this.stacks = cheStack.getStacks();
+    if (this.stacks.length) {
       this.updateData();
     } else {
-      let promiseStack = cheStack.fetchStacks();
-      promiseStack.then(() => {
-          this.updateData();
-        },
-        (error) => {
-          // etag handling so also retrieve last data that were fetched before
-          if (error.status === 304) {
-            // ok
-            this.updateData();
-          }
-        });
+      cheStack.fetchStacks().then(() => {
+        this.updateData();
+      });
     }
-  }
-
-  cheSimpleSelecterDefault(stack) {
-    this.stack = stack;
-    this.$timeout(() => {
-      this.onChange();
-    });
-  }
-
-  cheSimpleSelecter(projectName, stack) {
-    this.stack = stack;
-    this.$timeout(() => {
-      this.onChange();
-    });
   }
 
   /**
    * Update stacks' data
    */
   updateData() {
-    this.stacks.length = 0;
-    var remoteStacks = this.cheStack.getStacks();
-    // remote stacks are
-    remoteStacks.forEach((stack) => {
-      let findLink = this.lodash.find(stack.links, (link) => {
+    this.stacks.forEach((stack) => {
+      if (stack.scope !== 'general') {
+        return;
+      }
+      let generalStack = angular.copy(stack);
+      let findLink = this.lodash.find(generalStack.links, (link) => {
         return link.rel === 'get icon link';
       });
       if (findLink) {
-        stack.iconSrc = findLink.href;
+        generalStack.iconSrc = findLink.href;
       }
-      this.stacks.push(stack);
+      this.generalStacks.push(generalStack);
     });
     // broadcast event
     this.$rootScope.$broadcast('create-project-stacks:initialized');
@@ -99,6 +78,25 @@ export class ReadyToGoStacksCtrl {
     }
 
     return privilegedNames.length;
+  }
+
+  /**
+   * Select stack
+   */
+  select(stack) {
+    this.stack = stack;
+    this.$timeout(() => {
+      this.onChange();
+    });
+  }
+
+  /**
+   * When initializing with the first item, select it
+   */
+  initValue(isFirst, stack) {
+    if (isFirst) {
+      this.select(stack);
+    }
   }
 
 }

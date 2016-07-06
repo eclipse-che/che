@@ -20,6 +20,7 @@ import {CheButtonWarning} from './button/che-button-warning.directive';
 import {CheButtonDropdownCtrl} from './button-dropdown/che-button-dropdown.controller';
 import {CheButtonDropdown} from './button-dropdown/che-button-dropdown.directive';
 import {CheClipboard} from './copy-clipboard/che-clipboard.directive';
+import {CheCompile} from './compile/che-compile.directive';
 import {CheDropZoneCtrl} from './dropzone/che-dropzone.controller';
 import {CheDropZone} from './dropzone/che-dropzone.directive';
 import {CheEmptyState} from './empty-state/che-empty-state.directive';
@@ -46,8 +47,6 @@ import {CheSearch} from './search/che-search.directive';
 import {CheSelect} from './select/che-select.directive';
 import {CheSelecterCtrl} from './selecter/che-selecter.controller';
 import {CheSelecter} from './selecter/che-selecter.directive';
-import {CheSimpleSelecterCtrl} from './simple-selecter/che-simple-selecter.controller';
-import {CheSimpleSelecter} from './simple-selecter/che-simple-selecter.directive';
 import {CheSlider} from './slider/che-slider.directive';
 import {CheLogsOutput} from './logs-output/che-logs-output.directive';
 import {CheTextInfo} from './text-info/che-text-info.directive';
@@ -78,6 +77,7 @@ export class WidgetConfig {
       .directive('cheButtonDropdown', CheButtonDropdown)
       //clipboard
       .directive('cheClipboard', CheClipboard)
+      .directive('cheCompile', CheCompile)
       //dropzone
       .controller('CheDropZoneCtrl', CheDropZoneCtrl)
       .directive('cheDropzone', CheDropZone)
@@ -114,9 +114,6 @@ export class WidgetConfig {
       .controller('CheSelecterCtrl', CheSelecterCtrl)
       .directive('cheSelecter', CheSelecter)
 
-      .controller('CheSimpleSelecterCtrl', CheSimpleSelecterCtrl)
-      .directive('cheSimpleSelecter', CheSimpleSelecter)
-
       .directive('cheSlider', CheSlider)
 
       .directive('cheLogsOutput', CheLogsOutput)
@@ -128,7 +125,7 @@ export class WidgetConfig {
       .directive('cheToggle', CheToggle)
 
       .directive('cheToolbar', CheToolbar)
-    //notifications
+      //notifications
       .directive('cheErrorNotification', CheErrorNotification)
       .directive('cheInfoNotification', CheInfoNotification)
 

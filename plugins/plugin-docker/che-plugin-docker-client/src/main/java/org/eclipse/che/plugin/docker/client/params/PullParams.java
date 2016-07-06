@@ -11,12 +11,15 @@
 package org.eclipse.che.plugin.docker.client.params;
 
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
+import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 
 import javax.validation.constraints.NotNull;
 
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY;
+import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#pull(PullParams, ProgressMonitor)}.
@@ -25,9 +28,10 @@ import static java.util.Objects.requireNonNull;
  */
 public class PullParams {
 
-    private String image;
-    private String tag;
-    private String registry;
+    private String      image;
+    private String      tag;
+    private String      registry;
+    private AuthConfigs authConfigs;
 
     /**
      * Creates arguments holder with required parameters.
@@ -36,7 +40,7 @@ public class PullParams {
      *          name of the image to pull
      * @return arguments holder with required parameters
      * @throws NullPointerException
-     *         if {@code image} is null
+     *         if {@code image} null
      */
     public static PullParams create(@NotNull String image) {
         return new PullParams().withImage(image);
@@ -51,7 +55,7 @@ public class PullParams {
      *         name of the image to pull
      * @return this params instance
      * @throws NullPointerException
-     *         if {@code image} is null
+     *         if {@code image} null
      */
     public PullParams withImage(@NotNull String image) {
         requireNonNull(image);
@@ -76,11 +80,23 @@ public class PullParams {
      *
      * @param registry
      *         host and port of registry, e.g. localhost:5000.
-     *         If it is not set, default value "hub.docker.com" will be used
+     *         If it is not set, default value will be used
      * @return this params instance
      */
     public PullParams withRegistry(String registry) {
         this.registry = registry;
+        return this;
+    }
+
+    /**
+     * Adds auth configuration to this parameters.
+     *
+     * @param authConfigs
+     *         authentication configuration for registries
+     * @return this params instance
+     */
+    public PullParams withAuthConfigs(AuthConfigs authConfigs) {
+        this.authConfigs = authConfigs;
         return this;
     }
 
@@ -96,6 +112,24 @@ public class PullParams {
         return registry;
     }
 
+    public AuthConfigs getAuthConfigs() {
+        return authConfigs;
+    }
+
+    /**
+     * Returns full repo.
+     * It has following format: [registry/]image
+     * In case of docker.io registry is omitted,
+     *  otherwise it may cause some troubles with swarm
+     */
+    public String getFullRepo() {
+        if (registry == null || DEFAULT_REGISTRY_SYNONYMS.contains(registry)) {
+            return image;
+        } else {
+            return registry + '/' + image;
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -103,12 +137,13 @@ public class PullParams {
         PullParams that = (PullParams)o;
         return Objects.equals(image, that.image) &&
                Objects.equals(tag, that.tag) &&
-               Objects.equals(registry, that.registry);
+               Objects.equals(registry, that.registry) &&
+               Objects.equals(authConfigs, that.authConfigs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(image, tag, registry);
+        return Objects.hash(image, tag, registry, authConfigs);
     }
 
 }

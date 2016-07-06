@@ -23,17 +23,12 @@ export class CheWorkspace {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($resource, $q, cheUser, cheWebsocket, lodash) {
+  constructor ($resource, $q, cheWebsocket, lodash) {
     // keep resource
     this.$resource = $resource;
-
     this.$q = $q;
     this.lodash = lodash;
-
-    this.cheUser = cheUser;
     this.cheWebsocket = cheWebsocket;
-
-    this.lodash = lodash;
 
     // current list of workspaces
     this.workspaces = [];
@@ -53,7 +48,7 @@ export class CheWorkspace {
 
     // remote call
     this.remoteWorkspaceAPI = this.$resource('/api/workspace', {}, {
-        getDetails: {method: 'GET', url: '/api/workspace/:workspaceId'},
+        getDetails: {method: 'GET', url: '/api/workspace/:workspaceKey'},
         create: {method: 'POST', url: '/api/workspace?account=:accountId'},
         deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
         updateWorkspace: {method: 'PUT', url : '/api/workspace/:workspaceId'},
@@ -61,7 +56,8 @@ export class CheWorkspace {
         deleteProject: {method: 'DELETE', url : '/api/workspace/:workspaceId/project/:path'},
         stopWorkspace: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url : '/api/workspace/:workspaceId/runtime?environment=:envName'},
-        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
+        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
+        createSnapshot: {method: 'POST', url: '/api/workspace/:workspaceId/snapshot'}
       }
     );
   }
@@ -122,6 +118,12 @@ export class CheWorkspace {
     return this.workspacesById;
   }
 
+  getWorkspaceByName(namespace, name) {
+    return this.lodash.find(this.workspaces, (workspace) => {
+      return workspace.namespace === namespace && workspace.config.name === name;
+    });
+  }
+
   /**
    * Gets the workspace by id
    * @param workspace id
@@ -130,6 +132,8 @@ export class CheWorkspace {
   getWorkspaceById(id) {
     return this.workspacesById.get(id);
   }
+
+
 
   /**
    * Ask for loading the workspaces in asynchronous way
@@ -174,13 +178,25 @@ export class CheWorkspace {
     return callbackPromises;
   }
 
-  fetchWorkspaceDetails(workspaceId) {
+  /**
+   * Fetch workspace details by workspace's key.
+   *
+   * @param workspaceKey workspace key: can be just id or namespace:workspaceName pair
+   * @returns {Promise}
+   */
+  fetchWorkspaceDetails(workspaceKey) {
     var defer = this.$q.defer();
 
-    let promise = this.remoteWorkspaceAPI.getDetails({workspaceId : workspaceId}).$promise;
+    let promise = this.remoteWorkspaceAPI.getDetails({workspaceKey : workspaceKey}).$promise;
     promise.then((data) => {
-      this.workspacesById.set(workspaceId, data);
-      this.startUpdateWorkspaceStatus(workspaceId);
+      this.workspacesById.set(data.id, data);
+      this.lodash.remove(this.workspaces, (workspace) => {
+        return workspace.id === data.id;
+      });
+
+     this.workspaces.push(data);
+
+      this.startUpdateWorkspaceStatus(data.id);
       defer.resolve();
     }, (error) => {
       if (error.status !== 304) {
@@ -215,32 +231,66 @@ export class CheWorkspace {
     return promise;
   }
 
+  /**
+   * Prepares workspace config using the data in provided one,
+   * workspace name, machine source, RAM.
+   *
+   * @param config provided base workspace config
+   * @param workspaceName workspace name
+   * @param source machine source
+   * @param ram workspace's RAM
+   * @returns {config} prepared workspace config
+   */
+  formWorkspaceConfig(config, workspaceName, source, ram) {
+    config = config || {};
+    config.name = workspaceName;
+    config.projects = [];
+    config.defaultEnv = config.defaultEnv || workspaceName;
+    config.description = null;
+    ram = ram || 2048;
 
-  createWorkspace(accountId, workspaceName, recipeUrl, ram, attributes) {
-    let data = {
-      'environments': [],
-      'name': workspaceName,
-      'projects': [],
-      'defaultEnv': workspaceName,
-      'description': null,
-      'commands': []
-    };
+    //Check environments were provided in config:
+    config.environments = (config.environments && config.environments.length > 0) ? config.environments : [];
 
-    let memory = ram || 2048;
+    let defaultEnvironment = this.lodash.find(config.environments, (environment) => {
+      return environment.name === config.defaultEnv;
+    });
 
-    let envEntry = {
-        'name': workspaceName,
+    //Check default environment is provided and add if there is no:
+    if (!defaultEnvironment) {
+      defaultEnvironment = {
+        'name': config.defaultEnv,
         'recipe': null,
-        'machineConfigs': [{
-          'name': 'ws-machine',
-          'limits': {'ram': memory},
-          'type': 'docker',
-          'source': {'location': recipeUrl, 'type': 'dockerfile'},
-          'dev': true
-        }]
-      };
+        'machineConfigs': []
+      }
 
-    data.environments.push(envEntry);
+      config.environments.push(defaultEnvironment);
+    }
+
+    let devMachine = this.lodash.find(defaultEnvironment.machineConfigs, (config) => {
+      return config.dev;
+    });
+
+    //Check dev machine is provided and add if there is no:
+    if (!devMachine) {
+      devMachine = {
+        'name': 'ws-machine',
+        'limits': {'ram': ram},
+        'type': 'docker',
+        'source': source,
+        'dev': true
+      }
+      defaultEnvironment.machineConfigs.push(devMachine);
+    } else {
+      devMachine.limits = {'ram': ram};
+      devMachine.source = source;
+    }
+
+    return config;
+  }
+
+  createWorkspace(accountId, workspaceName, source, ram, attributes) {
+    let data = this.formWorkspaceConfig({}, workspaceName, source, ram);
 
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item) => { return item[0] + ':' + item[1]});
     let promise = this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, data).$promise;
@@ -286,9 +336,22 @@ export class CheWorkspace {
    * @returns {*|promise|n|N}
    */
   updateWorkspace(workspaceId, data) {
+    var defer = this.$q.defer();
+
     let promise = this.remoteWorkspaceAPI.updateWorkspace({workspaceId : workspaceId}, data).$promise;
-    promise.then(() => {this.fetchWorkspaceDetails(workspaceId);});
-    return promise;
+    promise.then((data) => {
+      this.workspacesById.set(data.id, data);
+      this.lodash.remove(this.workspaces, (workspace) => {
+        return workspace.id === data.id;
+      });
+      this.workspaces.push(data);
+      this.startUpdateWorkspaceStatus(data.id);
+      defer.resolve(data);
+    }, (error) => {
+      defer.reject(error);
+    });
+
+    return defer.promise;
   }
 
   /**
@@ -349,8 +412,8 @@ export class CheWorkspace {
     return websocketLink ? websocketLink.href : '';
   }
 
-  getIdeUrl(workspaceName) {
-    return '/ide/' + workspaceName;
+  getIdeUrl(namespace, workspaceName) {
+    return '/ide/' + namespace + '/' + workspaceName;
   }
 
   /**
@@ -397,4 +460,14 @@ export class CheWorkspace {
       });
     }
   }
+
+  /**
+   * Create snapshot of workspace
+   * @param workspaceId {String} workspace id
+   * @returns {*}
+   */
+  createSnapshot(workspaceId) {
+    return this.remoteWorkspaceAPI.createSnapshot({workspaceId : workspaceId}, {}).$promise;
+  }
+
 }

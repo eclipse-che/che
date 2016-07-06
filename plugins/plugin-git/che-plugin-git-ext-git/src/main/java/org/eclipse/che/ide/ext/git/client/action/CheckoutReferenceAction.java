@@ -15,10 +15,12 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.checkout.CheckoutReferencePresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Checkout reference(branch, tag) name or commit hash Action
@@ -33,16 +35,21 @@ public class CheckoutReferenceAction extends GitAction {
     public CheckoutReferenceAction(AppContext appContext,
                                    GitResources resources,
                                    GitLocalizationConstant constant,
-                                   ProjectExplorerPresenter projectExplorer,
                                    CheckoutReferencePresenter presenter) {
-        super(constant.checkoutReferenceTitle(), constant.checkoutReferenceDescription(), resources.checkoutReference(), appContext,
-              projectExplorer);
+        super(constant.checkoutReferenceTitle(),
+              constant.checkoutReferenceDescription(),
+              resources.checkoutReference(),
+              appContext);
         this.presenter = presenter;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        presenter.showDialog();
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null, "Null project occurred");
+
+        presenter.showDialog(project);
     }
 }

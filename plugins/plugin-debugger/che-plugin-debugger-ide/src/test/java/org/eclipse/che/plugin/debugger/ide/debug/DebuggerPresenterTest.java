@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.debug.Breakpoint;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.debug.Debugger;
@@ -35,7 +35,6 @@ import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.plugin.debugger.ide.BaseTest;
 import org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant;
 import org.eclipse.che.plugin.debugger.ide.DebuggerResources;
-import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -80,8 +79,6 @@ public class DebuggerPresenterTest extends BaseTest {
     @Mock
     @DebuggerToolbar
     private ToolbarPresenter             debuggerToolbar;
-    @Mock
-    private FqnResolverFactory           fqnResolverFactory;
     @Mock
     private DtoFactory                   dtoFactory;
     @Mock

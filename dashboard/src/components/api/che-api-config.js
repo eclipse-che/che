@@ -12,13 +12,13 @@
 
 import {CheAPI} from './che-api.factory';
 import {CheWorkspace} from './che-workspace.factory';
-import {CheUser} from './che-user.factory';
 import {CheProjectTemplate} from './che-project-template.factory';
 import {CheRecipe} from './che-recipe.factory';
 import {CheRecipeTemplate} from './che-recipe-template.factory';
 import {CheStack} from './che-stack.factory';
 import {CheWebsocket} from './che-websocket.factory';
 import {CheProfile} from './che-profile.factory';
+import {ChePreferences} from './che-preferences.factory';
 import {CheService} from './che-service.factory';
 import {CheSvn} from './che-svn.factory';
 import {CheHttpBackend} from './test/che-http-backend';
@@ -34,9 +34,9 @@ export class ApiConfig {
 
   constructor(register) {
     register.factory('cheWorkspace', CheWorkspace);
-    register.factory('cheUser', CheUser);
     register.factory('cheProjectTemplate', CheProjectTemplate);
     register.factory('cheProfile', CheProfile);
+    register.factory('chePreferences', ChePreferences);
     register.factory('cheWebsocket', CheWebsocket);
     register.factory('cheRecipe', CheRecipe);
     register.factory('cheRecipeTemplate', CheRecipeTemplate);

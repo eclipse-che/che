@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.parser;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Describes specific docker image.
@@ -51,6 +56,7 @@ public class DockerImageIdentifier {
         return new DockerImageIdentifierBuilder();
     }
 
+    @Nullable
     public String getRegistry() {
         return registry;
     }
@@ -59,10 +65,12 @@ public class DockerImageIdentifier {
         return repository;
     }
 
+    @Nullable
     public String getTag() {
         return tag;
     }
 
+    @Nullable
     public String getDigest() {
         return digest;
     }
@@ -108,7 +116,8 @@ public class DockerImageIdentifier {
             return this;
         }
 
-        public DockerImageIdentifierBuilder setRepository(String repository) {
+        public DockerImageIdentifierBuilder setRepository(@NotNull String repository) {
+            requireNonNull(repository);
             this.repository = repository;
             return this;
         }

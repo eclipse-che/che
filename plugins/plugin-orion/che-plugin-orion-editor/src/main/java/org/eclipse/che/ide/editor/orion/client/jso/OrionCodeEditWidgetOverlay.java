@@ -43,4 +43,13 @@ public class OrionCodeEditWidgetOverlay extends JavaScriptObject {
         options.parent = element;
         return this.create(options);
     }-*/;
+    
+    /**
+     * Provides Access to Orion's service registry.
+     * 
+     * @return the service registry
+     */
+    public final native OrionServiceRegistryOverlay getServiceRegistry() /*-{
+        return this.serviceRegistry;
+    }-*/;
 }

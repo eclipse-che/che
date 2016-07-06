@@ -1,0 +1,41 @@
+<ng-form name="addRegistryForm" class="add-registry-form">
+  <div class="form-input-fields">
+    <che-input type="text"
+               che-form="addRegistryForm"
+               che-name="address"
+               che-label-name="Address"
+               che-place-holder="registry"
+               ng-model="addRegistryController.registryUrl"
+               required
+               ng-maxlength="128">
+      <div ng-message="required">Registry is required.</div>
+      <div ng-message="maxlength">Registry should be less than 128 characters long.</div>
+    </che-input>
+    <che-input che-form="addRegistryForm"
+               che-name="username"
+               che-label-name="Username"
+               che-place-holder="username"
+               ng-model="addRegistryController.registryUserName"
+               ng-maxlength="128">
+      <div ng-message="maxlength">Username should be less than 128 characters long.</div>
+    </che-input>
+    <che-input che-form="addRegistryForm"
+               che-name="password"
+               che-label-name="Password"
+               che-place-holder="password"
+               ng-maxlength="128"
+               type="password"
+               required
+               ng-model="addRegistryController.registryUserPassword">
+      <div ng-message="required">User Password is required.</div>
+      <div ng-message="maxlength">User Password should be less than 128 characters long.</div>
+    </che-input>
+  </div>
+  <che-button-primary che-button-title="Create"
+                      ng-click="addRegistryController.createRegistry()"
+                      ng-disabled="addRegistryForm.$invalid">
+  </che-button-primary>
+  <che-button-notice che-button-title="Cancel"
+                     ng-click="addRegistryController.abort()">
+  </che-button-notice>
+</ng-form>

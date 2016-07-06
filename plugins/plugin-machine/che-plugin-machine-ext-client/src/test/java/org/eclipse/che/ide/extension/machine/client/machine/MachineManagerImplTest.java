@@ -23,11 +23,11 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsolePresenter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
@@ -65,9 +65,6 @@ public class MachineManagerImplTest {
 
     @Mock
     private WorkspaceServiceClient workspaceServiceClient;
-
-    @Mock
-    private MachineConsolePresenter machineConsolePresenter;
 
     @Mock
     private MachineStatusNotifier machineStatusNotifier;
@@ -167,6 +164,9 @@ public class MachineManagerImplTest {
         WorkspaceDto workspaceDto = mock(WorkspaceDto.class);
         when(appContext.getWorkspace()).thenReturn(workspaceDto);
         when(workspaceDto.getId()).thenReturn(ID);
+        DevMachine devMachine = mock(DevMachine.class);
+        when(appContext.getDevMachine()).thenReturn(devMachine);
+        when(devMachine.getId()).thenReturn(ID);
 
         Promise<MachineDto> promiseEmpty = mock(Promise.class);
         when(workspaceServiceClient.createMachine(anyString(), any(MachineConfigDto.class))).thenReturn(promiseEmpty);

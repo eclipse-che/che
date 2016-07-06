@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.search;
 
+import com.google.common.base.Optional;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -25,11 +26,15 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesRequest;
 import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesResponse;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
@@ -49,13 +54,13 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public class FindUsagesPresenter extends BasePresenter implements FindUsagesView.ActionDelegate {
 
 
-    private WorkspaceAgent           workspaceAgent;
-    private JavaLocalizationConstant localizationConstant;
-    private FindUsagesView           view;
-    private JavaSearchService        searchService;
-    private DtoFactory               dtoFactory;
-    private NotificationManager      manager;
-    private final Resources resources;
+    private       WorkspaceAgent           workspaceAgent;
+    private       JavaLocalizationConstant localizationConstant;
+    private       FindUsagesView           view;
+    private       JavaSearchService        searchService;
+    private       DtoFactory               dtoFactory;
+    private       NotificationManager      manager;
+    private final Resources                resources;
 
     @Inject
     public FindUsagesPresenter(WorkspaceAgent workspaceAgent,
@@ -107,37 +112,55 @@ public class FindUsagesPresenter extends BasePresenter implements FindUsagesView
 
     public void findUsages(TextEditor activeEditor) {
 
-        VirtualFile virtualFile = activeEditor.getEditorInput().getFile();
+        final VirtualFile virtualFile = activeEditor.getEditorInput().getFile();
 
-        String projectPath = virtualFile.getProject().getProjectConfig().getPath();
-        FindUsagesRequest request = dtoFactory.createDto(FindUsagesRequest.class);
-        request.setFQN(JavaSourceFolderUtil.getFQNForFile(virtualFile));
-        request.setProjectPath(projectPath);
-        request.setOffset(activeEditor.getCursorOffset());
+        if (virtualFile instanceof Resource) {
+            final Project project = ((Resource)virtualFile).getRelatedProject().get();
 
-        Promise<FindUsagesResponse> promise = searchService.findUsages(request);
-        promise.then(new Operation<FindUsagesResponse>() {
-            @Override
-            public void apply(FindUsagesResponse arg) throws OperationException {
-                handleResponse(arg);
+            if (project == null) {
+                return;
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                Throwable cause = arg.getCause();
-                if (cause instanceof ServerException) {
-                    handleError(((ServerException)cause).getHTTPStatus(), cause.getMessage());
-                    return;
-                }
-                //in case websocket request
-                if (cause instanceof org.eclipse.che.ide.websocket.rest.exceptions.ServerException) {
-                    handleError(((org.eclipse.che.ide.websocket.rest.exceptions.ServerException)cause).getHTTPStatus(), cause.getMessage());
-                    return;
-                }
-                Log.error(getClass(), arg);
-                manager.notify(localizationConstant.failedToProcessFindUsage(), arg.getMessage(), FAIL, FLOAT_MODE);
+
+            final Optional<Resource> srcFolder = ((Resource)virtualFile).getParentWithMarker(SourceFolderMarker.ID);
+
+            if (!srcFolder.isPresent()) {
+                return;
             }
-        });
+
+            final String fqn = JavaUtil.resolveFQN((Container)srcFolder.get(), (Resource)virtualFile);
+
+            String projectPath = project.getLocation().toString();
+            FindUsagesRequest request = dtoFactory.createDto(FindUsagesRequest.class);
+            request.setFQN(fqn);
+            request.setProjectPath(projectPath);
+            request.setOffset(activeEditor.getCursorOffset());
+
+            Promise<FindUsagesResponse> promise = searchService.findUsages(request);
+            promise.then(new Operation<FindUsagesResponse>() {
+                @Override
+                public void apply(FindUsagesResponse arg) throws OperationException {
+                    handleResponse(arg);
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError arg) throws OperationException {
+                    Throwable cause = arg.getCause();
+                    if (cause instanceof ServerException) {
+                        handleError(((ServerException)cause).getHTTPStatus(), cause.getMessage());
+                        return;
+                    }
+                    //in case websocket request
+                    if (cause instanceof org.eclipse.che.ide.websocket.rest.exceptions.ServerException) {
+                        handleError(((org.eclipse.che.ide.websocket.rest.exceptions.ServerException)cause).getHTTPStatus(),
+                                    cause.getMessage());
+                        return;
+                    }
+                    Log.error(getClass(), arg);
+                    manager.notify(localizationConstant.failedToProcessFindUsage(), arg.getMessage(), FAIL, FLOAT_MODE);
+                }
+            });
+        }
+
 
     }
 

@@ -12,9 +12,8 @@ package org.eclipse.che.plugin.debugger.ide.debug;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
-
-import java.util.List;
+import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.api.debug.shared.model.Location;
 
 /**
  * Responsible to open files in editor when debugger stopped at breakpoint.
@@ -23,7 +22,13 @@ import java.util.List;
  */
 public interface ActiveFileHandler {
 
-    void openFile(final List<String> filePaths,
-                  final String className,
-                  final int lineNumber,
-                  final AsyncCallback<VirtualFile> callback);}
+    /**
+     * Open file, scroll to the debug line and do some actions from {@code callback}
+     *
+     * @param location
+     *         location to the source file. See more {@link Location}
+     * @param callback
+     *         some action which should be performed after opening file
+     */
+    void openFile(Location location, AsyncCallback<VirtualFile> callback);
+}

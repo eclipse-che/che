@@ -10,10 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.compare.changedList;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.node.Node;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
@@ -26,6 +31,7 @@ import java.util.Map;
  * Presenter for displaying list of changed files.
  *
  * @author Igor Vinokur
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class ChangedListPresenter implements ChangedListView.ActionDelegate {
@@ -34,6 +40,7 @@ public class ChangedListPresenter implements ChangedListView.ActionDelegate {
     private final ComparePresenter        comparePresenter;
 
     private Map<String, Status> changedFiles;
+    private Project             project;
     private String              file;
     private String              revision;
     private Status              status;
@@ -57,8 +64,9 @@ public class ChangedListPresenter implements ChangedListView.ActionDelegate {
      * @param revision
      *         hash of revision or branch
      */
-    public void show(Map<String, Status> changedFiles, String revision) {
+    public void show(Map<String, Status> changedFiles, String revision, Project project) {
         this.changedFiles = changedFiles;
+        this.project = project;
         view.showDialog();
         viewChangedFiles();
         view.setEnableExpandCollapseButtons(treeViewEnabled);
@@ -130,6 +138,13 @@ public class ChangedListPresenter implements ChangedListView.ActionDelegate {
     }
 
     private void showCompare() {
-        comparePresenter.show(file, status, revision);
+        project.getFile(file).then(new Operation<Optional<File>>() {
+            @Override
+            public void apply(Optional<File> file) throws OperationException {
+                if (file.isPresent()) {
+                    comparePresenter.show(file.get(), status, revision);
+                }
+            }
+        });
     }
 }

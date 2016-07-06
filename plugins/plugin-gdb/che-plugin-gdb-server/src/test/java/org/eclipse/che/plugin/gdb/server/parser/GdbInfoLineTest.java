@@ -43,4 +43,15 @@ public class GdbInfoLineTest {
         assertEquals(location.getTarget(), "/usr/src/debug/gcc-4.8.3-20140911/obj-x86_64-redhat-linux/x86_64-redhat-linux/libstdc++-v3/include/ostream");
         assertEquals(location.getLineNumber(), 530);
     }
+
+    @Test
+    public void testParse3() throws Exception {
+        GdbOutput gdbOutput = GdbOutput.of("Line number 34 is out of range for \"artic_adc.c\"");
+
+        GdbInfoLine gdbInfoLine = GdbInfoLine.parse(gdbOutput);
+        Location location = gdbInfoLine.getLocation();
+
+        assertEquals(location.getTarget(), "artic_adc.c");
+        assertEquals(location.getLineNumber(), 34);
+    }
 }

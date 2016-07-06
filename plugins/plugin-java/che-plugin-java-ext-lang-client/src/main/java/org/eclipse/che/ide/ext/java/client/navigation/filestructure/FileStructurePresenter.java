@@ -10,33 +10,35 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.navigation.filestructure;
 
+import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.project.node.Node;
-import org.eclipse.che.ide.api.project.tree.VirtualFile;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.SyntheticFile;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
+import org.eclipse.che.ide.ext.java.shared.JarEntry;
+import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.ext.java.shared.dto.Region;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Member;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
@@ -45,16 +47,15 @@ import org.eclipse.che.ide.util.loging.Log;
  * The class that manages class structure window.
  *
  * @author Valeriy Svydenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class FileStructurePresenter implements FileStructure.ActionDelegate {
-    private final FileStructure            view;
-    private final JavaNavigationService    javaNavigationService;
-    private final AppContext               context;
-    private final EditorAgent              editorAgent;
-    private final MessageLoader            loader;
-    private final ProjectExplorerPresenter projectExplorer;
-    private final JavaNodeManager          javaNodeManager;
+    private final FileStructure         view;
+    private final JavaNavigationService javaNavigationService;
+    private final AppContext            context;
+    private final EditorAgent           editorAgent;
+    private final MessageLoader         loader;
 
     private TextEditorPresenter activeEditor;
     private boolean             showInheritedMembers;
@@ -65,16 +66,12 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
                                   JavaNavigationService javaNavigationService,
                                   AppContext context,
                                   EditorAgent editorAgent,
-                                  LoaderFactory loaderFactory,
-                                  ProjectExplorerPresenter projectExplorer,
-                                  JavaNodeManager javaNodeManager) {
+                                  LoaderFactory loaderFactory) {
         this.view = view;
         this.javaNavigationService = javaNavigationService;
         this.context = context;
         this.editorAgent = editorAgent;
         this.loader = loaderFactory.newLoader();
-        this.projectExplorer = projectExplorer;
-        this.javaNodeManager = javaNodeManager;
         this.view.setDelegate(this);
     }
 
@@ -96,44 +93,86 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
         cursorOffset = activeEditor.getCursorOffset();
         VirtualFile file = activeEditor.getEditorInput().getFile();
 
-        String projectPath = file.getProject().getProjectConfig().getPath();
-        String fqn = JavaSourceFolderUtil.getFQNForFile(file);
+        if (file instanceof Resource) {
+            final Optional<Project> project = ((Resource)file).getRelatedProject();
 
-        Promise<CompilationUnit> promise = javaNavigationService.getCompilationUnit(projectPath, fqn, showInheritedMembers);
-        promise.then(new Operation<CompilationUnit>() {
-            @Override
-            public void apply(CompilationUnit arg) throws OperationException {
-                view.setStructure(arg, showInheritedMembers);
-                showInheritedMembers = !showInheritedMembers;
-                loader.hide();
-                view.show();
+            final Optional<Resource> srcFolder = ((Resource)file).getParentWithMarker(SourceFolderMarker.ID);
+
+            if (!srcFolder.isPresent()) {
+                return;
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                Log.error(FileStructurePresenter.class, arg.getMessage());
-                loader.hide();
-            }
-        });
+
+            final String fqn = JavaUtil.resolveFQN((Container)srcFolder.get(), (Resource)file);
+
+            javaNavigationService.getCompilationUnit(project.get().getLocation(), fqn, showInheritedMembers).then(
+                    new Operation<CompilationUnit>() {
+                        @Override
+                        public void apply(CompilationUnit unit) throws OperationException {
+                            view.setStructure(unit, showInheritedMembers);
+                            showInheritedMembers = !showInheritedMembers;
+                            loader.hide();
+                            view.show();
+                        }
+                    }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError arg) throws OperationException {
+                    Log.error(FileStructurePresenter.class, arg.getMessage());
+                    loader.hide();
+                }
+            });
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(final Member member) {
         if (member.isBinary()) {
-            javaNodeManager.getClassNode(context.getCurrentProject().getProjectConfig(), member.getLibId(), member.getRootPath())
-                           .then(new Operation<Node>() {
-                               @Override
-                               public void apply(Node node) throws OperationException {
-                                   if (node instanceof VirtualFile) {
-                                       openFile((VirtualFile)node, member);
-                                   }
-                               }
-                           });
+
+            final Resource resource = context.getResource();
+
+            if (resource == null) {
+                return;
+            }
+
+            final Optional<Project> project = resource.getRelatedProject();
+
+            javaNavigationService.getEntry(project.get().getLocation(), member.getLibId(), member.getRootPath())
+                                 .then(new Operation<JarEntry>() {
+                                     @Override
+                                     public void apply(final JarEntry entry) throws OperationException {
+                                         javaNavigationService
+                                                 .getContent(project.get().getLocation(), member.getLibId(), Path.valueOf(entry.getPath()))
+                                                 .then(new Operation<ClassContent>() {
+                                                     @Override
+                                                     public void apply(ClassContent content) throws OperationException {
+                                                         final String clazz = entry.getName().substring(0, entry.getName().indexOf('.'));
+                                                         final VirtualFile file = new SyntheticFile(entry.getName(),
+                                                                                                    clazz,
+                                                                                                    content.getContent());
+                                                         editorAgent.openEditor(file, new OpenEditorCallbackImpl() {
+                                                             @Override
+                                                             public void onEditorOpened(EditorPartPresenter editor) {
+                                                                 setCursor(editor, member.getFileRegion().getOffset());
+                                                             }
+                                                         });
+                                                     }
+                                                 });
+                                     }
+                                 });
         } else {
-            projectExplorer.getNodeByPath(new HasStorablePath.StorablePath(member.getRootPath()))
-                           .then(selectNode())
-                           .then(openNode(member));
+            context.getWorkspaceRoot().getFile(member.getRootPath()).then(new Operation<Optional<File>>() {
+                @Override
+                public void apply(Optional<File> file) throws OperationException {
+                    if (file.isPresent()) {
+                        editorAgent.openEditor(file.get(), new OpenEditorCallbackImpl() {
+                            @Override
+                            public void onEditorOpened(EditorPartPresenter editor) {
+                                setCursor(editor, member.getFileRegion().getOffset());
+                            }
+                        });
+                    }
+                }
+            });
         }
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
@@ -148,39 +187,6 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
     public void onEscapeClicked() {
         activeEditor.setFocus();
         setCursor(activeEditor, cursorOffset);
-    }
-
-    private void openFile(VirtualFile result, final Member member) {
-        editorAgent.openEditor(result, new OpenEditorCallbackImpl() {
-            @Override
-            public void onEditorOpened(EditorPartPresenter editor) {
-                setCursor(editor, member.getFileRegion().getOffset());
-            }
-        });
-    }
-
-    private Function<Node, Node> selectNode() {
-        return new Function<Node, Node>() {
-            @Override
-            public Node apply(Node node) throws FunctionException {
-                projectExplorer.select(node, false);
-
-                return node;
-            }
-        };
-    }
-
-    private Function<Node, Node> openNode(final Member member) {
-        return new Function<Node, Node>() {
-            @Override
-            public Node apply(Node node) throws FunctionException {
-                if (node instanceof FileReferenceNode) {
-                    openFile((VirtualFile)node, member);
-                }
-
-                return node;
-            }
-        };
     }
 
     private void setCursorPosition(Region region) {

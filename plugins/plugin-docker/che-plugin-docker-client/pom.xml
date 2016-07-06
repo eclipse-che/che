@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-docker-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.3.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-docker-client</artifactId>
     <packaging>jar</packaging>
@@ -40,10 +40,6 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -80,6 +76,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-dto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-user</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
