@@ -1525,11 +1525,12 @@ public class DockerConnectorTest {
         verify(dockerResponse).getInputStream();
     }
 
-    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "exc_message")
+    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "Error response from docker API, status: 404, message: exc_message")
     public void shouldThrowExceptionOnInspectNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream("exc_message".getBytes());
+        doReturn(inputStream).when(dockerResponse).getInputStream();
 
         // when
         dockerConnector.inspectNetwork("net_id");
@@ -1561,11 +1562,12 @@ public class DockerConnectorTest {
         verify(dockerResponse).getInputStream();
     }
 
-    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "exc_message")
+    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "Error response from docker API, status: 404, message: exc_message")
     public void shouldThrowExceptionOnCreateNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream("exc_message".getBytes());
+        doReturn(inputStream).when(dockerResponse).getInputStream();
         CreateNetworkParams createNetworkParams = CreateNetworkParams.create(createNewNetwork());
 
         // when
@@ -1610,11 +1612,12 @@ public class DockerConnectorTest {
         verify(dockerResponse).getStatus();
     }
 
-    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "exc_message")
+    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "Error response from docker API, status: 404, message: exc_message")
     public void shouldThrowExceptionOnConnectToNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream("exc_message".getBytes());
+        doReturn(inputStream).when(dockerResponse).getInputStream();
         ConnectContainerToNetworkParams connectToNetworkParams =
                 ConnectContainerToNetworkParams.create("net_id", createConnectContainer());
 
@@ -1661,11 +1664,12 @@ public class DockerConnectorTest {
         verify(dockerResponse).getStatus();
     }
 
-    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "exc_message")
+    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "Error response from docker API, status: 404, message: exc_message")
     public void shouldThrowExceptionOnDisconnectFromNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream("exc_message".getBytes());
+        doReturn(inputStream).when(dockerResponse).getInputStream();
         DisconnectContainerFromNetworkParams disconnectFromNetworkParams =
                 DisconnectContainerFromNetworkParams.create("net_id", new DisconnectContainer().withContainer("container_id")
                                                                                                .withForce(true));
@@ -1704,11 +1708,12 @@ public class DockerConnectorTest {
         verify(dockerResponse).getStatus();
     }
 
-    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "exc_message")
+    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "Error response from docker API, status: 404, message: exc_message")
     public void shouldThrowExceptionOnRemoveNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();
-        doReturn(new DockerException("exc_message", 404)).when(dockerConnector).getDockerException(dockerResponse);
+        ByteArrayInputStream inputStream = new ByteArrayInputStream("exc_message".getBytes());
+        doReturn(inputStream).when(dockerResponse).getInputStream();
         RemoveNetworkParams removeNetworkParams = RemoveNetworkParams.create("net_id");
 
         // when
