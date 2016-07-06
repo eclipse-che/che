@@ -606,9 +606,9 @@ public class StandardComponentInitializer {
         keyBinding.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.DELETE).build(), "deleteItem");
 
         if (UserAgent.isMac()) {
-            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), "closeCurrentFile");
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), "closeActiveEditor");
         } else {
-            keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('w').build(), "closeCurrentFile");
+            keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('w').build(), "closeActiveEditor");
         }
     }
 
