@@ -53,6 +53,8 @@ import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.head
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeaderImpl;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelView;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelViewImpl;
+import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerView;
+import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerViewImpl;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.extension.machine.client.targets.BaseTarget;
 import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
@@ -94,7 +96,8 @@ public class MachineGinModule extends AbstractGinModule {
                         .implement(OutputConsole.class, Names.named("default"), DefaultOutputConsole.class)
                         .build(CommandConsoleFactory.class));
 
-        bind(ConsolesPanelView.class).to(ConsolesPanelViewImpl.class).in(Singleton.class);
+        bind(ConsolesPanelView.class).to(ConsolesPanelViewImpl.class);
+        bind(ConsolesContainerView.class).to(ConsolesContainerViewImpl.class).in(Singleton.class);
 
         bind(EditCommandsView.class).to(EditCommandsViewImpl.class).in(Singleton.class);
 
