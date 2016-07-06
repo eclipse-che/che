@@ -13,9 +13,11 @@ package org.eclipse.che.plugin.docker.client.json;
 import org.eclipse.che.commons.lang.Size;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author andrew00x
+ * @author Alexander Garagatyi
  */
 public class SystemInfo {
     public static final String DRIVER_STATE_DATA_SPACE_TOTAL     = "Data Space Total";
@@ -23,22 +25,23 @@ public class SystemInfo {
     public static final String DRIVER_STATE_METADATA_SPACE_TOTAL = "Metadata Space Total";
     public static final String DRIVER_STATE_METADATA_SPACE_USED  = "Metadata Space Used";
 
+    // Fields are sorted in alphabetical order to eas comparison with docker docs and output
+    //Architecture
+    //BridgeNfIptables
+    //BridgeNfIp6tables
+    //ClusterAdvertise
+    //ClusterStore
     private int        containers;
-    private int        images;
-    private int        debug;
+    //ContainersPaused
+    //ContainersRunning
+    //ContainersStopped
+    //CPUSet
+    //CpuCfsPeriod
+    //CpuCfsQuota
+    //CPUShares
+    private boolean    debug;
+    private String     dockerRootDir;
     private String     driver;
-    private String     executionDriver;
-    private int        IPv4Forwarding;
-    private String     indexServerAddress;
-    private String     initPath;
-    private String     initSha1;
-    private String     kernelVersion;
-    private long       memoryLimit;
-    private int        nEventsListener;
-    private int        nFd;
-    private int        nGoroutines;
-    private String     operatingSystem;
-    private long       swapLimit;
     // Json has ugly format for this parameters, e.g.
     // "DriverStatus": [
     //     [
@@ -61,159 +64,43 @@ public class SystemInfo {
     // ]
     // So seems two-dimensional array is simplest solution for model.
     private String[][] driverStatus;
-    // data was moved here from driver status in recent docker-swarm versions
-    private String[][] systemStatus;
-    private int        nCPU;
-    private long       memTotal;
-    private String     name;
-    private String     iD;
-    private String     systemTime;
-    private String[]   labels;
-    private String     dockerRootDir;
+    private String     executionDriver;
+    //ExperimentalBuild
     private String     httpProxy;
     private String     httpsProxy;
+    private String     iD;
+    private boolean    iPv4Forwarding;
+    private int        images;
+    private String     indexServerAddress;
+    private String     initPath;
+    private String     initSha1;
+    //KernelMemory
+    private String     kernelVersion;
+    private String[]   labels;
+    //LoggingDriver
+    //CgroupDriver
+    private long       memTotal;
+    private boolean    memoryLimit;
+    private int        nCPU;
+    private int        nEventsListener;
+    private int        nFd;
+    private int        nGoroutines;
+    private String     name;
     private String     noProxy;
-
-    public int getContainers() {
-        return containers;
-    }
-
-    public void setContainers(int containers) {
-        this.containers = containers;
-    }
-
-    public int getImages() {
-        return images;
-    }
-
-    public void setImages(int images) {
-        this.images = images;
-    }
-
-    public int getDebug() {
-        return debug;
-    }
-
-    public void setDebug(int debug) {
-        this.debug = debug;
-    }
-
-    public String getDriver() {
-        return driver;
-    }
-
-    public void setDriver(String driver) {
-        this.driver = driver;
-    }
-
-    public String getExecutionDriver() {
-        return executionDriver;
-    }
-
-    public void setExecutionDriver(String executionDriver) {
-        this.executionDriver = executionDriver;
-    }
-
-    public int getIPv4Forwarding() {
-        return IPv4Forwarding;
-    }
-
-    public void setIPv4Forwarding(int IPv4Forwarding) {
-        this.IPv4Forwarding = IPv4Forwarding;
-    }
-
-    public String getIndexServerAddress() {
-        return indexServerAddress;
-    }
-
-    public void setIndexServerAddress(String indexServerAddress) {
-        this.indexServerAddress = indexServerAddress;
-    }
-
-    public String getInitPath() {
-        return initPath;
-    }
-
-    public void setInitPath(String initPath) {
-        this.initPath = initPath;
-    }
-
-    public String getInitSha1() {
-        return initSha1;
-    }
-
-    public void setInitSha1(String initSha1) {
-        this.initSha1 = initSha1;
-    }
-
-    public String getKernelVersion() {
-        return kernelVersion;
-    }
-
-    public void setKernelVersion(String kernelVersion) {
-        this.kernelVersion = kernelVersion;
-    }
-
-    public long getMemoryLimit() {
-        return memoryLimit;
-    }
-
-    public void setMemoryLimit(long memoryLimit) {
-        this.memoryLimit = memoryLimit;
-    }
-
-    public int getnEventsListener() {
-        return nEventsListener;
-    }
-
-    public void setnEventsListener(int nEventsListener) {
-        this.nEventsListener = nEventsListener;
-    }
-
-    public int getnFd() {
-        return nFd;
-    }
-
-    public void setnFd(int nFd) {
-        this.nFd = nFd;
-    }
-
-    public int getnGoroutines() {
-        return nGoroutines;
-    }
-
-    public void setnGoroutines(int nGoroutines) {
-        this.nGoroutines = nGoroutines;
-    }
-
-    public String getOperatingSystem() {
-        return operatingSystem;
-    }
-
-    public void setOperatingSystem(String operatingSystem) {
-        this.operatingSystem = operatingSystem;
-    }
-
-    public long getSwapLimit() {
-        return swapLimit;
-    }
-
-    public void setSwapLimit(long swapLimit) {
-        this.swapLimit = swapLimit;
-    }
-
-    public String[][] getDriverStatus() {
-        return driverStatus;
-    }
-
-    public void setDriverStatus(String[][] driverStatus) {
-        this.driverStatus = driverStatus;
-    }
+    //OomKillDisable
+    private String     operatingSystem;
+    //OSType
+    //Plugins
+    //RegistryConfig
+    //ServerVersion
+    private boolean    swapLimit;
+    private String     systemTime;
+    // data was moved here from driver status in recent docker-swarm versions
+    private String[][] systemStatus;
 
     // ---------------------------------------------------------------------------
     // Methods for access DriverStatus information in comfortable way.
     // Getters don't have "get" prefixes to avoid mixing with methods for accessing info provided by docker API in json format.
-
     public String statusField(String fieldName) {
         if (driverStatus == null) {
             return null;
@@ -227,14 +114,6 @@ public class SystemInfo {
             }
         }
         return null;
-    }
-
-    public String[][] getSystemStatus() {
-        return systemStatus;
-    }
-
-    public void setSystemStatus(String[][] systemStatus) {
-        this.systemStatus = systemStatus;
     }
 
     /** Gets total space for storing images or {@code -1} if required information is not available from docker API or has unexpected format. */
@@ -278,53 +157,22 @@ public class SystemInfo {
         }
         return Size.parseSize(str);
     }
+    // --------------------------------------------------------------------------- //
 
-    public int getnCPU() {
-        return nCPU;
+    public int getContainers() {
+        return containers;
     }
 
-    public void setnCPU(int nCPU) {
-        this.nCPU = nCPU;
+    public void setContainers(int containers) {
+        this.containers = containers;
     }
 
-    public long getMemTotal() {
-        return memTotal;
+    public boolean isDebug() {
+        return debug;
     }
 
-    public void setMemTotal(long memTotal) {
-        this.memTotal = memTotal;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getiD() {
-        return iD;
-    }
-
-    public void setiD(String iD) {
-        this.iD = iD;
-    }
-
-    public String getSystemTime() {
-        return systemTime;
-    }
-
-    public void setSystemTime(String systemTime) {
-        this.systemTime = systemTime;
-    }
-
-    public String[] getLabels() {
-        return labels;
-    }
-
-    public void setLabels(String[] labels) {
-        this.labels = labels;
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     public String getDockerRootDir() {
@@ -333,6 +181,30 @@ public class SystemInfo {
 
     public void setDockerRootDir(String dockerRootDir) {
         this.dockerRootDir = dockerRootDir;
+    }
+
+    public String getDriver() {
+        return driver;
+    }
+
+    public void setDriver(String driver) {
+        this.driver = driver;
+    }
+
+    public String[][] getDriverStatus() {
+        return driverStatus;
+    }
+
+    public void setDriverStatus(String[][] driverStatus) {
+        this.driverStatus = driverStatus;
+    }
+
+    public String getExecutionDriver() {
+        return executionDriver;
+    }
+
+    public void setExecutionDriver(String executionDriver) {
+        this.executionDriver = executionDriver;
     }
 
     public String getHttpProxy() {
@@ -351,6 +223,126 @@ public class SystemInfo {
         this.httpsProxy = httpsProxy;
     }
 
+    public String getID() {
+        return iD;
+    }
+
+    public void setID(String iD) {
+        this.iD = iD;
+    }
+
+    public boolean setIPv4Forwarding() {
+        return iPv4Forwarding;
+    }
+
+    public void setiPv4Forwarding(boolean iPv4Forwarding) {
+        this.iPv4Forwarding = iPv4Forwarding;
+    }
+
+    public int getImages() {
+        return images;
+    }
+
+    public void setImages(int images) {
+        this.images = images;
+    }
+
+    public String getIndexServerAddress() {
+        return indexServerAddress;
+    }
+
+    public void setIndexServerAddress(String indexServerAddress) {
+        this.indexServerAddress = indexServerAddress;
+    }
+
+    public String getInitPath() {
+        return initPath;
+    }
+
+    public void setInitPath(String initPath) {
+        this.initPath = initPath;
+    }
+
+    public String getInitSha1() {
+        return initSha1;
+    }
+
+    public void setInitSha1(String initSha1) {
+        this.initSha1 = initSha1;
+    }
+
+    public String getKernelVersion() {
+        return kernelVersion;
+    }
+
+    public void setKernelVersion(String kernelVersion) {
+        this.kernelVersion = kernelVersion;
+    }
+
+    public String[] getLabels() {
+        return labels;
+    }
+
+    public void setLabels(String[] labels) {
+        this.labels = labels;
+    }
+
+    public long getMemTotal() {
+        return memTotal;
+    }
+
+    public void setMemTotal(long memTotal) {
+        this.memTotal = memTotal;
+    }
+
+    public boolean isMemoryLimit() {
+        return memoryLimit;
+    }
+
+    public void setMemoryLimit(boolean memoryLimit) {
+        this.memoryLimit = memoryLimit;
+    }
+
+    public int getNCPU() {
+        return nCPU;
+    }
+
+    public void setNCPU(int nCPU) {
+        this.nCPU = nCPU;
+    }
+
+    public int getnEventsListener() {
+        return nEventsListener;
+    }
+
+    public void setnEventsListener(int nEventsListener) {
+        this.nEventsListener = nEventsListener;
+    }
+
+    public int getNFd() {
+        return nFd;
+    }
+
+    public void setNFd(int nFd) {
+        this.nFd = nFd;
+    }
+
+    public int getNGoroutines() {
+        return nGoroutines;
+    }
+
+    public void setNGoroutines(int nGoroutines) {
+        this.nGoroutines = nGoroutines;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getNoProxy() {
         return noProxy;
     }
@@ -359,36 +351,112 @@ public class SystemInfo {
         this.noProxy = noProxy;
     }
 
+    public String getOperatingSystem() {
+        return operatingSystem;
+    }
+
+    public void setOperatingSystem(String operatingSystem) {
+        this.operatingSystem = operatingSystem;
+    }
+
+    public boolean isSwapLimit() {
+        return swapLimit;
+    }
+
+    public void setSwapLimit(boolean swapLimit) {
+        this.swapLimit = swapLimit;
+    }
+
+    public String getSystemTime() {
+        return systemTime;
+    }
+
+    public void setSystemTime(String systemTime) {
+        this.systemTime = systemTime;
+    }
+
+    public String[][] getSystemStatus() {
+        return systemStatus;
+    }
+
+    public void setSystemStatus(String[][] systemStatus) {
+        this.systemStatus = systemStatus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SystemInfo)) return false;
+        SystemInfo that = (SystemInfo)o;
+        return containers == that.containers &&
+               debug == that.debug &&
+               iPv4Forwarding == that.iPv4Forwarding &&
+               images == that.images &&
+               memTotal == that.memTotal &&
+               memoryLimit == that.memoryLimit &&
+               nCPU == that.nCPU &&
+               nEventsListener == that.nEventsListener &&
+               nFd == that.nFd &&
+               nGoroutines == that.nGoroutines &&
+               swapLimit == that.swapLimit &&
+               Objects.equals(dockerRootDir, that.dockerRootDir) &&
+               Objects.equals(driver, that.driver) &&
+               Arrays.equals(driverStatus, that.driverStatus) &&
+               Objects.equals(executionDriver, that.executionDriver) &&
+               Objects.equals(httpProxy, that.httpProxy) &&
+               Objects.equals(httpsProxy, that.httpsProxy) &&
+               Objects.equals(iD, that.iD) &&
+               Objects.equals(indexServerAddress, that.indexServerAddress) &&
+               Objects.equals(initPath, that.initPath) &&
+               Objects.equals(initSha1, that.initSha1) &&
+               Objects.equals(kernelVersion, that.kernelVersion) &&
+               Arrays.equals(labels, that.labels) &&
+               Objects.equals(name, that.name) &&
+               Objects.equals(noProxy, that.noProxy) &&
+               Objects.equals(operatingSystem, that.operatingSystem) &&
+               Objects.equals(systemTime, that.systemTime) &&
+               Arrays.equals(systemStatus, that.systemStatus);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(containers, debug, dockerRootDir, driver, driverStatus, executionDriver, httpProxy, httpsProxy,
+                            iD, iPv4Forwarding, images, indexServerAddress, initPath, initSha1, kernelVersion, labels,
+                            memTotal, memoryLimit, nCPU, nEventsListener, nFd, nGoroutines, name, noProxy, operatingSystem,
+                            swapLimit, systemTime, systemStatus);
+    }
+
     @Override
     public String toString() {
         return "SystemInfo{" +
                "containers=" + containers +
-               ", images=" + images +
                ", debug=" + debug +
+               ", dockerRootDir='" + dockerRootDir + '\'' +
                ", driver='" + driver + '\'' +
+               ", driverStatus=" + Arrays.toString(driverStatus) +
                ", executionDriver='" + executionDriver + '\'' +
-               ", IPv4Forwarding=" + IPv4Forwarding +
+               ", httpProxy='" + httpProxy + '\'' +
+               ", httpsProxy='" + httpsProxy + '\'' +
+               ", iD='" + iD + '\'' +
+               ", iPv4Forwarding=" + iPv4Forwarding +
+               ", images=" + images +
                ", indexServerAddress='" + indexServerAddress + '\'' +
                ", initPath='" + initPath + '\'' +
                ", initSha1='" + initSha1 + '\'' +
                ", kernelVersion='" + kernelVersion + '\'' +
+               ", labels=" + Arrays.toString(labels) +
+               ", memTotal=" + memTotal +
                ", memoryLimit=" + memoryLimit +
+               ", nCPU=" + nCPU +
                ", nEventsListener=" + nEventsListener +
                ", nFd=" + nFd +
                ", nGoroutines=" + nGoroutines +
+               ", name='" + name + '\'' +
+               ", noProxy='" + noProxy + '\'' +
                ", operatingSystem='" + operatingSystem + '\'' +
                ", swapLimit=" + swapLimit +
-               ", driverStatus=" + Arrays.toString(driverStatus) +
-               ", nCPU=" + nCPU +
-               ", memTotal=" + memTotal +
-               ", name='" + name + '\'' +
-               ", iD='" + iD + '\'' +
                ", systemTime='" + systemTime + '\'' +
-               ", labels=" + Arrays.toString(labels) +
-               ", dockerRootDir='" + dockerRootDir + '\'' +
-               ", httpProxy='" + httpProxy + '\'' +
-               ", httpsProxy='" + httpsProxy + '\'' +
-               ", noProxy='" + noProxy + '\'' +
+               ", systemStatus=" + Arrays.toString(systemStatus) +
                '}';
     }
 }
