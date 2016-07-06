@@ -193,7 +193,7 @@ public class DockerInstanceTest {
     public void shouldThrowMachineExceptionWhenDockerPushInterrupted() throws Exception {
         dockerInstance = getDockerInstance(getMachine(), REGISTRY, CONTAINER, IMAGE, true);
         when(dockerConnectorMock.push(any(PushParams.class),
-                                      any(ProgressMonitor.class))).thenThrow(new InterruptedException("err"));
+                                      any(ProgressMonitor.class))).thenThrow(new IOException("err"));
 
         dockerInstance.saveToSnapshot(OWNER);
     }

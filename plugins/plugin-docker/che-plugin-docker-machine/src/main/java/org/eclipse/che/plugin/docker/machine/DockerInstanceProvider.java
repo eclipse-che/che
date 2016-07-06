@@ -50,10 +50,9 @@ import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
-import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
-import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
@@ -430,8 +429,8 @@ public class DockerInstanceProvider implements InstanceProvider {
                                               .withMemoryLimit(memoryLimit)
                                               .withMemorySwapLimit(memorySwapLimit),
                               progressMonitor);
-        } catch (IOException | InterruptedException e) {
-            throw new MachineException(e.getMessage(), e);
+        } catch (IOException e) {
+            throw new MachineException(e.getLocalizedMessage(), e);
         } finally {
             if (workDir != null) {
                 FileCleaner.addFile(workDir);

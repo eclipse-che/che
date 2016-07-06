@@ -19,7 +19,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 
 import org.eclipse.che.api.core.util.FileCleaner;
-import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.TarUtils;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
@@ -101,8 +100,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
@@ -721,11 +722,9 @@ public class DockerConnector {
      *         ProgressMonitor for images creation process
      * @return image id
      * @throws IOException
-     * @throws InterruptedException
-     *         if build process was interrupted
      */
     public String buildImage(final BuildImageParams params,
-                             final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
+                             final ProgressMonitor progressMonitor) throws IOException {
 
         if (params.getRemote() != null) {
             // build context provided by remote URL
@@ -758,7 +757,7 @@ public class DockerConnector {
 
     private String buildImage(final DockerConnection dockerConnection,
                               final BuildImageParams params,
-                              final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
+                              final ProgressMonitor progressMonitor) throws IOException {
         final AuthConfigs authConfigs = params.getAuthConfigs();
         final String repository = params.getRepository();
         final String tag = params.getTag();
@@ -783,48 +782,35 @@ public class DockerConnector {
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);
             }
+
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
 
-                final ValueHolder<IOException> errorHolder = new ValueHolder<>();
-                final ValueHolder<String> imageIdHolder = new ValueHolder<>();
-                // Here do some trick to be able interrupt build process. Basically for now it is not possible interrupt docker daemon while
-                // it's building images but here we need just be able to close connection to the unix socket. Thread is blocking while read
-                // from the socket stream so need one more thread that is able to close socket. In this way we can release thread that is
-                // blocking on i/o.
-                final Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ProgressStatus progressStatus;
-                            while ((progressStatus = progressReader.next()) != null) {
-                                final String buildImageId = getBuildImageId(progressStatus);
-                                if (buildImageId != null) {
-                                    imageIdHolder.set(buildImageId);
-                                }
-                                progressMonitor.updateProgress(progressStatus);
-                            }
-                        } catch (IOException e) {
-                            errorHolder.set(e);
+                // Here do some trick to be able interrupt output streaming process.
+                // Current unix socket implementation of DockerConnection doesn't react to interruption.
+                // So to be able to close unix socket connection and free resources we use main thread.
+                // In case of any exception main thread cancels future and close connection.
+                // If Docker connection implementation supports interrupting it will stop streaming on interruption,
+                // if not it will be stopped by closure of unix socket
+                Future<String> imageIdFuture = executor.submit(() -> {
+                    ProgressStatus progressStatus;
+                    while ((progressStatus = progressReader.next()) != null) {
+                        final String buildImageId = getBuildImageId(progressStatus);
+                        if (buildImageId != null) {
+                            return buildImageId;
                         }
-                        synchronized (this) {
-                            notify();
-                        }
+                        progressMonitor.updateProgress(progressStatus);
                     }
-                };
-                executor.execute(runnable);
-                // noinspection SynchronizationOnLocalVariableOrMethodParameter
-                synchronized (runnable) {
-                    runnable.wait();
-                }
-                final IOException ioe = errorHolder.get();
-                if (ioe != null) {
-                    throw ioe;
-                }
-                if (imageIdHolder.get() == null) {
-                    throw new IOException("Docker image build failed");
-                }
-                return imageIdHolder.get();
+
+                    throw new DockerException("Docker image build failed. Image id not found in build output.", 500);
+                });
+
+                return imageIdFuture.get();
+            } catch (ExecutionException e) {
+                // unwrap exception thrown by task with .getCause()
+                throw new DockerException(e.getCause().getLocalizedMessage(), 500);
+            } catch (InterruptedException e) {
+                throw new DockerException("Docker image build was interrupted", 500);
             }
         }
     }
@@ -895,13 +881,10 @@ public class DockerConnector {
      * @return digest of just pushed image
      * @throws IOException
      *          when a problem occurs with docker api calls
-     * @throws InterruptedException
-     *         if push process was interrupted
      */
-    public String push(final PushParams params, final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
+    public String push(final PushParams params, final ProgressMonitor progressMonitor) throws IOException {
         final String fullRepo = params.getFullRepo();
 
-        final ValueHolder<String> digestHolder = new ValueHolder<>();
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path(apiVersionPathPrefix + "/images/" + fullRepo + "/push")
@@ -914,67 +897,48 @@ public class DockerConnector {
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);
             }
+
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
 
-                final ValueHolder<IOException> errorHolder = new ValueHolder<>();
-                //it is necessary to track errors during the push, this is useful in the case when docker API returns status 200 OK,
-                //but in fact we have an error (e.g docker registry is not accessible but we are trying to push).
-                final ValueHolder<String> exceptionHolder = new ValueHolder<>();
-                // Here do some trick to be able interrupt push process. Basically for now it is not possible interrupt docker daemon while
-                // it's pushing images but here we need just be able to close connection to the unix socket. Thread is blocking while read
-                // from the socket stream so need one more thread that is able to close socket. In this way we can release thread that is
-                // blocking on i/o.
-                final Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            String digestPrefix = firstNonNull(params.getTag(), "latest") + ": digest: ";
-                            ProgressStatus progressStatus;
-                            while ((progressStatus = progressReader.next()) != null && exceptionHolder.get() == null) {
-                                progressMonitor.updateProgress(progressStatus);
-                                if (progressStatus.getError() != null) {
-                                    exceptionHolder.set(progressStatus.getError());
-                                }
-                                String status = progressStatus.getStatus();
-                                // Here we find string with digest which has following format:
-                                // <tag>: digest: <digest> size: <size>
-                                // for example:
-                                // latest: digest: sha256:9a70e6222ded459fde37c56af23887467c512628eb8e78c901f3390e49a800a0 size: 62189
-                                if (status != null && status.startsWith(digestPrefix)) {
-                                    String digest = status.substring(digestPrefix.length(), status.indexOf(" ", digestPrefix.length()));
-                                    digestHolder.set(digest);
-                                }
-                            }
-                        } catch (IOException e) {
-                            errorHolder.set(e);
+                // Here do some trick to be able interrupt output streaming process.
+                // Current unix socket implementation of DockerConnection doesn't react to interruption.
+                // So to be able to close unix socket connection and free resources we use main thread.
+                // In case of any exception main thread cancels future and close connection.
+                // If Docker connection implementation supports interrupting it will stop streaming on interruption,
+                // if not it will be stopped by closure of unix socket
+                Future<String>digestFuture = executor.submit(() -> {
+                    String digestPrefix = firstNonNull(params.getTag(), "latest") + ": digest: ";
+                    ProgressStatus progressStatus;
+                    while ((progressStatus = progressReader.next()) != null) {
+                        progressMonitor.updateProgress(progressStatus);
+                        if (progressStatus.getError() != null) {
+                            throw new DockerException(progressStatus.getError(), 500);
                         }
-                        synchronized (this) {
-                            notify();
+                        String status = progressStatus.getStatus();
+                        // Here we find string with digest which has following format:
+                        // <tag>: digest: <digest> size: <size>
+                        // for example:
+                        // latest: digest: sha256:9a70e6222ded459fde37c56af23887467c512628eb8e78c901f3390e49a800a0 size: 62189
+                        if (status != null && status.startsWith(digestPrefix)) {
+                            return status.substring(digestPrefix.length(), status.indexOf(" ", digestPrefix.length()));
                         }
                     }
-                };
-                executor.execute(runnable);
-                // noinspection SynchronizationOnLocalVariableOrMethodParameter
-                synchronized (runnable) {
-                    runnable.wait();
-                }
-                if (exceptionHolder.get() != null) {
-                    throw new DockerException(exceptionHolder.get(), 500);
-                }
-                if (digestHolder.get() == null) {
+
                     LOG.error("Docker image {}:{} was successfully pushed, but its digest wasn't obtained",
                               fullRepo,
                               firstNonNull(params.getTag(), "latest"));
-                    throw new DockerException("Docker image was successfully pushed, but its digest wasn't obtained", 500);
-                }
-                final IOException ioe = errorHolder.get();
-                if (ioe != null) {
-                    throw ioe;
-                }
+                    throw new DockerException("Docker push response doesn't contain image digest", 500);
+                });
+
+                return digestFuture.get();
+            } catch (ExecutionException e) {
+                // unwrap exception thrown by task with .getCause()
+                throw new DockerException("Docker image pushing failed. Cause: " + e.getCause().getLocalizedMessage(), 500);
+            } catch (InterruptedException e) {
+                throw new DockerException("Docker image pushing was interrupted", 500);
             }
         }
-        return digestHolder.get();
     }
 
     /**
@@ -1029,12 +993,10 @@ public class DockerConnector {
      *         docker service URI
      * @throws IOException
      *          when a problem occurs with docker api calls
-     * @throws InterruptedException
-     *         if push process was interrupted
      */
     protected void pull(final PullParams params,
                         final ProgressMonitor progressMonitor,
-                        final URI dockerDaemonUri) throws IOException, InterruptedException {
+                        final URI dockerDaemonUri) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("POST")
                                                             .path(apiVersionPathPrefix + "/images/create")
@@ -1048,39 +1010,32 @@ public class DockerConnector {
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);
             }
+
             try (InputStream responseStream = response.getInputStream()) {
                 JsonMessageReader<ProgressStatus> progressReader = new JsonMessageReader<>(responseStream, ProgressStatus.class);
 
-                final ValueHolder<IOException> errorHolder = new ValueHolder<>();
-                // Here do some trick to be able interrupt pull process. Basically for now it is not possible interrupt docker daemon while
-                // it's pulling images but here we need just be able to close connection to the unix socket. Thread is blocking while read
-                // from the socket stream so need one more thread that is able to close socket. In this way we can release thread that is
-                // blocking on i/o.
-                final Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ProgressStatus progressStatus;
-                            while ((progressStatus = progressReader.next()) != null) {
-                                progressMonitor.updateProgress(progressStatus);
-                            }
-                        } catch (IOException e) {
-                            errorHolder.set(e);
-                        }
-                        synchronized (this) {
-                            notify();
-                        }
+                // Here do some trick to be able interrupt output streaming process.
+                // Current unix socket implementation of DockerConnection doesn't react to interruption.
+                // So to be able to close unix socket connection and free resources we use main thread.
+                // In case of any exception main thread cancels future and close connection.
+                // If Docker connection implementation supports interrupting it will stop streaming on interruption,
+                // if not it will be stopped by closure of unix socket
+                Future<Object> pullFuture = executor.submit(() -> {
+                    ProgressStatus progressStatus;
+                    while ((progressStatus = progressReader.next()) != null) {
+                        progressMonitor.updateProgress(progressStatus);
                     }
-                };
-                executor.execute(runnable);
-                // noinspection SynchronizationOnLocalVariableOrMethodParameter
-                synchronized (runnable) {
-                    runnable.wait();
-                }
-                final IOException ioe = errorHolder.get();
-                if (ioe != null) {
-                    throw ioe;
-                }
+
+                    return null;
+                });
+
+                // perform get to be able to get execution exception
+                pullFuture.get();
+            } catch (ExecutionException e) {
+                // unwrap exception thrown by task with .getCause()
+                throw new DockerException(e.getCause().getLocalizedMessage(), 500);
+            } catch (InterruptedException e) {
+                throw new DockerException("Docker image pulling was interrupted", 500);
             }
         }
     }
