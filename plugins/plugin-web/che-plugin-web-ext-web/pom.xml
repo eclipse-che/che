@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-web-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.4.2-SNAPSHOT</version>
+        <version>4.4.2</version>
     </parent>
     <artifactId>che-plugin-web-ext-web</artifactId>
     <packaging>jar</packaging>

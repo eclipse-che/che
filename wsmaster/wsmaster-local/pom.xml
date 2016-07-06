@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.4.2-SNAPSHOT</version>
+        <version>4.4.2</version>
     </parent>
     <artifactId>wsmaster-local</artifactId>
     <name>Che Core :: API :: Impl Local</name>
