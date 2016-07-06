@@ -18,12 +18,14 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
+import org.eclipse.che.ide.project.ResolvingProjectStateHolder;
 import org.eclipse.che.plugin.maven.client.command.MavenCommandType;
 import org.eclipse.che.plugin.maven.client.editor.PomEditorConfigurationFactory;
+import org.eclipse.che.plugin.maven.client.editor.PomReconcilingStrategyFactory;
+import org.eclipse.che.plugin.maven.client.project.ResolvingMavenProjectStateHolder;
 import org.eclipse.che.plugin.maven.client.resource.MavenProjectInterceptor;
 import org.eclipse.che.plugin.maven.client.resource.MavenSourceFolderInterceptor;
 import org.eclipse.che.plugin.maven.client.resource.PomInterceptor;
-import org.eclipse.che.plugin.maven.client.editor.PomReconcilingStrategyFactory;
 import org.eclipse.che.plugin.maven.client.wizard.MavenProjectWizardRegistrar;
 
 /**
@@ -47,5 +49,9 @@ public class MavenGinModule extends AbstractGinModule {
 
         install(new GinFactoryModuleBuilder().build(PomReconcilingStrategyFactory.class));
         install(new GinFactoryModuleBuilder().build(PomEditorConfigurationFactory.class));
+
+        final GinMultibinder<ResolvingProjectStateHolder> resolvingProjectStateHolderBinder =
+                GinMultibinder.newSetBinder(binder(), ResolvingProjectStateHolder.class);
+        resolvingProjectStateHolderBinder.addBinding().to(ResolvingMavenProjectStateHolder.class);
     }
 }

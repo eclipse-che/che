@@ -28,6 +28,7 @@ import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.D
 import org.eclipse.che.plugin.maven.client.editor.ClassFileSourcesDownloader;
 import org.eclipse.che.plugin.maven.client.editor.PomEditorProvider;
 import org.eclipse.che.plugin.maven.client.project.MavenModelImporter;
+import org.eclipse.che.plugin.maven.client.project.ResolvingMavenProjectStateHolder;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 import java.util.Arrays;
@@ -54,7 +55,8 @@ public class MavenExtension {
                           MavenMessagesHandler messagesHandler,
                           ClassFileSourcesDownloader downloader,
                           MavenModelImporter importMavenModelHandler,
-                          MavenResources resources) {
+                          MavenResources resources,
+                          ResolvingMavenProjectStateHolder resolvingProjectStateHolder) {
         this.resources = resources;
 
         preSelectedProjectManager.setProjectTypeIdToPreselect(MavenAttributes.MAVEN_ID, 100);
