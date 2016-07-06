@@ -384,76 +384,46 @@ public class SystemInfo {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof SystemInfo)) {
-            return false;
-        }
-        final SystemInfo that = (SystemInfo)obj;
-        return containers == that.containers
-               && debug == that.debug
-               && iPv4Forwarding == that.iPv4Forwarding
-               && images == that.images
-               && memTotal == that.memTotal
-               && memoryLimit == that.memoryLimit
-               && nCPU == that.nCPU
-               && nEventsListener == that.nEventsListener
-               && nFd == that.nFd
-               && nGoroutines == that.nGoroutines
-               && swapLimit == that.swapLimit
-               && Objects.equals(dockerRootDir, that.dockerRootDir)
-               && Objects.equals(driver, that.driver)
-               && Arrays.equals(driverStatus, that.driverStatus)
-               && Objects.equals(executionDriver, that.executionDriver)
-               && Objects.equals(httpProxy, that.httpProxy)
-               && Objects.equals(httpsProxy, that.httpsProxy)
-               && Objects.equals(iD, that.iD)
-               && Objects.equals(indexServerAddress, that.indexServerAddress)
-               && Objects.equals(initPath, that.initPath)
-               && Objects.equals(initSha1, that.initSha1)
-               && Objects.equals(kernelVersion, that.kernelVersion)
-               && Arrays.equals(labels, that.labels)
-               && Objects.equals(name, that.name)
-               && Objects.equals(noProxy, that.noProxy)
-               && Objects.equals(operatingSystem, that.operatingSystem)
-               && Objects.equals(systemTime, that.systemTime)
-               && Arrays.equals(systemStatus, that.systemStatus);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SystemInfo)) return false;
+        SystemInfo that = (SystemInfo)o;
+        return containers == that.containers &&
+               debug == that.debug &&
+               iPv4Forwarding == that.iPv4Forwarding &&
+               images == that.images &&
+               memTotal == that.memTotal &&
+               memoryLimit == that.memoryLimit &&
+               nCPU == that.nCPU &&
+               nEventsListener == that.nEventsListener &&
+               nFd == that.nFd &&
+               nGoroutines == that.nGoroutines &&
+               swapLimit == that.swapLimit &&
+               Objects.equals(dockerRootDir, that.dockerRootDir) &&
+               Objects.equals(driver, that.driver) &&
+               Arrays.equals(driverStatus, that.driverStatus) &&
+               Objects.equals(executionDriver, that.executionDriver) &&
+               Objects.equals(httpProxy, that.httpProxy) &&
+               Objects.equals(httpsProxy, that.httpsProxy) &&
+               Objects.equals(iD, that.iD) &&
+               Objects.equals(indexServerAddress, that.indexServerAddress) &&
+               Objects.equals(initPath, that.initPath) &&
+               Objects.equals(initSha1, that.initSha1) &&
+               Objects.equals(kernelVersion, that.kernelVersion) &&
+               Arrays.equals(labels, that.labels) &&
+               Objects.equals(name, that.name) &&
+               Objects.equals(noProxy, that.noProxy) &&
+               Objects.equals(operatingSystem, that.operatingSystem) &&
+               Objects.equals(systemTime, that.systemTime) &&
+               Arrays.equals(systemStatus, that.systemStatus);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + containers;
-        hash = 31 * hash + Boolean.hashCode(debug);
-        hash = 31 * hash + Objects.hashCode(dockerRootDir);
-        hash = 31 * hash + Objects.hashCode(driver);
-        hash = 31 * hash + Arrays.hashCode(driverStatus);
-        hash = 31 * hash + Objects.hashCode(executionDriver);
-        hash = 31 * hash + Objects.hashCode(httpProxy);
-        hash = 31 * hash + Objects.hashCode(httpsProxy);
-        hash = 31 * hash + Objects.hashCode(iD);
-        hash = 31 * hash + Boolean.hashCode(iPv4Forwarding);
-        hash = 31 * hash + images;
-        hash = 31 * hash + Objects.hashCode(indexServerAddress);
-        hash = 31 * hash + Objects.hashCode(initPath);
-        hash = 31 * hash + Objects.hashCode(initSha1);
-        hash = 31 * hash + Objects.hashCode(kernelVersion);
-        hash = 31 * hash + Arrays.hashCode(labels);
-        hash = 31 * hash + Long.hashCode(memTotal);
-        hash = 31 * hash + Boolean.hashCode(memoryLimit);
-        hash = 31 * hash + nCPU;
-        hash = 31 * hash + nEventsListener;
-        hash = 31 * hash + nFd;
-        hash = 31 * hash + nGoroutines;
-        hash = 31 * hash + Objects.hashCode(name);
-        hash = 31 * hash + Objects.hashCode(noProxy);
-        hash = 31 * hash + Objects.hashCode(operatingSystem);
-        hash = 31 * hash + Boolean.hashCode(swapLimit);
-        hash = 31 * hash + Objects.hashCode(systemTime);
-        hash = 31 * hash + Arrays.hashCode(systemStatus);
-        return hash;
+        return Objects.hash(containers, debug, dockerRootDir, driver, driverStatus, executionDriver, httpProxy, httpsProxy,
+                            iD, iPv4Forwarding, images, indexServerAddress, initPath, initSha1, kernelVersion, labels,
+                            memTotal, memoryLimit, nCPU, nEventsListener, nFd, nGoroutines, name, noProxy, operatingSystem,
+                            swapLimit, systemTime, systemStatus);
     }
 
     @Override
