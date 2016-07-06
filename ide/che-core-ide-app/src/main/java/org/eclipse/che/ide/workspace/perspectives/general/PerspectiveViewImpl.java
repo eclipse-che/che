@@ -239,7 +239,7 @@ public class PerspectiveViewImpl extends LayoutPanel implements WorkBenchView<Wo
         el.getParentElement().getStyle().setProperty("zIndex", "1000");
         el.getParentElement().getStyle().setProperty("overflow", "visible");
 
-        el.getStyle().setProperty("height", "5px");
+        el.getStyle().setProperty("height", "3px");
         el.getStyle().setProperty("marginTop", "-2px");
         el.getStyle().setProperty("backgroundColor", "transparent");
 

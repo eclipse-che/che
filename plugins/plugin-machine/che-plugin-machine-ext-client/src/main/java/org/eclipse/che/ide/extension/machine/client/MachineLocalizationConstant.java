@@ -416,6 +416,15 @@ public interface MachineLocalizationConstant extends Messages {
     String consolesAutoScrollButtonTooltip();
 
 
+    @Key("consoles.defaultMode.tooltip")
+    String consolesDefaultModeTooltip();
+
+    @Key("consoles.splitHorizontally.tooltip")
+    String consolesSplitHorizontallyTooltip();
+
+    @Key("consoles.splitVertically.tooltip")
+    String consolesSplitVerticallyTooltip();
+
     @Key("view.processes.tooltip")
     String viewProcessesTooltip();
 
