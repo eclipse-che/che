@@ -106,14 +106,15 @@ public class RemoteUpdateTest {
         addInitialRemote(connection);
         RemoteUpdateRequest addRequest = newDto(RemoteUpdateRequest.class);
         addRequest.setName("newRemote");
-        addRequest.setAddUrl(Arrays.asList("newRemote"));
+        addRequest.setAddUrl(Arrays.asList("newUrl"));
+        connection.remoteUpdate(addRequest);
         //when
         RemoteUpdateRequest deleteRequest = newDto(RemoteUpdateRequest.class);
         deleteRequest.setName("newRemote");
-        deleteRequest.setRemoveUrl(Arrays.asList("newurl"));
+        deleteRequest.setRemoveUrl(Arrays.asList("newUrl"));
         connection.remoteUpdate(deleteRequest);
         //then
-        assertFalse(!parseAllConfig(connection).containsKey("remote.newRemote.url"));
+        assertFalse(parseAllConfig(connection).containsKey("remote.newRemote.newUrl"));
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
@@ -124,7 +125,7 @@ public class RemoteUpdateTest {
         //add push url
         RemoteUpdateRequest addRequest = newDto(RemoteUpdateRequest.class);
         addRequest.setName("newRemote");
-        addRequest.setAddUrl(Arrays.asList("pushurl"));
+        addRequest.setAddPushUrl(Arrays.asList("pushurl"));
         connection.remoteUpdate(addRequest);
 
         //when
