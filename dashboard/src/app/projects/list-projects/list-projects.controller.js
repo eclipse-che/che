@@ -22,7 +22,7 @@ export class ListProjectsCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, cheAPI, cheNotification, lodash, $q) {
+  constructor($mdDialog, cheAPI, cheNotification, lodash, $q, $rootScope) {
     this.$mdDialog = $mdDialog;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
@@ -49,9 +49,9 @@ export class ListProjectsCtrl {
         }
       });
 
-    let profilePreferences = cheAPI.getProfile().getPreferences();
+    let preferences = cheAPI.getPreferences().getPreferences();
 
-    this.profileCreationDate = profilePreferences['che:created'];
+    this.profileCreationDate = preferences['che:created'];
 
     this.menuOptions = [
       {
@@ -73,6 +73,8 @@ export class ListProjectsCtrl {
 
     // projects on all workspaces
     this.projects = [];
+
+    $rootScope.showIDE = false;
   }
 
   updateData() {
@@ -90,12 +92,12 @@ export class ListProjectsCtrl {
   }
 
   /**
-   * Gets the name of the workspace based on its ID
+   * Gets the workspace based on its ID
    * @param workspaceId
-   * @returns {CheWorkspace.name|*}
+   * @returns {workspace|*}
    */
-  getWorkspaceName(workspaceId) {
-    return this.workspacesById.get(workspaceId).config.name;
+  getWorkspace(workspaceId) {
+    return this.workspacesById.get(workspaceId);
   }
 
   /**

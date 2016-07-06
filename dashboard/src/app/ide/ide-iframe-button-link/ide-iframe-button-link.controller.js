@@ -20,10 +20,23 @@ class IdeIFrameButtonLinkCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor() {
+  constructor($mdSidenav, $rootScope) {
+    this.$mdSidenav = $mdSidenav;
+    this.$rootScope = $rootScope;
   }
 
+  toggleLeftMenu() {
+    let isLockedOpen = this.$mdSidenav('left').isLockedOpen(),
+      isOpen  = this.$mdSidenav('left').isOpen();
 
+    if (isOpen || isLockedOpen) {
+      this.$rootScope.hideNavbar = true;
+      this.$mdSidenav('left').close();
+    } else {
+      this.$rootScope.hideNavbar = isLockedOpen;
+      this.$mdSidenav('left').toggle();
+    }
+  }
 }
 
 

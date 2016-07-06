@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-java-testing-classpath</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>che-java-testing-classpath-maven-server</artifactId>
     <dependencies>
@@ -56,11 +56,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>org.eclipse.core.resources</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

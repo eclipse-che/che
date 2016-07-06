@@ -10,35 +10,30 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.init;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.googlecode.gwt.test.utils.GwtReflectionUtils;
-
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
-import org.eclipse.che.ide.ext.git.client.GitRepositoryInitializer;
+import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import java.lang.reflect.Method;
-
+import static org.eclipse.che.ide.ext.git.client.init.InitRepositoryPresenter.INIT_COMMAND_NAME;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.eclipse.che.ide.ext.git.client.init.InitRepositoryPresenter.INIT_COMMAND_NAME;
+import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link InitRepositoryPresenter} functionality.
  *
  * @author Andrey Plotnikov
  * @author Roman Nikitenko
+ * @author Vlad Zhukovskyi
  */
 public class InitRepositoryPresenterTest extends BaseTest {
-    @Mock
-    private GitRepositoryInitializer gitRepositoryInitializer;
 
     private InitRepositoryPresenter presenter;
 
@@ -46,61 +41,44 @@ public class InitRepositoryPresenterTest extends BaseTest {
     public void disarm() {
         super.disarm();
 
-        presenter = new InitRepositoryPresenter(appContext,
-                                                constant,
+        presenter = new InitRepositoryPresenter(constant,
                                                 notificationManager,
-                                                gitRepositoryInitializer,
-                                                projectServiceClient,
-                                                dtoUnmarshallerFactory,
-                                                eventBus,
                                                 gitOutputConsoleFactory,
-                                                consolesPanelPresenter);
+                                                consolesPanelPresenter,
+                                                service,
+                                                appContext);
+
+        when(service.init(anyObject(), any(Path.class), anyBoolean())).thenReturn(voidPromise);
+        when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
+        when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
     }
 
     @Test
     public void testOnOkClickedInitWSRequestAndGetProjectIsSuccessful() throws Exception {
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncCallback<Void> callback = (AsyncCallback<Void>)arguments[1];
-                @SuppressWarnings("NonJREEmulationClassesInClientCode")
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, (Void)null);
-                return callback;
-            }
-        }).when(gitRepositoryInitializer).initGitRepository(anyObject(), (AsyncCallback<Void>)anyObject());
+        presenter.initRepository(project);
 
-        presenter.initRepository();
+        verify(voidPromise).then(voidPromiseCaptor.capture());
+        voidPromiseCaptor.getValue().apply(null);
 
-        verify(gitRepositoryInitializer).initGitRepository(eq(rootProjectConfig), (AsyncCallback<Void>)anyObject());
-        verify(gitOutputConsoleFactory).create(INIT_COMMAND_NAME);
+        verify(gitOutputConsoleFactory).create(eq(INIT_COMMAND_NAME));
         verify(console).print(eq(constant.initSuccess()));
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
+        verify(notificationManager).notify(anyString());
+
+        verify(project).synchronize();
     }
 
     @Test
     public void testOnOkClickedInitWSRequestIsFailed() throws Exception {
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncCallback<String> callback = (AsyncCallback<String>)arguments[1];
-                @SuppressWarnings("NonJREEmulationClassesInClientCode")
-                Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
-                onFailure.invoke(callback, mock(Throwable.class));
-                return callback;
-            }
-        }).when(gitRepositoryInitializer).initGitRepository(anyObject(), (AsyncCallback<Void>)anyObject());
+        presenter.initRepository(project);
 
-        presenter.initRepository();
+        verify(voidPromise).catchError(promiseErrorCaptor.capture());
+        promiseErrorCaptor.getValue().apply(promiseError);
 
-        verify(gitRepositoryInitializer).initGitRepository(eq(rootProjectConfig), (AsyncCallback<Void>)anyObject());
         verify(constant).initFailed();
         verify(gitOutputConsoleFactory).create(INIT_COMMAND_NAME);
-        verify(console).printError(eq(constant.initFailed()));
+        verify(console).printError(anyObject());
         verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
+        verify(notificationManager).notify(anyString(), any(StatusNotification.Status.class), anyObject());
     }
 }

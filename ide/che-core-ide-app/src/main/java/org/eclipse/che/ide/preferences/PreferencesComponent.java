@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.api.theme.Theme;
 import org.eclipse.che.ide.api.theme.ThemeAgent;
+import org.eclipse.che.ide.context.AppContextImpl;
 
 import java.util.Map;
 
@@ -63,7 +64,10 @@ public class PreferencesComponent implements Component {
             @Override
             public void apply(Map<String, String> preferences) throws OperationException {
                 currentUser.setPreferences(preferences);
-                appContext.setCurrentUser(currentUser);
+
+                if (appContext instanceof AppContextImpl) {
+                    ((AppContextImpl)appContext).setCurrentUser(currentUser);
+                }
 
                 setTheme();
 

@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.navigation;
 
-import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.resource.Path;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import java.util.List;
@@ -21,10 +22,11 @@ import java.util.List;
  *
  * @author Ann Shumilova
  * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskyi
  */
 public interface NavigateToFileView extends View<NavigateToFileView.ActionDelegate> {
     /** Needs for delegate some function into NavigateToFile view. */
-    public interface ActionDelegate {
+    interface ActionDelegate {
         /**
          * Called when suggestions are requested.
          *
@@ -33,18 +35,11 @@ public interface NavigateToFileView extends View<NavigateToFileView.ActionDelega
          * @param callback
          *         callback
          */
-        void onRequestSuggestions(String query, AsyncCallback<List<ItemReference>> callback);
+        void onRequestSuggestions(String query, AsyncCallback<List<Path>> callback);
 
         /** Called when file selected. */
-        void onFileSelected();
+        void onFileSelected(Path path);
     }
-
-    /**
-     * Returns chosen item's path.
-     *
-     * @return chosen item's path
-     */
-    String getItemPath();
 
     /** Clear input. */
     void clearInput();

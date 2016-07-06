@@ -260,6 +260,9 @@ public interface GitLocalizationConstant extends Messages {
     @Key("view.import.gitImporterPage.projectUrl")
     String gitImporterPageProjectUrl();
 
+    @Key("view.import.gitImporterPage.recursive")
+    String gitImporterPageRecursive();
+
     @Key("view.import.gitImporterPage.projectInfo")
     String gitImporterPageProjectInfo();
 

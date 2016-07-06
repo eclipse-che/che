@@ -10,29 +10,33 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.json;
 
+import org.eclipse.che.plugin.docker.client.json.container.NetworkingConfig;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /** @author andrew00x */
 public class ContainerConfig {
-    private String     domainName;
-    private int        cpuShares;
-    private String     cpuset;
-    private boolean    attachStdin;
-    private boolean    attachStdout;
-    private boolean    attachStderr;
-    private boolean    tty;
-    private boolean    openStdin;
-    private boolean    stdinOnce;
-    private String[]   env;
-    private String[]   cmd;
-    private String     entrypoint;
-    private String     image;
-    private boolean    networkDisabled;
-    private String     macAddress;
-    private String[]   securityOpts;
-    private HostConfig hostConfig;
+    private String           domainName;
+    private int              cpuShares;
+    private String           cpuset;
+    private boolean          attachStdin;
+    private boolean          attachStdout;
+    private boolean          attachStderr;
+    private boolean          tty;
+    private boolean          openStdin;
+    private boolean          stdinOnce;
+    private String[]         env;
+    private String[]         cmd;
+    private String[]         entrypoint;
+    private String           image;
+    private boolean          networkDisabled;
+    private String           macAddress;
+    private String[]         securityOpts;
+    private HostConfig       hostConfig;
+    private NetworkingConfig networkingConfig;
 
     // from docs for 1.15 API https://docs.docker.com/reference/api/docker_remote_api_v1.15/#create-a-container
     // An object mapping ports to an empty object in the form of: "ExposedPorts": { "<port>/<tcp|udp>: {}" }
@@ -127,7 +131,7 @@ public class ContainerConfig {
         return cmd;
     }
 
-    public void setCmd(String[] cmd) {
+    public void setCmd(String... cmd) {
         this.cmd = cmd;
     }
 
@@ -277,15 +281,15 @@ public class ContainerConfig {
         return this;
     }
 
-    public String getEntrypoint() {
+    public String[] getEntrypoint() {
         return entrypoint;
     }
 
-    public void setEntrypoint(String entrypoint) {
+    public void setEntrypoint(String[] entrypoint) {
         this.entrypoint = entrypoint;
     }
 
-    public ContainerConfig withEntrypoint(String entrypoint) {
+    public ContainerConfig withEntrypoint(String[] entrypoint) {
         this.entrypoint = entrypoint;
         return this;
     }
@@ -342,6 +346,84 @@ public class ContainerConfig {
         return this;
     }
 
+    public NetworkingConfig getNetworkingConfig() {
+        return networkingConfig;
+    }
+
+    public void setNetworkingConfig(NetworkingConfig networkingConfig) {
+        this.networkingConfig = networkingConfig;
+    }
+
+    public ContainerConfig withNetworkingConfig(NetworkingConfig networkingConfig) {
+        this.networkingConfig = networkingConfig;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ContainerConfig)) {
+            return false;
+        }
+        final ContainerConfig that = (ContainerConfig)obj;
+        return cpuShares == that.cpuShares
+               && attachStdin == that.attachStdin
+               && attachStdout == that.attachStdout
+               && attachStderr == that.attachStderr
+               && tty == that.tty
+               && openStdin == that.openStdin
+               && stdinOnce == that.stdinOnce
+               && networkDisabled == that.networkDisabled
+               && Objects.equals(domainName, that.domainName)
+               && Objects.equals(cpuset, that.cpuset)
+               && Arrays.equals(env, that.env)
+               && Arrays.equals(cmd, that.cmd)
+               && Arrays.equals(entrypoint, that.entrypoint)
+               && Objects.equals(image, that.image)
+               && Objects.equals(macAddress, that.macAddress)
+               && Arrays.equals(securityOpts, that.securityOpts)
+               && Objects.equals(hostConfig, that.hostConfig)
+               && Objects.equals(networkingConfig, that.networkingConfig)
+               && getExposedPorts().equals(that.getExposedPorts())
+               && Objects.equals(user, that.user)
+               && Objects.equals(hostname, that.hostname)
+               && Objects.equals(workingDir, that.workingDir)
+               && getVolumes().equals(that.getVolumes())
+               && getLabels().equals(that.getLabels());
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(domainName);
+        hash = 31 * hash + cpuShares;
+        hash = 31 * hash + Objects.hashCode(cpuset);
+        hash = 31 * hash + Boolean.hashCode(attachStdin);
+        hash = 31 * hash + Boolean.hashCode(attachStdout);
+        hash = 31 * hash + Boolean.hashCode(attachStderr);
+        hash = 31 * hash + Boolean.hashCode(tty);
+        hash = 31 * hash + Boolean.hashCode(openStdin);
+        hash = 31 * hash + Boolean.hashCode(stdinOnce);
+        hash = 31 * hash + Arrays.hashCode(env);
+        hash = 31 * hash + Arrays.hashCode(cmd);
+        hash = 31 * hash + Arrays.hashCode(entrypoint);
+        hash = 31 * hash + Objects.hashCode(image);
+        hash = 31 * hash + Boolean.hashCode(networkDisabled);
+        hash = 31 * hash + Objects.hashCode(macAddress);
+        hash = 31 * hash + Arrays.hashCode(securityOpts);
+        hash = 31 * hash + Objects.hashCode(hostConfig);
+        hash = 31 * hash + Objects.hashCode(networkingConfig);
+        hash = 31 * hash + getExposedPorts().hashCode();
+        hash = 31 * hash + Objects.hashCode(user);
+        hash = 31 * hash + Objects.hashCode(hostname);
+        hash = 31 * hash + Objects.hashCode(workingDir);
+        hash = 31 * hash + getVolumes().hashCode();
+        hash = 31 * hash + getLabels().hashCode();
+        return hash;
+    }
+
     @Override
     public String toString() {
         return "ContainerConfig{" +
@@ -356,12 +438,13 @@ public class ContainerConfig {
                ", stdinOnce=" + stdinOnce +
                ", env=" + Arrays.toString(env) +
                ", cmd=" + Arrays.toString(cmd) +
-               ", entrypoint='" + entrypoint + '\'' +
+               ", entrypoint=" + Arrays.toString(entrypoint) +
                ", image='" + image + '\'' +
                ", networkDisabled=" + networkDisabled +
                ", macAddress='" + macAddress + '\'' +
                ", securityOpts=" + Arrays.toString(securityOpts) +
                ", hostConfig=" + hostConfig +
+               ", networkingConfig=" + networkingConfig +
                ", exposedPorts=" + exposedPorts +
                ", user='" + user + '\'' +
                ", hostname='" + hostname + '\'' +

@@ -11,14 +11,12 @@
 package org.eclipse.che.ide.projectimport.wizard.presenter;
 
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.api.wizard.WizardPage;
-import org.eclipse.che.ide.dto.DtoFactory;
 
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizard;
@@ -45,7 +43,6 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
                                                      MainPagePresenter.ImporterSelectionListener {
 
     private final DialogFactory                                dialogFactory;
-    private final DtoFactory                                   dtoFactory;
     private final ImportWizardFactory                          importWizardFactory;
     private final ImportProjectWizardView                      view;
     private final Provider<MainPagePresenter>                  mainPageProvider;
@@ -64,7 +61,6 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
                                         Provider<MainPagePresenter> mainPageProvider,
                                         ImportWizardRegistry wizardRegistry,
                                         DialogFactory dialogFactory,
-                                        DtoFactory dtoFactory,
                                         ImportWizardFactory importWizardFactory) {
         this.view = view;
         this.locale = locale;
@@ -72,7 +68,6 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
         this.mainPage = mainPage;
         this.mainPageProvider = mainPageProvider;
         this.dialogFactory = dialogFactory;
-        this.dtoFactory = dtoFactory;
         this.importWizardFactory = importWizardFactory;
         wizardsCache = new HashMap<>();
         view.setDelegate(this);
@@ -127,7 +122,7 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
         resetState();
 
         wizard = createDefaultWizard();
-        final WizardPage<ProjectConfigDto> firstPage = wizard.navigateToFirst();
+        final WizardPage<MutableProjectConfig> firstPage = wizard.navigateToFirst();
         if (firstPage != null) {
             showPage(firstPage);
             view.showDialog();
@@ -154,9 +149,9 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
             throw new IllegalStateException("WizardRegistrar for the importer " + importer.getId() + " isn't registered.");
         }
 
-        List<Provider<? extends WizardPage<ProjectConfigDto>>> pageProviders = wizardRegistrar.getWizardPages();
+        List<Provider<? extends WizardPage<MutableProjectConfig>>> pageProviders = wizardRegistrar.getWizardPages();
         final ImportWizard importWizard = createDefaultWizard();
-        for (Provider<? extends WizardPage<ProjectConfigDto>> provider : pageProviders) {
+        for (Provider<? extends WizardPage<MutableProjectConfig>> provider : pageProviders) {
             importWizard.addPage(provider.get(), 1, false);
         }
 
@@ -166,8 +161,7 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
 
     /** Creates and returns 'default' project wizard with pre-defined pages only. */
     private ImportWizard createDefaultWizard() {
-        final ProjectConfigDto dataObject = dtoFactory.createDto(ProjectConfigDto.class)
-               .withSource(dtoFactory.createDto(SourceStorageDto.class).withType("").withLocation(""));
+        final MutableProjectConfig dataObject = new MutableProjectConfig();
 
         final ImportWizard importWizard = importWizardFactory.newWizard(dataObject);
         importWizard.setUpdateDelegate(this);
@@ -193,9 +187,9 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
 
     @Override
     public void onImporterSelected(ProjectImporterDescriptor importer) {
-        final ProjectConfigDto prevData = wizard.getDataObject();
+        final MutableProjectConfig prevData = wizard.getDataObject();
         wizard = getWizardForImporter(importer);
-        final ProjectConfigDto dataObject = wizard.getDataObject();
+        final MutableProjectConfig dataObject = wizard.getDataObject();
 
         dataObject.getSource().setType(importer.getId());
 
@@ -203,12 +197,12 @@ public class ImportProjectWizardPresenter implements Wizard.UpdateDelegate,
         dataObject.setName(prevData.getName());
         dataObject.setDescription(prevData.getDescription());
 
-        WizardPage<ProjectConfigDto> firstPage = wizard.navigateToFirst();
+        WizardPage<MutableProjectConfig> firstPage = wizard.navigateToFirst();
         if (firstPage != null) {
             firstPage.init(dataObject);
         }
 
-        WizardPage<ProjectConfigDto> importerPage = wizard.navigateToNext();
+        WizardPage<MutableProjectConfig> importerPage = wizard.navigateToNext();
         importerPage.go(mainPage.getImporterPanel());
     }
 }

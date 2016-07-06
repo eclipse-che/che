@@ -1,0 +1,39 @@
+<div class="admin-navbar-menu recent-workspaces"
+     ng-show="navbarRecentWorkspacesController.getRecentWorkspaces().length">
+  <section class="left-sidebar-menu" layout="column" layout-align="start start">
+
+    <div class="navbar-section"
+         flex layout="row" layout-align="start start">
+      <span flex class="navbar-section-title">Recent workspaces</span>
+    </div>
+
+    <md-list layout="column">
+      <md-list-item flex class="navbar-subsection-item"
+                    ng-repeat="workspace in navbarRecentWorkspacesController.getRecentWorkspaces()
+                    | orderBy:['attributes.opened', 'attributes.updated']:'reverse'
+                    | limitTo:5"
+                    ng-class="{'recent-workspaces-last-opened': navbarRecentWorkspacesController.isOpen(workspace.id)}">
+        <navbar-dropdown-menu flex
+                              navbar-dropdown-items="navbarRecentWorkspacesController.getDropdownItems(workspace.id)"
+                              navbar-dropdown-right-click
+                              navbar-dropdown-external-class="recent-workspaces-menu"
+                              navbar-dropdown-offset="30 22">
+          <md-button nav-bar-selected flex che-reload-href
+                     che-on-long-touch="navbarRecentWorkspacesController.openLinkInNewTab(workspace.id)"
+                     ng-href="{{navbarRecentWorkspacesController.getIdeLink(workspace.id)}}" layout-align="left"
+                     target="_self">
+            <div class="navbar-item" layout="row" layout-align="start center">
+              <workspace-status-indicator
+                che-status="navbarRecentWorkspacesController.getWorkspaceStatus(workspace.id)"
+                che-empty-circle="true"
+                class="navbar-icon"
+                title="{{navbarRecentWorkspacesController.getWorkspaceStatus(workspace.id)}}"></workspace-status-indicator>
+            <span title="{{navbarRecentWorkspacesController.getWorkspaceName(workspace.id)}}"
+                  ng-class="{'recent-workspaces-stopped-workspace': navbarRecentWorkspacesController.getWorkspaceStatus(workspace.id) === 'STOPPED'}">{{navbarRecentWorkspacesController.getWorkspaceName(workspace.id)}}</span>
+            </div>
+          </md-button>
+        </navbar-dropdown-menu>
+      </md-list-item>
+    </md-list>
+  </section>
+</div>

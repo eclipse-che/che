@@ -13,7 +13,9 @@ package org.eclipse.che.api.promises.client.js;
 import com.google.gwt.core.client.JavaScriptObject;
 
 import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.Thenable;
@@ -34,27 +36,25 @@ public class JsPromise<V> extends JavaScriptObject implements Promise<V> {
     protected JsPromise() {
     }
 
-    private static final native void applyOperationToError(Operation<PromiseError> onRejected, JavaScriptObject reason) /*-{
-        var reasonString = reason.toString();
-        if (reasonString.indexOf("org.eclipse.che.api.promises.client.OperationException:") == 0
-            || reasonString.indexOf("org.eclipse.che.api.promises.client.FunctionException:") == 0) {
-            var promiseError = @org.eclipse.che.api.promises.client.js.JsPromiseError::create(Ljava/lang/Throwable;)(reason)
-            onRejected.@org.eclipse.che.api.promises.client.Operation::apply(*)(promiseError);
-        } else {
-            onRejected.@org.eclipse.che.api.promises.client.Operation::apply(*)(reason);
-        }
-    }-*/;
+    private static void applyOperationToError(Operation<PromiseError> onRejected, Object reason) throws OperationException {
+        final Throwable cause = getCause(reason);
 
-    private static final native <V> V applyFunctionToError(Function<PromiseError, V> onRejected, JavaScriptObject reason) /*-{
-        var reasonString = reason.toString();
-        if (reasonString.indexOf("org.eclipse.che.api.promises.client.OperationException:") == 0
-            || reasonString.indexOf("org.eclipse.che.api.promises.client.FunctionException:") == 0) {
-            var promiseError = @org.eclipse.che.api.promises.client.js.JsPromiseError::create(Ljava/lang/Throwable;)(reason)
-            return onRejected.@org.eclipse.che.api.promises.client.Function::apply(*)(promiseError);
+        if (cause != null) {
+            onRejected.apply(JsPromiseError.create(cause));
         } else {
-            return onRejected.@org.eclipse.che.api.promises.client.Function::apply(*)(reason);
+            onRejected.apply(JsPromiseError.create(reason instanceof Throwable ? (Throwable)reason : null));
         }
-    }-*/;
+    }
+
+    private static <V> V applyFunctionToError(Function<PromiseError, V> onRejected, Object reason) throws FunctionException {
+        final Throwable cause = getCause(reason);
+
+        if (cause != null) {
+            return onRejected.apply(JsPromiseError.create(cause));
+        } else {
+            return onRejected.apply(JsPromiseError.create(reason instanceof Throwable ? (Throwable)reason : null));
+        }
+    }
 
     private final static <B> Thenable<B> staticThen(Thenable<B> thenable, B arg) {
         return thenable.then(arg);
@@ -181,4 +181,8 @@ public class JsPromise<V> extends JavaScriptObject implements Promise<V> {
     )
         ;
     }-*/;
+
+    public static Throwable getCause(Object object) {
+        return object instanceof JsPromiseError ? ((JsPromiseError)object).getCause() : null;
+    }
 }

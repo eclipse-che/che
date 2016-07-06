@@ -45,12 +45,14 @@ import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTO
  * @author Roman Nikitenko
  */
 public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
-    public static final Map<String, String> MACHINE_LABELS_BY_CATEGORY_MAP = new HashMap<String, String>() {
+
+    public static final Map<String, String> LABELS = new HashMap<String, String>() {
         {
             put("docker", "dkr");
             put("development", "dev");
         }
     };
+
     private final MachineResources            resources;
     private final MachineLocalizationConstant locale;
     private final PartStackUIResources        partStackUIResources;
@@ -95,8 +97,8 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
     private DivElement createMachineLabel(String machineCategory) {
         final DivElement machineLabel = Elements.createDivElement();
 
-        if (MACHINE_LABELS_BY_CATEGORY_MAP.containsKey(machineCategory)) {
-            machineLabel.setTextContent(MACHINE_LABELS_BY_CATEGORY_MAP.get(machineCategory));
+        if (LABELS.containsKey(machineCategory)) {
+            machineLabel.setTextContent(LABELS.get(machineCategory));
             machineLabel.setClassName(resources.getCss().dockerMachineLabel());
             return machineLabel;
         }

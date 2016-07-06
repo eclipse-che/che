@@ -12,29 +12,47 @@ package org.eclipse.che.ide.ext.dashboard.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
+import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.Presentation;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.ui.Tooltip;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.RIGHT;
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
 /**
  * Action to provide Dashboard button onto toolbar.
  *
  * @author Oleksii Orel
  */
-public class RedirectToDashboardAction extends Action implements CustomComponentAction {
+public class RedirectToDashboardAction extends Action implements CustomComponentAction,
+        WorkspaceStartedEvent.Handler, WorkspaceStoppedEvent.Handler {
+
     private final DashboardLocalizationConstant constant;
     private final DashboardResources            resources;
+    private final AppContext                    appContext;
+
+    private Element                             arrow;
 
     @Inject
     public RedirectToDashboardAction(DashboardLocalizationConstant constant,
-                                     DashboardResources resources) {
+                                     DashboardResources resources,
+                                     EventBus eventBus,
+                                     AppContext appContext) {
         this.constant = constant;
         this.resources = resources;
+        this.appContext = appContext;
+
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
     @Override
@@ -43,22 +61,38 @@ public class RedirectToDashboardAction extends Action implements CustomComponent
 
     @Override
     public Widget createCustomComponent(Presentation presentation) {
-        final Anchor dashboardButton = new Anchor();
-        final Element tooltipContainer = DOM.createDiv();
-        final Element tooltipElement = DOM.createSpan();
+        FlowPanel panel = new FlowPanel();
+        panel.setWidth("24px");
+        panel.setHeight("24px");
 
-        dashboardButton.ensureDebugId("dashboard-toolbar-button");
-        dashboardButton.addStyleName(resources.dashboardCSS().dashboardButton());
-        dashboardButton.setHref(constant.openDashboardRedirectUrl());
-        dashboardButton.getElement().setAttribute("target", "_blank");
-        dashboardButton.getElement().insertFirst(resources.dashboardButtonBackground().getSvg().getElement());
-        dashboardButton.getElement().appendChild(resources.dashboardButtonIcon().getSvg().getElement());
-        tooltipElement.setInnerText(constant.openDashboardToolbarButtonTitle());
-        tooltipContainer.appendChild(tooltipElement);
-        tooltipContainer.setClassName(resources.dashboardCSS().tooltip());
-        dashboardButton.getElement().appendChild(tooltipContainer);
+        arrow = DOM.createAnchor();
+        arrow.setClassName(resources.dashboardCSS().dashboardArrow());
+        arrow.setInnerHTML("<i class=\"fa fa-chevron-right\" />");
+        panel.getElement().appendChild(arrow);
 
-        return dashboardButton;
+        arrow.setAttribute("href", constant.openDashboardUrlWorkspace(appContext.getWorkspace().getConfig().getName()));
+        arrow.setAttribute("target", "_blank");
+
+        Tooltip.create((elemental.dom.Element) arrow,
+                BOTTOM,
+                RIGHT,
+                constant.openDashboardToolbarButtonTitle());
+
+        return panel;
+    }
+
+    @Override
+    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+        if (arrow != null) {
+            arrow.setAttribute("href", constant.openDashboardUrlWorkspace(event.getWorkspace().getConfig().getName()));
+        }
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        if (arrow != null) {
+            arrow.setAttribute("href", constant.openDashboardUrlWorkspaces());
+        }
     }
 
 }

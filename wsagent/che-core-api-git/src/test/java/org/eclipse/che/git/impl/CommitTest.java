@@ -27,9 +27,11 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 
+import static java.nio.file.Files.write;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
 import static org.testng.Assert.assertEquals;
 
@@ -94,7 +96,7 @@ public class CommitTest {
         addFile(connection, "README.txt", CONTENT);
         connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
         connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
-        int beforeCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+        int beforeCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
 
         //when
         //change existing README
@@ -104,8 +106,56 @@ public class CommitTest {
 
         //then
         Revision revision = connection.commit(commitRequest);
-        int afterCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+        int afterCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
         assertEquals(revision.getMessage(), commitRequest.getMessage());
-        assertEquals(beforeCount, afterCount);
+        assertEquals(beforeCommitsCount, afterCommitsCount);
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
+    public void testChangeMessageOfLastCommit(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        //given
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        addFile(connection, "NewFile.txt", CONTENT);
+        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("NewFile.txt")));
+        connection.commit(newDto(CommitRequest.class).withMessage("First commit"));
+        int beforeCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+
+        //when
+        CommitRequest commitRequest = newDto(CommitRequest.class).withMessage("Changed message").withAmend(true);
+        connection.commit(commitRequest);
+
+        //then
+        int afterCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+        assertEquals(beforeCommitsCount, afterCommitsCount);
+        assertEquals(connection.log(newDto(LogRequest.class)).getCommits().get(0).getMessage(), commitRequest.getMessage());
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+          expectedExceptions = GitException.class)
+    public void testCommitWithNotStagedChanges(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        //given
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        //Prepare unstaged deletion
+        addFile(connection, "FileToDelete.txt", "content");
+        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("FileToDelete.txt")));
+        connection.commit(newDto(CommitRequest.class).withMessage("File to delete"));
+        new File(connection.getWorkingDir().getAbsolutePath(), "FileToDelete.txt").delete();
+        //Prepare unstaged new file
+        addFile(connection, "newFile", "content");
+        //Prepare unstaged editing
+        write(new File(connection.getWorkingDir(), "README.txt").toPath(), "new content".getBytes());
+
+        //when
+        connection.commit(newDto(CommitRequest.class)).withMessage("test commit");
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
+          expectedExceptions = GitException.class)
+    public void testCommitWithCleanIndex(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        //given
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+
+        //when
+        connection.commit(newDto(CommitRequest.class)).withMessage("test commit");
     }
 }

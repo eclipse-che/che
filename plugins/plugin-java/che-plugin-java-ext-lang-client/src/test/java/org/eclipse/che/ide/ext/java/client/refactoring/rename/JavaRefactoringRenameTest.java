@@ -10,25 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 
+import com.google.common.base.Optional;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.project.node.HasProjectConfig;
-import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenamePresenter;
 import org.eclipse.che.ide.ext.java.client.refactoring.service.RefactoringServiceClient;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.shared.dto.LinkedModeModel;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateRenameRefactoring;
@@ -36,18 +38,16 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.LinkedRenameRefactori
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatusEntry;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameRefactoringSession;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
 import org.eclipse.che.ide.api.editor.link.LinkedMode;
 import org.eclipse.che.ide.api.editor.link.LinkedModel;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
-import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +77,6 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -85,18 +84,14 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Alexander Andrinko
+ * @author Vlad Zhukovskyi
  */
 @RunWith(MockitoJUnitRunner.class)
 public class JavaRefactoringRenameTest {
 
-    private static final String TEXT                 = "some text for test";
-    private static final String PATH                 = "to/be/or/not/to/be";
-    private static final String JAVA_CLASS__NAME     = "JavaTest";
-    private static final String JAVA_CLASS_FULL_NAME = JAVA_CLASS__NAME + ".java";
-    private static final String NEW_JAVA_CLASS_NAME  = "NewJavaTest.java";
-    private static final String SESSION_ID           = "some session id";
-    private static final int    CURSOR_OFFSET        = 10;
-
+    private static final String NEW_JAVA_CLASS_NAME = "NewJavaTest.java";
+    private static final String SESSION_ID          = "some session id";
+    private static final int    CURSOR_OFFSET       = 10;
 
     //variables for constructor
     @Mock
@@ -112,9 +107,7 @@ public class JavaRefactoringRenameTest {
     @Mock
     private RefactoringUpdater       refactoringUpdater;
     @Mock
-    private DtoUnmarshallerFactory   unmarshallerFactory;
-    @Mock
-    private NotificationManager      notificationManager;
+    private NotificationManager notificationManager;
 
     @Mock
     private CreateRenameRefactoring           createRenameRefactoringDto;
@@ -125,19 +118,17 @@ public class JavaRefactoringRenameTest {
     @Mock
     private EditorInput                       editorInput;
     @Mock
-    private VirtualFile                       virtualFile;
+    private File                              file;
     @Mock
-    private ProjectConfigDto                  projectConfig;
+    private Container                         srcFolder;
     @Mock
-    private HasProjectConfig                  hasProjectConfig;
+    private Project                           relatedProject;
     @Mock
     private Promise<RenameRefactoringSession> createRenamePromise;
     @Mock
     private RenameRefactoringSession          session;
     @Mock
     private LinkedModeModel                   linkedModel;
-    @Mock
-    private InputDialog                       dialog;
     @Mock
     private Promise<RefactoringResult>        applyModelPromise;
     @Mock
@@ -172,28 +163,26 @@ public class JavaRefactoringRenameTest {
         when(dtoFactory.createDto(CreateRenameRefactoring.class)).thenReturn(createRenameRefactoringDto);
         when(dtoFactory.createDto(LinkedRenameRefactoringApply.class)).thenReturn(linkedRenameRefactoringApplyDto);
         when(textEditor.getEditorInput()).thenReturn(editorInput);
-        when(editorInput.getFile()).thenReturn(virtualFile);
-        when(projectConfig.getPath()).thenReturn(TEXT);
-        when(virtualFile.getName()).thenReturn(JAVA_CLASS_FULL_NAME);
+        when(editorInput.getFile()).thenReturn(file);
+        when(file.getName()).thenReturn("A.java");
+        when(file.getExtension()).thenReturn("java");
+        when(file.getParentWithMarker(eq(SourceFolderMarker.ID))).thenReturn(Optional.of(srcFolder));
+        when(file.getLocation()).thenReturn(Path.valueOf("/project/src/a/b/c/A.java"));
+        when(file.getResourceType()).thenReturn(Resource.FILE);
+        when(srcFolder.getLocation()).thenReturn(Path.valueOf("/project/src"));
+        when(file.getRelatedProject()).thenReturn(Optional.of(relatedProject));
+        when(relatedProject.getLocation()).thenReturn(Path.valueOf("/project"));
         when(refactoringServiceClient.createRenameRefactoring(createRenameRefactoringDto)).thenReturn(createRenamePromise);
         when(createRenamePromise.then((Operation<RenameRefactoringSession>)any())).thenReturn(createRenamePromise);
         when(applyModelPromise.then((Operation<RefactoringResult>)any())).thenReturn(applyModelPromise);
         when(session.getLinkedModeModel()).thenReturn(linkedModel);
-        when(session.getSessionId()).thenReturn(SESSION_ID);
-        when(locale.renameDialogTitle()).thenReturn(TEXT);
-        when(locale.renameDialogLabel()).thenReturn(TEXT);
-        when(dialogFactory.createInputDialog(eq(TEXT), eq(TEXT), any(InputCallback.class), isNull(CancelCallback.class)))
-                .thenReturn(dialog);
         when(refactoringServiceClient.applyLinkedModeRename(linkedRenameRefactoringApplyDto)).thenReturn(applyModelPromise);
-        when(virtualFile.getPath()).thenReturn(PATH);
-        when(virtualFile.getProject()).thenReturn(hasProjectConfig);
-        when(hasProjectConfig.getProjectConfig()).thenReturn(projectConfig);
         when(textEditor.getCursorOffset()).thenReturn(CURSOR_OFFSET);
         when(document.getContentRange(anyInt(), anyInt())).thenReturn(NEW_JAVA_CLASS_NAME);
         when(((HasLinkedMode)textEditor).getLinkedMode()).thenReturn(linkedMode);
         when(((HasLinkedMode)textEditor).createLinkedModel()).thenReturn(editorLinkedModel);
         when(textEditor.getDocument()).thenReturn(document);
-        when(document.getFile()).thenReturn(virtualFile);
+        when(document.getFile()).thenReturn(file);
 
         when(result.getEntries()).thenReturn(Collections.singletonList(entry));
     }
@@ -208,15 +197,14 @@ public class JavaRefactoringRenameTest {
 
         mainCheckRenameRefactoring();
 
-        verify(refactoringUpdater).updateAfterRefactoring(Matchers.<RefactorInfo>any(), Matchers.<List<ChangeInfo>>any());
+        verify(refactoringUpdater).updateAfterRefactoring(Matchers.<List<ChangeInfo>>any());
         verify(eventBus).addHandler(FileEvent.TYPE, refactoringRename);
     }
 
     @Test
     public void turnOffLinkedEditorModeWhenEditorIsClosed() throws Exception {
         when(fileEvent.getOperationType()).thenReturn(CLOSE);
-        when(virtualFile.getPath()).thenReturn(PATH);
-        when(fileEvent.getFile()).thenReturn(virtualFile);
+        when(fileEvent.getFile()).thenReturn(file);
 
         refactoringRename.refactor(textEditor);
         refactoringRename.onFileOperation(fileEvent);
@@ -373,10 +361,9 @@ public class JavaRefactoringRenameTest {
         verify(createRenameRefactoringDto).setRefactorLightweight(true);
         verify(textEditor).getEditorInput();
         verify(editorInput).getFile();
-        verify(createRenameRefactoringDto).setPath(JAVA_CLASS__NAME);
-        verify(createRenameRefactoringDto).setProjectPath(TEXT);
-        verify(projectConfig).getPath();
-        verify(createRenameRefactoringDto).setProjectPath(TEXT);
+        verify(createRenameRefactoringDto).setPath(eq("a.b.c.A"));
+        verify(createRenameRefactoringDto).setProjectPath(eq("/project"));
+        verify(createRenameRefactoringDto).setProjectPath(eq("/project"));
         verify(createRenameRefactoringDto).setType(JAVA_ELEMENT);
 
         verify(refactoringServiceClient).createRenameRefactoring(createRenameRefactoringDto);

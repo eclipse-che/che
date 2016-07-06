@@ -34,12 +34,13 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
+import org.eclipse.che.ide.context.AppContextImpl;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.workspace.WorkspacePresenter;
@@ -52,6 +53,7 @@ import java.util.Map;
  *
  * @author Nikolay Zamosenchuk
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class BootstrapController {
@@ -83,6 +85,7 @@ public class BootstrapController {
         this.workspaceService = workspaceService;
         this.wsAgentStateControllerProvider = wsAgentStateControllerProvider;
         this.wsAgentURLModifier = wsAgentURLModifier;
+
         appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
         dtoRegistrar.registerDtoProviders();
 
@@ -96,7 +99,7 @@ public class BootstrapController {
 
     @Inject
     private void startWsAgentComponents(EventBus eventBus, final Map<String, Provider<WsAgentComponent>> components) {
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedHandler() {
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedEvent.Handler() {
             @Override
             public void onWorkspaceStarted(WorkspaceStartedEvent event) {
                 workspaceService.getWorkspace(event.getWorkspace().getId()).then(new Operation<WorkspaceDto>() {
@@ -104,8 +107,12 @@ public class BootstrapController {
                     public void apply(WorkspaceDto ws) throws OperationException {
                         MachineDto devMachineDto = ws.getRuntime().getDevMachine();
                         DevMachine devMachine = new DevMachine(devMachineDto);
-                        appContext.setDevMachine(devMachine);
-                        appContext.setProjectsRoot(devMachineDto.getRuntime().projectsRoot());
+
+                        if (appContext instanceof AppContextImpl) {
+                            ((AppContextImpl)appContext).setDevMachine(devMachine);
+                            ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(devMachineDto.getRuntime().projectsRoot()));
+                        }
+
                         wsAgentStateControllerProvider.get().initialize(devMachine);
                         wsAgentURLModifier.initialize(devMachine);
                         startWsAgentComponents(components.values().iterator());
@@ -126,11 +133,9 @@ public class BootstrapController {
             Provider<Component> componentProvider = componentProviderIterator.next();
 
             final Component component = componentProvider.get();
-            Log.info(component.getClass(), "starting...");
             component.start(new Callback<Component, Exception>() {
                 @Override
                 public void onSuccess(Component result) {
-                    Log.info(result.getClass(), "started");
                     startComponents(componentProviderIterator);
                 }
 
@@ -150,11 +155,9 @@ public class BootstrapController {
             Provider<WsAgentComponent> componentProvider = componentProviderIterator.next();
 
             final WsAgentComponent component = componentProvider.get();
-            Log.info(component.getClass(), "starting...");
             component.start(new Callback<WsAgentComponent, Exception>() {
                 @Override
                 public void onSuccess(WsAgentComponent result) {
-                    Log.info(result.getClass(), "started");
                     startWsAgentComponents(componentProviderIterator);
                 }
 
@@ -211,7 +214,20 @@ public class BootstrapController {
 
         elemental.html.Window window = Browser.getWindow();
 
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            @Override
+            public void execute() {
+                notifyShowIDE();
+            }
+        });
     }
+
+    /**
+     * Sends a message to the parent frame to inform that IDE application can be shown.
+     */
+    private native void notifyShowIDE() /*-{
+        $wnd.parent.postMessage("show-ide", "*");
+    }-*/;
 
     /**
      * Handles any of initialization errors.
@@ -223,6 +239,7 @@ public class BootstrapController {
     private native void initializationFailed(String reason) /*-{
         try {
             $wnd.IDE.eventHandlers.initializationFailed(reason);
+            this.@org.eclipse.che.ide.client.BootstrapController::notifyShowIDE()();
         } catch (e) {
             console.log(e.message);
         }

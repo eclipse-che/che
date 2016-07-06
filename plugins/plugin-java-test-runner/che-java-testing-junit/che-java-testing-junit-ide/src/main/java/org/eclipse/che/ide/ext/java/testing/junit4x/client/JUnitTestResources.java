@@ -15,10 +15,10 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 public interface JUnitTestResources extends ClientBundle {
 
-    @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test.svg")
+    @Source("org/eclipse/che/ide/ext/java/testing/core/client/svg/test.svg")
     SVGResource testIcon();
 
-    @Source("org/eclipse/che/ide/ext/java/testing/client/svg/test_all.svg")
+    @Source("org/eclipse/che/ide/ext/java/testing/core/client/svg/test_all.svg")
     SVGResource testAllIcon();
 
 }

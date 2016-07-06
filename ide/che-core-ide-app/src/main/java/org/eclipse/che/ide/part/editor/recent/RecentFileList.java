@@ -11,14 +11,14 @@
 package org.eclipse.che.ide.part.editor.recent;
 
 import org.eclipse.che.ide.api.recent.RecentList;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.api.resources.File;
 
 /**
  * Extension for the recent list which process recent file lists.
  *
  * @author Vlad Zhukovskiy
  */
-public interface RecentFileList extends RecentList<FileReferenceNode> {
+public interface RecentFileList extends RecentList<File> {
     /**
      * Return recent file list user dialog.
      *

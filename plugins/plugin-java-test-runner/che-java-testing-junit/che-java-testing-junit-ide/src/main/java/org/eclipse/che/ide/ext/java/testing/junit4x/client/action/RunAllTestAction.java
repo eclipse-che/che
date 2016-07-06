@@ -17,12 +17,16 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestServiceClient;
 import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestLocalizationConstant;
 import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestResources;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.TestResultPresenter;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
@@ -63,14 +67,15 @@ public class RunAllTestAction extends JavaEditorAction {
     public void actionPerformed(ActionEvent e) {
         final StatusNotification notification = new StatusNotification("Running Tests...", PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
-        final ProjectConfigDto project = appContext.getCurrentProject().getRootProject();
+
+        final Project project = appContext.getRootProject();
 
         Unmarshallable<TestResult> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(TestResult.class);
 
-        Map<String,String> parameters = new HashMap<>();
-        parameters.put("updateClasspath","true");
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("updateClasspath", "true");
 
-        service.run(project.getPath(),"junit",parameters,
+        service.run(project.getPath(), "junit", parameters,
                 new RequestCallback<TestResult>(unmarshaller) {
                     @Override
                     protected void onSuccess(TestResult result) {
@@ -96,6 +101,7 @@ public class RunAllTestAction extends JavaEditorAction {
                     }
                 }
         );
+
 //        presenter.handleResponse(null);
     }
 

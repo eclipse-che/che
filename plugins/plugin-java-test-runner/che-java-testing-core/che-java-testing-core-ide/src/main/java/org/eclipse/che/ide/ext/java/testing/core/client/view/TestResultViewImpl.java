@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.testing.core.client.view;
 
+import com.google.common.base.Optional;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -39,10 +40,13 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 //import org.eclipse.che.ide.extension.machine.client.MachineResources;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.TestClassNavigation;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.factory.TestResultNodeFactory;
@@ -52,7 +56,7 @@ import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.nodes.Te
 import org.eclipse.che.ide.ext.java.testing.core.shared.Failure;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
@@ -262,30 +266,36 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
 //        doc.setCursorPosition(new TextPosition(5, 0));
 //        Log.info(TestRunnerPresenter.class, file);
         lastWentLine = line;
-        String testSrcPath = appContext.getCurrentProject().getRootProject().getPath() + "/src/test/java/";
+
+        final Project project = appContext.getRootProject();
+
+
+        String testSrcPath = project.getPath() + "/src/test/java/";
 
         Log.info(TestResultViewImpl.class, "hi");
         Log.info(TestResultViewImpl.class, testSrcPath + packagePath);
-        projectExplorer.getNodeByPath(new HasStorablePath.StorablePath(testSrcPath + packagePath)).then(new Operation<Node>() {
+        appContext.getWorkspaceRoot().getFile(testSrcPath + packagePath).then(new Operation<Optional<File>>() {
             @Override
-            public void apply(final Node node) throws OperationException {
-                Log.info(TestResultViewImpl.class, node);
-                if (!(node instanceof FileReferenceNode)) {
-                    return;
-                }
-                eventBus.fireEvent(new FileEvent((VirtualFile) node, OPEN));
+            public void apply(Optional<File> file) throws OperationException {
+                if (file.isPresent()) {
+
+                    eventBus.fireEvent(new FileEvent(file.get(), OPEN));
+
+                    Log.info(TestResultViewImpl.class, file.get());
+
+                    eventBus.fireEvent(new FileEvent(file.get(), OPEN));
 //
 //                // // TODO: 6/8/16 find a way to get a call back
-                Timer t = new Timer() {
-                    @Override
-                    public void run() {
-                        EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-                        Document doc = ((TextEditor) editorPart).getDocument();
-                        doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
-                    }
-                };
-                t.schedule(500);
-
+                    Timer t = new Timer() {
+                        @Override
+                        public void run() {
+                            EditorPartPresenter editorPart = editorAgent.getActiveEditor();
+                            Document doc = ((TextEditor) editorPart).getDocument();
+                            doc.setCursorPosition(new TextPosition(lastWentLine - 1, 0));
+                        }
+                    };
+                    t.schedule(500);
+                }
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -293,5 +303,6 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
                 Log.info(TestResultViewImpl.class, error);
             }
         });
+
     }
 }

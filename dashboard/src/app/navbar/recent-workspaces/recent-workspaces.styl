@@ -1,0 +1,39 @@
+.recent-workspaces
+  $recent-workspaces-stopped-color = #9B9CA0
+  $recent-workspaces-notstopped-color = #C1C2C6
+
+  .navbar-subsection-item
+    height 19px
+    min-height 19px
+    line-height 19px
+
+    .md-button
+      height 19px !important
+      min-height 19px !important
+
+      .navbar-item
+        line-height 19px !important
+
+        .navbar-icon
+          font-size inherit !important
+          height 19px !important
+          line-height 19px !important
+
+          .spinner
+            height 19px
+
+  .workspace-status-indicator .workspace-status-stopped
+    color $recent-workspaces-stopped-color
+    text-shadow none
+
+  .md-button span.recent-workspaces-notstopped-workspace
+    color $recent-workspaces-notstopped-color
+
+  .md-button span.recent-workspaces-stopped-workspace
+    font-style italic
+    padding-right 2px
+    color $recent-workspaces-stopped-color
+
+.recent-workspaces-menu.navbar-dropdown-menu
+  width 140px
+  min-width 140px

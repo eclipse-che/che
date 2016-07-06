@@ -19,7 +19,12 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.preferences.PreferencesPresenter;
 
-/** @author Evgen Vidolob */
+/**
+ * Show preferences action.
+ *
+ * @author Evgen Vidolob
+ * @author Vlad Zhukovskyi
+ **/
 @Singleton
 public class ShowPreferencesAction extends Action {
 
@@ -42,11 +47,6 @@ public class ShowPreferencesAction extends Action {
 
     @Override
     public void update(ActionEvent e) {
-        e.getPresentation().setVisible(true);
-        if ((appContext.getCurrentProject() == null && !appContext.getCurrentUser().isUserPermanent())) {
-            e.getPresentation().setEnabled(false);
-        } else {
-            e.getPresentation().setEnabled(true);
-        }
+        e.getPresentation().setEnabledAndVisible(true);
     }
 }

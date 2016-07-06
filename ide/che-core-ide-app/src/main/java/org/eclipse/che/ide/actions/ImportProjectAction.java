@@ -17,12 +17,11 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.projectimport.wizard.presenter.ImportProjectWizardPresenter;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -35,19 +34,16 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class ImportProjectAction extends AbstractPerspectiveAction {
 
     private final ImportProjectWizardPresenter presenter;
-    private final AppContext                   appContext;
 
     @Inject
     public ImportProjectAction(ImportProjectWizardPresenter presenter,
                                CoreLocalizationConstant locale,
-                               Resources resources,
-                               AppContext appContext) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), locale.importProjectFromLocationName(),
+                               Resources resources) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID), locale.importProjectFromLocationName(),
               locale.importProjectFromLocationDescription(),
               null,
               resources.importProjectFromLocation());
         this.presenter = presenter;
-        this.appContext = appContext;
     }
 
     /** {@inheritDoc} */
@@ -59,8 +55,6 @@ public class ImportProjectAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        if (appContext.getCurrentProject() == null) {
-            event.getPresentation().setEnabled(appContext.getCurrentUser().isUserPermanent());
-        }
+        event.getPresentation().setEnabledAndVisible(true);
     }
 }

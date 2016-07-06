@@ -19,15 +19,15 @@ public interface NotificationListener {
     /**
      * Perform operation when user clicks on the notification.
      */
-    void onClick();
+    void onClick(Notification notification);
 
     /**
      * Perform operation when user double clicks on the notification.
      */
-    void onDoubleClick();
+    void onDoubleClick(Notification notification);
 
     /**
      * Perform operation when user closes the notification.
      */
-    void onClose();
+    void onClose(Notification notification);
 }

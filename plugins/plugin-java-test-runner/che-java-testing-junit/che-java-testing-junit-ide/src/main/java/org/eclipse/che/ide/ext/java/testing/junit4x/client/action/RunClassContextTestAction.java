@@ -21,18 +21,22 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.project.node.resource.SupportRename;
+//import org.eclipse.che.ide.api.project.node.resource.SupportRename;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
+//import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
 import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestServiceClient;
 import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestLocalizationConstant;
 import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestResources;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.TestResultPresenter;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
+import org.eclipse.che.ide.resources.tree.FileNode;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
@@ -84,15 +88,15 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
 
         final Selection<?> selection = selectionAgent.getSelection();
         final Object possibleNode = selection.getHeadElement();
+        Log.info(TestResultPresenter.class, possibleNode.toString());
+        if (possibleNode instanceof FileNode) {
+            VirtualFile file = ((FileNode) possibleNode).getData();
 
-        if (possibleNode instanceof JavaFileNode) {
-            JavaFileNode file = (JavaFileNode) possibleNode;
 
-
-            final ProjectConfigDto project = appContext.getCurrentProject().getRootProject();
+            final Project project = appContext.getRootProject();
 //        EditorPartPresenter editorPart = editorAgent.getActiveEditor();
 //        final VirtualFile file = editorPart.getEditorInput().getFile();
-            String fqn = JavaSourceFolderUtil.getFQNForFile(file);
+            String fqn = JavaUtil.resolveFQN(file);
             Unmarshallable<TestResult> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(TestResult.class);
 
             Map<String,String> parameters = new HashMap<>();
@@ -132,7 +136,7 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
-        if ((appContext.getCurrentProject() == null && !appContext.getCurrentUser().isUserPermanent())) {
+        if ((appContext.getRootProject() == null)) {
             e.getPresentation().setVisible(true);
             e.getPresentation().setEnabled(false);
             return;
@@ -153,7 +157,8 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
 
         final Object possibleNode = selection.getHeadElement();
 
-        boolean enable = possibleNode instanceof JavaFileNode;
+        boolean enable = possibleNode instanceof FileNode
+                && ((FileNode)possibleNode).getData().getExtension().equals("java");
 
         e.getPresentation().setEnabled(enable);
     }

@@ -13,7 +13,7 @@ package org.eclipse.che.api.factory.server.impl;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.shared.dto.Factory;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

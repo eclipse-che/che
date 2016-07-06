@@ -129,7 +129,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             md.put("config.cmd", Arrays.toString(config.getCmd()));
             md.put("config.volumes", String.valueOf(config.getVolumes()));
             md.put("config.cpuset", config.getCpuset());
-            md.put("config.entrypoint", config.getEntrypoint());
+            md.put("config.entrypoint", Arrays.toString(config.getEntrypoint()));
             md.put("config.exposedPorts", String.valueOf(config.getExposedPorts()));
             md.put("config.macAddress", config.getMacAddress());
             md.put("config.securityOpts", Arrays.toString(config.getSecurityOpts()));

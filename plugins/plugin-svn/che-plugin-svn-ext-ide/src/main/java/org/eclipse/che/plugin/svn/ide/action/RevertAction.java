@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.revert.RevertPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn revert" command.
@@ -29,13 +28,11 @@ public class RevertAction extends SubversionAction {
     private final RevertPresenter presenter;
 
     @Inject
-    public RevertAction(final RevertPresenter presenter,
-                        final AppContext appContext,
-                        final ProjectExplorerPresenter projectExplorerPresenter,
-                        final SubversionExtensionLocalizationConstants constants,
-                        final SubversionExtensionResources resources) {
-        super(constants.revertTitle(), constants.revertDescription(), resources.revert(), appContext,
-              constants, resources, projectExplorerPresenter);
+    public RevertAction(RevertPresenter presenter,
+                        AppContext appContext,
+                        SubversionExtensionLocalizationConstants constants,
+                        SubversionExtensionResources resources) {
+        super(constants.revertTitle(), constants.revertDescription(), resources.revert(), appContext, constants, resources);
 
         this.presenter = presenter;
     }
@@ -43,10 +40,5 @@ public class RevertAction extends SubversionAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         presenter.show();
-    }
-
-    @Override
-    protected boolean isSelectionRequired() {
-        return true;
     }
 }

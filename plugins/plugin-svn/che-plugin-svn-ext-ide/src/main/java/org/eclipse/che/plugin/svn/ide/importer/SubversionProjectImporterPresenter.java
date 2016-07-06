@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.shared.ImportParameterKeys;
@@ -30,7 +31,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  *
  * @author vzhukovskii@codenvy.com
  */
-public class SubversionProjectImporterPresenter extends AbstractWizardPage<ProjectConfigDto>
+public class SubversionProjectImporterPresenter extends AbstractWizardPage<MutableProjectConfig>
         implements SubversionProjectImporterView.ActionDelegate {
 
     // start with white space
@@ -44,8 +45,8 @@ public class SubversionProjectImporterPresenter extends AbstractWizardPage<Proje
     private boolean ignoreChanges;
 
     @Inject
-    public SubversionProjectImporterPresenter(final SubversionExtensionLocalizationConstants constants,
-                                              final SubversionProjectImporterView view) {
+    public SubversionProjectImporterPresenter(SubversionExtensionLocalizationConstants constants,
+                                              SubversionProjectImporterView view) {
         this.constants = constants;
         this.view = view;
         this.view.setDelegate(this);

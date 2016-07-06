@@ -4,9 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * <p>
+ *
  * Contributors:
- * Codenvy, S.A. - initial API and implementation
+ *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.testing.junit4x.server;
 
@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -37,20 +38,21 @@ import java.util.Map;
  */
 public class JUnit4TestRunner implements TestRunner {
 
-
+    private static final String JUNIT4X_RUNNER_CLASS = "org.junit.runner.JUnitCore";
+    private static final String JUNIT3X_RUNNER_CLASS = "junit.textui.TestRunner";
     String projectPath;
     ClassLoader projectClassLoader;
 
 
-    private TestResult run(String testClass) throws Exception {
+    private TestResult run4x(String testClass) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTest = Class.forName(testClass, true, classLoader);
 //        Result r = JUnitCore.runClasses(clsTest);
-        return runTestClasses(clsTest);
+        return run4xTestClasses(clsTest);
 
     }
 
-    private TestResult runAll() throws Exception {
+    private TestResult runAll4x() throws Exception {
         List<String> testClassNames = new ArrayList<>();
         Files.walk(Paths.get(projectPath, "target", "test-classes")).forEach(filePath -> {
             if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {
@@ -65,17 +67,17 @@ public class JUnit4TestRunner implements TestRunner {
         List<Class> testableClasses = new ArrayList<>();
         for (String className : testClassNames) {
             Class<?> clazz = Class.forName(className, false, projectClassLoader);
-            if (isTestable(clazz)) {
+            if (isTestable4x(clazz)) {
                 testableClasses.add(clazz);
             }
         }
 
-        return runTestClasses(testableClasses.toArray(new Class[testableClasses.size()]));
+        return run4xTestClasses(testableClasses.toArray(new Class[testableClasses.size()]));
 
     }
 
 
-    private boolean isTestable(Class<?> clazz) throws ClassNotFoundException {
+    private boolean isTestable4x(Class<?> clazz) throws ClassNotFoundException {
         for (Method method : clazz.getDeclaredMethods()) {
             for (Annotation annotation : method.getAnnotations()) {
                 if (annotation.annotationType().getName().equals("org.junit.Test")) {
@@ -87,7 +89,7 @@ public class JUnit4TestRunner implements TestRunner {
     }
 
 
-    private TestResult runTestClasses(Class<?>... classes) throws Exception {
+    private TestResult run4xTestClasses(Class<?>... classes) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsJUnitCore = Class.forName("org.junit.runner.JUnitCore", true, classLoader);
         Class<?> clsResult = Class.forName("org.junit.runner.Result", true, classLoader);
@@ -149,6 +151,127 @@ public class JUnit4TestRunner implements TestRunner {
         return dtoResult;
     }
 
+
+
+
+
+    private TestResult run3x(String testClass) throws Exception {
+        ClassLoader classLoader = projectClassLoader;
+        Class<?> clsTest = Class.forName(testClass, true, classLoader);
+//        Result r = JUnitCore.runClasses(clsTest);
+        return run3xTestClasses(clsTest);
+
+    }
+
+    private TestResult runAll3x() throws Exception {
+        List<String> testClassNames = new ArrayList<>();
+        Files.walk(Paths.get(projectPath, "target", "test-classes")).forEach(filePath -> {
+            if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {
+                String path = Paths.get(projectPath, "target", "test-classes").relativize(filePath).toString();
+                String className = path.replace('/', '.');
+                className = className.replace('\\', '.');
+                className = className.substring(0, className.length() - 6);
+                testClassNames.add(className);
+            }
+        });
+
+        List<Class> testableClasses = new ArrayList<>();
+        for (String className : testClassNames) {
+            Class<?> clazz = Class.forName(className, false, projectClassLoader);
+            if (isTestable3x(clazz)) {
+                testableClasses.add(clazz);
+            }
+        }
+
+        return run3xTestClasses(testableClasses.toArray(new Class[testableClasses.size()]));
+
+    }
+
+
+    private boolean isTestable3x(Class<?> clazz) throws ClassNotFoundException {
+
+        Class<?> superClass = Class.forName("junit.framework.TestCase", true, projectClassLoader);
+        return superClass.isAssignableFrom(clazz);
+    }
+
+
+    private TestResult run3xTestClasses(Class<?>... classes) throws Exception {
+
+
+        ClassLoader classLoader = projectClassLoader;
+        Class<?> clsTestSuite = Class.forName("junit.framework.TestSuite", true, classLoader);
+
+        Class<?> clsTestResult = Class.forName("junit.framework.TestResult", true, classLoader);
+        Class<?> clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
+        Class<?> clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
+        Class<?> clsFailure = Class.forName("junit.framework.TestFailure", true, classLoader);
+
+        Object testSuite = clsTestSuite.newInstance();
+        Object testResult = clsTestResult.newInstance();
+
+        for(Class testClass : classes){
+            clsTestSuite.getMethod("addTestSuite", Class.class)
+                    .invoke(testSuite, testClass);
+        }
+
+
+        clsTestSuite.getMethod("run", clsTestResult)
+                .invoke(testSuite, testResult);
+
+        JUnitTestResult dtoResult = DtoFactory.getInstance().createDto(JUnitTestResult.class);
+
+
+
+        boolean isSuccess = (Boolean) clsTestResult.getMethod("wasSuccessful").invoke(testResult);
+        Enumeration failures = (Enumeration) clsTestResult.getMethod("failures").invoke(testResult);
+        List<Failure> jUnitFailures = new ArrayList<Failure>();
+
+        while(failures.hasMoreElements()){
+            Failure dtoFailure = DtoFactory.getInstance().createDto(Failure.class);
+
+            Object failure =  failures.nextElement();
+            String message = (String) clsFailure.getMethod("exceptionMessage").invoke(failure);
+            String trace = (String) clsFailure.getMethod("trace").invoke(failure);
+
+            Object failClassObject = clsFailure.getMethod("failedTest").invoke(failure);
+            String failClassName = failClassObject.getClass().getName();
+
+
+            Object exception = clsFailure.getMethod("thrownException").invoke(failure);
+            Object stackTrace = clsThrowable.getMethod("getStackTrace").invoke(exception);
+
+            String failMethod = "";
+            Integer failLine = null;
+            if (stackTrace.getClass().isArray()) {
+                int length = Array.getLength(stackTrace);
+                for (int i = 0; i < length; i ++) {
+                    Object arrayElement = Array.get(stackTrace, i);
+                    String failClass = (String) clsStackTraceElement.getMethod("getClassName").invoke(arrayElement);
+                    if(failClass.equals(failClassName)) {
+                        failMethod = (String) clsStackTraceElement.getMethod("getMethodName").invoke(arrayElement);
+                        failLine = (Integer) clsStackTraceElement.getMethod("getLineNumber").invoke(arrayElement);
+                        break;
+                    }
+                }
+            }
+            dtoFailure.setFailingClass(failClassName);
+            dtoFailure.setFailingMethod(failMethod);
+            dtoFailure.setFailingLine(failLine);
+            dtoFailure.setMessage(message);
+            dtoFailure.setTrace(trace);
+
+            jUnitFailures.add(dtoFailure);
+
+        }
+
+        dtoResult.setTestFramework("JUnit3x");
+        dtoResult.setSuccess(isSuccess);
+        dtoResult.setFailureCount(jUnitFailures.size());
+        dtoResult.setFailures(jUnitFailures);
+        dtoResult.setFrameworkVersion("3.x");
+        return dtoResult;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -159,16 +282,31 @@ public class JUnit4TestRunner implements TestRunner {
         boolean runClass = Boolean.valueOf(testParameters.get("runClass"));
         projectClassLoader = classpathProvider.getClassLoader(projectPath, updateClasspath);
         TestResult a = null;
+
         try {
+            Class.forName(JUNIT4X_RUNNER_CLASS, true, projectClassLoader);
             if (runClass) {
                 String fqn = testParameters.get("fqn");
-                a = run(fqn);
+                a = run4x(fqn);
             } else {
-                a = runAll();
+                a = runAll4x();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            return a;
+        } catch (Exception ignored) {
         }
+
+        try {
+            Class.forName(JUNIT3X_RUNNER_CLASS, true, projectClassLoader);
+            if (runClass) {
+                String fqn = testParameters.get("fqn");
+                a = run3x(fqn);
+            } else {
+                a = runAll3x();
+            }
+        } catch (Exception ignored) {
+        }
+
+
         return a;
     }
 

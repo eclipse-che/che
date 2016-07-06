@@ -11,9 +11,9 @@
 package org.eclipse.che.ide.projectimport.zip;
 
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.util.NameUtils;
 
@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * @author Roman Nikitenko
  */
-public class ZipImporterPagePresenter extends AbstractWizardPage<ProjectConfigDto> implements ZipImporterPageView.ActionDelegate {
+public class ZipImporterPagePresenter extends AbstractWizardPage<MutableProjectConfig> implements ZipImporterPageView.ActionDelegate {
 
     private static final String SKIP_FIRST_LEVEL_PARAM_NAME = "skipFirstLevel";
 
@@ -47,7 +47,7 @@ public class ZipImporterPagePresenter extends AbstractWizardPage<ProjectConfigDt
     }
 
     @Override
-    public void init(ProjectConfigDto dataObject) {
+    public void init(MutableProjectConfig dataObject) {
         super.init(dataObject);
 
         setImportParameterValue(SKIP_FIRST_LEVEL_PARAM_NAME, String.valueOf(true));

@@ -39,9 +39,18 @@ public class PutResourceParams {
      * @throws NullPointerException
      *         if {@code container} or {@code targetPath} is null
      */
+    @Deprecated
     public static PutResourceParams create(@NotNull String container, @NotNull String targetPath) {
         return new PutResourceParams().withContainer(container)
                                       .withTargetPath(targetPath);
+    }
+
+    public static PutResourceParams create(@NotNull String container,
+                                           @NotNull String targetPath,
+                                           @NotNull InputStream sourceStream) {
+        return new PutResourceParams().withContainer(container)
+                                      .withTargetPath(targetPath)
+                                      .withSourceStream(sourceStream);
     }
 
     private PutResourceParams() {}
@@ -84,8 +93,11 @@ public class PutResourceParams {
      *         stream of files from source container, must be obtained from another container
      *          using {@link org.eclipse.che.plugin.docker.client.DockerConnector#getResource(GetResourceParams)}
      * @return this params instance
+     * @throws NullPointerException
+     *         if {@code sourceStream} is null
      */
-    public PutResourceParams withSourceStream(InputStream sourceStream) {
+    public PutResourceParams withSourceStream(@NotNull InputStream sourceStream) {
+        requireNonNull(sourceStream);
         this.sourceStream = sourceStream;
         return this;
     }
@@ -120,19 +132,37 @@ public class PutResourceParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PutResourceParams that = (PutResourceParams)o;
-        return Objects.equals(container, that.container) &&
-               Objects.equals(targetPath, that.targetPath) &&
-               Objects.equals(sourceStream, that.sourceStream) &&
-               Objects.equals(noOverwriteDirNonDir, that.noOverwriteDirNonDir);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PutResourceParams)) {
+            return false;
+        }
+        final PutResourceParams that = (PutResourceParams)obj;
+        return Objects.equals(container, that.container)
+               && Objects.equals(targetPath, that.targetPath)
+               && Objects.equals(sourceStream, that.sourceStream)
+               && Objects.equals(noOverwriteDirNonDir, that.noOverwriteDirNonDir);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(container, targetPath, sourceStream, noOverwriteDirNonDir);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(container);
+        hash = 31 * hash + Objects.hashCode(targetPath);
+        hash = 31 * hash + Objects.hashCode(sourceStream);
+        hash = 31 * hash + Objects.hashCode(noOverwriteDirNonDir);
+        return hash;
     }
 
+    @Override
+    public String toString() {
+        return "PutResourceParams{" +
+               "container='" + container + '\'' +
+               ", targetPath='" + targetPath + '\'' +
+               ", sourceStream=" + sourceStream +
+               ", noOverwriteDirNonDir=" + noOverwriteDirNonDir +
+               '}';
+    }
 }

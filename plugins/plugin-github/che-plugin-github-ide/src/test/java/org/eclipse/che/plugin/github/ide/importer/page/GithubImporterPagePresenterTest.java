@@ -20,7 +20,7 @@ import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.user.UserServiceClient;
-import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
+import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -28,6 +28,7 @@ import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -91,37 +92,37 @@ public class GithubImporterPagePresenterTest {
     @Mock
     private DtoFactory                      dtoFactory;
     @Mock
-    private GithubImporterPageView          view;
+    private GithubImporterPageView                    view;
     @Mock
-    private UserServiceClient               userServiceClient;
+    private UserServiceClient                         userServiceClient;
     @Mock
-    private GitHubClientService             gitHubClientService;
+    private GitHubClientService                       gitHubClientService;
     @Mock
-    private DtoUnmarshallerFactory          dtoUnmarshallerFactory;
+    private DtoUnmarshallerFactory                    dtoUnmarshallerFactory;
     @Mock
-    private NotificationManager             notificationManager;
+    private NotificationManager                       notificationManager;
     @Mock
-    private GitHubLocalizationConstant      locale;
+    private GitHubLocalizationConstant                locale;
     @Mock
-    private ProjectConfigDto                dataObject;
+    private MutableProjectConfig                      dataObject;
     @Mock
-    private SourceStorageDto                source;
+    private MutableProjectConfig.MutableSourceStorage source;
     @Mock
-    private Map<String, String>             parameters;
+    private Map<String, String>                       parameters;
     @Mock
-    private Promise<GitHubUser>             gitHubUserPromise;
+    private Promise<GitHubUser>                       gitHubUserPromise;
     @Mock
-    private Promise<List<GitHubUser>>       gitHubOrgsPromise;
+    private Promise<List<GitHubUser>>                 gitHubOrgsPromise;
     @Mock
-    private Promise<List<GitHubRepository>> gitHubReposPromise;
+    private Promise<List<GitHubRepository>>           gitHubReposPromise;
     @Mock
-    private JsArrayMixed                    jsArrayMixed;
+    private JsArrayMixed                              jsArrayMixed;
     @Mock
-    private GitHubUser                      gitHubUser;
+    private GitHubUser                                gitHubUser;
     @Mock
-    private PromiseError                    promiseError;
+    private PromiseError                              promiseError;
     @Mock
-    private Response                        response;
+    private Response                                  response;
     @Mock
     private OAuth2Authenticator             gitHubAuthenticator;
     @Mock
@@ -184,7 +185,6 @@ public class GithubImporterPagePresenterTest {
         verify(gitHubClientService).getUserInfo();
         verify(gitHubClientService).getOrganizations();
 
-        verify(notificationManager, never()).notify(anyString(), any(ProjectConfigDto.class));
         verify(view).setLoaderVisibility(eq(true));
         verify(view).setInputsEnableState(eq(false));
         verify(view).setLoaderVisibility(eq(false));
@@ -240,7 +240,7 @@ public class GithubImporterPagePresenterTest {
         String incorrectUrl = " https://github.com/codenvy/ide.git";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(incorrectUrl);
+        presenter.onProjectUrlChanged(incorrectUrl);
 
         verify(view).markURLInvalid();
         verify(view).setURLErrorMessage(eq(locale.importProjectMessageStartWithWhiteSpace()));
@@ -255,7 +255,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "host.xz:path/to/repo.git";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -265,7 +265,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "git@hostname.com:projectName.git";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -276,7 +276,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "ssh://host.com/some/path";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -287,7 +287,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "ssh://host.com:port/some/path";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -298,7 +298,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "git://host.com/user/repo";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -309,7 +309,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "user@host.com:login/repo";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -320,7 +320,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "ssh://user@host.com/some/path";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verifyInvocationsForCorrectUrl(correctUrl);
     }
@@ -330,7 +330,7 @@ public class GithubImporterPagePresenterTest {
         String correctUrl = "htps://github.com/codenvy/ide.git";
         when(view.getProjectName()).thenReturn("");
 
-        presenter.projectUrlChanged(correctUrl);
+        presenter.onProjectUrlChanged(correctUrl);
 
         verify(view).markURLInvalid();
         verify(view).setURLErrorMessage(eq(locale.importProjectMessageProtocolIncorrect()));
@@ -344,7 +344,7 @@ public class GithubImporterPagePresenterTest {
         String correctName = "angularjs";
         when(view.getProjectName()).thenReturn(correctName);
 
-        presenter.projectNameChanged(correctName);
+        presenter.onProjectNameChanged(correctName);
 
         verify(dataObject).setName(eq(correctName));
         verify(view).markNameValid();
@@ -357,7 +357,7 @@ public class GithubImporterPagePresenterTest {
         String correctName = "Test.project..ForCodenvy";
         when(view.getProjectName()).thenReturn(correctName);
 
-        presenter.projectNameChanged(correctName);
+        presenter.onProjectNameChanged(correctName);
 
         verify(dataObject).setName(eq(correctName));
         verify(view).markNameValid();
@@ -370,7 +370,7 @@ public class GithubImporterPagePresenterTest {
         String emptyName = "";
         when(view.getProjectName()).thenReturn(emptyName);
 
-        presenter.projectNameChanged(emptyName);
+        presenter.onProjectNameChanged(emptyName);
 
         verify(dataObject).setName(eq(emptyName));
         verify(updateDelegate).updateControls();
@@ -381,7 +381,7 @@ public class GithubImporterPagePresenterTest {
         String incorrectName = "angularjs+";
         when(view.getProjectName()).thenReturn(incorrectName);
 
-        presenter.projectNameChanged(incorrectName);
+        presenter.onProjectNameChanged(incorrectName);
 
         verify(dataObject).setName(eq(incorrectName));
         verify(view).markNameInvalid();
@@ -391,7 +391,7 @@ public class GithubImporterPagePresenterTest {
     @Test
     public void projectDescriptionChangedTest() {
         String description = "description";
-        presenter.projectDescriptionChanged(description);
+        presenter.onProjectDescriptionChanged(description);
 
         verify(dataObject).setDescription(eq(description));
     }
@@ -402,12 +402,12 @@ public class GithubImporterPagePresenterTest {
         when(source.getParameters()).thenReturn(parameters);
         when(view.getDirectoryName()).thenReturn("directory");
 
-        presenter.keepDirectorySelected(true);
+        presenter.onKeepDirectorySelected(true);
 
         assertEquals("directory", parameters.get("keepDir"));
-        verify(dataObject).withType("blank");
+        verify(dataObject).setType("blank");
         verify(view).highlightDirectoryNameField(eq(false));
-        verify(view).focusDirectoryNameFiend();
+        verify(view).focusDirectoryNameField();
     }
 
     @Test
@@ -416,11 +416,33 @@ public class GithubImporterPagePresenterTest {
         parameters.put("keepDir", "directory");
         when(source.getParameters()).thenReturn(parameters);
 
-        presenter.keepDirectorySelected(false);
+        presenter.onKeepDirectorySelected(false);
 
         assertTrue(parameters.isEmpty());
-        verify(dataObject).withType(eq(null));
+        verify(dataObject).setType(eq(null));
         verify(view).highlightDirectoryNameField(eq(false));
+    }
+
+    @Test
+    public void recursiveCloneSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getDirectoryName()).thenReturn("recursive");
+
+        presenter.onRecursiveSelected(true);
+
+        assertTrue(parameters.containsKey("recursive"));
+    }
+
+    @Test
+    public void recursiveCloneUnSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("recursive", null);
+        when(source.getParameters()).thenReturn(parameters);
+
+        presenter.onRecursiveSelected(false);
+
+        assertTrue(parameters.isEmpty());
     }
 
     @Test
@@ -430,11 +452,11 @@ public class GithubImporterPagePresenterTest {
         when(view.getDirectoryName()).thenReturn("directory");
         when(view.keepDirectory()).thenReturn(true);
 
-        presenter.keepDirectoryNameChanged("directory");
+        presenter.onKeepDirectoryNameChanged("directory");
 
         assertEquals("directory", parameters.get("keepDir"));
         verify(dataObject, never()).setPath(any());
-        verify(dataObject).withType(eq("blank"));
+        verify(dataObject).setType(eq("blank"));
         verify(view).highlightDirectoryNameField(eq(false));
     }
 
@@ -445,23 +467,46 @@ public class GithubImporterPagePresenterTest {
         when(source.getParameters()).thenReturn(parameters);
         when(view.keepDirectory()).thenReturn(false);
 
-        presenter.keepDirectoryNameChanged("directory");
+        presenter.onKeepDirectoryNameChanged("directory");
 
         assertTrue(parameters.isEmpty());
         verify(dataObject, never()).setPath(any());
-        verify(dataObject).withType(eq(null));
+        verify(dataObject).setType(eq(null));
         verify(view).highlightDirectoryNameField(eq(false));
+    }
+
+    @Test
+    public void branchSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        when(source.getParameters()).thenReturn(parameters);
+        when(view.getBranchName()).thenReturn("someBranch");
+
+        presenter.onBranchCheckBoxSelected(true);
+        verify(view).enableBranchNameField(true);
+        verify(view).focusBranchNameField();
+        assertEquals("someBranch", parameters.get("branch"));
+    }
+
+    @Test
+    public void branchNotSelectedTest() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("branch", "someBranch");
+        when(source.getParameters()).thenReturn(parameters);
+
+        presenter.onBranchCheckBoxSelected(false);
+        verify(view).enableBranchNameField(false);
+        assertTrue(parameters.isEmpty());
     }
 
     @Test
     public void onLoadRepoClickedWhenAuthorizeIsFailed() throws Exception {
         String userId = "userId";
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDescriptor profile = mock(ProfileDescriptor.class);
+        ProfileDto profile = mock(ProfileDto.class);
 
         when(appContext.getCurrentUser()).thenReturn(user);
         when(user.getProfile()).thenReturn(profile);
-        when(profile.getId()).thenReturn(userId);
+        when(profile.getUserId()).thenReturn(userId);
 
 
         final Throwable exception = mock(UnauthorizedException.class);
@@ -510,12 +555,12 @@ public class GithubImporterPagePresenterTest {
         final Throwable exception = mock(UnauthorizedException.class);
         String userId = "userId";
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDescriptor profile = mock(ProfileDescriptor.class);
+        ProfileDto profile = mock(ProfileDto.class);
         doReturn(exception).when(promiseError).getCause();
 
         when(appContext.getCurrentUser()).thenReturn(user);
         when(user.getProfile()).thenReturn(profile);
-        when(profile.getId()).thenReturn(userId);
+        when(profile.getUserId()).thenReturn(userId);
 
         presenter.onLoadRepoClicked();
 

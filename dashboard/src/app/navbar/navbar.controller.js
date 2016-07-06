@@ -16,28 +16,21 @@ export class CheNavBarCtrl {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI) {
+  constructor($mdSidenav, $scope, $location, $route, cheAPI, $window) {
     this.mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
     this.$route = $route;
     this.cheAPI = cheAPI;
+    this.$window = $window;
     this.links = [{href: '#/create-workspace', name: 'New Workspace'}];
 
-    this.displayLoginItem = userDashboardConfig.developmentMode;
-
-    let promiseAdminService = this.cheAPI.getAdminService().fetchServices();
-    promiseAdminService.then(() => {
-      this.isAdminServiceAvailable = cheAPI.getAdminService().isAdminServiceAvailable();
-      this.isAdminPluginServiceAvailable = cheAPI.getAdminService().isServiceAvailable(cheAPI.getAdminPlugins().getPluginsServicePath());
-    });
-
     this.profile = cheAPI.getProfile().getProfile();
-    if (this.profile.attributes) {
-      this.email = this.profile.attributes.email;
+    if (this.profile.email) {
+      this.email = this.profile.email;
     } else {
       this.profile.$promise.then(() => {
-        this.email = this.profile.attributes.email ? this.profile.attributes.email : 'N/A ';
+        this.email = this.profile.email ? this.profile.email : 'N/A ';
       }, () => {
         this.email = 'N/A ';
       });
@@ -47,30 +40,16 @@ export class CheNavBarCtrl {
       dashboard: '#/',
       projects: '#/projects',
       workspaces: '#/workspaces',
-      factories: '#/factories',
-
-      // subsection
+      administration: '#/administration',
+      // subsections
       plugins: '#/admin/plugins',
-
-      // subsection
-      account: '#/account',
-      team: '#/team',
-      subscriptions: '#/subscriptions',
-      billing: '#/billing'
+      account: '#/account'
     };
 
-    // clear highlighting of menu item from navbar
-    // if route is not part of navbar
-    // or restore highlighting otherwise
+    // highlight navbar menu item
     $scope.$on('$locationChangeStart', () => {
-      let path = '#' + $location.path(),
-        match = Object.keys(this.menuItemUrl).some(item => this.menuItemUrl[item] === path);
-      if (match) {
-        $scope.$broadcast('navbar-selected:restore', path);
-      }
-      else {
-        $scope.$broadcast('navbar-selected:clear');
-      }
+      let path = '#' + $location.path();
+      $scope.$broadcast('navbar-selected:set', path);
     });
 
     cheAPI.cheWorkspace.fetchWorkspaces();
@@ -93,5 +72,13 @@ export class CheNavBarCtrl {
 
   getWorkspacesNumber() {
     return this.cheAPI.cheWorkspace.getWorkspaces().length;
+  }
+
+  getProjectsNumber() {
+    return this.cheAPI.cheWorkspace.getAllProjects().length;
+  }
+
+  openLinkInNewTab(url) {
+    this.$window.open(url, '_blank');
   }
 }

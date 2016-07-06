@@ -22,7 +22,7 @@ export class ListWorkspacesCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $q, $log, $mdDialog, cheNotification, cheWorkspace) {
+  constructor(cheAPI, $q, $log, $mdDialog, cheNotification, cheWorkspace, $rootScope) {
     this.cheAPI = cheAPI;
     this.$q = $q;
     this.$log = $log;
@@ -71,6 +71,8 @@ export class ListWorkspacesCtrl {
         }
       }
     ];
+
+    $rootScope.showIDE = false;
   }
 
   //Fetch current user's workspaces (where he is a member):

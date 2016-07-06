@@ -26,11 +26,13 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration.BRIDGE_LINUX_INTERFACE_NAME;
+import static org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration.DEFAULT_LINUX_INTERFACE_NAME;
 import static org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration.DEFAULT_DOCKER_MACHINE_DOCKER_HOST_IP;
 import static org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration.DEFAULT_LINUX_DOCKER_HOST_IP;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
@@ -185,18 +187,42 @@ public class DockerConnectorConfigurationTest {
     }
 
     /**
-     * Check if docker host ip from container is DEFAULT_LINUX_DOCKER_HOST_IP when bridge is not defined
+     * Check if Che server IP from container is DEFAULT_LINUX_DOCKER_HOST_IP
+     * when bridge docker0 and interface eth0 are not defined
      */
     @Test
-    public void testLinuxDefaultDockerHostWithoutBridge() throws Exception {
+    public void testLinuxDefaultDockerHostWithoutInterfaces() throws Exception {
         Map<String, String> env = new HashMap<>();
         NetworkFinder networkFinder = Mockito.mock(NetworkFinder.class);
         doReturn(Optional.empty()).when(networkFinder).getIPAddress(BRIDGE_LINUX_INTERFACE_NAME);
+        doReturn(Optional.empty()).when(networkFinder).getIPAddress(DEFAULT_LINUX_INTERFACE_NAME);
         DockerConnectorConfiguration dockerConnectorConfiguration = new DockerConnectorConfiguration(null, null, null, networkFinder);
 
         String ip = dockerConnectorConfiguration.getDockerHostIp(true, env);
         assertEquals(ip, DEFAULT_LINUX_DOCKER_HOST_IP);
         verify(networkFinder).getIPAddress(BRIDGE_LINUX_INTERFACE_NAME);
+        verify(networkFinder).getIPAddress(DEFAULT_LINUX_INTERFACE_NAME);
+    }
+
+
+    /**
+     * Check if Che server IP from container is eth0 default IP when bridge docker0 is not defined
+     */
+    @Test
+    public void testLinuxDefaultDockerHostWithEth0() throws Exception {
+        Map<String, String> env = new HashMap<>();
+        String eth0IpAddress = "172.17.0.2";
+        InetAddress eth0InetAddress = Mockito.mock(InetAddress.class);
+        doReturn(eth0IpAddress).when(eth0InetAddress).getHostAddress();
+        NetworkFinder networkFinder = Mockito.mock(NetworkFinder.class);
+        doReturn(Optional.empty()).when(networkFinder).getIPAddress(BRIDGE_LINUX_INTERFACE_NAME);
+        doReturn(Optional.of(eth0InetAddress)).when(networkFinder).getIPAddress(DEFAULT_LINUX_INTERFACE_NAME);
+        DockerConnectorConfiguration dockerConnectorConfiguration = new DockerConnectorConfiguration(null, null, null, networkFinder);
+
+        String ip = dockerConnectorConfiguration.getDockerHostIp(true, env);
+        assertEquals(ip, eth0IpAddress);
+        verify(networkFinder).getIPAddress(BRIDGE_LINUX_INTERFACE_NAME);
+        verify(networkFinder).getIPAddress(DEFAULT_LINUX_INTERFACE_NAME);
     }
 
 
@@ -206,16 +232,23 @@ public class DockerConnectorConfigurationTest {
     @Test
     public void testLinuxDefaultDockerHostWithBrige() throws Exception {
         Map<String, String> env = new HashMap<>();
-        String myCustomIpAddress = "123.231.133.10";
-        InetAddress inetAddress = Mockito.mock(InetAddress.class);
-        doReturn(myCustomIpAddress).when(inetAddress).getHostAddress();
         NetworkFinder networkFinder = Mockito.mock(NetworkFinder.class);
-        doReturn(Optional.of(inetAddress)).when(networkFinder).getIPAddress(BRIDGE_LINUX_INTERFACE_NAME);
+        // eth0
+        String eth0IpAddress = "172.17.0.2";
+        InetAddress eth0InetAddress = Mockito.mock(InetAddress.class);
+        doReturn(eth0IpAddress).when(eth0InetAddress).getHostAddress();
+        doReturn(Optional.of(eth0InetAddress)).when(networkFinder).getIPAddress(DEFAULT_LINUX_INTERFACE_NAME);
+        // docker0
+        String docker0IpAddress = "123.231.133.10";
+        InetAddress docker0InetAddress = Mockito.mock(InetAddress.class);
+        doReturn(docker0IpAddress).when(docker0InetAddress).getHostAddress();
+        doReturn(Optional.of(docker0InetAddress)).when(networkFinder).getIPAddress(BRIDGE_LINUX_INTERFACE_NAME);
         DockerConnectorConfiguration dockerConnectorConfiguration = new DockerConnectorConfiguration(null, null, null, networkFinder);
 
         String ip = dockerConnectorConfiguration.getDockerHostIp(true, env);
-        assertEquals(ip, myCustomIpAddress);
+        assertEquals(ip, docker0IpAddress);
         verify(networkFinder).getIPAddress(BRIDGE_LINUX_INTERFACE_NAME);
+        verify(networkFinder, never()).getIPAddress(DEFAULT_LINUX_INTERFACE_NAME);
     }
 
 

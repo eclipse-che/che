@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.remove.RemovePresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn rm" command.
@@ -29,13 +28,11 @@ public class RemoveAction extends SubversionAction {
     private final RemovePresenter presenter;
 
     @Inject
-    public RemoveAction(final AppContext appContext,
-                        final ProjectExplorerPresenter projectExplorerPresenter,
-                        final SubversionExtensionLocalizationConstants constants,
-                        final SubversionExtensionResources resources,
-                        final RemovePresenter presenter) {
-        super(constants.removeTitle(), constants.removeDescription(), resources.delete(), appContext,
-              constants, resources, projectExplorerPresenter);
+    public RemoveAction(AppContext appContext,
+                        SubversionExtensionLocalizationConstants constants,
+                        SubversionExtensionResources resources,
+                        RemovePresenter presenter) {
+        super(constants.removeTitle(), constants.removeDescription(), resources.delete(), appContext, constants, resources);
 
         this.presenter = presenter;
     }
@@ -44,10 +41,4 @@ public class RemoveAction extends SubversionAction {
     public void actionPerformed(final ActionEvent e) {
         presenter.showRemove();
     }
-
-    @Override
-    protected boolean isSelectionRequired() {
-        return true;
-    }
-
 }

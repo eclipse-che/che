@@ -35,7 +35,7 @@ import {CreateProjectPopup} from './create-project/popup/create-project-popup.di
 
 import {CreateProjectZip} from './create-project/zip/create-project-zip.directive';
 import {CreateProjectConfFile} from './create-project/config-file/create-project-conf-file.directive';
-import {ProjectDetailsCtrl} from './project-details/project-details.controller';
+import {ProjectDetailsController} from './project-details/project-details.controller';
 import {ProjectRepositoryConfig} from './project-details/repository/project-repository-config';
 import {CheProjectItem} from './list-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './list-projects/project-item/project-item.controller';
@@ -51,7 +51,7 @@ export class ProjectsConfig {
 
     register.controller('ListProjectsCtrl', ListProjectsCtrl);
 
-    register.controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
+    register.controller('ProjectDetailsController', ProjectDetailsController);
 
     register.controller('CreateProjectPopupCtrl', CreateProjectPopupCtrl);
     register.directive('createProjectPopup', CreateProjectPopup);
@@ -85,6 +85,7 @@ export class ProjectsConfig {
 
 
     let locationCreateProjectProvider = {
+      title: 'New Project',
       templateUrl: 'app/projects/create-project/create-project.html',
       controller: 'CreateProjectCtrl',
       controllerAs: 'createProjectCtrl'
@@ -93,14 +94,16 @@ export class ProjectsConfig {
     // config routes
     register.app.config(function ($routeProvider) {
       $routeProvider.accessWhen('/projects', {
+        title: 'Projects',
         templateUrl: 'app/projects/list-projects/list-projects.html',
         controller: 'ListProjectsCtrl',
         controllerAs: 'listProjectsCtrl'
       })
-        .accessWhen('/project/:workspaceId/:projectName', {
+        .accessWhen('/project/:namespace/:workspaceName/:projectName', {
+          title: (params) => {return params.workspaceName + ' | ' + params.projectName},
           templateUrl: 'app/projects/project-details/project-details.html',
-          controller: 'ProjectDetailsCtrl',
-          controllerAs: 'projectDetailsCtrl'
+          controller: 'ProjectDetailsController',
+          controllerAs: 'projectDetailsController'
         })
         .accessWhen('/create-project', locationCreateProjectProvider)
         .accessWhen('/create-project/:tabName', locationCreateProjectProvider);

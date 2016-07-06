@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.project.classpath;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -17,11 +19,12 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
@@ -35,6 +38,7 @@ import java.util.Set;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
 /**
  * Presenter for managing classpath.
@@ -86,11 +90,6 @@ public class ProjectClasspathPresenter implements ProjectClasspathView.ActionDel
             property.clearData();
         }
 
-        if ("maven".equals(appContext.getCurrentProject().getProjectConfig().getType())) {
-            view.hideWindow();
-            return;
-        }
-
         classpathResolver.updateClasspath().then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
@@ -138,13 +137,16 @@ public class ProjectClasspathPresenter implements ProjectClasspathView.ActionDel
 
     /** Show dialog. */
     public void show() {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
-            return;
-        }
 
-        String projectPath = currentProject.getProjectConfig().getPath();
-        classpathContainer.getClasspathEntries(projectPath).then(new Operation<List<ClasspathEntryDto>>() {
+        final Resource[] resources = appContext.getResources();
+
+        Preconditions.checkState(resources != null && resources.length == 1);
+
+        final Optional<Project> project = resources[0].getRelatedProject();
+
+        Preconditions.checkState(isJavaProject(project.get()));
+
+        classpathContainer.getClasspathEntries(project.get().getLocation().toString()).then(new Operation<List<ClasspathEntryDto>>() {
             @Override
             public void apply(List<ClasspathEntryDto> arg) throws OperationException {
                 classpathResolver.resolveClasspathEntries(arg);

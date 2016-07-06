@@ -14,14 +14,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.event.project.CurrentProjectChangedEvent;
-import org.eclipse.che.ide.api.event.project.CurrentProjectChangedHandler;
+import org.eclipse.che.ide.api.resources.Resource;
 
 import javax.validation.constraints.NotNull;
 
@@ -34,22 +32,22 @@ import javax.validation.constraints.NotNull;
  */
 @Singleton
 public class CurrentProjectPathProvider implements CommandPropertyValueProvider,
-                                                   CurrentProjectChangedHandler,
                                                    WsAgentStateHandler {
 
     private static final String KEY = "${current.project.path}";
 
-    private final AppContext appContext;
+    private final AppContext      appContext;
+    private final PromiseProvider promises;
 
     private String value;
 
     @Inject
-    public CurrentProjectPathProvider(EventBus eventBus, AppContext appContext) {
+    public CurrentProjectPathProvider(EventBus eventBus, AppContext appContext, PromiseProvider promises) {
         this.appContext = appContext;
+        this.promises = promises;
         value = "";
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
-        eventBus.addHandler(CurrentProjectChangedEvent.TYPE, this);
     }
 
     @NotNull
@@ -61,20 +59,20 @@ public class CurrentProjectPathProvider implements CommandPropertyValueProvider,
     @NotNull
     @Override
     public Promise<String> getValue() {
-        return Promises.resolve(value);
+        updateValue();
+
+        return promises.resolve(value);
     }
 
     private void updateValue() {
-        final CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
+        final Resource[] resources = appContext.getResources();
+
+        if (resources != null && resources.length == 1) {
+            value = appContext.getProjectsRoot().append(resources[0].getLocation()).toString();
             return;
         }
-        value = appContext.getProjectsRoot() + currentProject.getProjectConfig().getPath();
-    }
 
-    @Override
-    public void onCurrentProjectChanged(CurrentProjectChangedEvent event) {
-        updateValue();
+        value = "";
     }
 
     @Override

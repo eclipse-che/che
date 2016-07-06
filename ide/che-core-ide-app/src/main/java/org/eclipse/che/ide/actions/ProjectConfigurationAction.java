@@ -12,18 +12,23 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.ConfigureProjectEvent;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.projecttype.wizard.presenter.ProjectWizardPresenter;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -31,38 +36,58 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  *
  * @author Evgen Vidolob
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class ProjectConfigurationAction extends AbstractPerspectiveAction {
 
-    private final EventBus             eventBus;
-    private final AppContext           appContext;
+    private final AppContext             appContext;
+    private final ProjectWizardPresenter projectWizard;
 
     @Inject
     public ProjectConfigurationAction(AppContext appContext,
                                       CoreLocalizationConstant localization,
                                       Resources resources,
-                                      EventBus eventBus) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
+                                      ProjectWizardPresenter projectWizard) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID),
               localization.actionProjectConfigurationTitle(),
               localization.actionProjectConfigurationDescription(),
               null,
               resources.projectConfiguration());
-        this.eventBus = eventBus;
         this.appContext = appContext;
+        this.projectWizard = projectWizard;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (appContext.getCurrentProject() == null) {
-            return;
+        final Resource[] resources = appContext.getResources();
+
+        checkState(resources != null && resources.length == 1);
+
+        final Resource resource = resources[0];
+
+        checkState(resource instanceof Container);
+
+        if (resource.getResourceType() == PROJECT) {
+            final MutableProjectConfig config = new MutableProjectConfig((Project)resource);
+
+            projectWizard.show(config);
         }
-        eventBus.fireEvent(new ConfigureProjectEvent(appContext.getCurrentProject().getProjectConfig()));
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setVisible(true);
-        event.getPresentation().setEnabled(appContext.getCurrentProject() != null);
+        final Resource[] resources = appContext.getResources();
+
+        if (resources != null && resources.length == 1) {
+            final Resource resource = resources[0];
+
+            if (resource.getResourceType() == PROJECT) {
+                event.getPresentation().setEnabledAndVisible(true);
+                event.getPresentation().setText("Update Project Configuration...");
+            } else {
+                event.getPresentation().setEnabledAndVisible(false);
+            }
+        }
     }
 }

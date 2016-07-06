@@ -8,12 +8,16 @@
 #   Codenvy, S.A. - initial API and implementation
 
 # Set to "<proto>://<user>:<pass>@<host>:<port>"
-$http_proxy  = ""
-$https_proxy = ""
-$no_proxy    = "localhost,127.0.0.1"
-$che_version = "nightly"
-$ip          = "192.168.28.100"
-$port        = 8080
+$http_proxy    = ENV['HTTP_PROXY'] || ""
+$https_proxy   = ENV['HTTPS_PROXY'] || ""
+$no_proxy      = ENV['NO_PROXY'] || "localhost,127.0.0.1"
+$che_version   = ENV['CHE_VERSION'] || "latest"
+$ip            = ENV['CHE_IP'] || "192.168.28.100"
+$hostPort      = (ENV['CHE_PORT'] || 8080).to_i
+$containerPort = (ENV['CHE_CONTAINER_PORT'] || ($hostPort == -1 ? 8080 : $hostPort)).to_i
+$user_data     = ENV['CHE_DATA'] || "."
+
+$provisionProgress = ENV['PROVISION_PROGRESS'] || "basic"
 
 Vagrant.configure(2) do |config|
   puts ("ECLIPSE CHE: VAGRANT INSTALLER")
@@ -35,9 +39,15 @@ Vagrant.configure(2) do |config|
   config.vm.box = "boxcutter/centos72-docker"
   config.vm.box_download_insecure = true
   config.ssh.insert_key = false
-  config.vm.network :private_network, ip: $ip
-  config.vm.network "forwarded_port", guest: $port, host: $port
-  config.vm.synced_folder ".", "/home/user/che"
+  if $ip.to_s.downcase == "dhcp"
+    config.vm.network :private_network, type: "dhcp"
+  else
+    config.vm.network :private_network, ip: $ip
+  end
+  if $hostPort != -1
+    config.vm.network "forwarded_port", guest: $containerPort, host: $hostPort
+  end
+  config.vm.synced_folder $user_data, "/home/user/che"
   config.vm.define "che" do |che|
   end
 
@@ -46,13 +56,32 @@ Vagrant.configure(2) do |config|
     vb.name = "eclipse-che-vm"
   end
 
-  $script = <<-SHELL
+  $script = <<-'SHELL'
     HTTP_PROXY=$1
     HTTPS_PROXY=$2
     NO_PROXY=$3
     CHE_VERSION=$4
     IP=$5
     PORT=$6
+    PROVISION_PROGRESS=$7
+
+    if [ "${IP,,}" = "dhcp" ]; then
+       echo "----------------------------------------"
+       echo "ECLIPSE CHE: CHECKING DYNAMIC IP ADDRESS"
+       echo "----------------------------------------"
+       DEV=$(grep -l "VAGRANT-BEGIN" /etc/sysconfig/network-scripts/ifcfg-*|xargs grep "DEVICE="|sort|tail -1|cut -d "=" -f 2)
+       if [ -z "${DEV}" ]; then
+          >&2 echo "Unable to find DHCP network device"
+          exit 1
+       fi
+       IP=$(ip addr show dev ${DEV} | sed -r -e '/inet [0-9]/!d;s/^[[:space:]]*inet ([^[:space:]/]+).*$/\1/')
+       if [ -z "${IP}" ]; then
+          >&2 echo "Unable to find DHCP network ip"
+          exit 1
+       fi
+       echo "IP: ${IP}"
+       echo
+    fi
 
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
       echo "-------------------------------------"
@@ -72,16 +101,39 @@ Vagrant.configure(2) do |config|
       echo "HTTPS PROXY set to: $HTTPS_PROXY"
     fi
 
-    # Add the user in the VM to the docker group
+    function perform
+    {
+      local progress=$1
+      local command=$2
+      shift 2
+      
+      local pid=""
+      
+      case "$progress" in
+        extended)
+          # simulate tty environment to get full output of progress bars and percentages
+          printf "set timeout -1\nspawn %s\nexpect eof" "$command $*" | expect -f -
+          ;;
+        basic|*)
+          $command "$@" &>/dev/null &
+          pid=$!
+          while kill -0 "$pid" >/dev/null 2>&1; do
+            printf "#"
+            sleep 10
+          done
+          wait $pid # return pid's exit code
+          ;;
+      esac
+    }
+    
     echo "------------------------------------"
     echo "ECLIPSE CHE: UPGRADING DOCKER ENGINE"
     echo "------------------------------------"
-    echo 'y' | sudo yum update docker-engine &>/dev/null &
-    PROC_ID=$!
-    while kill -0 "$PROC_ID" >/dev/null 2>&1; do
-      printf "#"
-      sleep 10
-    done
+    if [ "$PROVISION_PROGRESS" = "extended" ]; then
+       # we sacrifice a few seconds of additional install time for much better progress afterwards
+       perform basic yum -y install expect
+    fi
+    perform $PROVISION_PROGRESS sudo yum -y update docker-engine
 
     echo $(docker --version)
  
@@ -111,13 +163,7 @@ Vagrant.configure(2) do |config|
     echo "-------------------------------------------------"
     echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE DOCKER IMAGE"
     echo "-------------------------------------------------"
-    docker pull codenvy/che:${CHE_VERSION} &>/dev/null &
-    PROC_ID=$!
- 
-    while kill -0 "$PROC_ID" >/dev/null 2>&1; do
-      printf "#"
-      sleep 10
-    done
+    perform $PROVISION_PROGRESS docker pull codenvy/che:${CHE_VERSION}
 
     echo "--------------------------------"
     echo "ECLIPSE CHE: BOOTING ECLIPSE CHE"
@@ -134,23 +180,35 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell" do |s| 
     s.inline = $script
-    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version, $ip, $port]
+    s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version, $ip, $containerPort, $provisionProgress]
   end
 
-  $script2 = <<-SHELL
+  $script2 = <<-'SHELL'
     IP=$1
     PORT=$2
+    MAPPED_PORT=$3
+
+    if [ "${IP,,}" = "dhcp" ]; then
+       DEV=$(grep -l "VAGRANT-BEGIN" /etc/sysconfig/network-scripts/ifcfg-*|xargs grep "DEVICE="|sort|tail -1|cut -d "=" -f 2)
+       IP=$(ip addr show dev ${DEV} | sed -r -e '/inet [0-9]/!d;s/^[[:space:]]*inet ([^[:space:]/]+).*$/\1/')
+    fi
+
+    rm -f /home/user/che/.che_url
+    rm -f /home/user/che/.che_host_port
+    CHE_URL="http://${IP}:${PORT}"
 
     # Test the default dashboard page to see when it returns a non-error value.
     # Che is active once it returns success        
     while [ true ]; do
       printf "#"
-      curl -v http://${IP}:${PORT}/dashboard &>/dev/null
+      curl -v ${CHE_URL}/dashboard &>/dev/null
       exitcode=$?
       if [ $exitcode == "0" ]; then
+        echo "${CHE_URL}" > /home/user/che/.che_url
+        echo "${MAPPED_PORT}" > /home/user/che/.che_host_port
         echo "---------------------------------------"
         echo "ECLIPSE CHE: BOOTED AND REACHABLE"
-        echo "ECLIPSE CHE: http://${IP}:${PORT}      "
+        echo "ECLIPSE CHE: ${CHE_URL}      "
         echo "---------------------------------------"
         exit 0             
       fi 
@@ -160,7 +218,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "shell", run: "always" do |s|
     s.inline = $script2
-    s.args = [$ip, $port]
+    s.args = [$ip, $containerPort, $hostPort]
   end
 
 end

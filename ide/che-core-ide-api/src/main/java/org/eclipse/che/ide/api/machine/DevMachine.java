@@ -12,10 +12,11 @@ package org.eclipse.che.ide.api.machine;
 
 import com.google.common.base.Strings;
 
+import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
+import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
@@ -32,17 +33,18 @@ import java.util.Map;
  */
 public class DevMachine {
 
-    private final MachineDto                    devMachineDescriptor;
+    private final Machine devMachineDescriptor;
+
     private final Map<String, DevMachineServer> servers;
     private final Map<String, String>           runtimeProperties;
     private final Map<String, String>           envVariables;
     private final List<Link>                    devMachineLinks;
 
-    public DevMachine(@NotNull MachineDto devMachineDescriptor) {
+    public DevMachine(@NotNull Machine devMachineDescriptor) {
         this.devMachineDescriptor = devMachineDescriptor;
-        this.devMachineLinks = devMachineDescriptor.getLinks();
+        this.devMachineLinks = devMachineDescriptor instanceof Hyperlinks ? ((Hyperlinks)devMachineDescriptor).getLinks() : null;
 
-        Map<String, ServerDto> serverDtoMap = devMachineDescriptor.getRuntime().getServers();
+        Map<String, ? extends Server> serverDtoMap = devMachineDescriptor.getRuntime().getServers();
         servers = new HashMap<>(serverDtoMap.size());
         for (String s : serverDtoMap.keySet()) {
             servers.put(s, new DevMachineServer(serverDtoMap.get(s)));
@@ -132,5 +134,16 @@ public class DevMachine {
 
     public List<Link> getDevMachineLinks() {
         return devMachineLinks;
+    }
+
+    /** Returns address (protocol://host:port) of the Workspace Agent. */
+    public String getAddress() {
+        final DevMachineServer server = getServer(Constants.WSAGENT_REFERENCE);
+        return server.getProtocol() + "://" + server.getAddress();
+    }
+
+    /** Returns {@link Machine descriptor} of the Workspace Agent. */
+    public Machine getDescriptor() {
+        return devMachineDescriptor;
     }
 }

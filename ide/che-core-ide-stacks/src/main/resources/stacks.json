@@ -68,7 +68,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -123,7 +123,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -197,7 +197,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -273,7 +273,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -354,12 +354,84 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
     "stackIcon": {
       "name": "type-dotnet.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+   {
+    "id": "go-default",
+    "creator": "ide",
+    "name": "Go",
+    "description": "Default Go Stack with Go 1.6.2",
+    "scope": "general",
+    "tags": [
+      "Ubuntu",
+      "Go"
+    ],
+    "components": [
+      {
+        "name": "Ubuntu",
+        "version": "14.04"
+      },
+      {
+        "name": "Go",
+        "version": "1.6.2"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_go"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "run",
+          "type": "custom",
+          "commandLine": "cd ${current.project.path} && go get -d && go run main.go",
+          "attributes": {
+            "previewUrl": "http://${server.port.8080}"
+          }
+        }
+      ]
+    },
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "search"
+        ]
+      }
+    ],
+    "stackIcon": {
+      "name": "type-go.svg",
       "mediaType": "image/svg+xml"
     }
   },
@@ -440,7 +512,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -545,7 +617,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -619,7 +691,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -706,7 +778,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -763,7 +835,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ]
@@ -840,7 +912,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -921,7 +993,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1008,7 +1080,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1082,7 +1154,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1153,7 +1225,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1233,7 +1305,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ]
@@ -1307,7 +1379,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ],
@@ -1364,7 +1436,7 @@
       {
         "user": "*",
         "actions": [
-          "read"
+          "search"
         ]
       }
     ]

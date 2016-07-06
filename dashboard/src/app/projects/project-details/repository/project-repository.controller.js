@@ -12,7 +12,7 @@
 
 import {gitMixinId, subversionMixinId} from '../repository/project-repository-data';
 
-export class ProjectRepositoryCtrl {
+export class ProjectRepositoryController {
 
   /**
    * Controller for the project local repository and remote repositories details
@@ -28,23 +28,32 @@ export class ProjectRepositoryCtrl {
     this.remoteSvnRepository = null;
     this.isEmptyState = false;
 
-    var workspaceId = $route.current.params.workspaceId;
+    var namespace = $route.current.params.namespace;
+    var workspaceName = $route.current.params.workspaceName;
     var projectPath = '/' + $route.current.params.projectName;
+    debugger;
 
-    this.wsagent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId);
+    let workspace = this.cheAPI.getWorkspace().getWorkspaceByName(namespace, workspaceName);
+    if (workspace && (workspace.status === 'STARTING' || workspace.status === 'RUNNING')) {
+      this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'RUNNING').then(() => {
+        return this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
+      }).then(() => {
+        this.wsagent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspace.id);
+        if (this.wsagent !== null) {
+          if (!this.wsagent.getProject().getProjectDetailsByKey(projectPath)) {
+            let promise = this.wsagent.getProject().fetchProjectDetails(workspace.id, projectPath);
 
-    if (!this.wsagent.getProject().getProjectDetailsByKey(projectPath)) {
-      let promise = this.wsagent.getProject().fetchProjectDetails(workspaceId, projectPath);
-
-      promise.then(() => {
-        var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
-        this.updateRepositories(projectDetails);
+            promise.then(() => {
+              var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
+              this.updateRepositories(projectDetails);
+            });
+          } else {
+            var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
+            this.updateRepositories(projectDetails);
+          }
+        }
       });
-    } else {
-      var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);
-      this.updateRepositories(projectDetails);
     }
-
   }
 
   updateRepositories(projectDetails) {

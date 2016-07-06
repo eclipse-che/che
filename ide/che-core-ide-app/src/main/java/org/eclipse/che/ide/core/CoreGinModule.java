@@ -41,6 +41,8 @@ import org.eclipse.che.ide.api.project.ProjectTypeServiceClient;
 import org.eclipse.che.ide.api.project.ProjectTypeServiceClientImpl;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
+import org.eclipse.che.ide.api.user.PreferencesServiceClient;
+import org.eclipse.che.ide.api.user.PreferencesServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
 import org.eclipse.che.ide.api.user.UserProfileServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserServiceClient;
@@ -86,7 +88,6 @@ import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.data.tree.settings.impl.DummySettingsProvider;
-import org.eclipse.che.ide.api.project.tree.TreeStructureProviderRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTemplateRegistry;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
 import org.eclipse.che.ide.api.project.type.wizard.PreSelectedProjectTypeManager;
@@ -96,6 +97,11 @@ import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscribe
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistrar;
 import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
+import org.eclipse.che.ide.api.resources.ResourceInterceptor;
+import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
+import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
+import org.eclipse.che.ide.resources.impl.ClipboardManagerImpl;
+import org.eclipse.che.ide.resources.impl.ResourceManager;
 import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.api.theme.Theme;
@@ -132,7 +138,6 @@ import org.eclipse.che.ide.part.editor.recent.RecentFileActionFactory;
 import org.eclipse.che.ide.part.editor.recent.RecentFileList;
 import org.eclipse.che.ide.part.editor.recent.RecentFileStore;
 import org.eclipse.che.ide.part.explorer.project.DefaultNodeInterceptor;
-import org.eclipse.che.ide.part.explorer.project.ProjectConfigEnforcer;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerViewImpl;
@@ -146,8 +151,6 @@ import org.eclipse.che.ide.preferences.pages.appearance.AppearanceViewImpl;
 import org.eclipse.che.ide.preferences.pages.extensions.ExtensionManagerPresenter;
 import org.eclipse.che.ide.preferences.pages.extensions.ExtensionManagerView;
 import org.eclipse.che.ide.preferences.pages.extensions.ExtensionManagerViewImpl;
-import org.eclipse.che.ide.project.node.NodeManager;
-import org.eclipse.che.ide.project.node.factory.NodeFactory;
 import org.eclipse.che.ide.project.node.icon.DockerfileIconProvider;
 import org.eclipse.che.ide.project.node.icon.FileIconProvider;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
@@ -155,7 +158,6 @@ import org.eclipse.che.ide.projectimport.wizard.ImportWizardFactory;
 import org.eclipse.che.ide.projectimport.wizard.ImportWizardRegistryImpl;
 import org.eclipse.che.ide.projectimport.wizard.ProjectNotificationSubscriberImpl;
 import org.eclipse.che.ide.projectimport.zip.ZipImportWizardRegistrar;
-import org.eclipse.che.ide.projecttree.TreeStructureProviderRegistryImpl;
 import org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar;
 import org.eclipse.che.ide.projecttype.ProjectTemplateRegistryImpl;
 import org.eclipse.che.ide.projecttype.ProjectTemplatesComponent;
@@ -164,6 +166,7 @@ import org.eclipse.che.ide.projecttype.ProjectTypeRegistryImpl;
 import org.eclipse.che.ide.projecttype.wizard.PreSelectedProjectTypeManagerImpl;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardFactory;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardRegistryImpl;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.rest.RestContextProvider;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
@@ -205,7 +208,6 @@ import org.eclipse.che.ide.ui.toolbar.ToolbarView;
 import org.eclipse.che.ide.ui.toolbar.ToolbarViewImpl;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilder;
 import org.eclipse.che.ide.ui.zeroclipboard.ClipboardButtonBuilderImpl;
-import org.eclipse.che.ide.upload.BasicUploadPresenter;
 import org.eclipse.che.ide.upload.file.UploadFileView;
 import org.eclipse.che.ide.upload.file.UploadFileViewImpl;
 import org.eclipse.che.ide.upload.folder.UploadFolderFromZipView;
@@ -253,6 +255,11 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ExtensionRegistry.class).in(Singleton.class);
         bind(StandardComponentInitializer.class).in(Singleton.class);
         bind(ClipboardButtonBuilder.class).to(ClipboardButtonBuilderImpl.class);
+
+        install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceFactory.class));
+        install(new GinFactoryModuleBuilder().build(ResourceManager.ResourceManagerFactory.class));
+        install(new GinFactoryModuleBuilder().build(ResourceNode.NodeFactory.class));
+
         bind(AppContext.class).to(AppContextImpl.class);
 
         install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
@@ -286,6 +293,10 @@ public class CoreGinModule extends AbstractGinModule {
                                              .implement(WorkspaceWidget.class, WorkspaceWidgetImpl.class)
                                              .build(WorkspaceWidgetFactory.class));
         bind(StartUpActionsProcessor.class).in(Singleton.class);
+
+        bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
+
+        GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class).addBinding().to(ResourceInterceptor.NoOpInterceptor.class);
     }
 
     private void configureComponents() {
@@ -324,6 +335,7 @@ public class CoreGinModule extends AbstractGinModule {
     private void configurePlatformApiGwtClients() {
         bind(UserServiceClient.class).to(UserServiceClientImpl.class).in(Singleton.class);
         bind(UserProfileServiceClient.class).to(UserProfileServiceClientImpl.class).in(Singleton.class);
+        bind(PreferencesServiceClient.class).to(PreferencesServiceClientImpl.class).in(Singleton.class);
         bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
         bind(OAuthServiceClient.class).to(OAuthServiceClientImpl.class).in(Singleton.class);
         bind(FactoryServiceClient.class).to(FactoryServiceClientImpl.class).in(Singleton.class);
@@ -344,7 +356,7 @@ public class CoreGinModule extends AbstractGinModule {
     private void configureApiBinding() {
         // Agents
         bind(KeyBindingAgent.class).to(KeyBindingManager.class).in(Singleton.class);
-        bind(SelectionAgent.class).to(SelectionAgentImpl.class).in(Singleton.class);
+        bind(SelectionAgent.class).to(SelectionAgentImpl.class).asEagerSingleton();
         bind(WorkspaceAgent.class).to(WorkspacePresenter.class).in(Singleton.class);
         bind(IconRegistry.class).to(IconRegistryImpl.class).in(Singleton.class);
         // UI Model
@@ -353,7 +365,6 @@ public class CoreGinModule extends AbstractGinModule {
 
         GinMultibinder<NodeInterceptor> nodeInterceptors = GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
         nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
-        nodeInterceptors.addBinding().to(ProjectConfigEnforcer.class);
     }
 
     /** Configure Core UI components, resources and views */
@@ -421,7 +432,6 @@ public class CoreGinModule extends AbstractGinModule {
 
         bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);
 
-        bind(BasicUploadPresenter.class);
         install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));
     }
 
@@ -436,19 +446,14 @@ public class CoreGinModule extends AbstractGinModule {
 
     /** Configure bindings for project's tree. */
     private void configureProjectTree() {
-        install(new GinFactoryModuleBuilder().build(NodeFactory.class));
         bind(SettingsProvider.class).to(DummySettingsProvider.class).in(Singleton.class);
-        bind(NodeManager.class);
         bind(ProjectExplorerView.class).to(ProjectExplorerViewImpl.class).in(Singleton.class);
         bind(ProjectExplorerPart.class).to(ProjectExplorerPresenter.class).in(Singleton.class);
-
-        //support old tree
-        bind(TreeStructureProviderRegistry.class).to(TreeStructureProviderRegistryImpl.class).in(Singleton.class);
-        install(new GinFactoryModuleBuilder().build(org.eclipse.che.ide.api.project.tree.generic.NodeFactory.class));
 
         GinMultibinder<NodeIconProvider> themeBinder = GinMultibinder.newSetBinder(binder(), NodeIconProvider.class);
         themeBinder.addBinding().to(FileIconProvider.class);
         themeBinder.addBinding().to(DockerfileIconProvider.class);
+        bind(TreeResourceRevealer.class);
     }
 
     @Provides

@@ -10,19 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
-import org.eclipse.che.plugin.svn.shared.Depth;
-import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
-import org.eclipse.che.plugin.svn.shared.InfoResponse;
-import org.eclipse.che.plugin.svn.shared.ListResponse;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-
-import javax.validation.constraints.NotNull;
-
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
 import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
+import org.eclipse.che.plugin.svn.shared.Depth;
+import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
+import org.eclipse.che.plugin.svn.shared.InfoResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +32,7 @@ public interface SubversionClientService {
     /**
      * Adds the provided paths to version control.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param paths
      *         the paths to update
@@ -51,73 +46,63 @@ public interface SubversionClientService {
      *         whether to explicitly use automatic properties (--auto-props)
      * @param noAutoProps
      *         whether to explicitly not use automatic properties (--no-auto-props)
-     * @param callback
-     *         the callback
      */
-    void add(final @NotNull String projectPath, final List<String> paths, final String depth, final boolean addIgnored,
-             final boolean addParents, final boolean autoProps, final boolean noAutoProps,
-             final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> add(Path project,
+                                   Path[] paths,
+                                   String depth,
+                                   boolean addIgnored,
+                                   boolean addParents,
+                                   boolean autoProps,
+                                   boolean noAutoProps);
 
     /**
      * Removes the provided paths from version control.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param paths
      *         the paths to remove
-     * @param callback
-     *         the callback
      */
-    void remove(final @NotNull String projectPath, final List<String> paths,
-                final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> remove(Path project, Path[] paths);
 
     /**
      * Reverts any local changes to provided paths and resolves any conflicted states.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param paths
      *         the paths to remove
-     * @param callback
-     *         the callback
      */
-    void revert(final @NotNull String projectPath, final List<String> paths, final String depth,
-                final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> revert(Path project, Path[] paths, String depth);
 
     /**
      * Copy provided path.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param source
      *         source item path
      * @param destination
      *         destination path
-     * @param callback
-     *         the callback
      */
-    void copy(final @NotNull String projectPath, final String source, final String destination, final String comment,
-              final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> copy(Path project, Path source, Path destination, String comment);
 
     /**
      * Merge specified URL with target.
      *
-     * @param projectPath
+     * @param project
      *          project path
      * @param target
      *          target directory
-     * @param sourceURL
+     * @param sourceUrl
      *          source URL to merge
-     * @param callback
-     *          callback
      */
-    void merge(final @NotNull String projectPath, final String target, final String sourceURL,
-               final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> merge(Path project, Path target, Path sourceUrl);
 
     /**
      * Retrieves the information about repository item.
      *
-     * @param projectPath
+     * @param project
      *          relative path to the project in local workspace
      * @param target
      *          target to operate
@@ -125,30 +110,14 @@ public interface SubversionClientService {
      *          revision, use HEAD to specify latest revision
      * @param children
      *          whether list children or not
-     * @param callback
-     *          callback
      */
-    void info(final @NotNull String projectPath, final String target, final String revision, final boolean children,
-              final AsyncRequestCallback<InfoResponse> callback);
-
-
-    /**
-     * List server directory.
-     *
-     * @param projectPath
-     *          project path
-     * @param target
-     *          target directory
-     * @param callback
-     *          callback
-     */
-    void list(final @NotNull String projectPath, final String target,
-                     final AsyncRequestCallback<ListResponse> callback);
+    Promise<InfoResponse> info(Path project, Path target, String revision, boolean children);
+    Promise<InfoResponse> info(Path project, String target, String revision, boolean children);
 
     /**
      * Retrieves the status for the provided paths, or the working copy as a whole.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param paths
      *         the paths to update
@@ -166,18 +135,21 @@ public interface SubversionClientService {
      *         whether or not to be verbose (--verbose)
      * @param changeLists
      *         which changelists to operation on (--changelist)
-     * @param callback
-     *         the callback
      */
-    void status(final @NotNull String projectPath, final List<String> paths, final String depth,
-                final boolean ignoreExternals, final boolean showIgnored, final boolean showUpdates,
-                final boolean showUnversioned, final boolean verbose, final List<String> changeLists,
-                final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> status(Path project,
+                                      Path[] paths,
+                                      String depth,
+                                      boolean ignoreExternals,
+                                      boolean showIgnored,
+                                      boolean showUpdates,
+                                      boolean showUnversioned,
+                                      boolean verbose,
+                                      List<String> changeLists);
 
     /**
      * Updates the provided paths, or the working copy as a whole, to the latest, or requested, repository version.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param paths
      *         the paths to update
@@ -189,55 +161,43 @@ public interface SubversionClientService {
      *         whether or not to ignore externals (--ignore-externals)
      * @param accept
      *         the accept argument (--accept)
-     * @param callback
-     *         the callback
      */
-    void update(final @NotNull String projectPath, final List<String> paths, final String revision, final String depth,
-                final boolean ignoreExternals, final String accept,
-                final AsyncRequestCallback<CLIOutputWithRevisionResponse> callback);
+    Promise<CLIOutputWithRevisionResponse> update(Path project, Path[] paths, String revision, String depth, boolean ignoreExternals, String accept);
 
-    void showLog(final @NotNull String projectPath, final List<String> paths, final String revision,
-                 final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> showLog(Path project, Path[] paths, String revision);
 
-    void showDiff(final @NotNull String projectPath, final List<String> paths, final String revision,
-                  final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision);
 
     /**
      * Locks the given paths.
      *
-     * @param projectPath
+     * @param project
      *         the path of the project
      * @param paths
      *         the paths to lock
      * @param force
      *         if false, will warn if another user already has a lock on a target, leave this target unchanged, and continue.<br>
      *         if true, will steal the lock from the previous owner instead
-     * @param callback
-     *         follow-up action
      */
-    void lock(final @NotNull String projectPath, final List<String> paths, final boolean force,
-              final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> lock(Path project, Path[] paths, boolean force);
 
     /**
      * Unocks the given paths.
      *
-     * @param projectPath
+     * @param project
      *         the path of the project
      * @param paths
      *         the paths to lock
      * @param force
      *         if false, will warn if another user already has a lock on a target, leave this target unchanged, and continue.<br>
      *         if true, will unlock anyway
-     * @param callback
-     *         follow-up action
      */
-    void unlock(final @NotNull String projectPath, final List<String> paths, final boolean force,
-                final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> unlock(Path project, Path[] paths, boolean force);
 
     /**
      * Commits the changes in the repository.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param paths
      *         the paths to include in the commit
@@ -247,53 +207,41 @@ public interface SubversionClientService {
      *         if true, doesn't remove the changelist assigments from working copy items after committing
      * @param keepLocks
      *         if true, doesn't unlock files after commiting
-     * @param callback
-     *         the callback
      */
-    void commit(String projectPath, List<String> paths, String message,
-                boolean keepChangeLists, boolean keepLocks,
-                AsyncRequestCallback<CLIOutputWithRevisionResponse> callback);
+    Promise<CLIOutputWithRevisionResponse> commit(Path project, Path[] paths, String message, boolean keepChangeLists, boolean keepLocks);
 
     /**
      * Cleans up recursively the working copy.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param paths
      *         the paths to clean up
-     * @param callback
-     *         the callback
      */
-    void cleanup(String projectPath, List<String> paths, AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> cleanup(Path project, Path[] paths);
 
-    void showConflicts(final @NotNull String projectPath, final List<String> paths, final AsyncCallback<List<String>> callback);
+    Promise<CLIOutputResponse> showConflicts(Path project, Path[] paths);
 
-    void resolve(final @NotNull String projectPath,
-                 final Map<String, String> resolution,
-                 final String depth,
-                 final AsyncCallback<CLIOutputResponseList> callback);
+    Promise<CLIOutputResponseList> resolve(Path project, Map<String, String> resolutions, String depth);
 
-    void saveCredentials(String repositoryUrl, String username, String password, AsyncRequestCallback<Void> callback);
+    Promise<Void> saveCredentials(String repositoryUrl, String username, String password);
 
     /**
      * Move provided path.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param source
      *         source item path
      * @param destination
      *         destination path
-     * @param callback
-     *         the callback
      */
-    void move(final @NotNull String projectPath, final List<String> source, final String destination, final String comment,
-              final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> move(Path project, Path source, Path destination, String comment);
 
     /**
      * Set specified property to a path or a target.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param propertyName
      *         the property name
@@ -305,41 +253,30 @@ public interface SubversionClientService {
      *         forcing or not
      * @param path
      *         path to which property sets
-     * @param callback
-     *         the callback
      */
-    void propertySet(final String projectPath, final String propertyName, final String propertyValues,
-                     final Depth depth, final boolean force, final String path,
-                     final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> propertySet(Path project, String propertyName, String propertyValues, Depth depth, boolean force, Path path);
 
     /**
      * Get specified property for a path or a target.
      *
-     * @param projectPath the project path
+     * @param project the project path
      * @param propertyName the property name
      * @param path path to which property get
-     * @param callback the callback
      */
-    void propertyGet(final String projectPath,
-                     final String propertyName,
-                     final String path,
-                     final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> propertyGet(Path project, String propertyName, Path path);
 
     /**
      * Get properties set for a path or a target.
      *
-     * @param projectPath the project path
+     * @param project the project path
      * @param path path to which property get
-     * @param callback the callback
      */
-    void propertyList(final String projectPath,
-                      final String path,
-                      final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> propertyList(Path project, Path path);
 
     /**
      * Delete specified property from a path or a target.
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param propertyName
      *         the property name
@@ -349,24 +286,18 @@ public interface SubversionClientService {
      *         forcing or not
      * @param path
      *         path from which property should be deleted
-     * @param callback
-     *         the callback
      */
-    void propertyDelete(final String projectPath, final String propertyName, final Depth depth,
-                        final boolean force, final String path, final AsyncRequestCallback<CLIOutputResponse> callback);
+    Promise<CLIOutputResponse> propertyDelete(Path project, String propertyName, Depth depth, boolean force, Path path);
 
     /**
      * Get the list of all revisions where a given path was modified
      *
-     * @param projectPath
+     * @param project
      *         the project path
      * @param path
      *         path to get the revisions for
      * @param revisionRange
      *         the range of revisions to check
-     * @param callback
-     *         the callback
      */
-    void getRevisions(final @NotNull String projectPath, final String path, final String revisionRange,
-                      final AsyncRequestCallback<GetRevisionsResponse> callback);
+    Promise<GetRevisionsResponse> getRevisions(Path project, Path path, String revisionRange);
 }

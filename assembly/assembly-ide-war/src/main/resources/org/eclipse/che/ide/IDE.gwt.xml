@@ -77,7 +77,8 @@
     <inherits name="org.eclipse.che.api.debug.Debug"/>
     <inherits name="org.eclipse.che.api.ssh.Ssh"/>
 
-    <inherits name="org.eclipse.che.ide.ext.java.testing.TestExtension"/>
+    <inherits name="org.eclipse.che.plugin.svn.Subversion"/>
+    <inherits name="org.eclipse.che.ide.ext.java.testing.core.TestExtension"/>
 
     <stylesheet src="IDE.css"/>
 

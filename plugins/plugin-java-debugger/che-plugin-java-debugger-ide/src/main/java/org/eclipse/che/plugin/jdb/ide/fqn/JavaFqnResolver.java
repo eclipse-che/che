@@ -12,22 +12,17 @@ package org.eclipse.che.plugin.jdb.ide.fqn;
 
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.node.HasProjectConfig;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolver;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil.getProjectBuilder;
-import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 
 /**
  * @author Evgen Vidolob
  * @author Anatoliy Bazko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class JavaFqnResolver implements FqnResolver {
@@ -36,52 +31,10 @@ public class JavaFqnResolver implements FqnResolver {
     @NotNull
     @Override
     public String resolveFqn(@NotNull final VirtualFile file) {
-        final HasProjectConfig projectNode = file.getProject();
-        final List<String> sourceFolders = detectSourceFolders(projectNode);
-
-        final String projectPath = projectNode.getProjectConfig().getPath();
-        String filePath = file.getPath();
-        int i = 1;
-        int j = filePath.lastIndexOf('.');
-        if (j < 0) {
-            j = filePath.length();
+        if (file instanceof Resource) {
+            return JavaUtil.resolveFQN(file);
+        } else {
+            return file.getName();
         }
-        for (String sourceFolder : sourceFolders) {
-            boolean projectPathEndsWithSeparator = projectPath.charAt(projectPath.length() - 1) == '/';
-            boolean sourcePathStartsWithSeparator = sourceFolder.charAt(0) == '/';
-            boolean sourcePathEndsWithSeparator = sourceFolder.charAt(sourceFolder.length() - 1) == '/';
-            String base;
-            if (projectPathEndsWithSeparator && sourcePathStartsWithSeparator) {
-                base = projectNode + sourceFolder.substring(1);
-            } else if (!(projectPathEndsWithSeparator || sourcePathStartsWithSeparator)) {
-                base = projectPath + '/' + sourceFolder;
-            } else {
-                base = projectNode + sourceFolder;
-            }
-            if (!sourcePathEndsWithSeparator) {
-                base = base + '/';
-            }
-
-            if (filePath.startsWith(base)) {
-                i = base.length();
-                return filePath.substring(i, j).replaceAll("/", ".");
-            }
-        }
-        return filePath.substring(i, j).replaceAll("/", ".");
-    }
-
-    private List<String> detectSourceFolders(HasProjectConfig projectNode) {
-        List<String> sourceFolders = new ArrayList<>();
-
-        String projectBuilder = getProjectBuilder(projectNode);
-        Map<String, List<String>> attributes = projectNode.getProjectConfig().getAttributes();
-
-        sourceFolders.addAll(attributes.containsKey(SOURCE_FOLDER) ? attributes.get(SOURCE_FOLDER)
-                                                                                       : Collections.<String>emptyList());
-
-        sourceFolders.addAll(attributes.containsKey(projectBuilder + ".test.source.folder") ? attributes.get(projectBuilder + ".test.source.folder")
-                                                                                            : Collections.<String>emptyList());
-
-        return sourceFolders;
     }
 }

@@ -12,10 +12,10 @@ che-roundimage()
   border-radius 50%
 
 che-developers-face()
-  che-roundimage()
   box-shadow-simple()
-  height 20px
-  width 20px
+  border-radius 1px
+  height 14px
+  width 14px
   padding 0
 
 @import '../../bower_components/bootstrap-stylus/bootstrap/index'
@@ -38,14 +38,19 @@ $che-logs-output-font = "Droid Sans Mono", monospace
   background-color $menu-bg-color
 
 md-sidenav.dark-menu-bg
-  overflow auto
+  overflow hidden
 
   img.pull-right
     width 50px
 
 md-sidenav
   box-shadow none !important
-  width 230px
+  width 200px
+  min-width 200px
+
+md-sidenav > *
+  width 200px
+  min-width 200px
 
 html
 
@@ -53,7 +58,7 @@ body
   font-size 13px
   font-family 'Open Sans'
   background-color $background-site-color
-
+  min-width 600px
 
 button,
 select,
@@ -73,10 +78,12 @@ label
   font-weight normal !important
 
 md-divider
-  border-top-color #454F5F !important
+  border-top-color #353E5D !important
+  margin 0 10px
 
 md-toolbar
   font-size 1em
+  flex 1
 
 md-option
   padding 5px
@@ -85,13 +92,14 @@ md-option
 md-option:hover
   background-color $hover-on-list-color
 
-.sidebar-entry
-  margin-left auto
+.md-open-menu-container
+  transition none !important
+
+  md-menu-item
+    transition none !important
 
 .main-page
-  max-width 1296px
   min-width 320px
-  margin-right auto
 
 
 .main-page-loader

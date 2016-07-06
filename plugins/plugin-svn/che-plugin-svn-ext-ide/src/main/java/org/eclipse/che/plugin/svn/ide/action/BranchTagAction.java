@@ -17,7 +17,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn copy" (branch/tag) command.
@@ -26,12 +25,10 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 public class BranchTagAction extends SubversionAction {
 
     @Inject
-    public BranchTagAction(final AppContext appContext,
-                           final ProjectExplorerPresenter projectExplorerPresenter,
-                           final SubversionExtensionLocalizationConstants constants,
-                           final SubversionExtensionResources resources) {
-        super(constants.branchTagTitle(), constants.branchTagDescription(), resources.branchTag(),
-              appContext, constants, resources, projectExplorerPresenter);
+    public BranchTagAction(AppContext appContext,
+                           SubversionExtensionLocalizationConstants constants,
+                           SubversionExtensionResources resources) {
+        super(constants.branchTagTitle(), constants.branchTagDescription(), resources.branchTag(), appContext, constants, resources);
     }
 
     @Override

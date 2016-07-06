@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.project.type.wizard;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import com.google.inject.Provider;
 
@@ -34,9 +34,6 @@ public interface ProjectWizardRegistrar {
     /** Key allows to get project's name from wizard's context when project wizard opened for updating project. */
     String PROJECT_NAME_KEY = "ProjectWizard:CurrentProjectName";
 
-    /** Key allows to get project's path from wizard's context when project wizard opened for updating project. */
-    String PROJECT_PATH_KEY = "ProjectWizard:CurrentProjectPath";
-
     /** Returns ID of the project type that should be registered in project wizard. */
     @NotNull
     String getProjectTypeId();
@@ -47,5 +44,5 @@ public interface ProjectWizardRegistrar {
 
     /** Returns pages that should be used in project wizard. */
     @NotNull
-    List<Provider<? extends WizardPage<ProjectConfigDto>>> getWizardPages();
+    List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages();
 }

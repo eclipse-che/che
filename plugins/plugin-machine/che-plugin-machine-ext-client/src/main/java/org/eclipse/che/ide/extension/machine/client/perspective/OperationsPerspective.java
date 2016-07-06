@@ -17,7 +17,6 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartStack;
-import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsolePresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.MachineAppliancePresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.RecipePartPresenter;
@@ -50,7 +49,6 @@ public class OperationsPerspective extends AbstractPerspective {
                                  PartStackViewFactory partViewFactory,
                                  WorkBenchControllerFactory controllerFactory,
                                  PartStackPresenterFactory stackPresenterFactory,
-                                 MachineConsolePresenter console,
                                  MachinePanelPresenter machinePanel,
                                  RecipePartPresenter recipePanel,
                                  NotificationManager notificationManager,
@@ -63,7 +61,6 @@ public class OperationsPerspective extends AbstractPerspective {
         //central panel
         partStacks.put(EDITING, infoContainer);
 
-        addPart(console, INFORMATION);
         addPart(notificationManager, INFORMATION, FIRST);
         addPart(machinePanel, NAVIGATION);
         addPart(recipePanel, NAVIGATION);
@@ -93,4 +90,5 @@ public class OperationsPerspective extends AbstractPerspective {
         openActivePart(INFORMATION);
         openActivePart(NAVIGATION);
     }
+
 }

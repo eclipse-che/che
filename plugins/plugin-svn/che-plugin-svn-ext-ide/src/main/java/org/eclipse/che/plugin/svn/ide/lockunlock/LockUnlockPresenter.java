@@ -12,19 +12,20 @@ package org.eclipse.che.plugin.svn.ide.lockunlock;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.action.UnlockAction;
-import org.eclipse.che.plugin.svn.ide.common.PathTypeFilter;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
@@ -32,12 +33,7 @@ import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialog;
 import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -46,34 +42,27 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 public class LockUnlockPresenter extends SubversionActionPresenter {
 
-    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
     private final NotificationManager                      notificationManager;
     private final SubversionClientService                  service;
     private final SubversionExtensionLocalizationConstants constants;
 
     private final ChoiceDialogFactory choiceDialogFactory;
-    private final DialogFactory dialogFactory;
 
     @Inject
-    protected LockUnlockPresenter(final AppContext appContext,
-                                  final DialogFactory dialogFactory,
-                                  final ChoiceDialogFactory choiceDialogFactory,
-                                  final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                                  final NotificationManager notificationManager,
-                                  final SubversionOutputConsoleFactory consoleFactory,
-                                  final ConsolesPanelPresenter consolesPanelPresenter,
-                                  final SubversionExtensionLocalizationConstants constants,
-                                  final SubversionClientService service,
-                                  final ProjectExplorerPresenter projectExplorerPart,
-                                  final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
+    protected LockUnlockPresenter(AppContext appContext,
+                                  ChoiceDialogFactory choiceDialogFactory,
+                                  NotificationManager notificationManager,
+                                  SubversionOutputConsoleFactory consoleFactory,
+                                  ConsolesPanelPresenter consolesPanelPresenter,
+                                  SubversionExtensionLocalizationConstants constants,
+                                  SubversionClientService service,
+                                  StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
 
         this.service = service;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.notificationManager = notificationManager;
         this.constants = constants;
         this.choiceDialogFactory = choiceDialogFactory;
-        this.dialogFactory = dialogFactory;
     }
 
     public void showLockDialog() {
@@ -85,23 +74,14 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
     }
 
     private void showDialog(final boolean lock) {
-        final String projectPath = getCurrentProjectPath();
 
-        if (projectPath == null) {
-            return;
-        }
+        final Project project = appContext.getRootProject();
 
-        final Collection<PathTypeFilter> filter = new ArrayList<>();
-        filter.add(PathTypeFilter.FOLDER);
-        filter.add(PathTypeFilter.PROJECT);
-        final List<String> selectedFolders = getSelectedPaths(filter);
-        if (!selectedFolders.isEmpty()) {
-            this.dialogFactory.createMessageDialog(getLockDirectoryTitle(lock),
-                                                   getLockDirectoryErrorMessage(lock), null).show();
-            return;
-        }
+        checkState(project != null);
 
-        final List<String> selectedPaths = getSelectedPaths(Collections.singletonList(PathTypeFilter.FILE));
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
 
         final String withoutForceLabel = getWithoutForceLabel(lock);
         final String withForceLabel = getWithForceLabel(lock);
@@ -110,13 +90,13 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
         final ConfirmCallback withoutForceCallback = new ConfirmCallback() {
             @Override
             public void accepted() {
-                doAction(lock, false, selectedPaths);
+                doAction(lock, false, toRelative(project, resources));
             }
         };
         final ConfirmCallback withForceCallback = new ConfirmCallback() {
             @Override
             public void accepted() {
-                doAction(lock, true, selectedPaths);
+                doAction(lock, true, toRelative(project, resources));
             }
         };
         final ChoiceDialog dialog = this.choiceDialogFactory.createChoiceDialog(getTitle(lock), getContent(lock),
@@ -162,23 +142,7 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
         return constants.buttonCancel();
     }
 
-    private String getLockDirectoryTitle(final boolean lock) {
-        if (lock) {
-            return constants.dialogTitleLockDirectory();
-        } else {
-            return constants.dialogTitleUnlockDirectory();
-        }
-    }
-
-    private String getLockDirectoryErrorMessage(final boolean lock) {
-        if (lock) {
-            return constants.errorMessageLockDirectory();
-        } else {
-            return constants.errorMessageUnlockDirectory();
-        }
-    }
-
-    private void doAction(final boolean lock, final boolean force, final List<String> paths) {
+    private void doAction(final boolean lock, final boolean force, final Path[] paths) {
         if (lock) {
             doLockAction(force, paths);
         } else {
@@ -186,38 +150,40 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
         }
     }
 
-    private void doLockAction(final boolean force, final List<String> paths) {
-        final AsyncRequestCallback<CLIOutputResponse> callback = makeCallback(true);
-        this.service.lock(getCurrentProjectPath(), paths, force, callback);
-    }
+    private void doLockAction(final boolean force, final Path[] paths) {
+        final Project project = appContext.getRootProject();
 
-    private void doUnlockAction(final boolean force, final List<String> paths) {
-        final AsyncRequestCallback<CLIOutputResponse> callback = makeCallback(false);
-        this.service.unlock(getCurrentProjectPath(), paths, force, callback);
-    }
+        checkState(project != null);
 
-    private AsyncRequestCallback<CLIOutputResponse> makeCallback(final boolean lock) {
-        final Unmarshallable<CLIOutputResponse> unmarshaller = this.dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class);
-        return new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
+        service.lock(project.getLocation(), paths, force).then(new Operation<CLIOutputResponse>() {
             @Override
-            protected void onSuccess(final CLIOutputResponse result) {
-                printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(),
-                              (lock ? constants.commandLock() : constants.commandUnlock()));
+            public void apply(CLIOutputResponse response) throws OperationException {
+                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandLock());
             }
+        }).catchError(new Operation<PromiseError>() {
             @Override
-            protected void onFailure(final Throwable exception) {
-                handleError(exception);
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
             }
-        };
+        });
     }
 
-    private void handleError(@NotNull final Throwable e) {
-        String errorMessage;
-        if (e.getMessage() != null && !e.getMessage().isEmpty()) {
-            errorMessage = e.getMessage();
-        } else {
-            errorMessage = constants.commitFailed();
-        }
-        this.notificationManager.notify(errorMessage, FAIL, FLOAT_MODE);
+    private void doUnlockAction(final boolean force, final Path[] paths) {
+
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null);
+
+        service.unlock(project.getLocation(), paths, force).then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse response) throws OperationException {
+                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandUnlock());
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
     }
 }

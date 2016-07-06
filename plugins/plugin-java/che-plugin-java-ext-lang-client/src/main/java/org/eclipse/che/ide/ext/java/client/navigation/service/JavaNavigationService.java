@@ -19,6 +19,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.ImplementationsDescriptorDTO;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 
 import java.util.List;
@@ -40,6 +41,8 @@ public interface JavaNavigationService {
      */
     void findDeclaration(String projectPath, String fqn, int offset, AsyncRequestCallback<OpenDeclarationDescriptor> callback);
 
+    Promise<OpenDeclarationDescriptor> findDeclaration(Path project, String fqn, int offset);
+
     /**
      * Receive all jar dependency's
      *
@@ -49,15 +52,27 @@ public interface JavaNavigationService {
      */
     void getExternalLibraries(String projectPath, AsyncRequestCallback<List<Jar>> callback);
 
+    Promise<List<Jar>> getExternalLibraries(Path project);
+
     void getLibraryChildren(String projectPath, int libId, AsyncRequestCallback<List<JarEntry>> callback);
+
+    Promise<List<JarEntry>> getLibraryChildren(Path project, int libId);
 
     void getChildren(String projectPath, int libId, String path, AsyncRequestCallback<List<JarEntry>> callback);
 
+    Promise<List<JarEntry>> getChildren(Path project, int libId, Path path);
+
     void getEntry(String projectPath, int libId, String path, AsyncRequestCallback<JarEntry> callback);
+
+    Promise<JarEntry> getEntry(Path project, int libId, String path);
 
     void getContent(String projectPath, int libId, String path, AsyncRequestCallback<ClassContent> callback);
 
+    Promise<ClassContent> getContent(Path project, int libId, Path path);
+
     void getContent(String projectPath, String fqn, AsyncRequestCallback<ClassContent> callback);
+
+    Promise<ClassContent> getContent(Path project, String fqn);
 
     /**
      * Get the compilation unit representation of the java file.
@@ -69,7 +84,7 @@ public interface JavaNavigationService {
      * @param showInherited
      *         <code>true</code> iff inherited members are shown
      */
-    Promise<CompilationUnit> getCompilationUnit(String projectPath, String fqn, boolean showInherited);
+    Promise<CompilationUnit> getCompilationUnit(Path project, String fqn, boolean showInherited);
 
     /**
      * Get implementations of the selected element.
@@ -82,7 +97,7 @@ public interface JavaNavigationService {
      *         cursor position
      * @return descriptors of the implementations
      */
-    Promise<ImplementationsDescriptorDTO> getImplementations(String projectPath, String fqn, int offset);
+    Promise<ImplementationsDescriptorDTO> getImplementations(Path project, String fqn, int offset);
 
     Promise<List<JavaProject>> getProjectsAndPackages(boolean includePackage);
 
@@ -109,4 +124,5 @@ public interface JavaNavigationService {
      * @return list of parameters which method or constructor can accept
      */
     Promise<List<MethodParameters>> getMethodParametersHints(String projectPath, String fqn, int offset, int lineStartOffset);
+    Promise<List<MethodParameters>> getMethodParametersHints(Path project, String fqn, int offset, int lineStartOffset);
 }

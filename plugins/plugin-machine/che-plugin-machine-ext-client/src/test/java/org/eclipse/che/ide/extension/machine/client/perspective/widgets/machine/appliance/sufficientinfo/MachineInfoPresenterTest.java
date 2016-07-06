@@ -13,8 +13,8 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
-import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -62,22 +62,22 @@ public class MachineInfoPresenterTest {
 
     //additional mocks
     @Mock
-    private Machine                           machine;
+    private Machine                      machine;
     @Mock
-    private AcceptsOneWidget                  container;
+    private AcceptsOneWidget             container;
     @Mock
-    private Unmarshallable<ProfileDescriptor> profileUnmarshaller;
+    private Unmarshallable<ProfileDto>   profileUnmarshaller;
     @Mock
-    private Unmarshallable<WorkspaceDto>      wsUnmarshaller;
+    private Unmarshallable<WorkspaceDto> wsUnmarshaller;
     @Mock
-    private ProfileDescriptor                 profileDescriptor;
+    private ProfileDto                   profileDescriptor;
     @Mock
     private WorkspaceDto                 wsDescriptor;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private Promise<WorkspaceDto>        promise;
 
     @Captor
-    private ArgumentCaptor<AsyncRequestCallback<ProfileDescriptor>> profileCaptor;
+    private ArgumentCaptor<AsyncRequestCallback<ProfileDto>>   profileCaptor;
     @Captor
     private ArgumentCaptor<AsyncRequestCallback<WorkspaceDto>> wsCaptor;
 
@@ -88,7 +88,7 @@ public class MachineInfoPresenterTest {
     public void setUp() {
         when(machine.getWorkspaceId()).thenReturn(SOME_TEXT);
 
-        when(unmarshallerFactory.newUnmarshaller(ProfileDescriptor.class)).thenReturn(profileUnmarshaller);
+        when(unmarshallerFactory.newUnmarshaller(ProfileDto.class)).thenReturn(profileUnmarshaller);
         when(unmarshallerFactory.newUnmarshaller(WorkspaceDto.class)).thenReturn(wsUnmarshaller);
     }
 
@@ -98,9 +98,9 @@ public class MachineInfoPresenterTest {
 
         presenter.update(machine);
 
-        verify(unmarshallerFactory).newUnmarshaller(ProfileDescriptor.class);
+        verify(unmarshallerFactory).newUnmarshaller(ProfileDto.class);
 
-        verify(userProfile).getCurrentProfile(Matchers.<AsyncRequestCallback<ProfileDescriptor>>anyObject());
+        verify(userProfile).getCurrentProfile(Matchers.<AsyncRequestCallback<ProfileDto>>anyObject());
         verify(machine).getWorkspaceId();
         verify(wsService).getWorkspace(eq(SOME_TEXT));
 
@@ -119,7 +119,7 @@ public class MachineInfoPresenterTest {
         presenter.update(machine);
 
         verify(userProfile).getCurrentProfile(profileCaptor.capture());
-        AsyncRequestCallback<ProfileDescriptor> callback = profileCaptor.getValue();
+        AsyncRequestCallback<ProfileDto> callback = profileCaptor.getValue();
 
         //noinspection NonJREEmulationClassesInClientCode
         Method method = callback.getClass().getDeclaredMethod("onSuccess", Object.class);
@@ -144,7 +144,7 @@ public class MachineInfoPresenterTest {
         presenter.update(machine);
 
         verify(userProfile).getCurrentProfile(profileCaptor.capture());
-        AsyncRequestCallback<ProfileDescriptor> callback = profileCaptor.getValue();
+        AsyncRequestCallback<ProfileDto> callback = profileCaptor.getValue();
 
         //noinspection NonJREEmulationClassesInClientCode
         Method method = callback.getClass().getDeclaredMethod("onSuccess", Object.class);

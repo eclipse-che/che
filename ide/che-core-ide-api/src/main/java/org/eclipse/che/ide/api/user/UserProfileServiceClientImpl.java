@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.user;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
+import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.json.JsonHelper;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
@@ -35,7 +35,6 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
  */
 public class UserProfileServiceClientImpl implements UserProfileServiceClient {
     private final String              PROFILE;
-    private final String              PREFS;
     private final LoaderFactory       loaderFactory;
     private final AsyncRequestFactory asyncRequestFactory;
 
@@ -46,12 +45,11 @@ public class UserProfileServiceClientImpl implements UserProfileServiceClient {
         this.loaderFactory = loaderFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         PROFILE = restContext + "/profile/";
-        PREFS = PROFILE + "prefs";
     }
 
     /** {@inheritDoc} */
     @Override
-    public void getCurrentProfile(AsyncRequestCallback<ProfileDescriptor> callback) {
+    public void getCurrentProfile(AsyncRequestCallback<ProfileDto> callback) {
         asyncRequestFactory.createGetRequest(PROFILE)
                            .header(ACCEPT, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Retrieving current user's profile..."))
@@ -60,7 +58,7 @@ public class UserProfileServiceClientImpl implements UserProfileServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public void updateCurrentProfile(@NotNull Map<String, String> updates, AsyncRequestCallback<ProfileDescriptor> callback) {
+    public void updateCurrentProfile(@NotNull Map<String, String> updates, AsyncRequestCallback<ProfileDto> callback) {
         asyncRequestFactory.createPostRequest(PROFILE, null)
                            .header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON)
@@ -71,7 +69,7 @@ public class UserProfileServiceClientImpl implements UserProfileServiceClient {
 
     /** {@inheritDoc} */
     @Override
-    public void getProfileById(@NotNull String id, AsyncRequestCallback<ProfileDescriptor> callback) {
+    public void getProfileById(@NotNull String id, AsyncRequestCallback<ProfileDto> callback) {
         String requestUrl = PROFILE + id;
 
         asyncRequestFactory.createGetRequest(requestUrl)
@@ -80,27 +78,9 @@ public class UserProfileServiceClientImpl implements UserProfileServiceClient {
                            .send(callback);
     }
 
-    @Override
-    public void getPreferences(AsyncRequestCallback<Map<String, String>> callback) {
-        asyncRequestFactory.createGetRequest(PREFS)
-                           .header(ACCEPT, APPLICATION_JSON)
-                           .header(CONTENT_TYPE, APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Getting user's preferences..."))
-                           .send(callback);
-    }
-
-    @Override
-    public Promise<Map<String, String>> getPreferences() {
-        return asyncRequestFactory.createGetRequest(PREFS)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .header(CONTENT_TYPE, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting user's preferences..."))
-                                  .send(new StringMapUnmarshaller());
-    }
-
     /** {@inheritDoc} */
     @Override
-    public void updateProfile(@NotNull String id, Map<String, String> updates, AsyncRequestCallback<ProfileDescriptor> callback) {
+    public void updateProfile(@NotNull String id, Map<String, String> updates, AsyncRequestCallback<ProfileDto> callback) {
         String requestUrl = PROFILE + id;
 
         asyncRequestFactory.createPostRequest(requestUrl, null)
@@ -109,29 +89,5 @@ public class UserProfileServiceClientImpl implements UserProfileServiceClient {
                            .data(JsonHelper.toJson(updates))
                            .loader(loaderFactory.newLoader("Updating user's profile..."))
                            .send(callback);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void updatePreferences(@NotNull Map<String, String> update, AsyncRequestCallback<Map<String, String>> callback) {
-        final String data = JsonHelper.toJson(update);
-        asyncRequestFactory.createPostRequest(PREFS, null)
-                           .header(ACCEPT, APPLICATION_JSON)
-                           .header(CONTENT_TYPE, APPLICATION_JSON)
-                           .data(data)
-                           .loader(loaderFactory.newLoader("Updating user's preferences..."))
-                           .send(callback);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<Map<String, String>> updatePreferences(@NotNull Map<String, String> update) {
-        final String data = JsonHelper.toJson(update);
-        return asyncRequestFactory.createPostRequest(PREFS, null)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .header(CONTENT_TYPE, APPLICATION_JSON)
-                                  .data(data)
-                                  .loader(loaderFactory.newLoader("Updating user's preferences..."))
-                                  .send(new StringMapUnmarshaller());
     }
 }
