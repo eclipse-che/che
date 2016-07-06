@@ -28,8 +28,7 @@ import java.io.IOException;
 import java.security.Principal;
 
 /**
- * The  class contains commons business logic for all environment workspace id initialization filters. The filters are necessary to set
- * workspace meta information to environment context.
+ * Fills environment context with information about current subject.
  *
  * @author Dmitry Shnurenko
  */
@@ -67,12 +66,7 @@ public class EnvironmentInitializationFilter implements Filter {
 
             @Override
             public Principal getUserPrincipal() {
-                return new Principal() {
-                    @Override
-                    public String getName() {
-                        return subject.getUserName();
-                    }
-                };
+                return () -> subject.getUserName();
             }
         };
     }
