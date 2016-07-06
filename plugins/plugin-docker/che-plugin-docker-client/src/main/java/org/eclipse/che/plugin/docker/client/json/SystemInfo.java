@@ -420,10 +420,34 @@ public class SystemInfo {
 
     @Override
     public int hashCode() {
-        return Objects.hash(containers, debug, dockerRootDir, driver, Arrays.deepHashCode(driverStatus), executionDriver, httpProxy,
-                            httpsProxy, iD, iPv4Forwarding, images, indexServerAddress, initPath, initSha1, kernelVersion,
-                            Arrays.hashCode(labels), memTotal, memoryLimit, nCPU, nEventsListener, nFd, nGoroutines, name, noProxy,
-                            operatingSystem, swapLimit, systemTime, Arrays.deepHashCode(systemStatus));
+        return Objects.hash(containers,
+                            debug,
+                            dockerRootDir,
+                            driver,
+                            Arrays.deepHashCode(driverStatus),
+                            executionDriver,
+                            httpProxy,
+                            httpsProxy,
+                            iD,
+                            iPv4Forwarding,
+                            images,
+                            indexServerAddress,
+                            initPath,
+                            initSha1,
+                            kernelVersion,
+                            Arrays.hashCode(labels),
+                            memTotal,
+                            memoryLimit,
+                            nCPU,
+                            nEventsListener,
+                            nFd,
+                            nGoroutines,
+                            name,
+                            noProxy,
+                            operatingSystem,
+                            swapLimit,
+                            systemTime,
+                            Arrays.deepHashCode(systemStatus));
     }
 
     @Override
