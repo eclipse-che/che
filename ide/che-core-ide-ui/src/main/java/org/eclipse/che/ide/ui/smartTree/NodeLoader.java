@@ -80,7 +80,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
 
                 childRequested.put(entry.getKey(), entry.getValue());
 
-                _load(entry.getKey());
+                doLoad(entry.getKey());
             }
 
             loadQueue.clear();
@@ -359,7 +359,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *         parent node
      * @return true if load was requested, otherwise false
      */
-    private boolean _load(@NotNull final Node parent) {
+    private boolean doLoad(@NotNull final Node parent) {
         if (fireEvent(new BeforeLoadEvent(parent))) {
             lastRequest = parent;
 
