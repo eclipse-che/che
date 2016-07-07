@@ -2,3 +2,5 @@
 !assembly/assembly-main/target/eclipse-che-*
 assembly/assembly-main/target/eclipse-che-*.tar.gz
 assembly/assembly-main/target/eclipse-che-*.zip
+
+!assembly/assembly-main/src/assembly/bin/launcher.sh
