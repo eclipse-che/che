@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.testing.junit4x.client.action;
+package org.eclipse.che.ide.ext.java.testing.junit.client.action;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -32,8 +32,8 @@ import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestServiceClient;
-import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestLocalizationConstant;
-import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestResources;
+import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestLocalizationConstant;
+import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestResources;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.TestResultPresenter;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.eclipse.che.ide.resources.tree.FileNode;
@@ -51,7 +51,7 @@ import java.util.Map;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.*;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-//import org.eclipse.che.ide.ext.java.testing.junit4x.client.view.TestRunnerPresenter;
+//import org.eclipse.che.ide.ext.java.testing.junit.client.view.TestRunnerPresenter;
 //import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 //import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 

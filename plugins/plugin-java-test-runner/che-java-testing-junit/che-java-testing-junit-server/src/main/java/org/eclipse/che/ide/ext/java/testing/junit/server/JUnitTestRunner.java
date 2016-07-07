@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.testing.junit4x.server;
+package org.eclipse.che.ide.ext.java.testing.junit.server;
 
 //import org.junit.runner.JUnitCore;
 //import org.junit.runner.Result;
@@ -36,7 +36,7 @@ import java.util.Map;
  *
  * @author Mirage Abeysekara
  */
-public class JUnit4TestRunner implements TestRunner {
+public class JUnitTestRunner implements TestRunner {
 
     private static final String JUNIT4X_RUNNER_CLASS = "org.junit.runner.JUnitCore";
     private static final String JUNIT3X_RUNNER_CLASS = "junit.textui.TestRunner";
@@ -189,7 +189,6 @@ public class JUnit4TestRunner implements TestRunner {
 
 
     private boolean isTestable3x(Class<?> clazz) throws ClassNotFoundException {
-
         Class<?> superClass = Class.forName("junit.framework.TestCase", true, projectClassLoader);
         return superClass.isAssignableFrom(clazz);
     }
@@ -277,21 +276,22 @@ public class JUnit4TestRunner implements TestRunner {
      */
     @Override
     public TestResult execute(Map<String, String> testParameters, TestClasspathProvider classpathProvider) {
+
         projectPath = testParameters.get("absoluteProjectPath");
         boolean updateClasspath = Boolean.valueOf(testParameters.get("updateClasspath"));
         boolean runClass = Boolean.valueOf(testParameters.get("runClass"));
         projectClassLoader = classpathProvider.getClassLoader(projectPath, updateClasspath);
-        TestResult a = null;
+        TestResult testResult;
 
         try {
             Class.forName(JUNIT4X_RUNNER_CLASS, true, projectClassLoader);
             if (runClass) {
                 String fqn = testParameters.get("fqn");
-                a = run4x(fqn);
+                testResult = run4x(fqn);
             } else {
-                a = runAll4x();
+                testResult = runAll4x();
             }
-            return a;
+            return testResult;
         } catch (Exception ignored) {
         }
 
@@ -299,15 +299,16 @@ public class JUnit4TestRunner implements TestRunner {
             Class.forName(JUNIT3X_RUNNER_CLASS, true, projectClassLoader);
             if (runClass) {
                 String fqn = testParameters.get("fqn");
-                a = run3x(fqn);
+                testResult = run3x(fqn);
             } else {
-                a = runAll3x();
+                testResult = runAll3x();
             }
+            return testResult;
         } catch (Exception ignored) {
         }
 
 
-        return a;
+        return null;
     }
 
     /**

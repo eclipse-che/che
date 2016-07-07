@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.testing.junit4x.client.action;
+package org.eclipse.che.ide.ext.java.testing.junit.client.action;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -22,8 +22,8 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestServiceClient;
-import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestLocalizationConstant;
-import org.eclipse.che.ide.ext.java.testing.junit4x.client.JUnitTestResources;
+import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestLocalizationConstant;
+import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestResources;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.TestResultPresenter;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.eclipse.che.ide.resource.Path;

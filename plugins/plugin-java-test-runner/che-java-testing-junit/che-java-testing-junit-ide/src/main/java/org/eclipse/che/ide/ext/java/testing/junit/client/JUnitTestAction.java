@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.testing.junit4x.client;
+package org.eclipse.che.ide.ext.java.testing.junit.client;
 
 import com.google.inject.Inject;
 import org.eclipse.che.ide.api.action.Action;
@@ -17,9 +17,9 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestAction;
-import org.eclipse.che.ide.ext.java.testing.junit4x.client.action.RunAllTestAction;
-import org.eclipse.che.ide.ext.java.testing.junit4x.client.action.RunClassContextTestAction;
-import org.eclipse.che.ide.ext.java.testing.junit4x.client.action.RunClassTestAction;
+import org.eclipse.che.ide.ext.java.testing.junit.client.action.RunAllTestAction;
+import org.eclipse.che.ide.ext.java.testing.junit.client.action.RunClassContextTestAction;
+import org.eclipse.che.ide.ext.java.testing.junit.client.action.RunClassTestAction;
 
 public class JUnitTestAction implements TestAction {
 
