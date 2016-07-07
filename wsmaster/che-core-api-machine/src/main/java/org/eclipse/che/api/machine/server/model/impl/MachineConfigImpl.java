@@ -33,7 +33,7 @@ public class MachineConfigImpl implements MachineConfig {
         return new MachineConfigImplBuilder();
     }
 
-    private boolean              isDev;
+    private boolean              dev;
     private String               name;
     private String               type;
     private MachineSourceImpl    source;
@@ -44,14 +44,14 @@ public class MachineConfigImpl implements MachineConfig {
     public MachineConfigImpl() {
     }
 
-    public MachineConfigImpl(boolean isDev,
+    public MachineConfigImpl(boolean dev,
                              String name,
                              String type,
                              MachineSource source,
                              Limits limits,
                              List<? extends ServerConf> servers,
                              Map<String, String> envVariables) {
-        this.isDev = isDev;
+        this.dev = dev;
         this.name = name;
         this.type = type;
         this.envVariables = envVariables;
@@ -97,7 +97,7 @@ public class MachineConfigImpl implements MachineConfig {
 
     @Override
     public boolean isDev() {
-        return isDev;
+        return dev;
     }
 
     @Override
@@ -135,7 +135,7 @@ public class MachineConfigImpl implements MachineConfig {
         if (this == obj) return true;
         if (!(obj instanceof MachineConfigImpl)) return false;
         final MachineConfigImpl other = (MachineConfigImpl)obj;
-        return isDev == other.isDev &&
+        return dev == other.dev &&
                Objects.equals(name, other.name) &&
                Objects.equals(source, other.source) &&
                Objects.equals(limits, other.limits) &&
@@ -147,7 +147,7 @@ public class MachineConfigImpl implements MachineConfig {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = hash * 31 + Boolean.hashCode(isDev);
+        hash = hash * 31 + Boolean.hashCode(dev);
         hash = hash * 31 + Objects.hashCode(name);
         hash = hash * 31 + Objects.hashCode(type);
         hash = hash * 31 + Objects.hashCode(source);
@@ -160,7 +160,7 @@ public class MachineConfigImpl implements MachineConfig {
     @Override
     public String toString() {
         return "MachineConfigImpl{" +
-               "isDev=" + isDev +
+               "dev=" + dev +
                ", name='" + name + '\'' +
                ", type='" + type + '\'' +
                ", source=" + source +
@@ -177,7 +177,7 @@ public class MachineConfigImpl implements MachineConfig {
      */
     public static class MachineConfigImplBuilder {
 
-        private boolean                    isDev;
+        private boolean                    dev;
         private String                     name;
         private String                     type;
         private MachineSource              source;
@@ -186,7 +186,7 @@ public class MachineConfigImpl implements MachineConfig {
         private Map<String, String>        envVariables;
 
         public MachineConfigImpl build() {
-            return new MachineConfigImpl(isDev,
+            return new MachineConfigImpl(dev,
                                          name,
                                          type,
                                          source,
@@ -196,7 +196,7 @@ public class MachineConfigImpl implements MachineConfig {
         }
 
         public MachineConfigImplBuilder fromConfig(MachineConfig machineConfig) {
-            isDev = machineConfig.isDev();
+            dev = machineConfig.isDev();
             name = machineConfig.getName();
             type = machineConfig.getType();
             source = machineConfig.getSource();
@@ -206,8 +206,8 @@ public class MachineConfigImpl implements MachineConfig {
             return this;
         }
 
-        public MachineConfigImplBuilder setDev(boolean isDev) {
-            this.isDev = isDev;
+        public MachineConfigImplBuilder setDev(boolean dev) {
+            this.dev = dev;
             return this;
         }
 
