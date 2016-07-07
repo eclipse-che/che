@@ -20,7 +20,6 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -49,13 +48,14 @@ public class DefaultWorkspaceValidatorTest {
 
     @Mock
     private MachineInstanceProviders machineInstanceProviders;
-    @InjectMocks
+
     private DefaultWorkspaceValidator wsValidator;
 
     @BeforeMethod
     public void prepare() throws Exception {
         when(machineInstanceProviders.hasProvider("docker")).thenReturn(true);
         when(machineInstanceProviders.getProviderTypes()).thenReturn(Arrays.asList(new String[] { "docker", "ssh" }));
+        wsValidator = new DefaultWorkspaceValidator(machineInstanceProviders, "http://localhost");
     }
 
     @Test
@@ -515,13 +515,23 @@ public class DefaultWorkspaceValidatorTest {
         wsValidator.validateConfig(config);
     }
 
+    @Test(expectedExceptions = BadRequestException.class,
+          expectedExceptionsMessageRegExp = "Environment 'dev-env' contains source with http location, which is not allowed")
+    public void shouldFailValidationIfUsingHttpRecipeOnHttps() throws Exception {
+        wsValidator = new DefaultWorkspaceValidator(machineInstanceProviders, "https://localhost");
+        final WorkspaceConfigDto configDto = createConfig();
+
+        wsValidator.validateConfig(configDto);
+    }
+
+
     private static WorkspaceConfigDto createConfig() {
         final WorkspaceConfigDto workspaceConfigDto = newDto(WorkspaceConfigDto.class).withName("ws-name")
                                                                                       .withDefaultEnv("dev-env");
 
         final List<ServerConfDto> serversConf = new ArrayList<>(Arrays.asList(newDto(ServerConfDto.class).withRef("ref1")
                                                                                                          .withPort("8080/tcp")
-                                                                                                         .withProtocol("https")
+                                                                                                         .withProtocol("http")
                                                                                                          .withPath("some/path"),
                                                                               newDto(ServerConfDto.class).withRef("ref2")
                                                                                                          .withPort("9090/udp")
@@ -530,7 +540,7 @@ public class DefaultWorkspaceValidatorTest {
         MachineConfigDto devMachine = newDto(MachineConfigDto.class).withDev(true)
                                                                     .withName("dev-machine")
                                                                     .withType("docker")
-                                                                    .withSource(newDto(MachineSourceDto.class).withLocation("location")
+                                                                    .withSource(newDto(MachineSourceDto.class).withLocation("http://location")
                                                                                                               .withType("dockerfile"))
                                                                     .withServers(serversConf)
                                                                     .withEnvVariables(new HashMap<>(singletonMap("key1", "value1")));
