@@ -12,10 +12,9 @@
 -->
 <che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
   <div flex="100"
-       layout="column" layout-gt-xs="row"
+       layout="row"
        layout-align="start stretch"
        class="workspace-item-row">
-
     <div layout="row"
          layout-align="center center"
          class="workspace-list-item-checkbox"
@@ -26,33 +25,33 @@
                                che-aria-label-checkbox="Workspace {{workspaceItemCtrl.workspace.config.name}}"></che-list-item-checked>
       </div>
     </div>
-
     <div flex
          layout-xs="column" layout-gt-xs="row"
-         layout-align="start center"
+         layout-align-gt-xs="start center"
+         layout-align-xs="start start"
          class="workspace-item-details"
          ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
       <div flex-gt-xs="33"
            class="workspace-item-name">
-        <span class="che-hover">{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}</span>
-        <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.temporary"></i>
+        <span class="che-xs-header noselect" hide-gt-xs>Name</span>
+        <span>
+          <workspace-status-indicator che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status-indicator>
+          <span class="che-hover">{{workspaceItemCtrl.workspace.config.name}}</span>
+          <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.temporary"></i>
+        </span>
       </div>
-      <div flex-gt-xs="33"
-           class="workspace-item-status">
-        <workspace-status che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status>
+      <div flex-gt-xs="33">
+        <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
+        <span class="workspace-consumed-value">{{workspaceItemCtrl.getDefaultEnvironment(workspaceItemCtrl.workspace).machineConfigs[0].limits.ram}} MB</span>
       </div>
-      <div flex-gt-xs="33"
-           class="workspace-consumed-value">
-        {{workspaceItemCtrl.getDefaultEnvironment(workspaceItemCtrl.workspace).machineConfigs[0].limits.ram}} MB
+      <div flex-gt-xs="33">
+        <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+        <span class="workspace-actions">
+          <a ng-href="#/create-project?workspaceId={{workspaceItemCtrl.workspace.id}}" tooltip="Add project">
+            <span class="fa fa-plus-square-o"></span>
+          </a>
+        </span>
       </div>
-    </div>
-
-    <div flex="none" layout="row" layout-align="center center">
-      <a ng-href="#/ide/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}">
-        <che-button-default class="che-hover workspace-list-item-arrow"
-                            che-button-icon="fa fa fa-chevron-circle-right"
-                            che-button-title="Open in IDE"></che-button-default>
-      </a>
     </div>
   </div>
 </che-list-item>

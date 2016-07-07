@@ -2,7 +2,8 @@
   flex-wrap wrap
 
 .workspace-list-content
-  padding 15px
+  margin-top 50px
+  padding 15px 0 15px 0
 
 .workspace-list-content .workspace-empty-list
   overflow visible
@@ -19,7 +20,7 @@ md-progress-linear.workspaces-list-progress
   height 10px
 
 .workspace-list-title
-  margin-left 12px
+  margin-left 5px
 
 .workspace-list-empty
   font-size 12px
@@ -29,3 +30,23 @@ md-progress-linear.workspaces-list-progress
 
 .che-list che-workspace-item:not(:last-of-type) .che-list-item
   border-bottom 1px solid $list-separator-color
+
+.header-column
+  margin-left 12px
+  line-height 50px
+  text-transform uppercase
+  color $frame-subscription-color
+
+.sort-direction
+  position relative
+  text-align center
+  display inline
+  top 4px
+
+.sort-direction *:first-child
+  position relative
+  top 3px
+
+.sort-direction *::before
+  font-size 20px
+  color $menu-bg-color

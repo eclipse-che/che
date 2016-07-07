@@ -1,28 +1,55 @@
 .workspace-item-row
-  min-height 56px
+  min-height 40px
 
 .workspace-item-row div
   outline none
 
 .workspace-item-details
+  line-height 22px
   cursor pointer
+
+  & > *:last-child
+    margin-right 10px
+
+  & .che-xs-header
+    text-transform uppercase
+    color $frame-subscription-color
+    display inline-block
+    line-height 22px
+    min-width 65px
+
+  div
+    display flex
 
 .workspace-item-name
   font-size 1em
   color $label-primary-color
-  margin 5px 12px
 
-.workspace-item-status
-  font-size 12px
-  margin 5px
+.workspace-actions
+  width 100%
+  margin-right 10px
+  display inline-block
   color $label-info-color
-  text-align center
+
+  *
+    float right
+
+  *:before
+    vertical-align middle
+    font-size 22px
+    position relative
+    top 2px
+
+  a
+    text-decoration none
+    display inline-flex
+    color inherit
 
 .workspace-item-temp
   color $label-info-color
 
 .workspace-resources-locked
-  background-color  $error-color
+  background-color $error-color
   color $white-color
   padding 5px 10px
   border-radius 5px
@@ -37,13 +64,11 @@
 .workspace-no-consumed-value
   color $label-info-color
 
-
 .workspace-list-item-arrow md-icon
   height 32px !important
   line-height 35px
   width 36px !important
   font-size 32px !important
-
 
 .workspace-list-item-arrow button
   font-size 11px !important

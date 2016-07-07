@@ -33,6 +33,7 @@ export class ListWorkspacesCtrl {
     this.state = 'loading';
     this.isInfoLoading = true;
     this.workspaceFilter = {config: {name: ''}};
+    this.workspaceOrderBy = 'config.name';
 
     //Map of all workspaces with additional info by id:
     this.workspacesById = new Map();
@@ -72,6 +73,7 @@ export class ListWorkspacesCtrl {
       }
     ];
 
+    this.isBulkChecked = false;
     $rootScope.showIDE = false;
   }
 
@@ -185,6 +187,7 @@ export class ListWorkspacesCtrl {
     for (let key of this.workspacesById.keys()) {
       this.workspacesSelectedStatus[key] = true;
     }
+    this.isBulkChecked = true;
   }
 
   /**
@@ -194,6 +197,18 @@ export class ListWorkspacesCtrl {
     Object.keys(this.workspacesSelectedStatus).forEach((key) => {
       this.workspacesSelectedStatus[key] = false;
     });
+    this.isBulkChecked = false;
+  }
+
+  /**
+   * Change bulk selection value
+   */
+  changeBulkSelection() {
+    if (this.isBulkChecked) {
+      this.deselectAllWorkspaces();
+      return;
+    }
+    this.selectAllWorkspaces();
   }
 
   /**

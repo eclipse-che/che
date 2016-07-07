@@ -333,10 +333,7 @@ initModule.config(($mdThemingProvider, jsonColors) => {
 
   $mdThemingProvider.theme('maincontent-theme')
     .primaryPalette('che')
-    .accentPalette('cheAccent')
-    .backgroundPalette('cheGrey');
-
-
+    .accentPalette('cheAccent');
 });
 
 initModule.constant('userDashboardConfig', {
