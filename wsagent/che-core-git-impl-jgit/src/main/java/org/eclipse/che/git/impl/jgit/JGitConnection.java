@@ -15,7 +15,6 @@ import com.google.common.io.Files;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -127,9 +126,9 @@ import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
-import org.eclipse.jgit.transport.TrackingRefUpdate;
 import org.eclipse.jgit.transport.SshSessionFactory;
 import org.eclipse.jgit.transport.SshTransport;
+import org.eclipse.jgit.transport.TrackingRefUpdate;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -145,6 +144,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.net.URISyntaxException;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
@@ -152,11 +153,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -166,6 +168,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.lineSeparator;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
+import static java.util.Objects.nonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -235,6 +238,29 @@ class JGitConnection implements GitConnection {
     private final GitUserResolver   userResolver;
     private final Repository        repository;
 
+    // setup authenticators to use JGit behind the proxy
+    private static Authenticator httpsProxyAuth;
+    private static Authenticator httpProxyAuth;
+    static {
+        if (nonNull(System.getProperty("http.proxyUser")) && nonNull(System.getProperty("http.proxyPassword"))) {
+            httpProxyAuth = new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(System.getProperty("http.proxyUser"),
+                                                      System.getProperty("http.proxyPassword").toCharArray());
+                }
+            };
+        }
+
+        if (nonNull(System.getProperty("https.proxyUser")) && nonNull(System.getProperty("https.proxyPassword"))) {
+            httpsProxyAuth = new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(System.getProperty("https.proxyUser"),
+                                                      System.getProperty("https.proxyPassword").toCharArray());
+                }
+            };
+        }
+    }
+    
     @Inject
     JGitConnection(Repository repository, CredentialsLoader credentialsLoader, SshKeyProvider sshKeyProvider,
                    GitUserResolver userResolver) {
@@ -1590,13 +1616,22 @@ class JGitConnection implements GitConnection {
                         sshTransport.setSshSessionFactory(sshSessionFactory);
                     }
                 });
+
+                if (nonNull(httpProxyAuth)) {
+                    Authenticator.setDefault(httpProxyAuth);
+                }
             } else {
                 UserCredential credentials = credentialsLoader.getUserCredential(remoteUrl);
                 if (credentials != null) {
                     command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(credentials.getUserName(),
                                                                                            credentials.getPassword()));
                 }
+
+                if (nonNull(httpsProxyAuth)) {
+                    Authenticator.setDefault(httpsProxyAuth);
+                }
             }
+
             return command.call();
         } catch (GitException | TransportException exception) {
             if ("Unable get private ssh key".equals(exception.getMessage())
