@@ -20,10 +20,6 @@
     </parent>
     <artifactId>che-java-testing-classpath-maven-server</artifactId>
     <dependencies>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
         <!--<dependency>-->
         <!--<groupId>javax.inject</groupId>-->
         <!--<artifactId>javax.inject</artifactId>-->

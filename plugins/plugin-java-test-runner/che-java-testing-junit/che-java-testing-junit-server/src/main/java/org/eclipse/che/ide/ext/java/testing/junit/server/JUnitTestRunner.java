@@ -275,7 +275,8 @@ public class JUnitTestRunner implements TestRunner {
      * {@inheritDoc}
      */
     @Override
-    public TestResult execute(Map<String, String> testParameters, TestClasspathProvider classpathProvider) {
+    public TestResult execute(Map<String, String> testParameters,
+                              TestClasspathProvider classpathProvider) throws Exception {
 
         projectPath = testParameters.get("absoluteProjectPath");
         boolean updateClasspath = Boolean.valueOf(testParameters.get("updateClasspath"));

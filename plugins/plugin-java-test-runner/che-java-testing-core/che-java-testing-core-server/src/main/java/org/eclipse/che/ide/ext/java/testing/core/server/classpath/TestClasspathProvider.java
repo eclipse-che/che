@@ -24,8 +24,9 @@ public interface TestClasspathProvider {
      * @param projectPath     absolute path for the project location.
      * @param updateClasspath calculate the classpath if true. otherwise return existing class loader.
      * @return the class loader for the Java project.
+     * @throws Exception when classloader creation failed.
      */
-    ClassLoader getClassLoader(String projectPath, boolean updateClasspath);
+    ClassLoader getClassLoader(String projectPath, boolean updateClasspath) throws Exception;
 
     /**
      * String representation of the project type.

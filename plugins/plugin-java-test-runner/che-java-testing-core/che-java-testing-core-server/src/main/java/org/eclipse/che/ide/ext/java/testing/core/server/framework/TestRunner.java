@@ -31,8 +31,9 @@ public interface TestRunner {
      *                          the REST service request are passed as a map.
      * @param classpathProvider The classpath provider for executing the test cases.
      * @return the test results.
+     * @throws Exception when test runner execution fails.
      */
-    TestResult execute(Map<String, String> testParameters, TestClasspathProvider classpathProvider);
+    TestResult execute(Map<String, String> testParameters, TestClasspathProvider classpathProvider) throws Exception;
 
     /**
      * The test runner framework will call this method to get the framework name for registration.

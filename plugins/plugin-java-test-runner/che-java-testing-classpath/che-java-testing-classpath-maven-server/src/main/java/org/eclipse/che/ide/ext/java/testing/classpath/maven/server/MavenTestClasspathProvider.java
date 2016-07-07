@@ -33,27 +33,6 @@ import java.util.List;
  */
 public class MavenTestClasspathProvider implements TestClasspathProvider {
 
-    private static final String JUNIT4X_RUNNER_CLASS = "org.junit.runner.JUnitCore";
-    private static final String JUNIT3X_RUNNER_CLASS = "junit.textui.TestRunner";
-
-
-//    private TestRunnerFramework getFramework(ClassLoader projectClassLoader){
-//        try {
-//            Class.forName(JUNIT4X_RUNNER_CLASS, true, projectClassLoader);
-//            return TestRunnerFramework.JUNIT4x;
-//        } catch (ClassNotFoundException ignored) {
-//        }
-//
-//        try {
-//            Class.forName(JUNIT3X_RUNNER_CLASS, true, projectClassLoader);
-//            return TestRunnerFramework.JUNIT3x;
-//        } catch (ClassNotFoundException ignored) {
-//        }
-//
-//        return TestRunnerFramework.UNKNOWN;
-//    }
-
-
     private boolean buildClasspath(String projectPath) throws IOException, InterruptedException {
 
         final CommandLine commandLineClassPath = new CommandLine("mvn", "clean", "dependency:build-classpath",
@@ -104,15 +83,15 @@ public class MavenTestClasspathProvider implements TestClasspathProvider {
      * {@inheritDoc}
      */
     @Override
-    public ClassLoader getClassLoader(String projectPath, boolean updateClasspath) {
-        List<URL> classUrls = new ArrayList<>();
+    public ClassLoader getClassLoader(String projectPath, boolean updateClasspath) throws Exception {
+        List<URL> classUrls;
         try {
             if (updateClasspath) {
                 buildClasspath(projectPath);
             }
             classUrls = getProjectClasspath(projectPath);
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            throw new Exception("Failed to build Maven classpath.", e);
         }
         return new URLClassLoader(classUrls.toArray(new URL[classUrls.size()]), null);
     }
