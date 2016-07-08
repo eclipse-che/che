@@ -35,6 +35,15 @@ public class CSharpLanguageServerFactory extends LanguageServerFactoryTemplate {
     public static final String[] EXTENSIONS  = new String[] {"cs", "csx"};
     public static final String[] MIME_TYPES  = new String[] {"text/x-csharp"};
 
+    public static final LanguageDescriptionImpl description;
+
+    static {
+        description = new LanguageDescriptionImpl();
+        description.setFileExtensions(asList(EXTENSIONS));
+        description.setLanguageId(LANGUAGE_ID);
+        description.setMimeTypes(Arrays.asList(MIME_TYPES));
+    }
+
     @Override
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
         restoreDependencies(projectPath);
@@ -76,10 +85,6 @@ public class CSharpLanguageServerFactory extends LanguageServerFactoryTemplate {
 
     @Override
     public LanguageDescription getLanguageDescription() {
-        LanguageDescriptionImpl languageDescription = new LanguageDescriptionImpl();
-        languageDescription.setFileExtensions(asList(EXTENSIONS));
-        languageDescription.setLanguageId(LANGUAGE_ID);
-        languageDescription.setMimeTypes(Arrays.asList(MIME_TYPES));
-        return languageDescription;
+        return description;
     }
 }

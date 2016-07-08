@@ -33,13 +33,18 @@ public class JsonLanguageServerFactory extends LanguageServerFactoryTemplate {
     public static final String[] EXTENSIONS  = new String[] {"json", "bowerrc", "jshintrc", "jscsrc", "eslintrc", "babelrc"};
     public static final String[] MIME_TYPES  = new String[] {"application/json"};
 
+    public static final LanguageDescriptionImpl description;
+
+    static {
+        description = new LanguageDescriptionImpl();
+        description.setFileExtensions(asList(EXTENSIONS));
+        description.setLanguageId(LANGUAGE_ID);
+        description.setMimeTypes(Arrays.asList(MIME_TYPES));
+    }
+
     @Override
     public LanguageDescription getLanguageDescription() {
-        LanguageDescriptionImpl languageDescription = new LanguageDescriptionImpl();
-        languageDescription.setFileExtensions(asList(EXTENSIONS));
-        languageDescription.setLanguageId(LANGUAGE_ID);
-        languageDescription.setMimeTypes(Arrays.asList(MIME_TYPES));
-        return languageDescription;
+        return description;
     }
 
     protected JsonBasedLanguageServer connectToLanguageServer(Process languageServerProcess) {

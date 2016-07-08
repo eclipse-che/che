@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
+
 /**
  * @author Anatoliy Bazko
  */
@@ -76,15 +78,13 @@ public class ServerInitializerImpl implements ServerInitializer {
         }
         registerCallbacks(server);
 
-        InitializeResult initializeResult;
+        CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
         try {
-            CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
-            initializeResult = completableFuture.get();
-
+            InitializeResult initializeResult = completableFuture.get();
             onServerInitialized(server, initializeResult.getCapabilities(), factory.getLanguageDescription());
         } catch (InterruptedException | ExecutionException e) {
-            String errMsg = "Error initialing language server. " + e.getMessage();
-            LOG.error(errMsg, e);
+            LOG.error("Error fetching server capabilities. " + e.getMessage(), e);
+            onServerInitialized(server, newDto(ServerCapabilities.class), factory.getLanguageDescription());
         }
 
         LOG.info("Initialized Language Server {} on project {}", languageId, projectPath);

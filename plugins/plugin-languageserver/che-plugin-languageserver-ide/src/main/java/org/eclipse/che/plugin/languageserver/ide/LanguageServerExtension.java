@@ -43,7 +43,6 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.declaration.FindDefi
 import org.eclipse.che.plugin.languageserver.ide.navigation.references.FindReferencesAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
-import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
@@ -155,8 +154,7 @@ public class LanguageServerExtension {
     @Inject
     protected void registerFileEventHandler(final EventBus eventBus,
                                             final TextDocumentServiceClient serviceClient,
-                                            final DtoFactory dtoFactory,
-                                            final LanguageServerRegistry registry) {
+                                            final DtoFactory dtoFactory) {
         eventBus.addHandler(FileEvent.TYPE, new FileEventHandler() {
 
             @Override
@@ -165,7 +163,6 @@ public class LanguageServerExtension {
                 documentId.setUri(event.getFile().getPath());
                 switch (event.getOperationType()) {
                     case OPEN:
-                        registry.getCapabilitiesByExtension("json");
                         onOpen(event, dtoFactory, serviceClient);
                         break;
                     case CLOSE:
