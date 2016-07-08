@@ -140,6 +140,11 @@ public class RenameRefactoringAction extends Action implements ActivePartChanged
             if (file instanceof File) {
                 final Optional<Project> project = ((File)file).getRelatedProject();
 
+                if (!project.isPresent()) {
+                    event.getPresentation().setEnabled(false);
+                    return;
+                }
+
                 event.getPresentation().setEnabled(JavaUtil.isJavaProject(project.get()) && isJavaFile(file));
             } else {
                 event.getPresentation().setEnabled(isJavaFile(file));
@@ -156,6 +161,12 @@ public class RenameRefactoringAction extends Action implements ActivePartChanged
             final Resource resource = resources[0];
 
             final Optional<Project> project = resource.getRelatedProject();
+
+            if (!project.isPresent()) {
+                event.getPresentation().setEnabled(false);
+                return;
+            }
+
             final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
 
             if (resource.getResourceType() == FILE) {

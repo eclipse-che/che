@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.action;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathPresenter;
@@ -23,6 +25,7 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathPre
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
+import static org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker.ID;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -57,8 +60,18 @@ public class ProjectClasspathAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        final Resource[] resources = appContext.getResources();
+        final Resource resource = appContext.getResource();
+        if (resource == null) {
+            event.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
 
-        event.getPresentation().setEnabledAndVisible(resources != null && resources.length == 1 && isJavaProject(resources[0].getRelatedProject().get()));
+        final Optional<Project> project = resource.getRelatedProject();
+        if (!project.isPresent()) {
+            event.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        event.getPresentation().setEnabledAndVisible(isJavaProject(project.get()) && resource.getParentWithMarker(ID).isPresent());
     }
 }
