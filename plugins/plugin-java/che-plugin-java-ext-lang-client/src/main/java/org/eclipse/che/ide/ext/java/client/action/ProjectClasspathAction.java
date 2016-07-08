@@ -72,6 +72,6 @@ public class ProjectClasspathAction extends AbstractPerspectiveAction {
             return;
         }
 
-        event.getPresentation().setEnabledAndVisible(isJavaProject(project.get()) && resource.getParentWithMarker(ID).isPresent());
+        event.getPresentation().setEnabledAndVisible(isJavaProject(project.get()));
     }
 }
