@@ -739,6 +739,6 @@ public class WorkspaceRuntimesTest {
                                                                 .setEnvironments(singletonList(environment))
                                                                 .setDefaultEnv(environment.getName())
                                                                 .build();
-        return new WorkspaceImpl(WORKSPACE_ID, "user123", wsConfig);
+        return new WorkspaceImpl(WORKSPACE_ID, "user123",  wsConfig);
     }
 }

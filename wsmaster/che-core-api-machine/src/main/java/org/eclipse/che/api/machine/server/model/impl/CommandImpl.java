@@ -16,17 +16,37 @@ import java.util.Objects;
 
 import org.eclipse.che.api.core.model.machine.Command;
 
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
 /**
  * Data object for {@link Command}.
  *
  * @author Eugene Voevodin
  */
+@Entity(name = "Command")
 public class CommandImpl implements Command {
 
-    private String              name;
-    private String              commandLine;
-    private String              type;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String commandLine;
+
+    @Column(nullable = false)
+    private String type;
+
+    @ElementCollection
     private Map<String, String> attributes;
+
+    public CommandImpl() {}
 
     public CommandImpl(String name, String commandLine, String type) {
         this.name = name;

@@ -12,14 +12,23 @@ package org.eclipse.che.api.machine.server.model.impl;
 
 import org.eclipse.che.api.core.model.machine.Limits;
 
+import javax.persistence.Basic;
+import javax.persistence.Embeddable;
+
 /**
  * @author Alexander Garagatyi
+ * @author Yevhenii Voevodin
  */
+@Embeddable
 public class LimitsImpl implements Limits {
-    private final int memory;
+
+    @Basic
+    private int memory;
+
+    public LimitsImpl() {}
 
     public LimitsImpl(Limits limits) {
-        if(limits != null) {
+        if (limits != null) {
             memory = limits.getRam();
         } else {
             memory = 0;
@@ -33,6 +42,10 @@ public class LimitsImpl implements Limits {
     @Override
     public int getRam() {
         return memory;
+    }
+
+    public void setRam(int memory) {
+        this.memory = memory;
     }
 
     @Override
@@ -49,5 +62,12 @@ public class LimitsImpl implements Limits {
     @Override
     public int hashCode() {
         return memory;
+    }
+
+    @Override
+    public String toString() {
+        return "LimitsImpl{" +
+               "memory=" + memory +
+               '}';
     }
 }

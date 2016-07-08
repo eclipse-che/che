@@ -16,6 +16,18 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.commons.lang.NameGenerator;
 
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -28,27 +40,57 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
  *
  * @author Yevhenii Voevodin
  */
+@Entity(name = "Workspace")
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "namespace"}))
+@NamedQueries(
+        {
+                @NamedQuery(name = "Workspace.getByNamespace",
+                            query = "SELECT w FROM Workspace w WHERE w.namespace = :namespace"),
+                @NamedQuery(name = "Workspace.getByName",
+                            query = "SELECT w FROM Workspace w WHERE w.namespace = :namespace AND w.name = :name"),
+                @NamedQuery(name = "Workspace.getAll",
+                            query = "SELECT w FROM Workspace w")
+        }
+)
 public class WorkspaceImpl implements Workspace {
 
     public static WorkspaceImplBuilder builder() {
         return new WorkspaceImplBuilder();
     }
 
-    private final String id;
-    private final String namespace;
+    @Id
+    private String id;
 
-    private WorkspaceConfigImpl  config;
-    private boolean              isTemporary;
-    private WorkspaceStatus      status;
-    private Map<String, String>  attributes;
+    @Column(nullable = false)
+    private String namespace;
+
+    @Column(nullable = false)
+    private String name;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private WorkspaceConfigImpl config;
+
+    @ElementCollection
+    private Map<String, String> attributes;
+
+    @Basic
+    private boolean isTemporary;
+
+    @Transient
+    private WorkspaceStatus status = STOPPED;
+
+    @Transient
     private WorkspaceRuntimeImpl runtime;
 
+    public WorkspaceImpl() {}
+
     public WorkspaceImpl(String id, String namespace, WorkspaceConfig config) {
-        this(id, namespace, config, null, null, false, STOPPED);
+        this(id, namespace, config.getName(), config, null, null, false, STOPPED);
     }
 
     public WorkspaceImpl(String id,
                          String namespace,
+                         String name,
                          WorkspaceConfig config,
                          WorkspaceRuntime runtime,
                          Map<String, String> attributes,
@@ -56,8 +98,9 @@ public class WorkspaceImpl implements Workspace {
                          WorkspaceStatus status) {
         this.id = id;
         this.namespace = namespace;
+        this.name = name;
         this.config = new WorkspaceConfigImpl(config);
-        if (runtime  != null) {
+        if (runtime != null) {
             this.runtime = new WorkspaceRuntimeImpl(runtime);
         }
         if (attributes != null) {
@@ -68,9 +111,7 @@ public class WorkspaceImpl implements Workspace {
     }
 
     public WorkspaceImpl(Workspace workspace) {
-        this(workspace.getId(),
-             workspace.getNamespace(),
-             workspace.getConfig());
+        this(workspace.getId(), workspace.getNamespace(), workspace.getConfig());
         this.attributes = new HashMap<>(workspace.getAttributes());
         if (workspace.getRuntime() != null) {
             this.runtime = new WorkspaceRuntimeImpl(workspace.getRuntime());
@@ -84,18 +125,30 @@ public class WorkspaceImpl implements Workspace {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     @Override
     public String getNamespace() {
         return namespace;
     }
 
-    @Override
-    public WorkspaceStatus getStatus() {
-        return status;
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
-    public void setStatus(WorkspaceStatus status) {
-        this.status = status;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public WorkspaceConfigImpl getConfig() {
+        return config;
     }
 
     public void setConfig(WorkspaceConfigImpl config) {
@@ -119,13 +172,17 @@ public class WorkspaceImpl implements Workspace {
         return isTemporary;
     }
 
-    public void setTemporary(boolean isTemporary) {
-        this.isTemporary = isTemporary;
+    public void setTemporary(boolean temporary) {
+        isTemporary = temporary;
     }
 
     @Override
-    public WorkspaceConfigImpl getConfig() {
-        return config;
+    public WorkspaceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(WorkspaceStatus status) {
+        this.status = status;
     }
 
     @Override
@@ -144,6 +201,7 @@ public class WorkspaceImpl implements Workspace {
         final WorkspaceImpl other = (WorkspaceImpl)obj;
         return Objects.equals(id, other.id)
                && Objects.equals(namespace, other.namespace)
+               && Objects.equals(name, other.name)
                && Objects.equals(status, other.status)
                && isTemporary == other.isTemporary
                && getAttributes().equals(other.getAttributes())
@@ -156,6 +214,7 @@ public class WorkspaceImpl implements Workspace {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(namespace);
+        hash = 31 * hash + Objects.hashCode(name);
         hash = 31 * hash + Objects.hashCode(status);
         hash = 31 * hash + Objects.hashCode(config);
         hash = 31 * hash + getAttributes().hashCode();
@@ -169,6 +228,7 @@ public class WorkspaceImpl implements Workspace {
         return "WorkspaceImpl{" +
                "id='" + id + '\'' +
                ", namespace='" + namespace + '\'' +
+               ", name='" + name + '\'' +
                ", config=" + config +
                ", isTemporary=" + isTemporary +
                ", status=" + status +
@@ -178,24 +238,25 @@ public class WorkspaceImpl implements Workspace {
     }
 
     /**
-     * Helps to build complex {@link WorkspaceImpl users workspace instance}.
+     * Helps to build complex {@link WorkspaceImpl workspace} instance.
      *
      * @see WorkspaceImpl#builder()
      */
     public static class WorkspaceImplBuilder {
 
-        private String              id;
-        private String              namespace;
-        private boolean             isTemporary;
-        private WorkspaceStatus     status;
-        private WorkspaceConfigImpl config;
+        private String               id;
+        private String               namespace;
+        private String               name;
+        private boolean              isTemporary;
+        private WorkspaceStatus      status;
+        private WorkspaceConfigImpl  config;
         private WorkspaceRuntimeImpl runtime;
-        private Map<String, String> attributes;
+        private Map<String, String>  attributes;
 
         private WorkspaceImplBuilder() {}
 
         public WorkspaceImpl build() {
-            return new WorkspaceImpl(id, namespace, config, runtime, attributes, isTemporary, status);
+            return new WorkspaceImpl(id, namespace, name, config, runtime, attributes, isTemporary, status);
         }
 
         public WorkspaceImplBuilder generateId() {
@@ -205,6 +266,7 @@ public class WorkspaceImpl implements Workspace {
 
         public WorkspaceImplBuilder setConfig(WorkspaceConfig workspaceConfig) {
             this.config = new WorkspaceConfigImpl(workspaceConfig);
+            this.name = workspaceConfig.getName();
             return this;
         }
 
@@ -235,6 +297,11 @@ public class WorkspaceImpl implements Workspace {
 
         public WorkspaceImplBuilder setRuntime(WorkspaceRuntimeImpl runtime) {
             this.runtime = runtime;
+            return this;
+        }
+
+        public WorkspaceImplBuilder setName(String name) {
+            this.name = name;
             return this;
         }
     }

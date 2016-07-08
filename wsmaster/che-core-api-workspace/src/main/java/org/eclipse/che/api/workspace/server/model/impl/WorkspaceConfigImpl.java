@@ -15,14 +15,20 @@ import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -31,18 +37,39 @@ import static java.util.stream.Collectors.toList;
  * @author Alexander Garagatyi
  * @author Yevhenii Voevodin
  */
+@Entity(name = "WorkspaceConfig")
 public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     public static WorkspaceConfigImplBuilder builder() {
         return new WorkspaceConfigImplBuilder();
     }
 
-    private String                  name;
-    private String                  description;
-    private String                  defaultEnv;
-    private List<CommandImpl>       commands;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Basic
+    private String name;
+
+    @Basic
+    private String description;
+
+    @Column(nullable = false)
+    private String defaultEnv;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
+    private List<CommandImpl> commands;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
     private List<ProjectConfigImpl> projects;
-    private List<EnvironmentImpl>   environments;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
+    private List<EnvironmentImpl> environments;
+
+    public WorkspaceConfigImpl() {}
 
     public WorkspaceConfigImpl(String name,
                                String description,
@@ -85,11 +112,10 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     }
 
     public void setName(String name) {
-        this.name = requireNonNull(name, "Non-null name required");
+        this.name = name;
     }
 
     @Override
-    @Nullable
     public String getDescription() {
         return description;
     }
@@ -101,6 +127,10 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     @Override
     public String getDefaultEnv() {
         return defaultEnv;
+    }
+
+    public void setDefaultEnv(String defaultEnv) {
+        this.defaultEnv = defaultEnv;
     }
 
     @Override
@@ -129,7 +159,14 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public List<EnvironmentImpl> getEnvironments() {
+        if (environments == null) {
+            environments = new ArrayList<>();
+        }
         return environments;
+    }
+
+    public void setEnvironments(List<EnvironmentImpl> environments) {
+        this.environments = environments;
     }
 
     public Optional<EnvironmentImpl> getEnvironment(String name) {
