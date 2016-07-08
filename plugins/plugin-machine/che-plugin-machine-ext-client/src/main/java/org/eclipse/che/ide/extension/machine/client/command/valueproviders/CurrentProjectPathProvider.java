@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.command.valueproviders;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -19,6 +20,7 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 
 import javax.validation.constraints.NotNull;
@@ -68,11 +70,16 @@ public class CurrentProjectPathProvider implements CommandPropertyValueProvider,
         final Resource[] resources = appContext.getResources();
 
         if (resources != null && resources.length == 1) {
-            value = appContext.getProjectsRoot().append(resources[0].getLocation()).toString();
-            return;
-        }
+            final Optional<Project> project = appContext.getResource().getRelatedProject();
 
-        value = "";
+            if (project.isPresent()) {
+                value = project.get().getLocation().toString();
+            } else {
+                value = "";
+            }
+        } else {
+            value = "";
+        }
     }
 
     @Override
