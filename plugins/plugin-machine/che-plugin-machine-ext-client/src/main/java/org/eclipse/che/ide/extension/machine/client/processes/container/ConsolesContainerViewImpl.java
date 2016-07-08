@@ -72,6 +72,7 @@ public class ConsolesContainerViewImpl extends BaseView<ConsolesContainerView.Ac
         addToolButtons();
         tuneSplitter();
         defaultModeButton.getElement().getFirstChildElement().setAttribute(ACTIVE_STATE_TOOLBUTTON_ATTRIBUTE, "");
+        minimizeButton.ensureDebugId("consoles-minimizeButton");
     }
 
     private void addToolButtons() {
@@ -86,9 +87,9 @@ public class ConsolesContainerViewImpl extends BaseView<ConsolesContainerView.Ac
         addToolButton(splitVerticallyButton);
         addToolTip(splitVerticallyButton, localizationConstant.consolesSplitVerticallyTooltip());
         splitVerticallyButton.getElement().getFirstChildElement().addClassName(toolButtonStyle);
+        splitVerticallyButton.ensureDebugId("consoles-splitVerticallyButton");
 
         splitHorizontallyButton = new ToolButton(FontAwesome.MINUS_SQUARE_O);
-        splitHorizontallyButton.getElement().getFirstChildElement().addClassName(toolButtonStyle);
         splitHorizontallyButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -97,9 +98,10 @@ public class ConsolesContainerViewImpl extends BaseView<ConsolesContainerView.Ac
         });
         addToolButton(splitHorizontallyButton);
         addToolTip(splitHorizontallyButton, localizationConstant.consolesSplitHorizontallyTooltip());
+        splitHorizontallyButton.getElement().getFirstChildElement().addClassName(toolButtonStyle);
+        splitHorizontallyButton.ensureDebugId("consoles-splitHorizontallyButton");
 
         defaultModeButton = new ToolButton(FontAwesome.SQUARE_O);
-        defaultModeButton.getElement().getFirstChildElement().addClassName(toolButtonStyle);
         defaultModeButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -108,6 +110,8 @@ public class ConsolesContainerViewImpl extends BaseView<ConsolesContainerView.Ac
         });
         addToolButton(defaultModeButton);
         addToolTip(defaultModeButton, localizationConstant.consolesDefaultModeTooltip());
+        defaultModeButton.getElement().getFirstChildElement().addClassName(toolButtonStyle);
+        defaultModeButton.ensureDebugId("consoles-defaultModeButton");
     }
 
     private void addToolTip(ToolButton button, String tooltip) {
