@@ -110,6 +110,19 @@ public class TreeResourceRevealer {
      * @return promise object with found node or promise error if node wasn't found
      */
     public Promise<Node> reveal(final Path path) {
+        return reveal(path, true);
+    }
+
+    /**
+     * Search node in the project explorer tree by storable path.
+     *
+     * @param path
+     *         path to node
+     * @param select
+     *         select node after reveal
+     * @return promise object with found node or promise error if node wasn't found
+     */
+    public Promise<Node> reveal(final Path path, final boolean select) {
 
         return queue.thenPromise(new Function<Void, Promise<Node>>() {
             @Override
@@ -117,14 +130,14 @@ public class TreeResourceRevealer {
                 return createFromAsyncRequest(new RequestCall<Node>() {
                     @Override
                     public void makeCall(AsyncCallback<Node> callback) {
-                        reveal(path, callback);
+                        reveal(path, select, callback);
                     }
                 });
             }
         });
     }
 
-    protected void reveal(final Path path, final AsyncCallback<Node> callback) {
+    protected void reveal(final Path path, final boolean select, final AsyncCallback<Node> callback) {
         if (path == null) {
             callback.onFailure(new IllegalArgumentException("Invalid search path"));
         }
@@ -150,7 +163,7 @@ public class TreeResourceRevealer {
                     return false;
                 }
 
-                expandToPath(root, path).then(new Operation<ResourceNode>() {
+                expandToPath(root, path, select).then(new Operation<ResourceNode>() {
                     @Override
                     public void apply(ResourceNode node) throws OperationException {
                         callback.onSuccess(node);
@@ -168,27 +181,29 @@ public class TreeResourceRevealer {
 
     }
 
-    private Promise<ResourceNode> expandToPath(final ResourceNode root, final Path path) {
+    private Promise<ResourceNode> expandToPath(final ResourceNode root, final Path path, final boolean select) {
         return createFromAsyncRequest(new RequestCall<ResourceNode>() {
             @Override
             public void makeCall(final AsyncCallback<ResourceNode> callback) {
-                expand(root, path, callback);
+                expand(root, path, select, callback);
             }
         });
     }
 
-    protected void expand(final ResourceNode parent, final Path segment, final AsyncCallback<ResourceNode> callback) {
+    protected void expand(final ResourceNode parent, final Path segment, final boolean select, final AsyncCallback<ResourceNode> callback) {
 
         if (parent.getData().getLocation().equals(segment)) {
-            if (toSelect == null) {
-                toSelect = new Node[]{parent};
-            } else {
-                final int index = toSelect.length;
-                toSelect = copyOf(toSelect, index + 1);
-                toSelect[index] = parent;
-            }
+            if (select) {
+                if (toSelect == null) {
+                    toSelect = new Node[]{parent};
+                } else {
+                    final int index = toSelect.length;
+                    toSelect = copyOf(toSelect, index + 1);
+                    toSelect[index] = parent;
+                }
 
-            selectTask.delay(200);
+                selectTask.delay(200);
+            }
 
             callback.onSuccess(parent);
             return;
@@ -212,7 +227,7 @@ public class TreeResourceRevealer {
 
                 for (Node child : children) {
                     if (child instanceof ResourceNode && ((ResourceNode)child).getData().getLocation().isPrefixOf(segment)) {
-                        expand((ResourceNode)child, segment, callback);
+                        expand((ResourceNode)child, segment, select, callback);
                         return;
                     }
                 }
