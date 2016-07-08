@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.java.plain.client.wizard;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.plugin.java.plain.client.wizard.selector.SelectNodePresenter;
@@ -47,7 +47,7 @@ public class PlainJavaPagePresenterTest {
     @Mock
     private PlainJavaPageView     view;
     @Mock
-    private ProjectConfigDto      dataObject;
+    private MutableProjectConfig  dataObject;
     @Mock
     private AcceptsOneWidget      container;
     @Mock

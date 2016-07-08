@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -50,6 +51,7 @@ public class ClasspathResolver {
 
     private final ClasspathUpdaterServiceClient classpathUpdater;
     private final NotificationManager           notificationManager;
+    private final EventBus                      eventBus;
     private final AppContext                    appContext;
     private final DtoFactory                    dtoFactory;
 
@@ -61,10 +63,12 @@ public class ClasspathResolver {
     @Inject
     public ClasspathResolver(ClasspathUpdaterServiceClient classpathUpdater,
                              NotificationManager notificationManager,
+                             EventBus eventBus,
                              AppContext appContext,
                              DtoFactory dtoFactory) {
         this.classpathUpdater = classpathUpdater;
         this.notificationManager = notificationManager;
+        this.eventBus = eventBus;
         this.appContext = appContext;
         this.dtoFactory = dtoFactory;
     }
@@ -122,6 +126,7 @@ public class ClasspathResolver {
         promise.then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
+                eventBus.fireEvent(new ClasspathChangedEvent(project.get().getLocation().toString(), entries));
                 project.get().synchronize();
             }
         }).catchError(new Operation<PromiseError>() {
