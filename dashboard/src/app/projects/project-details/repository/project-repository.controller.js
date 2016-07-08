@@ -31,7 +31,6 @@ export class ProjectRepositoryController {
     var namespace = $route.current.params.namespace;
     var workspaceName = $route.current.params.workspaceName;
     var projectPath = '/' + $route.current.params.projectName;
-    debugger;
 
     let workspace = this.cheAPI.getWorkspace().getWorkspaceByName(namespace, workspaceName);
     if (workspace && (workspace.status === 'STARTING' || workspace.status === 'RUNNING')) {
