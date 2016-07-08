@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server.lsapi;
+package org.eclipse.che.plugin.languageserver.server.messager;
 
 import io.typefox.lsapi.PublishDiagnosticsParams;
 import io.typefox.lsapi.PublishDiagnosticsParamsImpl;
@@ -33,10 +33,10 @@ import java.io.IOException;
 public class PublishDiagnosticsParamsMessenger implements EventSubscriber<PublishDiagnosticsParams> {
     private final static Logger LOG = LoggerFactory.getLogger(PublishDiagnosticsParamsMessenger.class);
 
-    private EventService eventService;
+    private final EventService eventService;
 
     @Inject
-    public PublishDiagnosticsParamsMessenger(final EventService eventService) {
+    public PublishDiagnosticsParamsMessenger(EventService eventService) {
         this.eventService = eventService;
     }
 

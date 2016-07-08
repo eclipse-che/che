@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide;
 
 import com.google.inject.Inject;
@@ -33,7 +43,8 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.declaration.FindDefi
 import org.eclipse.che.plugin.languageserver.ide.navigation.references.FindReferencesAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
-import org.eclipse.che.plugin.languageserver.ide.service.LanguageRegistryServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
+import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
@@ -60,19 +71,18 @@ public class LanguageServerExtension {
     }
 
     @Inject
-    protected void configureFileTypes(
-            final FileTypeRegistry fileTypeRegistry,
-            final LanguageServerResources resources,
-            final EditorRegistry editorRegistry,
-            final LanguageServerEditorProvider editorProvider,
-            final OrionContentTypeRegistrant contentTypeRegistrant,
-            final LanguageRegistryServiceClient serverLanguageRegistry,
-            final EventBus eventBus) {
+    protected void configureFileTypes(final FileTypeRegistry fileTypeRegistry,
+                                      final LanguageServerResources resources,
+                                      final EditorRegistry editorRegistry,
+                                      final LanguageServerEditorProvider editorProvider,
+                                      final OrionContentTypeRegistrant contentTypeRegistrant,
+                                      final LanguageServerRegistryServiceClient serverLanguageRegistry,
+                                      final EventBus eventBus) {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
 
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                Promise<List<LanguageDescriptionDTO>> registeredLanguages = serverLanguageRegistry.getRegisteredLanguages();
+                Promise<List<LanguageDescriptionDTO>> registeredLanguages = serverLanguageRegistry.getSupportedLanguages();
                 registeredLanguages.then(new Operation<List<LanguageDescriptionDTO>>() {
                     @Override
                     public void apply(List<LanguageDescriptionDTO> langs) throws OperationException {
@@ -113,10 +123,7 @@ public class LanguageServerExtension {
             }
 
             @Override
-            public void onWsAgentStopped(WsAgentStateEvent event) {
-                // TODO Auto-generated method stub
-
-            }
+            public void onWsAgentStopped(WsAgentStateEvent event) { }
         });
     }
 
@@ -146,8 +153,10 @@ public class LanguageServerExtension {
     }
 
     @Inject
-    protected void registerFileEventHandler(EventBus eventBus, final TextDocumentServiceClient serviceClient,
-                                            final DtoFactory dtoFactory) {
+    protected void registerFileEventHandler(final EventBus eventBus,
+                                            final TextDocumentServiceClient serviceClient,
+                                            final DtoFactory dtoFactory,
+                                            final LanguageServerRegistry registry) {
         eventBus.addHandler(FileEvent.TYPE, new FileEventHandler() {
 
             @Override
@@ -156,34 +165,53 @@ public class LanguageServerExtension {
                 documentId.setUri(event.getFile().getPath());
                 switch (event.getOperationType()) {
                     case OPEN:
-                        event.getFile().getContent().then(new Operation<String>() {
-                            @Override
-                            public void apply(String text) throws OperationException {
-                                DidOpenTextDocumentParamsDTO openEvent = dtoFactory
-                                        .createDto(DidOpenTextDocumentParamsDTO.class);
-                                TextDocumentItemDTO documentItem = dtoFactory.createDto(TextDocumentItemDTO.class);
-                                documentItem.setUri(event.getFile().getPath());
-                                documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
-                                documentItem.setText(text);
-                                openEvent.setTextDocument(documentItem);
-                                openEvent.setUri(event.getFile().getPath());
-                                openEvent.setText(text);
-                                serviceClient.didOpen(openEvent);
-                            }
-                        });
+                        registry.getCapabilitiesByExtension("json");
+                        onOpen(event, dtoFactory, serviceClient);
                         break;
                     case CLOSE:
-                        DidCloseTextDocumentParamsDTO closeEvent = dtoFactory
-                                .createDto(DidCloseTextDocumentParamsDTO.class);
-                        closeEvent.setTextDocument(documentId);
-                        serviceClient.didClose(closeEvent);
+                        onClose(documentId, dtoFactory, serviceClient);
                         break;
                     case SAVE:
-                        DidSaveTextDocumentParamsDTO saveEvent = dtoFactory.createDto(DidSaveTextDocumentParamsDTO.class);
-                        saveEvent.setTextDocument(documentId);
-                        serviceClient.didSave(saveEvent);
+                        onSave(documentId, dtoFactory, serviceClient);
                         break;
                 }
+            }
+        });
+    }
+
+    private void onSave(TextDocumentIdentifierDTO documentId,
+                        DtoFactory dtoFactory,
+                        TextDocumentServiceClient serviceClient) {
+        DidSaveTextDocumentParamsDTO saveEvent = dtoFactory.createDto(DidSaveTextDocumentParamsDTO.class);
+        saveEvent.setTextDocument(documentId);
+        serviceClient.didSave(saveEvent);
+    }
+
+    private void onClose(TextDocumentIdentifierDTO documentId,
+                         DtoFactory dtoFactory,
+                         TextDocumentServiceClient serviceClient) {
+        DidCloseTextDocumentParamsDTO closeEvent = dtoFactory.createDto(DidCloseTextDocumentParamsDTO.class);
+        closeEvent.setTextDocument(documentId);
+        serviceClient.didClose(closeEvent);
+    }
+
+    private void onOpen(final FileEvent event,
+                        final DtoFactory dtoFactory,
+                        final TextDocumentServiceClient serviceClient) {
+        event.getFile().getContent().then(new Operation<String>() {
+            @Override
+            public void apply(String text) throws OperationException {
+                TextDocumentItemDTO documentItem = dtoFactory.createDto(TextDocumentItemDTO.class);
+                documentItem.setUri(event.getFile().getPath());
+                documentItem.setVersion(LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION);
+                documentItem.setText(text);
+
+                DidOpenTextDocumentParamsDTO openEvent = dtoFactory.createDto(DidOpenTextDocumentParamsDTO.class);
+                openEvent.setTextDocument(documentItem);
+                openEvent.setUri(event.getFile().getPath());
+                openEvent.setText(text);
+
+                serviceClient.didOpen(openEvent);
             }
         });
     }

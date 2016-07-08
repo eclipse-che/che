@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server;
+package org.eclipse.che.plugin.languageserver.server.registry;
 
 import io.typefox.lsapi.InitializeParams;
 import io.typefox.lsapi.InitializeResult;
@@ -17,8 +17,9 @@ import io.typefox.lsapi.services.LanguageServer;
 import io.typefox.lsapi.services.TextDocumentService;
 import io.typefox.lsapi.services.WindowService;
 
-import org.eclipse.che.plugin.languageserver.server.json.JsonLanguageServerFactory;
-import org.eclipse.che.plugin.languageserver.server.lsapi.PublishDiagnosticsParamsMessenger;
+import org.eclipse.che.plugin.languageserver.server.factory.JsonLanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.messager.PublishDiagnosticsParamsMessenger;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -50,6 +51,8 @@ public class LanguageServerRegistryImplTest {
     private static final String PATH2  = "/projects/2/test.json";
 
     @Mock
+    private ServerInitializer                 initializer;
+    @Mock
     private LanguageServerFactory             languageServerFactory;
     @Mock
     private LanguageDescription               languageDescription;
@@ -66,7 +69,7 @@ public class LanguageServerRegistryImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(languageServerFactory.create(anyString())).thenReturn(languageServer1).thenReturn(languageServer2);
+        when(initializer.initialize(any(LanguageServerFactory.class), anyString())).thenReturn(languageServer1).thenReturn(languageServer2);
         when(languageServerFactory.getLanguageDescription()).thenReturn(languageDescription);
         when(languageDescription.getLanguageId()).thenReturn(JsonLanguageServerFactory.LANGUAGE_ID);
         when(languageDescription.getFileExtensions()).thenReturn(asList(JsonLanguageServerFactory.EXTENSIONS));
@@ -85,8 +88,8 @@ public class LanguageServerRegistryImplTest {
 
 
         registry = spy(new LanguageServerRegistryImpl(Collections.singleton(languageServerFactory),
-                                                      publishDiagnosticsMessenger,
-                                                      null));
+                                                      null,
+                                                      initializer));
         doReturn("/1").when(registry).findProject(PATH1);
         doReturn("/2").when(registry).findProject(PATH2);
     }
@@ -94,6 +97,11 @@ public class LanguageServerRegistryImplTest {
     @Test
     public void findServerShouldReturnSameJsonServerFor() throws Exception {
         LanguageServer server = registry.findServer(PREFIX + PATH1);
+
+        assertNotNull(server);
+        assertEquals(server, languageServer1);
+
+        server = registry.findServer(PREFIX + PATH1);
 
         assertNotNull(server);
         assertEquals(server, languageServer1);

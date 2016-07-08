@@ -8,11 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server;
+package org.eclipse.che.plugin.languageserver.server.registry;
 
-import io.typefox.lsapi.InitializeParamsImpl;
 import io.typefox.lsapi.InitializeResult;
 import io.typefox.lsapi.LanguageDescription;
+import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
 
 import com.google.inject.Inject;
@@ -23,33 +23,28 @@ import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
-import org.eclipse.che.plugin.languageserver.server.json.JsonLanguageServerFactory;
-import org.eclipse.che.plugin.languageserver.server.lsapi.PublishDiagnosticsParamsMessenger;
+import org.eclipse.che.plugin.languageserver.server.factory.JsonLanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.shared.model.impl.InitializeResultImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
-import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Singleton
-public class LanguageServerRegistryImpl implements LanguageServerRegistry {
-
-    public static final String CLIENT_NAME = "EclipseChe";
+public class LanguageServerRegistryImpl implements LanguageServerRegistry, ServerInitializerObserver {
 
     private final static Logger LOG                 = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
-    private final static int    PROCESS_ID          = getProcessId();
     private final static String PROJECT_FOLDER_PATH = "/projects";
+    private static final String ALL_PROJECT_MARKER = "*";
 
     /**
      * Available {@link LanguageServerFactory} by extension.
@@ -67,18 +62,20 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
     private final ConcurrentHashMap<LanguageServer, InitializeResult> serverToInitResult;
 
 
-    private final PublishDiagnosticsParamsMessenger publishDiagnosticsMessenger;
-    private final ProjectManager                    projectManager;
+    private final ProjectManager    projectManager;
+    private final ServerInitializer initializer;
 
     @Inject
     public LanguageServerRegistryImpl(Set<LanguageServerFactory> languageServerFactories,
-                                      PublishDiagnosticsParamsMessenger publishDiagnosticsMessenger,
-                                      ProjectManager projectManager) {
+                                      ProjectManager projectManager,
+                                      ServerInitializer initializer) {
         this.projectManager = projectManager;
+        this.initializer = initializer;
         this.extensionToFactory = new ConcurrentHashMap<>();
         this.projectToServer = new ConcurrentHashMap<>();
         this.serverToInitResult = new ConcurrentHashMap<>();
-        this.publishDiagnosticsMessenger = publishDiagnosticsMessenger;
+
+        this.initializer.addObserver(this);
 
         for (LanguageServerFactory factory : languageServerFactories) {
             for (String extension : factory.getLanguageDescription().getFileExtensions()) {
@@ -88,16 +85,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         }
     }
 
-    @PreDestroy
-    public void shutdown() {
-        for (LanguageServer server : serverToInitResult.keySet()) {
-            server.shutdown();
-            server.exit();
-        }
-    }
-
     @Override
-    @Nullable
     public LanguageServer findServer(String uri) {
         String path = URI.create(uri).getPath();
         String extension = extractExtension(path);
@@ -114,7 +102,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
 
     @Nullable
     protected LanguageServer findOrInitializeServer(String extension, String projectPath) {
-        ProjectExtensionKey allProjectKey = new ProjectExtensionKey("*", extension);
+        ProjectExtensionKey allProjectKey = new ProjectExtensionKey(ALL_PROJECT_MARKER, extension);
         ProjectExtensionKey projectKey = new ProjectExtensionKey(projectPath, extension);
 
         for (LanguageServerFactory factory : extensionToFactory.get(extension)) {
@@ -128,7 +116,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                         if (server != null) {
                             projectToServer.put(projectKey, server);
                         } else {
-                            server = initialize(factory, projectPath);
+                            server = initializer.initialize(factory, projectPath);
                             projectToServer.put(projectKey, server);
 
                             // ############################################
@@ -141,48 +129,16 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                                 projectToServer.put(allProjectKey, server);
                             }
                         }
-                        return server;
                     }
                 }
             }
+
+            return projectToServer.get(projectKey);
         }
 
         return null;
     }
 
-    protected LanguageServer initialize(LanguageServerFactory factory, String projectPath) {
-        String languageId = factory.getLanguageDescription().getLanguageId();
-
-        InitializeParamsImpl initializeParams = new InitializeParamsImpl();
-        initializeParams.setProcessId(PROCESS_ID);
-        initializeParams.setRootPath(projectPath);
-        initializeParams.setClientName(CLIENT_NAME);
-
-        LanguageServer server;
-        try {
-            server = factory.create(projectPath);
-        } catch (LanguageServerException e) {
-            LOG.error("Can't initialize Language Server {} on {}. " + e.getMessage(), languageId, projectPath);
-            return null;
-        }
-
-        server.getTextDocumentService().onPublishDiagnostics(publishDiagnosticsMessenger::onEvent);
-        server.getWindowService().onLogMessage(messageParams -> LOG.error(messageParams.getType() + " " + messageParams.getMessage()));
-
-        CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
-
-        InitializeResult initializeResult;
-        try {
-            initializeResult = completableFuture.get();
-            serverToInitResult.put(server, initializeResult);
-        } catch (InterruptedException | ExecutionException e) {
-            String errMsg = "Error initialing language server. " + e.getMessage();
-            LOG.error(errMsg, e);
-        }
-
-        LOG.info("Initialized Language Server {} on project {}", languageId, projectPath);
-        return server;
-    }
 
     @Override
     public List<LanguageDescription> getSupportedLanguages() {
@@ -191,6 +147,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
                                  .flatMap(Collection::stream)
                                  .map(LanguageServerFactory::getLanguageDescription)
                                  .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InitializeResult> getRegisteredLanguages() {
+        return serverToInitResult.values().stream().collect(Collectors.toList());
     }
 
     protected String findProject(String path) throws ServerException {
@@ -208,25 +169,27 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry {
         return extPos == -1 ? path : path.substring(extPos + 1);
     }
 
-    private static int getProcessId() {
-        String name = ManagementFactory.getRuntimeMXBean().getName();
-        int prefixEnd = name.indexOf('@');
-        if (prefixEnd != -1) {
-            String prefix = name.substring(0, prefixEnd);
-            try {
-                return Integer.parseInt(prefix);
-            } catch (NumberFormatException ignored) {
-            }
+
+    @Override
+    public void onServerInitialized(LanguageServer server, ServerCapabilities capabilities, LanguageDescription languageDescription) {
+        InitializeResult initializeResult = new InitializeResultImpl(capabilities, languageDescription);
+        serverToInitResult.put(server, initializeResult);
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        for (LanguageServer server : serverToInitResult.keySet()) {
+            server.shutdown();
+            server.exit();
         }
-        return -1;
     }
 
     /**
      * Is used to register {@link LanguageServer} by project.
      */
     private class ProjectExtensionKey {
-        private final String extension;
         private final String project;
+        private final String extension;
 
         public ProjectExtensionKey(String project, String extension) {
             this.project = project;

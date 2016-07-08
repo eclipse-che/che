@@ -43,10 +43,10 @@ import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 @Singleton
 public class TextDocumentServiceClient {
 
-    private final DtoUnmarshallerFactory unmarshallerFactory;
-    private final AsyncRequestFactory asyncRequestFactory;
-    private final AppContext appContext;
-    private final NotificationManager notificationManager;
+    private final DtoUnmarshallerFactory      unmarshallerFactory;
+    private final AsyncRequestFactory         asyncRequestFactory;
+    private final AppContext                  appContext;
+    private final NotificationManager         notificationManager;
     private final PublishDiagnosticsProcessor publishDiagnosticsProcessor;
 
     @Inject

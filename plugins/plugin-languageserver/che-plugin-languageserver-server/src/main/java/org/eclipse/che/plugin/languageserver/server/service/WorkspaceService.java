@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server;
+package org.eclipse.che.plugin.languageserver.server.service;
 
 import io.typefox.lsapi.SymbolInformation;
 import io.typefox.lsapi.services.LanguageServer;
@@ -16,6 +16,8 @@ import io.typefox.lsapi.services.LanguageServer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
+import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
 
 import javax.ws.rs.Consumes;
@@ -36,12 +38,12 @@ import static java.util.Collections.emptyList;
  */
 @Singleton
 @Path("languageserver/workspace")
-public class WorkspaceServiceImpl {
-    private LanguageServerRegistry languageServerRegistry;
+public class WorkspaceService {
+    private LanguageServerRegistry registry;
 
     @Inject
-    public WorkspaceServiceImpl(LanguageServerRegistry languageServerRegistry) {
-        this.languageServerRegistry = languageServerRegistry;
+    public WorkspaceService(LanguageServerRegistry registry) {
+        this.registry = registry;
     }
 
     @POST
@@ -59,6 +61,6 @@ public class WorkspaceServiceImpl {
     }
 
     private LanguageServer getServer(String uri) {
-        return languageServerRegistry.findServer(uri);
+        return registry.findServer(uri);
     }
 }

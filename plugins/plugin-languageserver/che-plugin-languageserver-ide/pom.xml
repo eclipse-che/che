@@ -33,6 +33,10 @@
             <artifactId>guice-assistedinject</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.typefox.lsapi</groupId>
+            <artifactId>io.typefox.lsapi</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>

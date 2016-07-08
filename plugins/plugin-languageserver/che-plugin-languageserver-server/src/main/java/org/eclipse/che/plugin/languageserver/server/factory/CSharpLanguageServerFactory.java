@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server.csharp;
+package org.eclipse.che.plugin.languageserver.server.factory;
 
 import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.LanguageDescriptionImpl;
@@ -17,7 +17,6 @@ import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
 import com.google.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.che.plugin.languageserver.server.LanguageServerFactoryTemplate;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 
 import java.io.File;

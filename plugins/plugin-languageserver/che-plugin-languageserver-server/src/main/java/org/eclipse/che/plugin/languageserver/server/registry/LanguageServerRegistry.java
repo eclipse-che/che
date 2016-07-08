@@ -8,23 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server;
+package org.eclipse.che.plugin.languageserver.server.registry;
 
+import io.typefox.lsapi.InitializeResult;
 import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.services.LanguageServer;
 
-import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
+import org.eclipse.che.commons.annotation.Nullable;
+
+import java.util.List;
 
 /**
  * @author Anatoliy Bazko
  */
-public interface LanguageServerFactory {
+public interface LanguageServerRegistry {
+    @Nullable
+    LanguageServer findServer(String uri);
 
-    /**
-     * Starts {@link io.typefox.lsapi.services.LanguageServer}.
-     * @param projectPath
-     */
-    LanguageServer create(String projectPath) throws LanguageServerException;
+    List<LanguageDescription> getSupportedLanguages();
 
-    LanguageDescription getLanguageDescription();
+    List<InitializeResult> getRegisteredLanguages();
 }

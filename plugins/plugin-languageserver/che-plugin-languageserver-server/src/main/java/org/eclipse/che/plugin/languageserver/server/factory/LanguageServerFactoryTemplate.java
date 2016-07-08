@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server;
+package org.eclipse.che.plugin.languageserver.server.factory;
 
 import io.typefox.lsapi.services.LanguageServer;
 

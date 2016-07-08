@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server;
+package org.eclipse.che.plugin.languageserver.server.service;
 
 import io.typefox.lsapi.CompletionItem;
 import io.typefox.lsapi.Location;
@@ -19,6 +19,8 @@ import io.typefox.lsapi.services.LanguageServer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
+import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
@@ -44,14 +46,14 @@ import static java.util.Collections.emptyList;
  */
 @Singleton
 @Path("languageserver/textDocument")
-public class TextDocumentServiceImpl {
+public class TextDocumentService {
 
     private static final String FILE_PROJECTS = "file:///projects";
 
     private final LanguageServerRegistry languageServerRegistry;
 
     @Inject
-    public TextDocumentServiceImpl(LanguageServerRegistry languageServerRegistry) {
+    public TextDocumentService(LanguageServerRegistry languageServerRegistry) {
         this.languageServerRegistry = languageServerRegistry;
     }
 
@@ -173,8 +175,9 @@ public class TextDocumentServiceImpl {
         openEvent.getTextDocument().setUri(prefixURI(openEvent.getTextDocument().getUri()));
         openEvent.setUri(prefixURI(openEvent.getUri()));
         LanguageServer server = getServer(openEvent.getTextDocument().getUri());
-        if (server != null)
-        	server.getTextDocumentService().didOpen(openEvent);
+        if (server != null) {
+            server.getTextDocumentService().didOpen(openEvent);
+        }
     }
 
     @POST
