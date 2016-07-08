@@ -47,7 +47,6 @@ export class ProjectDetailsController {
          this.fetchProjectDetails();
         } else {
           this.loading = false;
-          this.noWorkspaceRuntime = true;
         }
       }, (error) => {
         this.cheNotification.showError(error.data.message ? error.data.message : 'Failed to get runtime of the project workspace.');
@@ -60,7 +59,6 @@ export class ProjectDetailsController {
 
   fetchProjectDetails() {
     this.loading = true;
-    this.noWorkspaceRuntime = true;
 
     if (this.workspace.status !== 'STARTING' && this.workspace.status !== 'RUNNING') {
       this.loading = false;
@@ -75,17 +73,14 @@ export class ProjectDetailsController {
 
       if (this.projectService.getProjectDetailsByKey(this.projectPath)) {
         this.loading = false;
-        this.noWorkspaceRuntime = false;
         this.updateProjectDetails();
       } else {
         this.projectService.fetchProjectDetails(this.workspace.id, this.projectPath).then(() => {
           this.loading = false;
-          this.noWorkspaceRuntime = false;
           this.updateProjectDetails();
         }, (error) => {
           if (error.status === 304) {
             this.loading = false;
-            this.noWorkspaceRuntime = false;
             this.updateProjectDetails();
           } else {
             this.$log.error(error);
@@ -193,7 +188,7 @@ export class ProjectDetailsController {
       // remove it !
       let promise = this.projectService.remove(this.projectDetails.name);
       promise.then(() => {
-        this.$location.path('/projects');
+        this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name + '/projects');
       }, (error) => {
         this.$log.log('error', error);
       });
@@ -210,4 +205,15 @@ export class ProjectDetailsController {
     return _projects;
   }
 
+  /**
+   * Returns current status of workspace
+   * @returns {String}
+   */
+  getWorkspaceStatus() {
+    if (!this.workspace) {
+      return 'unknown';
+    }
+    let workspace = this.cheAPI.getWorkspace().getWorkspaceById(this.workspace.id);
+    return workspace ? workspace.status : 'unknown';
+  }
 }
