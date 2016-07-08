@@ -35,8 +35,8 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_LOCAL;
-import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_REMOTE;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
 import static org.eclipse.che.api.git.shared.MergeResult.MergeStatus.ALREADY_UP_TO_DATE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;

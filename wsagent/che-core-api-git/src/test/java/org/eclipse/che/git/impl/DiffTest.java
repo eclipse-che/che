@@ -17,10 +17,12 @@ import org.eclipse.che.api.git.DiffPage;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.DiffParams;
+import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
-import org.eclipse.che.api.git.shared.DiffRequest;
-import org.eclipse.che.api.git.shared.RmRequest;
+import org.eclipse.che.api.git.shared.DiffType;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -35,8 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.eclipse.che.api.git.shared.DiffRequest.DiffType;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
@@ -66,9 +66,9 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withType(DiffType.NAME_STATUS)
-                                             .withRenameLimit(0),
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withType(DiffType.NAME_STATUS)
+                                               .withRenameLimit(0),
                                      connection);
         //then
         assertEquals(diff.size(), 1);
@@ -81,17 +81,17 @@ public class DiffTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         makeCommitInMaster(connection);
         //change README.txt
-        connection.add(newDto(AddRequest.class).withFilepattern(AddRequest.DEFAULT_PATTERN));
-        connection.rm(newDto(RmRequest.class).withItems(Arrays.asList("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("testDiffNameStatusWithCommits"));
+        connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
+        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(null)
-                                             .withType(DiffType.NAME_STATUS)
-                                             .withRenameLimit(0)
-                                             .withCommitA("HEAD^")
-                                             .withCommitB("HEAD"),
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(null)
+                                               .withType(DiffType.NAME_STATUS)
+                                               .withRenameLimit(0)
+                                               .withCommitA("HEAD^")
+                                               .withCommitB("HEAD"),
                                      connection);
 
         //then
@@ -106,18 +106,18 @@ public class DiffTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         makeCommitInMaster(connection);
 
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList("aaa")));
-        connection.rm(newDto(RmRequest.class).withItems(Arrays.asList("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("testDiffNameStatusWithCommits"));
+        connection.add(AddParams.create(Arrays.asList("aaa")));
+        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(Arrays.asList("aaa"))
-                                             .withType(DiffType.NAME_STATUS)
-                                             .withNoRenames(false)
-                                             .withRenameLimit(0)
-                                             .withCommitA("HEAD^1")
-                                             .withCommitB("HEAD"),
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(Arrays.asList("aaa"))
+                                               .withType(DiffType.NAME_STATUS)
+                                               .withNoRenames(false)
+                                               .withRenameLimit(0)
+                                               .withCommitA("HEAD^1")
+                                               .withCommitB("HEAD"),
                                      connection);
 
         //then
@@ -132,11 +132,11 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(null)
-                                             .withType(DiffType.NAME_ONLY)
-                                             .withNoRenames(false)
-                                             .withRenameLimit(0),
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(null)
+                                               .withType(DiffType.NAME_ONLY)
+                                               .withNoRenames(false)
+                                               .withRenameLimit(0),
                                      connection);
 
         //then
@@ -150,18 +150,18 @@ public class DiffTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         makeCommitInMaster(connection);
 
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList("aaa")));
-        connection.rm(newDto(RmRequest.class).withItems(Arrays.asList("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("testDiffNameStatusWithCommits"));
+        connection.add(AddParams.create(Arrays.asList("aaa")));
+        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(null)
-                                             .withType(DiffType.NAME_ONLY)
-                                             .withNoRenames(false)
-                                             .withRenameLimit(0)
-                                             .withCommitA("HEAD^1")
-                                             .withCommitB("HEAD"),
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(null)
+                                               .withType(DiffType.NAME_ONLY)
+                                               .withNoRenames(false)
+                                               .withRenameLimit(0)
+                                               .withCommitA("HEAD^1")
+                                               .withCommitB("HEAD"),
                                      connection);
 
         //then
@@ -177,14 +177,14 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList("aaa")));
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(null)
-                                             .withType(DiffType.NAME_ONLY)
-                                             .withNoRenames(false)
-                                             .withRenameLimit(0)
-                                             .withCommitA("HEAD")
-                                             .withCached(true),
+        connection.add(AddParams.create(Arrays.asList("aaa")));
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(null)
+                                               .withType(DiffType.NAME_ONLY)
+                                               .withNoRenames(false)
+                                               .withRenameLimit(0)
+                                               .withCommitA("HEAD")
+                                               .withCached(true),
                                      connection);
 
         //then
@@ -199,14 +199,14 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList("aaa")));
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(null)
-                                             .withType(DiffType.NAME_ONLY)
-                                             .withNoRenames(false)
-                                             .withRenameLimit(0)
-                                             .withCommitA(null)
-                                             .withCached(true),
+        connection.add(AddParams.create(Arrays.asList("aaa")));
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(null)
+                                               .withType(DiffType.NAME_ONLY)
+                                               .withNoRenames(false)
+                                               .withRenameLimit(0)
+                                               .withCommitA(null)
+                                               .withCached(true),
                                      connection);
 
         //then
@@ -221,13 +221,13 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(null)
-                                             .withType(DiffType.NAME_ONLY)
-                                             .withNoRenames(false)
-                                             .withRenameLimit(0)
-                                             .withCommitA("HEAD")
-                                             .withCached(false),
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(null)
+                                               .withType(DiffType.NAME_ONLY)
+                                               .withNoRenames(false)
+                                               .withRenameLimit(0)
+                                               .withCommitA("HEAD")
+                                               .withCached(false),
                                      connection);
 
         //then
@@ -242,11 +242,11 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(Arrays.asList("aaa"))
-                                             .withType(DiffType.NAME_ONLY)
-                                             .withNoRenames(false)
-                                             .withRenameLimit(0),
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(Arrays.asList("aaa"))
+                                               .withType(DiffType.NAME_ONLY)
+                                               .withNoRenames(false)
+                                               .withRenameLimit(0),
                                      connection);
 
         //then
@@ -262,11 +262,11 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(Arrays.asList("anotherFile"))
-                                             .withType(DiffType.NAME_ONLY)
-                                             .withNoRenames(false)
-                                             .withRenameLimit(0),
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(Arrays.asList("anotherFile"))
+                                               .withType(DiffType.NAME_ONLY)
+                                               .withNoRenames(false)
+                                               .withRenameLimit(0),
                                      connection);
         //then
         assertEquals(diff.size(), 0);
@@ -278,18 +278,18 @@ public class DiffTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         makeCommitInMaster(connection);
 
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList("aaa")));
-        connection.rm(newDto(RmRequest.class).withItems(Arrays.asList("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("testDiffNameStatusWithCommits"));
+        connection.add(AddParams.create(Arrays.asList("aaa")));
+        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
-        List<String> diff = readDiff(newDto(DiffRequest.class)
-                                             .withFileFilter(Arrays.asList("aaa"))
-                                             .withType(DiffType.NAME_ONLY)
-                                             .withNoRenames(false)
-                                             .withRenameLimit(0)
-                                             .withCommitA("HEAD^1")
-                                             .withCommitB("HEAD"),
+        List<String> diff = readDiff(DiffParams.create()
+                                               .withFileFilter(Arrays.asList("aaa"))
+                                               .withType(DiffType.NAME_ONLY)
+                                               .withNoRenames(false)
+                                               .withRenameLimit(0)
+                                               .withCommitA("HEAD^1")
+                                               .withCommitB("HEAD"),
                                      connection);
 
         //then
@@ -304,12 +304,12 @@ public class DiffTest {
         makeCommitInMaster(connection);
 
         //when
-        DiffRequest request = newDto(DiffRequest.class)
-                .withFileFilter(null)
-                .withType(DiffType.RAW)
-                .withNoRenames(false)
-                .withRenameLimit(0);
-        DiffPage diffPage = connection.diff(request);
+        DiffParams params = DiffParams.create()
+                                      .withFileFilter(null)
+                                      .withType(DiffType.RAW)
+                                      .withNoRenames(false)
+                                      .withRenameLimit(0);
+        DiffPage diffPage = connection.diff(params);
 
         //then
         diffPage.writeTo(System.out);
@@ -321,26 +321,26 @@ public class DiffTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         makeCommitInMaster(connection);
 
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList("aaa")));
-        connection.rm(newDto(RmRequest.class).withItems(Arrays.asList("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("testDiffNameStatusWithCommits"));
+        connection.add(AddParams.create(Arrays.asList("aaa")));
+        connection.rm(RmParams.create(Arrays.asList("README.txt")));
+        connection.commit(CommitParams.create("testDiffNameStatusWithCommits"));
 
         //when
-        DiffRequest request = newDto(DiffRequest.class)
-                .withFileFilter(null)
-                .withType(DiffType.RAW)
-                .withNoRenames(false)
-                .withRenameLimit(0)
-                .withCommitA("HEAD^1")
-                .withCommitB("HEAD");
-        DiffPage diffPage = connection.diff(request);
+        DiffParams params = DiffParams.create()
+                                      .withFileFilter(null)
+                                      .withType(DiffType.RAW)
+                                      .withNoRenames(false)
+                                      .withRenameLimit(0)
+                                      .withCommitA("HEAD^1")
+                                      .withCommitB("HEAD");
+        DiffPage diffPage = connection.diff(params);
 
         //then
         diffPage.writeTo(System.out);
     }
 
-    private List<String> readDiff(DiffRequest request, GitConnection connection) throws GitException, IOException {
-        DiffPage diffPage = connection.diff(request);
+    private List<String> readDiff(DiffParams params, GitConnection connection) throws GitException, IOException {
+        DiffPage diffPage = connection.diff(params);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         diffPage.writeTo(out);
         BufferedReader reader = new BufferedReader(
@@ -357,12 +357,12 @@ public class DiffTest {
     private void makeCommitInMaster(GitConnection connection) throws GitException, IOException {
         //create branch "master"
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
 
         //make some changes
         addFile(connection, "aaa", "AAA\n");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
+        connection.add(AddParams.create(Arrays.asList(".")));
         addFile(connection, "aaa", "BBB\n");
     }
 }

@@ -11,7 +11,7 @@
 package org.eclipse.che.git.impl.nativegit.commands;
 
 import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.api.git.shared.DiffRequest;
+import org.eclipse.che.api.git.shared.DiffType;
 
 import java.io.File;
 import java.util.List;
@@ -40,7 +40,7 @@ public class DiffCommand extends GitCommand<String> {
     public String execute() throws GitException {
         reset();
         commandLine.add("diff");
-        if (!(type == null || type.equals(DiffRequest.DiffType.RAW.toString()))) {
+        if (!(type == null || type.equals(DiffType.RAW.getValue()))) {
             commandLine.add(type);
         }
         if (noRenames) {

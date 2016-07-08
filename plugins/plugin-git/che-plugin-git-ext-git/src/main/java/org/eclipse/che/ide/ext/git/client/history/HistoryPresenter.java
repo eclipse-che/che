@@ -46,7 +46,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.git.shared.DiffRequest.DiffType.RAW;
+import static org.eclipse.che.api.git.shared.DiffType.RAW;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;

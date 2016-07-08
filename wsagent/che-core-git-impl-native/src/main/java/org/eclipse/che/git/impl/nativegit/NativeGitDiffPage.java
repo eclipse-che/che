@@ -14,7 +14,7 @@ package org.eclipse.che.git.impl.nativegit;
 
 import org.eclipse.che.api.git.DiffPage;
 import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.api.git.shared.DiffRequest;
+import org.eclipse.che.api.git.params.DiffParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,25 +31,25 @@ import java.io.PrintWriter;
 public class NativeGitDiffPage extends DiffPage {
 
     private static Logger LOG = LoggerFactory.getLogger(NativeGitDiffPage.class);
-    private DiffRequest request;
-    private NativeGit   nativeGit;
+    private final DiffParams params;
+    private final NativeGit  nativeGit;
 
-    public NativeGitDiffPage(DiffRequest request, NativeGit nativeGit) {
-        this.request = request;
+    public NativeGitDiffPage(DiffParams params, NativeGit nativeGit) {
+        this.params = params;
         this.nativeGit = nativeGit;
     }
 
     @Override
     public void writeTo(OutputStream out) throws IOException {
         try (PrintWriter outWriter = new PrintWriter(out);) {
-            if (request.getCommitA() == null && request.getCommitB() == null && !request.isCached()) {
+            if (params.getCommitA() == null && params.getCommitB() == null && !params.isCached()) {
                 workingTreeToIndex(outWriter);
-            } else if (request.getCommitA() != null && request.getCommitB() == null && !request.isCached()) {
-                commitToWorkingTree(request.getCommitA(), outWriter);
-            } else if (request.getCommitB() == null && request.isCached()) {
-                commitToIndex(request.getCommitA(), outWriter);
+            } else if (params.getCommitA() != null && params.getCommitB() == null && !params.isCached()) {
+                commitToWorkingTree(params.getCommitA(), outWriter);
+            } else if (params.getCommitB() == null && params.isCached()) {
+                commitToIndex(params.getCommitA(), outWriter);
             } else {
-                commitToCommit(request.getCommitA(), request.getCommitB(), outWriter);
+                commitToCommit(params.getCommitA(), params.getCommitB(), outWriter);
             }
         } catch (GitException e) {
             LOG.error("Diff page creating exception", e);
@@ -65,10 +65,10 @@ public class NativeGitDiffPage extends DiffPage {
         outWriter.print(nativeGit.createDiffCommand()
                 .setCommitA(commit)
                 .setCached(true)
-                .setType(request.getType().toString())
-                .setFileFilter(request.getFileFilter())
-                .setNoRenames(request.isNoRenames())
-                .setRenamesCount(request.getRenameLimit())
+                .setType(params.getType().getValue())
+                .setFileFilter(params.getFileFilter())
+                .setNoRenames(params.isNoRenames())
+                .setRenamesCount(params.getRenameLimit())
                 .execute());
     }
 
@@ -78,10 +78,10 @@ public class NativeGitDiffPage extends DiffPage {
      */
     private void workingTreeToIndex(PrintWriter outWriter) throws GitException {
         outWriter.print(nativeGit.createDiffCommand()
-                .setType(request.getType().toString())
-                .setFileFilter(request.getFileFilter())
-                .setNoRenames(request.isNoRenames())
-                .setRenamesCount(request.getRenameLimit())
+                .setType(params.getType().getValue())
+                .setFileFilter(params.getFileFilter())
+                .setNoRenames(params.isNoRenames())
+                .setRenamesCount(params.getRenameLimit())
                 .execute());
     }
 
@@ -95,10 +95,10 @@ public class NativeGitDiffPage extends DiffPage {
         outWriter.print(nativeGit.createDiffCommand()
                 .setCommitA(commitA)
                 .setCommitB(commitB)
-                .setType(request.getType().toString())
-                .setFileFilter(request.getFileFilter())
-                .setNoRenames(request.isNoRenames())
-                .setRenamesCount(request.getRenameLimit())
+                .setType(params.getType().getValue())
+                .setFileFilter(params.getFileFilter())
+                .setNoRenames(params.isNoRenames())
+                .setRenamesCount(params.getRenameLimit())
                 .execute());
     }
 
@@ -110,10 +110,10 @@ public class NativeGitDiffPage extends DiffPage {
     private void commitToWorkingTree(String commit, PrintWriter outWriter) throws GitException {
          outWriter.print(nativeGit.createDiffCommand()
                  .setCommitA(commit)
-                 .setType(request.getType().toString())
-                 .setFileFilter(request.getFileFilter())
-                 .setNoRenames(request.isNoRenames())
-                 .setRenamesCount(request.getRenameLimit())
+                 .setType(params.getType().getValue())
+                 .setFileFilter(params.getFileFilter())
+                 .setNoRenames(params.isNoRenames())
+                 .setRenamesCount(params.getRenameLimit())
                  .execute());
     }
 }

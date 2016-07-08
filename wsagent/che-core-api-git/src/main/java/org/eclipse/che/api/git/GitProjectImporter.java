@@ -20,18 +20,15 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
+import org.eclipse.che.api.git.params.CheckoutParams;
+import org.eclipse.che.api.git.params.CloneParams;
+import org.eclipse.che.api.git.params.FetchParams;
+import org.eclipse.che.api.git.params.RemoteAddParams;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.BranchListRequest;
-import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.api.git.shared.CloneRequest;
-import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.GitCheckoutEvent;
-import org.eclipse.che.api.git.shared.InitRequest;
-import org.eclipse.che.api.git.shared.RemoteAddRequest;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +42,9 @@ import java.util.Optional;
 
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT;
 import static org.eclipse.che.api.core.ErrorCodes.FAILED_CHECKOUT_WITH_START_POINT;
-import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_ALL;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * @author Vladyslav Zhukovskii
@@ -138,44 +137,46 @@ public class GitProjectImporter implements ProjectImporter {
             }
             // Get path to local file. Git works with local filesystem only.
             final String localPath = baseFolder.getVirtualFile().toIoFile().getAbsolutePath();
-            final DtoFactory dtoFactory = DtoFactory.getInstance();
             final String location = storage.getLocation();
             final String projectName = baseFolder.getName();
             git = gitConnectionFactory.getConnection(localPath, consumerFactory);
             if (keepDir != null) {
-                git.cloneWithSparseCheckout(keepDir, location, branch == null ? "master" : branch);
+                git.cloneWithSparseCheckout(keepDir, location);
+                if (branch != null) {
+                    git.checkout(CheckoutParams.create(branch));
+                }
             } else {
                 if (baseFolder.getChildren().size() == 0) {
-                    cloneRepository(git, "origin", location, dtoFactory, recursiveEnabled);
+                    cloneRepository(git, "origin", location, recursiveEnabled);
                     if (commitId != null) {
-                        checkoutCommit(git, commitId, dtoFactory);
+                        checkoutCommit(git, commitId);
                     } else if (fetch != null) {
                         git.getConfig().add("remote.origin.fetch", fetch);
-                        fetch(git, "origin", dtoFactory);
+                        fetch(git, "origin");
                         if (branch != null) {
-                            checkoutBranch(git, projectName, branch, startPoint, dtoFactory);
+                            checkoutBranch(git, projectName, branch, startPoint);
                         }
                     } else if (branch != null) {
-                        checkoutBranch(git, projectName, branch, startPoint, dtoFactory);
+                        checkoutBranch(git, projectName, branch, startPoint);
                     }
                 } else {
-                    initRepository(git, dtoFactory);
-                    addRemote(git, "origin", location, dtoFactory);
+                    git.init(false);
+                    addRemote(git, "origin", location);
                     if (commitId != null) {
-                        fetchBranch(git, "origin", branch == null ? "*" : branch, dtoFactory);
-                        checkoutCommit(git, commitId, dtoFactory);
+                        fetchBranch(git, "origin", branch == null ? "*" : branch);
+                        checkoutCommit(git, commitId);
                     } else if (fetch != null) {
                         git.getConfig().add("remote.origin.fetch", fetch);
-                        fetch(git, "origin", dtoFactory);
+                        fetch(git, "origin");
                         if (branch != null) {
-                            checkoutBranch(git, projectName, branch, startPoint, dtoFactory);
+                            checkoutBranch(git, projectName, branch, startPoint);
                         }
                     } else {
-                        fetchBranch(git, "origin", branch == null ? "*" : branch, dtoFactory);
+                        fetchBranch(git, "origin", branch == null ? "*" : branch);
 
-                        List<Branch> branchList = git.branchList(dtoFactory.createDto(BranchListRequest.class).withListMode("r"));
+                        List<Branch> branchList = git.branchList(LIST_REMOTE);
                         if (!branchList.isEmpty()) {
-                            checkoutBranch(git, projectName, branch == null ? "master" : branch, startPoint, dtoFactory);
+                            checkoutBranch(git, projectName, branch == null ? "master" : branch, startPoint);
                         }
                     }
                 }
@@ -198,36 +199,27 @@ public class GitProjectImporter implements ProjectImporter {
         }
     }
 
-    private void cloneRepository(GitConnection git, String remoteName, String url, DtoFactory dtoFactory, boolean recursiveEnabled)
+    private void cloneRepository(GitConnection git, String remoteName, String url, boolean recursiveEnabled)
             throws ServerException, UnauthorizedException, URISyntaxException {
-        final CloneRequest request = dtoFactory.createDto(CloneRequest.class)
-                                               .withRemoteName(remoteName)
-                                               .withRemoteUri(url)
-                                               .withRecursive(recursiveEnabled);
-        git.clone(request);
+        final CloneParams params = CloneParams.create(url).withRemoteName(remoteName).withRecursive(recursiveEnabled);
+        git.clone(params);
     }
 
-    private void initRepository(GitConnection git, DtoFactory dtoFactory) throws GitException {
-        final InitRequest request = dtoFactory.createDto(InitRequest.class).withBare(false);
-        git.init(request);
+    private void addRemote(GitConnection git, String name, String url) throws GitException {
+        git.remoteAdd(RemoteAddParams.create(name, url));
     }
 
-    private void addRemote(GitConnection git, String name, String url, DtoFactory dtoFactory) throws GitException {
-        final RemoteAddRequest request = dtoFactory.createDto(RemoteAddRequest.class).withName(name).withUrl(url);
-        git.remoteAdd(request);
+    private void fetch(GitConnection git, String remote) throws UnauthorizedException, GitException {
+        final FetchParams params = FetchParams.create(remote);
+        git.fetch(params);
     }
 
-    private void fetch(GitConnection git, String remote, DtoFactory dtoFactory) throws UnauthorizedException, GitException {
-        final FetchRequest request = dtoFactory.createDto(FetchRequest.class).withRemote(remote);
-        git.fetch(request);
-    }
-
-    private void fetchBranch(GitConnection gitConnection, String remote, String branch, DtoFactory dtoFactory)
+    private void fetchBranch(GitConnection gitConnection, String remote, String branch)
             throws UnauthorizedException, GitException {
 
         final List<String> refSpecs = Collections.singletonList(String.format("refs/heads/%1$s:refs/remotes/origin/%1$s", branch));
         try {
-            fetchRefSpecs(gitConnection, remote, refSpecs, dtoFactory);
+            fetchRefSpecs(gitConnection, remote, refSpecs);
         } catch (GitException e) {
             LOG.warn("Git exception on branch fetch", e);
             throw new GitException(
@@ -236,18 +228,18 @@ public class GitProjectImporter implements ProjectImporter {
         }
     }
 
-    private void fetchRefSpecs(GitConnection git, String remote, List<String> refSpecs, DtoFactory dtoFactory)
+    private void fetchRefSpecs(GitConnection git, String remote, List<String> refSpecs)
             throws UnauthorizedException, GitException {
-        final FetchRequest request = dtoFactory.createDto(FetchRequest.class).withRemote(remote).withRefSpec(refSpecs);
-        git.fetch(request);
+        final FetchParams params = FetchParams.create(remote).withRefSpec(refSpecs);
+        git.fetch(params);
     }
 
-    private void checkoutCommit(GitConnection git, String commit, DtoFactory dtoFactory) throws GitException {
-        final CheckoutRequest request = dtoFactory.createDto(CheckoutRequest.class).withName("temp")
-                                                  .withCreateNew(true)
-                                                  .withStartPoint(commit);
+    private void checkoutCommit(GitConnection git, String commit) throws GitException {
+        final CheckoutParams params = CheckoutParams.create("temp")
+                                                    .withCreateNew(true)
+                                                    .withStartPoint(commit);
         try {
-            git.checkout(request);
+            git.checkout(params);
         } catch (GitException e) {
             LOG.warn("Git exception on commit checkout", e);
             throw new GitException(
@@ -258,35 +250,33 @@ public class GitProjectImporter implements ProjectImporter {
     private void checkoutBranch(GitConnection git,
                                 String projectName,
                                 String branchName,
-                                String startPoint,
-                                DtoFactory dtoFactory) throws GitException {
-        final CheckoutRequest request = dtoFactory.createDto(CheckoutRequest.class).withName(branchName);
-        final boolean branchExist = git.branchList(dtoFactory.createDto(BranchListRequest.class).withListMode(LIST_ALL))
+                                String startPoint) throws GitException {
+        final CheckoutParams params = CheckoutParams.create(branchName);
+        final boolean branchExist = git.branchList(LIST_ALL)
                                        .stream()
                                        .anyMatch(branch -> branch.getName().equals(branchName));
-        final GitCheckoutEvent checkout = dtoFactory.createDto(GitCheckoutEvent.class)
-                                                    .withWorkspaceId(System.getenv("CHE_WORKSPACE_ID"))
-                                                    .withProjectName(projectName);
+        final GitCheckoutEvent checkout = newDto(GitCheckoutEvent.class).withWorkspaceId(System.getenv("CHE_WORKSPACE_ID"))
+                                                                        .withProjectName(projectName);
         if (startPoint != null) {
             if (branchExist) {
-                git.checkout(request);
+                git.checkout(params);
                 eventService.publish(checkout.withCheckoutOnly(true)
-                                             .withBranchRef(getRemoteBranch(dtoFactory, git, branchName)));
+                                             .withBranchRef(getRemoteBranch(git, branchName)));
             } else {
-                checkoutAndRethrow(git, request.withCreateNew(true).withStartPoint(startPoint).withNoTrack(true),
+                checkoutAndRethrow(git, params.withCreateNew(true).withStartPoint(startPoint).withNoTrack(true),
                                    FAILED_CHECKOUT_WITH_START_POINT);
                 eventService.publish(checkout.withCheckoutOnly(false));
             }
         } else {
-            checkoutAndRethrow(git, request, FAILED_CHECKOUT);
+            checkoutAndRethrow(git, params, FAILED_CHECKOUT);
             eventService.publish(checkout.withCheckoutOnly(true)
-                                         .withBranchRef(getRemoteBranch(dtoFactory, git, branchName)));
+                                         .withBranchRef(getRemoteBranch(git, branchName)));
         }
     }
 
-    private void checkoutAndRethrow(GitConnection git, CheckoutRequest request, int errorCode) throws GitException {
+    private void checkoutAndRethrow(GitConnection git, CheckoutParams params, int errorCode) throws GitException {
         try {
-            git.checkout(request);
+            git.checkout(params);
         } catch (GitException ex) {
             throw new GitException(ex.getMessage(), errorCode);
         }
@@ -297,9 +287,8 @@ public class GitProjectImporter implements ProjectImporter {
         new File(project, ".gitignore").delete();
     }
 
-    private String getRemoteBranch(DtoFactory dtoFactory, GitConnection git, String branchName) throws GitException {
-        final List<Branch> remotes = git.branchList(dtoFactory.createDto(BranchListRequest.class)
-                                                              .withListMode(BranchListRequest.LIST_REMOTE));
+    private String getRemoteBranch(GitConnection git, String branchName) throws GitException {
+        final List<Branch> remotes = git.branchList(LIST_REMOTE);
         final Optional<Branch> first = remotes.stream()
                                               .filter(br -> branchName.equals(br.getName().substring(br.getName().lastIndexOf("/") + 1)))
                                               .findFirst();

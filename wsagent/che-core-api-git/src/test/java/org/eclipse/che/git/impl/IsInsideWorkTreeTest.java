@@ -15,9 +15,8 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
-import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CommitParams;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -28,7 +27,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
@@ -62,8 +60,8 @@ public class IsInsideWorkTreeTest {
 
         // add new dir into working tree
         addFile(connection.getWorkingDir().toPath().resolve("new_directory"), "a", "content of a");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection.commit(newDto(CommitRequest.class).withMessage("test"));
+        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.commit(CommitParams.create("test"));
 
         // when
         boolean isInsideWorkingTree = connection.isInsideWorkTree();

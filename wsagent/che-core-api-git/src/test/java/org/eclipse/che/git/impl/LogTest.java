@@ -16,9 +16,9 @@ import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
-import org.eclipse.che.api.git.shared.LogRequest;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.LogParams;
 import org.eclipse.che.api.git.shared.Revision;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
@@ -57,19 +56,19 @@ public class LogTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", "someChanges");
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial add"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial add"));
 
         addFile(connection, "README.txt", "newChanges");
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Second commit"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Second commit"));
 
         addFile(connection, "README.txt", "otherChanges");
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Third commit"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Third commit"));
 
         //when
-        List<Revision> commits = connection.log(newDto(LogRequest.class)).getCommits();
+        List<Revision> commits = connection.log(LogParams.create()).getCommits();
 
         //then
         assertEquals("Third commit", commits.get(0).getMessage());
@@ -82,32 +81,32 @@ public class LogTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", "someChanges");
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial add"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial add"));
 
         addFile(connection, "README.txt", "newChanges");
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Second commit"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Second commit"));
 
         addFile(connection, "README.txt", "otherChanges");
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Third commit"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Third commit"));
 
         addFile(connection, "newFile.txt", "someChanges");
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("newFile.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Add newFile.txt"));
+        connection.add(AddParams.create(ImmutableList.of("newFile.txt")));
+        connection.commit(CommitParams.create("Add newFile.txt"));
 
 
         //when
         int readMeCommitCount =
-                connection.log(newDto(LogRequest.class).withFileFilter(Collections.singletonList("README.txt"))).getCommits().size();
+                connection.log(LogParams.create().withFileFilter(Collections.singletonList("README.txt"))).getCommits().size();
         int newFileCommitCount =
-                connection.log(newDto(LogRequest.class).withFileFilter(Collections.singletonList("newFile.txt"))).getCommits().size();
+                connection.log(LogParams.create().withFileFilter(Collections.singletonList("newFile.txt"))).getCommits().size();
         List<String> fileFilter = new ArrayList<>();
         fileFilter.add("README.txt");
         fileFilter.add("newFile.txt");
         int allFilesCommitCount =
-                connection.log(newDto(LogRequest.class).withFileFilter(fileFilter)).getCommits().size();
+                connection.log(LogParams.create().withFileFilter(fileFilter)).getCommits().size();
 
         //then
         assertEquals(3, readMeCommitCount);

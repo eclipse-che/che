@@ -19,12 +19,10 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CheckoutParams;
+import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.api.git.shared.BranchCreateRequest;
-import org.eclipse.che.api.git.shared.BranchListRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
-import org.eclipse.che.api.git.shared.PullRequest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -33,7 +31,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
@@ -65,22 +62,22 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
 
         //when
         //create additional branch and make a commit
-        connection.branchCreate(newDto(BranchCreateRequest.class).withName(FIRST_BRANCH_NAME));
-        connection.checkout(newDto(CheckoutRequest.class).withName(FIRST_BRANCH_NAME));
+        connection.branchCreate(FIRST_BRANCH_NAME, null);
+        connection.checkout(CheckoutParams.create(FIRST_BRANCH_NAME));
         addFile(connection, "newfile", "new file content");
-        connection.add(newDto(AddRequest.class).withFilepattern(AddRequest.DEFAULT_PATTERN));
-        connection.commit(newDto(CommitRequest.class).withMessage("Commit message"));
-        connection.checkout(newDto(CheckoutRequest.class).withName("master"));
+        connection.add(AddParams.create(AddRequest.DEFAULT_PATTERN));
+        connection.commit(CommitParams.create("Commit message"));
+        connection.checkout(CheckoutParams.create("master"));
         //then
         assertFalse(new File(repository, "newf3ile").exists());
 
         //when
-        connection.checkout(newDto(CheckoutRequest.class).withName(FIRST_BRANCH_NAME));
+        connection.checkout(CheckoutParams.create(FIRST_BRANCH_NAME));
         //then
         assertTrue(new File(repository, "newfile").exists());
     }
@@ -90,8 +87,8 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
 
         //when
         //modify a file
@@ -103,7 +100,7 @@ public class CheckoutTest {
         assertEquals(MODIFIED_CONTENT, Files.toString(new File(connection.getWorkingDir(), "README.txt"), Charsets.UTF_8));
         
         //when
-        connection.checkout(newDto(CheckoutRequest.class).withFiles(Arrays.asList("README.txt")));
+        connection.checkout(CheckoutParams.create(null).withFiles(Arrays.asList("README.txt")));
 
         //then
         assertTrue(new File(repository, "README.txt").exists());
@@ -120,8 +117,8 @@ public class CheckoutTest {
         String ORIG_CONTENT_2_TXT = "2.txt original content";
         addFile(connection, "1.txt", ORIG_CONTENT_1_TXT);
         addFile(connection, "2.txt", ORIG_CONTENT_2_TXT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt", "1.txt", "2.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt", "1.txt", "2.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
 
         //when
         //modify the two files
@@ -137,7 +134,7 @@ public class CheckoutTest {
         assertEquals(MODIFIED_CONTENT_2_TXT, Files.toString(new File(connection.getWorkingDir(), "2.txt"), Charsets.UTF_8));
         
         //when
-        connection.checkout(newDto(CheckoutRequest.class).withFiles(ImmutableList.of("1.txt", "2.txt")));
+        connection.checkout(CheckoutParams.create(null).withFiles(ImmutableList.of("1.txt", "2.txt")));
 
         //then
         assertTrue(new File(repository, "1.txt").exists());
@@ -152,17 +149,17 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
 
         //check existence of branch master
-        assertEquals(connection.branchList(newDto(BranchListRequest.class)).size(), 1);
+        assertEquals(connection.branchList(null).size(), 1);
 
         //when
-        connection.checkout(newDto(CheckoutRequest.class).withName("thirdBranch").withCreateNew(true));
+        connection.checkout(CheckoutParams.create("thirdBranch").withCreateNew(true));
 
         //then
-        assertEquals(connection.branchList(newDto(BranchListRequest.class)).size(), 2);
+        assertEquals(connection.branchList(null).size(), 2);
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
@@ -170,28 +167,27 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial addd"));
 
         //when
         //create branch additional branch and make a commit
-        connection.branchCreate(newDto(BranchCreateRequest.class).withName(FIRST_BRANCH_NAME));
-        connection.checkout(newDto(CheckoutRequest.class).withName(FIRST_BRANCH_NAME));
+        connection.branchCreate(FIRST_BRANCH_NAME, null);
+        connection.checkout(CheckoutParams.create(FIRST_BRANCH_NAME));
         addFile(connection, "newfile", "new file content");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Commit message"));
-        connection.checkout(newDto(CheckoutRequest.class).withName("master"));
+        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.commit(CommitParams.create("Commit message"));
+        connection.checkout(CheckoutParams.create("master"));
 
         //check existence of 2 branches
-        assertEquals(connection.branchList(newDto(BranchListRequest.class)).size(), 2);
+        assertEquals(connection.branchList(null).size(), 2);
 
         //when
-        connection.checkout(newDto(CheckoutRequest.class)
-                                          .withName(SECOND_BRANCH_NAME)
+        connection.checkout(CheckoutParams.create(SECOND_BRANCH_NAME)
                                           .withStartPoint(FIRST_BRANCH_NAME)
                                           .withCreateNew(true));
         //then
-        assertEquals(connection.branchList(newDto(BranchListRequest.class)).size(), 3);
+        assertEquals(connection.branchList(null).size(), 3);
         assertTrue(new File(repository, "newfile").exists());
     }
 
@@ -200,28 +196,27 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial add"));
+        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.commit(CommitParams.create("Initial add"));
 
         //when
         //create branch additional branch and make a commit
-        connection.branchCreate(newDto(BranchCreateRequest.class).withName(FIRST_BRANCH_NAME));
-        connection.checkout(newDto(CheckoutRequest.class).withName(FIRST_BRANCH_NAME));
+        connection.branchCreate(FIRST_BRANCH_NAME, null);
+        connection.checkout(CheckoutParams.create(FIRST_BRANCH_NAME));
         addFile(connection, "newfile", "new file content");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Commit message"));
-        connection.checkout(newDto(CheckoutRequest.class).withName("master"));
+        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.commit(CommitParams.create("Commit message"));
+        connection.checkout(CheckoutParams.create("master"));
 
         //check existence of 2 branches
-        assertEquals(connection.branchList(newDto(BranchListRequest.class)).size(), 2);
+        assertEquals(connection.branchList(null).size(), 2);
 
         //when
-        connection.checkout(newDto(CheckoutRequest.class)
+        connection.checkout(CheckoutParams.create(SECOND_BRANCH_NAME)
                                           .withCreateNew(true)
-                                          .withName(SECOND_BRANCH_NAME)
                                           .withTrackBranch(FIRST_BRANCH_NAME));
         //then
-        assertEquals(connection.branchList(newDto(BranchListRequest.class)).size(), 3);
+        assertEquals(connection.branchList(null).size(), 3);
         assertTrue(new File(repository, "newfile").exists());
     }
 }

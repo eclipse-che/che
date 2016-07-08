@@ -12,7 +12,7 @@ package org.eclipse.che.api.git.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author andrew00x
@@ -20,16 +20,10 @@ import java.util.List;
 @DTO
 public interface ConfigRequest {
 
-    boolean isGetAll();
+    Map<String, String> getConfigEntries();
 
-    void setGetAll(boolean geAll);
+    void setConfigEntries(Map<String, String> configEntries);
 
-    ConfigRequest withGetAll(boolean geAll);
-
-    List<String> getConfigEntry();
-
-    void setConfigEntry(List<String> configEntry);
-
-    ConfigRequest withConfigEntry(List<String> configEntry);
+    ConfigRequest withConfigEntries(Map<String, String> configEntries);
 
 }

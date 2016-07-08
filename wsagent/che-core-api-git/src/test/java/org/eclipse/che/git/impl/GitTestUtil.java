@@ -13,10 +13,9 @@ package org.eclipse.che.git.impl;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CommitParams;
 import org.eclipse.che.api.git.shared.GitUser;
-import org.eclipse.che.api.git.shared.InitRequest;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.subject.SubjectImpl;
@@ -46,8 +45,8 @@ public class GitTestUtil {
 
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", CONTENT);
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList("README.txt")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Initial commit"));
+        connection.add(AddParams.create(Arrays.asList("README.txt")));
+        connection.commit(CommitParams.create("Initial commit"));
         return connection;
     }
 
@@ -55,7 +54,7 @@ public class GitTestUtil {
             throws GitException, IOException {
 
         GitConnection connection = getTestUserConnection(connectionFactory, repository);
-        connection.init(newDto(InitRequest.class).withBare(false));
+        connection.init(false);
         return connection;
     }
 
@@ -85,9 +84,5 @@ public class GitTestUtil {
 
     public static void deleteFile(GitConnection connection, String name) throws IOException {
         delete(connection.getWorkingDir().toPath().resolve(name));
-    }
-
-    public static void init(GitConnection connection) throws GitException {
-        connection.init(newDto(InitRequest.class).withBare(false));
     }
 }

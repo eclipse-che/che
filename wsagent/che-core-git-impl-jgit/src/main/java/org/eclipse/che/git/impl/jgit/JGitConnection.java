@@ -33,47 +33,37 @@ import org.eclipse.che.api.git.GitUrlUtils;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
 import org.eclipse.che.api.git.UserCredential;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.LsFilesParams;
+import org.eclipse.che.api.git.shared.BranchListMode;
+import org.eclipse.che.api.git.params.CheckoutParams;
+import org.eclipse.che.api.git.params.CloneParams;
+import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.DiffParams;
+import org.eclipse.che.api.git.params.FetchParams;
+import org.eclipse.che.api.git.params.LogParams;
+import org.eclipse.che.api.git.params.PullParams;
+import org.eclipse.che.api.git.params.PushParams;
+import org.eclipse.che.api.git.params.RemoteAddParams;
+import org.eclipse.che.api.git.params.RemoteUpdateParams;
+import org.eclipse.che.api.git.params.ResetParams;
+import org.eclipse.che.api.git.params.RmParams;
+import org.eclipse.che.api.git.params.TagCreateParams;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.Branch;
-import org.eclipse.che.api.git.shared.BranchCreateRequest;
-import org.eclipse.che.api.git.shared.BranchDeleteRequest;
-import org.eclipse.che.api.git.shared.BranchListRequest;
-import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.api.git.shared.CloneRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
-import org.eclipse.che.api.git.shared.DiffRequest;
-import org.eclipse.che.api.git.shared.FetchRequest;
 import org.eclipse.che.api.git.shared.GitUser;
-import org.eclipse.che.api.git.shared.InitRequest;
-import org.eclipse.che.api.git.shared.LogRequest;
-import org.eclipse.che.api.git.shared.LsFilesRequest;
-import org.eclipse.che.api.git.shared.LsRemoteRequest;
-import org.eclipse.che.api.git.shared.MergeRequest;
 import org.eclipse.che.api.git.shared.MergeResult;
-import org.eclipse.che.api.git.shared.MoveRequest;
-import org.eclipse.che.api.git.shared.PullRequest;
 import org.eclipse.che.api.git.shared.PullResponse;
-import org.eclipse.che.api.git.shared.PushRequest;
 import org.eclipse.che.api.git.shared.PushResponse;
-import org.eclipse.che.api.git.shared.RebaseRequest;
 import org.eclipse.che.api.git.shared.RebaseResponse;
 import org.eclipse.che.api.git.shared.RebaseResponse.RebaseStatus;
 import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.api.git.shared.RemoteAddRequest;
-import org.eclipse.che.api.git.shared.RemoteListRequest;
 import org.eclipse.che.api.git.shared.RemoteReference;
-import org.eclipse.che.api.git.shared.RemoteUpdateRequest;
-import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Revision;
-import org.eclipse.che.api.git.shared.RmRequest;
-import org.eclipse.che.api.git.shared.ShowFileContentRequest;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.git.shared.Tag;
-import org.eclipse.che.api.git.shared.TagCreateRequest;
-import org.eclipse.che.api.git.shared.TagDeleteRequest;
-import org.eclipse.che.api.git.shared.TagListRequest;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -168,6 +158,9 @@ import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_LOCAL;
+import static org.eclipse.che.api.git.shared.BranchListMode.LIST_REMOTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -245,12 +238,12 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void add(AddRequest request) throws GitException {
-        add(request, request.isUpdate());
+    public void add(AddParams params) throws GitException {
+        add(params, params.isUpdate());
 
         // "all" option, when update is false, should run git add with both update true and update false
-        if ((!request.isUpdate()) && request.getAttributes().containsKey(ADD_ALL_OPTION)) {
-            add(request, true);
+        if ((!params.isUpdate()) && params.getAttributes().containsKey(ADD_ALL_OPTION)) {
+            add(params, true);
         }
     }
 
@@ -259,10 +252,10 @@ class JGitConnection implements GitConnection {
      * as the value for the "update" parameter instead of the value in the
      * AddRequest.
      */
-    private void add(AddRequest request, boolean isUpdate) throws GitException {
+    private void add(AddParams params , boolean isUpdate) throws GitException {
         AddCommand addCommand = getGit().add().setUpdate(isUpdate);
 
-        List<String> filePatterns = request.getFilepattern();
+        List<String> filePatterns = params.getFilePattern();
         if (filePatterns.isEmpty()) {
             filePatterns = AddRequest.DEFAULT_PATTERN;
         }
@@ -276,18 +269,18 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void checkout(CheckoutRequest request) throws GitException {
+    public void checkout(CheckoutParams params) throws GitException {
         CheckoutCommand checkoutCommand = getGit().checkout();
-        String startPoint = request.getStartPoint();
-        String name = request.getName();
-        String trackBranch = request.getTrackBranch();
+        String startPoint = params.getStartPoint();
+        String name = params.getName();
+        String trackBranch = params.getTrackBranch();
 
         // checkout files?
-        List<String> files = request.getFiles();
+        List<String> files = params.getFiles();
         boolean shouldCheckoutToFile = name != null && new File(getWorkingDir(), name).exists();
         if (shouldCheckoutToFile || !files.isEmpty()) {
             if (shouldCheckoutToFile) {
-                checkoutCommand.addPath(request.getName());
+                checkoutCommand.addPath(params.getName());
             } else {
                 files.forEach(checkoutCommand::addPath);
             }
@@ -296,26 +289,24 @@ class JGitConnection implements GitConnection {
             if (startPoint != null && trackBranch != null) {
                 throw new GitException("Start point and track branch can not be used together.");
             }
-            if (request.isCreateNew() && name == null) {
+            if (params.isCreateNew() && name == null) {
                 throw new GitException("Branch name must be set when createNew equals to true.");
             }
             if (startPoint != null) {
                 checkoutCommand.setStartPoint(startPoint);
             }
-            if (request.isCreateNew()) {
+            if (params.isCreateNew()) {
                 checkoutCommand.setCreateBranch(true);
                 checkoutCommand.setName(name);
             } else if (name != null) {
                 checkoutCommand.setName(name);
-                List<String> localBranches =
-                        branchList(newDto(BranchListRequest.class).withListMode(BranchListRequest.LIST_LOCAL)).stream()
-                                                                                                              .map(Branch::getDisplayName)
-                                                                                                              .collect(Collectors.toList());
+                List<String> localBranches = branchList(LIST_LOCAL).stream()
+                                                                   .map(Branch::getDisplayName)
+                                                                   .collect(Collectors.toList());
                 if (!localBranches.contains(name)) {
-                    Optional<Branch> remoteBranch = branchList(newDto(BranchListRequest.class).withListMode(BranchListRequest.LIST_REMOTE))
-                            .stream()
-                            .filter(branch -> branch.getName().contains(name))
-                            .findFirst();
+                    Optional<Branch> remoteBranch = branchList(LIST_REMOTE).stream()
+                                                                           .filter(branch -> branch.getName().contains(name))
+                                                                           .findFirst();
                     if (remoteBranch.isPresent()) {
                         checkoutCommand.setCreateBranch(true);
                         checkoutCommand.setStartPoint(remoteBranch.get().getName());
@@ -342,11 +333,10 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public Branch branchCreate(BranchCreateRequest request) throws GitException {
-        CreateBranchCommand createBranchCommand = getGit().branchCreate().setName(request.getName());
-        String start = request.getStartPoint();
-        if (start != null) {
-            createBranchCommand.setStartPoint(start);
+    public Branch branchCreate(String name, String startPoint) throws GitException {
+        CreateBranchCommand createBranchCommand = getGit().branchCreate().setName(name);
+        if (startPoint != null) {
+            createBranchCommand.setStartPoint(startPoint);
         }
         try {
             Ref brRef = createBranchCommand.call();
@@ -362,11 +352,11 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void branchDelete(BranchDeleteRequest request) throws GitException {
+    public void branchDelete(String name, boolean force) throws GitException {
         try {
             getGit().branchDelete()
-                    .setBranchNames(request.getName())
-                    .setForce(request.isForce())
+                    .setBranchNames(name)
+                    .setForce(force)
                     .call();
         } catch (GitAPIException exception) {
             throw new GitException(exception.getMessage(), exception);
@@ -386,16 +376,11 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public List<Branch> branchList(BranchListRequest request) throws GitException {
-        String listMode = request.getListMode();
-        if (listMode != null && !BranchListRequest.LIST_ALL.equals(listMode) && !BranchListRequest.LIST_REMOTE.equals(listMode)) {
-            throw new GitException(String.format(ERROR_BRANCH_LIST_UNSUPPORTED_LIST_MODE, listMode));
-        }
-
+    public List<Branch> branchList(BranchListMode listMode) throws GitException {
         ListBranchCommand listBranchCommand = getGit().branchList();
-        if (BranchListRequest.LIST_ALL.equals(listMode)) {
+        if (LIST_ALL == listMode || listMode == null) {
             listBranchCommand.setListMode(ListMode.ALL);
-        } else if (BranchListRequest.LIST_REMOTE.equals(listMode)) {
+        } else if (LIST_REMOTE == listMode) {
             listBranchCommand.setListMode(ListMode.REMOTE);
         }
         List<Ref> refs;
@@ -435,15 +420,15 @@ class JGitConnection implements GitConnection {
         return branches;
     }
 
-    public void clone(CloneRequest request) throws GitException, UnauthorizedException {
-        String remoteUri = request.getRemoteUri();
+    public void clone(CloneParams params) throws GitException, UnauthorizedException {
+        String remoteUri = params.getRemoteUrl();
         boolean removeIfFailed = false;
         try {
-            if (request.getRemoteName() == null) {
-                request.setRemoteName(Constants.DEFAULT_REMOTE_NAME);
+            if (params.getRemoteName() == null) {
+                params.setRemoteName(Constants.DEFAULT_REMOTE_NAME);
             }
-            if (request.getWorkingDir() == null) {
-                request.setWorkingDir(repository.getWorkTree().getCanonicalPath());
+            if (params.getWorkingDir() == null) {
+                params.setWorkingDir(repository.getWorkTree().getCanonicalPath());
             }
 
             // If clone fails and the .git folder didn't exist we want to remove it.
@@ -451,14 +436,14 @@ class JGitConnection implements GitConnection {
             removeIfFailed = !repository.getDirectory().exists();
 
             CloneCommand cloneCommand = Git.cloneRepository()
-                                           .setDirectory(new File(request.getWorkingDir()))
-                                           .setRemote(request.getRemoteName())
-                                           .setCloneSubmodules(request.isRecursive())
+                                           .setDirectory(new File(params.getWorkingDir()))
+                                           .setRemote(params.getRemoteName())
+                                           .setCloneSubmodules(params.isRecursive())
                                            .setURI(remoteUri);
-            if (request.getBranchesToFetch().isEmpty()) {
+            if (params.getBranchesToFetch().isEmpty()) {
                 cloneCommand.setCloneAllBranches(true);
             } else {
-                cloneCommand.setBranchesToClone(request.getBranchesToFetch());
+                cloneCommand.setBranchesToClone(params.getBranchesToFetch());
             }
 
             LineConsumer lineConsumer = lineConsumerFactory.newLineConsumer();
@@ -509,7 +494,7 @@ class JGitConnection implements GitConnection {
             if (exception.getMessage().contains(": 301 Moved Permanently")) {
                 remoteUri = "https" + remoteUri.substring(4);
                 try {
-                    clone(request.withRemoteUri(remoteUri));
+                    clone(params.withRemoteUrl(remoteUri));
                 } catch (UnauthorizedException | GitException e) {
                     throw new GitException("Failed to clone the repository", e);
                 }
@@ -520,9 +505,9 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public Revision commit(CommitRequest request) throws GitException {
+    public Revision commit(CommitParams params) throws GitException {
         try {
-            String message = request.getMessage();
+            String message = params.getMessage();
             GitUser committer = getUser();
             if (message == null) {
                 throw new GitException("Message wasn't set");
@@ -533,10 +518,10 @@ class JGitConnection implements GitConnection {
 
             //Check that there are staged changes present for commit, or any changes if is 'isAll' enabled, otherwise throw exception
             Status status = status(StatusFormat.SHORT);
-            if (!request.isAmend() && !request.isAll()
+            if (!params.isAmend() && !params.isAll()
                 && status.getAdded().isEmpty() && status.getChanged().isEmpty() && status.getRemoved().isEmpty()) {
                 throw new GitException("No changes added to commit");
-            } else if (!request.isAmend() && request.isAll() && status.isClean()) {
+            } else if (!params.isAmend() && params.isAll() && status.isClean()) {
                 throw new GitException("Nothing to commit, working directory clean");
             }
 
@@ -551,7 +536,7 @@ class JGitConnection implements GitConnection {
                 return rev;
             }
 
-            if (request.isAmend() && !repository.getRepositoryState().canAmend()) {
+            if (params.isAmend() && !repository.getRepositoryState().canAmend()) {
                 Revision rev = newDto(Revision.class);
                 rev.setMessage(String.format(MESSAGE_COMMIT_AMEND_NOT_POSSIBLE, repository.getRepositoryState().getDescription()));
                 return rev;
@@ -560,8 +545,8 @@ class JGitConnection implements GitConnection {
             CommitCommand commitCommand = getGit().commit()
                                                   .setCommitter(committerName, committerEmail).setAuthor(committerName, committerEmail)
                                                   .setMessage(message)
-                                                  .setAll(request.isAll())
-                                                  .setAmend(request.isAmend());
+                                                  .setAll(params.isAll())
+                                                  .setAmend(params.isAmend());
 
             // Check if repository is configured with Gerrit Support
             String gerritSupportConfigValue = repository.getConfig().getString(
@@ -581,8 +566,8 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public DiffPage diff(DiffRequest request) throws GitException {
-        return new JGitDiffPage(request, repository);
+    public DiffPage diff(DiffParams params) throws GitException {
+        return new JGitDiffPage(params, repository);
     }
 
     @Override
@@ -591,11 +576,11 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public ShowFileContentResponse showFileContent(ShowFileContentRequest request) throws GitException {
+    public ShowFileContentResponse showFileContent(String file, String version) throws GitException {
         String content;
         ObjectId revision;
         try {
-            revision = getRepository().resolve(request.getVersion());
+            revision = getRepository().resolve(version);
             try (RevWalk revWalk = new RevWalk(getRepository())) {
                 RevCommit revCommit = revWalk.parseCommit(revision);
                 RevTree tree = revCommit.getTree();
@@ -603,10 +588,9 @@ class JGitConnection implements GitConnection {
                 try (TreeWalk treeWalk = new TreeWalk(getRepository())) {
                     treeWalk.addTree(tree);
                     treeWalk.setRecursive(true);
-                    treeWalk.setFilter(PathFilter.create(request.getFile()));
+                    treeWalk.setFilter(PathFilter.create(file));
                     if (!treeWalk.next()) {
-                        throw new GitException("fatal: Path '" + request.getFile() + "' does not exist in '"
-                                               + request.getVersion() + "'" + lineSeparator());
+                        throw new GitException("fatal: Path '" + file + "' does not exist in '" + version + "'" + lineSeparator());
                     }
                     ObjectId objectId = treeWalk.getObjectId(0);
                     ObjectLoader loader = repository.open(objectId);
@@ -620,12 +604,12 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void fetch(FetchRequest request) throws GitException, UnauthorizedException {
-        String remoteName = request.getRemote();
+    public void fetch(FetchParams params) throws GitException, UnauthorizedException {
+        String remoteName = params.getRemote();
         String remoteUri;
         try {
             List<RefSpec> fetchRefSpecs;
-            List<String> refSpec = request.getRefSpec();
+            List<String> refSpec = params.getRefSpec();
             if (!refSpec.isEmpty()) {
                 fetchRefSpecs = new ArrayList<>(refSpec.size());
                 for (String refSpecItem : refSpec) {
@@ -644,7 +628,7 @@ class JGitConnection implements GitConnection {
             // (otherwise JGit fails)
             if (remoteName != null && refSpec.isEmpty()) {
                 boolean found = false;
-                List<Remote> configRemotes = remoteList(newDto(RemoteListRequest.class));
+                List<Remote> configRemotes = remoteList(null, false);
                 for (Remote configRemote : configRemotes) {
                     if (remoteName.equals(configRemote.getName())) {
                         found = true;
@@ -664,11 +648,11 @@ class JGitConnection implements GitConnection {
                                                               ConfigConstants.CONFIG_KEY_URL);
             fetchCommand.setRefSpecs(fetchRefSpecs);
 
-            int timeout = request.getTimeout();
+            int timeout = params.getTimeout();
             if (timeout > 0) {
                 fetchCommand.setTimeout(timeout);
             }
-            fetchCommand.setRemoveDeletedRefs(request.isRemoveDeletedRefs());
+            fetchCommand.setRemoveDeletedRefs(params.isRemoveDeletedRefs());
 
             executeRemoteCommand(remoteUri, fetchCommand);
         } catch (GitException | GitAPIException exception) {
@@ -685,7 +669,7 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void init(InitRequest request) throws GitException {
+    public void init(boolean bare) throws GitException {
         File workDir = repository.getWorkTree();
         if (!workDir.exists()) {
             throw new GitException(String.format(ERROR_INIT_FOLDER_MISSING, workDir));
@@ -695,7 +679,7 @@ class JGitConnection implements GitConnection {
         boolean removeIfFailed = !repository.getDirectory().exists();
 
         try {
-            repository.create(request.isBare());
+            repository.create(bare);
         } catch (IOException exception) {
             if (removeIfFailed) {
                 deleteRepositoryFolder();
@@ -705,12 +689,12 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public LogPage log(LogRequest request) throws GitException {
+    public LogPage log(LogParams params) throws GitException {
         LogCommand logCommand = getGit().log();
         try {
-            setRevisionRange(logCommand, request);
+            setRevisionRange(logCommand, params);
 
-            request.getFileFilter().forEach(logCommand::addPath);
+            params.getFileFilter().forEach(logCommand::addPath);
 
             Iterator<RevCommit> revIterator = logCommand.call().iterator();
             List<Revision> commits = new ArrayList<>();
@@ -738,15 +722,13 @@ class JGitConnection implements GitConnection {
         }
     }
 
-    private void setRevisionRange(LogCommand logCommand, LogRequest request) throws IOException {
-        if (request != null) {
-            String revisionRangeSince = request.getRevisionRangeSince();
-            String revisionRangeUntil = request.getRevisionRangeUntil();
-            if (revisionRangeSince != null && revisionRangeUntil != null) {
-                ObjectId since = repository.resolve(revisionRangeSince);
-                ObjectId until = repository.resolve(revisionRangeUntil);
-                logCommand.addRange(since, until);
-            }
+    private void setRevisionRange(LogCommand logCommand, LogParams params) throws IOException {
+        String revisionRangeSince = params.getRevisionRangeSince();
+        String revisionRangeUntil = params.getRevisionRangeUntil();
+        if (revisionRangeSince != null && revisionRangeUntil != null) {
+            ObjectId since = repository.resolve(revisionRangeSince);
+            ObjectId until = repository.resolve(revisionRangeUntil);
+            logCommand.addRange(since, until);
         }
     }
 
@@ -771,13 +753,13 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public MergeResult merge(MergeRequest request) throws GitException {
+    public MergeResult merge(String commit) throws GitException {
         org.eclipse.jgit.api.MergeResult jGitMergeResult;
         MergeResult.MergeStatus status;
         try {
-            Ref ref = repository.findRef(request.getCommit());
+            Ref ref = repository.findRef(commit);
             if (ref == null) {
-                throw new GitException("Invalid reference to commit for merge " + request.getCommit());
+                throw new GitException("Invalid reference to commit for merge " + commit);
             }
             // Shorten local branch names by removing '/refs/heads/' from the beginning
             String name = ref.getName();
@@ -820,8 +802,8 @@ class JGitConnection implements GitConnection {
         ObjectId[] jGitMergedCommits = jGitMergeResult.getMergedCommits();
         List<String> mergedCommits = new ArrayList<>();
         if (jGitMergedCommits != null) {
-            for (ObjectId commit : jGitMergedCommits) {
-                mergedCommits.add(commit.getName());
+            for (ObjectId jGitMergedCommit : jGitMergedCommits) {
+                mergedCommits.add(jGitMergedCommit.getName());
             }
         }
 
@@ -844,15 +826,14 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public RebaseResponse rebase(RebaseRequest request) throws GitException {
+    public RebaseResponse rebase(String operation, String branch) throws GitException {
         RebaseResult result;
         RebaseStatus status;
         List<String> failed;
         List<String> conflicts;
         try {
             RebaseCommand rebaseCommand = getGit().rebase();
-            setRebaseOperation(rebaseCommand, request);
-            String branch = request.getBranch();
+            setRebaseOperation(rebaseCommand, operation);
             if (branch != null && !branch.isEmpty()) {
                 rebaseCommand.setUpstream(branch);
             }
@@ -902,12 +883,12 @@ class JGitConnection implements GitConnection {
         return newDto(RebaseResponse.class).withStatus(status).withConflicts(conflicts).withFailed(failed);
     }
 
-    private void setRebaseOperation(RebaseCommand rebaseCommand, RebaseRequest request) {
+    private void setRebaseOperation(RebaseCommand rebaseCommand, String operation) {
         RebaseCommand.Operation op = RebaseCommand.Operation.BEGIN;
 
         // If other operation other than 'BEGIN' was specified, set it
-        if (request.getOperation() != null) {
-            switch (request.getOperation()) {
+        if (operation != null) {
+            switch (operation) {
                 case REBASE_OPERATION_ABORT:
                     op = RebaseCommand.Operation.ABORT;
                     break;
@@ -926,18 +907,18 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void mv(MoveRequest request) throws GitException {
+    public void mv(String source, String target) throws GitException {
         try {
-            getGit().add().addFilepattern(request.getTarget()).call();
-            getGit().rm().addFilepattern(request.getSource()).call();
+            getGit().add().addFilepattern(target).call();
+            getGit().rm().addFilepattern(source).call();
         } catch (GitAPIException exception) {
             throw new GitException(exception.getMessage(), exception);
         }
     }
 
     @Override
-    public PullResponse pull(PullRequest request) throws GitException, UnauthorizedException {
-        String remoteName = request.getRemote();
+    public PullResponse pull(PullParams params) throws GitException, UnauthorizedException {
+        String remoteName = params.getRemote();
         String remoteUri;
         try {
             if (repository.getRepositoryState().equals(RepositoryState.MERGING)) {
@@ -962,7 +943,7 @@ class JGitConnection implements GitConnection {
 
             String remoteBranch;
             RefSpec fetchRefSpecs = null;
-            String refSpec = request.getRefSpec();
+            String refSpec = params.getRefSpec();
             if (refSpec != null) {
                 fetchRefSpecs = (refSpec.indexOf(':') < 0) //
                                 ? new RefSpec(Constants.R_HEADS + refSpec + ":" + fullBranch) //
@@ -982,7 +963,7 @@ class JGitConnection implements GitConnection {
             if (fetchRefSpecs != null) {
                 fetchCommand.setRefSpecs(fetchRefSpecs);
             }
-            int timeout = request.getTimeout();
+            int timeout = params.getTimeout();
             if (timeout > 0) {
                 fetchCommand.setTimeout(timeout);
             }
@@ -1032,24 +1013,24 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public PushResponse push(PushRequest request) throws GitException, UnauthorizedException {
+    public PushResponse push(PushParams params) throws GitException, UnauthorizedException {
         List<Map<String, String>> updates = new ArrayList<>();
         String currentBranch = getCurrentBranch();
-        String remoteName = request.getRemote();
+        String remoteName = params.getRemote();
         String remoteUri = getRepository().getConfig().getString(ConfigConstants.CONFIG_REMOTE_SECTION, remoteName,
                                                                  ConfigConstants.CONFIG_KEY_URL);
         PushCommand pushCommand = getGit().push();
-        if (request.getRemote() != null) {
+        if (params.getRemote() != null) {
             pushCommand.setRemote(remoteName);
         }
-        List<String> refSpec = request.getRefSpec();
+        List<String> refSpec = params.getRefSpec();
         if (!refSpec.isEmpty()) {
             pushCommand.setRefSpecs(refSpec.stream()
                                            .map(RefSpec::new)
                                            .collect(Collectors.toList()));
         }
-        pushCommand.setForce(request.isForce());
-        int timeout = request.getTimeout();
+        pushCommand.setForce(params.isForce());
+        int timeout = params.getTimeout();
         if (timeout > 0) {
             pushCommand.setTimeout(timeout);
         }
@@ -1073,7 +1054,7 @@ class JGitConnection implements GitConnection {
                 Map<String, String> update = new HashMap<>();
                 RemoteRefUpdate.Status status = remoteRefUpdate.getStatus();
                 if (status != RemoteRefUpdate.Status.OK) {
-                    List<String> refSpecs = request.getRefSpec();
+                    List<String> refSpecs = params.getRefSpec();
                     if (remoteRefUpdate.getStatus() == RemoteRefUpdate.Status.UP_TO_DATE) {
                         commandOutput = INFO_PUSH_IGNORED_UP_TO_DATE;
                     } else {
@@ -1111,8 +1092,8 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void remoteAdd(RemoteAddRequest request) throws GitException {
-        String remoteName = request.getName();
+    public void remoteAdd(RemoteAddParams params) throws GitException {
+        String remoteName = params.getName();
         if (isNullOrEmpty(remoteName)) {
             throw new GitException(ERROR_ADD_REMOTE_NAME_MISSING);
         }
@@ -1123,7 +1104,7 @@ class JGitConnection implements GitConnection {
             throw new GitException(String.format(ERROR_ADD_REMOTE_NAME_ALREADY_EXISTS, remoteName));
         }
 
-        String url = request.getUrl();
+        String url = params.getUrl();
         if (isNullOrEmpty(url)) {
             throw new GitException(ERROR_ADD_REMOTE_URL_MISSING);
         }
@@ -1142,7 +1123,7 @@ class JGitConnection implements GitConnection {
             throw new GitException("Remote url " + url + " is invalid. ");
         }
 
-        List<String> branches = request.getBranches();
+        List<String> branches = params.getBranches();
         if (branches.isEmpty()) {
             remoteConfig.addFetchRefSpec(
                     new RefSpec(Constants.R_HEADS + "*" + ":" + Constants.R_REMOTES + remoteName + "/*").setForceUpdate(true));
@@ -1179,10 +1160,10 @@ class JGitConnection implements GitConnection {
             if (name.equals(r)) {
                 config.unset(ConfigConstants.CONFIG_BRANCH_SECTION, branch, ConfigConstants.CONFIG_KEY_REMOTE);
                 config.unset(ConfigConstants.CONFIG_BRANCH_SECTION, branch, ConfigConstants.CONFIG_KEY_MERGE);
-                List<Branch> remoteBranches = branchList(newDto(BranchListRequest.class).withListMode("r"));
+                List<Branch> remoteBranches = branchList(LIST_REMOTE);
                 for (Branch remoteBranch : remoteBranches) {
                     if (remoteBranch.getDisplayName().startsWith(name)) {
-                        branchDelete(newDto(BranchDeleteRequest.class).withName(remoteBranch.getName()).withForce(true));
+                        branchDelete(remoteBranch.getName(), true);
                     }
                 }
             }
@@ -1196,21 +1177,20 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public List<Remote> remoteList(RemoteListRequest request) throws GitException {
+    public List<Remote> remoteList(String remoteName, boolean verbose) throws GitException {
         StoredConfig config = repository.getConfig();
         Set<String> remoteNames = new HashSet<>(config.getSubsections(ConfigConstants.CONFIG_KEY_REMOTE));
-        String remote = request.getRemote();
 
-        if (remote != null && remoteNames.contains(remote)) {
+        if (remoteName != null && remoteNames.contains(remoteName)) {
             remoteNames.clear();
-            remoteNames.add(remote);
+            remoteNames.add(remoteName);
         }
 
         List<Remote> result = new ArrayList<>(remoteNames.size());
-        for (String remoteName : remoteNames) {
+        for (String remote : remoteNames) {
             try {
-                List<URIish> uris = new RemoteConfig(config, remoteName).getURIs();
-                result.add(newDto(Remote.class).withName(remoteName).withUrl(uris.isEmpty() ? null : uris.get(0).toString()));
+                List<URIish> uris = new RemoteConfig(config, remote).getURIs();
+                result.add(newDto(Remote.class).withName(remote).withUrl(uris.isEmpty() ? null : uris.get(0).toString()));
             } catch (URISyntaxException exception) {
                 throw new GitException(exception.getMessage(), exception);
             }
@@ -1219,8 +1199,8 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void remoteUpdate(RemoteUpdateRequest request) throws GitException {
-        String remoteName = request.getName();
+    public void remoteUpdate(RemoteUpdateParams params) throws GitException {
+        String remoteName = params.getName();
         if (isNullOrEmpty(remoteName)) {
             throw new GitException(ERROR_UPDATE_REMOTE_NAME_MISSING);
         }
@@ -1238,9 +1218,9 @@ class JGitConnection implements GitConnection {
             throw new GitException(e.getMessage(), e);
         }
 
-        List<String> branches = request.getBranches();
+        List<String> branches = params.getBranches();
         if (!branches.isEmpty()) {
-            if (!request.isAddBranches()) {
+            if (!params.isAddBranches()) {
                 remoteConfig.setFetchRefSpecs(Collections.emptyList());
                 remoteConfig.setPushRefSpecs(Collections.emptyList());
             } else {
@@ -1261,7 +1241,7 @@ class JGitConnection implements GitConnection {
         }
 
         // Remove URLs first.
-        for (String url : request.getRemoveUrl()) {
+        for (String url : params.getRemoveUrl()) {
             try {
                 remoteConfig.removeURI(new URIish(url));
             } catch (URISyntaxException e) {
@@ -1270,7 +1250,7 @@ class JGitConnection implements GitConnection {
         }
 
         // Add new URLs.
-        for (String url : request.getAddUrl()) {
+        for (String url : params.getAddUrl()) {
             try {
                 remoteConfig.addURI(new URIish(url));
             } catch (URISyntaxException e) {
@@ -1279,7 +1259,7 @@ class JGitConnection implements GitConnection {
         }
 
         // Remove URLs for pushing.
-        for (String url : request.getRemovePushUrl()) {
+        for (String url : params.getRemovePushUrl()) {
             try {
                 remoteConfig.removePushURI(new URIish(url));
             } catch (URISyntaxException e) {
@@ -1288,7 +1268,7 @@ class JGitConnection implements GitConnection {
         }
 
         // Add URLs for pushing.
-        for (String url : request.getAddPushUrl()) {
+        for (String url : params.getAddPushUrl()) {
             try {
                 remoteConfig.addPushURI(new URIish(url));
             } catch (URISyntaxException e) {
@@ -1306,15 +1286,15 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void reset(ResetRequest request) throws GitException {
+    public void reset(ResetParams params) throws GitException {
         try {
             ResetCommand resetCommand = getGit().reset();
-            resetCommand.setRef(request.getCommit());
-            List<String> patterns = request.getFilePattern();
+            resetCommand.setRef(params.getCommit());
+            List<String> patterns = params.getFilePattern();
             patterns.stream().forEach(resetCommand::addPath);
 
-            if (request.getType() != null && patterns.isEmpty()) {
-                switch (request.getType()) {
+            if (params.getType() != null && patterns.isEmpty()) {
+                switch (params.getType()) {
                     case HARD:
                         resetCommand.setMode(ResetType.HARD);
                         break;
@@ -1340,11 +1320,11 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void rm(RmRequest request) throws GitException {
-        List<String> files = request.getItems();
+    public void rm(RmParams params) throws GitException {
+        List<String> files = params.getItems();
         RmCommand rmCommand = getGit().rm();
 
-        rmCommand.setCached(request.isCached());
+        rmCommand.setCached(params.isCached());
 
         if (files != null) {
             files.forEach(rmCommand::addFilepattern);
@@ -1366,8 +1346,8 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public Tag tagCreate(TagCreateRequest request) throws GitException {
-        String commit = request.getCommit();
+    public Tag tagCreate(TagCreateParams params) throws GitException {
+        String commit = params.getCommit();
         if (commit == null) {
             commit = Constants.HEAD;
         }
@@ -1382,10 +1362,10 @@ class JGitConnection implements GitConnection {
             }
 
             TagCommand tagCommand = getGit().tag()
-                                            .setName(request.getName())
+                                            .setName(params.getName())
                                             .setObjectId(revObject)
-                                            .setMessage(request.getMessage())
-                                            .setForceUpdate(request.isForce());
+                                            .setMessage(params.getMessage())
+                                            .setForceUpdate(params.isForce());
 
             GitUser tagger = getUser();
             if (tagger != null) {
@@ -1401,12 +1381,11 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void tagDelete(TagDeleteRequest request) throws GitException {
+    public void tagDelete(String name) throws GitException {
         try {
-            String tagName = request.getName();
-            Ref tagRef = repository.findRef(tagName);
+            Ref tagRef = repository.findRef(name);
             if (tagRef == null) {
-                throw new GitException("Tag " + tagName + " not found. ");
+                throw new GitException("Tag " + name + " not found. ");
             }
 
             RefUpdate updateRef = repository.updateRef(tagRef.getName());
@@ -1414,7 +1393,7 @@ class JGitConnection implements GitConnection {
             updateRef.setForceUpdate(true);
             Result deleteResult = updateRef.delete();
             if (deleteResult != Result.FORCED && deleteResult != Result.FAST_FORWARD) {
-                throw new GitException(String.format(ERROR_TAG_DELETE, tagName, deleteResult));
+                throw new GitException(String.format(ERROR_TAG_DELETE, name, deleteResult));
             }
         } catch (IOException exception) {
             throw new GitException(exception.getMessage(), exception);
@@ -1422,8 +1401,7 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public List<Tag> tagList(TagListRequest request) throws GitException {
-        String patternStr = request.getPattern();
+    public List<Tag> tagList(String patternStr) throws GitException {
         Pattern pattern = null;
         if (patternStr != null) {
             StringBuilder sb = new StringBuilder();
@@ -1462,8 +1440,7 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public List<RemoteReference> lsRemote(LsRemoteRequest request) throws UnauthorizedException, GitException {
-        String remoteUrl = request.getRemoteUrl();
+    public List<RemoteReference> lsRemote(String remoteUrl) throws UnauthorizedException, GitException {
         LsRemoteCommand lsRemoteCommand = getGit().lsRemote().setRemote(remoteUrl);
         Collection<Ref> refs;
         try {
@@ -1502,7 +1479,7 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public List<String> listFiles(LsFilesRequest request) throws GitException {
+    public List<String> listFiles(LsFilesParams params) throws GitException {
         return Arrays.asList(getWorkingDir().list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -1512,12 +1489,12 @@ class JGitConnection implements GitConnection {
     }
 
     @Override
-    public void cloneWithSparseCheckout(String directory, String remoteUrl, String branch) throws GitException, UnauthorizedException {
+    public void cloneWithSparseCheckout(String directory, String remoteUrl) throws GitException, UnauthorizedException {
         //TODO rework this code when jgit will support sparse-checkout. Tracked issue: https://bugs.eclipse.org/bugs/show_bug.cgi?id=383772
-        clone(newDto(CloneRequest.class).withRemoteUri(remoteUrl));
-        if (!"master".equals(branch)) {
-            checkout(newDto(CheckoutRequest.class).withName(branch));
+        if (directory == null) {
+            throw new GitException("Subdirectory for sparse-checkout is not specified");
         }
+        clone(CloneParams.create(remoteUrl));
         final String sourcePath = getWorkingDir().getPath();
         final String keepDirectoryPath = sourcePath + "/" + directory;
         IOFileFilter folderFilter = new DirectoryFileFilter() {
@@ -1681,7 +1658,7 @@ class JGitConnection implements GitConnection {
      */
     private String cleanRemoteName(String branchName) throws GitException {
         String returnName = branchName;
-        List<Remote> remotes = this.remoteList(newDto(RemoteListRequest.class));
+        List<Remote> remotes = this.remoteList(null, false);
         for (Remote remote : remotes) {
             if (branchName.startsWith(remote.getName())) {
                 returnName = branchName.replaceFirst(remote.getName() + "/", "");

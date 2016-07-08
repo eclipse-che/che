@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.api.git.shared.LsRemoteRequest;
 import org.eclipse.che.api.git.shared.RemoteReference;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -56,9 +55,7 @@ public class LsRemoteTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
         //when
-        Set<RemoteReference> remoteReferenceSet =
-                new HashSet<>(connection.lsRemote(newDto(LsRemoteRequest.class)
-                                                          .withRemoteUrl("https://github.com/codenvy/everrest.git")));
+        Set<RemoteReference> remoteReferenceSet = new HashSet<>(connection.lsRemote("https://github.com/codenvy/everrest.git"));
 
         //then
         assertTrue(remoteReferenceSet.contains(newDto(RemoteReference.class)
@@ -74,7 +71,6 @@ public class LsRemoteTest {
 
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
-        connection.lsRemote(newDto(LsRemoteRequest.class)
-                                    .withRemoteUrl("https://bitbucket.org/exoinvitemain/privater.git"));
+        connection.lsRemote("https://bitbucket.org/exoinvitemain/privater.git");
     }
 }

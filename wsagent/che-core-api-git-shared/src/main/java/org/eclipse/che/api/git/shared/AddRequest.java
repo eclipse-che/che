@@ -27,11 +27,11 @@ public interface AddRequest extends GitRequest {
     List<String> DEFAULT_PATTERN = new ArrayList<String>(Arrays.asList("."));
 
     /** @return files to add content from */
-    List<String> getFilepattern();
+    List<String> getFilePattern();
     
-    void setFilepattern(List<String> pattern);
+    void setFilePattern(List<String> pattern);
     
-    AddRequest withFilepattern(List<String> filepattern);
+    AddRequest withFilePattern(List<String> filepattern);
 
     /**
      * @return if <code>true</code> than never stage new files, but stage modified new contents of tracked files. It will remove files from

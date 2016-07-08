@@ -15,7 +15,6 @@ import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.api.git.shared.InitRequest;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -24,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.getTestUserConnection;
 import static org.testng.Assert.assertFalse;
@@ -54,7 +52,7 @@ public class InitTest {
         assertFalse(new File(repository, ".git").exists());
 
         //when
-        connection.init(newDto(InitRequest.class).withWorkingDir(null).withBare(false));
+        connection.init(false);
 
         //then
         assertTrue(new File(repository, ".git").exists());

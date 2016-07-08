@@ -13,6 +13,10 @@ package org.eclipse.che.git.impl;
 import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CheckoutParams;
+import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.shared.*;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -22,7 +26,6 @@ import org.testng.annotations.Test;
 import java.io.File;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -102,7 +105,7 @@ public class StatusTest {
         addFile(connection, "b", "b content");
         addFile(connection, "c", "c content");
         //add "a" and "b" files
-        connection.add(newDto(AddRequest.class).withFilepattern(asList("a", "b")));
+        connection.add(AddParams.create(asList("a", "b")));
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
@@ -122,7 +125,7 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(newDto(AddRequest.class).withFilepattern(asList("a", "b")));
+        connection.add(AddParams.create(asList("a", "b")));
         //modify "a"
         addFile(connection, "a", "new content of a");
         //when
@@ -144,13 +147,13 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(newDto(AddRequest.class).withFilepattern(asList("a", "b")));
+        connection.add(AddParams.create(asList("a", "b")));
         //commit "a" and "b"
-        connection.commit(newDto(CommitRequest.class).withMessage("add 2 test files"));
+        connection.commit(CommitParams.create("add 2 test files"));
         //modify "a"
         addFile(connection, "a", "modified content of a");
         //add "a"
-        connection.add(newDto(AddRequest.class).withFilepattern(asList("a")));
+        connection.add(AddParams.create(asList("a")));
         //change "a"
         addFile(connection, "a", "changed content of a");
         //when
@@ -172,24 +175,21 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(newDto(AddRequest.class).withFilepattern(asList("a", "b")));
+        connection.add(AddParams.create(asList("a", "b")));
         //commit "a" and "b"
-        connection.commit(newDto(CommitRequest.class).withMessage("add 2 test files"));
+        connection.commit(CommitParams.create("add 2 test files"));
         //switch to other branch
-        connection.checkout(newDto(CheckoutRequest.class).withCreateNew(true)
-                .withName("new_branch"));
+        connection.checkout(CheckoutParams.create("new_branch").withCreateNew(true));
         //modify and commit "a"
         addFile(connection, "a", "new_branch a content");
-        connection.commit(newDto(CommitRequest.class).withAll(true)
-                .withMessage("a changed in new_branch"));
+        connection.commit(CommitParams.create("a changed in new_branch").withAll(true));
         //switch back to master
-        connection.checkout(newDto(CheckoutRequest.class).withName("master"));
+        connection.checkout(CheckoutParams.create("master"));
         //modify and commit "a"
         addFile(connection, "a", "master content");
-        connection.commit(newDto(CommitRequest.class).withAll(true)
-                .withMessage("a changed in master"));
+        connection.commit(CommitParams.create("a changed in master").withAll(true));
         //merge with "new_branch" to get conflict
-        connection.merge(newDto(MergeRequest.class).withCommit("new_branch"));
+        connection.merge("new_branch");
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
@@ -208,7 +208,7 @@ public class StatusTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "a", "content of a");
         //add "a"
-        connection.add(newDto(AddRequest.class).withFilepattern(asList("a")));
+        connection.add(AddParams.create(asList("a")));
         //delete "a"
         deleteFile(connection, "a");
         //when
@@ -230,9 +230,9 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(newDto(AddRequest.class).withFilepattern(asList("a", "b")));
+        connection.add(AddParams.create(asList("a", "b")));
         //commit "a" and "b"
-        connection.commit(newDto(CommitRequest.class).withMessage("add 2 test files"));
+        connection.commit(CommitParams.create("add 2 test files"));
         //delete "a"
         deleteFile(connection, "a");
         //when
@@ -254,11 +254,11 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(newDto(AddRequest.class).withFilepattern(asList("a", "b")));
+        connection.add(AddParams.create(asList("a", "b")));
         //commit "a" and "b"
-        connection.commit(newDto(CommitRequest.class).withMessage("add 2 test files"));
+        connection.commit(CommitParams.create("add 2 test files"));
         //remove "a" from index
-        connection.rm(newDto(RmRequest.class).withItems(asList("a")));
+        connection.rm(RmParams.create(asList("a")));
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then

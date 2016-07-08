@@ -68,7 +68,7 @@ public class FetchPresenterTest extends BaseTest {
         when(remoteListPromise.then(any(Operation.class))).thenReturn(remoteListPromise);
         when(remoteListPromise.catchError(any(Operation.class))).thenReturn(remoteListPromise);
 
-        when(service.branchList(anyObject(), any(Path.class), anyString())).thenReturn(branchListPromise);
+        when(service.branchList(anyObject(), any(Path.class), any())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
 

@@ -17,12 +17,11 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitException;
-import org.eclipse.che.api.git.shared.AddRequest;
-import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.api.git.shared.BranchListRequest;
-import org.eclipse.che.api.git.shared.CloneRequest;
-import org.eclipse.che.api.git.shared.CommitRequest;
-import org.eclipse.che.api.git.shared.PullRequest;
+import org.eclipse.che.api.git.params.AddParams;
+import org.eclipse.che.api.git.params.CheckoutParams;
+import org.eclipse.che.api.git.params.CloneParams;
+import org.eclipse.che.api.git.params.CommitParams;
+import org.eclipse.che.api.git.params.PullParams;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,7 +31,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
 import static org.eclipse.che.git.impl.GitTestUtil.connectToGitRepositoryWithContent;
@@ -68,13 +66,12 @@ public class PullTest {
         //create new repository clone of default
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
-        connection2.clone(newDto(CloneRequest.class)
-                                  .withRemoteUri(connection.getWorkingDir().getAbsolutePath()));
+        connection2.clone(CloneParams.create(connection.getWorkingDir().getAbsolutePath()));
         addFile(connection, "newfile1", "new file1 content");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Test commit"));
+        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.commit(CommitParams.create("Test commit"));
         //when
-        connection2.pull(newDto(PullRequest.class).withRemote("origin").withTimeout(-1));
+        connection2.pull(PullParams.create("origin").withTimeout(-1));
         //then
         assertTrue(new File(remoteRepo.getAbsolutePath(), "newfile1").exists());
     }
@@ -88,19 +85,18 @@ public class PullTest {
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         GitConnection connection2 = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
 
-        connection2.clone(newDto(CloneRequest.class).withRemoteUri(connection.getWorkingDir().getAbsolutePath()));
+        connection2.clone(CloneParams.create(connection.getWorkingDir().getAbsolutePath()));
         //add new branch
-        connection.checkout(newDto(CheckoutRequest.class).withName("b1").withCreateNew(true));
+        connection.checkout(CheckoutParams.create("b1").withCreateNew(true));
         addFile(connection, "newfile1", "new file1 content");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection.commit(newDto(CommitRequest.class).withMessage("Test commit"));
-        int branchesBefore = connection2.branchList(newDto(BranchListRequest.class)).size();
+        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.commit(CommitParams.create("Test commit"));
+        int branchesBefore = connection2.branchList(null).size();
         //when
-        connection2.pull(newDto(PullRequest.class)
-                                 .withRemote("origin")
-                                 .withRefSpec("refs/heads/b1:refs/heads/b1")
-                                 .withTimeout(-1));
-        int branchesAfter = connection2.branchList(newDto(BranchListRequest.class).withListMode(BranchListRequest.LIST_LOCAL)).size();
+        connection2.pull(PullParams.create("origin")
+                                   .withRefSpec("refs/heads/b1:refs/heads/b1")
+                                   .withTimeout(-1));
+        int branchesAfter = connection2.branchList(null).size();
         assertEquals(branchesAfter, branchesBefore + 1);
     }
 
@@ -110,18 +106,17 @@ public class PullTest {
         //given
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         String branchName = "remoteBranch";
-        connection.checkout(newDto(CheckoutRequest.class).withCreateNew(true).withName(branchName));
+        connection.checkout(CheckoutParams.create(branchName).withCreateNew(true));
         addFile(connection, "remoteFile", "");
-        connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection.commit(newDto(CommitRequest.class).withMessage("remote test"));
+        connection.add(AddParams.create(Arrays.asList(".")));
+        connection.commit(CommitParams.create("remote test"));
 
         GitConnection connection2 = connectToGitRepositoryWithContent(connectionFactory, remoteRepo);
 
         //when
-        PullRequest request = newDto(PullRequest.class);
-        request.setRemote(connection.getWorkingDir().getAbsolutePath());
-        request.setRefSpec("refs/heads/remoteBranch:refs/heads/remoteBranch");
-        connection2.pull(request);
+        PullParams params = PullParams.create(connection.getWorkingDir().getAbsolutePath())
+                                      .withRefSpec("refs/heads/remoteBranch:refs/heads/remoteBranch");
+        connection2.pull(params);
         //then
         assertTrue(new File(remoteRepo.getAbsolutePath(), "remoteFile").exists());
     }
@@ -134,7 +129,6 @@ public class PullTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
 
         //when
-        PullRequest request = newDto(PullRequest.class);
-        connection.pull(request);
+        connection.pull(PullParams.create(null));
     }
 }
