@@ -14,8 +14,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
-import org.eclipse.che.api.machine.server.dao.RecipeDao;
-import org.eclipse.che.api.machine.server.dao.SnapshotDao;
+import org.eclipse.che.api.machine.server.spi.RecipeDao;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
 import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;

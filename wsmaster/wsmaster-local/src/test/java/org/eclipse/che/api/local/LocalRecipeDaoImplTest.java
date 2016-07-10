@@ -14,8 +14,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.acl.AclEntryImpl;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
+import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -26,11 +26,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 
 import static java.nio.file.Files.readAllBytes;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.testng.Assert.assertEquals;
@@ -114,10 +114,10 @@ public class LocalRecipeDaoImplTest {
 
     @Test
     public void shouldBeAbleToUpdateRecipeWithoutAcl() throws Exception {
-        recipeDao.create(createRecipe().withAcl(null));
+        recipeDao.create(createRecipe().withAcl(emptyList()));
         final RecipeImpl newRecipe = createRecipe().withDescription("new description")
                                                    .withScript("FROM che/ubuntu_jdk")
-                                                   .withAcl(null);
+                                                   .withAcl(emptyList());
 
         final RecipeImpl stored = recipeDao.update(newRecipe);
 
@@ -130,7 +130,7 @@ public class LocalRecipeDaoImplTest {
         recipeDao.create(toFind);
         recipeDao.create(createRecipe().withId("recipe321")
                                        .withType("custom")
-                                       .withTags(Collections.emptyList()));
+                                       .withTags(emptyList()));
 
         final List<RecipeImpl> search = recipeDao.search("creator", singletonList("java"), "dockerfile", 0, 0);
 

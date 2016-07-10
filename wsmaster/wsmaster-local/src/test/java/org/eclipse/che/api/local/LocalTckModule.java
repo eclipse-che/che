@@ -15,6 +15,8 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
+import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
@@ -54,8 +56,10 @@ public class LocalTckModule extends TckModule {
 
         bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(LocalUserTckRepository.class).in(Singleton.class);
         bind(new TypeLiteral<TckRepository<ProfileImpl>>() {}).to(LocalProfileTckRepository.class).in(Singleton.class);
+        bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).to(LocalRecipeTckRepository.class).in(Singleton.class);
 
         bind(UserDao.class).to(LocalUserDaoImpl.class).in(Singleton.class);
         bind(ProfileDao.class).to(LocalProfileDaoImpl.class).in(Singleton.class);
+        bind(RecipeDao.class).to(LocalRecipeDaoImpl.class).in(Singleton.class);
     }
 }

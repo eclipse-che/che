@@ -29,7 +29,7 @@ import org.eclipse.che.api.core.util.CompositeLineConsumer;
 import org.eclipse.che.api.core.util.FileLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.WebsocketLineConsumer;
-import org.eclipse.che.api.machine.server.dao.SnapshotDao;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;

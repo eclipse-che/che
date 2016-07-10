@@ -53,6 +53,10 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
@@ -67,6 +71,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-machine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-machine-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -97,8 +105,16 @@
             <artifactId>che-core-commons-annotations</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-inject</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-websockets</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -112,6 +128,12 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-machine</artifactId>
+            <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -168,7 +190,8 @@
                         </goals>
                         <configuration>
                             <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
-                            <includeArtifactIds>che-core-api-user</includeArtifactIds>
+                            <includeArtifactIds>che-core-api-user,
+                                che-core-api-machine</includeArtifactIds>
                             <includeScope>test</includeScope>
                         </configuration>
                     </execution>
