@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.4.2-artik</version>
+        <version>4.4.2-artik-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-core-ide-app</artifactId>
