@@ -133,8 +133,7 @@ export class WorkspaceDetailsCtrl {
   //Perform workspace deletion.
   deleteWorkspace(event) {
     var confirm = this.$mdDialog.confirm()
-      .title('Would you like to delete the workspace ' + this.workspaceDetails.config.name)
-      .content('Please confirm for the workspace removal.')
+      .title('Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?')
       .ariaLabel('Delete workspace')
       .ok('Delete it!')
       .cancel('Cancel')
