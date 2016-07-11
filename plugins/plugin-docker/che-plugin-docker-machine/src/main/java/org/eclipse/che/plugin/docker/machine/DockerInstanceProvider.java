@@ -81,6 +81,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -107,6 +108,13 @@ public class DockerInstanceProvider implements InstanceProvider {
      * image type support with recipe script being the name of the repository + image name
      */
     public static final String DOCKER_IMAGE_TYPE = "image";
+
+    /**
+     * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
+     */
+    public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
+
+    private static final Pattern SNAPSHOT_LOCATION_PATTERN = Pattern.compile("(.+/)?" + MACHINE_SNAPSHOT_PREFIX + ".+");
 
     private final DockerConnector                               docker;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
@@ -344,7 +352,8 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                                                        SourceNotFoundException {
         final DockerMachineSource dockerMachineSource = new DockerMachineSource(machine.getConfig().getSource());
 
-        if (snapshotUseRegistry) {
+        boolean isSnapshot = SNAPSHOT_LOCATION_PATTERN.matcher(dockerMachineSource.getLocation()).matches();
+        if (!isSnapshot || snapshotUseRegistry) {
             pullImage(dockerMachineSource, creationLogsOutput);
         }
 
@@ -360,8 +369,10 @@ public class DockerInstanceProvider implements InstanceProvider {
             throw new MachineException("Can't create machine from snapshot.");
         }
         try {
-            // remove unneeded tag
-            docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
+            // remove unneeded tag if restoring snapshot from registry
+            if (isSnapshot && snapshotUseRegistry){
+                docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
+            }
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }

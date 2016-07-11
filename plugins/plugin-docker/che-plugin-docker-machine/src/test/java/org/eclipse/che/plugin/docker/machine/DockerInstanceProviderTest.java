@@ -67,6 +67,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_FILE_TYPE;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_IMAGE_TYPE;
+import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -208,11 +209,10 @@ public class DockerInstanceProviderTest {
     }
 
     @Test
-    public void shouldPullDockerImageOnInstanceCreationFromSnapshot() throws Exception {
-        String repo = "repo";
+    public void shouldPullDockerImageOnInstanceCreationFromSnapshotFromRegistry() throws Exception {
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
         String tag = "latest";
         String registry = "localhost:1234";
-
 
         createInstanceFromSnapshot(repo, tag, registry);
 
@@ -222,8 +222,20 @@ public class DockerInstanceProviderTest {
     }
 
     @Test
+    public void shouldNotPullDockerImageOnInstanceCreationFromLocalSnapshot() throws Exception {
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
+        String tag = "latest";
+        String registry = "localhost:1234";
+        dockerInstanceProvider = getDockerInstanceProvider(false);
+
+        createInstanceFromSnapshot(repo, tag, registry);
+
+        verify(dockerConnector, never()).pull(eq(PullParams.create(repo).withTag(tag)), any(ProgressMonitor.class));
+    }
+
+    @Test
     public void shouldUseLocalImageOnInstanceCreationFromSnapshot() throws Exception {
-        final String repo = "repo";
+        final String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
         final String tag = "latest";
         dockerInstanceProvider = getDockerInstanceProvider(false);
 
@@ -239,7 +251,7 @@ public class DockerInstanceProviderTest {
 
     @Test
     public void shouldRemoveLocalImageDuringRemovalOfSnapshot() throws Exception {
-        final String repo = "repo";
+        final String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
         final String tag = "latest";
         final DockerMachineSource dockerMachineSource = new DockerMachineSource(repo).withTag(tag);
         dockerInstanceProvider = getDockerInstanceProvider(false);
@@ -250,13 +262,47 @@ public class DockerInstanceProviderTest {
     }
 
     @Test
+    public void shouldRemoveImageAfterRestoreFromSnapshotFromRegistry() throws Exception {
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
+        String tag = "latest";
+
+        createInstanceFromSnapshot(repo, tag, null);
+
+        verify(dockerConnector).removeImage(any(RemoveImageParams.class));
+    }
+
+    @Test
+    public void shouldNotRemoveImageAfterRestoreFromLocalSnapshot() throws Exception {
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
+        String tag = "latest";
+        dockerInstanceProvider = getDockerInstanceProvider(false);
+
+        createInstanceFromSnapshot(repo, tag, null);
+
+        verify(dockerConnector, never()).removeImage(any(RemoveImageParams.class));
+    }
+
+    @Test
+    public void shouldNotRemoveImageWhenCreatingInstanceFromLocalImage() throws Exception {
+        String repo = "repo1";
+        String tag = "latest";
+        DockerInstanceProvider dockerInstanceProvider = getDockerInstanceProvider(false);
+        MachineImpl machine = getMachineBuilder().build();
+        machine.getConfig().setSource(new DockerMachineSource(repo).withTag(tag).withDigest("digest"));
+
+        dockerInstanceProvider.createInstance(machine, LineConsumer.DEV_NULL);
+
+        verify(dockerConnector, never()).removeImage(any(RemoveImageParams.class));
+    }
+
+    @Test
     public void shouldReTagBuiltImageWithPredictableOnInstanceCreationFromRecipe() throws Exception {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(containerNameGenerator).generateContainerName(eq(WORKSPACE_ID),
                                                                                           eq(MACHINE_ID),
                                                                                           eq(USER_NAME),
                                                                                           eq(MACHINE_NAME));
-        String repo = "repo1";
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo1";
         String tag = "tag1";
         String registry = "registry1";
         TagParams tagParams = TagParams.create(registry + "/" + repo + ":" + tag, "eclipse-che/" + generatedContainerId);
