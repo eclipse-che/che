@@ -16,6 +16,7 @@ import com.google.inject.name.Named;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -127,10 +128,14 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
     private void validateMachine(MachineConfig machineCfg, String envName) throws BadRequestException {
         checkArgument(!isNullOrEmpty(machineCfg.getName()), "Environment %s contains machine with null or empty name", envName);
         checkNotNull(machineCfg.getSource(), "Environment " + envName + " contains machine without source");
-        if (apiEndpoint.startsWith("https://") && machineCfg.getSource().getLocation() != null) {
-            checkArgument(!machineCfg.getSource().getLocation().startsWith("http://"),
-                          "Environment '%s' contains source with http location, which is not allowed", envName);
+
+        if (apiEndpoint.startsWith("https://")
+            && machineCfg.getSource().getType() == "recipe"
+            && machineCfg.getSource().getLocation() != null) {
+            checkArgument(machineCfg.getSource().getLocation().startsWith("https://"),
+                          "Environment '%s' contains source recipe with http location, which is not allowed", envName);
         }
+
         checkArgument(!(machineCfg.getSource().getContent() == null && machineCfg.getSource().getLocation() == null),
                       "Environment " + envName + " contains machine with source but this source doesn't define a location or content");
 

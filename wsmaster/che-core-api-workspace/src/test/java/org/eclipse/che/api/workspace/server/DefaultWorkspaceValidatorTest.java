@@ -516,10 +516,15 @@ public class DefaultWorkspaceValidatorTest {
     }
 
     @Test(expectedExceptions = BadRequestException.class,
-          expectedExceptionsMessageRegExp = "Environment 'dev-env' contains source with http location, which is not allowed")
+          expectedExceptionsMessageRegExp = "Environment 'dev-env' contains source recipe with http location, which is not allowed")
     public void shouldFailValidationIfUsingHttpRecipeOnHttps() throws Exception {
         wsValidator = new DefaultWorkspaceValidator(machineInstanceProviders, "https://localhost");
         final WorkspaceConfigDto configDto = createConfig();
+        configDto.getEnvironments()
+                 .get(0)
+                 .getMachineConfigs()
+                 .get(0)
+                 .getSource().setType("recipe");
 
         wsValidator.validateConfig(configDto);
     }
