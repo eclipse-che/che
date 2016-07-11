@@ -42,12 +42,18 @@ import static java.util.stream.Collectors.toMap;
  *
  * @author andrew00x
  * @author Alexander Garagatyi
+ * @author Roman Iuvshyn
  */
 public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     /**
      * Env variable that points to root folder of projects in dev machine
      */
     public static final String PROJECTS_ROOT_VARIABLE = "CHE_PROJECTS_ROOT";
+
+    /**
+     * Env variable for jvm settings
+     */
+    public static final String JAVA_OPTS_VARIABLE = "JAVA_OPTS";
 
     /**
      * Env variable for dev machine that contains url of Che API

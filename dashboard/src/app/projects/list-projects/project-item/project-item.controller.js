@@ -22,8 +22,9 @@ export class ProjectItemCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location) {
+  constructor($location, cheWorkspace) {
     this.$location = $location;
+    this.cheWorkspace = cheWorkspace;
   }
 
 

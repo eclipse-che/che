@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client.actions;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -71,11 +72,20 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        final Resource[] resources = appContext.getResources();
 
-        event.getPresentation().setEnabledAndVisible(resources != null
-                                                     && resources.length == 1
-                                                     && MAVEN_ID.equals(resources[0].getRelatedProject().get().getType()));
+        final Resource resource = appContext.getResource();
+        if (resource == null) {
+            event.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        final Optional<Project> project = resource.getRelatedProject();
+        if (!project.isPresent()) {
+            event.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        event.getPresentation().setEnabledAndVisible(project.get().isTypeOf(MAVEN_ID));
     }
 
     @Override

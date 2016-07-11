@@ -857,13 +857,6 @@ export class CreateProjectCtrl {
       this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
     }
-    // do we have projects ?
-    let projects = this.cheAPI.getWorkspace().getAllProjects();
-    if (projects.length > 1) {
-      // we have projects, show notification first and redirect to the list of projects
-      this.createProjectSvc.showPopup();
-      this.$location.path('/projects');
-    }
   }
 
   /**

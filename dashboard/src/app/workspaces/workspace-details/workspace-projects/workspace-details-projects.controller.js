@@ -27,20 +27,21 @@ export class WorkspaceDetailsProjectsCtrl {
     this.$mdMedia = $mdMedia;
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
+    this.workspaceKey = this.namespace + ":" + this.workspaceName;
 
     let preferences = cheAPI.getPreferences().getPreferences();
 
     this.profileCreationDate = preferences['che:created'];
 
-    if (!this.cheWorkspace.getWorkspacesById().get(this.workspaceId)) {
-      let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId);
+    if (!this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName)) {
+      let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey);
       promise.then(() => {
         this.updateProjectsData();
-      }, (error) => {
-        if (error.status === 304) {
-          this.updateProjectsData();
-        }
-      });
+    }, (error) => {
+      if (error.status === 304) {
+        this.updateProjectsData();
+      }
+    });
     } else {
       this.updateProjectsData();
     }

@@ -287,6 +287,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
 
             if (file.getLocation().equals(movedFrom)) {
                 file = (VirtualFile)resource;
+                title.setText(file.getDisplayName());
             }
         } else if (delta.getKind() == UPDATED) {
             if (!delta.getResource().isFile()) {

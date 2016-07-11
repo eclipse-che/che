@@ -23,6 +23,7 @@ import org.eclipse.che.plugin.docker.machine.ext.provider.WsAgentServerConfProvi
  *
  * @author Alexander Garagatyi
  * @author Sergii Leschenko
+ * @author Roman Iuvshyn
  */
 // Not a DynaModule, install manually
 public class DockerExtServerModule extends AbstractModule {
@@ -45,6 +46,7 @@ public class DockerExtServerModule extends AbstractModule {
                                                            .permitDuplicates();
         devMachineEnvVars.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ApiEndpointEnvVariableProvider.class);
         devMachineEnvVars.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ProjectsRootEnvVariableProvider.class);
+        devMachineEnvVars.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.JavaOptsEnvVariableProvider.class);
         devMachineEnvVars.addBinding()
                          .toInstance(CheBootstrap.CHE_LOCAL_CONF_DIR
                                      + '='
