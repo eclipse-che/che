@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Function;
@@ -24,8 +23,8 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
@@ -56,7 +55,6 @@ public class CommandManager {
     private final CommandConsoleFactory                commandConsoleFactory;
     private final NotificationManager                  notificationManager;
     private final MachineLocalizationConstant          localizationConstant;
-    private final WorkspaceAgent                       workspaceAgent;
     private final AppContext                           appContext;
     private final CommandPropertyValueProviderRegistry commandPropertyValueProviderRegistry;
 
@@ -67,7 +65,6 @@ public class CommandManager {
                           CommandConsoleFactory commandConsoleFactory,
                           NotificationManager notificationManager,
                           MachineLocalizationConstant localizationConstant,
-                          WorkspaceAgent workspaceAgent,
                           AppContext appContext,
                           CommandPropertyValueProviderRegistry commandPropertyValueProviderRegistry) {
         this.dtoFactory = dtoFactory;
@@ -76,7 +73,6 @@ public class CommandManager {
         this.commandConsoleFactory = commandConsoleFactory;
         this.notificationManager = notificationManager;
         this.localizationConstant = localizationConstant;
-        this.workspaceAgent = workspaceAgent;
         this.appContext = appContext;
         this.commandPropertyValueProviderRegistry = commandPropertyValueProviderRegistry;
     }
@@ -113,7 +109,6 @@ public class CommandManager {
         final CommandOutputConsole console = commandConsoleFactory.create(configuration, machineId);
         console.listenToOutput(outputChannel);
         consolesPanelPresenter.addCommandOutput(machineId, console);
-        workspaceAgent.setActivePart(consolesPanelPresenter);
 
         substituteProperties(configuration.toCommandLine()).then(new Operation<String>() {
             @Override

@@ -31,6 +31,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -160,6 +161,8 @@ public class ConsolesPanelPresenterTest {
                 new ConsolesPanelPresenter(view, eventBus, dtoFactory, dialogFactory, entityFactory, terminalFactory, commandConsoleFactory,
                                            commandTypeRegistry, workspaceAgent, notificationManager, localizationConstant,
                                            machineService, resources, appContext, consoleTreeContextMenuFactory);
+        PartPresenter parent = mock(PartPresenter.class);
+        presenter.setParent(parent);
     }
 
     @Test
@@ -202,7 +205,7 @@ public class ConsolesPanelPresenterTest {
 
         verify(outputConsole).listenToOutput(eq(OUTPUT_CHANNEL));
         verify(outputConsole).attachToProcess(machineProcessDto);
-        verify(workspaceAgent, times(2)).setActivePart(eq(presenter));
+        verify(workspaceAgent, times(2)).setActivePart(eq(presenter.parent));
     }
 
     @Test
@@ -608,34 +611,6 @@ public class ConsolesPanelPresenterTest {
     }
 
     @Test
-    public void shouldReturnTitle() throws Exception {
-        presenter.getTitle();
-
-        verify(localizationConstant, times(2)).viewConsolesTitle();
-    }
-
-    @Test
-    public void shouldReturnTitleToolTip() throws Exception {
-        presenter.getTitleToolTip();
-
-        verify(localizationConstant).viewProcessesTooltip();
-    }
-
-    @Test
-    public void shouldSetViewVisible() throws Exception {
-        presenter.setVisible(true);
-
-        verify(view).setVisible(eq(true));
-    }
-
-    @Test
-    public void shouldReturnTitleSVGImage() {
-        presenter.getTitleImage();
-
-        verify(resources).terminal();
-    }
-
-    @Test
     public void testGo() throws Exception {
         AcceptsOneWidget container = mock(AcceptsOneWidget.class);
 
@@ -643,5 +618,4 @@ public class ConsolesPanelPresenterTest {
 
         verify(container).setWidget(eq(view));
     }
-
 }
