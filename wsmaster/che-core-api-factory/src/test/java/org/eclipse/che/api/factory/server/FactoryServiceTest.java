@@ -922,7 +922,7 @@ public class FactoryServiceTest {
 
         assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
         assertEquals(dto.createDtoFromJson(response.getBody().asString(), ServiceError.class).getMessage(),
-                     "The updating factory shouldn't be null");
+                     "The factory information is not updateable");
 
     }
 
