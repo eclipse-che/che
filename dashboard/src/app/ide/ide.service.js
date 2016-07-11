@@ -144,8 +144,8 @@ class IdeSvc {
           // need to show the error
           this.$mdDialog.show(
             this.$mdDialog.alert()
-              .title('Unable to start workspace')
-              .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
+              .title('Unable to start the workspace runtime')
+              .content('Your workspace runtime is no longer available. It was either destroyed or ran out of memory.')
               .ariaLabel('Workspace start')
               .ok('OK')
           );

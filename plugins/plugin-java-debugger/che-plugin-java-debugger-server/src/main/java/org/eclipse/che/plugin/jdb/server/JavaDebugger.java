@@ -210,7 +210,7 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
     @Override
     public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
-        final String className = breakpoint.getLocation().getTarget();
+        final String className = findFQN(breakpoint);
         final int lineNumber = breakpoint.getLocation().getLineNumber();
         List<ReferenceType> classes = vm.classesByName(className);
         // it may mean that class doesn't loaded by a target JVM yet
@@ -261,6 +261,15 @@ public class JavaDebugger implements EventsHandler, Debugger {
 
         debuggerCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
         LOG.debug("Add breakpoint: {}", location);
+    }
+
+    private String findFQN(Breakpoint breakpoint) throws DebuggerException {
+        Location location = breakpoint.getLocation();
+        final String parentFqn = location.getTarget();
+        final String projectPath = location.getResourceProjectPath();
+        int lineNumber = location.getLineNumber();
+
+        return debuggerUtil.findFqnByPosition(projectPath, parentFqn, lineNumber);
     }
 
     private void deferBreakpoint(Breakpoint breakpoint) throws DebuggerException {

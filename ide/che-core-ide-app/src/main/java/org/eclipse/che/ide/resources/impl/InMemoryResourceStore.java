@@ -203,7 +203,7 @@ class InMemoryResourceStore implements ResourceStore {
 
             final Path comparedPath = setEntry.getKey();
 
-            if (parent.segmentCount() > comparedPath.segmentCount() && !parent.isPrefixOf(comparedPath)) {
+            if (!parent.isPrefixOf(comparedPath)) {
                 continue;
             }
 

@@ -57,6 +57,27 @@ export class WorkspaceDetailsCtrl {
     this.showShowMore = false;
 
     this.cheWorkspace.fetchWorkspaces();
+
+    //search the selected page
+    let page = $route.current.params.page;
+    if (!page) {
+      $location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
+    } else {
+      switch (page) {
+        case 'info':
+          this.selectedTabIndex = 0;
+          break;
+        case 'projects':
+          this.selectedTabIndex = 1;
+          break;
+        case 'share':
+          this.selectedTabIndex = 2;
+          break;
+        default:
+          $location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
+          break;
+      }
+    }
   }
 
   /**
@@ -112,8 +133,7 @@ export class WorkspaceDetailsCtrl {
   //Perform workspace deletion.
   deleteWorkspace(event) {
     var confirm = this.$mdDialog.confirm()
-      .title('Would you like to delete the workspace ' + this.workspaceDetails.config.name)
-      .content('Please confirm for the workspace removal.')
+      .title('Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?')
       .ariaLabel('Delete workspace')
       .ok('Delete it!')
       .cancel('Cancel')

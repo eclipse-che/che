@@ -294,7 +294,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
         }
 
         childRequested.put(parent, reloadExpandedChild);
-        return _load(parent);
+        return doLoad(parent);
     }
 
     /**
@@ -335,7 +335,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *         parent node
      * @return true if load was requested, otherwise false
      */
-    private boolean _load(@NotNull final Node parent) {
+    private boolean doLoad(@NotNull final Node parent) {
         if (fireEvent(new BeforeLoadEvent(parent))) {
             lastRequest = parent;
 

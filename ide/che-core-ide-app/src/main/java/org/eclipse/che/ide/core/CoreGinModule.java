@@ -99,6 +99,7 @@ import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
+import org.eclipse.che.ide.part.explorer.project.RevealNodesPersistenceComponent;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.resources.impl.ClipboardManagerImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
@@ -288,6 +289,7 @@ public class CoreGinModule extends AbstractGinModule {
                 GinMultibinder.newSetBinder(binder(), PersistenceComponent.class);
         persistenceComponentsMultibinder.addBinding().to(ShowHiddenFilesPersistenceComponent.class);
         persistenceComponentsMultibinder.addBinding().to(OpenedFilesPersistenceComponent.class);
+        persistenceComponentsMultibinder.addBinding().to(RevealNodesPersistenceComponent.class);
 
         install(new GinFactoryModuleBuilder().implement(RecipeWidget.class, RecipeWidgetImpl.class)
                                              .implement(WorkspaceWidget.class, WorkspaceWidgetImpl.class)

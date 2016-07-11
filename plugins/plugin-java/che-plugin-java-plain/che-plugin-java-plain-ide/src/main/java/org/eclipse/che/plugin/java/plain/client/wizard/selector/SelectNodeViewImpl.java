@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
+import org.eclipse.che.ide.resources.tree.SkipHiddenNodesInterceptor;
 import org.eclipse.che.ide.search.selectpath.FolderNodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
@@ -45,6 +46,7 @@ import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.MULTI;
 @Singleton
 public class SelectNodeViewImpl extends Window implements SelectNodeView {
     private final FolderNodeInterceptor folderNodeInterceptor;
+    private SkipHiddenNodesInterceptor skipHiddenNodesInterceptor;
 
     private Tree           tree;
     private ActionDelegate delegate;
@@ -61,8 +63,10 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
     @Inject
     public SelectNodeViewImpl(CoreLocalizationConstant locale,
                               FolderNodeInterceptor folderNodeInterceptor,
-                              SelectPathViewImplUiBinder uiBinder) {
+                              SelectPathViewImplUiBinder uiBinder,
+                              SkipHiddenNodesInterceptor skipHiddenNodesInterceptor) {
         this.folderNodeInterceptor = folderNodeInterceptor;
+        this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
         setTitle(locale.selectPathWindowTitle());
 
         Widget widget = uiBinder.createAndBindUi(this);
@@ -136,6 +140,7 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
         tree.getNodeStorage().clear();
         tree.getNodeLoader().getNodeInterceptors().clear();
         tree.getNodeLoader().getNodeInterceptors().add(folderNodeInterceptor);
+        tree.getNodeLoader().getNodeInterceptors().add(skipHiddenNodesInterceptor);
         for (Node node : nodes) {
             tree.getNodeStorage().add(node);
         }
