@@ -130,7 +130,7 @@ public class DefaultWorkspaceValidator implements WorkspaceValidator {
         checkNotNull(machineCfg.getSource(), "Environment " + envName + " contains machine without source");
 
         if (apiEndpoint.startsWith("https://")
-            && machineCfg.getSource().getType() == "recipe"
+            && machineCfg.getSource().getType() == "dockerfile"
             && machineCfg.getSource().getLocation() != null) {
             checkArgument(machineCfg.getSource().getLocation().startsWith("https://"),
                           "Environment '%s' contains source recipe with http location, which is not allowed", envName);

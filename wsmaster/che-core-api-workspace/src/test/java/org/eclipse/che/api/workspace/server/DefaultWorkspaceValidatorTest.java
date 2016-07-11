@@ -520,11 +520,6 @@ public class DefaultWorkspaceValidatorTest {
     public void shouldFailValidationIfUsingHttpRecipeOnHttps() throws Exception {
         wsValidator = new DefaultWorkspaceValidator(machineInstanceProviders, "https://localhost");
         final WorkspaceConfigDto configDto = createConfig();
-        configDto.getEnvironments()
-                 .get(0)
-                 .getMachineConfigs()
-                 .get(0)
-                 .getSource().setType("recipe");
 
         wsValidator.validateConfig(configDto);
     }
