@@ -41,7 +41,7 @@
     </scm>
     <properties>
         <che.lib.version>4.4.0</che.lib.version>
-        <che.version>4.4.2</che.version>
+        <che.version>4.4.2-artik</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
