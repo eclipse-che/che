@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sample-plugin-json-parent</artifactId>
         <groupId>org.eclipse.che.sample</groupId>
-        <version>4.4.2</version>
+        <version>4.4.2-artik</version>
     </parent>
     <artifactId>che-sample-plugin-json-server</artifactId>
     <name>Che Sample :: Plugin JSON :: Server</name>

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.4.2</version>
+        <version>4.4.2-artik</version>
     </parent>
     <artifactId>wsagent-local</artifactId>
     <name>Che Core :: API :: Agent</name>
