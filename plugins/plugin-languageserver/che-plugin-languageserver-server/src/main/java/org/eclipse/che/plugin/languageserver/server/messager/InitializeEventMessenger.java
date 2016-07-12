@@ -51,10 +51,13 @@ public class InitializeEventMessenger implements ServerInitializerObserver {
     @Override
     public void onServerInitialized(LanguageServer server,
                                     ServerCapabilities serverCapabilities,
-                                    LanguageDescription languageDescription) {
+                                    LanguageDescription languageDescription,
+                                    String projectPath) {
+
         LanguageServerInitializeEventDto initializeEventDto = newDto(LanguageServerInitializeEventDto.class);
         initializeEventDto.setSupportedLanguages(asDto(languageDescription));
         initializeEventDto.setServerCapabilities(asDto(serverCapabilities));
+        initializeEventDto.setProjectPath(projectPath);
 
         send(initializeEventDto);
     }

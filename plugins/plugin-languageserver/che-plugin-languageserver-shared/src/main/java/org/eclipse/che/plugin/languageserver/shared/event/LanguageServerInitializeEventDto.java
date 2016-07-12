@@ -20,6 +20,10 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.ServerCapabilitiesDTO;
 @DTO
 public interface LanguageServerInitializeEventDto {
 
+    String getProjectPath();
+
+    void setProjectPath(String projectPath);
+
     LanguageDescriptionDTO getSupportedLanguages();
 
     void setSupportedLanguages(LanguageDescriptionDTO supportedLanguages);

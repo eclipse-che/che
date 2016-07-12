@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server.exception;
 
+import org.eclipse.che.api.core.ServerException;
+
 /**
  * @author Anatoliy Bazko
  */
-public class LanguageServerException extends Exception {
+public class LanguageServerException extends ServerException {
     public LanguageServerException(String message) {
         super(message);
     }

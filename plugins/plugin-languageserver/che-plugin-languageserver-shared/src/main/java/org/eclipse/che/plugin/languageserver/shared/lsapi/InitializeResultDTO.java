@@ -24,6 +24,10 @@ import java.util.List;
 @DTO
 public interface InitializeResultDTO extends InitializeResult {
 
+    String getProject();
+
+    void setProject(String project);
+
     @Override
     ServerCapabilitiesDTO getCapabilities();
 

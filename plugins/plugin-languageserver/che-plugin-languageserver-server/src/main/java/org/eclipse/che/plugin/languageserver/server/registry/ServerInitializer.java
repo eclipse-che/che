@@ -13,10 +13,13 @@
 
 package org.eclipse.che.plugin.languageserver.server.registry;
 
+import io.typefox.lsapi.InitializeResult;
 import io.typefox.lsapi.services.LanguageServer;
 
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+
+import java.util.Map;
 
 /**
  * Is responsible to start new {@link LanguageServer}.
@@ -25,8 +28,12 @@ import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactor
  */
 public interface ServerInitializer extends ServerInitializerObservable {
     /**
-     * Initialize {@link LanguageServer} with given project path.
+     * Initialize new {@link LanguageServer} with given project path.
      */
-    @Nullable
-    LanguageServer initialize(LanguageServerFactory factory, String projectPath);
+    LanguageServer initialize(LanguageServerFactory factory, String projectPath) throws LanguageServerException;
+
+    /**
+     * Returns initialized servers.
+     */
+    Map<LanguageServer, InitializeResult> getInitializedServers();
 }

@@ -23,28 +23,25 @@ import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.plugin.languageserver.server.factory.JsonLanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
-import org.eclipse.che.plugin.languageserver.shared.model.impl.InitializeResultImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
 
-import javax.annotation.PreDestroy;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static com.google.common.io.Files.getFileExtension;
+import static org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey.createProjectKey;
+
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry, ServerInitializerObserver {
-
-    private final static Logger LOG                 = LoggerFactory.getLogger(LanguageServerRegistryImpl.class);
     private final static String PROJECT_FOLDER_PATH = "/projects";
-    private static final String ALL_PROJECT_MARKER = "*";
 
     /**
      * Available {@link LanguageServerFactory} by extension.
@@ -55,12 +52,6 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
      * Started {@link LanguageServer} by project.
      */
     private final ConcurrentHashMap<ProjectExtensionKey, LanguageServer> projectToServer;
-
-    /**
-     * Started {@link LanguageServer}.
-     */
-    private final ConcurrentHashMap<LanguageServer, InitializeResult> serverToInitResult;
-
 
     private final ProjectManager    projectManager;
     private final ServerInitializer initializer;
@@ -73,8 +64,6 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
         this.initializer = initializer;
         this.extensionToFactory = new ConcurrentHashMap<>();
         this.projectToServer = new ConcurrentHashMap<>();
-        this.serverToInitResult = new ConcurrentHashMap<>();
-
         this.initializer.addObserver(this);
 
         for (LanguageServerFactory factory : languageServerFactories) {
@@ -86,53 +75,28 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     }
 
     @Override
-    public LanguageServer findServer(String uri) {
-        String path = URI.create(uri).getPath();
-        String extension = extractExtension(path);
+    public LanguageServer findServer(String fileUri) throws LanguageServerException {
+        String path = URI.create(fileUri).getPath();
 
-        String projectPath;
-        try {
-            projectPath = findProject(path);
-        } catch (ServerException e) {
-            return null;
-        }
+        String extension = getFileExtension(path);
+        String projectPath = extractProjectPath(path);
 
-        return findOrInitializeServer(extension, projectPath);
+        return findServer(extension, projectPath);
     }
 
     @Nullable
-    protected LanguageServer findOrInitializeServer(String extension, String projectPath) {
-        ProjectExtensionKey allProjectKey = new ProjectExtensionKey(ALL_PROJECT_MARKER, extension);
-        ProjectExtensionKey projectKey = new ProjectExtensionKey(projectPath, extension);
+    protected LanguageServer findServer(String extension, String projectPath) throws LanguageServerException {
+        ProjectExtensionKey projectKey = createProjectKey(projectPath, extension);
 
         for (LanguageServerFactory factory : extensionToFactory.get(extension)) {
-
             if (!projectToServer.containsKey(projectKey)) {
                 synchronized (factory) {
-
                     if (!projectToServer.containsKey(projectKey)) {
-                        LanguageServer server = projectToServer.get(allProjectKey);
-
-                        if (server != null) {
-                            projectToServer.put(projectKey, server);
-                        } else {
-                            server = initializer.initialize(factory, projectPath);
-                            projectToServer.put(projectKey, server);
-
-                            // ############################################
-                            // TODO: We have to check capabilities here
-                            // If server supports multiply projects binding then register server for all projects.
-                            // InitializeResult initializeResult = serverToInitResult.get(server);
-                            // initializeResult.getCapabilities()
-                            // ############################################
-                            if (JsonLanguageServerFactory.LANGUAGE_ID.equals(factory.getLanguageDescription().getLanguageId())) {
-                                projectToServer.put(allProjectKey, server);
-                            }
-                        }
+                        LanguageServer server = initializer.initialize(factory, projectPath);
+                        projectToServer.put(projectKey, server);
                     }
                 }
             }
-
             return projectToServer.get(projectKey);
         }
 
@@ -150,64 +114,46 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     }
 
     @Override
-    public List<InitializeResult> getRegisteredLanguages() {
-        return serverToInitResult.values().stream().collect(Collectors.toList());
+    public Map<ProjectExtensionKey, InitializeResult> getInitializedLanguages() {
+        Map<LanguageServer, InitializeResult> initializedServers = initializer.getInitializedServers();
+        return projectToServer.entrySet()
+                              .stream()
+                              .collect(Collectors.toMap(Map.Entry::getKey, e -> initializedServers.get(e.getValue())));
     }
 
-    protected String findProject(String path) throws ServerException {
-        FolderEntry root = projectManager.getProjectsRoot();
-        if (!path.startsWith(PROJECT_FOLDER_PATH)) {
-            return PROJECT_FOLDER_PATH;
+    protected String extractProjectPath(String filePath) throws LanguageServerException {
+        FolderEntry root;
+        try {
+            root = projectManager.getProjectsRoot();
+        } catch (ServerException e) {
+            throw new LanguageServerException("Project not found for " + filePath, e);
         }
 
-        VirtualFileEntry fileEntry = root.getChild(path.substring(PROJECT_FOLDER_PATH.length() + 1));
-        return PROJECT_FOLDER_PATH + (fileEntry == null ? "" : fileEntry.getProject());
-    }
+        if (!filePath.startsWith(PROJECT_FOLDER_PATH)) {
+            throw new LanguageServerException("Project not found for " + filePath);
+        }
 
-    private String extractExtension(String path) {
-        int extPos = path.lastIndexOf('.');
-        return extPos == -1 ? path : path.substring(extPos + 1);
-    }
+        VirtualFileEntry fileEntry;
+        try {
+            fileEntry = root.getChild(filePath.substring(PROJECT_FOLDER_PATH.length() + 1));
+        } catch (ServerException e) {
+            throw new LanguageServerException("Project not found for " + filePath, e);
+        }
 
+        if (fileEntry == null) {
+            throw new LanguageServerException("Project not found for " + filePath);
+        }
+
+        return PROJECT_FOLDER_PATH + fileEntry.getProject();
+    }
 
     @Override
-    public void onServerInitialized(LanguageServer server, ServerCapabilities capabilities, LanguageDescription languageDescription) {
-        InitializeResult initializeResult = new InitializeResultImpl(capabilities, languageDescription);
-        serverToInitResult.put(server, initializeResult);
-    }
-
-    @PreDestroy
-    public void shutdown() {
-        for (LanguageServer server : serverToInitResult.keySet()) {
-            server.shutdown();
-            server.exit();
-        }
-    }
-
-    /**
-     * Is used to register {@link LanguageServer} by project.
-     */
-    private class ProjectExtensionKey {
-        private final String project;
-        private final String extension;
-
-        public ProjectExtensionKey(String project, String extension) {
-            this.project = project;
-            this.extension = extension;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof ProjectExtensionKey)) return false;
-            ProjectExtensionKey that = (ProjectExtensionKey)o;
-            return Objects.equals(extension, that.extension) &&
-                   Objects.equals(project, that.project);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(extension, project);
+    public void onServerInitialized(LanguageServer server,
+                                    ServerCapabilities capabilities,
+                                    LanguageDescription languageDescription,
+                                    String projectPath) {
+        for (String ext : languageDescription.getFileExtensions()) {
+            projectToServer.put(createProjectKey(projectPath, ext), server);
         }
     }
 }

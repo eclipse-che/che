@@ -27,13 +27,15 @@ import org.eclipse.che.plugin.languageserver.server.messager.PublishDiagnosticsP
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PreDestroy;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
-import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * @author Anatoliy Bazko
@@ -48,9 +50,14 @@ public class ServerInitializerImpl implements ServerInitializer {
     private final List<ServerInitializerObserver>   observers;
     private final PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger;
 
+    private final ConcurrentHashMap<String, LanguageServer>           languageIdToServers;
+    private final ConcurrentHashMap<LanguageServer, InitializeResult> serversToInitResult;
+
     @Inject
     public ServerInitializerImpl(PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger) {
         this.observers = new ArrayList<>();
+        this.languageIdToServers = new ConcurrentHashMap<>();
+        this.serversToInitResult = new ConcurrentHashMap<>();
         this.publishDiagnosticsParamsMessenger = publishDiagnosticsParamsMessenger;
     }
 
@@ -65,7 +72,31 @@ public class ServerInitializerImpl implements ServerInitializer {
     }
 
     @Override
-    public LanguageServer initialize(LanguageServerFactory factory, String projectPath) {
+    public LanguageServer initialize(LanguageServerFactory factory, String projectPath) throws LanguageServerException {
+        String languageId = factory.getLanguageDescription().getLanguageId();
+
+        synchronized (factory) {
+            LanguageServer server = languageIdToServers.get(languageId);
+            if (server != null) {
+                InitializeResult initializeResult = serversToInitResult.get(server);
+//                if (!initializeResult.getCapabilities().isMultiplyProjectsProvider()) {
+                    server = doInitialize(factory, projectPath);
+//                }
+            } else {
+                server = doInitialize(factory, projectPath);
+                languageIdToServers.put(languageId, server);
+            }
+            onServerInitialized(server, serversToInitResult.get(server).getCapabilities(), factory.getLanguageDescription(), projectPath);
+            return server;
+        }
+    }
+
+    @Override
+    public Map<LanguageServer, InitializeResult> getInitializedServers() {
+        return Collections.unmodifiableMap(serversToInitResult);
+    }
+
+    protected LanguageServer doInitialize(LanguageServerFactory factory, String projectPath) throws LanguageServerException {
         String languageId = factory.getLanguageDescription().getLanguageId();
         InitializeParamsImpl initializeParams = prepareInitializeParams(projectPath);
 
@@ -73,18 +104,20 @@ public class ServerInitializerImpl implements ServerInitializer {
         try {
             server = factory.create(projectPath);
         } catch (LanguageServerException e) {
-            LOG.error("Can't initialize Language Server {} on {}. " + e.getMessage(), languageId, projectPath);
-            return null;
+            throw new LanguageServerException(
+                    "Can't initialize Language Server " + languageId + " on " + projectPath + ". " + e.getMessage(), e);
         }
         registerCallbacks(server);
 
         CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
         try {
             InitializeResult initializeResult = completableFuture.get();
-            onServerInitialized(server, initializeResult.getCapabilities(), factory.getLanguageDescription());
+            serversToInitResult.put(server, initializeResult);
         } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Error fetching server capabilities. " + e.getMessage(), e);
-            onServerInitialized(server, newDto(ServerCapabilities.class), factory.getLanguageDescription());
+            server.shutdown();
+            server.exit();
+
+            throw new LanguageServerException("Error fetching server capabilities " + languageId + ". " + e.getMessage(), e);
         }
 
         LOG.info("Initialized Language Server {} on project {}", languageId, projectPath);
@@ -104,8 +137,11 @@ public class ServerInitializerImpl implements ServerInitializer {
         return initializeParams;
     }
 
-    protected void onServerInitialized(LanguageServer server, ServerCapabilities capabilities, LanguageDescription languageDescription) {
-        observers.stream().forEach(observer -> observer.onServerInitialized(server, capabilities, languageDescription));
+    protected void onServerInitialized(LanguageServer server,
+                                       ServerCapabilities capabilities,
+                                       LanguageDescription languageDescription,
+                                       String projectPath) {
+        observers.stream().forEach(observer -> observer.onServerInitialized(server, capabilities, languageDescription, projectPath));
     }
 
     private static int getProcessId() {
@@ -122,4 +158,13 @@ public class ServerInitializerImpl implements ServerInitializer {
         LOG.error("Failed to recognize the pid of the process");
         return -1;
     }
+
+    @PreDestroy
+    protected void shutdown() {
+        for (LanguageServer server : serversToInitResult.keySet()) {
+            server.shutdown();
+            server.exit();
+        }
+    }
+
 }

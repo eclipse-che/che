@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server.service;
 
+import io.typefox.lsapi.InitializeResult;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.plugin.languageserver.server.DtoConverter;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
+import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.InitializeResultDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
 
@@ -23,7 +26,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.eclipse.che.plugin.languageserver.server.DtoConverter.asDto;
 
 @Singleton
 @Path("languageserver")
@@ -43,17 +49,33 @@ public class LanguageRegistryService {
 		return registry.getSupportedLanguages()
 					   .stream()
 					   .map(DtoConverter::asDto)
-					   .collect(Collectors.toList());
+					   .collect(toList());
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("registered")
 	public List<InitializeResultDTO> getRegisteredLanguages() {
-		return registry.getRegisteredLanguages()
+		return registry.getInitializedLanguages()
+					   .entrySet()
 					   .stream()
-					   .map(DtoConverter::asDto)
-					   .collect(Collectors.toList());
+					   .map(entry -> {
+						   ProjectExtensionKey projectExtensionKey = entry.getKey();
+						   InitializeResult initializeResult = entry.getValue();
+
+						   List<LanguageDescriptionDTO> languageDescriptionDTOs
+								   = initializeResult.getSupportedLanguages()
+													 .stream()
+													 .map(DtoConverter::asDto)
+													 .collect(toList());
+
+						   InitializeResultDTO dto = newDto(InitializeResultDTO.class);
+						   dto.setProject(projectExtensionKey.getProject());
+						   dto.setSupportedLanguages(languageDescriptionDTOs);
+						   dto.setCapabilities(asDto(initializeResult.getCapabilities()));
+						   return dto;
+					   })
+					   .collect(toList());
 
 	}
 }

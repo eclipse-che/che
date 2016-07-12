@@ -23,6 +23,10 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
@@ -82,11 +86,6 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-languageserver-shared</artifactId>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.xtend</groupId>-->
-        <!--<artifactId>org.eclipse.xtend.lib</artifactId>-->
-        <!--<version>${xtext-version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-websockets</artifactId>

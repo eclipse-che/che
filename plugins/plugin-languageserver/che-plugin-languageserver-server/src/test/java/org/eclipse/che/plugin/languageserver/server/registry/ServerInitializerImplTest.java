@@ -45,9 +45,17 @@ import static org.testng.Assert.assertEquals;
 public class ServerInitializerImplTest {
 
     @Mock
-    private ServerInitializerObserver         observer;
+    private ServerInitializerObserver           observer;
     @Mock
-    private PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger;
+    private PublishDiagnosticsParamsMessenger   publishDiagnosticsParamsMessenger;
+    @Mock
+    private LanguageDescription                 languageDescription;
+    @Mock
+    private LanguageServerFactory               factory;
+    @Mock
+    private LanguageServer                      server;
+    @Mock
+    private CompletableFuture<InitializeResult> completableFuture;
 
     private ServerInitializerImpl initializer;
 
@@ -58,11 +66,7 @@ public class ServerInitializerImplTest {
 
     @Test
     public void initializerShouldNotifyObservers() throws Exception {
-        LanguageDescription languageDescription = mock(LanguageDescription.class);
-        LanguageServerFactory factory = mock(LanguageServerFactory.class);
-        LanguageServer server = mock(LanguageServer.class);
-
-        CompletableFuture completableFuture = mock(CompletableFuture.class);
+        when(languageDescription.getLanguageId()).thenReturn("languageId");
         when(server.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
         when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
 
@@ -74,6 +78,6 @@ public class ServerInitializerImplTest {
         LanguageServer languageServer = initializer.initialize(factory, "/path");
 
         assertEquals(server, languageServer);
-        verify(observer).onServerInitialized(eq(server), any(ServerCapabilities.class), eq(languageDescription));
+        verify(observer).onServerInitialized(eq(server), any(ServerCapabilities.class), eq(languageDescription), eq("/path"));
     }
 }

@@ -16,6 +16,7 @@ import io.typefox.lsapi.services.LanguageServer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
@@ -51,7 +52,8 @@ public class WorkspaceService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<? extends SymbolInformation> documentSymbol(WorkspaceSymbolParamsDTO workspaceSymbolParams) throws ExecutionException,
-                                                                                                                   InterruptedException {
+                                                                                                                   InterruptedException,
+                                                                                                                   LanguageServerException {
         LanguageServer server = getServer(workspaceSymbolParams.getFileUri());
         if (server == null) {
             return emptyList();
@@ -60,7 +62,7 @@ public class WorkspaceService {
         return server.getWorkspaceService().symbol(workspaceSymbolParams).get();
     }
 
-    private LanguageServer getServer(String uri) {
+    private LanguageServer getServer(String uri) throws LanguageServerException {
         return registry.findServer(uri);
     }
 }

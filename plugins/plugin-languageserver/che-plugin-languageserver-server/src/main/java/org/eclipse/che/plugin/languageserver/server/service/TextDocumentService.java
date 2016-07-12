@@ -19,6 +19,7 @@ import io.typefox.lsapi.services.LanguageServer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
@@ -72,8 +73,9 @@ public class TextDocumentService {
     @Path("completion")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams)
-            throws InterruptedException, ExecutionException {
+    public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams) throws InterruptedException,
+                                                                                                                      ExecutionException,
+                                                                                                                      LanguageServerException {
         textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
         textDocumentPositionParams.setUri(prefixURI(textDocumentPositionParams.getUri()));
         LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
@@ -89,8 +91,9 @@ public class TextDocumentService {
     @Path("documentSymbol")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends SymbolInformation> documentSymbol(DocumentSymbolParamsDTO documentSymbolParams)
-            throws ExecutionException, InterruptedException {
+    public List<? extends SymbolInformation> documentSymbol(DocumentSymbolParamsDTO documentSymbolParams) throws ExecutionException,
+                                                                                                                 InterruptedException,
+                                                                                                                 LanguageServerException {
         documentSymbolParams.getTextDocument().setUri(prefixURI(documentSymbolParams.getTextDocument().getUri()));
         LanguageServer server = getServer(documentSymbolParams.getTextDocument().getUri());
         if (server == null) {
@@ -104,8 +107,9 @@ public class TextDocumentService {
     @Path("references")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends Location> references(ReferenceParamsDTO params)
-            throws ExecutionException, InterruptedException {
+    public List<? extends Location> references(ReferenceParamsDTO params) throws ExecutionException,
+                                                                                 InterruptedException,
+                                                                                 LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {
@@ -127,8 +131,9 @@ public class TextDocumentService {
     @Path("definition")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends Location> definition(TextDocumentPositionParamsDTO params)
-            throws ExecutionException, InterruptedException {
+    public List<? extends Location> definition(TextDocumentPositionParamsDTO params) throws ExecutionException,
+                                                                                            InterruptedException,
+                                                                                            LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {
@@ -149,7 +154,9 @@ public class TextDocumentService {
     @Path("completionItem/resolve")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public CompletionItem resolveCompletionItem(CompletionItemDTO unresolved) throws InterruptedException, ExecutionException {
+    public CompletionItem resolveCompletionItem(CompletionItemDTO unresolved) throws InterruptedException,
+                                                                                     ExecutionException,
+                                                                                     LanguageServerException {
         LanguageServer server = getServer(unresolved.getTextDocumentIdentifier().getUri());
         if (server != null)
         	return server.getTextDocumentService().resolveCompletionItem(unresolved).get();
@@ -160,7 +167,7 @@ public class TextDocumentService {
     @POST
     @Path("didChange")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void didChange(DidChangeTextDocumentParamsDTO change) {
+    public void didChange(DidChangeTextDocumentParamsDTO change) throws LanguageServerException {
         change.getTextDocument().setUri(prefixURI(change.getTextDocument().getUri()));
         change.setUri(prefixURI(change.getUri()));
         LanguageServer server = getServer(change.getTextDocument().getUri());
@@ -171,7 +178,7 @@ public class TextDocumentService {
     @POST
     @Path("didOpen")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void didOpen(DidOpenTextDocumentParamsDTO openEvent) {
+    public void didOpen(DidOpenTextDocumentParamsDTO openEvent) throws LanguageServerException {
         openEvent.getTextDocument().setUri(prefixURI(openEvent.getTextDocument().getUri()));
         openEvent.setUri(prefixURI(openEvent.getUri()));
         LanguageServer server = getServer(openEvent.getTextDocument().getUri());
@@ -183,7 +190,7 @@ public class TextDocumentService {
     @POST
     @Path("didClose")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void didClose(DidCloseTextDocumentParamsDTO closeEvent) {
+    public void didClose(DidCloseTextDocumentParamsDTO closeEvent) throws LanguageServerException {
         closeEvent.getTextDocument().setUri(prefixURI(closeEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(closeEvent.getTextDocument().getUri());
         if (server != null)
@@ -193,14 +200,14 @@ public class TextDocumentService {
     @POST
     @Path("didSave")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void didSave(DidSaveTextDocumentParamsDTO saveEvent) {
+    public void didSave(DidSaveTextDocumentParamsDTO saveEvent) throws LanguageServerException {
         saveEvent.getTextDocument().setUri(prefixURI(saveEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(saveEvent.getTextDocument().getUri());
         if (server != null)
         	server.getTextDocumentService().didSave(saveEvent);
     }
 
-    private LanguageServer getServer(String uri) {
+    private LanguageServer getServer(String uri) throws LanguageServerException {
         return languageServerRegistry.findServer(uri);
     }
 }

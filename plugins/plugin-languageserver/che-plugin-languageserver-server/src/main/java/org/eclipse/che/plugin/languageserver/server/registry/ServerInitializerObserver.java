@@ -30,9 +30,10 @@ public interface ServerInitializerObserver {
      * @param capabilities
      *      the supported capabilities by server
      * @param languageDescription
-     *      the language description
+     * @param projectPath
      */
     void onServerInitialized(LanguageServer server,
                              ServerCapabilities capabilities,
-                             LanguageDescription languageDescription);
+                             LanguageDescription languageDescription,
+                             String projectPath);
 }
