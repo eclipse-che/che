@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.4.2-artik-SNAPSHOT</version>
+        <version>4.4.2-artik</version>
     </parent>
     <artifactId>che-core-api-user</artifactId>
     <name>Che Core :: API :: User</name>

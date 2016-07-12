@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.4.2-artik-SNAPSHOT</version>
+        <version>4.4.2-artik</version>
     </parent>
     <artifactId>che-plugin-java-debugger-ide</artifactId>
     <packaging>jar</packaging>
