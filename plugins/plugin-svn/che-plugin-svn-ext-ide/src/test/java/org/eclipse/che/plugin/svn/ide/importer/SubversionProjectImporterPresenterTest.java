@@ -13,8 +13,7 @@ package org.eclipse.che.plugin.svn.ide.importer;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.junit.Before;
@@ -27,7 +26,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.Map;
 
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -41,19 +39,19 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SubversionProjectImporterPresenterTest {
     @Mock
-    private ProjectConfigDto                         dataObject;
+    private MutableProjectConfig                      dataObject;
     @Mock
-    private SourceStorageDto                         sourceStorage;
+    private MutableProjectConfig.MutableSourceStorage sourceStorage;
     @Mock
-    private Map<String, String>                      parameters;
+    private Map<String, String>                       parameters;
     @Mock
-    private SubversionProjectImporterView            view;
+    private SubversionProjectImporterView             view;
     @Mock
-    private SubversionExtensionLocalizationConstants constants;
+    private SubversionExtensionLocalizationConstants  constants;
     @InjectMocks
-    private SubversionProjectImporterPresenter       presenter;
+    private SubversionProjectImporterPresenter        presenter;
     @Mock
-    private Wizard.UpdateDelegate                    updateDelegate;
+    private Wizard.UpdateDelegate                     updateDelegate;
 
     /**
      * Setup the tests.

@@ -10,22 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client.wizard;
 
+import com.google.common.base.Optional;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.plugin.maven.client.MavenArchetype;
 import org.eclipse.che.plugin.maven.client.MavenExtension;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
 import java.util.Arrays;
@@ -33,10 +32,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE_MODULE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.PROJECT_PATH_KEY;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.WIZARD_MODE_KEY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
@@ -56,35 +54,25 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
  * @author Evgen Vidolob
  * @author Artem Zatsarynnyi
  */
-public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> implements MavenPageView.ActionDelegate {
+public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig> implements MavenPageView.ActionDelegate {
 
-    protected final MavenPageView          view;
-    protected final EventBus               eventBus;
-    private final   ProjectServiceClient   projectServiceClient;
-    private final   DialogFactory          dialogFactory;
-    private final   DtoUnmarshallerFactory dtoUnmarshallerFactory;
-    private final   AppContext             appContext;
+    protected final MavenPageView view;
+    protected final EventBus      eventBus;
+    private final   AppContext    appContext;
 
     @Inject
     public MavenPagePresenter(MavenPageView view,
                               EventBus eventBus,
-                              AppContext appContext,
-                              ProjectServiceClient projectServiceClient,
-                              DialogFactory dialogFactory,
-                              DtoUnmarshallerFactory dtoUnmarshallerFactory) {
+                              AppContext appContext) {
         super();
         this.view = view;
         this.eventBus = eventBus;
-        this.projectServiceClient = projectServiceClient;
-        this.dialogFactory = dialogFactory;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        view.setDelegate(this);
-
         this.appContext = appContext;
+        view.setDelegate(this);
     }
 
     @Override
-    public void init(ProjectConfigDto dataObject) {
+    public void init(MutableProjectConfig dataObject) {
         super.init(dataObject);
 
         final ProjectWizardMode wizardMode = ProjectWizardMode.parse(context.get(WIZARD_MODE_KEY));
@@ -94,18 +82,24 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
             setAttribute(PACKAGING, DEFAULT_PACKAGING);
             setAttribute(SOURCE_FOLDER, DEFAULT_SOURCE_FOLDER);
             setAttribute(TEST_SOURCE_FOLDER, DEFAULT_TEST_SOURCE_FOLDER);
-        } else if (CREATE_MODULE == wizardMode || UPDATE == wizardMode && getAttribute(ARTIFACT_ID).isEmpty()) {
+        } else if (UPDATE == wizardMode && getAttribute(ARTIFACT_ID).isEmpty()) {
             estimateAndSetAttributes();
         }
     }
 
     private void estimateAndSetAttributes() {
-        projectServiceClient.estimateProject(appContext.getDevMachine(),
-                context.get(PROJECT_PATH_KEY), MAVEN_ID,
-                new AsyncRequestCallback<SourceEstimation>(dtoUnmarshallerFactory.newUnmarshaller(SourceEstimation.class)) {
+
+        appContext.getWorkspaceRoot().getContainer(dataObject.getPath()).then(new Operation<Optional<Container>>() {
+            @Override
+            public void apply(Optional<Container> container) throws OperationException {
+                if (!container.isPresent()) {
+                    return;
+                }
+
+                container.get().estimate(MAVEN_ID).then(new Operation<SourceEstimation>() {
                     @Override
-                    protected void onSuccess(SourceEstimation result) {
-                        Map<String, List<String>> estimatedAttributes = result.getAttributes();
+                    public void apply(SourceEstimation estimation) throws OperationException {
+                        Map<String, List<String>> estimatedAttributes = estimation.getAttributes();
                         List<String> artifactIdValues = estimatedAttributes.get(ARTIFACT_ID);
                         if (artifactIdValues != null && !artifactIdValues.isEmpty()) {
                             setAttribute(ARTIFACT_ID, artifactIdValues.get(0));
@@ -134,13 +128,9 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
 
                         updateDelegate.updateControls();
                     }
-
-                    @Override
-                    protected void onFailure(Throwable exception) {
-                        dialogFactory.createMessageDialog("Not valid Maven project", exception.getLocalizedMessage(), null).show();
-                        Log.error(MavenPagePresenter.class, exception);
-                    }
                 });
+            }
+        });
     }
 
     @Override
@@ -241,12 +231,6 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
             view.setArchetypes(MavenExtension.getAvailableArchetypes());
         }
 
-//        final GeneratorDescription generatorDescription = dtoFactory.createDto(GeneratorDescription.class);
-//        if (isGenerateFromArchetype) {
-//            fillGeneratorDescription(generatorDescription);
-//        }
-//        dataObject.setGeneratorDescription(generatorDescription);
-
         updateDelegate.updateControls();
     }
 
@@ -254,19 +238,6 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
     public void archetypeChanged(MavenArchetype archetype) {
         updateDelegate.updateControls();
     }
-
-//    private void fillGeneratorDescription(GeneratorDescription generatorDescription) {
-//        MavenArchetype archetype = view.getArchetype();
-//        HashMap<String, String> options = new HashMap<>();
-//        options.put(GENERATION_STRATEGY_OPTION, ARCHETYPE_GENERATION_STRATEGY);
-//        options.put(ARCHETYPE_GROUP_ID_OPTION, archetype.getGroupId());
-//        options.put(ARCHETYPE_ARTIFACT_ID_OPTION, archetype.getArtifactId());
-//        options.put(ARCHETYPE_VERSION_OPTION, archetype.getVersion());
-//        if (archetype.getRepository() != null) {
-//            options.put(ARCHETYPE_REPOSITORY_OPTION, archetype.getRepository());
-//        }
-//        generatorDescription.setOptions(options);
-//    }
 
     private void validateCoordinates() {
         view.showArtifactIdMissingIndicator(view.getArtifactId().isEmpty());
@@ -288,6 +259,6 @@ public class MavenPagePresenter extends AbstractWizardPage<ProjectConfigDto> imp
     /** Sets single value of attribute of data-object. */
     private void setAttribute(String attrId, String value) {
         Map<String, List<String>> attributes = dataObject.getAttributes();
-        attributes.put(attrId, Arrays.asList(value));
+        attributes.put(attrId, singletonList(value));
     }
 }

@@ -19,10 +19,8 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
 
 /**
  * Performs closing all opened editors.
@@ -42,15 +40,8 @@ public class CloseAllAction extends EditorAbstractAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        List<VirtualFile> toClose = new ArrayList<>();
-
         for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
-            toClose.add(editor.getEditorInput().getFile());
-        }
-
-        for (VirtualFile virtualFile : toClose) {
-            eventBus.fireEvent(new FileEvent(virtualFile, FileEvent.FileOperation.CLOSE));
+            eventBus.fireEvent(new FileEvent(editor.getEditorInput().getFile(), CLOSE));
         }
     }
 }

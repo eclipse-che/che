@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.project.node.icon;
 
+import org.eclipse.che.ide.api.resources.Resource;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -19,11 +20,11 @@ import org.vectomatic.dom.svg.ui.SVGResource;
  */
 public interface NodeIconProvider {
     /**
-     * Resolve icon based on file extension.
+     * Resolve icon based on given {@code resource}.
      *
-     * @param fileName
-     *         file name
+     * @param resource
+     *         the resource to resolve icon
      * @return icon or null if icons for this extension doesn't exist
      */
-    SVGResource getIcon(String fileName);
+    SVGResource getIcon(Resource resource);
 }

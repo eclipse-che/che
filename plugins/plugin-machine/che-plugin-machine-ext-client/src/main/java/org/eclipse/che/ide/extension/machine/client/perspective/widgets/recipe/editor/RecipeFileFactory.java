@@ -13,9 +13,9 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.api.resources.SyntheticFile;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.api.project.tree.VirtualFileImpl;
-import org.eclipse.che.ide.api.project.tree.VirtualFileInfo;
 
 import javax.validation.constraints.NotNull;
 
@@ -31,7 +31,6 @@ public class RecipeFileFactory {
     public static final String NAME = "Dockerfile";
     public static final String PATH = "machine_recipe";
 
-    @Inject
     public RecipeFileFactory() {
     }
 
@@ -51,15 +50,7 @@ public class RecipeFileFactory {
 
     @NotNull
     private VirtualFile newInstance(@NotNull String content, @NotNull String name, @NotNull String path) {
-        VirtualFileInfo virtualFileInfo = VirtualFileInfo.newBuilder()
-                                                         .setName(name)
-                                                         .setDisplayName(name)
-                                                         .setPath(path)
-                                                         .setContent(content)
-                                                         .build();
-
-
-        return new VirtualFileImpl(virtualFileInfo);
+        return new SyntheticFile(name, content);
     }
 
 }

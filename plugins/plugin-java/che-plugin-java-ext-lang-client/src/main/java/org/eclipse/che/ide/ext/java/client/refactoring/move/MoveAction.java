@@ -10,23 +10,26 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.refactoring.move;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
-import org.eclipse.che.ide.ext.java.client.project.node.PackageNode;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.wizard.MovePresenter;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.ext.java.client.refactoring.move.MoveType.REFACTOR_MENU;
 import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.COMPILATION_UNIT;
 import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.PACKAGE;
@@ -39,73 +42,92 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredIte
 public class MoveAction extends Action {
 
     private final MovePresenter  movePresenter;
-    private final SelectionAgent selectionAgent;
-
-    private List<?>            selectedItems;
-    private RefactoredItemType refactoredItemType;
+    private final AppContext appContext;
+    private final FileTypeRegistry fileTypeRegistry;
 
     @Inject
-    public MoveAction(JavaLocalizationConstant locale, SelectionAgent selectionAgent, MovePresenter movePresenter) {
+    public MoveAction(JavaLocalizationConstant locale,
+                      MovePresenter movePresenter,
+                      AppContext appContext,
+                      FileTypeRegistry fileTypeRegistry) {
         super(locale.moveActionName(), locale.moveActionDescription());
 
         this.movePresenter = movePresenter;
-        this.selectionAgent = selectionAgent;
-        this.selectedItems = new ArrayList<>();
+        this.appContext = appContext;
+        this.fileTypeRegistry = fileTypeRegistry;
     }
 
     /** {@inheritDoc} */
     @Override
-    public void update(ActionEvent actionEvent) {
-        actionEvent.getPresentation().setEnabled(isActionEnable());
-    }
+    public void update(ActionEvent event) {
+        event.getPresentation().setVisible(true);
 
-    /**
-     * Check if action can be applied.
-     *
-     * @return {@code true} if action should be enabled otherwise return {@code false}
-     */
-    public boolean isActionEnable() {
-        Selection<?> selection = selectionAgent.getSelection();
+        final Resource[] resources = appContext.getResources();
 
-        if (selection == null || selection.isEmpty()) {
-            return false;
+        if (resources == null || resources.length != 1) {
+            event.getPresentation().setEnabled(false);
+            return;
         }
 
-        List<?> selectedItems = selection.getAllElements();
+        final Resource resource = resources[0];
 
-        this.selectedItems = selectedItems;
+        final Optional<Project> project = resource.getRelatedProject();
 
-        for (Object selectedItem : selectedItems) {
-            if (!(selectedItem instanceof HasStorablePath)) {
-                return false;
-            }
-
-            HasStorablePath item = (HasStorablePath)selectedItem;
-
-            boolean isSourceFileNode = item instanceof JavaFileNode;
-            boolean isPackageNode = item instanceof PackageNode;
-
-            if (isSourceFileNode) {
-                refactoredItemType = COMPILATION_UNIT;
-                return true;
-            }
-
-            if (isPackageNode) {
-                refactoredItemType = PACKAGE;
-                return true;
-            }
+        if (!project.isPresent()) {
+            event.getPresentation().setEnabled(false);
+            return;
         }
 
-        return false;
+        final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+
+        if (resource.getResourceType() == FILE) {
+            event.getPresentation().setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent() && isJavaFile((File)resource));
+        } else if (resource instanceof Container) {
+            event.getPresentation().setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent());
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        RefactorInfo refactorInfo = RefactorInfo.of(REFACTOR_MENU, refactoredItemType, selectedItems);
+        final Resource[] resources = appContext.getResources();
 
-        if (isActionEnable()) {
-            movePresenter.show(refactorInfo);
+        if (resources == null || resources.length > 1) {
+            return;
         }
+
+        final Resource resource = resources[0];
+
+        final Optional<Project> project = resource.getRelatedProject();
+
+        if (!JavaUtil.isJavaProject(project.get())) {
+            return;
+        }
+
+        final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
+
+        if (!srcFolder.isPresent() || resource.getLocation().equals(srcFolder.get().getLocation())) {
+            return;
+        }
+
+        RefactoredItemType renamedItemType = null;
+
+        if (resource.getResourceType() == FILE && isJavaFile((File)resource)) {
+            renamedItemType = COMPILATION_UNIT;
+        } else if (resource instanceof Container) {
+            renamedItemType = PACKAGE;
+        }
+
+        if (renamedItemType == null) {
+            return;
+        }
+
+        movePresenter.show(RefactorInfo.of(REFACTOR_MENU, renamedItemType, resources));
+    }
+
+    protected boolean isJavaFile(VirtualFile file) {
+        final String ext = fileTypeRegistry.getFileTypeByFile(file).getExtension();
+
+        return "java".equals(ext) || "class".equals(ext);
     }
 }

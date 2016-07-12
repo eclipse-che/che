@@ -14,6 +14,8 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -23,9 +25,6 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,7 +56,12 @@ public class DockerMachineTerminalLauncherTest {
         launcher = new DockerMachineImplTerminalLauncher(docker, LAUNCH_COMMAND);
 
         when(dockerInstance.getContainer()).thenReturn(CONTAINER);
-        when(docker.createExec(CONTAINER, true, "/bin/bash", "-c", LAUNCH_COMMAND)).thenReturn(exec);
+        when(docker.createExec(CreateExecParams.create(CONTAINER,
+                                                       new String[] {"/bin/bash",
+                                                                     "-c",
+                                                                     LAUNCH_COMMAND})
+                                               .withDetach(true)))
+                .thenReturn(exec);
         when(exec.getId()).thenReturn(EXEC_ID);
     }
 
@@ -76,20 +80,21 @@ public class DockerMachineTerminalLauncherTest {
     public void shouldCreateDetachedExecWithTerminalCommandInBash() throws Exception {
         launcher.launchTerminal(dockerInstance);
 
-        verify(docker).createExec(CONTAINER, true, "/bin/bash", "-c", LAUNCH_COMMAND);
+        verify(docker).createExec(CreateExecParams.create(CONTAINER, new String[] {"/bin/bash", "-c", LAUNCH_COMMAND})
+                                                  .withDetach(true));
     }
 
     @Test
     public void shouldStartCreatedExec() throws Exception {
         launcher.launchTerminal(dockerInstance);
 
-        verify(docker).startExec(eq(EXEC_ID), any());
+        verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), any());
     }
 
     @Test(expectedExceptions = MachineException.class,
           expectedExceptionsMessageRegExp = "test error")
     public void shouldThrowMachineExceptionIfIOExceptionWasThrownByDocker() throws Exception {
-        when(docker.createExec(anyString(), anyBoolean(), anyVararg())).thenThrow(new IOException("test error"));
+        when(docker.createExec(any(CreateExecParams.class))).thenThrow(new IOException("test error"));
 
         launcher.launchTerminal(dockerInstance);
     }

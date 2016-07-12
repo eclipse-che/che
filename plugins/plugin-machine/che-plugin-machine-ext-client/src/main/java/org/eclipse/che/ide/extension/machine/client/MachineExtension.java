@@ -49,6 +49,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
+import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
@@ -83,6 +84,7 @@ public class MachineExtension {
                             final EventBus eventBus,
                             final WorkspaceAgent workspaceAgent,
                             final AppContext   appContext,
+                            final ConsolesContainerPresenter consolesContainerPresenter,
                             final ConsolesPanelPresenter consolesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
@@ -94,6 +96,11 @@ public class MachineExtension {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 machinePortProvider.get();
+                /* Do not show terminal on factories by default */
+                if (appContext.getFactory() == null) {
+                    consolesPanelPresenter.newTerminal();
+                    workspaceAgent.setActivePart(consolesContainerPresenter);
+                }
             }
 
             @Override
@@ -110,16 +117,13 @@ public class MachineExtension {
 
                 /* Add Consoles to Operation perspective */
                 perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
-                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
+                workspaceAgent.openPart(consolesContainerPresenter, PartStackType.INFORMATION);
 
                 /* Add Consoles to Project perspective */
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
-                workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
-
-                /* Do not show terminal on factories by default */
+                workspaceAgent.openPart(consolesContainerPresenter, PartStackType.INFORMATION);
                 if (appContext.getFactory() == null) {
-                    consolesPanelPresenter.newTerminal();
-                    workspaceAgent.setActivePart(consolesPanelPresenter);
+                     workspaceAgent.setActivePart(consolesContainerPresenter);
                 }
             }
         });

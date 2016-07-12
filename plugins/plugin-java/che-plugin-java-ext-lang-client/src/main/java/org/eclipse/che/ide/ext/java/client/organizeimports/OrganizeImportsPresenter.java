@@ -10,28 +10,30 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.organizeimports;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.editor.JavaCodeAssistClient;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.ConflictImportDTO;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
@@ -51,7 +53,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDelegate {
     private final OrganizeImportsView      view;
     private final JavaCodeAssistClient     javaCodeAssistClient;
-    private final AppContext               appContext;
     private final DtoFactory               dtoFactory;
     private final JavaLocalizationConstant locale;
     private final NotificationManager      notificationManager;
@@ -60,24 +61,19 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
     private List<ConflictImportDTO> choices;
     private Map<Integer, String>    selected;
     private VirtualFile             file;
-    private ProjectServiceClient    projectService;
     private Document                document;
     private EditorPartPresenter     editor;
 
     @Inject
     public OrganizeImportsPresenter(OrganizeImportsView view,
-                                    AppContext appContext,
-                                    ProjectServiceClient projectService,
                                     JavaCodeAssistClient javaCodeAssistClient,
                                     DtoFactory dtoFactory,
                                     JavaLocalizationConstant locale,
                                     NotificationManager notificationManager) {
         this.view = view;
-        this.projectService = projectService;
         this.javaCodeAssistClient = javaCodeAssistClient;
         this.view.setDelegate(this);
 
-        this.appContext = appContext;
         this.dtoFactory = dtoFactory;
         this.locale = locale;
         this.notificationManager = notificationManager;
@@ -95,27 +91,35 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
         this.document = ((TextEditor)editor).getDocument();
         this.file = editor.getEditorInput().getFile();
 
+        if (file instanceof Resource) {
+            final Optional<Project> project = ((Resource)file).getRelatedProject();
 
-        final String projectPath = file.getProject().getProjectConfig().getPath();
-        final String fqn = JavaSourceFolderUtil.getFQNForFile(file);
+            final Optional<Resource> srcFolder = ((Resource)file).getParentWithMarker(SourceFolderMarker.ID);
 
-        javaCodeAssistClient.organizeImports(projectPath, fqn)
-                            .then(new Operation<List<ConflictImportDTO>>() {
-                                @Override
-                                public void apply(List<ConflictImportDTO> choices) throws OperationException {
-                                    if (!choices.isEmpty()) {
-                                        show(choices);
-                                    } else {
-                                        applyChanges(file);
+            if (!srcFolder.isPresent()) {
+                return;
+            }
+
+            final String fqn = JavaUtil.resolveFQN((Container)srcFolder.get(), (Resource)file);
+
+            javaCodeAssistClient.organizeImports(project.get().getLocation().toString(), fqn)
+                                .then(new Operation<List<ConflictImportDTO>>() {
+                                    @Override
+                                    public void apply(List<ConflictImportDTO> choices) throws OperationException {
+                                        if (!choices.isEmpty()) {
+                                            show(choices);
+                                        } else {
+                                            applyChanges(file);
+                                        }
                                     }
-                                }
-                            })
-                            .catchError(new Operation<PromiseError>() {
-                                @Override
-                                public void apply(PromiseError arg) throws OperationException {
-                                    notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
-                                }
-                            });
+                                })
+                                .catchError(new Operation<PromiseError>() {
+                                    @Override
+                                    public void apply(PromiseError arg) throws OperationException {
+                                        notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
+                                    }
+                                });
+        }
     }
 
     /** {@inheritDoc} */
@@ -147,24 +151,25 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
 
         ConflictImportDTO result = dtoFactory.createDto(ConflictImportDTO.class).withTypeMatches(new ArrayList<>(selected.values()));
 
-        String projectPath = file.getProject().getProjectConfig().getPath();
-        String fqn = JavaSourceFolderUtil.getFQNForFile(file);
+        if (file instanceof Resource) {
+            final Optional<Project> project = ((Resource)file).getRelatedProject();
 
-        javaCodeAssistClient.applyChosenImports(projectPath, fqn, result)
-                            .then(new Operation<Void>() {
-                                @Override
-                                public void apply(Void arg) throws OperationException {
-                                    applyChanges(file);
-                                    view.hide();
-                                    ((TextEditor)editor).setFocus();
-                                }
-                            })
-                            .catchError(new Operation<PromiseError>() {
-                                @Override
-                                public void apply(PromiseError arg) throws OperationException {
-                                    notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
-                                }
-                            });
+            javaCodeAssistClient.applyChosenImports(project.get().getLocation().toString(), JavaUtil.resolveFQN(file), result)
+                                .then(new Operation<Void>() {
+                                    @Override
+                                    public void apply(Void arg) throws OperationException {
+                                        applyChanges(file);
+                                        view.hide();
+                                        ((TextEditor)editor).setFocus();
+                                    }
+                                })
+                                .catchError(new Operation<PromiseError>() {
+                                    @Override
+                                    public void apply(PromiseError arg) throws OperationException {
+                                        notificationManager.notify(locale.failedToProcessOrganizeImports(), arg.getMessage(), FAIL, FLOAT_MODE);
+                                    }
+                                });
+        }
     }
 
     /** {@inheritDoc} */
@@ -219,19 +224,14 @@ public class OrganizeImportsPresenter implements OrganizeImportsView.ActionDeleg
     }
 
     private void replaceContent(VirtualFile file, final Document document) {
-        projectService.getFileContent(appContext.getDevMachine(),
-                                      file.getPath(),
-                                      new AsyncRequestCallback<String>(new StringUnmarshaller()) {
-                                          @Override
-                                          protected void onSuccess(String result) {
-                                              document.replace(0, document.getContents().length(), result);
-                                          }
-
-                                          @Override
-                                          protected void onFailure(Throwable exception) {
-                                              Log.error(getClass(), exception);
-                                          }
-                                      });
+        if (file instanceof File) {
+            file.getContent().then(new Operation<String>() {
+                @Override
+                public void apply(String content) throws OperationException {
+                    document.replace(0, document.getContents().length(), content);
+                }
+            });
+        }
     }
 
     private void updateButtonsState() {

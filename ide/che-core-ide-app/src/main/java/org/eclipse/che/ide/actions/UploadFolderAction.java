@@ -17,13 +17,15 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.api.selection.SelectionAgent;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.upload.folder.UploadFolderFromZipPresenter;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -31,42 +33,44 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  *
  * @author Roman Nikitenko
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class UploadFolderAction extends AbstractPerspectiveAction {
 
     private final UploadFolderFromZipPresenter presenter;
-    private final SelectionAgent               selectionAgent;
+    private final AppContext                   appContext;
 
     @Inject
     public UploadFolderAction(UploadFolderFromZipPresenter presenter,
                               CoreLocalizationConstant locale,
-                              SelectionAgent selectionAgent,
-                              Resources resources) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
+                              Resources resources,
+                              AppContext appContext) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID),
               locale.uploadFolderFromZipName(),
               locale.uploadFolderFromZipDescription(),
               null,
               resources.uploadFile());
         this.presenter = presenter;
-        this.selectionAgent = selectionAgent;
+        this.appContext = appContext;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        presenter.showDialog();
+        final Resource[] resources = appContext.getResources();
+
+        checkState(resources != null && resources.length == 1 && resources[0] instanceof Container);
+
+        presenter.showDialog((Container)resources[0]);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setVisible(true);
-        boolean enabled = false;
-        Selection<?> selection = selectionAgent.getSelection();
-        if (selection != null) {
-            enabled = selection.getHeadElement() != null;
-        }
-        event.getPresentation().setEnabled(enabled);
+    public void updateInPerspective(@NotNull ActionEvent e) {
+        final Resource[] resources = appContext.getResources();
+
+        e.getPresentation().setVisible(true);
+        e.getPresentation().setEnabled(resources != null && resources.length == 1 && resources[0] instanceof Container);
     }
 }

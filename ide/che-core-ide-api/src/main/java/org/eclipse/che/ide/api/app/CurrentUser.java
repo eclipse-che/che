@@ -63,14 +63,4 @@ public class CurrentUser {
     public void setPreferences(Map<String, String> preferences) {
         this.preferences = preferences;
     }
-
-    /**
-     * Determines whether the user is permanent.
-     *
-     * @return <b>true</b> for permanent user, <b>false</b> otherwise
-     */
-    public boolean isUserPermanent() {
-        return preferences == null || !"true".equals(preferences.get("temporary"));
-    }
-
 }

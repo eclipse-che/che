@@ -60,7 +60,7 @@
          layout="row"
          layout-align="center center"
          ng-show="hover">
-      <a ng-href="#/ide/{{projectItemCtrl.workspaceName}}">
+      <a ng-href="#/ide/{{projectItemCtrl.workspace.namespace}}/{{projectItemCtrl.workspace.config.name}}">
         <che-button-default class="che-hover project-list-details-arrow"
                             che-button-icon="fa fa fa-chevron-circle-right"
                             che-button-title="Open in IDE"></che-button-default>

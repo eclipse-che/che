@@ -10,16 +10,30 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.json;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Docker event.
  *
  * @author Alexander Garagatyi
+ * @author Mykola Morhun
  */
 public class Event {
+    @SerializedName("status")
     private String status;
+    @SerializedName("id")
     private String id;
+    @SerializedName("from")
     private String from;
+    @SerializedName("Type")
+    private String type;
+    @SerializedName("Action")
+    private String action;
+    @SerializedName("Actor")
+    private Actor  actor;
+    @SerializedName("time")
     private long   time;
+    @SerializedName("timeNano")
     private long   timeNano;
 
     public long getTime() {
@@ -36,6 +50,18 @@ public class Event {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public Actor getActor() {
+        return actor;
     }
 
     public long getTimeNano() {
@@ -57,6 +83,21 @@ public class Event {
         return this;
     }
 
+    public Event withType(String type) {
+        this.type = type;
+        return this;
+    }
+
+    public Event withAction(String action) {
+        this.action = action;
+        return this;
+    }
+
+    public Event withActor(Actor actor) {
+        this.actor = actor;
+        return this;
+    }
+
     public Event withTime(long time) {
         this.time = time;
         return this;
@@ -73,6 +114,9 @@ public class Event {
                "status='" + status + '\'' +
                ", id='" + id + '\'' +
                ", from='" + from + '\'' +
+               ", type='" + type + '\'' +
+               ", action='" + action + '\'' +
+               ", actor='" + actor + '\'' +
                ", time=" + time +
                ", timeNano=" + timeNano +
                '}';

@@ -14,9 +14,9 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerImage;
-import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.Dockerfile;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
+import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.Collections;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -108,7 +107,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
         final String tag = "latest";
         final String repo = "my_repo/my_image";
         when(dockerImage.getFrom()).thenReturn(repo + ":" + tag);
-        doThrow(throwable).when(dockerConnector).pull(anyString(), anyString(), anyString(), any(ProgressMonitor.class));
+        doThrow(throwable).when(dockerConnector).pull(any(PullParams.class), any(ProgressMonitor.class));
 
 
         interceptor.invoke(methodInvocation);

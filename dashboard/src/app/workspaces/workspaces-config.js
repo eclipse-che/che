@@ -93,19 +93,25 @@ export class WorkspacesConfig {
     register.controller('CheStackLibraryFilterCtrl', CheStackLibraryFilterCtrl);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
 
+    let locationProvider = {
+      title: (params) => { return params.workspaceName;},
+      templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
+      controller: 'WorkspaceDetailsCtrl',
+      controllerAs: 'workspaceDetailsCtrl'
+    }
+
     // config routes
     register.app.config(function ($routeProvider) {
       $routeProvider.accessWhen('/workspaces', {
+        title: 'Workspaces',
         templateUrl: 'app/workspaces/list-workspaces/list-workspaces.html',
         controller: 'ListWorkspacesCtrl',
         controllerAs: 'listWorkspacesCtrl'
       })
-      .accessWhen('/workspace/:workspaceId', {
-          templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
-          controller: 'WorkspaceDetailsCtrl',
-          controllerAs: 'workspaceDetailsCtrl'
-        })
+      .accessWhen('/workspace/:namespace/:workspaceName', locationProvider)
+      .accessWhen('/workspace/:namespace/:workspaceName/:page', locationProvider)
       .accessWhen('/create-workspace', {
+          title: 'New Workspace',
           templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
           controller: 'CreateWorkspaceCtrl',
           controllerAs: 'createWorkspaceCtrl'

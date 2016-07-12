@@ -93,7 +93,7 @@ public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionD
         targets.clear();
         machines.clear();
 
-        machineService.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
+        machineService.getMachines(appContext.getDevMachine().getId()).then(new Operation<List<MachineDto>>() {
             @Override
             public void apply(List<MachineDto> machineList) throws OperationException {
 

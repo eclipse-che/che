@@ -545,7 +545,7 @@ public class WorkspaceService extends Service {
         requiredNotNull(update, "Environment description");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         final List<EnvironmentImpl> environments = workspace.getConfig().getEnvironments();
-        if (!environments.stream().anyMatch(env -> env.getName().equals(envName))) {
+        if (!environments.removeIf(env -> env.getName().equals(envName))) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(update));
@@ -694,7 +694,7 @@ public class WorkspaceService extends Service {
         requiredNotNull(machineConfig.getSource().getType(), "Machine source type");
         // definition of source should come either with a content or with location
         requiredOnlyOneNotNull(machineConfig.getSource().getLocation(), machineConfig.getSource().getContent(),
-                        "Machine source should provide either location or content");
+                               "Machine source should provide either location or content");
 
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
         if (workspace.getRuntime() == null) {

@@ -15,29 +15,37 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.merge.MergePresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
-/** @author Andrey Plotnikov */
+import static com.google.common.base.Preconditions.checkState;
+
+/**
+ * @author Andrey Plotnikov
+ * @author Vlad Zhukovskyi
+ */
 @Singleton
 public class ShowMergeAction extends GitAction {
-    private final MergePresenter       presenter;
+    private final MergePresenter presenter;
 
     @Inject
     public ShowMergeAction(MergePresenter presenter,
                            AppContext appContext,
                            GitResources resources,
-                           GitLocalizationConstant constant,
-                           ProjectExplorerPresenter projectExplorer) {
-        super(constant.mergeControlTitle(), constant.mergeControlPrompt(), resources.merge(), appContext, projectExplorer);
+                           GitLocalizationConstant constant) {
+        super(constant.mergeControlTitle(), constant.mergeControlPrompt(), resources.merge(), appContext);
         this.presenter = presenter;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        presenter.showDialog();
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null, "Null project occurred");
+
+        presenter.showDialog(project);
     }
 }

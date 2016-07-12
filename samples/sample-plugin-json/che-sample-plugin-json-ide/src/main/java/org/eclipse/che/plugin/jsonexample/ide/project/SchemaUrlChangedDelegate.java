@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.jsonexample.ide.project;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.plugin.jsonexample.shared.Constants;
 
 import java.util.Collections;
@@ -20,7 +21,7 @@ import java.util.Collections;
  */
 public class SchemaUrlChangedDelegate {
 
-    private ProjectConfigDto dataObject;
+    private MutableProjectConfig dataObject;
 
     /**
      * Constructor that expects the {@link ProjectConfigDto} data object
@@ -30,7 +31,7 @@ public class SchemaUrlChangedDelegate {
      *         the {@link ProjectConfigDto} data object that holds the current value
      *         of the schema URL
      */
-    public SchemaUrlChangedDelegate(ProjectConfigDto dataObject) {
+    public SchemaUrlChangedDelegate(MutableProjectConfig dataObject) {
         this.dataObject = dataObject;
     }
 

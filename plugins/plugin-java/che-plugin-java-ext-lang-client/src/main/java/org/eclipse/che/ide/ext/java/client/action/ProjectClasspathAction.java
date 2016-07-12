@@ -10,23 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.action;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathPresenter;
-import org.eclipse.che.ide.ext.java.shared.Constants;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
-import static org.eclipse.che.ide.ext.java.shared.Constants.JAVA_ID;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -55,27 +54,23 @@ public class ProjectClasspathAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (appContext.getCurrentProject() == null) {
-            return;
-        }
         projectClasspathPresenter.show();
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
-            event.getPresentation().setVisible(false);
+        final Resource resource = appContext.getResource();
+        if (resource == null) {
+            event.getPresentation().setEnabledAndVisible(false);
             return;
         }
 
-        event.getPresentation().setEnabledAndVisible(isJavaProject(currentProject));
-    }
+        final Optional<Project> project = resource.getRelatedProject();
+        if (!project.isPresent()) {
+            event.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
 
-    private boolean isJavaProject(CurrentProject project) {
-        Map<String, List<String>> attributes = project.getProjectConfig().getAttributes();
-        return attributes.containsKey(Constants.LANGUAGE)
-               && attributes.get(Constants.LANGUAGE) != null
-               && JAVA_ID.equals(attributes.get(Constants.LANGUAGE).get(0));
+        event.getPresentation().setEnabledAndVisible(isJavaProject(project.get()));
     }
 }

@@ -10,25 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client.comunnication;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.java.client.event.DependencyUpdatedEvent;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.BackgroundLoaderPresenter;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.eclipse.che.plugin.maven.shared.MessageType;
@@ -58,27 +55,24 @@ public class MavenMessagesHandler {
 
     private final EventBus                  eventBus;
     private final NotificationManager       notificationManager;
-    private final ProjectServiceClient      projectServiceClient;
-    private final AppContext                context;
     private final BackgroundLoaderPresenter dependencyResolver;
     private final PomEditorReconciler       pomEditorReconciler;
+    private final AppContext                appContext;
 
     @Inject
     public MavenMessagesHandler(EventBus eventBus,
                                 NotificationManager notificationManager,
                                 DtoFactory factory,
-                                ProjectServiceClient projectServiceClient,
-                                AppContext context,
                                 BackgroundLoaderPresenter dependencyResolver,
                                 PomEditorReconciler pomEditorReconciler,
-                                WsAgentStateController agentStateController) {
+                                WsAgentStateController agentStateController,
+                                AppContext appContext) {
         this.eventBus = eventBus;
 
         this.notificationManager = notificationManager;
-        this.projectServiceClient = projectServiceClient;
-        this.context = context;
         this.dependencyResolver = dependencyResolver;
         this.pomEditorReconciler = pomEditorReconciler;
+        this.appContext = appContext;
 
         handleOperations(factory, agentStateController);
     }
@@ -136,7 +130,6 @@ public class MavenMessagesHandler {
         if (dto.isStart()) {
             dependencyResolver.show();
         } else {
-            eventBus.fireEvent(new DependencyUpdatedEvent());
             dependencyResolver.hide();
         }
     }
@@ -144,15 +137,15 @@ public class MavenMessagesHandler {
     private void handleUpdate(ProjectsUpdateMessage dto) {
         List<String> updatedProjects = dto.getUpdatedProjects();
         Set<String> projectToRefresh = computeUniqueHiLevelProjects(updatedProjects);
-        for (String path : projectToRefresh) {
-            final String projectPath = path;
-            Promise<ProjectConfigDto> promise = projectServiceClient.getProject(context.getDevMachine(), path);
-            promise.then(new Operation<ProjectConfigDto>() {
-                @Override
-                public void apply(ProjectConfigDto arg) throws OperationException {
-                    eventBus.fireEvent(new ProjectUpdatedEvent(projectPath, arg));
-                }
-            });
+        for (final String path : projectToRefresh) {
+            appContext.getWorkspaceRoot().getContainer(path).then(new Operation<Optional<Container>>() {
+                  @Override
+                  public void apply(Optional<Container> container) throws OperationException {
+                      if (container.isPresent()) {
+                          container.get().synchronize();
+                      }
+                  }
+              });
         }
         for (String path : dto.getDeletedProjects()) {
             if (!updatedProjects.contains(path)) {

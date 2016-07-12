@@ -22,6 +22,8 @@ import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,8 +85,12 @@ public class KeysInjector {
                                    .append("' >> ~/.ssh/authorized_keys");
                         }
 
-                        final Exec exec = docker.createExec(containerId, true, "/bin/bash", "-c", command.toString());
-                        docker.startExec(exec.getId(), logMessage -> {
+                        final Exec exec = docker.createExec(CreateExecParams.create(containerId,
+                                                                                    new String[] {"/bin/bash",
+                                                                                                  "-c",
+                                                                                                  command.toString()})
+                                                                            .withDetach(true));
+                        docker.startExec(StartExecParams.create(exec.getId()), logMessage -> {
                             if (logMessage.getType() == LogMessage.Type.STDERR) {
                                 try {
                                     machine.getLogger().writeLine("Error of injection public ssh keys. " + logMessage.getContent());

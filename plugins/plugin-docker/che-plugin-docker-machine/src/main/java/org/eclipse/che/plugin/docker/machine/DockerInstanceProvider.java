@@ -14,7 +14,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ObjectArrays;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -44,11 +46,16 @@ import org.eclipse.che.plugin.docker.client.DockerfileParser;
 import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
+import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
+import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
+import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
+import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
@@ -61,8 +68,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -73,6 +79,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -86,6 +95,7 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
  * @author Alexander Garagatyi
  * @author Roman Iuvshyn
  */
+@Singleton
 public class DockerInstanceProvider implements InstanceProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceProvider.class);
 
@@ -99,8 +109,16 @@ public class DockerInstanceProvider implements InstanceProvider {
      */
     public static final String DOCKER_IMAGE_TYPE = "image";
 
+    /**
+     * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
+     */
+    public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
+
+    private static final Pattern SNAPSHOT_LOCATION_PATTERN = Pattern.compile("(.+/)?" + MACHINE_SNAPSHOT_PREFIX + ".+");
+
     private final DockerConnector                               docker;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
+    private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
     private final DockerContainerNameGenerator                  containerNameGenerator;
     private final WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
@@ -203,6 +221,10 @@ public class DockerInstanceProvider implements InstanceProvider {
         } else {
             this.allMachinesExtraHosts = ObjectArrays.concat(allMachinesExtraHosts.split(","), cheHostAlias);
         }
+
+        executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineLogsStreamer-%d")
+                                                                           .setDaemon(true)
+                                                                           .build());
     }
 
     /**
@@ -330,7 +352,8 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                                                        SourceNotFoundException {
         final DockerMachineSource dockerMachineSource = new DockerMachineSource(machine.getConfig().getSource());
 
-        if (snapshotUseRegistry) {
+        boolean isSnapshot = SNAPSHOT_LOCATION_PATTERN.matcher(dockerMachineSource.getLocation()).matches();
+        if (!isSnapshot || snapshotUseRegistry) {
             pullImage(dockerMachineSource, creationLogsOutput);
         }
 
@@ -346,8 +369,10 @@ public class DockerInstanceProvider implements InstanceProvider {
             throw new MachineException("Can't create machine from snapshot.");
         }
         try {
-            // remove unneeded tag
-            docker.removeImage(fullNameOfPulledImage, false);
+            // remove unneeded tag if restoring snapshot from registry
+            if (isSnapshot && snapshotUseRegistry){
+                docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
+            }
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
         }
@@ -408,15 +433,15 @@ public class DockerInstanceProvider implements InstanceProvider {
                     LOG.error(e.getLocalizedMessage(), e);
                 }
             };
-            docker.buildImage(imageName,
-                              progressMonitor,
-                              dockerCredentials.getCredentials(),
-                              doForcePullOnBuild,
-                              memoryLimit,
-                              memorySwapLimit,
-                              files.toArray(new File[files.size()]));
-        } catch (IOException | InterruptedException e) {
-            throw new MachineException(e.getMessage(), e);
+            docker.buildImage(BuildImageParams.create(files.toArray(new File[files.size()]))
+                                              .withRepository(imageName)
+                                              .withAuthConfigs(dockerCredentials.getCredentials())
+                                              .withDoForcePull(doForcePullOnBuild)
+                                              .withMemoryLimit(memoryLimit)
+                                              .withMemorySwapLimit(memorySwapLimit),
+                              progressMonitor);
+        } catch (IOException e) {
+            throw new MachineException(e.getLocalizedMessage(), e);
         } finally {
             if (workDir != null) {
                 FileCleaner.addFile(workDir);
@@ -571,9 +596,35 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                                 .withHostConfig(hostConfig)
                                                                 .withEnv(env.toArray(new String[env.size()]));
 
-            final String containerId = docker.createContainer(config, containerName).getId();
+            final String containerId = docker.createContainer(CreateContainerParams.create(config)
+                                                                                   .withContainerName(containerName))
+                                             .getId();
 
-            docker.startContainer(containerId, null);
+            docker.startContainer(StartContainerParams.create(containerId));
+
+            executor.execute(() -> {
+                long lastProcessedLogDate = 0;
+                boolean isContainerRunning = true;
+                while(isContainerRunning) {
+                    try {
+                        docker.getContainerLogs(GetContainerLogsParams.create(containerId)
+                                                                      .withFollow(true)
+                                                                      .withSince(lastProcessedLogDate),
+                                                new LogMessagePrinter(outputConsumer));
+                        isContainerRunning = false;
+                    } catch (SocketTimeoutException ste) {
+                        lastProcessedLogDate = System.currentTimeMillis() / 1000L;
+                        // reconnect to container
+                    } catch (ContainerNotFoundException e) {
+                        isContainerRunning = false;
+                    } catch (IOException e) {
+                        LOG.error("Failed to get logs from machine {} backed by container {} with {} id",
+                                  machine,
+                                  containerName,
+                                  containerId);
+                    }
+                }
+            });
 
             final DockerNode node = dockerMachineFactory.createNode(machine.getWorkspaceId(), containerId);
             if (machine.getConfig().isDev()) {
@@ -608,4 +659,5 @@ public class DockerInstanceProvider implements InstanceProvider {
                     .filter(path -> !Strings.isNullOrEmpty(path))
                     .collect(Collectors.toSet());
     }
+
 }

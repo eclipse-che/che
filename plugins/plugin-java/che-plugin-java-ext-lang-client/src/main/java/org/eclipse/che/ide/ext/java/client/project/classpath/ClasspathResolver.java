@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.project.classpath;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -18,12 +20,10 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
@@ -51,7 +51,6 @@ public class ClasspathResolver {
 
     private final ClasspathUpdaterServiceClient classpathUpdater;
     private final NotificationManager           notificationManager;
-    private final ProjectServiceClient          projectService;
     private final EventBus                      eventBus;
     private final AppContext                    appContext;
     private final DtoFactory                    dtoFactory;
@@ -64,13 +63,11 @@ public class ClasspathResolver {
     @Inject
     public ClasspathResolver(ClasspathUpdaterServiceClient classpathUpdater,
                              NotificationManager notificationManager,
-                             ProjectServiceClient projectService,
                              EventBus eventBus,
                              AppContext appContext,
                              DtoFactory dtoFactory) {
         this.classpathUpdater = classpathUpdater;
         this.notificationManager = notificationManager;
-        this.projectService = projectService;
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.dtoFactory = dtoFactory;
@@ -104,10 +101,12 @@ public class ClasspathResolver {
 
     /** Concatenates classpath entries and update classpath file. */
     public Promise<Void> updateClasspath() {
-        final CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
-            return null;
-        }
+
+        final Resource resource = appContext.getResource();
+
+        Preconditions.checkState(resource != null);
+
+        final Optional<Project> project = resource.getRelatedProject();
 
         final List<ClasspathEntryDto> entries = new ArrayList<>();
         for (String path : libs) {
@@ -122,19 +121,13 @@ public class ClasspathResolver {
         for (String path : projects) {
             entries.add(dtoFactory.createDto(ClasspathEntryDto.class).withPath(path).withEntryKind(PROJECT));
         }
-        Promise<Void> promise = classpathUpdater.setRawClasspath(currentProject.getProjectConfig().getPath(), entries);
+        Promise<Void> promise = classpathUpdater.setRawClasspath(project.get().getLocation().toString(), entries);
 
         promise.then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                eventBus.fireEvent(new ClasspathChangedEvent(currentProject.getProjectConfig().getPath(), entries));
-                projectService.getProject(appContext.getDevMachine(), currentProject.getProjectConfig().getPath()).then(
-                        new Operation<ProjectConfigDto>() {
-                            @Override
-                            public void apply(ProjectConfigDto arg) throws OperationException {
-                                eventBus.fireEvent(new ProjectUpdatedEvent(arg.getPath(), arg));
-                            }
-                        });
+                eventBus.fireEvent(new ClasspathChangedEvent(project.get().getLocation().toString(), entries));
+                project.get().synchronize();
             }
         }).catchError(new Operation<PromiseError>() {
             @Override

@@ -32,6 +32,7 @@ class IdeCtrl {
     $rootScope.wantTokeepLoader = true;
 
     // search the selected workspace
+    let namespace = $routeParams.namespace;
     let workspace = $routeParams.workspaceName;
     if (!workspace) {
       this.selectedWorkspaceName = null;
@@ -41,7 +42,7 @@ class IdeCtrl {
 
     let ideAction = $routeParams.action;
     let ideParams = $routeParams.ideParams;
-    let selectedWorkspaceIdeUrl = this.cheWorkspace.getIdeUrl(this.selectedWorkspaceName);
+    let selectedWorkspaceIdeUrl = this.cheWorkspace.getIdeUrl(namespace, this.selectedWorkspaceName);
     if (ideAction) {
       // send action
       this.ideSvc.setIDEAction(ideAction);

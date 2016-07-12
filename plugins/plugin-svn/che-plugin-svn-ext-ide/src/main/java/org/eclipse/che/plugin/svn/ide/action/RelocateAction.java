@@ -17,7 +17,6 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn relocate" command.
@@ -26,12 +25,10 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 public class RelocateAction extends SubversionAction {
 
     @Inject
-    public RelocateAction(final AppContext appContext,
-                          final ProjectExplorerPresenter projectExplorerPresenter,
-                          final SubversionExtensionLocalizationConstants constants,
-                          final SubversionExtensionResources resources) {
-        super(constants.relocateTitle(), constants.relocateDescription(), resources.relocate(),
-              appContext, constants, resources, projectExplorerPresenter);
+    public RelocateAction(AppContext appContext,
+                          SubversionExtensionLocalizationConstants constants,
+                          SubversionExtensionResources resources) {
+        super(constants.relocateTitle(), constants.relocateDescription(), resources.relocate(), appContext, constants, resources);
     }
 
     @Override

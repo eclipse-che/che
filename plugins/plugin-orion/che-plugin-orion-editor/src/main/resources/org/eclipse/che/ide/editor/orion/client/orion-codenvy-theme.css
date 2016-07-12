@@ -39,6 +39,11 @@
 .orionCodenvy .textviewSelectionUnfocused {
     background-color: gray;
 }
+
+.orionCodenvy .textviewBlockCursor {
+    background: white;
+}
+
 .textviewScroll {
     padding: 5px 2px 2px 2px;
 }

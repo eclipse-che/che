@@ -12,18 +12,20 @@ package org.eclipse.che.plugin.svn.ide.revert;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -33,6 +35,7 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
@@ -40,77 +43,68 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 
 public class RevertPresenter extends SubversionActionPresenter {
 
-    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
-    private final SubversionClientService                  subversionClientService;
+    private final SubversionClientService                  service;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
     private final DialogFactory                            dialogFactory;
 
     @Inject
-    protected RevertPresenter(final AppContext appContext,
-                              final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                              final SubversionOutputConsoleFactory consoleFactory,
-                              final ConsolesPanelPresenter consolesPanelPresenter,
-                              final SubversionClientService subversionClientService,
-                              final SubversionExtensionLocalizationConstants constants,
-                              final NotificationManager notificationManager,
-                              final DialogFactory dialogFactory,
-                              final ProjectExplorerPresenter projectExplorerPart,
-                              final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.subversionClientService = subversionClientService;
+    protected RevertPresenter(AppContext appContext,
+                              SubversionOutputConsoleFactory consoleFactory,
+                              ConsolesPanelPresenter consolesPanelPresenter,
+                              SubversionClientService service,
+                              SubversionExtensionLocalizationConstants constants,
+                              NotificationManager notificationManager,
+                              DialogFactory dialogFactory,
+                              StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
+        this.service = service;
         this.constants = constants;
         this.notificationManager = notificationManager;
         this.dialogFactory = dialogFactory;
     }
 
     public void show() {
-        CurrentProject project = getActiveProject();
-        if (project == null) {
-            return;
-        }
+        final Project project = appContext.getRootProject();
 
-        List<String> paths = getSelectedPaths();
-        ConfirmDialog confirmDialog = createConfirmDialog(project, paths);
+        checkState(project != null);
+
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+
+        ConfirmDialog confirmDialog = createConfirmDialog(project, resources);
         confirmDialog.show();
     }
 
-    private ConfirmDialog createConfirmDialog(final CurrentProject project, final List<String> paths) {
+    private ConfirmDialog createConfirmDialog(final Project project, final Resource[] resources) {
         final ConfirmCallback okCallback = new ConfirmCallback() {
             @Override
             public void accepted() {
                 final StatusNotification notification = new StatusNotification(constants.revertStarted(), PROGRESS, FLOAT_MODE);
                 notificationManager.notify(notification);
 
-                subversionClientService.revert(project.getRootProject().getPath(),
-                                               paths,
-                                               "infinity",
-                                               new AsyncRequestCallback<CLIOutputResponse>(
-                                                       dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class)) {
+                service.revert(project.getLocation(), toRelative(project, resources), "infinity").then(new Operation<CLIOutputResponse>() {
+                    @Override
+                    public void apply(CLIOutputResponse response) throws OperationException {
+                        List<String> errOutput = response.getErrOutput();
+                        printResponse(response.getCommand(), response.getOutput(), errOutput, "svn revert");
 
-                                                   @Override
-                                                   protected void onSuccess(CLIOutputResponse result) {
-
-                                                       List<String> errOutput = result.getErrOutput();
-                                                       printResponse(result.getCommand(), result.getOutput(), errOutput, "svn revert");
-
-                                                       if (errOutput == null || errOutput.size() == 0) {
-                                                           notification.setTitle(constants.revertSuccessful());
-                                                           notification.setStatus(SUCCESS);
-                                                       } else {
-                                                           notification.setTitle(constants.revertWarning());
-                                                           notification.setStatus(SUCCESS);
-                                                       }
-                                                   }
-
-                                                   @Override
-                                                   protected void onFailure(Throwable exception) {
-                                                       String errorMessage = exception.getMessage();
-                                                       notification.setTitle(constants.revertFailed() + ": " + errorMessage);
-                                                       notification.setStatus(FAIL);
-                                                   }
-                                               });
+                        if (errOutput == null || errOutput.size() == 0) {
+                            notification.setTitle(constants.revertSuccessful());
+                            notification.setStatus(SUCCESS);
+                        } else {
+                            notification.setTitle(constants.revertWarning());
+                            notification.setStatus(SUCCESS);
+                        }
+                    }
+                }).catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        notification.setTitle(constants.revertFailed());
+                        notification.setStatus(FAIL);
+                    }
+                });
             }
         };
 
@@ -122,16 +116,16 @@ public class RevertPresenter extends SubversionActionPresenter {
         };
 
         String pathsString = null;
-        for (String path : paths) {
+        for (Resource resource : resources) {
             if (pathsString == null) {
-                pathsString = path;
+                pathsString = resource.getLocation().toString();
             }
             else {
-                pathsString += ", " + path;
+                pathsString += ", " + resource.getLocation().toString();
             }
         }
 
-        String confirmText = paths.size() > 0 ? constants.revertConfirmText(" to " + pathsString) : constants.revertConfirmText("");
+        String confirmText = resources.length > 0 ? constants.revertConfirmText(" to " + pathsString) : constants.revertConfirmText("");
         return dialogFactory.createConfirmDialog(constants.revertTitle(), confirmText, okCallback, cancelCallback);
     }
 }

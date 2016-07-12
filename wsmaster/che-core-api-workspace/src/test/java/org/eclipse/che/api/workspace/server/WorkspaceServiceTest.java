@@ -501,6 +501,7 @@ public class WorkspaceServiceTest {
                                               + "/environment/" + envDto.getName());
 
         assertEquals(response.getStatusCode(), 200);
+        assertEquals(workspace.getConfig().getEnvironments().size(), 1);
         verify(validator).validateConfig(workspace.getConfig());
         verify(wsManager).updateWorkspace(any(), any());
     }

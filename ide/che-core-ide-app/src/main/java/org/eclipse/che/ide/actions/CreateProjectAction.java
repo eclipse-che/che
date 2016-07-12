@@ -13,62 +13,41 @@ package org.eclipse.che.ide.actions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.projecttype.wizard.presenter.ProjectWizardPresenter;
+import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.Map;
 
-import static org.eclipse.che.api.project.shared.Constants.BLANK_ID;
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * @author Evgen Vidolob
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class CreateProjectAction extends AbstractPerspectiveAction {
 
     private final ProjectWizardPresenter wizard;
-    private final DtoFactory dtoFactory;
 
     @Inject
     public CreateProjectAction(Resources resources,
-                               ProjectWizardPresenter wizard,
-                               DtoFactory dtoFactory) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID), "Create Project...", "Create new project", null, resources.newProject());
+                               ProjectWizardPresenter wizard) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID), "Create Project...", "Create new project", null, resources.newProject());
         this.wizard = wizard;
-        this.dtoFactory = dtoFactory;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Map<String, String> parameters = e.getParameters();
-        if (parameters != null && !parameters.isEmpty()) {
-            final ProjectConfigDto dataObject = dtoFactory.createDto(ProjectConfigDto.class);
-            if (parameters.containsKey("projectName")) {
-                dataObject.setName(parameters.get("projectName"));
-            }
-
-            if (parameters.containsKey("projectType")) {
-                dataObject.setType(parameters.get("projectType"));
-            } else {
-                dataObject.setType(BLANK_ID);
-            }
-            wizard.show(dataObject, CREATE);
-        } else {
-           wizard.show();
-        }
+        wizard.show(Path.ROOT);
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-
+        event.getPresentation().setEnabledAndVisible(true);
     }
 }

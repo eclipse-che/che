@@ -10,16 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.project.node.icon;
 
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Resolve icon based on registered file type.
@@ -30,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class FileIconProvider implements NodeIconProvider {
 
     private final FileTypeRegistry fileTypeRegistry;
-    private final FileType         unknownFileType;
+    private final FileType unknownFileType;
 
     @Inject
     public FileIconProvider(FileTypeRegistry fileTypeRegistry,
@@ -40,31 +39,14 @@ public class FileIconProvider implements NodeIconProvider {
     }
 
     @Override
-    public SVGResource getIcon(String fileName) {
-        FileType fileType = fileTypeRegistry.getFileTypeByNamePattern(fileName);
+    public SVGResource getIcon(Resource resource) {
 
-        if (fileType != unknownFileType) {
-            return fileType.getImage();
-        }
-
-        final String extension = getFileExtension(fileName);
-
-        if (Strings.isNullOrEmpty(extension)) {
+        if (resource.getResourceType() != Resource.FILE) {
             return null;
         }
 
-        fileType = fileTypeRegistry.getFileTypeByExtension(extension);
+        FileType fileType = fileTypeRegistry.getFileTypeByFile((File)resource);
 
-        if (fileType != unknownFileType) {
-            return fileType.getImage();
-        }
-
-        return null;
-    }
-
-    public static String getFileExtension(String fullName) {
-        checkNotNull(fullName);
-        int dotIndex = fullName.lastIndexOf('.');
-        return (dotIndex == -1) ? "" : fullName.substring(dotIndex + 1);
+        return fileType.equals(unknownFileType) ? null : fileType.getImage();
     }
 }

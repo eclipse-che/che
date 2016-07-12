@@ -96,7 +96,7 @@ public class CommitTest {
         addFile(connection, "README.txt", CONTENT);
         connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("README.txt")));
         connection.commit(newDto(CommitRequest.class).withMessage("Initial addd"));
-        int beforeCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+        int beforeCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
 
         //when
         //change existing README
@@ -106,9 +106,28 @@ public class CommitTest {
 
         //then
         Revision revision = connection.commit(commitRequest);
-        int afterCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+        int afterCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
         assertEquals(revision.getMessage(), commitRequest.getMessage());
-        assertEquals(beforeCount, afterCount);
+        assertEquals(beforeCommitsCount, afterCommitsCount);
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
+    public void testChangeMessageOfLastCommit(GitConnectionFactory connectionFactory) throws GitException, IOException {
+        //given
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        addFile(connection, "NewFile.txt", CONTENT);
+        connection.add(newDto(AddRequest.class).withFilepattern(ImmutableList.of("NewFile.txt")));
+        connection.commit(newDto(CommitRequest.class).withMessage("First commit"));
+        int beforeCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+
+        //when
+        CommitRequest commitRequest = newDto(CommitRequest.class).withMessage("Changed message").withAmend(true);
+        connection.commit(commitRequest);
+
+        //then
+        int afterCommitsCount = connection.log(newDto(LogRequest.class)).getCommits().size();
+        assertEquals(beforeCommitsCount, afterCommitsCount);
+        assertEquals(connection.log(newDto(LogRequest.class)).getCommits().get(0).getMessage(), commitRequest.getMessage());
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,

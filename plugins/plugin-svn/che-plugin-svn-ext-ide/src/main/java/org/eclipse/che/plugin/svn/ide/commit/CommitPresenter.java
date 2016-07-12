@@ -13,14 +13,17 @@ package org.eclipse.che.plugin.svn.ide.commit;
 import com.google.common.base.Joiner;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
@@ -35,14 +38,14 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
 import org.eclipse.che.plugin.svn.shared.StatusItem;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.resource.Path.valueOf;
 
 /**
  * Presenter for the {@link CommitView}.
@@ -52,10 +55,9 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class CommitPresenter extends SubversionActionPresenter implements ActionDelegate {
 
-    private final SubversionClientService                  subversionService;
+    private final SubversionClientService                  service;
     private final CommitView                               view;
     private       DiffViewerPresenter                      diffViewerPresenter;
-    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
 
@@ -67,23 +69,20 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
     private Map<Changes, List<StatusItem>> cache = new HashMap<>();
 
     @Inject
-    public CommitPresenter(final AppContext appContext,
-                           final CommitView view,
-                           final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                           final NotificationManager notificationManager,
-                           final SubversionOutputConsoleFactory consoleFactory,
-                           final SubversionExtensionLocalizationConstants constants,
-                           final SubversionClientService subversionService,
-                           final ConsolesPanelPresenter consolesPanelPresenter,
-                           final ProjectExplorerPresenter projectExplorerPart,
-                           final DiffViewerPresenter diffViewerPresenter,
-                           final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
-        this.subversionService = subversionService;
+    public CommitPresenter(AppContext appContext,
+                           CommitView view,
+                           NotificationManager notificationManager,
+                           SubversionOutputConsoleFactory consoleFactory,
+                           SubversionExtensionLocalizationConstants constants,
+                           SubversionClientService service,
+                           ConsolesPanelPresenter consolesPanelPresenter,
+                           DiffViewerPresenter diffViewerPresenter,
+                           StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
+        this.service = service;
         this.view = view;
         this.diffViewerPresenter = diffViewerPresenter;
         this.view.setDelegate(this);
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.notificationManager = notificationManager;
         this.constants = constants;
     }
@@ -93,23 +92,27 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
     }
 
     private void loadAllChanges() {
-        Unmarshallable<CLIOutputResponse> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class);
-        subversionService.status(getCurrentProjectPath(), Collections.<String>emptyList(), null, false, false, false, true, false, null,
-                                 new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
-                                     @Override
-                                     protected void onSuccess(CLIOutputResponse response) {
-                                         List<StatusItem> statusItems = parseChangesList(response);
-                                         view.setChangesList(statusItems);
-                                         view.onShow();
+        final Project project = appContext.getRootProject();
 
-                                         cache.put(Changes.ALL, statusItems);
-                                     }
+        checkState(project != null);
 
-                                     @Override
-                                     protected void onFailure(Throwable exception) {
-                                         Log.error(CommitPresenter.class, exception);
-                                     }
-                                 });
+        service.status(project.getLocation(), new Path[0], null, false, false, false, true, false, null)
+               .then(new Operation<CLIOutputResponse>() {
+                    @Override
+                    public void apply(CLIOutputResponse response) throws OperationException {
+                        List<StatusItem> statusItems = parseChangesList(response);
+                        view.setChangesList(statusItems);
+                        view.onShow();
+
+                        cache.put(Changes.ALL, statusItems);
+                    }
+                })
+                .catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        Log.error(CommitPresenter.class, error.getMessage());
+                    }
+                });
     }
 
     private  List<StatusItem> parseChangesList(CLIOutputResponse response) {
@@ -117,22 +120,30 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
     }
 
     private void loadSelectionChanges() {
-        Unmarshallable<CLIOutputResponse> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class);
-        subversionService.status(getCurrentProjectPath(), getSelectedPaths(), null, false, false, false, true, false, null,
-                                 new AsyncRequestCallback<CLIOutputResponse>(unmarshaller) {
-                                     @Override
-                                     protected void onSuccess(CLIOutputResponse response) {
-                                         List<StatusItem> statusItems = parseChangesList(response);
-                                         view.setChangesList(statusItems);
+        final Project project = appContext.getRootProject();
 
-                                         cache.put(Changes.SELECTION, statusItems);
-                                     }
+        checkState(project != null);
 
-                                     @Override
-                                     protected void onFailure(Throwable exception) {
-                                         Log.error(CommitPresenter.class, exception);
-                                     }
-                                 });
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+
+        service.status(project.getLocation(), toRelative(project, resources), null, false, false, false, true, false, null)
+               .then(new Operation<CLIOutputResponse>() {
+                   @Override
+                   public void apply(CLIOutputResponse response) throws OperationException {
+                       List<StatusItem> statusItems = parseChangesList(response);
+                       view.setChangesList(statusItems);
+
+                       cache.put(Changes.SELECTION, statusItems);
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError error) throws OperationException {
+                       Log.error(CommitPresenter.class, error.getMessage());
+                   }
+               });
     }
 
     /** {@inheritDoc} */
@@ -173,59 +184,58 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
     /** {@inheritDoc} */
     @Override
     public void showDiff(String path) {
-        this.subversionService.showDiff(getCurrentProjectPath(), Collections.singletonList(path), "HEAD",
-                                        new AsyncRequestCallback<CLIOutputResponse>(
-                                                dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class)) {
-                                            @Override
-                                            protected void onSuccess(CLIOutputResponse result) {
-                                                String content = Joiner.on('\n').join(result.getOutput());
-                                                diffViewerPresenter.showDiff(content);
-                                            }
+        final Project project = appContext.getRootProject();
 
-                                            @Override
-                                            protected void onFailure(Throwable exception) {
-                                                notificationManager.notify(exception.getMessage(), FAIL, FLOAT_MODE);
-                                            }
-                                        });
+        checkState(project != null);
+
+        service.showDiff(project.getLocation(), new Path[]{valueOf(path)}, "HEAD").then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse response) throws OperationException {
+                String content = Joiner.on('\n').join(response.getOutput());
+                diffViewerPresenter.showDiff(content);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
     }
 
-    private void commitSelection(final String message, final boolean keepLocks) {
-        final List<String> paths = getSelectedPaths();
-        doCommit(message, paths, keepLocks);
+    private void commitSelection(String message, boolean keepLocks) {
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null);
+
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+
+        doCommit(message, toRelative(project, resources), keepLocks);
     }
 
-    private void commitAll(final String message, final boolean keepLocks) {
-        doCommit(message, Collections.singletonList("."), keepLocks);
+    private void commitAll(String message, boolean keepLocks) {
+        doCommit(message, new Path[]{valueOf(".")}, keepLocks);
     }
 
-    private void doCommit(final String message, final List<String> paths, final boolean keepLocks) {
-        this.subversionService.commit(getCurrentProjectPath(), paths, message, false, keepLocks,
-                                      new AsyncRequestCallback<CLIOutputWithRevisionResponse>(
-                                              dtoUnmarshallerFactory.newUnmarshaller(CLIOutputWithRevisionResponse.class)) {
-                                          @Override
-                                          protected void onSuccess(final CLIOutputWithRevisionResponse result) {
-                                              printResponse(result.getCommand(), result.getOutput(), result.getErrOutput(),
-                                                            constants.commandCommit());
-                                          }
+    private void doCommit(String message, Path[] paths, boolean keepLocks) {
+        final Project project = appContext.getRootProject();
 
-                                          @Override
-                                          protected void onFailure(final Throwable exception) {
-                                              handleError(exception);
-                                          }
-                                      }
-                                     );
+        checkState(project != null);
+
+        service.commit(project.getLocation(), paths, message, false, keepLocks).then(new Operation<CLIOutputWithRevisionResponse>() {
+            @Override
+            public void apply(CLIOutputWithRevisionResponse response) throws OperationException {
+                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandCommit());
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                final StatusNotification notification = new StatusNotification(error.getMessage(), FAIL, FLOAT_MODE);
+                notificationManager.notify(notification);
+            }
+        });
+
         view.onClose();
     }
-
-    private void handleError(@NotNull final Throwable e) {
-        String errorMessage;
-        if (e.getMessage() != null && !e.getMessage().isEmpty()) {
-            errorMessage = e.getMessage();
-        } else {
-            errorMessage = constants.commitFailed();
-        }
-        final StatusNotification notification = new StatusNotification(errorMessage, FAIL, FLOAT_MODE);
-        this.notificationManager.notify(notification);
-    }
-
 }

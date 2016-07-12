@@ -31,12 +31,14 @@ export class WorkspaceDetailsCtrl {
     this.workspaceDetailsService = workspaceDetailsService;
 
     this.workspaceDetails = {};
-    this.workspaceId = $route.current.params.workspaceId;
+    this.namespace = $route.current.params.namespace;
+    this.workspaceName = $route.current.params.workspaceName;
+    this.workspaceKey = this.namespace + ":" + this.workspaceName;
 
     this.loading = true;
 
-    if (!this.cheWorkspace.getWorkspacesById().get(this.workspaceId)) {
-      let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId);
+    if (!this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName)) {
+      let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey);
       promise.then(() => {
         this.updateWorkspaceData();
       }, (error) => {
@@ -55,6 +57,27 @@ export class WorkspaceDetailsCtrl {
     this.showShowMore = false;
 
     this.cheWorkspace.fetchWorkspaces();
+
+    //search the selected page
+    let page = $route.current.params.page;
+    if (!page) {
+      $location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
+    } else {
+      switch (page) {
+        case 'info':
+          this.selectedTabIndex = 0;
+          break;
+        case 'projects':
+          this.selectedTabIndex = 1;
+          break;
+        case 'share':
+          this.selectedTabIndex = 2;
+          break;
+        default:
+          $location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
+          break;
+      }
+    }
   }
 
   /**
@@ -67,10 +90,11 @@ export class WorkspaceDetailsCtrl {
 
   //Update the workspace data to be displayed.
   updateWorkspaceData() {
-    this.workspaceDetails = this.cheWorkspace.getWorkspacesById().get(this.workspaceId);
+    this.workspaceDetails = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
     if (this.loading) {
       this.loading = false;
     }
+    this.workspaceId = this.workspaceDetails.id;
     this.newName = angular.copy(this.workspaceDetails.config.name);
   }
 
@@ -95,9 +119,10 @@ export class WorkspaceDetailsCtrl {
 
     let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, workspaceNewDetails);
     promise.then((data) => {
-      this.cheWorkspace.getWorkspacesById().set(this.workspaceId, data);
+      this.workspaceName = data.config.name;
       this.updateWorkspaceData();
       this.cheNotification.showInfo('Workspace name is successfully updated.');
+      this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
     }, (error) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Rename workspace failed.');
@@ -108,8 +133,7 @@ export class WorkspaceDetailsCtrl {
   //Perform workspace deletion.
   deleteWorkspace(event) {
     var confirm = this.$mdDialog.confirm()
-      .title('Would you like to delete the workspace ' + this.workspaceDetails.config.name)
-      .content('Please confirm for the workspace removal.')
+      .title('Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?')
       .ariaLabel('Delete workspace')
       .ok('Delete it!')
       .cancel('Cancel')

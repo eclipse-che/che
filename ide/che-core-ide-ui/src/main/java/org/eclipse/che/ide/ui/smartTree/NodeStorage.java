@@ -423,12 +423,9 @@ public class NodeStorage implements StoreHandlers.HasStoreHandlers {
                     }
                 }
             } else {
-                int i = index;
-                int childrenSize = children.size();
-                for (int j = 0; j < childrenSize; j++) {
-                    if (currentChildren.get(i) == children.get(j)) {
-                        addedChildren.add(children.get(j));
-                        i++;
+                for (NodeDescriptor currentChild : currentChildren) {
+                    if (children.contains(currentChild.getNode())) {
+                        addedChildren.add(currentChild.getNode());
                     }
                 }
             }
@@ -600,7 +597,13 @@ public class NodeStorage implements StoreHandlers.HasStoreHandlers {
     }
 
     public Node getParent(Node child) {
-        NodeDescriptor nodeDescriptor = getWrapper(child).getParent();
+        final NodeDescriptor wrapper = getWrapper(child);
+
+        if (wrapper == null) {
+            return null;
+        }
+
+        NodeDescriptor nodeDescriptor = wrapper.getParent();
         return (nodeDescriptor != null && !nodeDescriptor.isRoot()) ? nodeDescriptor.getNode() : null;
     }
 

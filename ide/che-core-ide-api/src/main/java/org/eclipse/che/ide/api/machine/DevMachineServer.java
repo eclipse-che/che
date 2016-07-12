@@ -28,7 +28,7 @@ public class DevMachineServer implements Server {
         private final String ref;
         private final String url;
 
-        public DevMachineServer(ServerDto dto) {
+        public DevMachineServer(Server dto) {
             path = dto.getPath();
             address = dto.getAddress();
             protocol = dto.getProtocol();
