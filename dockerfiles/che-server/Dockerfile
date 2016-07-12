@@ -30,6 +30,7 @@ RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/reposit
     addgroup -S docker -g 101 && \
     adduser user docker && \
     adduser user user && \
+    adduser user users && \
     addgroup -g 50 -S docker4mac && \
     adduser user docker4mac && \
     echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
