@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.action;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -25,11 +26,11 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Folder;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.JavaUtils;
-import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
@@ -39,6 +40,7 @@ import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker.ID;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
 /**
@@ -67,10 +69,19 @@ public class NewPackageAction extends AbstractNewResourceAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
-        final Resource[] resources = appContext.getResources();
-        final boolean inJavaProject = resources != null && resources.length == 1 && isJavaProject(resources[0].getRelatedProject().get());
+        final Resource resource = appContext.getResource();
+        if (resource == null) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
 
-        e.getPresentation().setEnabledAndVisible(inJavaProject && resources[0].getParentWithMarker(SourceFolderMarker.ID).isPresent());
+        final Optional<Project> project = resource.getRelatedProject();
+        if (!project.isPresent()) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        e.getPresentation().setEnabledAndVisible(isJavaProject(project.get()) && resource.getParentWithMarker(ID).isPresent());
     }
 
     @Override

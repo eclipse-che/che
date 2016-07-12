@@ -93,6 +93,7 @@ public class RevealNodesPersistenceComponent implements PersistenceComponent {
            Then check if child is resource, then we store the path in user preference.
          */
 
+        outer:
         for (Node node : projectExplorer.getTree().getNodeStorage().getAll()) {
             if (projectExplorer.getTree().isExpanded(node) && node instanceof ResourceNode) {
 
@@ -101,6 +102,7 @@ public class RevealNodesPersistenceComponent implements PersistenceComponent {
                 for (Node children : childrenToStore) {
                     if (children instanceof ResourceNode) {
                         paths.add(((ResourceNode)children).getData().getLocation());
+                        continue outer;
                     }
                 }
             }
@@ -145,14 +147,14 @@ public class RevealNodesPersistenceComponent implements PersistenceComponent {
 
             for (final String path : paths) {
                 if (revealPromise == null) {
-                    revealPromise = revealer.reveal(Path.valueOf(path)).thenPromise(new Function<Node, Promise<Node>>() {
+                    revealPromise = revealer.reveal(Path.valueOf(path), false).thenPromise(new Function<Node, Promise<Node>>() {
                         @Override
                         public Promise<Node> apply(Node node) throws FunctionException {
                             if (node != null) {
                                 projectExplorer.getTree().setExpanded(node, true, false);
                             }
 
-                            return revealer.reveal(Path.valueOf(path));
+                            return revealer.reveal(Path.valueOf(path), false);
                         }
                     });
                     continue;
@@ -165,7 +167,7 @@ public class RevealNodesPersistenceComponent implements PersistenceComponent {
                             projectExplorer.getTree().setExpanded(node, true, false);
                         }
 
-                        return revealer.reveal(Path.valueOf(path));
+                        return revealer.reveal(Path.valueOf(path), false);
                     }
                 }).catchError(new Function<PromiseError, Node>() {
                     @Override

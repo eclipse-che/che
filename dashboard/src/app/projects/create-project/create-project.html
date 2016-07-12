@@ -14,15 +14,15 @@
   <div
     ng-show="createProjectCtrl.isCreateProjectInProgress() && createProjectCtrl.getCurrentProgressStep() !== (createProjectCtrl.getCreationSteps().length - 1)">
     <a class="create-project-minimize-icon che-toolbar-control-button material-design icon-ic_picture_in_picture_24px"
-       ng-href="#/projects"
+       ng-href="#/workspaces"
        ng-click="createProjectCtrl.hideCreateProjectPanel()"></a>
   </div>
   <che-button-primary class="create-project-header-button"
                       che-button-title="{{createProjectCtrl.getCreateButtonTitle()}}"
                       ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
                       ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
-                      ng-show="!createProjectCtrl.isCreateProjectInProgress() || createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)"
-  ></che-button-primary>
+                      ng-show="!createProjectCtrl.isCreateProjectInProgress() || createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)">
+  </che-button-primary>
 </che-toolbar>
 
 <md-progress-linear md-mode="indeterminate" class="projects-list-projects-progress"
