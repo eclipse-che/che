@@ -29,7 +29,12 @@ public enum DBErrorCode {
      * When any of the unique constraints is violated
      * e.g. duplicate key or unique index violation.
      */
-    DUPLICATE_KEY(1);
+    DUPLICATE_KEY(1),
+
+    /**
+     * When entity referenced foreign key does not exist
+     */
+    INTEGRITY_CONSTRAINT_VIOLATION(2);
 
     private final int code;
 

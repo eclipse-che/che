@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
-import org.eclipse.che.api.machine.server.dao.SnapshotDao;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.model.impl.adapter.MachineSourceAdapter;

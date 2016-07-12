@@ -8,8 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.acl;
+package org.eclipse.che.api.machine.server.model.impl;
 
+import org.eclipse.che.api.core.acl.AclEntry;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
+
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -19,9 +29,27 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * @author Sergii Leschenko
  */
+@Entity(name = "Acl")
 public class AclEntryImpl implements AclEntry {
-    private final String       user;
-    private final List<String> actions;
+
+    @Id
+    @GeneratedValue
+    private String id;
+
+    @Column
+    private String user;
+
+    @ManyToOne
+    @JoinColumn(insertable = false,
+                updatable = false,
+                name = "user",
+                referencedColumnName = "id")
+    private UserImpl userEntity;
+
+    @ElementCollection
+    private List<String> actions;
+
+    public AclEntryImpl() {}
 
     public AclEntryImpl(String user, List<String> actions) {
         checkArgument(actions != null && !actions.isEmpty(), "Required at least one action");
@@ -36,6 +64,9 @@ public class AclEntryImpl implements AclEntry {
 
     @Override
     public List<String> getActions() {
+        if (actions == null) {
+            return new ArrayList<>();
+        }
         return actions;
     }
 

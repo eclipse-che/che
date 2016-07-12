@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.util.LinksHelper;
-import org.eclipse.che.api.machine.server.dao.RecipeDao;
+import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 import org.eclipse.che.api.machine.shared.dto.recipe.NewRecipe;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;

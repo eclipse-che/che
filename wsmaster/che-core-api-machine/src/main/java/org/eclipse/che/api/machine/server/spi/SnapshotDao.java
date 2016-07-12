@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.dao;
+package org.eclipse.che.api.machine.server.spi;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;

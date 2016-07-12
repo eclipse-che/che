@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 
@@ -18,8 +19,8 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
-import org.eclipse.che.api.machine.server.dao.RecipeDao;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.spi.RecipeDao;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author Eugene Voevodin
@@ -42,9 +44,11 @@ import static java.lang.String.format;
 @Singleton
 public class LocalRecipeDaoImpl implements RecipeDao {
 
-    private final Map<String, RecipeImpl> recipes;
-    private final ReadWriteLock           lock;
-    private final LocalStorage            recipeStorage;
+    @VisibleForTesting
+    final Map<String, RecipeImpl> recipes;
+
+    private final ReadWriteLock lock;
+    private final LocalStorage  recipeStorage;
 
     @Inject
     public LocalRecipeDaoImpl(LocalStorageFactory storageFactory) throws IOException {
@@ -111,6 +115,7 @@ public class LocalRecipeDaoImpl implements RecipeDao {
 
     @Override
     public void remove(String id) {
+        requireNonNull(id);
         lock.writeLock().lock();
         try {
             recipes.remove(id);
@@ -121,6 +126,7 @@ public class LocalRecipeDaoImpl implements RecipeDao {
 
     @Override
     public RecipeImpl getById(String id) throws NotFoundException {
+        requireNonNull(id);
         lock.readLock().lock();
         try {
             final RecipeImpl recipe = recipes.get(id);

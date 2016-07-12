@@ -1,0 +1,38 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence persistence_1_0.xsd" version="1.0">
+    <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+
+        <class>org.eclipse.che.api.machine.server.recipe.RecipeImpl</class>
+        <class>org.eclipse.che.api.machine.server.model.impl.AclEntryImpl</class>
+        <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
+
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <properties>
+            <!-- EclipseLink should create the database schema automatically -->
+            <property name="eclipselink.ddl-generation" value="create-tables"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="database"/>
+
+            <!-- Logging configuration. -->
+            <property name="eclipselink.logging.logger" value="DefaultLogger"/>
+            <property name="eclipselink.logging.level" value="INFO"/>
+            <!--property name="eclipselink.logging.sql" value="FINEST"/>
+            <property name="eclipselink.logging.level.sql" value="FINEST"/>
+            <property name="eclipselink.logging.parameters" value="true"/-->
+        </properties>
+
+    </persistence-unit>
+</persistence>
