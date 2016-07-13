@@ -203,9 +203,13 @@ public final class ResourceManager {
                         Project[] tmpProjects = copyOf(projects, projects.length + 1);
                         tmpProjects[projects.length] = project;
                         projects = tmpProjects;
-
-                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED | DERIVED)));
                     }
+                }
+
+                java.util.Arrays.sort(projects);
+
+                for (Project project : projects) {
+                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED | DERIVED)));
                 }
 
                 return projects;
