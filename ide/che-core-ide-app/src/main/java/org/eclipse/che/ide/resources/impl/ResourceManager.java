@@ -203,9 +203,14 @@ public final class ResourceManager {
                         Project[] tmpProjects = copyOf(projects, projects.length + 1);
                         tmpProjects[projects.length] = project;
                         projects = tmpProjects;
-
-                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED | DERIVED)));
                     }
+                }
+
+                /* We need to guarantee that list of projects would be sorted by the logic provided in compareTo method implementation. */
+                java.util.Arrays.sort(projects);
+
+                for (Project project : projects) {
+                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED | DERIVED)));
                 }
 
                 return projects;

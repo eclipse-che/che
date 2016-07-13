@@ -172,6 +172,11 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
     }
 
     @Override
+    protected void focusView() {
+        tree.setFocus(true);
+    }
+
+    @Override
     public Tree getTree() {
         return tree;
     }
