@@ -17,6 +17,14 @@ import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,11 +36,24 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Yevhenii Voevodin
  */
+@Entity(name = "Environment")
 public class EnvironmentImpl implements Environment {
 
-    private String                  name;
-    private RecipeImpl              recipe;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
     private List<MachineConfigImpl> machineConfigs;
+
+    @Transient
+    private RecipeImpl recipe;
+
+    public EnvironmentImpl() {}
 
     public EnvironmentImpl(String name, Recipe recipe, List<? extends MachineConfig> machineConfigs) {
         this.name = name;
@@ -55,6 +76,10 @@ public class EnvironmentImpl implements Environment {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     @Nullable
     public Recipe getRecipe() {
@@ -67,6 +92,10 @@ public class EnvironmentImpl implements Environment {
             machineConfigs = new ArrayList<>();
         }
         return machineConfigs;
+    }
+
+    public void setMachineConfigs(List<MachineConfigImpl> machineConfigs) {
+        this.machineConfigs = machineConfigs;
     }
 
     @Override

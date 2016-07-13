@@ -15,6 +15,12 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 
+import javax.persistence.Basic;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,31 +33,49 @@ import java.util.stream.Collectors;
  *
  * @author Eugene Voevodin
  */
+@Entity(name = "MachineConfig")
 public class MachineConfigImpl implements MachineConfig {
 
     public static MachineConfigImplBuilder builder() {
         return new MachineConfigImplBuilder();
     }
 
-    private boolean              isDev;
-    private String               name;
-    private String               type;
-    private MachineSourceImpl    source;
-    private LimitsImpl           limits;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Basic
+    private boolean dev;
+
+    @Basic
+    private String name;
+
+    @Basic
+    private String type;
+
+    @Embedded
+    private MachineSourceImpl source;
+
+    @Embedded
+    private LimitsImpl limits;
+
+    @ElementCollection
     private List<ServerConfImpl> servers;
-    private Map<String, String>  envVariables;
+
+    @ElementCollection
+    private Map<String, String> envVariables;
 
     public MachineConfigImpl() {
     }
 
-    public MachineConfigImpl(boolean isDev,
+    public MachineConfigImpl(boolean dev,
                              String name,
                              String type,
                              MachineSource source,
                              Limits limits,
                              List<? extends ServerConf> servers,
                              Map<String, String> envVariables) {
-        this.isDev = isDev;
+        this.dev = dev;
         this.name = name;
         this.type = type;
         this.envVariables = envVariables;
@@ -91,13 +115,17 @@ public class MachineConfigImpl implements MachineConfig {
         return source;
     }
 
-    public void setSource(MachineSource machineSource) {
-        this.source = new MachineSourceImpl(machineSource);
+    public void setSource(MachineSourceImpl machineSource) {
+        this.source = machineSource;
     }
 
     @Override
     public boolean isDev() {
-        return isDev;
+        return dev;
+    }
+
+    public void setDev(boolean dev) {
+        this.dev = dev;
     }
 
     @Override
@@ -105,9 +133,17 @@ public class MachineConfigImpl implements MachineConfig {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @Override
     public LimitsImpl getLimits() {
         return limits;
+    }
+
+    public void setLimits(LimitsImpl limits) {
+        this.limits = limits;
     }
 
     @Override
@@ -118,6 +154,10 @@ public class MachineConfigImpl implements MachineConfig {
         return servers;
     }
 
+    public void setServers(List<ServerConfImpl> servers) {
+        this.servers = servers;
+    }
+
     @Override
     public Map<String, String> getEnvVariables() {
         if (envVariables == null) {
@@ -126,8 +166,8 @@ public class MachineConfigImpl implements MachineConfig {
         return envVariables;
     }
 
-    public void setLimits(Limits limits) {
-        this.limits = new LimitsImpl(limits);
+    public void setEnvVariables(Map<String, String> envVariables) {
+        this.envVariables = envVariables;
     }
 
     @Override
@@ -135,7 +175,7 @@ public class MachineConfigImpl implements MachineConfig {
         if (this == obj) return true;
         if (!(obj instanceof MachineConfigImpl)) return false;
         final MachineConfigImpl other = (MachineConfigImpl)obj;
-        return isDev == other.isDev &&
+        return dev == other.dev &&
                Objects.equals(name, other.name) &&
                Objects.equals(source, other.source) &&
                Objects.equals(limits, other.limits) &&
@@ -147,7 +187,7 @@ public class MachineConfigImpl implements MachineConfig {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = hash * 31 + Boolean.hashCode(isDev);
+        hash = hash * 31 + Boolean.hashCode(dev);
         hash = hash * 31 + Objects.hashCode(name);
         hash = hash * 31 + Objects.hashCode(type);
         hash = hash * 31 + Objects.hashCode(source);
@@ -160,7 +200,7 @@ public class MachineConfigImpl implements MachineConfig {
     @Override
     public String toString() {
         return "MachineConfigImpl{" +
-               "isDev=" + isDev +
+               "isDev=" + dev +
                ", name='" + name + '\'' +
                ", type='" + type + '\'' +
                ", source=" + source +
