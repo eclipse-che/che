@@ -14,13 +14,15 @@ package org.eclipse.che.plugin.languageserver.shared.model;
 
 import io.typefox.lsapi.LanguageDescription;
 
+import java.util.List;
+
 /**
  * @author Anatoliy Bazko
  */
 public interface ServerConfiguration {
     LanguageDescription getLanguageDescription();
 
-    String getLicence();
+    String getLicense();
 
-    String getInstallScript();
+    List<String> getInstallScript();
 }

@@ -70,6 +70,8 @@ public class LanguageServerRegistryImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
+        new LanguageServerRegistryConfigurationBasedImpl(initializer, null);
+
         when(completableFuture.get()).thenReturn(initializeResult);
         when(initializeResult.getCapabilities()).thenReturn(serverCapabilities);
         when(serverCapabilities.isMultiplyProjectsProvider()).thenReturn(true);

@@ -37,6 +37,7 @@ public class LanguageServerModule extends AbstractModule {
 //        Multibinder.newSetBinder(binder(), LanguageServerFactory.class).addBinding().to(FatJarBasedLanguageServerFactory.class);
 
         bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
+//        bind(LanguageServerRegistry.class).to(LanguageServerRegistryConfigurationBasedImpl.class);
         bind(ServerInitializer.class).to(ServerInitializerImpl.class);
 
         bind(LanguageRegistryService.class);

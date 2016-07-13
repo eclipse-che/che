@@ -19,6 +19,9 @@ import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.shared.model.ServerConfiguration;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -40,7 +43,9 @@ public class ConfigurationBasedLanguageServerFactory extends LanguageServerFacto
 
     @Override
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-        ProcessBuilder processBuilder = new ProcessBuilder(serverConfiguration.getInstallScript(), projectPath);
+        File tmpFile = writeInstallScriptToFile();
+
+        ProcessBuilder processBuilder = new ProcessBuilder("bash", tmpFile.getAbsolutePath(), projectPath);
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
         processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
         try {
@@ -48,6 +53,22 @@ public class ConfigurationBasedLanguageServerFactory extends LanguageServerFacto
         } catch (IOException e) {
             throw new LanguageServerException("Can't start " + getLanguageDescription().getLanguageId() + " language server", e);
         }
+    }
+
+    private File writeInstallScriptToFile() throws LanguageServerException {
+        File tmpFile;
+        try {
+            tmpFile = File.createTempFile("lserver", serverConfiguration.getLanguageDescription().getLanguageId());
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(tmpFile))) {
+                for (String cmd : serverConfiguration.getInstallScript()) {
+                    writer.write(cmd);
+                    writer.newLine();
+                }
+            }
+        } catch (IOException e) {
+            throw new LanguageServerException("Can't prepare install script", e);
+        }
+        return tmpFile;
     }
 
     @Override

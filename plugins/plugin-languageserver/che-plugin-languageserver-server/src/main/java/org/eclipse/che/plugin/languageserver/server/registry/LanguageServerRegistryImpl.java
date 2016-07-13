@@ -53,8 +53,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
      */
     private final ConcurrentHashMap<ProjectExtensionKey, LanguageServer> projectToServer;
 
-    private final ProjectManager    projectManager;
-    private final ServerInitializer initializer;
+    private final ProjectManager         projectManager;
+    private final ServerInitializer      initializer;
 
     @Inject
     public LanguageServerRegistryImpl(Set<LanguageServerFactory> languageServerFactories,
@@ -76,6 +76,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
 
     @Override
     public LanguageServer findServer(String fileUri) throws LanguageServerException {
+        new LanguageServerRegistryConfigurationBasedImpl(initializer, projectManager);
+
         String path = URI.create(fileUri).getPath();
 
         String extension = getFileExtension(path);

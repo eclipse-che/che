@@ -12,21 +12,25 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
+import org.eclipse.che.dto.shared.DTO;
 import org.eclipse.che.plugin.languageserver.shared.model.ServerConfiguration;
+
+import java.util.List;
 
 /**
  * @author Anatoliy Bazko
  */
+@DTO
 public interface ServerConfigurationDTO extends ServerConfiguration {
     LanguageDescriptionDTO getLanguageDescription();
 
     void setLanguageDescription(LanguageDescriptionDTO languageDescriptionDTO);
 
-    String getLicence();
+    String getLicense();
 
     void setLicense(String license);
 
-    String getInstallScript();
+    List<String> getInstallScript();
 
-    void setInstallScript(String installScript);
+    void setInstallScript(List<String> installScript);
 }
