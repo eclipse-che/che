@@ -206,6 +206,7 @@ public final class ResourceManager {
                     }
                 }
 
+                /* We need to guarantee that list of projects would be sorted by the logic provided in compareTo method implementation. */
                 java.util.Arrays.sort(projects);
 
                 for (Project project : projects) {
