@@ -15,6 +15,7 @@ import com.google.common.io.Files;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -74,6 +75,7 @@ import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.TagDeleteRequest;
 import org.eclipse.che.api.git.shared.TagListRequest;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
+import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CloneCommand;
@@ -235,8 +237,6 @@ class JGitConnection implements GitConnection {
     private final GitUserResolver   userResolver;
     private final Repository        repository;
 
-    private final ProxyAuthenticator proxyAuthenticator;
-
     @Inject
     JGitConnection(Repository repository, CredentialsLoader credentialsLoader, SshKeyProvider sshKeyProvider,
                    GitUserResolver userResolver) {
@@ -244,7 +244,6 @@ class JGitConnection implements GitConnection {
         this.credentialsLoader = credentialsLoader;
         this.sshKeyProvider = sshKeyProvider;
         this.userResolver = userResolver;
-        this.proxyAuthenticator = new ProxyAuthenticator();
     }
 
     @Override
@@ -1619,6 +1618,8 @@ class JGitConnection implements GitConnection {
                     throw new GitException("Can't remove SSH key directory", exception);
                 }
             }
+
+            ProxyAuthenticator.resetAuthenticator();
         }
     }
 

@@ -7,18 +7,30 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- *   SAP           - implementation
  *******************************************************************************/
-package org.eclipse.che.git.impl.jgit;
+package org.eclipse.che.commons.proxy;
 
 import com.google.common.base.Strings;
 
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 /**
+ * Set default java.net.Authenticator for requesting through the http(s) proxy.
+ * Proxy credentials are read from the system properties:
+ * http.proxyUser
+ * http.proxyPassword
+ * https.proxyUser
+ * https.proxyPassword
+ *
+ * Usage:
+ * ProxyAuthenticator.initAuthenticator(url)
+ * ... making http(s) request by url ...
+ * ProxyAuthenticator.resetAuthenticator()
+ *
  * @author Dmytro Nochevnov
  */
 public class ProxyAuthenticator extends Authenticator {
@@ -36,14 +48,18 @@ public class ProxyAuthenticator extends Authenticator {
         }
     }
 
-    public enum Protocol {
+    public static void resetAuthenticator() {
+        currentProtocolHolder.remove();
+    }
+
+    private enum Protocol {
         HTTP, HTTPS;
 
-        public PasswordAuthentication passwordAuthentication = createPasswordAuthentication();
+        private PasswordAuthentication passwordAuthentication = createPasswordAuthentication();
 
         private PasswordAuthentication createPasswordAuthentication() {
-            if (! (Strings.isNullOrEmpty(getProxyUserSystemProperty())
-                   || Strings.isNullOrEmpty(getProxyPasswordSystemProperty()))) {
+            if (! (isNullOrEmpty(getProxyUserSystemProperty())
+                   || isNullOrEmpty(getProxyPasswordSystemProperty()))) {
                 return new PasswordAuthentication(getProxyUserSystemProperty(),
                                                   getProxyPasswordSystemProperty().toCharArray());
             } else {
@@ -61,7 +77,7 @@ public class ProxyAuthenticator extends Authenticator {
             return System.getProperty(propertyName);
         }
 
-        public PasswordAuthentication getPasswordAuthentication() {
+        private PasswordAuthentication getPasswordAuthentication() {
             return passwordAuthentication;
         }
     }
