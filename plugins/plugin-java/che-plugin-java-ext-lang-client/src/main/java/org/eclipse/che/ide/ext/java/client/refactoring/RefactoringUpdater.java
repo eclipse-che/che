@@ -27,6 +27,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class RefactoringUpdater {
         }
 
         ExternalResourceDelta[] deltas = new ExternalResourceDelta[0];
-
+        final List<String> pathChanged = new ArrayList<>();
         for (ChangeInfo change : changes) {
 
             final ExternalResourceDelta delta;
@@ -88,6 +89,8 @@ public class RefactoringUpdater {
                 case RENAME_PACKAGE:
                     delta = new ExternalResourceDelta(newPath, oldPath, ADDED | MOVED_FROM | MOVED_TO);
                     break;
+                case UPDATE:
+                    pathChanged.add(change.getPath());
                 default:
                     continue;
             }
@@ -97,13 +100,28 @@ public class RefactoringUpdater {
             deltas[index] = delta;
         }
 
+        //here we need to remove file for file that moved or renamed JDT lib sent it to
+        for (int i = 0; i < deltas.length; i++) {
+            if (pathChanged.contains(deltas[i].getToPath().toString())) {
+                pathChanged.remove(deltas[i].getToPath().toString());
+            }
+            if (pathChanged.contains(deltas[i].getFromPath().toString())) {
+                pathChanged.remove(deltas[i].getFromPath().toString());
+            }
+        }
+
         if (deltas.length > 0) {
             appContext.getWorkspaceRoot().synchronize(deltas).then(new Operation<ResourceDelta[]>() {
                 @Override
                 public void apply(final ResourceDelta[] appliedDeltas) throws OperationException {
                     for (ResourceDelta delta : appliedDeltas) {
-                        if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) != 0) {
                             eventBus.fireEvent(new RevealResourceEvent(delta.getToPath()));
+                    }
+                    for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors()) {
+                        final String path = editorPartPresenter.getEditorInput().getFile().getLocation().toString();
+                        if (pathChanged.contains(path)) {
+                            eventBus.fireEvent(
+                                    new FileContentUpdateEvent(editorPartPresenter.getEditorInput().getFile().getLocation().toString()));
                         }
                     }
                 }
@@ -113,7 +131,8 @@ public class RefactoringUpdater {
                 @Override
                 public void execute() {
                     for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors()) {
-                        eventBus.fireEvent(new FileContentUpdateEvent(editorPartPresenter.getEditorInput().getFile().getLocation().toString()));
+                        eventBus.fireEvent(
+                                new FileContentUpdateEvent(editorPartPresenter.getEditorInput().getFile().getLocation().toString()));
                     }
                 }
             });
