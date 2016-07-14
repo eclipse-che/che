@@ -50,6 +50,11 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>com.google.inject.extensions</groupId>
+                <artifactId>guice-persist</artifactId>
+                <version>${com.google.code.guice.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${com.h2database.version}</version>
@@ -69,11 +74,6 @@
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-main</artifactId>
                 <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.inject.extensions</groupId>
-                <artifactId>guice-persist</artifactId>
-                <version>${com.google.code.guice.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>

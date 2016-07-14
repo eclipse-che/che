@@ -6,7 +6,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- * Codenvy, S.A. - initial API and implementation
+ *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.api.user.server.model.impl;
 
@@ -32,6 +32,22 @@ import java.util.Objects;
  * @author Yevhenii Voevodin
  */
 @Entity(name = "User")
+@NamedQueries(
+        {
+                @NamedQuery(name = "User.getByAliasAndPassword",
+                            query = "SELECT distinct(u) " +
+                                    "FROM User u " +
+                                    "WHERE :alias = u.name OR" +
+                                    "      :alias = u.email OR" +
+                                    "      :alias = ANY(SELECT alias FROM u.aliases alias)"),
+                @NamedQuery(name = "User.getByAlias",
+                            query = "SELECT u FROM User u WHERE :alias MEMBER OF u.aliases"),
+                @NamedQuery(name = "User.getByName",
+                            query = "SELECT u FROM User u WHERE u.name = :name"),
+                @NamedQuery(name = "User.getByEmail",
+                            query = "SELECT u FROM User u WHERE u.email = :email")
+        }
+)
 public class UserImpl implements User {
 
     @Id

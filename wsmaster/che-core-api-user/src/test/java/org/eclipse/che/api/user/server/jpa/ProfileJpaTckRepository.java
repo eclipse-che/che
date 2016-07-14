@@ -10,27 +10,29 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.jpa;
 
+import com.google.inject.persist.Transactional;
+
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import java.util.Collection;
 
 import static java.util.Collections.emptyList;
 
+@Transactional
 public class ProfileJpaTckRepository implements TckRepository<ProfileImpl> {
 
     @Inject
-    private EntityManagerFactory factory;
+    private Provider<EntityManager> managerProvider;
 
     @Override
     public void createAll(Collection<? extends ProfileImpl> entities) throws TckRepositoryException {
-        final EntityManager manager = factory.createEntityManager();
-        manager.getTransaction().begin();
+        final EntityManager manager = managerProvider.get();
         for (ProfileImpl profile : entities) {
             manager.persist(new UserImpl(profile.getUserId(),
                                          profile.getUserId() + "@eclipse.org",
@@ -39,17 +41,12 @@ public class ProfileJpaTckRepository implements TckRepository<ProfileImpl> {
                                          emptyList()));
             manager.persist(profile);
         }
-        manager.getTransaction().commit();
-        manager.close();
     }
 
     @Override
     public void removeAll() throws TckRepositoryException {
-        final EntityManager manager = factory.createEntityManager();
-        manager.getTransaction().begin();
+        final EntityManager manager = managerProvider.get();
         manager.createQuery("DELETE FROM Profile").executeUpdate();
         manager.createQuery("DELETE FROM User").executeUpdate();
-        manager.getTransaction().commit();
-        manager.close();
     }
 }

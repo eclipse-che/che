@@ -10,28 +10,31 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.jpa;
 
+import com.google.inject.persist.Transactional;
+
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.eclipse.che.security.PasswordEncryptor;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.Collection;
 
+@Transactional
 public class UserJpaTckRepository implements TckRepository<UserImpl> {
 
     @Inject
-    private EntityManagerFactory factory;
+    private Provider<EntityManager> managerProvider;
 
     @Inject
     private PasswordEncryptor encryptor;
 
     @Override
     public void createAll(Collection<? extends UserImpl> entities) throws TckRepositoryException {
-        final EntityManager manager = factory.createEntityManager();
-        manager.getTransaction().begin();
+        final EntityManager manager = managerProvider.get();
         entities.stream()
                 .map(user -> new UserImpl(user.getId(),
                                           user.getEmail(),
@@ -39,16 +42,12 @@ public class UserJpaTckRepository implements TckRepository<UserImpl> {
                                           encryptor.encrypt(user.getPassword()),
                                           user.getAliases()))
                 .forEach(manager::persist);
-        manager.getTransaction().commit();
-        manager.close();
     }
 
     @Override
     public void removeAll() throws TckRepositoryException {
-        final EntityManager manager = factory.createEntityManager();
-        manager.getTransaction().begin();
-        manager.createQuery("DELETE FROM User").executeUpdate();
-        manager.getTransaction().commit();
-        manager.close();
+        managerProvider.get()
+                       .createQuery("DELETE FROM User")
+                       .executeUpdate();
     }
 }

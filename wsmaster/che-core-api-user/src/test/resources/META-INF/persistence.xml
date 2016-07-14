@@ -19,17 +19,17 @@
         <class>org.eclipse.che.api.user.server.model.impl.ProfileImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
-            <!-- EclipseLink should create the database schema automatically -->
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:;DB_CLOSE_DELAY=0;MVCC=true;TRACE_LEVEL_FILE=4;TRACE_LEVEL_SYSTEM_OUT=4"/>
+            <property name="javax.persistence.jdbc.user" value=""/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+
+            <property name="eclipselink.exception-handler" value="org.eclipse.che.api.core.h2.jdbc.jpa.eclipselink.H2ExceptionHandler"/>
+            <property name="eclipselink.target-server" value="None"/>
             <property name="eclipselink.ddl-generation" value="create-tables"/>
             <property name="eclipselink.ddl-generation.output-mode" value="database"/>
-
-            <!-- Logging configuration. -->
             <property name="eclipselink.logging.logger" value="DefaultLogger"/>
             <property name="eclipselink.logging.level" value="INFO"/>
-            <!--property name="eclipselink.logging.sql" value="FINEST"/>
-            <property name="eclipselink.logging.level.sql" value="FINEST"/>
-            <property name="eclipselink.logging.parameters" value="true"/-->
         </properties>
-
     </persistence-unit>
 </persistence>

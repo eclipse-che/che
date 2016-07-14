@@ -10,17 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.jpa;
 
+import com.google.inject.persist.Transactional;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -29,76 +32,48 @@ import static java.util.Objects.requireNonNull;
 public class JpaProfileDao implements ProfileDao {
 
     @Inject
-    private EntityManagerFactory factory;
+    private Provider<EntityManager> managerProvider;
 
     @Override
     public void create(ProfileImpl profile) throws ServerException, ConflictException {
         requireNonNull(profile, "Required non-null profile");
-        final EntityManager manager = factory.createEntityManager();
         try {
-            manager.getTransaction().begin();
-            manager.persist(profile);
-            manager.getTransaction().commit();
+            doCreate(profile);
         } catch (DuplicateKeyException x) {
             throw new ConflictException(format("Profile for user with id '%s' already exists", profile.getUserId()));
+        } catch (IntegrityConstraintViolationException x) {
+            throw new ConflictException(format("User with id '%s' referenced by profile doesn't exist", profile.getUserId()));
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
-        } finally {
-            if (manager.getTransaction().isActive()) {
-                manager.getTransaction().rollback();
-            }
-            manager.close();
         }
     }
 
     @Override
     public void update(ProfileImpl profile) throws NotFoundException, ServerException {
         requireNonNull(profile, "Required non-null profile");
-        final EntityManager manager = factory.createEntityManager();
         try {
-            manager.getTransaction().begin();
-            if (manager.find(ProfileImpl.class, profile.getUserId()) == null) {
-                throw new NotFoundException(format("Couldn't update profile, because profile for user with id '%s' doesn't exist",
-                                                   profile.getUserId()));
-            }
-            manager.merge(profile);
-            manager.getTransaction().commit();
+            doUpdate(profile);
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
-        } finally {
-            if (manager.getTransaction().isActive()) {
-                manager.getTransaction().rollback();
-            }
-            manager.close();
         }
     }
 
     @Override
     public void remove(String id) throws ServerException {
         requireNonNull(id, "Required non-null id");
-        final EntityManager manager = factory.createEntityManager();
         try {
-            manager.getTransaction().begin();
-            final ProfileImpl profile = manager.find(ProfileImpl.class, id);
-            if (profile != null) {
-                manager.remove(profile);
-            }
-            manager.getTransaction().commit();
+            doRemove(id);
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
-        } finally {
-            if (manager.getTransaction().isActive()) {
-                manager.getTransaction().rollback();
-            }
-            manager.close();
         }
     }
 
     @Override
+    @Transactional
     public ProfileImpl getById(String userId) throws NotFoundException, ServerException {
         requireNonNull(userId, "Required non-null id");
-        final EntityManager manager = factory.createEntityManager();
         try {
+            final EntityManager manager = managerProvider.get();
             final ProfileImpl profile = manager.find(ProfileImpl.class, userId);
             if (profile == null) {
                 throw new NotFoundException(format("Couldn't find profile for user with id '%s'", userId));
@@ -107,8 +82,30 @@ public class JpaProfileDao implements ProfileDao {
             return profile;
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
-        } finally {
-            manager.close();
+        }
+    }
+
+    @Transactional
+    protected void doCreate(ProfileImpl profile) {
+        managerProvider.get().persist(profile);
+    }
+
+    @Transactional
+    protected void doUpdate(ProfileImpl profile) throws NotFoundException {
+        final EntityManager manager = managerProvider.get();
+        if (manager.find(ProfileImpl.class, profile.getUserId()) == null) {
+            throw new NotFoundException(format("Couldn't update profile, because profile for user with id '%s' doesn't exist",
+                                               profile.getUserId()));
+        }
+        manager.merge(profile);
+    }
+
+    @Transactional
+    protected void doRemove(String userId) {
+        final EntityManager manager = managerProvider.get();
+        final ProfileImpl profile = manager.find(ProfileImpl.class, userId);
+        if (profile != null) {
+            manager.remove(profile);
         }
     }
 }
