@@ -30,5 +30,6 @@ public class WorkspaceTckModule extends TckModule {
         bind(new TypeLiteral<TckRepository<WorkspaceImpl>>(){}).to(WorkspaceTckRepository.class);
         install(new JpaPersistModule("main"));
         bind(JpaInitializer.class).asEagerSingleton();
+        bind(org.eclipse.che.api.core.h2.jdbc.jpa.eclipselink.H2ExceptionHandler.class);
     }
 }
