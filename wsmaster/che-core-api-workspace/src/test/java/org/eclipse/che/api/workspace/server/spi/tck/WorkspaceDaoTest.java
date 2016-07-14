@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server.jpa;
+package org.eclipse.che.api.workspace.server.spi.tck;
 
 import com.google.common.collect.ImmutableMap;
 

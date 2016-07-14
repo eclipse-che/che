@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
 
-import static org.eclipse.che.api.workspace.server.jpa.WorkspaceDaoTest.createWorkspace;
+import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspace;
 import static org.testng.Assert.assertEquals;
 
 /**
