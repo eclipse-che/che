@@ -17,6 +17,7 @@ import org.eclipse.che.ide.ext.java.testing.core.server.classpath.TestClasspathP
 import org.eclipse.che.ide.ext.java.testing.core.server.framework.TestRunner;
 import org.eclipse.che.ide.ext.java.testing.core.shared.Failure;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -88,7 +89,6 @@ public class TestNGRunner implements TestRunner {
     private TestResult runTestClasses(Class<?>... classes) throws Exception {
 
 
-
         ClassLoader classLoader = projectClassLoader;
 
         Class<?> clsTestNG = Class.forName("org.testng.TestNG", true, classLoader);
@@ -106,6 +106,8 @@ public class TestNGRunner implements TestRunner {
         clsTestNG.getMethod("addListener", clsITestListner).invoke(testNG, testListner);
 
         clsTestNG.getMethod("setTestClasses", Class[].class).invoke(testNG, new Object[]{classes});
+
+        clsTestNG.getMethod("setOutputDirectory", String.class).invoke(testNG, Paths.get(projectPath,"target","testng-out").toString());
 
         clsTestNG.getMethod("run").invoke(testNG);
 
@@ -168,6 +170,91 @@ public class TestNGRunner implements TestRunner {
     }
 
 
+    private TestResult runTestXML(String xmlPath) throws Exception {
+
+
+        ClassLoader classLoader = projectClassLoader;
+
+        Class<?> clsTestNG = Class.forName("org.testng.TestNG", true, classLoader);
+        Class<?> clsTestListner = Class.forName("org.testng.TestListenerAdapter", true, classLoader);
+        Class<?> clsITestListner = Class.forName("org.testng.ITestListener", true, classLoader);
+        Class<?> clsResult = Class.forName("org.testng.ITestResult", true, classLoader);
+        Class<?> clsIClass = Class.forName("org.testng.IClass", true, classLoader);
+
+        Class<?> clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
+        Class<?> clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
+
+        Object testNG = clsTestNG.newInstance();
+        Object testListner = clsTestListner.newInstance();
+
+        clsTestNG.getMethod("addListener", clsITestListner).invoke(testNG, testListner);
+
+        List<String> testSuites = new ArrayList<>();
+        testSuites.add(xmlPath);
+        clsTestNG.getMethod("setTestSuites", List.class).invoke(testNG, testSuites);
+
+        clsTestNG.getMethod("setOutputDirectory", String.class).invoke(testNG, Paths.get(projectPath,"target","testng-out").toString());
+
+        clsTestNG.getMethod("run").invoke(testNG);
+
+        List failures = (List) clsTestListner.getMethod("getFailedTests").invoke(testListner);
+
+        TestResult dtoResult = DtoFactory.getInstance().createDto(TestResult.class);
+
+
+        boolean isSuccess = (failures.size() == 0);
+
+
+        List<Failure> testNGFailures = new ArrayList<>();
+        for (Object failure : failures) {
+            Failure dtoFailure = DtoFactory.getInstance().createDto(Failure.class);
+
+            Object throwable = clsResult.getMethod("getThrowable").invoke(failure);
+
+            String message = (String) clsThrowable.getMethod("getMessage").invoke(throwable);
+            Object failingClass = clsResult.getMethod("getTestClass").invoke(failure);
+            String failClassName = (String) clsIClass.getMethod("getName").invoke(failingClass);
+
+            Object stackTrace = clsThrowable.getMethod("getStackTrace").invoke(throwable);
+
+            String failMethod = "";
+            Integer failLine = null;
+            if (stackTrace.getClass().isArray()) {
+                int length = Array.getLength(stackTrace);
+                for (int i = 0; i < length; i++) {
+                    Object arrayElement = Array.get(stackTrace, i);
+                    String failClass = (String) clsStackTraceElement.getMethod("getClassName").invoke(arrayElement);
+                    if (failClass.equals(failClassName)) {
+                        failMethod = (String) clsStackTraceElement.getMethod("getMethodName").invoke(arrayElement);
+                        failLine = (Integer) clsStackTraceElement.getMethod("getLineNumber").invoke(arrayElement);
+                        break;
+                    }
+                }
+            }
+            System.out.println(failMethod);
+            System.out.println(failLine);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+
+            clsThrowable.getMethod("printStackTrace", PrintWriter.class).invoke(throwable, pw);
+
+            String trace = sw.toString();
+
+            dtoFailure.setFailingClass(failClassName);
+            dtoFailure.setFailingMethod(failMethod);
+            dtoFailure.setFailingLine(failLine);
+            dtoFailure.setMessage(message);
+            dtoFailure.setTrace(trace);
+            testNGFailures.add(dtoFailure);
+        }
+
+        dtoResult.setTestFramework("TestNG");
+        dtoResult.setSuccess(isSuccess);
+        dtoResult.setFailureCount(testNGFailures.size());
+        dtoResult.setFailures(testNGFailures);
+        return dtoResult;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -176,6 +263,7 @@ public class TestNGRunner implements TestRunner {
                               TestClasspathProvider classpathProvider) throws Exception {
 
         projectPath = testParameters.get("absoluteProjectPath");
+        String xmlPath = testParameters.get("testngXML");
         boolean updateClasspath = Boolean.valueOf(testParameters.get("updateClasspath"));
         boolean runClass = Boolean.valueOf(testParameters.get("runClass"));
         projectClassLoader = classpathProvider.getClassLoader(projectPath, updateClasspath);
@@ -185,7 +273,11 @@ public class TestNGRunner implements TestRunner {
             String fqn = testParameters.get("fqn");
             testResult = run(fqn);
         } else {
-            testResult = runAll();
+            if (xmlPath == null) {
+                testResult = runAll();
+            } else {
+                testResult = runTestXML(ResourcesPlugin.getPathToWorkspace() + xmlPath);
+            }
         }
         return testResult;
 
