@@ -12,7 +12,7 @@ package org.eclipse.che.ide.ext.git.server.github;
 
 import org.eclipse.che.api.auth.oauth.OAuthTokenProvider;
 import org.eclipse.che.api.auth.shared.dto.OAuthToken;
-import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.api.git.CredentialsProvider;
