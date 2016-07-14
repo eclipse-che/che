@@ -194,7 +194,7 @@
 .selectCommandBox .selectCommandBoxIconPanel + div {
     float: left;
     text-align: left;
-    min-width: 138px;
+    width: 150px;
     padding: 0 5px 0 5px;
     display: inline-block;
 }
