@@ -594,7 +594,16 @@ public final class ResourceManager {
 
         final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
-        return ps.getTree(container.getLocation(), depth, includeFiles).then(new Function<TreeElement, Resource[]>() {
+        int depthToReload = depth;
+        if (descendants.isPresent()) {
+            for (Resource resource : descendants.get()) {
+                if (resource.getLocation().segmentCount() - container.getLocation().segmentCount() > depth) {
+                    depthToReload = resource.getLocation().segmentCount() - container.getLocation().segmentCount();
+                }
+            }
+        }
+
+        return ps.getTree(container.getLocation(), depthToReload, includeFiles).then(new Function<TreeElement, Resource[]>() {
             @Override
             public Resource[] apply(TreeElement tree) throws FunctionException {
 
