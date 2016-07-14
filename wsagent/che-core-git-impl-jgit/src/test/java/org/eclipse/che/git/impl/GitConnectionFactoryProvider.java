@@ -14,6 +14,7 @@ package org.eclipse.che.git.impl;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.git.CredentialsLoader;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.git.impl.jgit.JGitConnectionFactory;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
