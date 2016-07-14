@@ -974,8 +974,6 @@ public class DockerConnectorTest {
         verify(dockerConnectionFactory).openConnection(any(URI.class));
         verify(dockerConnection).method(REQUEST_METHOD_POST);
         verify(dockerConnection).path("/build");
-        verify(dockerConnection).query("rm", 1);
-        verify(dockerConnection).query("forcerm", 1);
         verify(dockerConnection).header("Content-Type", "application/x-compressed-tar");
         verify(dockerConnection).header(eq("Content-Length"), anyInt());
         verify(dockerConnection).header(eq("X-Registry-Config"), any(byte[].class));
