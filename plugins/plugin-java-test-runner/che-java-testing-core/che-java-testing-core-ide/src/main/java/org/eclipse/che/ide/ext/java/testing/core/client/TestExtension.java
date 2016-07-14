@@ -56,6 +56,7 @@ public class TestExtension {
 
         for(TestAction testAction : testActions){
             testAction.addMainMenuItems(testMainMenu);
+            testMainMenu.addSeparator();
         }
 
         runMenu.addSeparator();
@@ -75,6 +76,7 @@ public class TestExtension {
 
         for(TestAction testAction : testActions){
             testAction.addContextMenuItems(testContextMenu);
+            testContextMenu.addSeparator();
         }
 
 //        actionManager.registerAction("TestActionRunClassContext", runClassContextTestAction);

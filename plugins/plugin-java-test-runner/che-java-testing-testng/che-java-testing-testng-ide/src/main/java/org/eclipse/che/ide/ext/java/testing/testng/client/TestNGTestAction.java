@@ -20,20 +20,23 @@ import org.eclipse.che.ide.ext.java.testing.core.client.TestAction;
 import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunAllTestAction;
 import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunClassContextTestAction;
 import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunClassTestAction;
+import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunTestXMLAction;
 
 public class TestNGTestAction implements TestAction {
 
     private final Action runClassTestAction;
     private final Action runAllTestAction;
     private final Action runClassContextTestAction;
+    private final Action runTestXMLAction;
 
     @Inject
     public TestNGTestAction(ActionManager actionManager, RunClassTestAction runClassTestAction,
                             RunAllTestAction runAllTestAction, RunClassContextTestAction runClassContextTestAction,
-                            KeyBindingAgent keyBinding) {
+                            RunTestXMLAction runTestXMLAction, KeyBindingAgent keyBinding) {
 
         actionManager.registerAction("TestNGActionRunClass", runClassTestAction);
         actionManager.registerAction("TestNGActionRunAll", runAllTestAction);
+        actionManager.registerAction("TestNGActionRunXML", runTestXMLAction);
         actionManager.registerAction("TestNGActionRunClassContext", runClassContextTestAction);
 
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(),
@@ -45,6 +48,7 @@ public class TestNGTestAction implements TestAction {
         this.runAllTestAction = runAllTestAction;
         this.runClassContextTestAction = runClassContextTestAction;
         this.runClassTestAction = runClassTestAction;
+        this.runTestXMLAction = runTestXMLAction;
     }
 
 
@@ -52,11 +56,13 @@ public class TestNGTestAction implements TestAction {
     public void addMainMenuItems(DefaultActionGroup testMainMenu) {
         testMainMenu.add(runClassTestAction);
         testMainMenu.add(runAllTestAction);
+        testMainMenu.add(runTestXMLAction);
     }
 
     @Override
     public void addContextMenuItems(DefaultActionGroup testContextMenu) {
         testContextMenu.add(runClassContextTestAction);
         testContextMenu.add(runAllTestAction);
+        testContextMenu.add(runTestXMLAction);
     }
 }

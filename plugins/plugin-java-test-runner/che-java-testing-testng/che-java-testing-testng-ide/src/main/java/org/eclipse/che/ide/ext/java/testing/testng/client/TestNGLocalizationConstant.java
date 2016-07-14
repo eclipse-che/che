@@ -37,4 +37,10 @@ public interface TestNGLocalizationConstant extends Messages {
 
     @Key("action.runAll.description")
     String actionRunAllDescription();
+
+    @Key("action.runXML.title")
+    String actionRunXMLTitle();
+
+    @Key("action.runXML.description")
+    String actionRunXMLDescription();
 }
