@@ -19,12 +19,15 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
+import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.HTTPHeader;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.util.loging.Log;
@@ -33,6 +36,7 @@ import org.eclipse.che.ide.websocket.MessageBuilder;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.RequestCallback;
+import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.UriBuilder;
@@ -55,13 +59,21 @@ public class TestServiceClient {
 //    private final String wsID;
     private final WsAgentStateController wsAgentStateController;
     private final AppContext appContext;
+    private final AsyncRequestFactory    asyncRequestFactory;
+    private final LoaderFactory    loaderFactory;
+    private final DtoUnmarshallerFactory    dtoUnmarshallerFactory;
 
     @Inject
-    public TestServiceClient(AppContext appContext, WsAgentStateController wsAgentStateController) {
+    public TestServiceClient(AppContext appContext, WsAgentStateController wsAgentStateController,
+                             AsyncRequestFactory asyncRequestFactory,
+                             LoaderFactory loaderFactory,DtoUnmarshallerFactory dtoUnmarshallerFactory) {
 //        this.asyncRequestFactory = asyncRequestFactory;
 //        this.loaderFactory = loaderFactory;
         this.wsAgentStateController = wsAgentStateController;
         this.appContext = appContext;
+        this.asyncRequestFactory = asyncRequestFactory;
+        this.loaderFactory = loaderFactory;
+        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         // extPath gets the relative path of Che app from the @Named DI in constructor
         // appContext is a Che class that provides access to workspace
 //        helloPath = extPath + "/testing/" + appContext.getWorkspace().getId();
@@ -99,9 +111,25 @@ public class TestServiceClient {
 //        updateDependencies(url, callback);
 //    }
 
-    public void run(String projectPath, String testFramework, Map<String, String> parameters,
-                    RequestCallback<TestResult> callback) {
+//    public void run(String projectPath, String testFramework, Map<String, String> parameters,
+//                    RequestCallback<TestResult> callback) {
+//
+//        StringBuilder sb = new StringBuilder();
+//        if (parameters != null) {
+//            for (Map.Entry<String, String> e : parameters.entrySet()) {
+//                if (sb.length() > 0) {
+//                    sb.append('&');
+//                }
+//                sb.append(URL.encode(e.getKey())).append('=').append(URL.encode(e.getValue()));
+//            }
+//        }
+//        String url = "/java/testing/run/?projectPath=" + projectPath + "&testFramework=" + testFramework + "&"
+//                + sb.toString();
+//        Log.info(TestServiceClient.class, url);
+//        updateDependencies(url, callback);
+//    }
 
+    public Promise<TestResult> getTestResult(String projectPath, String testFramework, Map<String, String> parameters) {
         StringBuilder sb = new StringBuilder();
         if (parameters != null) {
             for (Map.Entry<String, String> e : parameters.entrySet()) {
@@ -111,32 +139,34 @@ public class TestServiceClient {
                 sb.append(URL.encode(e.getKey())).append('=').append(URL.encode(e.getValue()));
             }
         }
-        String url = "/java/testing/run/?projectPath=" + projectPath + "&testFramework=" + testFramework + "&"
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + "/java/testing/run/?projectPath=" + projectPath + "&testFramework=" + testFramework + "&"
                 + sb.toString();
-        Log.info(TestServiceClient.class, url);
-        updateDependencies(url, callback);
+//        org.eclipse.che.ide.rest.Unmarshallable<TestResult> unmarshaller = dtoUnmarshallerFactory.newUnmarshaller(TestResult.class);
+        return asyncRequestFactory.createGetRequest(url)
+                .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
+                .send(dtoUnmarshallerFactory.newUnmarshaller(TestResult.class));
     }
 
-    private void updateDependencies(String url, RequestCallback<TestResult> callback) {
+//    private void updateDependencies(String url, RequestCallback<TestResult> callback) {
+//
+//        MessageBuilder builder = new MessageBuilder(GET, url);
+//        builder.header(ACCEPT, APPLICATION_JSON);
+//        Message message = builder.build();
+//        sendMessageToWS(message, callback);
+//        Log.info(TestServiceClient.class, url);
+//    }
 
-        MessageBuilder builder = new MessageBuilder(GET, url);
-        builder.header(ACCEPT, APPLICATION_JSON);
-        Message message = builder.build();
-        sendMessageToWS(message, callback);
-        Log.info(TestServiceClient.class, url);
-    }
 
-
-    private void sendMessageToWS(final @NotNull Message message, final @NotNull RequestCallback<?> callback) {
-        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
-            @Override
-            public void apply(MessageBus arg) throws OperationException {
-                try {
-                    arg.send(message, callback);
-                } catch (WebSocketException e) {
-                    throw new OperationException(e.getMessage(), e);
-                }
-            }
-        });
-    }
+//    private void sendMessageToWS(final @NotNull Message message, final @NotNull RequestCallback<?> callback) {
+//        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
+//            @Override
+//            public void apply(MessageBus arg) throws OperationException {
+//                try {
+//                    arg.send(message, callback);
+//                } catch (WebSocketException e) {
+//                    throw new OperationException(e.getMessage(), e);
+//                }
+//            }
+//        });
+//    }
 }

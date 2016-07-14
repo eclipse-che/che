@@ -11,6 +11,10 @@
 package org.eclipse.che.ide.ext.java.testing.testng.client.action;
 
 import com.google.inject.Inject;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -75,39 +79,37 @@ public class RunClassTestAction extends JavaEditorAction {
         EditorPartPresenter editorPart = editorAgent.getActiveEditor();
         final VirtualFile file = editorPart.getEditorInput().getFile();
         String fqn = JavaUtil.resolveFQN(file);
-        Unmarshallable<TestResult> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(TestResult.class);
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("fqn", fqn);
         parameters.put("runClass", "true");
         parameters.put("updateClasspath", "true");
 
-        service.run(project.getPath(), "testng", parameters,
-                new RequestCallback<TestResult>(unmarshaller) {
-                    @Override
-                    protected void onSuccess(TestResult result) {
-                        Log.info(TestResultPresenter.class, result);
-                        notification.setStatus(SUCCESS);
-                        if (result.isSuccess()) {
-                            notification.setTitle("Test runner executed successfully");
-                            notification.setContent("All tests are passed");
-                        } else {
-                            notification.setTitle("Test runner executed successfully with test failures.");
-                            notification.setContent(result.getFailureCount() + " tests are failed.\n");
-                        }
-                        presenter.handleResponse(result);
-                    }
-
-                    @Override
-                    protected void onFailure(Throwable exception) {
-                        final String errorMessage = (exception.getMessage() != null)
-                                ? exception.getMessage()
-                                : "Failed to run test cases";
-                        notification.setContent(errorMessage);
-                        notification.setStatus(FAIL);
-                    }
+        Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters);
+        testResultPromise.then(new Operation<TestResult>() {
+            @Override
+            public void apply(TestResult result) throws OperationException {
+                Log.info(TestResultPresenter.class, result);
+                notification.setStatus(SUCCESS);
+                if (result.isSuccess()) {
+                    notification.setTitle("Test runner executed successfully");
+                    notification.setContent("All tests are passed");
+                } else {
+                    notification.setTitle("Test runner executed successfully with test failures.");
+                    notification.setContent(result.getFailureCount() + " test(s) failed.\n");
                 }
-        );
+                presenter.handleResponse(result);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError exception) throws OperationException {
+                final String errorMessage = (exception.getMessage() != null)
+                        ? exception.getMessage()
+                        : "Failed to run test cases";
+                notification.setContent(errorMessage);
+                notification.setStatus(FAIL);
+            }
+        });
 
 //        presenter.showDialog();
     }
