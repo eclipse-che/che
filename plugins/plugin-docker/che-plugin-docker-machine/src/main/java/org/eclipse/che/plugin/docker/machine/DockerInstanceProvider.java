@@ -94,7 +94,6 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
  * @author andrew00x
  * @author Alexander Garagatyi
  * @author Roman Iuvshyn
- * @author Mykola Morhun
  */
 @Singleton
 public class DockerInstanceProvider implements InstanceProvider {
@@ -122,7 +121,6 @@ public class DockerInstanceProvider implements InstanceProvider {
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
     private final DockerContainerNameGenerator                  containerNameGenerator;
-    private final RecipeRetriever                               recipeRetriever;
     private final WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegeMode;
@@ -137,6 +135,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     private final String[]                                      allMachinesExtraHosts;
     private final String                                        projectFolderPath;
     private final boolean                                       snapshotUseRegistry;
+    private final RecipeRetriever                               recipeRetriever;
     private final double                                        memorySwapMultiplier;
 
     @Inject
@@ -398,7 +397,6 @@ public class DockerInstanceProvider implements InstanceProvider {
             dockerfile.writeDockerfile(dockerfileFile);
 
             docker.buildImage(BuildImageParams.create(dockerfileFile)
-                                              .withForceRemoveIntermediateContainers(true)
                                               .withRepository(machineImageName)
                                               .withAuthConfigs(dockerCredentials.getCredentials())
                                               .withDoForcePull(doForcePullOnBuild)
