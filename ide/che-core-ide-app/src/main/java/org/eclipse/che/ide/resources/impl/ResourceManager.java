@@ -288,7 +288,15 @@ public final class ResourceManager {
 
                 checkState(resource instanceof Container, "Outdated resource is not a container");
 
-                return synchronize((Container)resource).then(new Function<Resource[], Project>() {
+                Container container = (Container)resource;
+
+                if (resource instanceof Folder) {
+                    Optional<Container> parent = resource.getParent();
+                    checkState(parent.isPresent(), "Parent of the resource wasn't found");
+                    container = parent.get();
+                }
+
+                return synchronize(container).then(new Function<Resource[], Project>() {
                     @Override
                     public Project apply(Resource[] synced) throws FunctionException {
                         final Optional<Resource> updatedProject = store.getResource(path);
