@@ -11,6 +11,7 @@
 package org.eclipse.che.api.local;
 
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.api.core.ServerException;
@@ -31,6 +32,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * @author Eugene Voevodin
  * @author Dmitry Shnurenko
@@ -42,9 +45,11 @@ public class LocalPreferenceDaoImpl implements PreferenceDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalPreferenceDaoImpl.class);
 
-    private final Map<String, Map<String, String>> preferences;
     private final ReadWriteLock                    lock;
     private final LocalStorage                     preferenceStorage;
+
+    @VisibleForTesting
+    final Map<String, Map<String, String>> preferences;
 
     @Inject
     public LocalPreferenceDaoImpl(LocalStorageFactory localStorageFactory) throws IOException {
@@ -72,6 +77,8 @@ public class LocalPreferenceDaoImpl implements PreferenceDao {
 
     @Override
     public void setPreferences(String userId, Map<String, String> prefs) throws ServerException {
+        requireNonNull(userId);
+        requireNonNull(prefs);
         lock.writeLock().lock();
         try {
             preferences.put(userId, new HashMap<>(prefs));
@@ -85,6 +92,7 @@ public class LocalPreferenceDaoImpl implements PreferenceDao {
 
     @Override
     public Map<String, String> getPreferences(String userId) throws ServerException {
+        requireNonNull(userId);
         lock.readLock().lock();
         try {
             //Need read all new preferences without restarting dev-machine. It is needed for  IDEX-2180
@@ -101,6 +109,8 @@ public class LocalPreferenceDaoImpl implements PreferenceDao {
 
     @Override
     public Map<String, String> getPreferences(String userId, String filter) throws ServerException {
+        requireNonNull(userId);
+        requireNonNull(filter);
         lock.readLock().lock();
         try {
             return filter(getPreferences(userId), filter);
@@ -112,6 +122,9 @@ public class LocalPreferenceDaoImpl implements PreferenceDao {
     private Map<String, String> filter(Map<String, String> prefs, String filter) {
         final Map<String, String> filtered = new HashMap<>();
         final Pattern pattern = Pattern.compile(filter);
+        if (filter.isEmpty()) {
+            return prefs;
+        }
         for (Map.Entry<String, String> entry : prefs.entrySet()) {
             if (pattern.matcher(entry.getKey()).matches()) {
                 filtered.put(entry.getKey(), entry.getValue());
@@ -122,6 +135,7 @@ public class LocalPreferenceDaoImpl implements PreferenceDao {
 
     @Override
     public void remove(String userId) throws ServerException {
+        requireNonNull(userId);
         lock.writeLock().lock();
         try {
             preferences.remove(userId);

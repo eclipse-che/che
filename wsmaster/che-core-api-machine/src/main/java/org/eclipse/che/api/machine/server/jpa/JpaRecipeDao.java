@@ -77,6 +77,9 @@ public class JpaRecipeDao implements RecipeDao {
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         } finally {
+            if (manager.getTransaction().isActive()) {
+                manager.getTransaction().rollback();
+            }
             manager.close();
         }
     }
@@ -115,9 +118,6 @@ public class JpaRecipeDao implements RecipeDao {
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         } finally {
-            if (manager.getTransaction().isActive()) {
-                manager.getTransaction().rollback();
-            }
             manager.close();
         }
     }
@@ -142,9 +142,6 @@ public class JpaRecipeDao implements RecipeDao {
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         } finally {
-            if (manager.getTransaction().isActive()) {
-                manager.getTransaction().rollback();
-            }
             manager.close();
         }
     }

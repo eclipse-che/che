@@ -148,8 +148,8 @@ public class StackServiceTest {
     @InjectMocks
     StackService service;
 
-    @BeforeClass
-    public void setUp() throws IOException, ConflictException {
+    @BeforeMethod
+    public void setUpUriInfo() throws NoSuchFieldException, IllegalAccessException {
         byte[] fileContent = STACK_ID.getBytes();
         stackIcon = new StackIcon(ICON_MEDIA_TYPE, "image/svg+xml", fileContent);
         componentsImpl = Collections.singletonList(new StackComponentImpl(COMPONENT_NAME, COMPONENT_VERSION));
@@ -217,10 +217,7 @@ public class StackServiceTest {
                                 .setWorkspaceConfig(workspaceConfig)
                                 .setStackIcon(stackIcon)
                                 .build();
-    }
 
-    @BeforeMethod
-    public void setUpUriInfo() throws NoSuchFieldException, IllegalAccessException {
         when(uriInfo.getBaseUriBuilder()).thenReturn(new UriBuilderImpl());
 
         final Field uriField = service.getClass()

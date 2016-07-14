@@ -8,11 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.jpa;
+package org.eclipse.che.api.user.server.jpa;
 
-import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 
@@ -21,29 +20,30 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * Implementation of {@link TckRepository}.
  *
  * @author Anton Korneta
  */
-public class RecipeJpaTckRepository implements TckRepository<RecipeImpl> {
+public class PreferenceJpaTckRepository implements TckRepository<Pair<String, Map<String, String>>> {
 
     @Inject
     private EntityManagerFactory factory;
 
     @Override
-    public void createAll(Collection<? extends RecipeImpl> entities) throws TckRepositoryException {
+    public void createAll(Collection<? extends Pair<String, Map<String, String>>> entities) throws TckRepositoryException {
         final EntityManager manager = factory.createEntityManager();
+
         manager.getTransaction().begin();
+
         int i = 0;
-        for (RecipeImpl entity : entities) {
-            for (AclEntryImpl acl : entity.getAcl()) {
-                manager.persist(new UserImpl(acl.getUser(), "email_" + i, "name_" + i, "password", Collections.emptyList()));
-                i++;
-            }
+        for (Pair<String, Map<String, String>> pair : entities) {
+            manager.persist(new UserImpl(pair.first, "email_" + i, "name_" + i, "password", Collections.emptyList()));
+            manager.persist(new PreferenceEntity(pair.first, pair.second));
+            i++;
         }
-        entities.stream().forEach(manager::persist);
         manager.getTransaction().commit();
         manager.close();
     }
@@ -52,9 +52,8 @@ public class RecipeJpaTckRepository implements TckRepository<RecipeImpl> {
     public void removeAll() throws TckRepositoryException {
         final EntityManager manager = factory.createEntityManager();
         manager.getTransaction().begin();
-        manager.createQuery("delete from Recipe").executeUpdate();
-        manager.createQuery("delete from Acl").executeUpdate();
-        manager.createQuery("delete from User").executeUpdate();
+        manager.createQuery("DELETE FROM Preference").executeUpdate();
+        manager.createQuery("DELETE FROM User").executeUpdate();
         manager.getTransaction().commit();
         manager.close();
     }
