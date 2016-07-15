@@ -128,10 +128,8 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
         if (SystemInfo.isWindows()) {
             final Path cheHome = WindowsHostUtils.ensureCheHomeExist(createFolders);
             final Path vfs = cheHome.resolve("vfs");
-            if (createFolders) {
-                if (!vfs.toFile().mkdir()) {
-                    throw new IOException(format("Can't create folder %s for projects of workspaces", vfs));
-                }
+            if (createFolders && !vfs.toFile().mkdir()) {
+                throw new IOException(format("Can't create folder %s for projects of workspaces", vfs));
             }
         }
 
