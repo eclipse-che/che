@@ -260,7 +260,7 @@ public class StackService extends Service {
                                @ApiParam("The stack id")
                                @PathParam("id")
                                final String id)
-            throws NotFoundException, ServerException, BadRequestException, ForbiddenException {
+            throws NotFoundException, ServerException, BadRequestException, ForbiddenException, ConflictException {
         if (formData.hasNext()) {
             FileItem fileItem = formData.next();
             StackIcon stackIcon = new StackIcon(fileItem.getName(), fileItem.getContentType(), fileItem.get());

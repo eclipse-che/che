@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server.model.impl.stack;
 
 import org.eclipse.che.api.workspace.shared.stack.StackSource;
 
+import javax.persistence.Basic;
+import javax.persistence.Embeddable;
 import java.util.Objects;
 
 /**
@@ -20,10 +22,16 @@ import java.util.Objects;
  *
  * @author Alexander Andrienko
  */
+@Embeddable
 public class StackSourceImpl implements StackSource {
 
+    @Basic
     private String type;
+
+    @Basic
     private String origin;
+
+    public StackSourceImpl() {}
 
     public StackSourceImpl(StackSource stackSource) {
         this(stackSource.getType(), stackSource.getOrigin());
@@ -39,9 +47,17 @@ public class StackSourceImpl implements StackSource {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @Override
     public String getOrigin() {
         return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
     }
 
     @Override

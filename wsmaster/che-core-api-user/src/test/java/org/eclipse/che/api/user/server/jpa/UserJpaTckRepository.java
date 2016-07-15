@@ -47,7 +47,7 @@ public class UserJpaTckRepository implements TckRepository<UserImpl> {
     @Override
     public void removeAll() throws TckRepositoryException {
         managerProvider.get()
-                       .createQuery("DELETE FROM User")
+                       .createQuery("DELETE FROM \"User\"")
                        .executeUpdate();
     }
 }

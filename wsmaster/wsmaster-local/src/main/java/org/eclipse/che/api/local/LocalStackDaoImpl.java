@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -44,9 +45,11 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class LocalStackDaoImpl implements StackDao {
 
-    private final StackLocalStorage      stackStorage;
-    private final Map<String, StackImpl> stacks;
-    private final ReadWriteLock          lock;
+    @VisibleForTesting
+    final Map<String, StackImpl> stacks;
+
+    private final StackLocalStorage stackStorage;
+    private final ReadWriteLock     lock;
 
     @Inject
     public LocalStackDaoImpl(StackLocalStorage stackLocalStorage) throws IOException {
@@ -77,7 +80,12 @@ public class LocalStackDaoImpl implements StackDao {
             if (stacks.containsKey(stack.getId())) {
                 throw new ConflictException(format("Stack with id %s is already exist", stack.getId()));
             }
-            stacks.put(stack.getId(), stack);
+            if (stacks.values()
+                      .stream()
+                      .anyMatch(s -> s.getName().equals(stack.getName()))) {
+                throw new ConflictException(format("Stack with name '%s' already exists", stack.getName()));
+            }
+            stacks.put(stack.getId(), new StackImpl(stack));
         } finally {
             lock.writeLock().unlock();
         }
@@ -110,7 +118,7 @@ public class LocalStackDaoImpl implements StackDao {
     }
 
     @Override
-    public StackImpl update(StackImpl update) throws NotFoundException, ServerException {
+    public StackImpl update(StackImpl update) throws NotFoundException, ServerException, ConflictException {
         requireNonNull(update, "Stack required");
         requireNonNull(update.getId(), "Stack id required");
         lock.writeLock().lock();
@@ -119,7 +127,12 @@ public class LocalStackDaoImpl implements StackDao {
             if (!stacks.containsKey(updateId)) {
                 throw new NotFoundException(format("Stack with id %s was not found", updateId));
             }
-            stacks.replace(updateId, update);
+            if (stacks.values()
+                      .stream()
+                      .anyMatch(stack -> stack.getName().equals(update.getName()) && !stack.getId().equals(updateId))) {
+                throw new ConflictException(format("Stack with name '%s' already exists", updateId));
+            }
+            stacks.replace(updateId, new StackImpl(update));
             return new StackImpl(update);
         } finally {
             lock.writeLock().unlock();
@@ -130,17 +143,14 @@ public class LocalStackDaoImpl implements StackDao {
     public List<StackImpl> searchStacks(String user, @Nullable List<String> tags, int skipCount, int maxItems) {
         lock.readLock().lock();
         try {
-            Stream<StackImpl> stacksStream = stacks.values()
-                                                   .stream()
-                                                   .skip(skipCount)
-                                                   .filter(decoratedStack -> tags == null ||
-                                                                             decoratedStack.getTags().containsAll(tags));
+            Stream<StackImpl> stream = stacks.values()
+                                             .stream()
+                                             .skip(skipCount)
+                                             .filter(s -> tags == null || s.getTags().containsAll(tags));
             if (maxItems != 0) {
-                stacksStream = stacksStream.limit(maxItems);
+                stream = stream.limit(maxItems);
             }
-
-            return stacksStream.map(StackImpl::new)
-                               .collect(toList());
+            return stream.map(StackImpl::new).collect(toList());
         } finally {
             lock.readLock().unlock();
         }

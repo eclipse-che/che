@@ -435,7 +435,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void creatorShouldNotBeUpdated() throws ServerException, NotFoundException {
+    public void creatorShouldNotBeUpdated() throws ServerException, NotFoundException, ConflictException {
         StackDto updatedStackDto = DtoFactory.getInstance().createDto(StackDto.class)
                                              .withId(STACK_ID)
                                              .withName(NAME)
@@ -575,7 +575,7 @@ public class StackServiceTest {
 
     /** Delete icon by stack id */
     @Test
-    public void stackIconShouldBeDeletedForUserOwner() throws NotFoundException, ServerException {
+    public void stackIconShouldBeDeletedForUserOwner() throws NotFoundException, ConflictException, ServerException {
         when(stackDao.getById(stackImpl.getId())).thenReturn(stackImpl);
 
         Response response = given().auth()
@@ -591,7 +591,7 @@ public class StackServiceTest {
     /** Update stack icon */
 
     @Test
-    public void stackIconShouldBeUploadedForUserOwner() throws NotFoundException, ServerException, URISyntaxException {
+    public void stackIconShouldBeUploadedForUserOwner() throws NotFoundException, ConflictException, ServerException, URISyntaxException {
         File file = new File(Resources.getResource("stack_img").getPath(), "type-java.svg");
 
         when(stackDao.getById(stackImpl.getId())).thenReturn(stackImpl);
@@ -609,7 +609,7 @@ public class StackServiceTest {
     }
 
     @Test
-    public void foreignStackIconShouldBeUploadedForUser() throws NotFoundException, ServerException {
+    public void foreignStackIconShouldBeUploadedForUser() throws NotFoundException, ConflictException, ServerException {
         File file = new File(Resources.getResource("stack_img").getPath(), "type-java.svg");
         when(stackDao.getById(foreignStack.getId())).thenReturn(foreignStack);
 

@@ -54,7 +54,7 @@ public class RecipeJpaTckRepository implements TckRepository<RecipeImpl> {
         manager.getTransaction().begin();
         manager.createQuery("delete from Recipe").executeUpdate();
         manager.createQuery("delete from Acl").executeUpdate();
-        manager.createQuery("delete from User").executeUpdate();
+        manager.createQuery("delete from \"User\"").executeUpdate();
         manager.getTransaction().commit();
         manager.close();
     }

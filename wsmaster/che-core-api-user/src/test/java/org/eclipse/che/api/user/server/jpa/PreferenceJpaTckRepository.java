@@ -50,6 +50,6 @@ public class PreferenceJpaTckRepository implements TckRepository<Pair<String, Ma
     public void removeAll() throws TckRepositoryException {
         final EntityManager manager = managerProvider.get();
         manager.createQuery("DELETE FROM Preference").executeUpdate();
-        manager.createQuery("DELETE FROM User").executeUpdate();
+        manager.createQuery("DELETE FROM \"User\"").executeUpdate();
     }
 }
