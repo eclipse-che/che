@@ -1451,7 +1451,11 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
             if (parent != null) {
                 NodeDescriptor descriptor = getNodeDescriptor(parent);
                 if (descriptor != null && descriptor.isExpanded() && nodeStorage.getChildCount(descriptor.getNode()) == 0) {
-                    setExpanded(descriptor.getNode(), false);
+                    if (fireCancellableEvent(new BeforeCollapseNodeEvent(parent))) {
+                        descriptor.setExpanded(false);
+                        view.onJointChange(descriptor, Joint.COLLAPSED);
+                        fireEvent(new CollapseNodeEvent(parent));
+                    }
                 }
                 moveFocus(nodeDescriptor.getRootContainer());
             }
