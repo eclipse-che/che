@@ -13,6 +13,7 @@ package org.eclipse.che.ide.projectimport.wizard;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.project.shared.Constants;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Function;
@@ -66,8 +67,11 @@ public class ProjectResolver {
                 }
 
                 final MutableProjectConfig config = new MutableProjectConfig(project);
+                final SourceStorage source = project.getSource();
 
-                if (primeTypes.isEmpty()) {
+                if (source != null && source.getParameters() != null && source.getParameters().containsKey("keepDir")) {
+                    config.setType(Constants.BLANK_ID);
+                } else if (primeTypes.isEmpty()) {
                     return promiseProvider.resolve(project);
                 } else if (primeTypes.size() == 1) {
                     config.setType(primeTypes.get(0));
