@@ -27,9 +27,12 @@ import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static java.lang.String.format;
 
 /**
  * Provides path to workspace folder in CHE.
@@ -98,17 +101,23 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
         if (hostProjectsFolder != null) {
             return hostProjectsFolder;
         } else {
+            Path workspaceFolder = null;
             try {
                 WorkspaceManager workspaceManager = this.workspaceManager.get();
-                final Workspace workspace = workspaceManager.getWorkspace(workspaceId);
+                Workspace workspace = workspaceManager.getWorkspace(workspaceId);
                 String wsName = workspace.getConfig().getName();
-                Path folder = Paths.get(workspacesMountPoint).resolve(wsName);
-                if (Files.notExists(folder)) {
-                    Files.createDirectory(folder);
+                workspaceFolder = Paths.get(workspacesMountPoint).resolve(wsName);
+                if (Files.notExists(workspaceFolder) && createFolders) {
+                    Files.createDirectory(workspaceFolder);
                 }
-                return folder.toString();
+                return workspaceFolder.toString();
             } catch (NotFoundException | ServerException e) {
                 throw new IOException(e.getMessage());
+            } catch (AccessDeniedException e) {
+                throw new IOException(format("Workspace folder '%s' creation failed. Please check permissions of this folder. Cause: %s",
+                                             workspaceFolder,
+                                             e.getLocalizedMessage()),
+                                      e);
             }
         }
     }
@@ -121,7 +130,7 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
             final Path vfs = cheHome.resolve("vfs");
             if (createFolders) {
                 if (!vfs.toFile().mkdir()) {
-                    throw new IOException(String.format("Can't create folder %s for projects of workspaces", vfs));
+                    throw new IOException(format("Can't create folder %s for projects of workspaces", vfs));
                 }
             }
         }
@@ -148,7 +157,7 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
             Files.createDirectory(folder);
         }
         if (!Files.isDirectory(folder)) {
-            throw new IOException(String.format("Projects %s is not directory. Check %s configuration property.", path, prop));
+            throw new IOException(format("Projects %s is not directory. Check %s configuration property.", path, prop));
         }
     }
 }

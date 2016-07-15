@@ -31,7 +31,7 @@ public class WindowsHostUtils {
     public static final String WINDOWS_CHE_HOME_PATH = "\\AppData\\Local\\Eclipse Che";
 
     /**
-     * Create Che Home directory if not exist on Windows hosts it will be locate in
+     * Creates Che home folder if not exist on Windows host. Che home folder is located in
      * System.getProperty("user.home") + {@link WindowsHostUtils#WINDOWS_CHE_HOME_PATH}
      *
      * @return Path to Che home dir
@@ -42,7 +42,7 @@ public class WindowsHostUtils {
     }
 
     /**
-     * Create Che Home directory if not exist on Windows hosts it will be locate in
+     * Creates Che home folder if not exist on Windows host. Che home folder is located in
      * System.getProperty("user.home") + {@link WindowsHostUtils#WINDOWS_CHE_HOME_PATH}
      *
      * @param allowFoldersCreation
@@ -53,11 +53,14 @@ public class WindowsHostUtils {
      */
     public static Path ensureCheHomeExist(boolean allowFoldersCreation) throws IOException {
         Path cheHome = Paths.get(System.getProperty("user.home") + WINDOWS_CHE_HOME_PATH);
-        if (Files.notExists(cheHome) && allowFoldersCreation) {
-            return Files.createDirectories(cheHome);
-        } else {
-            throw new IOException(String.format("Folder %s is missing and its creation is disallowed", cheHome));
+        if (Files.notExists(cheHome)) {
+            if (allowFoldersCreation) {
+                Files.createDirectories(cheHome);
+            } else {
+                throw new IOException(String.format("Folder %s is missing and its creation is disallowed", cheHome));
+            }
         }
+        return cheHome;
     }
 
     /**
