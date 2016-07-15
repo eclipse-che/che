@@ -24,10 +24,12 @@ import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.dialogs.InputDialog;
 import org.eclipse.che.ide.api.dialogs.InputValidator;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.NameUtils;
 
 import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
@@ -46,12 +48,14 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class RenameItemAction extends AbstractPerspectiveAction {
     private final CoreLocalizationConstant localization;
+    private final Set<RenamingSupport>     renamingSupport;
     private final DialogFactory            dialogFactory;
     private final AppContext               appContext;
 
     @Inject
     public RenameItemAction(Resources resources,
                             CoreLocalizationConstant localization,
+                            Set<RenamingSupport> renamingSupport,
                             DialogFactory dialogFactory,
                             AppContext appContext) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
@@ -60,6 +64,7 @@ public class RenameItemAction extends AbstractPerspectiveAction {
               null,
               resources.rename());
         this.localization = localization;
+        this.renamingSupport = renamingSupport;
         this.dialogFactory = dialogFactory;
         this.appContext = appContext;
     }
@@ -113,9 +118,21 @@ public class RenameItemAction extends AbstractPerspectiveAction {
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
         final Resource[] resources = appContext.getResources();
-
         e.getPresentation().setVisible(true);
-        e.getPresentation().setEnabled(resources != null && resources.length == 1);
+
+        if (resources == null || resources.length != 1) {
+            e.getPresentation().setEnabled(false);
+            return;
+        }
+
+        for (RenamingSupport validator : renamingSupport) {
+            if (!validator.isRenameAllowed(resources[0])) {
+                e.getPresentation().setEnabled(false);
+                return;
+            }
+        }
+
+        e.getPresentation().setEnabled(true);
     }
 
     private abstract class AbstractNameValidator implements InputValidator {
