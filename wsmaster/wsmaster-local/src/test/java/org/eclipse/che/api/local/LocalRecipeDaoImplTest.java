@@ -146,6 +146,7 @@ public class LocalRecipeDaoImplTest {
                               "FROM che/ubuntu",
                               asList("java", "ubuntu"),
                               "Che ubuntu",
-                              singletonList(new AclEntryImpl("creator", asList("read", "update"))));
+                              singletonList(new AclEntryImpl("creator", asList("read", "update"))),
+                              singletonList("search"));
     }
 }

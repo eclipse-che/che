@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author Sergii Leschenko
+ * @author Anton Korneta
  */
 @Entity(name = "Acl")
 public class AclEntryImpl implements AclEntry {

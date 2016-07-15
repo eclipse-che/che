@@ -23,12 +23,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
-import javax.persistence.PrePersist;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,8 +41,8 @@ import static javax.persistence.CascadeType.ALL;
                 @NamedQuery(
                         name = "Recipe.search",
                         query = "SELECT DISTINCT rec FROM Recipe rec " +
-                                "WHERE (EXISTS (SELECT publicAction FROM rec.publicActions publicAction WHERE publicAction = 'search') " +
-                                "   OR (EXISTS (SELECT userAction FROM rec.storedAcl acl, acl.actions userAction " +
+                                "WHERE (EXISTS (SELECT publicAction FROM rec.actions publicAction WHERE publicAction = 'search') " +
+                                "   OR (EXISTS (SELECT userAction FROM rec.acl acl, acl.actions userAction " +
                                 "WHERE userAction = 'search' AND acl.user =:user))) " +
                                 "  AND (:recipeType IS NULL OR rec.type = :recipeType) " +
                                 "  AND (:requiredCount = 0 OR :requiredCount = (SELECT COUNT(tag) " +
@@ -76,51 +71,18 @@ public class RecipeImpl implements ManagedRecipe {
     @Basic
     private String description;
 
-    // TODO: consider how to avoid this field
-    @Transient
-    private List<AclEntryImpl> acl;
-
-    // list of AclEntry which contain user without wildcard
     @OneToMany(cascade = ALL, orphanRemoval = true)
-    @JoinTable(name = "RECIPE_USER_ACL",
-               uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "recipe_id"}),
+    @JoinTable(name = "recipe_user_acl",
                inverseJoinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "user"),
                                      @JoinColumn(name = "acl_id", referencedColumnName = "id")},
                joinColumns = @JoinColumn(name = "recipe_id", referencedColumnName = "id"))
-    private List<AclEntryImpl> storedAcl;
+    private List<AclEntryImpl> acl;
 
     @ElementCollection
     private List<String> tags;
 
-    // describes the list of actions allowed to any user
     @ElementCollection
-    private List<String> publicActions;
-
-    @PrePersist
-    private void separateActions() {
-        // work around for storing public actions in separate collection
-        // so as not to violate the integrity constraint in case of userId = '*'
-        storedAcl = new ArrayList<>(getAcl());
-        if (publicActions == null) {
-            publicActions = new ArrayList<>();
-        }
-        final Iterator<AclEntryImpl> aclIterator = storedAcl.iterator();
-        while (aclIterator.hasNext()) {
-            final AclEntryImpl aclEntry = aclIterator.next();
-            if ("*".equals(aclEntry.getUser())) {
-                publicActions.addAll(aclEntry.getActions());
-                aclIterator.remove();
-            }
-        }
-    }
-
-    @PostLoad
-    private void collectActions() {
-        acl = new ArrayList<>(storedAcl);
-        if (publicActions != null && !publicActions.isEmpty()) {
-            acl.add(new AclEntryImpl("*", publicActions));
-        }
-    }
+    private List<String> actions;
 
     public RecipeImpl() {
     }
@@ -138,6 +100,7 @@ public class RecipeImpl implements ManagedRecipe {
              recipe.getScript(),
              recipe.getTags(),
              recipe.getDescription(),
+             null,
              null);
     }
 
@@ -149,7 +112,8 @@ public class RecipeImpl implements ManagedRecipe {
              recipe.getScript(),
              recipe.getTags(),
              recipe.getDescription(),
-             recipe.getAcl());
+             recipe.getAcl(),
+             recipe.getActions());
     }
 
     public RecipeImpl(String id,
@@ -159,7 +123,8 @@ public class RecipeImpl implements ManagedRecipe {
                       String script,
                       List<String> tags,
                       String description,
-                      List<AclEntryImpl> acl) {
+                      List<AclEntryImpl> acl,
+                      List<String> actions) {
         this.id = id;
         this.name = name;
         this.creator = creator;
@@ -168,6 +133,7 @@ public class RecipeImpl implements ManagedRecipe {
         this.tags = tags;
         this.description = description;
         this.acl = acl;
+        this.actions = actions;
     }
 
     @Override
@@ -287,6 +253,22 @@ public class RecipeImpl implements ManagedRecipe {
         return this;
     }
 
+    public List<String> getActions() {
+        if (actions == null) {
+            return new ArrayList<>();
+        }
+        return actions;
+    }
+
+    public void setActions(List<String> actions) {
+        this.actions = actions;
+    }
+
+    public RecipeImpl withActions(List<String> actions) {
+        this.actions = actions;
+        return this;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -303,7 +285,8 @@ public class RecipeImpl implements ManagedRecipe {
                Objects.equals(script, other.script) &&
                Objects.equals(description, other.description) &&
                getTags().equals(other.getTags()) &&
-               Objects.equals(acl, other.acl);
+               getAcl().equals(other.getAcl()) &&
+               getActions().equals(other.getActions());
     }
 
     @Override
@@ -316,7 +299,8 @@ public class RecipeImpl implements ManagedRecipe {
         hash = 31 * hash + Objects.hashCode(script);
         hash = 31 * hash + Objects.hashCode(description);
         hash = 31 * hash + getTags().hashCode();
-        hash = 31 * hash + Objects.hashCode(acl);
+        hash = 31 * hash + getAcl().hashCode();
+        hash = 31 * hash + getActions().hashCode();
         return hash;
     }
 
@@ -328,9 +312,10 @@ public class RecipeImpl implements ManagedRecipe {
                ", creator='" + creator + '\'' +
                ", type='" + type + '\'' +
                ", script='" + script + '\'' +
-               ", tags=" + tags +
                ", description='" + description + '\'' +
                ", acl=" + acl +
+               ", tags=" + tags +
+               ", actions=" + actions +
                '}';
     }
 }

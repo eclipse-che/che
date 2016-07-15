@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.jpa;
 
-import com.google.common.reflect.Reflection;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;

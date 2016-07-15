@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.jpa;
 
+import com.google.inject.persist.Transactional;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -19,9 +21,9 @@ import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.TypedQuery;
 import java.util.Collections;
 import java.util.List;
@@ -38,78 +40,48 @@ import static java.util.Objects.requireNonNull;
 public class JpaRecipeDao implements RecipeDao {
 
     @Inject
-    private EntityManagerFactory factory;
+    private Provider<EntityManager> managerProvider;
 
     @Override
     public void create(RecipeImpl recipe) throws ConflictException, ServerException {
         requireNonNull(recipe);
-        final EntityManager manager = factory.createEntityManager();
         try {
-            manager.getTransaction().begin();
-            manager.persist(recipe);
-            manager.getTransaction().commit();
+            doCreateRecipe(recipe);
         } catch (DuplicateKeyException ex) {
             throw new ConflictException(format("Recipe with id %s already exists", recipe.getId()));
         } catch (IntegrityConstraintViolationException ex) {
             throw new ConflictException("Could not create recipe with permissions for non-existent user");
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
-        } finally {
-            if (manager.getTransaction().isActive()) {
-                manager.getTransaction().rollback();
-            }
-            manager.close();
         }
     }
 
     @Override
     public RecipeImpl update(RecipeImpl update) throws NotFoundException, ServerException {
         requireNonNull(update);
-        final EntityManager manager = factory.createEntityManager();
         try {
-            manager.getTransaction().begin();
-            if (manager.find(RecipeImpl.class, update.getId()) == null) {
-                throw new NotFoundException(format("Could not update recipe with id %s because it doesn't exist", update.getId()));
-            }
-            final RecipeImpl updated = manager.merge(update);
-            manager.getTransaction().commit();
-            return updated;
+            return doUpdate(update);
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
-        } finally {
-            if (manager.getTransaction().isActive()) {
-                manager.getTransaction().rollback();
-            }
-            manager.close();
         }
     }
 
     @Override
     public void remove(String id) throws ServerException {
         requireNonNull(id);
-        final EntityManager manager = factory.createEntityManager();
         try {
-            manager.getTransaction().begin();
-            final RecipeImpl recipe = manager.find(RecipeImpl.class, id);
-            if (recipe != null) {
-                manager.remove(recipe);
-            }
-            manager.getTransaction().commit();
+            doRemove(id);
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
-        } finally {
-            if (manager.getTransaction().isActive()) {
-                manager.getTransaction().rollback();
-            }
-            manager.close();
         }
     }
 
     @Override
     public RecipeImpl getById(String id) throws NotFoundException, ServerException {
         requireNonNull(id);
-        final EntityManager manager = factory.createEntityManager();
+
         try {
+            final EntityManager manager = managerProvider.get();
             final RecipeImpl recipe = manager.find(RecipeImpl.class, id);
             if (recipe == null) {
                 throw new NotFoundException(format("Recipe with id '%s' doesn't exist", id));
@@ -117,8 +89,6 @@ public class JpaRecipeDao implements RecipeDao {
             return recipe;
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
-        } finally {
-            manager.close();
         }
     }
 
@@ -128,8 +98,9 @@ public class JpaRecipeDao implements RecipeDao {
                                    String type,
                                    int skipCount,
                                    int maxItems) throws ServerException {
-        final EntityManager manager = factory.createEntityManager();
+
         try {
+            final EntityManager manager = managerProvider.get();
             tags = tags == null ? Collections.emptyList() : tags;
             final TypedQuery<RecipeImpl> query = manager.createNamedQuery("Recipe.search", RecipeImpl.class)
                                                         .setParameter("user", user)
@@ -141,8 +112,29 @@ public class JpaRecipeDao implements RecipeDao {
                         .getResultList();
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
-        } finally {
-            manager.close();
         }
+    }
+
+    @Transactional
+    protected void doRemove(String id) {
+        final EntityManager manager = managerProvider.get();
+        final RecipeImpl recipe = manager.find(RecipeImpl.class, id);
+        if (recipe != null) {
+            manager.remove(recipe);
+        }
+    }
+
+    @Transactional
+    protected RecipeImpl doUpdate(RecipeImpl update) throws NotFoundException {
+        final EntityManager manager = managerProvider.get();
+        if (manager.find(RecipeImpl.class, update.getId()) == null) {
+            throw new NotFoundException(format("Could not update recipe with id %s because it doesn't exist", update.getId()));
+        }
+        return manager.merge(update);
+    }
+
+    @Transactional
+    protected void doCreateRecipe(RecipeImpl recipe) {
+        managerProvider.get().persist(recipe);
     }
 }

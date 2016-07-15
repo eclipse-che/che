@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.spi.tck;
 
-import com.google.common.collect.ImmutableList;
-
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
@@ -29,6 +27,8 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -90,6 +90,22 @@ public class RecipeDaoTest {
         final RecipeImpl update = recipes.get(0).withName("updatedName");
 
         assertEquals(recipeDao.update(update), update);
+    }
+
+    @Test
+    public void shouldUpdateRecipeWithAllRelatedAttributes() throws Exception {
+        final RecipeImpl update = recipes.get(0);
+        update.getAcl().add(new AclEntryImpl(recipes.get(1).getAcl().get(0).getUser(), asList("read", "write")));
+        update.getActions().clear();
+        update.getActions().add("create");
+        update.withName("debian")
+              .withCreator("userid_9")
+              .withDescription("description")
+              .withType("docker")
+              .setScript("FROM codenvy/debian_jdk8");
+        recipeDao.update(update);
+
+        assertEquals(recipeDao.getById(update.getId()), update);
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -175,8 +191,9 @@ public class RecipeDaoTest {
                               "creator" + index,
                               "dockerfile" + index,
                               "script",
-                              ImmutableList.of("tag1" + index, "tag2" + index),
+                              new ArrayList<>(asList("tag1" + index, "tag2" + index)),
                               "recipe description",
-                              ImmutableList.of(new AclEntryImpl("userId_" + index, ImmutableList.of("read", "search", "update"))));
+                              new ArrayList<>(singletonList(new AclEntryImpl("userId_" + index, asList("read", "search", "update")))),
+                              new ArrayList<>(asList("read", "update")));
     }
 }
