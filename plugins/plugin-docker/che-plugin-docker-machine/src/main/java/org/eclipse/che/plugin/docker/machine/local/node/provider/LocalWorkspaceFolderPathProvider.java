@@ -43,17 +43,20 @@ import static java.lang.String.format;
 public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProvider {
 
     public static final String ALLOW_FOLDERS_CREATION_ENV_VARIABLE = "CHE_CREATE_WS_FOLDERS";
+
+    private final Provider<WorkspaceManager> workspaceManager;
+    private final boolean                    isWindows;
+
     /**
      * Value provide path to directory on host machine where will by all created and mount to the
      * created workspaces folder that become root of workspace inside machine.
      * Inside machine it will point to the directory described by {@literal che.machine.projects.internal.storage}.
      * <p>
      * For example:
-     * if you set {@literal che.user.workspaces.storage} to the /home/user/che/workspaces after creating new workspace will be created new folder
+     * if you set {@literal che.workspaces.storage} to the /home/user/che/workspaces after creating new workspace will be created new folder
      * /home/user/che/workspaces/{workspaceName} and it will be mount to the  dev-machine to {@literal che.machine.projects.internal.storage}
      */
-    private final String                     workspacesMountPoint;
-    private final Provider<WorkspaceManager> workspaceManager;
+    private String workspacesMountPoint;
     /**
      * this value provide path to projects on local host
      * if this value will be set all workspace will manage
@@ -69,14 +72,19 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
      * It is also possible to overwrite with named constant.
      */
     @Inject(optional = true)
-    @Named("che.user.workspaces.storage.create_folders")
+    @Named("che.workspace.storage.create_folders")
     private boolean createFolders = true;
 
+    @Inject(optional = true)
+    @Named("che.user.workspaces.storage")
+    private String oldWorkspacesMountPoint;
+
     @Inject
-    public LocalWorkspaceFolderPathProvider(@Named("che.user.workspaces.storage") String workspacesMountPoint,
+    public LocalWorkspaceFolderPathProvider(@Named("che.workspace.storage") String workspacesMountPoint,
                                             Provider<WorkspaceManager> workspaceManager) throws IOException {
-        this.workspacesMountPoint = getWorkspacesRootPath(workspacesMountPoint);
+        this.workspacesMountPoint = workspacesMountPoint;
         this.workspaceManager = workspaceManager;
+        this.isWindows = SystemInfo.isWindows();
         String allowFoldersCreationEnvVar = System.getenv(ALLOW_FOLDERS_CREATION_ENV_VARIABLE);
         if (allowFoldersCreationEnvVar != null) {
             if ("false".equalsIgnoreCase(allowFoldersCreationEnvVar)) {
@@ -87,75 +95,89 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
 
     @VisibleForTesting
     protected LocalWorkspaceFolderPathProvider(String workspacesMountPoint,
+                                               String oldWorkspacesMountPoint,
                                                String projectsFolder,
                                                Provider<WorkspaceManager> workspaceManager,
-                                               boolean createFolders) throws IOException {
+                                               boolean createFolders,
+                                               boolean isWindows) throws IOException {
         this.workspaceManager = workspaceManager;
-        this.workspacesMountPoint = getWorkspacesRootPath(workspacesMountPoint);
+        this.workspacesMountPoint = workspacesMountPoint;
         this.hostProjectsFolder = projectsFolder;
         this.createFolders = createFolders;
+        this.oldWorkspacesMountPoint = oldWorkspacesMountPoint;
+        this.isWindows = isWindows;
     }
 
     @Override
     public String getPath(@Assisted("workspace") String workspaceId) throws IOException {
-        if (hostProjectsFolder != null) {
-            return hostProjectsFolder;
-        } else {
-            Path workspaceFolder = null;
+        if (isWindows || hostProjectsFolder == null) {
             try {
                 WorkspaceManager workspaceManager = this.workspaceManager.get();
                 Workspace workspace = workspaceManager.getWorkspace(workspaceId);
                 String wsName = workspace.getConfig().getName();
-                workspaceFolder = Paths.get(workspacesMountPoint).resolve(wsName);
-                if (Files.notExists(workspaceFolder) && createFolders) {
-                    Files.createDirectory(workspaceFolder);
-                }
-                return workspaceFolder.toString();
+                String workspaceFolderPath = Paths.get(workspacesMountPoint).resolve(wsName).toString();
+
+                ensureExist(workspaceFolderPath, null);
+
+                return workspaceFolderPath;
             } catch (NotFoundException | ServerException e) {
-                throw new IOException(e.getMessage());
-            } catch (AccessDeniedException e) {
-                throw new IOException(format("Workspace folder '%s' creation failed. Please check permissions of this folder. Cause: %s",
-                                             workspaceFolder,
-                                             e.getLocalizedMessage()),
-                                      e);
+                throw new IOException(e.getLocalizedMessage());
             }
+        } else {
+            return hostProjectsFolder;
         }
     }
 
     @VisibleForTesting
     @PostConstruct
-    void createNeededFolders() throws IOException {
-        if (SystemInfo.isWindows()) {
-            final Path cheHome = WindowsHostUtils.ensureCheHomeExist(createFolders);
-            final Path vfs = cheHome.resolve("vfs");
-            if (createFolders && !vfs.toFile().mkdir()) {
-                throw new IOException(format("Can't create folder %s for projects of workspaces", vfs));
-            }
+    void init() throws IOException {
+        // find root directory for projects in workspaces
+        if (isWindows) {
+            final Path vfs = WindowsHostUtils.getCheHome().resolve("vfs");
+            workspacesMountPoint = vfs.toString();
+        } else if (oldWorkspacesMountPoint != null) {
+            workspacesMountPoint = oldWorkspacesMountPoint;
         }
 
-        if (workspacesMountPoint != null && createFolders) {
-            ensureExist(workspacesMountPoint, "che.user.workspaces.storage");
-        }
-        if (hostProjectsFolder != null && createFolders) {
+        // create directories if needed
+        if (hostProjectsFolder == null) {
+            ensureExist(workspacesMountPoint,
+                        oldWorkspacesMountPoint == null ? "che.workspace.storage" : "che.user.workspaces.storage");
+        } else {
             ensureExist(hostProjectsFolder, "host.projects.root");
         }
     }
 
-    private String getWorkspacesRootPath(String configuredPath) throws IOException {
-        if (SystemInfo.isWindows()) {
-            Path cheHome = WindowsHostUtils.getCheHome();
-            return cheHome.resolve("vfs").toString();
-        }
-        return configuredPath;
-    }
+    private void ensureExist(String path,
+                             String prop) throws IOException {
 
-    private void ensureExist(String path, String prop) throws IOException {
-        Path folder = Paths.get(path);
-        if (Files.notExists(folder)) {
-            Files.createDirectory(folder);
-        }
-        if (!Files.isDirectory(folder)) {
-            throw new IOException(format("Projects %s is not directory. Check %s configuration property.", path, prop));
+        if (createFolders) {
+            Path folder = Paths.get(path);
+            if (Files.exists(folder)) {
+                if (!Files.isDirectory(folder)) {
+                    if (prop != null) {
+                        throw new IOException(
+                                format("Workspace folder '%s' is not directory. Check %s configuration property", path, prop));
+                    } else {
+                        throw new IOException(format("Workspace folder '%s' is not directory", path));
+                    }
+                }
+            } else {
+                try {
+                    Files.createDirectories(folder);
+                } catch (AccessDeniedException e) {
+                    throw new IOException(
+                            format("Workspace folder '%s' creation failed. Please check permissions of this folder. Cause: %s",
+                                   path,
+                                   e.getLocalizedMessage()),
+                            e);
+                } catch (IOException e) {
+                    throw new IOException(format("Workspace folder '%s' creation failed. Cause: %s",
+                                                 path,
+                                                 e.getLocalizedMessage()),
+                                          e);
+                }
+            }
         }
     }
 }
