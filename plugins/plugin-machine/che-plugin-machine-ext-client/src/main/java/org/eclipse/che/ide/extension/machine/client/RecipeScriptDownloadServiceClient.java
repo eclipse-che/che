@@ -8,19 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.machine.server;
+package org.eclipse.che.ide.extension.machine.client;
 
-import com.google.inject.AbstractModule;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 
-import org.eclipse.che.api.machine.server.MachineService;
-import org.eclipse.che.ide.ext.machine.server.ssh.KeysInjector;
-import org.eclipse.che.inject.DynaModule;
+/**
+ * @author Mihail Kuznyetsov.
+ */
+public interface RecipeScriptDownloadServiceClient {
 
-@DynaModule
-public class MachineModule extends AbstractModule {
-    protected void configure() {
-        bind(KeysInjector.class).asEagerSingleton();
-
-        bind(RecipeScriptDownloadService.class);
-    }
+    /**
+     * Fetch recipe script for machine source location
+     *
+     * @param machine
+     *         machine to fetch script for
+     * @return content of the recipe script
+     */
+    Promise<String> getRecipeScript(Machine machine);
 }

@@ -47,6 +47,8 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class SshMachineInstanceProviderTest {
+    private static final String RECIPE_SCRIPT = new Gson().toJson(new SshMachineRecipe("localhost", 22, "user", "password"));
+
     @Mock
     private RecipeDownloader recipeDownloader;
 
@@ -70,7 +72,7 @@ public class SshMachineInstanceProviderTest {
                                                                  "user",
                                                                  "password");
         recipe = new RecipeImpl().withType("ssh-config")
-                                 .withScript(new Gson().toJson(sshMachineRecipe));
+                                 .withScript(RECIPE_SCRIPT);
     }
 
     @Test
