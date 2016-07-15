@@ -42,7 +42,7 @@ import static java.lang.String.format;
 @Singleton
 public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProvider {
 
-    public static final String ALLOW_FOLDERS_CREATION_ENV_VARIABLE = "CHE_ALLOW_CREATION_WORKSPACE_FOLDERS";
+    public static final String ALLOW_FOLDERS_CREATION_ENV_VARIABLE = "CHE_CREATE_WS_FOLDERS";
     /**
      * Value provide path to directory on host machine where will by all created and mount to the
      * created workspaces folder that become root of workspace inside machine.
