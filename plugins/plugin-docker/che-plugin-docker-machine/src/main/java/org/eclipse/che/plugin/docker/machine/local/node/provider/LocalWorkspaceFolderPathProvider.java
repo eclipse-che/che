@@ -86,10 +86,8 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
         this.workspaceManager = workspaceManager;
         this.isWindows = SystemInfo.isWindows();
         String allowFoldersCreationEnvVar = System.getenv(ALLOW_FOLDERS_CREATION_ENV_VARIABLE);
-        if (allowFoldersCreationEnvVar != null) {
-            if ("false".equalsIgnoreCase(allowFoldersCreationEnvVar)) {
-                createFolders = false;
-            }
+        if ("false".equalsIgnoreCase(allowFoldersCreationEnvVar)) {
+            createFolders = false;
         }
     }
 
