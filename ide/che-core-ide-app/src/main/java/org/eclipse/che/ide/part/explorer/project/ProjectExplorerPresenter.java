@@ -221,6 +221,15 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             final Node node1 = getProjectNode(delta.getFromPath());
             final Node node2 = getProjectNode(delta.getToPath());
 
+            //TODO: brutal fix for CHE-1535 just avoid NPE here
+            if (node1 == null && node2 == null) {
+                final Node node = tree.getSelectionModel().getSelectedNodes().get(0);
+                if (node != null) {
+                    tree.refresh(node);
+                }
+                return;
+            }
+
             if (node1.equals(node2)) {
                 if (tree.isExpanded(node1)) {
                     tree.getNodeLoader().loadChildren(node1, true);
