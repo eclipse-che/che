@@ -1,5 +1,5 @@
 #
-# To build it:
+# To build, in this directory:
 #  `docker build -t codenvy/che .`
 #
 # To use it:

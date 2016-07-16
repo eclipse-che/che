@@ -1,3 +1,8 @@
+#
+# To build it, run in the repository root:
+#  `docker build -t codenvy/che-server -f $(pwd)/dockerfiles/che-server/Dockerfile .`
+#
+
 FROM alpine:3.4
 
 ENV LANG=C.UTF-8 \
@@ -21,7 +26,7 @@ EXPOSE 8000 8080
 
 USER user
 
-ADD /assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
+ADD assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
 
 ENV CHE_HOME /home/user/che
 
