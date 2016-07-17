@@ -11,7 +11,7 @@ only clutter the discussion, and don't help resolving it. However, if you
 have ways to reproduce the issue or have additional information that may help
 resolving the issue, please leave a comment.
 
-Wirting Good Bug Reports and Feature Requests
+Writing Good Bug Reports and Feature Requests
 ---------------------------------------------
 Please file a single issue per problem and feature request. Do not file combo issues.
 
