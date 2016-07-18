@@ -96,8 +96,8 @@ public class RecipeDaoTest {
     public void shouldUpdateRecipeWithAllRelatedAttributes() throws Exception {
         final RecipeImpl update = recipes.get(0);
         update.getAcl().add(new AclEntryImpl(recipes.get(1).getAcl().get(0).getUser(), asList("read", "write")));
-        update.getActions().clear();
-        update.getActions().add("create");
+        update.getPublicActions().clear();
+        update.getPublicActions().add("create");
         update.withName("debian")
               .withCreator("userid_9")
               .withDescription("description")

@@ -41,9 +41,9 @@ import static javax.persistence.CascadeType.ALL;
                 @NamedQuery(
                         name = "Recipe.search",
                         query = "SELECT DISTINCT rec FROM Recipe rec " +
-                                "WHERE (EXISTS (SELECT publicAction FROM rec.actions publicAction WHERE publicAction = 'search') " +
-                                "   OR (EXISTS (SELECT userAction FROM rec.acl acl, acl.actions userAction " +
-                                "WHERE userAction = 'search' AND acl.user =:user))) " +
+                                "WHERE (EXISTS (SELECT publicAction FROM rec.publicActions publicAction WHERE publicAction = 'search') " +
+                                "   OR (EXISTS (SELECT userAction FROM rec.acl acl, acl.actions userAction WHERE userAction = 'search' " +
+                                "                                                                            AND acl.user =:user))) " +
                                 "  AND (:recipeType IS NULL OR rec.type = :recipeType) " +
                                 "  AND (:requiredCount = 0 OR :requiredCount = (SELECT COUNT(tag) " +
                                 "                                               FROM Recipe recipe JOIN recipe.tags tag " +
@@ -82,7 +82,7 @@ public class RecipeImpl implements ManagedRecipe {
     private List<String> tags;
 
     @ElementCollection
-    private List<String> actions;
+    private List<String> publicActions;
 
     public RecipeImpl() {
     }
@@ -113,7 +113,7 @@ public class RecipeImpl implements ManagedRecipe {
              recipe.getTags(),
              recipe.getDescription(),
              recipe.getAcl(),
-             recipe.getActions());
+             recipe.getPublicActions());
     }
 
     public RecipeImpl(String id,
@@ -124,7 +124,7 @@ public class RecipeImpl implements ManagedRecipe {
                       List<String> tags,
                       String description,
                       List<AclEntryImpl> acl,
-                      List<String> actions) {
+                      List<String> publicActions) {
         this.id = id;
         this.name = name;
         this.creator = creator;
@@ -133,7 +133,7 @@ public class RecipeImpl implements ManagedRecipe {
         this.tags = tags;
         this.description = description;
         this.acl = acl;
-        this.actions = actions;
+        this.publicActions = publicActions;
     }
 
     @Override
@@ -253,19 +253,19 @@ public class RecipeImpl implements ManagedRecipe {
         return this;
     }
 
-    public List<String> getActions() {
-        if (actions == null) {
+    public List<String> getPublicActions() {
+        if (publicActions == null) {
             return new ArrayList<>();
         }
-        return actions;
+        return publicActions;
     }
 
-    public void setActions(List<String> actions) {
-        this.actions = actions;
+    public void setPublicActions(List<String> publicActions) {
+        this.publicActions = publicActions;
     }
 
     public RecipeImpl withActions(List<String> actions) {
-        this.actions = actions;
+        this.publicActions = actions;
         return this;
     }
 
@@ -286,7 +286,7 @@ public class RecipeImpl implements ManagedRecipe {
                Objects.equals(description, other.description) &&
                getTags().equals(other.getTags()) &&
                getAcl().equals(other.getAcl()) &&
-               getActions().equals(other.getActions());
+               getPublicActions().equals(other.getPublicActions());
     }
 
     @Override
@@ -300,7 +300,7 @@ public class RecipeImpl implements ManagedRecipe {
         hash = 31 * hash + Objects.hashCode(description);
         hash = 31 * hash + getTags().hashCode();
         hash = 31 * hash + getAcl().hashCode();
-        hash = 31 * hash + getActions().hashCode();
+        hash = 31 * hash + getPublicActions().hashCode();
         return hash;
     }
 
@@ -315,7 +315,7 @@ public class RecipeImpl implements ManagedRecipe {
                ", description='" + description + '\'' +
                ", acl=" + acl +
                ", tags=" + tags +
-               ", actions=" + actions +
+               ", publicActions=" + publicActions +
                '}';
     }
 }
