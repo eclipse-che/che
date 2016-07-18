@@ -65,8 +65,6 @@ public class ProjectPerspective extends AbstractPerspective {
 
         addPart(notificationManager, INFORMATION);
         addPart(projectExplorerPart, NAVIGATION);
-
-        setActivePart(projectExplorerPart);
     }
 
     /** {@inheritDoc} */

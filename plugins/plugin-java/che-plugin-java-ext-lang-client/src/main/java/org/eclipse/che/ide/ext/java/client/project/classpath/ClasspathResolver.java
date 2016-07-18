@@ -22,6 +22,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -127,7 +128,10 @@ public class ClasspathResolver {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new ClasspathChangedEvent(project.get().getLocation().toString(), entries));
-                project.get().synchronize();
+                final Optional<Container> parent = resource.getParent();
+                if (parent.isPresent()) {
+                    parent.get().synchronize();
+                }
             }
         }).catchError(new Operation<PromiseError>() {
             @Override

@@ -363,7 +363,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getEditorSelectionColor() {
-        return "#256c9f";
+        return "rgb(67, 80, 107)";
     }
 
     @Override

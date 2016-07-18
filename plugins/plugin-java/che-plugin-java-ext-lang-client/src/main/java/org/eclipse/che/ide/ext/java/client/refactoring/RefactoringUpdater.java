@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.refactoring;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -17,12 +18,16 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,7 +35,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
-import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 /**
  * Utility class for the refactoring operations.
@@ -42,14 +46,17 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 @Singleton
 public class RefactoringUpdater {
 
-    private final AppContext appContext;
-    private       EventBus   eventBus;
+    private final AppContext  appContext;
+    private final EventBus    eventBus;
+    private final EditorAgent editorAgent;
 
     @Inject
     public RefactoringUpdater(AppContext appContext,
-                              EventBus eventBus) {
+                              EventBus eventBus,
+                              EditorAgent editorAgent) {
         this.appContext = appContext;
         this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
     }
 
     /**
@@ -66,7 +73,7 @@ public class RefactoringUpdater {
         }
 
         ExternalResourceDelta[] deltas = new ExternalResourceDelta[0];
-
+        final List<String> pathChanged = new ArrayList<>();
         for (ChangeInfo change : changes) {
 
             final ExternalResourceDelta delta;
@@ -83,8 +90,7 @@ public class RefactoringUpdater {
                     delta = new ExternalResourceDelta(newPath, oldPath, ADDED | MOVED_FROM | MOVED_TO);
                     break;
                 case UPDATE:
-                    delta = new ExternalResourceDelta(newPath, UPDATED);
-                    break;
+                    pathChanged.add(change.getPath());
                 default:
                     continue;
             }
@@ -94,14 +100,39 @@ public class RefactoringUpdater {
             deltas[index] = delta;
         }
 
+        //here we need to remove file for file that moved or renamed JDT lib sent it to
+        for (int i = 0; i < deltas.length; i++) {
+            if (pathChanged.contains(deltas[i].getToPath().toString())) {
+                pathChanged.remove(deltas[i].getToPath().toString());
+            }
+            if (pathChanged.contains(deltas[i].getFromPath().toString())) {
+                pathChanged.remove(deltas[i].getFromPath().toString());
+            }
+        }
+
         if (deltas.length > 0) {
             appContext.getWorkspaceRoot().synchronize(deltas).then(new Operation<ResourceDelta[]>() {
                 @Override
                 public void apply(final ResourceDelta[] appliedDeltas) throws OperationException {
                     for (ResourceDelta delta : appliedDeltas) {
-                        if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) != 0) {
                             eventBus.fireEvent(new RevealResourceEvent(delta.getToPath()));
+                    }
+                    for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors()) {
+                        final String path = editorPartPresenter.getEditorInput().getFile().getLocation().toString();
+                        if (pathChanged.contains(path)) {
+                            eventBus.fireEvent(
+                                    new FileContentUpdateEvent(editorPartPresenter.getEditorInput().getFile().getLocation().toString()));
                         }
+                    }
+                }
+            });
+        } else {
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                @Override
+                public void execute() {
+                    for (EditorPartPresenter editorPartPresenter : editorAgent.getOpenedEditors()) {
+                        eventBus.fireEvent(
+                                new FileContentUpdateEvent(editorPartPresenter.getEditorInput().getFile().getLocation().toString()));
                     }
                 }
             });

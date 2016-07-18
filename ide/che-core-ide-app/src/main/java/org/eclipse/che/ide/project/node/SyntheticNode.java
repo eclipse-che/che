@@ -28,8 +28,6 @@ import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
  */
 public abstract class SyntheticNode<D> extends AbstractTreeNode implements HasDataObject<D>, HasPresentation, HasSettings {
 
-    private long hashSalt = -1;
-
     private D                data;
     private NodeSettings     nodeSettings;
     private NodePresentation nodePresentation;
@@ -37,10 +35,8 @@ public abstract class SyntheticNode<D> extends AbstractTreeNode implements HasDa
     public static final String CUSTOM_BACKGROUND_FILL = "fill";
 
     public SyntheticNode(D data, NodeSettings nodeSettings) {
-
         this.data = data;
         this.nodeSettings = nodeSettings;
-        this.hashSalt = System.currentTimeMillis();
     }
 
     /** {@inheritDoc} */
@@ -98,13 +94,13 @@ public abstract class SyntheticNode<D> extends AbstractTreeNode implements HasDa
 
         SyntheticNode node = (SyntheticNode)o;
 
-        return node.getData().equals(getData()) &&  node.hashSalt == hashSalt;
+        return node.getData().equals(getData()) &&  node.getProject().equals(getProject());
     }
 
     /** {@inheritDoc} */
     @Override
     public int hashCode() {
-        return Objects.hashCode(data, hashSalt);
+        return Objects.hashCode(data, getProject());
     }
 
     /** {@inheritDoc} */
@@ -112,7 +108,7 @@ public abstract class SyntheticNode<D> extends AbstractTreeNode implements HasDa
     public String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("data", data)
-                          .add("hashSalt", hashSalt)
+                          .add("project", getProject())
                           .toString();
     }
 }

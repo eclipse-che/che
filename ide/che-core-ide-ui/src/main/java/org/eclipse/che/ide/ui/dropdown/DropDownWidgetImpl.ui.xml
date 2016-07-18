@@ -21,6 +21,8 @@
         .selectedElementName {
             color: inherit;
             font-size: inherit;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .imagePanel {
@@ -29,6 +31,7 @@
 
         .container {
             float: left;
+            width: 130px;
         }
     </ui:style>
 

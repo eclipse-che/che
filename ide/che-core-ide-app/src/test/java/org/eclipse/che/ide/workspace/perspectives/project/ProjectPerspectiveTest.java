@@ -130,8 +130,6 @@ public class ProjectPerspectiveTest {
 
         verify(partStackPresenter, times(2)).addPart(notificationManager, null);
         verify(partStackPresenter).addPart(projectExplorerPart, null);
-
-        verify(partStackPresenter).setActivePart(projectExplorerPart);
     }
 
     @Test

@@ -30,6 +30,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
+import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
@@ -91,11 +92,22 @@ public class OpenDeclarationFinder {
                 @Override
                 public void apply(OpenDeclarationDescriptor result) throws OperationException {
                     if (result != null) {
-                        handleDescriptor(project.get(), result);
+                        handleDescriptor(project.get().getLocation(), result);
                     }
                 }
             });
 
+        } else if (file instanceof JarFileNode) {
+            navigationService.findDeclaration(((JarFileNode)file).getProjectLocation(),
+                                              file.getLocation().toString().replace('/', '.'),
+                                              offset).then(new Operation<OpenDeclarationDescriptor>() {
+                @Override
+                public void apply(OpenDeclarationDescriptor result) throws OperationException {
+                    if (result != null) {
+                        handleDescriptor(((JarFileNode)file).getProject(), result);
+                    }
+                }
+            });
         }
     }
 
@@ -118,7 +130,7 @@ public class OpenDeclarationFinder {
         }.delay(1);
     }
 
-    private void handleDescriptor(final Project project, final OpenDeclarationDescriptor descriptor) {
+    private void handleDescriptor(final Path projectPath, final OpenDeclarationDescriptor descriptor) {
         final EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(Path.valueOf(descriptor.getPath()));
         if (openedEditor != null) {
             editorAgent.openEditor(openedEditor.getEditorInput().getFile(), new OpenEditorCallbackImpl() {
@@ -136,17 +148,17 @@ public class OpenDeclarationFinder {
         }
 
         if (descriptor.isBinary()) {
-            navigationService.getEntry(project.getLocation(), descriptor.getLibId(), descriptor.getPath())
+            navigationService.getEntry(projectPath, descriptor.getLibId(), descriptor.getPath())
                              .then(new Operation<JarEntry>() {
                                  @Override
                                  public void apply(final JarEntry entry) throws OperationException {
                                      navigationService
-                                             .getContent(project.getLocation(), descriptor.getLibId(), Path.valueOf(entry.getPath()))
+                                             .getContent(projectPath, descriptor.getLibId(), Path.valueOf(entry.getPath()))
                                              .then(new Operation<ClassContent>() {
                                                  @Override
                                                  public void apply(ClassContent content) throws OperationException {
                                                      final VirtualFile file = javaNodeFactory
-                                                             .newJarFileNode(entry, descriptor.getLibId(), project.getLocation(), null);
+                                                             .newJarFileNode(entry, descriptor.getLibId(), projectPath, null);
                                                      editorAgent.openEditor(file, new OpenEditorCallbackImpl() {
                                                          @Override
                                                          public void onEditorOpened(final EditorPartPresenter editor) {

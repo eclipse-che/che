@@ -975,17 +975,14 @@ public class DockerConnector {
      *         ProgressMonitor for images creation process
      * @throws IOException
      *          when a problem occurs with docker api calls
-     * @throws InterruptedException
-     *         if push process was interrupted
      */
-    public void pull(final PullParams params, final ProgressMonitor progressMonitor) throws IOException, InterruptedException {
+    public void pull(final PullParams params, final ProgressMonitor progressMonitor) throws IOException {
         pull(params, progressMonitor, dockerDaemonUri);
     }
 
     /**
-     * See <a href="https://docs.docker.com/reference/api/docker_remote_api_v1.16/#create-an-image">Docker remote API # Create an
-     * image</a>.
-     * To pull from private registry use registry.address:port/image as image. This is not documented.
+     * Pull an image from registry.
+     * To pull from private registry use registry.address:port/image as image.
      *
      * @param progressMonitor
      *         ProgressMonitor for images creation process
