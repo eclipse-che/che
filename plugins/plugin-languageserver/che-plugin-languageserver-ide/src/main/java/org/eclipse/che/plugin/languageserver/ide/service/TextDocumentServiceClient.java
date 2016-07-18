@@ -27,12 +27,16 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentP
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.ReferenceParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.SymbolInformationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.TextEditDTO;
 
 import java.util.List;
 
@@ -137,6 +141,51 @@ public class TextDocumentServiceClient {
     public Promise<List<LocationDTO>> definition(TextDocumentPositionParamsDTO params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/definition";
         Unmarshallable<List<LocationDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(LocationDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, params)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .send(unmarshaller);
+    }
+
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#formatting(io.typefox.lsapi.DocumentFormattingParams)}
+     *
+     * @param params
+     * @return
+     */
+    public Promise<List<TextEditDTO>> formatting(DocumentFormattingParamsDTO params) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/formatting";
+        Unmarshallable<List<TextEditDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEditDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, params)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .send(unmarshaller);
+    }
+
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#formatting(io.typefox.lsapi.DocumentRangeFormattingParams)}
+     *
+     * @param params
+     * @return
+     */
+    public Promise<List<TextEditDTO>> rangeFormatting(DocumentRangeFormattingParamsDTO params) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/rangeFormatting";
+        Unmarshallable<List<TextEditDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEditDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, params)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .send(unmarshaller);
+    }
+
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#formatting(io.typefox.lsapi.DocumentFormattingParams)}
+     *
+     * @param params
+     * @return
+     */
+    public Promise<List<TextEditDTO>> onTypeFormatting(DocumentOnTypeFormattingParamsDTO params) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/onTypeFormatting";
+        Unmarshallable<List<TextEditDTO>> unmarshaller = unmarshallerFactory.newListUnmarshaller(TextEditDTO.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)

@@ -15,6 +15,7 @@ import elemental.events.KeyboardEvent.KeyCode;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.editor.events.DocumentReadyEvent;
+import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.HasAnnotationRendering;
@@ -100,9 +101,18 @@ public class TextEditorInit<T extends EditorWidget> {
                 configureCodeAssist(documentHandle);
                 configureChangeInterceptors(documentHandle);
                 addQuickAssistKeyBinding();
+                configureFormatter(textEditor);
             }
         };
         new DocReadyWrapper<TextEditorInit<T>>(generalEventBus, this.textEditor.getEditorHandle(), init, this);
+    }
+
+    private void configureFormatter(TextEditorPresenter<T> textEditor) {
+        ContentFormatter formatter = configuration.getContentFormatter();
+        if (formatter != null) {
+            formatter.install(textEditor);
+        }
+
     }
 
     /**

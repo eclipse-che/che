@@ -43,6 +43,11 @@ public abstract class AbstractDocument implements Document, DocumentHandle {
     }
 
     @Override
+    public void replace(int startLine, int startChar, int endLine, int endChar, String text) {
+        // does nothing by default
+    }
+
+    @Override
     public void setFile(VirtualFile fileNode) {
         this.file = fileNode;
     }

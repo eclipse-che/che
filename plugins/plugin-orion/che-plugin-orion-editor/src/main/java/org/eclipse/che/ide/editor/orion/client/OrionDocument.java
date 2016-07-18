@@ -16,6 +16,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.ModelChangedEventOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionEditorOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionPixelPositionOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionSelectionOverlay;
+import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextModelOverlay.EventHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextViewOverlay;
 import org.eclipse.che.ide.api.editor.document.AbstractDocument;
@@ -196,6 +197,14 @@ public class OrionDocument extends AbstractDocument {
 
     public void replace(int offset, int length, String text) {
         this.editorOverlay.setText(text, offset, offset + length);
+    }
+
+    @Override
+    public void replace(int startLine, int startChar, int endLine, int endChar, String text) {
+        OrionTextModelOverlay model = editorOverlay.getModel();
+        int lineStart = model.getLineStart(startLine);
+        int lineEnd = model.getLineStart(endLine);
+        editorOverlay.setText(text, lineStart + startChar, lineEnd + endChar);
     }
 
     public int getContentsCharCount() {

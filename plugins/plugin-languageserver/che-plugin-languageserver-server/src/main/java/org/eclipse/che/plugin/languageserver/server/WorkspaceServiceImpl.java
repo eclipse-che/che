@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server;
 
+import io.typefox.lsapi.Location;
+import io.typefox.lsapi.LocationImpl;
 import io.typefox.lsapi.SymbolInformation;
 import io.typefox.lsapi.services.LanguageServer;
 
@@ -55,7 +57,14 @@ public class WorkspaceServiceImpl {
             return emptyList();
         }
 
-        return server.getWorkspaceService().symbol(workspaceSymbolParams).get();
+        List<? extends SymbolInformation> informations = server.getWorkspaceService().symbol(workspaceSymbolParams).get();
+        informations.forEach(o -> {
+            Location location = o.getLocation();
+            if (location instanceof LocationImpl) {
+                ((LocationImpl)location).setUri(TextDocumentServiceImpl.removePrefixUri(location.getUri()));
+            }
+        });
+        return informations;
     }
 
     private LanguageServer getServer(String uri) {

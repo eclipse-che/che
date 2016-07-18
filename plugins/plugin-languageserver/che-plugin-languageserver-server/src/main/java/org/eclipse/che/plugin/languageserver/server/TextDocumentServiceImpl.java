@@ -4,6 +4,7 @@ import io.typefox.lsapi.CompletionItem;
 import io.typefox.lsapi.Location;
 import io.typefox.lsapi.LocationImpl;
 import io.typefox.lsapi.SymbolInformation;
+import io.typefox.lsapi.TextEdit;
 import io.typefox.lsapi.services.LanguageServer;
 
 import com.google.inject.Inject;
@@ -14,6 +15,9 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DidChangeTextDocumentP
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.ReferenceParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
@@ -44,13 +48,13 @@ public class TextDocumentServiceImpl {
     public TextDocumentServiceImpl(LanguageServerRegistry languageServerRegistry) {
         this.languageServerRegistry = languageServerRegistry;
     }
-    
+
     static String prefixURI(String relativePath) {
         return FILE_PROJECTS + relativePath;
     }
 
     static String removePrefixUri(String uri) {
-        if(uri.startsWith(FILE_PROJECTS)){
+        if (uri.startsWith(FILE_PROJECTS)) {
             return uri.substring(FILE_PROJECTS.length());
         }
         return uri;
@@ -60,12 +64,13 @@ public class TextDocumentServiceImpl {
     @Path("completion")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams) throws InterruptedException, ExecutionException {
+    public List<? extends CompletionItem> completion(TextDocumentPositionParamsDTO textDocumentPositionParams)
+            throws InterruptedException, ExecutionException {
         textDocumentPositionParams.getTextDocument().setUri(prefixURI(textDocumentPositionParams.getTextDocument().getUri()));
         textDocumentPositionParams.setUri(prefixURI(textDocumentPositionParams.getUri()));
         LanguageServer server = getServer(textDocumentPositionParams.getTextDocument().getUri());
         if (server == null) {
-        	return emptyList();
+            return emptyList();
         }
         List<? extends CompletionItem> completion = server.getTextDocumentService()
                                                           .completion(textDocumentPositionParams).get().getItems();
@@ -109,7 +114,6 @@ public class TextDocumentServiceImpl {
     }
 
 
-
     @POST
     @Path("definition")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -139,9 +143,51 @@ public class TextDocumentServiceImpl {
     public CompletionItem resolveCompletionItem(CompletionItemDTO unresolved) throws InterruptedException, ExecutionException {
         LanguageServer server = getServer(unresolved.getTextDocumentIdentifier().getUri());
         if (server != null)
-        	return server.getTextDocumentService().resolveCompletionItem(unresolved).get();
+            return server.getTextDocumentService().resolveCompletionItem(unresolved).get();
         else
-        	return unresolved;
+            return unresolved;
+    }
+
+    @POST
+    @Path("formatting")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<? extends TextEdit> formatting(DocumentFormattingParamsDTO params) throws InterruptedException, ExecutionException {
+        params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
+        LanguageServer server = getServer(params.getTextDocument().getUri());
+        if (server == null) {
+            return emptyList();
+        }
+        return server.getTextDocumentService().formatting(params).get();
+
+    }
+
+    @POST
+    @Path("rangeFormatting")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<? extends TextEdit> rangeFormatting(DocumentRangeFormattingParamsDTO params) throws InterruptedException, ExecutionException {
+        params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
+        LanguageServer server = getServer(params.getTextDocument().getUri());
+        if (server == null) {
+            return emptyList();
+        }
+        return server.getTextDocumentService().rangeFormatting(params).get();
+
+    }
+
+    @POST
+    @Path("onTypeFormatting")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<? extends TextEdit> onTypeFormatting(DocumentOnTypeFormattingParamsDTO params) throws InterruptedException, ExecutionException {
+        params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
+        LanguageServer server = getServer(params.getTextDocument().getUri());
+        if (server == null) {
+            return emptyList();
+        }
+        return server.getTextDocumentService().onTypeFormatting(params).get();
+
     }
 
     @POST
@@ -152,7 +198,7 @@ public class TextDocumentServiceImpl {
         change.setUri(prefixURI(change.getUri()));
         LanguageServer server = getServer(change.getTextDocument().getUri());
         if (server != null)
-        	server.getTextDocumentService().didChange(change);
+            server.getTextDocumentService().didChange(change);
     }
 
     @POST
@@ -163,7 +209,7 @@ public class TextDocumentServiceImpl {
         openEvent.setUri(prefixURI(openEvent.getUri()));
         LanguageServer server = getServer(openEvent.getTextDocument().getUri());
         if (server != null)
-        	server.getTextDocumentService().didOpen(openEvent);
+            server.getTextDocumentService().didOpen(openEvent);
     }
 
     @POST
@@ -173,7 +219,7 @@ public class TextDocumentServiceImpl {
         closeEvent.getTextDocument().setUri(prefixURI(closeEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(closeEvent.getTextDocument().getUri());
         if (server != null)
-        	server.getTextDocumentService().didClose(closeEvent);
+            server.getTextDocumentService().didClose(closeEvent);
     }
 
     @POST
@@ -183,7 +229,7 @@ public class TextDocumentServiceImpl {
         saveEvent.getTextDocument().setUri(prefixURI(saveEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(saveEvent.getTextDocument().getUri());
         if (server != null)
-        	server.getTextDocumentService().didSave(saveEvent);
+            server.getTextDocumentService().didSave(saveEvent);
     }
 
     private LanguageServer getServer(String uri) {

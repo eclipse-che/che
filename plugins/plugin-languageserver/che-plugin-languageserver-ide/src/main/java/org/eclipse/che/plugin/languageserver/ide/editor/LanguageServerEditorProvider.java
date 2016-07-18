@@ -1,11 +1,11 @@
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import javax.inject.Inject;
+import com.google.inject.Provider;
 
 import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 
-import com.google.inject.Provider;
+import javax.inject.Inject;
 
 public class LanguageServerEditorProvider extends AbstractTextEditorProvider {
 
