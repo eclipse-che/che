@@ -42,8 +42,8 @@ import static javax.persistence.CascadeType.ALL;
                         name = "Recipe.search",
                         query = "SELECT DISTINCT rec FROM Recipe rec " +
                                 "WHERE (EXISTS (SELECT publicAction FROM rec.publicActions publicAction WHERE publicAction = 'search') " +
-                                "   OR (EXISTS (SELECT userAction FROM rec.acl acl, acl.actions userAction WHERE userAction = 'search' " +
-                                "                                                                            AND acl.user =:user))) " +
+                                "           OR (EXISTS (SELECT userAction FROM rec.acl acl, acl.actions userAction " +
+                                "                       WHERE userAction = 'search' AND acl.user =:user))) " +
                                 "  AND (:recipeType IS NULL OR rec.type = :recipeType) " +
                                 "  AND (:requiredCount = 0 OR :requiredCount = (SELECT COUNT(tag) " +
                                 "                                               FROM Recipe recipe JOIN recipe.tags tag " +
@@ -72,10 +72,6 @@ public class RecipeImpl implements ManagedRecipe {
     private String description;
 
     @OneToMany(cascade = ALL, orphanRemoval = true)
-    @JoinTable(name = "recipe_user_acl",
-               inverseJoinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "user"),
-                                     @JoinColumn(name = "acl_id", referencedColumnName = "id")},
-               joinColumns = @JoinColumn(name = "recipe_id", referencedColumnName = "id"))
     private List<AclEntryImpl> acl;
 
     @ElementCollection
