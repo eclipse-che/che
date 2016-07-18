@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.action;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -19,23 +20,24 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.client.project.classpath.service.ClasspathServiceClient;
-import org.eclipse.che.ide.ext.java.client.project.node.SourceFolderNode;
+import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FolderReferenceNode;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -49,7 +51,6 @@ public class UnmarkDirAsSourceAction extends AbstractPerspectiveAction {
     private final ClasspathServiceClient   classpathService;
     private final ClasspathResolver        classpathResolver;
     private final NotificationManager      notificationManager;
-    private final ProjectExplorerPresenter projectExplorer;
 
     @Inject
     public UnmarkDirAsSourceAction(JavaResources javaResources,
@@ -57,7 +58,6 @@ public class UnmarkDirAsSourceAction extends AbstractPerspectiveAction {
                                    ClasspathServiceClient classpathService,
                                    ClasspathResolver classpathResolver,
                                    NotificationManager notificationManager,
-                                   ProjectExplorerPresenter projectExplorerPresenter,
                                    JavaLocalizationConstant locale) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
               locale.unmarkDirectoryAsSourceAction(),
@@ -69,39 +69,23 @@ public class UnmarkDirAsSourceAction extends AbstractPerspectiveAction {
         this.classpathService = classpathService;
         this.classpathResolver = classpathResolver;
         this.notificationManager = notificationManager;
-        this.projectExplorer = projectExplorerPresenter;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
-            return;
-        }
+        final Resource resource = appContext.getResource();
 
-        FolderReferenceNode folder = (FolderReferenceNode)(projectExplorer.getSelection().getHeadElement());
+        checkState(resource instanceof Container, "Parent should be a container");
 
-        updateClasspath(currentProject, folder);
-    }
+        final Optional<Project> project = resource.getRelatedProject();
 
-    @Override
-    public void updateInPerspective(ActionEvent e) {
-        Selection<?> selection = projectExplorer.getSelection();
-        if (selection == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
-        }
+        checkState(project.isPresent());
 
-        e.getPresentation().setVisible(selection.getHeadElement() instanceof SourceFolderNode);
-        e.getPresentation().setEnabled(selection.isSingleSelection());
-    }
-
-    private void updateClasspath(final CurrentProject currentProject, final FolderReferenceNode folder) {
-        classpathService.getClasspath(currentProject.getProjectConfig().getPath()).then(new Operation<List<ClasspathEntryDto>>() {
+        classpathService.getClasspath(project.get().getLocation().toString()).then(new Operation<List<ClasspathEntryDto>>() {
             @Override
             public void apply(List<ClasspathEntryDto> arg) throws OperationException {
                 classpathResolver.resolveClasspathEntries(arg);
-                classpathResolver.getSources().remove(folder.getStorablePath());
+                classpathResolver.getSources().remove(resource.getLocation().toString());
                 classpathResolver.updateClasspath();
             }
         }).catchError(new Operation<PromiseError>() {
@@ -110,5 +94,13 @@ public class UnmarkDirAsSourceAction extends AbstractPerspectiveAction {
                 notificationManager.notify("Can't get classpath", arg.getMessage(), FAIL, EMERGE_MODE);
             }
         });
+    }
+
+    @Override
+    public void updateInPerspective(ActionEvent e) {
+        final Resource[] resources = appContext.getResources();
+        final boolean inJavaProject = resources != null && resources.length == 1 && isJavaProject(resources[0].getRelatedProject().get());
+
+        e.getPresentation().setEnabledAndVisible(inJavaProject && resources[0].getMarker(SourceFolderMarker.ID).isPresent());
     }
 }

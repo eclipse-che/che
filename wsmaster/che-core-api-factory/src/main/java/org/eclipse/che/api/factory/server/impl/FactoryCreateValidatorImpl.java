@@ -15,7 +15,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.shared.dto.Factory;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 
 import javax.inject.Inject;

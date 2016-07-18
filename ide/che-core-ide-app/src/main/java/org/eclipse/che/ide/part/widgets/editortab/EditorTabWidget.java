@@ -36,12 +36,22 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
+import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.part.editor.EditorTabContextMenuFactory;
+import org.eclipse.che.ide.resource.Path;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
+
+import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 /**
  * Editor tab widget. Contains icon, title and close mark.
@@ -52,7 +62,7 @@ import javax.validation.constraints.NotNull;
  * @author Vitaliy Guliy
  * @author Vlad Zhukovskyi
  */
-public class EditorTabWidget extends Composite implements EditorTab, ContextMenuHandler {
+public class EditorTabWidget extends Composite implements EditorTab, ContextMenuHandler, ResourceChangedHandler {
 
     interface EditorTabWidgetUiBinder extends UiBinder<Widget, EditorTabWidget> {
     }
@@ -73,9 +83,9 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
 
     private final EventBus                    eventBus;
     private final EditorTabContextMenuFactory editorTabContextMenu;
-    private final VirtualFile                 file;
     private final FileTypeRegistry            fileTypeRegistry;
 
+    private VirtualFile    file;
     private ActionDelegate delegate;
     private boolean        pinned;
     private SVGResource    icon;
@@ -104,6 +114,8 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         addDomHandler(this, ClickEvent.getType());
         addDomHandler(this, DoubleClickEvent.getType());
         addDomHandler(this, ContextMenuEvent.getType());
+
+        eventBus.addHandler(ResourceChangedEvent.getType(), this);
 
         closeButton.addDomHandler(new ClickHandler() {
             @Override
@@ -259,5 +271,36 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     @Override
     public boolean isPinned() {
         return pinned;
+    }
+
+    @Override
+    public void onResourceChanged(ResourceChangedEvent event) {
+        final ResourceDelta delta = event.getDelta();
+
+        if (delta.getKind() == ADDED) {
+            if (!delta.getResource().isFile() || (delta.getFlags() & (MOVED_FROM | MOVED_TO)) == 0) {
+                return;
+            }
+
+            final Resource resource = delta.getResource();
+            final Path movedFrom = delta.getFromPath();
+
+            if (file.getLocation().equals(movedFrom)) {
+                file = (VirtualFile)resource;
+                title.setText(file.getDisplayName());
+            }
+        } else if (delta.getKind() == UPDATED) {
+            if (!delta.getResource().isFile()) {
+                return;
+            }
+
+            final Resource resource = delta.getResource();
+
+            if (file.getLocation().equals(resource.getLocation())) {
+                file = (VirtualFile)resource;
+
+                title.setText(file.getDisplayName());
+            }
+        }
     }
 }

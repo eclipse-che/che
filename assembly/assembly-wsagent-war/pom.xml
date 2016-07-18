@@ -181,10 +181,6 @@
             <artifactId>che-plugin-svn-ext-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-svn-ext-shared</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.everrest</groupId>
             <artifactId>everrest-core</artifactId>
         </dependency>

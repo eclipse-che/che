@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.property.PropertyEditorPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn [propset|propdel]" command.
@@ -29,13 +28,11 @@ public class PropertiesAction extends SubversionAction {
     private PropertyEditorPresenter presenter;
 
     @Inject
-    public PropertiesAction(final AppContext appContext,
-                            final ProjectExplorerPresenter projectExplorerPresenter,
-                            final SubversionExtensionLocalizationConstants constants,
-                            final SubversionExtensionResources resources,
-                            final PropertyEditorPresenter presenter) {
-        super(constants.propertiesTitle(), constants.propertiesDescription(), resources.properties(),
-              appContext, constants, resources, projectExplorerPresenter);
+    public PropertiesAction(AppContext appContext,
+                            SubversionExtensionLocalizationConstants constants,
+                            SubversionExtensionResources resources,
+                            PropertyEditorPresenter presenter) {
+        super(constants.propertiesTitle(), constants.propertiesDescription(), resources.properties(), appContext, constants, resources);
         this.presenter = presenter;
     }
 
@@ -43,11 +40,5 @@ public class PropertiesAction extends SubversionAction {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         presenter.showEditor();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected boolean isSelectionRequired() {
-        return true;
     }
 }

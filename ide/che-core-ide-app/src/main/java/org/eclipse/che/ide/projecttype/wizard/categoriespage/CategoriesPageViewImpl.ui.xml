@@ -21,8 +21,14 @@
             margin-right: 6px;
         }
 
-        .textBoxWidth {
-            width: 393px;
+        .selectPathButton {
+            position: relative;
+            top: 32px;
+            right: -334px;
+            min-width: 10px;
+            padding: 0px 6px 0px 6px;
+            line-height: 0px;
+            margin: 0px 0px 0px 0px;
         }
     </ui:style>
 
@@ -31,14 +37,17 @@
             <g:DockLayoutPanel unit="PCT">
                 <g:east size="53">
                     <g:FlowPanel addStyleNames="{style.rootDirPanel}">
-                        <g:FlowPanel addStyleNames="{style.rootDirPanel}">
-                            <g:Label text="{locale.projectRoot}" addStyleNames="{styles.labelTitle}"/>
-                            <g:TextBox ui:field="parentDirectory" addStyleNames="{style.textBoxWidth}"/>
-                        </g:FlowPanel>
                         <g:FlowPanel height="32px" addStyleNames="{styles.namePanel}">
                             <g:Label ui:field="projectType"
                                      addStyleNames="{styles.labelTitle}"/>
                         </g:FlowPanel>
+                        <g:FlowPanel height="65px" addStyleNames="{styles.namePanel}">
+                            <g:Label text="Parent:"
+                                     addStyleNames="{styles.labelPosition}"/>
+                            <g:Label ui:field="parentPath" addStyleNames="{styles.inputFieldPosition}"/>
+                            <g:Button ui:field="selectPath" text="…" addStyleNames="{style.selectPathButton}"/>
+                        </g:FlowPanel>
+
                         <g:FlowPanel height="65px" addStyleNames="{styles.namePanel}">
                             <g:Label text="{locale.createProjectFromTemplateName}"
                                      addStyleNames="{styles.labelPosition}"/>

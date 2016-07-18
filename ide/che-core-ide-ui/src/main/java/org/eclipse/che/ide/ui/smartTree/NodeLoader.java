@@ -30,11 +30,11 @@ import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.event.BeforeLoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.CancellableEvent;
-import org.eclipse.che.ide.ui.smartTree.handler.GroupingHandlerRegistration;
 import org.eclipse.che.ide.ui.smartTree.event.LoadEvent;
 import org.eclipse.che.ide.ui.smartTree.event.LoadExceptionEvent;
 import org.eclipse.che.ide.ui.smartTree.event.LoaderHandler;
 import org.eclipse.che.ide.ui.smartTree.event.PostLoadEvent;
+import org.eclipse.che.ide.ui.smartTree.handler.GroupingHandlerRegistration;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
@@ -46,6 +46,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Class that perform loading node children. May transform nodes if ones passed set of node interceptors.
@@ -129,16 +131,11 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
             }
 
             //Iterate on nested descendants to make additional load request
-            if (event.isReloadExpandedChild()) {
-                Iterable<Node> filter = Iterables.filter(tree.getNodeStorage().getChildren(parent), new Predicate<Node>() {
-                    @Override
-                    public boolean apply(@Nullable Node input) {
-                        return tree.isExpanded(input);
+            if (childRequested.remove(parent)) {
+                for (Node node : tree.getNodeStorage().getChildren(parent)) {
+                    if (tree.isExpanded(node)) {
+                        loadChildren(node, true);
                     }
-                });
-
-                for (Node node : filter) {
-                    loadChildren(node, event.isReloadExpandedChild());
                 }
             }
 
@@ -147,12 +144,17 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
 
         @Override
         public void onLoadException(LoadExceptionEvent event) {
-            NodeDescriptor requested = tree.getNodeDescriptor(event.getRequestedNode());
+            final Node node = event.getRequestedNode();
+
+            checkNotNull(node, "Null node occurred");
+
+            final NodeDescriptor requested = tree.getNodeDescriptor(node);
 
             if (requested == null) {
                 return;
             }
 
+            tree.getView().onLoadChange(requested, false);
             requested.setLoading(false);
         }
 
@@ -179,8 +181,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
             @Override
             public boolean apply(Node loadedChild) {
                 for (NodeDescriptor nodeDescriptor : existed) {
-                    if (nodeDescriptor.getNode().getName().equals(loadedChild.getName())
-                        && nodeDescriptor.getNode().getClass().equals(loadedChild.getClass())) {
+                    if (nodeDescriptor.getNode().equals(loadedChild)) {
                         return false;
                     }
                 }
@@ -203,8 +204,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
             public boolean apply(NodeDescriptor existedChild) {
                 boolean found = false;
                 for (Node loadedChild : loadedChildren) {
-                    if (loadedChild.getName().equals(existedChild.getNode().getName())
-                        && loadedChild.getClass().equals(existedChild.getNode().getClass())) {
+                    if (existedChild.getNode().equals(loadedChild)) {
                         found = true;
                     }
                 }
@@ -294,7 +294,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
         }
 
         childRequested.put(parent, reloadExpandedChild);
-        return _load(parent);
+        return doLoad(parent);
     }
 
     /**
@@ -324,8 +324,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *         parent node, children which have been loaded
      */
     private void onLoadSuccess(@NotNull final Node parent, List<Node> children) {
-        boolean reloadExpandedChild = childRequested.remove(parent);
-        fireEvent(new LoadEvent(parent, children, reloadExpandedChild));
+        fireEvent(new LoadEvent(parent, children));
     }
 
     /**
@@ -336,7 +335,7 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
      *         parent node
      * @return true if load was requested, otherwise false
      */
-    private boolean _load(@NotNull final Node parent) {
+    private boolean doLoad(@NotNull final Node parent) {
         if (fireEvent(new BeforeLoadEvent(parent))) {
             lastRequest = parent;
 
@@ -514,5 +513,9 @@ public class NodeLoader implements LoaderHandler.HasLoaderHandlers {
             handlerRegistration.add(addLoadHandler(cTreeNodeLoaderHandler));
             handlerRegistration.add(addLoadExceptionHandler(cTreeNodeLoaderHandler));
         }
+    }
+
+    public boolean isBusy() {
+        return !childRequested.isEmpty();
     }
 }

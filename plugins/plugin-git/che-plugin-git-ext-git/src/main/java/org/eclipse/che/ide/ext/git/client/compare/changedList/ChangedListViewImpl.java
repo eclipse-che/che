@@ -23,26 +23,22 @@ import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.FontAwesome;
-import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
-import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.SelectionModel;
+import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.compare.NameComparator;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.window.Window;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -94,18 +90,8 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
         this.setTitle(locale.changeListTitle());
         this.setWidget(widget);
 
-        NodeStorage nodeStorage = new NodeStorage(new NodeUniqueKeyProvider() {
-            @NotNull
-            @Override
-            public String getKey(@NotNull Node item) {
-                if (item instanceof HasStorablePath) {
-                    return ((HasStorablePath)item).getStorablePath();
-                } else {
-                    return String.valueOf(item.hashCode());
-                }
-            }
-        });
-        NodeLoader nodeLoader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
+        NodeStorage nodeStorage = new NodeStorage();
+        NodeLoader nodeLoader = new NodeLoader();
         tree = new Tree(nodeStorage, nodeLoader);
         tree.getSelectionModel().setSelectionMode(SelectionModel.Mode.SINGLE);
         tree.getSelectionModel().addSelectionChangedHandler(new SelectionChangedEvent.SelectionChangedHandler() {

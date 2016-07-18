@@ -97,8 +97,6 @@ import static org.eclipse.che.ide.util.dom.Elements.disableTextSelection;
  * Following snippet displays how to initialize tree widget:
  * <pre>
  *     NodeUniqueKeyProvider idProvider = new NodeUniqueKeyProvider() {
- *         @NotNull
- *         @Override
  *         public String getKey(@NotNull Node item) {
  *             return String.valueOf(item.hashCode());
  *         }
@@ -274,6 +272,8 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
     private GroupingHandlerRegistration storeHandlers;
 
     private boolean focusConstrainScheduled = false;
+
+    private boolean focused = false;
 
     @UiConstructor
     public Tree(NodeStorage nodeStorage, NodeLoader nodeLoader) {
@@ -762,7 +762,6 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
             Map<String, NodeDescriptor> nodeMap = getNodeStorage().getNodeMap();
             for (NodeDescriptor nodeDescriptor : nodeMap.values()) {
                 nodeDescriptor.clearElements();
-                nodeDescriptor.reset();
             }
 
             nodesByDom.clear();
@@ -860,7 +859,6 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
 
         ((HasPresentation) node).getPresentation(true); //update presentation
         Element el = getPresentationRenderer().render(node, nodeDescriptor.getDomId(), getJoint(node), nodeStorage.getDepth(node) - 1);
-
         view.onElementChanged(nodeDescriptor, el);
     }
 
@@ -1039,6 +1037,8 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
                                 Element html = renderNode(visible.get(i), nodeStorage.getDepth(parent));
                                 Element rootContainer = view.getRootContainer(getNodeDescriptor(visible.get(i)));
                                 rootContainer.replaceChild(rootContainer.getFirstChildElement(), html);
+                            } else {
+                                refresh(visible.get(i));
                             }
                         }
                     }
@@ -1240,14 +1240,21 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
             nodeDescriptor.setExpanded(false);
             view.collapse(nodeDescriptor);
 
-            update();
-
             fireEvent(new CollapseNodeEvent(node));
         }
 
-        if (deep) {
-            setExpandChildren(node, false);
+        nodeDescriptor.setLoaded(false);
+
+        for (Node toRemove : nodeStorage.getAllChildren(node)) {
+            nodeStorage.remove(toRemove);
         }
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                update();
+            }
+        });
     }
 
     private String register(Node node) {
@@ -1333,8 +1340,14 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
 
     private void findChildren(Node parent, List<Node> list, boolean onlyVisible) {
         for (Node child : nodeStorage.getChildren(parent)) {
+            final NodeDescriptor descriptor = getNodeDescriptor(child);
+            if (descriptor == null) {
+                continue;
+            }
+
             list.add(child);
-            if (!onlyVisible || getNodeDescriptor(child).isExpanded()) {
+
+            if (!onlyVisible || descriptor.isExpanded()) {
                 findChildren(child, list, onlyVisible);
             }
         }
@@ -1401,6 +1414,10 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
             }
             update();
 
+            if (selectionModel.getSelectedNodes().isEmpty() && autoSelect) {
+                selectionModel.select(event.getNodes().get(0), false);
+            }
+
             fireEvent(new NodeAddedEvent(event.getNodes()));
         }
 
@@ -1434,12 +1451,13 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
             if (parent != null) {
                 NodeDescriptor descriptor = getNodeDescriptor(parent);
                 if (descriptor != null && descriptor.isExpanded() && nodeStorage.getChildCount(descriptor.getNode()) == 0) {
-                    setExpanded(descriptor.getNode(), false);
+                    if (fireCancellableEvent(new BeforeCollapseNodeEvent(parent))) {
+                        descriptor.setExpanded(false);
+                        view.onJointChange(descriptor, Joint.COLLAPSED);
+                        fireEvent(new CollapseNodeEvent(parent));
+                    }
                 }
                 moveFocus(nodeDescriptor.getRootContainer());
-                if (autoSelect) {
-                    selectionModel.select(parent, true);
-                }
             }
         }
 
@@ -1473,6 +1491,7 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
+                getSelectionModel().fireSelectionChange();
                 if (contextMenuInvocationHandler != null && disableNativeContextMenu) {
                     contextMenuInvocationHandler.onInvokeContextMenu(x, y);
                 }
@@ -1482,10 +1501,12 @@ public class Tree extends FocusWidget implements HasBeforeExpandNodeHandlers,
 
     private void onFocus(Event event) {
         fireEvent(new FocusEvent());
+        focused = true;
     }
 
     private void onBlur(Event event) {
         fireEvent(new BlurEvent());
+        focused = false;
     }
 
     private void onScroll(Event event) {

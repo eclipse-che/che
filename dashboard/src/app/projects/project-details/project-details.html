@@ -1,16 +1,18 @@
 <che-toolbar che-title="{{projectDetailsController.projectName}}"
              che-title-icons-controller="projectDetailsController"
              che-button-name="Open"
-             che-button-href="#/ide/{{projectDetailsController.getWorkspaceName(projectDetailsController.workspaceId)}}"
+             che-button-href="#/ide/{{projectDetailsController.namespace}}/{{projectDetailsController.workspaceName}}"
              che-breadcrumb-title="All projects"
-             che-breadcrumb-href="#/projects"
+             che-breadcrumb-href="#/workspace/{{projectDetailsController.namespace}}/{{projectDetailsController.workspaceName}}"
              che-subheader-icon="chefont cheico-type-{{projectDetailsController.projectDetails.type}} cheico-type-blank"
              che-subheader-title="{{projectDetailsController.projectDetails.type}}">
 </che-toolbar>
 <md-progress-linear md-mode="indeterminate" ng-show="projectDetailsController.loading"></md-progress-linear>
 
 <md-content md-scroll-y flex class="projects-details-project"
-            ng-show="projectDetailsController.projectDetails" md-theme="maincontent-theme">
+            ng-show="projectDetailsController.projectDetails"
+            ng-if="projectDetailsController.getWorkspaceStatus() === 'RUNNING' || projectDetailsController.getWorkspaceStatus() === 'STARTING'"
+            md-theme="maincontent-theme">
   <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="selectedIndex" class="project-details-menu">
     <md-tab>
       <md-tab-label>
@@ -52,7 +54,7 @@
         </che-panel>
         <che-panel che-title="Workspace">
           <div layout="column" flex layout-align="space-around start">
-            <che-label che-label-text="{{projectDetailsController.getWorkspaceName(projectDetailsController.workspaceId)}}"></che-label>
+            <che-label che-label-text="{{projectDetailsController.workspaceName}}"></che-label>
           </div>
         </che-panel>
         <che-panel che-title="Delete Project">
@@ -106,13 +108,12 @@
   {{projectDetailsController.invalidProject}}
 </md-content>
 
-
 <md-content md-scroll-y flex class="projects-details-project"
-            ng-show="projectDetailsController.noWorkspaceRuntime" layout="column" layout-align="center center" md-theme="maincontent-theme">
+            ng-show="(projectDetailsController.getWorkspaceStatus() !== 'RUNNING')" layout="column" layout-align="center center" md-theme="maincontent-theme">
     <che-empty-state che-value="This project's workspace is not currently running."
                      che-icon-class="fa fa-folder-open"></che-empty-state>
 
-  <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsController.workspaceId}}" che-link-text="Start workspace"></che-link>
+  <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsController.namespace}}/{{projectDetailsController.workspaceName}}" che-link-text="Start workspace"></che-link>
 
 </md-content>
 

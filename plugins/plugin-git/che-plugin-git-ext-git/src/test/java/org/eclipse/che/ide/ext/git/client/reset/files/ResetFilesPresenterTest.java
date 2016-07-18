@@ -10,28 +10,24 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.git.client.reset.files;
 
-import com.googlecode.gwt.test.utils.GwtReflectionUtils;
-
 import org.eclipse.che.api.git.shared.IndexFile;
 import org.eclipse.che.api.git.shared.ResetRequest;
 import org.eclipse.che.api.git.shared.Status;
+import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
+import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -42,26 +38,38 @@ import static org.mockito.Mockito.when;
  * Testing {@link ResetFilesPresenter} functionality.
  *
  * @author Andrey Plotnikov
+ * @author Vlad Zhukovskyi
  */
 public class ResetFilesPresenterTest extends BaseTest {
     @Mock
-    private ResetFilesView      view;
+    private ResetFilesView view;
+    @Mock
+    private IndexFile      indexFile;
+
     private ResetFilesPresenter presenter;
 
     @Override
     public void disarm() {
         super.disarm();
+
         presenter = new ResetFilesPresenter(view,
                                             service,
                                             appContext,
                                             constant,
                                             notificationManager,
                                             dtoFactory,
-                                            dtoUnmarshallerFactory,
                                             dialogFactory,
                                             gitOutputConsoleFactory,
                                             consolesPanelPresenter);
-        when(dtoFactory.createDto(IndexFile.class)).thenReturn(mock(IndexFile.class));
+
+        when(dtoFactory.createDto(IndexFile.class)).thenReturn(indexFile);
+        when(indexFile.withIndexed(anyBoolean())).thenReturn(indexFile);
+        when(indexFile.withPath(anyString())).thenReturn(indexFile);
+        when(indexFile.getPath()).thenReturn("foo");
+
+        when(service.getStatus(anyObject(), any(Path.class))).thenReturn(statusPromise);
+        when(statusPromise.then(any(Operation.class))).thenReturn(statusPromise);
+        when(statusPromise.catchError(any(Operation.class))).thenReturn(statusPromise);
     }
 
     @Test
@@ -73,22 +81,12 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(status.getChanged()).thenReturn(changes);
         when(status.getRemoved()).thenReturn(changes);
 
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Status> callback = (AsyncRequestCallback<Status>)arguments[1];
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, status);
-                return callback;
-            }
-        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        presenter.showDialog(project);
 
-        presenter.showDialog();
+        verify(statusPromise).then(statusPromiseCaptor.capture());
+        statusPromiseCaptor.getValue().apply(status);
 
-        verify(appContext).getCurrentProject();
-        verify(service).status(eq(devMachine), eq(rootProjectConfig), (AsyncRequestCallback<Status>)anyObject());
-        verify(view).setIndexedFiles((List<IndexFile>)anyObject());
+        verify(view).setIndexedFiles(anyObject());
         verify(view).showDialog();
     }
 
@@ -97,55 +95,32 @@ public class ResetFilesPresenterTest extends BaseTest {
         MessageDialog messageDialog = mock(MessageDialog.class);
         when(constant.messagesWarningTitle()).thenReturn("Warning");
         when(constant.indexIsEmpty()).thenReturn("Index is Empty");
-        when(dialogFactory.createMessageDialog(anyString(), anyString(), (ConfirmCallback)anyObject()))
-                .thenReturn(messageDialog);
+        when(dialogFactory.createMessageDialog(anyString(), anyString(), anyObject())).thenReturn(messageDialog);
         final Status status = mock(Status.class);
         List<String> changes = new ArrayList<>();
         when(status.getAdded()).thenReturn(changes);
         when(status.getChanged()).thenReturn(changes);
         when(status.getRemoved()).thenReturn(changes);
 
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Status> callback = (AsyncRequestCallback<Status>)arguments[1];
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, status);
-                return callback;
-            }
-        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        presenter.showDialog(project);
 
-        presenter.showDialog();
+        verify(statusPromise).then(statusPromiseCaptor.capture());
+        statusPromiseCaptor.getValue().apply(status);
 
-        verify(appContext).getCurrentProject();
-        verify(service).status(eq(devMachine), eq(rootProjectConfig), (AsyncRequestCallback<Status>)anyObject());
-        verify(dialogFactory).createMessageDialog(eq("Warning"), eq("Index is Empty"),
-                                                  (ConfirmCallback)anyObject());
-        verify(view, never()).setIndexedFiles((List<IndexFile>)anyObject());
+        verify(dialogFactory).createMessageDialog(eq("Warning"), eq("Index is Empty"), anyObject());
+        verify(view, never()).setIndexedFiles(anyObject());
         verify(view, never()).showDialog();
     }
 
     @Test
     public void testShowDialogWhenStatusRequestIsFailed() throws Exception {
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Status> callback = (AsyncRequestCallback<Status>)arguments[1];
-                Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
-                onFailure.invoke(callback, mock(Throwable.class));
-                return callback;
-            }
-        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        presenter.showDialog(project);
 
-        presenter.showDialog();
+        verify(statusPromise).catchError(promiseErrorCaptor.capture());
+        promiseErrorCaptor.getValue().apply(promiseError);
 
-        verify(appContext).getCurrentProject();
-        verify(service).status(eq(devMachine), eq(rootProjectConfig), (AsyncRequestCallback<Status>)anyObject());
         verify(console).printError(anyString());
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
-        verify(constant).statusFailed();
+        verify(notificationManager).notify(anyString());
     }
 
     @Test
@@ -158,31 +133,23 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(constant.indexIsEmpty()).thenReturn("Index is Empty");
         when(dialogFactory.createMessageDialog(constant.messagesWarningTitle(), constant.indexIsEmpty(), null)).thenReturn(messageDialog);
         when(indexFile.isIndexed()).thenReturn(true);
+        when(indexFile.withIndexed(anyBoolean())).thenReturn(indexFile);
+        when(indexFile.withPath(anyString())).thenReturn(indexFile);
         List<String> changes = new ArrayList<String>();
         changes.add("Change");
         when(status.getAdded()).thenReturn(changes);
         when(status.getChanged()).thenReturn(changes);
         when(status.getRemoved()).thenReturn(changes);
 
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Status> callback = (AsyncRequestCallback<Status>)arguments[1];
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, status);
-                return callback;
-            }
-        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
+        presenter.showDialog(project);
 
-        presenter.showDialog();
+        verify(statusPromise).then(statusPromiseCaptor.capture());
+        statusPromiseCaptor.getValue().apply(status);
+
         presenter.onResetClicked();
 
         verify(view).close();
-        verify(service, never()).reset(eq(devMachine), eq(projectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
-                                       (AsyncRequestCallback<Void>)anyObject());
         verify(console).print(anyString());
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
         verify(constant, times(2)).nothingToReset();
     }
 
@@ -195,35 +162,22 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(status.getChanged()).thenReturn(changes);
         when(status.getRemoved()).thenReturn(changes);
 
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Status> callback = (AsyncRequestCallback<Status>)arguments[1];
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, status);
-                return callback;
-            }
-        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[4];
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, (Void)null);
-                return callback;
-            }
-        }).when(service).reset(eq(devMachine), anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
-                               (AsyncRequestCallback<Void>)anyObject());
+        when(service.reset(anyObject(), any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
+        when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
+        when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
-        presenter.showDialog();
+        presenter.showDialog(project);
+
+        verify(statusPromise).then(statusPromiseCaptor.capture());
+        statusPromiseCaptor.getValue().apply(status);
+
         presenter.onResetClicked();
 
+        verify(voidPromise).then(voidPromiseCaptor.capture());
+        voidPromiseCaptor.getValue().apply(null);
+
         verify(view).close();
-        verify(service).reset(eq(devMachine), eq(rootProjectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
-                              (AsyncRequestCallback<Void>)anyObject());
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
+        verify(notificationManager).notify(anyString());
         verify(console).print(anyString());
         verify(constant, times(2)).resetFilesSuccessfully();
     }
@@ -237,36 +191,22 @@ public class ResetFilesPresenterTest extends BaseTest {
         when(status.getChanged()).thenReturn(changes);
         when(status.getRemoved()).thenReturn(changes);
 
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Status> callback = (AsyncRequestCallback<Status>)arguments[1];
-                Method onSuccess = GwtReflectionUtils.getMethod(callback.getClass(), "onSuccess");
-                onSuccess.invoke(callback, status);
-                return callback;
-            }
-        }).when(service).status(devMachine, anyObject(), (AsyncRequestCallback<Status>)anyObject());
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Object[] arguments = invocation.getArguments();
-                AsyncRequestCallback<Void> callback = (AsyncRequestCallback<Void>)arguments[4];
-                Method onFailure = GwtReflectionUtils.getMethod(callback.getClass(), "onFailure");
-                onFailure.invoke(callback, mock(Throwable.class));
-                return callback;
-            }
-        }).when(service).reset(devMachine, anyObject(), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
-                               (AsyncRequestCallback<Void>)anyObject());
+        when(service.reset(anyObject(), any(Path.class), anyString(), any(ResetRequest.ResetType.class), anyObject())).thenReturn(voidPromise);
+        when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
+        when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
 
-        presenter.showDialog();
+        presenter.showDialog(project);
+
+        verify(statusPromise).then(statusPromiseCaptor.capture());
+        statusPromiseCaptor.getValue().apply(status);
+
         presenter.onResetClicked();
 
-        verify(service).reset(eq(devMachine), eq(rootProjectConfig), anyString(), (ResetRequest.ResetType)anyObject(), (List<String>)anyObject(),
-                              (AsyncRequestCallback<Void>)anyObject());
-        verify(constant).resetFilesFailed();
+        verify(voidPromise).catchError(promiseErrorCaptor.capture());
+        promiseErrorCaptor.getValue().apply(promiseError);
+
         verify(console).printError(anyString());
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
+        verify(notificationManager).notify(anyString());
     }
 
     @Test

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.editor.recent;
 
-import org.eclipse.che.ide.project.node.FileReferenceNode;
+import org.eclipse.che.ide.api.resources.File;
 
 /**
  * Factory for the recent files action.
@@ -25,5 +25,5 @@ public interface RecentFileActionFactory {
      *         file associated with
      * @return action
      */
-    RecentFileAction newRecentFileAction(FileReferenceNode file);
+    RecentFileAction newRecentFileAction(File file);
 }

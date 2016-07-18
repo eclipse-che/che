@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.server.credentials;
 
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 
@@ -45,7 +44,7 @@ public class CurrentUserPreferencesAccessImpl implements CurrentUserPreferencesA
         content.put(key, value);
         try {
             this.preferencesDao.setPreferences(currentSubject.getUserId(), content);
-        } catch (final ServerException | NotFoundException e) {
+        } catch (final ServerException e) {
             throw new PreferencesAccessException(e);
         }
     }

@@ -152,8 +152,6 @@ public class PathTest {
     public void testShouldReturnTrueWhenTwoEqualPathHaveSameHashCode() throws Exception {
         assertTrue(Path.valueOf("/foo").hashCode() == Path.valueOf("/foo").hashCode());
         assertTrue(Path.valueOf("/foo").hashCode() == Path.valueOf("/foo/").hashCode());
-        assertFalse(Path.valueOf("/foo").hashCode() == Path.valueOf("foo/").hashCode());
-        assertFalse(Path.valueOf("/").hashCode() == Path.valueOf("").hashCode());
     }
 
     @Test

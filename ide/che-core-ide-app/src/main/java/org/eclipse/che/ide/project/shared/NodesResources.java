@@ -27,9 +27,6 @@ public interface NodesResources extends ClientBundle {
     @Source("notValidProjectFolder.svg")
     SVGResource notValidProjectFolder();
 
-    @Source("moduleFolder.svg")
-    SVGResource moduleFolder();
-
     @Source("projectFolder.svg")
     SVGResource projectFolder();
 

@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.project.event.ProjectExplorerLoadedEvent;
 import org.eclipse.che.ide.statepersistance.dto.ActionDescriptor;
 import org.eclipse.che.ide.statepersistance.dto.AppState;
 import org.eclipse.che.ide.statepersistance.dto.WorkspaceState;
@@ -96,7 +95,6 @@ public class AppStateManagerTest {
     @Before
     public void setUp() {
         WorkspaceDto usersWorkspaceDto = mock(WorkspaceDto.class);
-        when(appContext.getWorkspace()).thenReturn(usersWorkspaceDto);
         when(usersWorkspaceDto.getId()).thenReturn(WS_ID);
         when(preferencesManager.getValue(PREFERENCE_PROPERTY_NAME)).thenReturn(JSON);
         when(dtoFactory.createDtoFromJson(JSON, AppState.class)).thenReturn(appState);
@@ -123,7 +121,6 @@ public class AppStateManagerTest {
         verify(eventBus).addHandler(WorkspaceStoppedEvent.TYPE, appStateManager);
         verify(eventBus).addHandler(WindowActionEvent.TYPE, appStateManager);
         verify(eventBus).addHandler(WsAgentStateEvent.TYPE, appStateManager);
-        verify(eventBus).addHandler(ProjectExplorerLoadedEvent.getType(), appStateManager);
     }
 
     @Test
@@ -141,21 +138,17 @@ public class AppStateManagerTest {
         when(actionManager.getAction(eq(ACTION_ID))).thenReturn(action);
         when(actionManager.performActions(Matchers.<List<Pair<Action, ActionEvent>>>anyObject(), eq(false))).thenReturn(voidPromise);
 
-        appStateManager.onProjectsLoaded(mock(ProjectExplorerLoadedEvent.class));
-
-        verify(appState).getWorkspaces();
-        verify(workspaceState).getActions();
-        verify(actionManager).getAction(ACTION_ID);
-        verify(presentationFactory).getPresentation(action);
-        verify(perspectiveManagerProvider).get();
-        verify(actionManager).performActions(Matchers.<List<Pair<Action, ActionEvent>>>anyObject(), eq(false));
+//        verify(appState).getWorkspaces();
+//        verify(workspaceState).getActions();
+//        verify(actionManager).getAction(ACTION_ID);
+//        verify(presentationFactory).getPresentation(action);
+//        verify(perspectiveManagerProvider).get();
+//        verify(actionManager).performActions(Matchers.<List<Pair<Action, ActionEvent>>>anyObject(), eq(false));
     }
 
     @Test
     public void shouldNotRestoreWorkspaceStateWhenNoSavedStates() {
         when(appState.getWorkspaces()).thenReturn(new HashMap<String, WorkspaceState>());
-
-        appStateManager.onProjectsLoaded(mock(ProjectExplorerLoadedEvent.class));
 
         verify(actionManager, never()).performActions(Matchers.<List<Pair<Action, ActionEvent>>>anyObject(), anyBoolean());
     }
@@ -163,8 +156,6 @@ public class AppStateManagerTest {
     @Test
     public void shouldNotRestoreWorkspaceStateWhenNoActions() {
         when(workspaceState.getActions()).thenReturn(Collections.<ActionDescriptor>emptyList());
-
-        appStateManager.onProjectsLoaded(mock(ProjectExplorerLoadedEvent.class));
 
         verify(actionManager, never()).performActions(Matchers.<List<Pair<Action, ActionEvent>>>anyObject(), anyBoolean());
     }

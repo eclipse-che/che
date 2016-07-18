@@ -20,7 +20,7 @@ import org.eclipse.che.api.project.shared.dto.ProjectImporterDescriptor;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.user.UserServiceClient;
-import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
+import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -28,6 +28,7 @@ import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.commons.exception.UnauthorizedException;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -91,37 +92,37 @@ public class GithubImporterPagePresenterTest {
     @Mock
     private DtoFactory                      dtoFactory;
     @Mock
-    private GithubImporterPageView          view;
+    private GithubImporterPageView                    view;
     @Mock
-    private UserServiceClient               userServiceClient;
+    private UserServiceClient                         userServiceClient;
     @Mock
-    private GitHubClientService             gitHubClientService;
+    private GitHubClientService                       gitHubClientService;
     @Mock
-    private DtoUnmarshallerFactory          dtoUnmarshallerFactory;
+    private DtoUnmarshallerFactory                    dtoUnmarshallerFactory;
     @Mock
-    private NotificationManager             notificationManager;
+    private NotificationManager                       notificationManager;
     @Mock
-    private GitHubLocalizationConstant      locale;
+    private GitHubLocalizationConstant                locale;
     @Mock
-    private ProjectConfigDto                dataObject;
+    private MutableProjectConfig                      dataObject;
     @Mock
-    private SourceStorageDto                source;
+    private MutableProjectConfig.MutableSourceStorage source;
     @Mock
-    private Map<String, String>             parameters;
+    private Map<String, String>                       parameters;
     @Mock
-    private Promise<GitHubUser>             gitHubUserPromise;
+    private Promise<GitHubUser>                       gitHubUserPromise;
     @Mock
-    private Promise<List<GitHubUser>>       gitHubOrgsPromise;
+    private Promise<List<GitHubUser>>                 gitHubOrgsPromise;
     @Mock
-    private Promise<List<GitHubRepository>> gitHubReposPromise;
+    private Promise<List<GitHubRepository>>           gitHubReposPromise;
     @Mock
-    private JsArrayMixed                    jsArrayMixed;
+    private JsArrayMixed                              jsArrayMixed;
     @Mock
-    private GitHubUser                      gitHubUser;
+    private GitHubUser                                gitHubUser;
     @Mock
-    private PromiseError                    promiseError;
+    private PromiseError                              promiseError;
     @Mock
-    private Response                        response;
+    private Response                                  response;
     @Mock
     private OAuth2Authenticator             gitHubAuthenticator;
     @Mock
@@ -184,7 +185,6 @@ public class GithubImporterPagePresenterTest {
         verify(gitHubClientService).getUserInfo();
         verify(gitHubClientService).getOrganizations();
 
-        verify(notificationManager, never()).notify(anyString(), any(ProjectConfigDto.class));
         verify(view).setLoaderVisibility(eq(true));
         verify(view).setInputsEnableState(eq(false));
         verify(view).setLoaderVisibility(eq(false));
@@ -405,7 +405,7 @@ public class GithubImporterPagePresenterTest {
         presenter.onKeepDirectorySelected(true);
 
         assertEquals("directory", parameters.get("keepDir"));
-        verify(dataObject).withType("blank");
+        verify(dataObject).setType("blank");
         verify(view).highlightDirectoryNameField(eq(false));
         verify(view).focusDirectoryNameField();
     }
@@ -419,7 +419,7 @@ public class GithubImporterPagePresenterTest {
         presenter.onKeepDirectorySelected(false);
 
         assertTrue(parameters.isEmpty());
-        verify(dataObject).withType(eq(null));
+        verify(dataObject).setType(eq(null));
         verify(view).highlightDirectoryNameField(eq(false));
     }
 
@@ -456,7 +456,7 @@ public class GithubImporterPagePresenterTest {
 
         assertEquals("directory", parameters.get("keepDir"));
         verify(dataObject, never()).setPath(any());
-        verify(dataObject).withType(eq("blank"));
+        verify(dataObject).setType(eq("blank"));
         verify(view).highlightDirectoryNameField(eq(false));
     }
 
@@ -471,7 +471,7 @@ public class GithubImporterPagePresenterTest {
 
         assertTrue(parameters.isEmpty());
         verify(dataObject, never()).setPath(any());
-        verify(dataObject).withType(eq(null));
+        verify(dataObject).setType(eq(null));
         verify(view).highlightDirectoryNameField(eq(false));
     }
 
@@ -502,11 +502,11 @@ public class GithubImporterPagePresenterTest {
     public void onLoadRepoClickedWhenAuthorizeIsFailed() throws Exception {
         String userId = "userId";
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDescriptor profile = mock(ProfileDescriptor.class);
+        ProfileDto profile = mock(ProfileDto.class);
 
         when(appContext.getCurrentUser()).thenReturn(user);
         when(user.getProfile()).thenReturn(profile);
-        when(profile.getId()).thenReturn(userId);
+        when(profile.getUserId()).thenReturn(userId);
 
 
         final Throwable exception = mock(UnauthorizedException.class);
@@ -555,12 +555,12 @@ public class GithubImporterPagePresenterTest {
         final Throwable exception = mock(UnauthorizedException.class);
         String userId = "userId";
         CurrentUser user = mock(CurrentUser.class);
-        ProfileDescriptor profile = mock(ProfileDescriptor.class);
+        ProfileDto profile = mock(ProfileDto.class);
         doReturn(exception).when(promiseError).getCause();
 
         when(appContext.getCurrentUser()).thenReturn(user);
         when(user.getProfile()).thenReturn(profile);
-        when(profile.getId()).thenReturn(userId);
+        when(profile.getUserId()).thenReturn(userId);
 
         presenter.onLoadRepoClicked();
 

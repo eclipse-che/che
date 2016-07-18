@@ -10,135 +10,194 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.local.interceptor;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.name.Names;
+import com.google.inject.spi.ConstructorBinding;
+
 import org.aopalliance.intercept.MethodInvocation;
-import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.machine.server.util.RecipeDownloader;
+import org.eclipse.che.api.machine.server.util.RecipeRetriever;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.DockerImage;
-import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
-import org.eclipse.che.plugin.docker.client.Dockerfile;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
+import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
-import org.mockito.InjectMocks;
+import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
+import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
+import org.eclipse.che.plugin.docker.machine.DockerMachineModule;
+import org.eclipse.che.plugin.docker.machine.local.node.provider.LocalWorkspaceFolderPathProvider;
+import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertEquals;
 
 @Listeners(MockitoTestNGListener.class)
 public class EnableOfflineDockerMachineBuildInterceptorTest {
-    @Mock
-    private DockerConnector dockerConnector;
+    private static final String REPO  = "some/image";
+    private static final String TAG   = "tag1";
+    private static final String IMAGE = REPO + ":" + TAG;
+    private static final String MACHINE_IMAGE_NAME = "machineImageName";
 
     @Mock
-    private MethodInvocation methodInvocation;
-
-    @Mock
-    private LineConsumer lineConsumer;
-
-    @Mock
-    private Dockerfile dockerfile;
-
-    @Mock
-    private DockerImage dockerImage;
-
+    private DockerConnector                               dockerConnector;
     @Mock
     private UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
+    @Mock
+    private DockerMachineFactory                          dockerMachineFactory;
+    @Mock
+    private WorkspaceManager                              workspaceManager;
+    @Mock
+    private MethodInvocation                              methodInvocation;
+    @Mock
+    private MachineConfig                                 machineConfig;
+    @Mock
+    private ProgressMonitor                               progressMonitor;
+    @Mock
+    private RecipeRetriever                               recipeRetriever;
+    @Mock
+    private Recipe                                        recipe;
+    @Mock
+    private Supplier<Boolean>                             doForcePullOnBuildFlagProvider;
 
-    @InjectMocks
+
+    private DockerInstanceProvider                     dockerInstanceProvider;
+    private Injector                                   injector;
     private EnableOfflineDockerMachineBuildInterceptor interceptor;
 
     @BeforeMethod
-    private void setup() {
+    private void setup() throws Exception {
         when(dockerCredentials.getCredentials()).thenReturn(null);
+        when(recipeRetriever.getRecipe(any(MachineConfig.class))).thenReturn(recipe);
+        when(recipe.getScript()).thenReturn("FROM " + IMAGE);
+        when(doForcePullOnBuildFlagProvider.get()).thenReturn(true);
+
+        injector = Guice.createInjector(new TestModule());
+        dockerInstanceProvider = injector.getInstance(DockerInstanceProvider.class);
+        interceptor = injector.getInstance(EnableOfflineDockerMachineBuildInterceptor.class);
+    }
+
+    @Test
+    public void checkAllInterceptedMethodsArePresent() throws Throwable {
+        ConstructorBinding<?> interceptedBinding
+                = (ConstructorBinding<?>)injector.getBinding(EnableOfflineDockerMachineBuildInterceptor.class);
+
+        for (Method method : interceptedBinding.getMethodInterceptors().keySet()) {
+            dockerInstanceProvider.getClass().getMethod(method.getName(), method.getParameterTypes());
+        }
     }
 
     @Test
     public void shouldProceedInterceptedMethodIfForcePullIsDisabled() throws Throwable {
-        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.FALSE, 0L, 0L};
+        when(doForcePullOnBuildFlagProvider.get()).thenReturn(true);
+
+        injector = Guice.createInjector(new TestModule());
+        dockerInstanceProvider = injector.getInstance(DockerInstanceProvider.class);
+        interceptor = injector.getInstance(EnableOfflineDockerMachineBuildInterceptor.class);
+
+        final Object[] arguments = {machineConfig, MACHINE_IMAGE_NAME, false, progressMonitor};
         when(methodInvocation.getArguments()).thenReturn(arguments);
 
 
         interceptor.invoke(methodInvocation);
 
 
-        assertFalse((Boolean)arguments[3]);
         verify(methodInvocation).proceed();
+        assertEquals(methodInvocation.getArguments(), new Object[] {machineConfig, MACHINE_IMAGE_NAME, false, progressMonitor});
     }
 
     @Test
     public void shouldPullDockerImageIfForcePullIsEnabled() throws Throwable {
-        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.TRUE, 0L, 0L};
+        final Object[] arguments = {machineConfig, MACHINE_IMAGE_NAME, true, progressMonitor};
         when(methodInvocation.getArguments()).thenReturn(arguments);
-        when(dockerfile.getImages()).thenReturn(Collections.singletonList(dockerImage));
-        final String tag = "latest";
-        final String repo = "my_repo/my_image";
-        final PullParams pullParams = PullParams.create(repo)
-                                                .withTag(tag)
+        final PullParams pullParams = PullParams.create(REPO)
+                                                .withTag(TAG)
                                                 .withAuthConfigs(null);
-        when(dockerImage.getFrom()).thenReturn(repo + ":" + tag);
 
 
         interceptor.invoke(methodInvocation);
 
 
-        assertFalse((Boolean)arguments[3]);
         verify(methodInvocation).proceed();
-        verify(dockerfile).getImages();
+        assertEquals(methodInvocation.getArguments(), new Object[] {machineConfig, MACHINE_IMAGE_NAME, false, progressMonitor});
         verify(dockerConnector).pull(eq(pullParams), any(ProgressMonitor.class));
     }
 
-    @Test(dataProvider = "throwableProvider")
-    public void shouldIgnoreExceptionsOnDockerImagePullingIfForcePullIsEnabled(Throwable throwable) throws Throwable {
-        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.TRUE, 0L, 0L};
+    @Test
+    public void shouldIgnoreExceptionsOnDockerImagePulling() throws Throwable {
+        final Object[] arguments = {machineConfig, MACHINE_IMAGE_NAME, true, progressMonitor};
         when(methodInvocation.getArguments()).thenReturn(arguments);
-        when(dockerfile.getImages()).thenReturn(Collections.singletonList(dockerImage));
-        final String tag = "latest";
-        final String repo = "my_repo/my_image";
-        when(dockerImage.getFrom()).thenReturn(repo + ":" + tag);
-        doThrow(throwable).when(dockerConnector).pull(anyString(), anyString(), anyString(), any(ProgressMonitor.class));
+        doThrow(new IOException()).when(dockerConnector).pull(any(PullParams.class), any(ProgressMonitor.class));
+        final PullParams pullParams = PullParams.create(REPO)
+                                                .withTag(TAG)
+                                                .withAuthConfigs(null);
 
 
         interceptor.invoke(methodInvocation);
 
 
-        assertFalse((Boolean)arguments[3]);
         verify(methodInvocation).proceed();
+        assertEquals(methodInvocation.getArguments(), new Object[] {machineConfig, MACHINE_IMAGE_NAME, false, progressMonitor});
+        verify(dockerConnector).pull(eq(pullParams), any(ProgressMonitor.class));
     }
 
     @Test
     public void shouldPullLatestIfNoTagFoundInDockerfile() throws Throwable {
-        final Object[] arguments = {dockerfile, lineConsumer, "string", Boolean.TRUE, 0L, 0L};
+        final Object[] arguments = {machineConfig, MACHINE_IMAGE_NAME, true, progressMonitor};
         when(methodInvocation.getArguments()).thenReturn(arguments);
-        when(dockerfile.getImages()).thenReturn(Collections.singletonList(dockerImage));
-        final String repo = "my_repo/my_image";
-        when(dockerImage.getFrom()).thenReturn(repo);
+        when(recipe.getScript()).thenReturn("FROM " + REPO);
+        final PullParams pullParams = PullParams.create(REPO)
+                                                .withTag("latest")
+                                                .withAuthConfigs(null);
 
 
         interceptor.invoke(methodInvocation);
 
 
-        assertFalse((Boolean)arguments[3]);
         verify(methodInvocation).proceed();
-        verify(dockerfile).getImages();
-        verify(dockerConnector).pull(eq(PullParams.create(repo).withTag("latest")), any(ProgressMonitor.class));
+        assertEquals(methodInvocation.getArguments(), new Object[] {machineConfig, MACHINE_IMAGE_NAME, false, progressMonitor});
+        verify(dockerConnector).pull(eq(pullParams), any(ProgressMonitor.class));
     }
 
-    @DataProvider(name = "throwableProvider")
-    public static Object[][] throwableProvider() {
-        return new Object[][] {{new IOException("test_exception")},
-                               {new InterruptedException("test_exception")}};
+    private class TestModule extends AbstractModule {
+        @Override
+        protected void configure() {
+            bind(DockerInstanceProvider.class);
+            bind(DockerConnector.class).toInstance(dockerConnector);
+            bind(UserSpecificDockerRegistryCredentialsProvider.class).toInstance(dockerCredentials);
+            bind(WorkspaceFolderPathProvider.class).to(LocalWorkspaceFolderPathProvider.class);
+            bind(DockerMachineFactory.class).toInstance(dockerMachineFactory);
+            bind(WorkspaceManager.class).toInstance(workspaceManager);
+            bind(RecipeRetriever.class).toInstance(recipeRetriever);
+            bind(RecipeDownloader.class).toInstance(mock(RecipeDownloader.class));
+
+            bindConstant().annotatedWith(Names.named("machine.docker.privilege_mode")).to(false);
+            bindConstant().annotatedWith(Names.named("machine.docker.pull_image")).to(true);
+            bindConstant().annotatedWith(Names.named("machine.docker.snapshot_use_registry")).to(doForcePullOnBuildFlagProvider.get());
+            bindConstant().annotatedWith(Names.named("machine.docker.memory_swap_multiplier")).to(1.0);
+            bindConstant().annotatedWith(Names.named("che.machine.projects.internal.storage")).to("/tmp");
+            bindConstant().annotatedWith(Names.named("machine.docker.machine_extra_hosts")).to("");
+            bindConstant().annotatedWith(Names.named("host.workspaces.root")).to("/tmp");
+            install(new DockerMachineModule());
+
+            install(new AllowOfflineMachineCreationModule());
+        }
     }
 }

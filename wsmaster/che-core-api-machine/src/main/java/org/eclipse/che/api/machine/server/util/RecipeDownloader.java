@@ -77,7 +77,7 @@ public class RecipeDownloader {
             return new RecipeImpl().withType(machineConfig.getSource().getType())
                                    .withScript(IoUtil.readAndCloseQuietly(new FileInputStream(file)));
         } catch (IOException | IllegalArgumentException e) {
-            throw new MachineException(format("Can't start machine %s because machine recipe downloading failed. Recipe url %s. Error: %s",
+            throw new MachineException(format("Failed to download recipe for machine %s. Recipe url %s. Error: %s",
                                               machineConfig.getName(),
                                               location,
                                               e.getLocalizedMessage()));

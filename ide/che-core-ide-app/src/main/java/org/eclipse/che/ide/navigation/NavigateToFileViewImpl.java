@@ -29,8 +29,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.window.Window;
 
 import java.util.ArrayList;
@@ -41,6 +41,7 @@ import java.util.List;
  *
  * @author Ann Shumilova
  * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class NavigateToFileViewImpl extends Window implements NavigateToFileView {
@@ -78,7 +79,7 @@ public class NavigateToFileViewImpl extends Window implements NavigateToFileView
         files.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
             @Override
             public void onSelection(SelectionEvent<SuggestOracle.Suggestion> event) {
-                delegate.onFileSelected();
+                delegate.onFileSelected(Path.valueOf(event.getSelectedItem().getReplacementString()));
             }
         });
 
@@ -130,16 +131,6 @@ public class NavigateToFileViewImpl extends Window implements NavigateToFileView
     }
 
     @Override
-    protected void onClose() {
-        //Do nothing
-    }
-
-    @Override
-    public String getItemPath() {
-        return files.getValue();
-    }
-
-    @Override
     public void clearInput() {
         files.getValueBox().setValue("");
     }
@@ -152,22 +143,22 @@ public class NavigateToFileViewImpl extends Window implements NavigateToFileView
 
         @Override
         public void requestSuggestions(final Request request, final Callback callback) {
-            delegate.onRequestSuggestions(request.getQuery(), new AsyncCallback<List<ItemReference>>() {
+            delegate.onRequestSuggestions(request.getQuery(), new AsyncCallback<List<Path>>() {
                 @Override
-                public void onSuccess(List<ItemReference> result) {
+                public void onSuccess(List<Path> result) {
                     errLabel.setText("");
 
                     final List<SuggestOracle.Suggestion> suggestions = new ArrayList<>(result.size());
-                    for (final ItemReference item : result) {
+                    for (final Path item : result) {
                         suggestions.add(new SuggestOracle.Suggestion() {
                             @Override
                             public String getDisplayString() {
-                                return getDisplayName(item);
+                                return item.lastSegment() + " (" + item.removeLastSegments(1) + ")";
                             }
 
                             @Override
                             public String getReplacementString() {
-                                return item.getPath();
+                                return item.toString();
                             }
                         });
                     }
@@ -182,25 +173,6 @@ public class NavigateToFileViewImpl extends Window implements NavigateToFileView
                     callback.onSuggestionsReady(request, new Response(new ArrayList<Suggestion>(0)));
                 }
             });
-        }
-
-        /** Returns the formed display name of the specified path. */
-        private String getDisplayName(ItemReference item) {
-            final String path = item.getPath();
-            final String itemName = path.substring(path.lastIndexOf('/') + 1);
-            final String itemPath = path.replaceFirst("/", "");
-            String displayString = itemName + "   (" + itemPath.substring(0, itemPath.length() - itemName.length() - 1) + ")";
-
-            String[] parts = displayString.split(" ");
-            if (parts.length > 1) {
-                displayString = parts[0];
-                displayString += " <span style=\"color: #989898;\">";
-                for (int i = 1; i < parts.length; i++) {
-                    displayString += parts[i];
-                }
-                displayString += "</span>";
-            }
-            return displayString;
         }
     }
 }

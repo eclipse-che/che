@@ -19,13 +19,15 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.core.util.ValueHolder;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.spi.impl.AbstractMachineProcess;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+import org.eclipse.che.api.machine.server.spi.impl.AbstractMachineProcess;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
+import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
+import org.eclipse.che.plugin.docker.client.params.StartExecParams;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -96,14 +98,14 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
         final String[] command = {"/bin/bash", "-c", shellCommand};
         Exec exec;
         try {
-            exec = docker.createExec(container, output == null, command);
+            exec = docker.createExec(CreateExecParams.create(container, command).withDetach(output == null));
         } catch (IOException e) {
             throw new MachineException(format("Error occurs while initializing command %s in docker container %s: %s",
                                               Arrays.toString(command), container, e.getMessage()), e);
         }
         started = true;
         try {
-            docker.startExec(exec.getId(), output == null ? null : new LogMessagePrinter(output));
+            docker.startExec(StartExecParams.create(exec.getId()), output == null ? null : new LogMessagePrinter(output));
         } catch (IOException e) {
             if (output != null && e instanceof SocketTimeoutException) {
                 throw new MachineException(getErrorMessage());
@@ -122,13 +124,13 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
         final String[] command = {"/bin/bash", "-c", isAliveCmd};
         Exec exec;
         try {
-            exec = docker.createExec(container, false, command);
+            exec = docker.createExec(CreateExecParams.create(container, command).withDetach(false));
         } catch (IOException e) {
             throw new MachineException(format("Error occurs while initializing command %s in docker container %s: %s",
                                               Arrays.toString(command), container, e.getMessage()), e);
         }
         try {
-            docker.startExec(exec.getId(), new LogMessagePrinter(output));
+            docker.startExec(StartExecParams.create(exec.getId()), new LogMessagePrinter(output));
         } catch (IOException e) {
             throw new MachineException(format("Error occurs while executing command %s in docker container %s: %s",
                                               Arrays.toString(exec.getCommand()), container, e.getMessage()), e);
@@ -147,13 +149,13 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
             final String[] command = {"/bin/bash", "-c", killCmd};
             Exec exec;
             try {
-                exec = docker.createExec(container, true, command);
+                exec = docker.createExec(CreateExecParams.create(container, command).withDetach(true));
             } catch (IOException e) {
                 throw new MachineException(format("Error occurs while initializing command %s in docker container %s: %s",
                                                   Arrays.toString(command), container, e.getMessage()), e);
             }
             try {
-                docker.startExec(exec.getId(), MessageProcessor.DEV_NULL);
+                docker.startExec(StartExecParams.create(exec.getId()), MessageProcessor.DEV_NULL);
             } catch (IOException e) {
                 throw new MachineException(format("Error occurs while executing command %s in docker container %s: %s",
                                                   Arrays.toString(exec.getCommand()), container, e.getMessage()), e);
@@ -165,14 +167,15 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
         final StringBuilder errorMessage = new StringBuilder("Command output read timeout is reached.");
         try {
             // check if process is alive
-            final Exec checkProcessExec =
-                    docker.createExec(container,
-                                      false,
-                                      "/bin/bash",
-                                      "-c",
-                                      format("if kill -0 $(cat %1$s 2>/dev/null) 2>/dev/null; then cat %1$s; fi", pidFilePath));
+            final Exec checkProcessExec = docker.createExec(
+                    CreateExecParams.create(container,
+                                            new String[] {"/bin/bash",
+                                                          "-c",
+                                                          format("if kill -0 $(cat %1$s 2>/dev/null) 2>/dev/null; then cat %1$s; fi",
+                                                                 pidFilePath)})
+                                    .withDetach(false));
             ValueHolder<String> pidHolder = new ValueHolder<>();
-            docker.startExec(checkProcessExec.getId(), message -> {
+            docker.startExec(StartExecParams.create(checkProcessExec.getId()), message -> {
                 if (message.getType() == LogMessage.Type.STDOUT) {
                     pidHolder.set(message.getContent());
                 }

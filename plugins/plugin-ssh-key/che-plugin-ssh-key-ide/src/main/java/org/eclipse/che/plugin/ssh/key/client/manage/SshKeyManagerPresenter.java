@@ -178,7 +178,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
         CurrentUser user = appContext.getCurrentUser();
         final SshKeyUploader githubUploader = registry.getUploaders().get(GITHUB_HOST);
         if (user != null && githubUploader != null) {
-            githubUploader.uploadKey(user.getProfile().getId(), new AsyncCallback<Void>() {
+            githubUploader.uploadKey(user.getProfile().getUserId(), new AsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
                     refreshKeys();

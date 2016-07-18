@@ -199,7 +199,7 @@ export class CreateWorkspaceCtrl {
 
       let infoMessage = 'Workspace ' + workspaceData.config.name + ' successfully created.';
       this.cheNotification.showInfo(infoMessage);
-      this.$location.path('/workspace/' + workspaceData.id);
+      this.$location.path('/workspace/' + workspaceData.namespace + '/' +  workspaceData.config.name);
     }, (error) => {
       let errorMessage = error.data.message ? error.data.message : 'Error during workspace creation.';
       this.cheNotification.showError(errorMessage);

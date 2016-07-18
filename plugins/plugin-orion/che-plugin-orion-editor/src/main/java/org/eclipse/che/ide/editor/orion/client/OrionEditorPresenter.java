@@ -14,6 +14,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -73,7 +74,8 @@ public class OrionEditorPresenter extends TextEditorPresenter<OrionEditorWidget>
                                 final FileTypeIdentifier fileTypeIdentifier,
                                 final QuickAssistantFactory quickAssistantFactory,
                                 final WorkspaceAgent workspaceAgent,
-                                final NotificationManager notificationManager) {
+                                final NotificationManager notificationManager,
+                                final AppContext appContext) {
         super(codeAssistantFactory,
               breakpointManager,
               breakpointRendererFactory,
@@ -87,7 +89,8 @@ public class OrionEditorPresenter extends TextEditorPresenter<OrionEditorWidget>
               fileTypeIdentifier,
               quickAssistantFactory,
               workspaceAgent,
-              notificationManager);
+              notificationManager,
+              appContext);
     }
 
     @Override

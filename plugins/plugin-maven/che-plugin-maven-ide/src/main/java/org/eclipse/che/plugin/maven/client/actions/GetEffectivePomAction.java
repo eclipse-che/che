@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client.actions;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -19,19 +20,20 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.project.node.HasProjectConfig;
-import org.eclipse.che.ide.api.project.tree.VirtualFileImpl;
-import org.eclipse.che.ide.api.project.tree.VirtualFileInfo;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.SyntheticFile;
 import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
+import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
@@ -44,9 +46,6 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Singleton
 public class GetEffectivePomAction extends AbstractPerspectiveAction {
-    private final static String NAME = "effective-pom.xml";
-    private final static String PATH = "effective_pom";
-
     private final EditorAgent              editorAgent;
     private final NotificationManager      notificationManager;
     private final MavenServerServiceClient mavenServerServiceClient;
@@ -73,30 +72,38 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        CurrentProject currentProject = appContext.getCurrentProject();
-        if (currentProject == null) {
+
+        final Resource resource = appContext.getResource();
+        if (resource == null) {
             event.getPresentation().setEnabledAndVisible(false);
             return;
         }
-        event.getPresentation().setEnabledAndVisible(MAVEN_ID.equals(currentProject.getProjectConfig().getType()));
+
+        final Optional<Project> project = resource.getRelatedProject();
+        if (!project.isPresent()) {
+            event.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        event.getPresentation().setEnabledAndVisible(project.get().isTypeOf(MAVEN_ID));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        mavenServerServiceClient.getEffectivePom(appContext.getCurrentProject().getProjectConfig().getPath()).then(new Operation<String>() {
+        final Resource[] resources = appContext.getResources();
+
+        checkState(resources != null && resources.length == 1);
+
+        final Project project = resources[0].getRelatedProject().get();
+
+        checkState(MAVEN_ID.equals(project.getType()));
+
+        mavenServerServiceClient.getEffectivePom(project.getLocation().toString()).then(new Operation<String>() {
             @Override
             public void apply(String content) throws OperationException {
-                HasProjectConfig.ProjectConfig project = new HasProjectConfig.ProjectConfig(appContext.getCurrentProject()
-                                                                                                      .getProjectConfig());
-                VirtualFileInfo fileInfo = VirtualFileInfo.newBuilder()
-                                                          .setContent(content)
-                                                          .setName(NAME)
-                                                          .setDisplayName(NAME)
-                                                          .setProject(project)
-                                                          .setPath(PATH)
-                                                          .build();
-
-                editorAgent.openEditor(new VirtualFileImpl(fileInfo));
+                editorAgent.openEditor(new SyntheticFile("pom.xml",
+                                                         project.getAttributes().get(MavenAttributes.ARTIFACT_ID).get(0) + " [effective pom]",
+                                                         content));
             }
         }).catchError(new Operation<PromiseError>() {
             @Override

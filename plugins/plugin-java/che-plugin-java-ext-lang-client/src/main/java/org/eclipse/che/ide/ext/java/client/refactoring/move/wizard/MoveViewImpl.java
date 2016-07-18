@@ -31,6 +31,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
@@ -42,7 +43,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragment;
 import org.eclipse.che.ide.ext.java.shared.dto.model.PackageFragmentRoot;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatusEntry;
-import org.eclipse.che.ide.project.node.ResourceBasedNode;
 import org.eclipse.che.ide.ui.cellview.CellTreeResources;
 import org.eclipse.che.ide.ui.window.Window;
 
@@ -156,16 +156,14 @@ final class MoveViewImpl extends Window implements MoveView {
         treePanelToHide.setVisible(REFACTOR_MENU.equals(moveType));
         patternsPanelToHide.setVisible(COMPILATION_UNIT.equals(refactoredItemType));
 
-        List<?> selectedItems = refactorInfo.getSelectedItems();
+        Resource[] selectedItems = refactorInfo.getResources();
 
-        int selectionSize = selectedItems.size();
+        int selectionSize = selectedItems.length;
 
         boolean isMultiSelection = selectionSize > 1;
 
-        ResourceBasedNode selectedItem = (ResourceBasedNode)selectedItems.get(0);
-
-        classNameUR.setText(isMultiSelection ? locale.multiSelectionReferences(selectionSize) : selectedItem.getName());
-        className.setText(isMultiSelection ? locale.multiSelectionDestination(selectionSize) : selectedItem.getName());
+        classNameUR.setText(isMultiSelection ? locale.multiSelectionReferences(selectionSize) : selectedItems[0].getName());
+        className.setText(isMultiSelection ? locale.multiSelectionDestination(selectionSize) : selectedItems[0].getName());
 
         show();
     }

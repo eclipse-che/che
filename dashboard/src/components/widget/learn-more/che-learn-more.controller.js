@@ -23,18 +23,18 @@ export class CheLearnMoreCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($scope, $element, $attrs, $compile, cheProfile) {
+  constructor($scope, $element, $attrs, $compile, chePreferences) {
     this.items = [];
 
     this.WIDGET_PREFERENCES_PREFIX = 'learn-widget-';
 
-    this.cheProfile = cheProfile;
+    this.chePreferences = chePreferences;
 
     // current index is first one
     this.currentIndex = 0;
 
 
-    let preferences = this.cheProfile.getPreferences();
+    let preferences = this.chePreferences.getPreferences();
     let promise = preferences.$promise;
 
     promise.then(() => {
@@ -87,7 +87,7 @@ export class CheLearnMoreCtrl {
     let checkKey = this.WIDGET_PREFERENCES_PREFIX + key;
     var properties = {};
     properties[checkKey] = value;
-    this.cheProfile.updatePreferences(properties);
+    this.chePreferences.updatePreferences(properties);
 
     // also update icon state
     this.stateIcons[key] = value;
@@ -104,7 +104,7 @@ export class CheLearnMoreCtrl {
     // check if key is stored in preferences
     // if there,
     if (key) {
-      let preferences = this.cheProfile.getPreferences();
+      let preferences = this.chePreferences.getPreferences();
       let promise = preferences.$promise;
 
       promise.then(() => {

@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.git.impl.GitTestUtil.addFile;
 import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
@@ -70,11 +71,11 @@ public class PushTest {
         remoteConnection.clone(newDto(CloneRequest.class).withRemoteUri(connection.getWorkingDir().getAbsolutePath())
                                                          .withWorkingDir(remoteConnection.getWorkingDir().getAbsolutePath()));
         addFile(remoteConnection, "newfile", "content");
-        remoteConnection.add(newDto(AddRequest.class).withFilepattern(Collections.singletonList(".")));
+        remoteConnection.add(newDto(AddRequest.class).withFilepattern(singletonList(".")));
         remoteConnection.commit(newDto(CommitRequest.class).withMessage("Fake commit"));
         //when
         remoteConnection.push(newDto(PushRequest.class)
-                                      .withRefSpec(Collections.singletonList("refs/heads/master:refs/heads/test"))
+                                      .withRefSpec(singletonList("refs/heads/master:refs/heads/test"))
                                       .withRemote("origin")
                                       .withTimeout(-1));
         //then
@@ -92,12 +93,12 @@ public class PushTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         GitConnection remoteConnection = connectToInitializedGitRepository(connectionFactory, remoteRepo);
         addFile(connection, "README", "README");
-        connection.add(newDto(AddRequest.class).withFilepattern(Collections.singletonList(".")));
+        connection.add(newDto(AddRequest.class).withFilepattern(singletonList(".")));
         connection.commit(newDto(CommitRequest.class).withMessage("Init commit."));
         //make push
         int branchesBefore = remoteConnection.branchList(newDto(BranchListRequest.class)).size();
         //when
-        connection.push(newDto(PushRequest.class).withRefSpec(Collections.singletonList("refs/heads/master:refs/heads/test"))
+        connection.push(newDto(PushRequest.class).withRefSpec(singletonList("refs/heads/master:refs/heads/test"))
                                                  .withRemote(remoteRepo.getAbsolutePath())
                                                  .withTimeout(-1));
         //then
@@ -125,7 +126,7 @@ public class PushTest {
         GitConnection localConnection = connectionFactory.getConnection(remoteRepo.getAbsolutePath());
         localConnection.clone(newDto(CloneRequest.class).withRemoteUri(remoteConnection.getWorkingDir().getAbsolutePath()));
         addFile(remoteConnection, "newfile", "content");
-        remoteConnection.add(newDto(AddRequest.class).withFilepattern(Collections.singletonList(".")));
+        remoteConnection.add(newDto(AddRequest.class).withFilepattern(singletonList(".")));
         remoteConnection.commit(newDto(CommitRequest.class).withMessage("Fake commit"));
 
         //when
@@ -151,6 +152,7 @@ public class PushTest {
 
         //when
         PushResponse pushResponse = localConnection.push(newDto(PushRequest.class)
+                                                                 .withRefSpec(singletonList("refs/heads/master:refs/heads/master"))
                                                                  .withRemote("origin")
                                                                  .withTimeout(-1));
 

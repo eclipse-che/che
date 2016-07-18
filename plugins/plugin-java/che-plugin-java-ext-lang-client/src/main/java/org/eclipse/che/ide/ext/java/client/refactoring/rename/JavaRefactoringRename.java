@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -34,14 +35,15 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
-import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
-import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenamePresenter;
 import org.eclipse.che.ide.ext.java.client.refactoring.service.RefactoringServiceClient;
+import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.LinkedData;
 import org.eclipse.che.ide.ext.java.shared.dto.LinkedModeModel;
 import org.eclipse.che.ide.ext.java.shared.dto.LinkedPositionGroup;
@@ -182,7 +184,7 @@ public class JavaRefactoringRename implements FileEventHandler {
     @Override
     public void onFileOperation(FileEvent event) {
         if (event.getOperationType() == CLOSE && textEditor != null && textEditor.getDocument() != null &&
-            textEditor.getDocument().getFile().getPath().equals(event.getFile().getPath())) {
+            textEditor.getDocument().getFile().getLocation().equals(event.getFile().getLocation())) {
             isActiveLinkedEditor = false;
         }
     }
@@ -254,11 +256,15 @@ public class JavaRefactoringRename implements FileEventHandler {
                 switch (result.getSeverity()) {
                     case OK:
                     case INFO:
-                        RefactorInfo refactorInfo = RefactorInfo.of(RefactoredItemType.JAVA_ELEMENT, null);
+                        final VirtualFile file = textEditor.getDocument().getFile();
 
-                        refactoringUpdater.updateAfterRefactoring(refactorInfo, result.getChanges());
-                        String projectPath = textEditor.getDocument().getFile().getProject().getProjectConfig().getPath();
-                        refactoringServiceClient.reindexProject(projectPath);
+                        if (file instanceof Resource) {
+                            final Optional<Project> project = ((Resource)file).getRelatedProject();
+
+                            refactoringServiceClient.reindexProject(project.get().getLocation().toString());
+                        }
+
+                        refactoringUpdater.updateAfterRefactoring(result.getChanges());
                         break;
                     case WARNING:
                     case ERROR:
@@ -330,11 +336,15 @@ public class JavaRefactoringRename implements FileEventHandler {
         dto.setOffset(editor.getCursorOffset());
         dto.setRefactorLightweight(isActiveLinkedMode);
 
-        String fqn = JavaSourceFolderUtil.getFQNForFile(editor.getEditorInput().getFile());
-        dto.setPath(fqn);
+        final VirtualFile file = editor.getEditorInput().getFile();
 
-        String projectPath = editor.getDocument().getFile().getProject().getProjectConfig().getPath();
-        dto.setProjectPath(projectPath);
+        dto.setPath(JavaUtil.resolveFQN(file));
+
+        if (file instanceof Resource) {
+            final Optional<Project> project = ((Resource)file).getRelatedProject();
+
+            dto.setProjectPath(project.get().getLocation().toString());
+        }
 
         dto.setType(JAVA_ELEMENT);
 

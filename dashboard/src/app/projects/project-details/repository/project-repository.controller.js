@@ -28,18 +28,19 @@ export class ProjectRepositoryController {
     this.remoteSvnRepository = null;
     this.isEmptyState = false;
 
-    var workspaceId = $route.current.params.workspaceId;
+    var namespace = $route.current.params.namespace;
+    var workspaceName = $route.current.params.workspaceName;
     var projectPath = '/' + $route.current.params.projectName;
 
-    let workspace = this.cheAPI.getWorkspace().getWorkspaceById(workspaceId);
+    let workspace = this.cheAPI.getWorkspace().getWorkspaceByName(namespace, workspaceName);
     if (workspace && (workspace.status === 'STARTING' || workspace.status === 'RUNNING')) {
-      this.cheAPI.getWorkspace().fetchStatusChange(workspaceId, 'RUNNING').then(() => {
-        return this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspaceId);
+      this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'RUNNING').then(() => {
+        return this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
       }).then(() => {
-        this.wsagent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId);
+        this.wsagent = this.cheAPI.getWorkspace().getWorkspaceAgent(workspace.id);
         if (this.wsagent !== null) {
           if (!this.wsagent.getProject().getProjectDetailsByKey(projectPath)) {
-            let promise = this.wsagent.getProject().fetchProjectDetails(workspaceId, projectPath);
+            let promise = this.wsagent.getProject().fetchProjectDetails(workspace.id, projectPath);
 
             promise.then(() => {
               var projectDetails = this.wsagent.getProject().getProjectDetailsByKey(projectPath);

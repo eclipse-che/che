@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.docker.client;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -35,11 +35,11 @@ public class UserSpecificDockerRegistryCredentialsProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserSpecificDockerRegistryCredentialsProvider.class);
 
-    private PreferenceDao preferenceDao;
+    private PreferenceManager preferenceManager;
 
     @Inject
-    public UserSpecificDockerRegistryCredentialsProvider(PreferenceDao preferenceDao) {
-        this.preferenceDao = preferenceDao;
+    public UserSpecificDockerRegistryCredentialsProvider(PreferenceManager preferenceManager) {
+        this.preferenceManager = preferenceManager;
     }
 
     /**
@@ -52,11 +52,11 @@ public class UserSpecificDockerRegistryCredentialsProvider {
     @Nullable
     public AuthConfigs getCredentials() {
         try {
-            String encodedCredentials = preferenceDao.getPreferences(EnvironmentContext.getCurrent()
-                                                                                .getSubject()
-                                                                                .getUserId(),
-                                                              DOCKER_REGISTRY_CREDENTIALS_KEY)
-                                              .get(DOCKER_REGISTRY_CREDENTIALS_KEY);
+            String encodedCredentials = preferenceManager.find(EnvironmentContext.getCurrent()
+                                                                                 .getSubject()
+                                                                                 .getUserId(),
+                                                               DOCKER_REGISTRY_CREDENTIALS_KEY)
+                                                         .get(DOCKER_REGISTRY_CREDENTIALS_KEY);
             String credentials = encodedCredentials != null ? new String(Base64.getDecoder().decode(encodedCredentials), "UTF-8") : "{}";
 
             return DtoFactory.newDto(AuthConfigs.class).withConfigs(

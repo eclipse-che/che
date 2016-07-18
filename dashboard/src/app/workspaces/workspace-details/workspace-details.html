@@ -1,7 +1,7 @@
 <che-toolbar che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
              che-title-icons-controller="workspaceDetailsCtrl"
              che-button-name="Open"
-             che-button-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
+             che-button-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.namespace}}/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
              che-breadcrumb-title="All workspaces"
              che-breadcrumb-href="#/workspaces">
 </che-toolbar>
@@ -9,7 +9,7 @@
 
 <md-content md-scroll-y flex ng-if="workspaceDetailsCtrl.workspaceDetails"
             md-theme="maincontent-theme">
-  <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="selectedIndex">
+  <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="workspaceDetailsCtrl.selectedTabIndex" md-selected="selectedIndex">
     <md-tab>
       <md-tab-label>
         <md-icon md-font-icon="material-design icon-ic_settings_24px" class="che-tab-label-icon"></md-icon>
@@ -49,7 +49,7 @@
                 <workspace-status che-status="workspaceDetailsCtrl.getWorkspaceStatus()"
                                             layout-align="start start"></workspace-status>
                 <che-link che-link-text="Show more"
-                          ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
+                          ng-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.namespace}}/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
                           layout-align="end start"
                           ng-show="(workspaceDetailsCtrl.showShowMore === true && (workspaceDetailsCtrl.getWorkspaceStatus() === 'STARTING' || workspaceDetailsCtrl.getWorkspaceStatus() === 'ERROR'))"></che-link>
               </div>

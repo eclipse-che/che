@@ -40,7 +40,7 @@ public class DocumentStorageImpl implements DocumentStorage {
         file.getContent().then(new Operation<String>() {
             @Override
             public void apply(String result) throws OperationException {
-                Log.debug(DocumentStorageImpl.class, "Document retrieved (" + file.getPath() + ").");
+                Log.debug(DocumentStorageImpl.class, "Document retrieved (" + file.getLocation() + ").");
                 try {
                     callback.onDocumentReceived(result);
                 } catch (final Exception e) {
@@ -55,7 +55,7 @@ public class DocumentStorageImpl implements DocumentStorage {
                 } catch (final Exception e) {
                     Log.warn(DocumentStorageImpl.class, "Exception during doc retrieve failure callback: ", e);
                 }
-                Log.error(DocumentStorageImpl.class, "Could not retrieve document (" + file.getPath() + ").", arg.getCause());
+                Log.error(DocumentStorageImpl.class, "Could not retrieve document (" + file.getLocation() + ").", arg.getCause());
             }
         });
     }
@@ -68,7 +68,7 @@ public class DocumentStorageImpl implements DocumentStorage {
         file.updateContent(document.getContents()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                Log.debug(DocumentStorageImpl.class, "Document saved (" + file.getPath() + ").");
+                Log.debug(DocumentStorageImpl.class, "Document saved (" + file.getLocation() + ").");
                 DocumentStorageImpl.this.eventBus.fireEvent(new FileEvent(file, FileEvent.FileOperation.SAVE));
                 try {
                     callback.onSuccess(editorInput);
@@ -79,7 +79,7 @@ public class DocumentStorageImpl implements DocumentStorage {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                Log.error(DocumentStorageImpl.class, "Document save failed (" + file.getPath() + ").", arg.getCause());
+                Log.error(DocumentStorageImpl.class, "Document save failed (" + file.getLocation() + ").", arg.getCause());
                 try {
                     callback.onFailure(arg.getCause());
                 } catch (final Exception e) {

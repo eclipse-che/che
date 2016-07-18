@@ -188,5 +188,8 @@ public interface MachineResources extends ClientBundle {
         String processesPanelStopButtonForProcess();
 
         String hideStopButton();
+
+        /** Returns the CSS class name for the active state of tool button of 'Consoles' panel. */
+        String consolesActiveToolButton();
     }
 }

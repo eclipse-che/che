@@ -311,6 +311,7 @@ export class CreateProjectCtrl {
       this.importProjectData.source.type = 'git';
     } else if ('zip' === tab) {
       this.importProjectData.project.type = '';
+      this.importProjectData.source.type = 'zip';
     } else if ('config' === tab) {
       this.importProjectData.project.type = 'blank';
       this.importProjectData.source.type = 'git';
@@ -854,14 +855,8 @@ export class CreateProjectCtrl {
       }
     } else {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
+      this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
-    }
-    // do we have projects ?
-    let projects = this.cheAPI.getWorkspace().getAllProjects();
-    if (projects.length > 1) {
-      // we have projects, show notification first and redirect to the list of projects
-      this.createProjectSvc.showPopup();
-      this.$location.path('/projects');
     }
   }
 
@@ -960,6 +955,7 @@ export class CreateProjectCtrl {
     //TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     creationPromise.then((workspace) => {
+      this.createProjectSvc.setWorkspaceNamespace(workspace.namespace);
       this.updateRecentWorkspace(workspace.id);
 
       // init message bus if not there

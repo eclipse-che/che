@@ -11,78 +11,57 @@
 package org.eclipse.che.ide.ext.git.client.checkout;
 
 import org.eclipse.che.api.git.shared.CheckoutRequest;
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
-import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorInput;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
-import org.eclipse.che.ide.api.event.project.OpenProjectEvent;
-import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.test.GwtReflectionUtils;
+import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.eclipse.che.ide.ext.git.client.checkout.CheckoutReferencePresenter.CHECKOUT_COMMAND_NAME;
 
 /**
  * Testing {@link CheckoutReferencePresenter} functionality.
  *
  * @author Roman Nikitenko
+ * @author Vlad Zhukovskyi
  */
 public class CheckoutReferenceTest extends BaseTest {
     private static final String CORRECT_REFERENCE   = "someTag";
     private static final String INCORRECT_REFERENCE = "";
-
-    @Captor
-    private ArgumentCaptor<AsyncRequestCallback<String>>           asyncCallbackCaptor;
-    @Captor
-    private ArgumentCaptor<AsyncRequestCallback<ProjectConfigDto>> projectDescriptorCaptor;
 
     @Mock
     private CheckoutReferenceView view;
     @Mock
     private CheckoutRequest       checkoutRequest;
 
-    @Mock
-    private EditorPartPresenter partPresenter;
-    @Mock
-    private EditorInput         editorInput;
-    @Mock
-    private EditorAgent         editorAgent;
-
-    @InjectMocks
     private CheckoutReferencePresenter presenter;
 
     @Override
     public void disarm() {
         super.disarm();
+
+        presenter = new CheckoutReferencePresenter(view,
+                                                   service,
+                                                   appContext,
+                                                   constant,
+                                                   notificationManager,
+                                                   gitOutputConsoleFactory,
+                                                   consolesPanelPresenter,
+                                                   dtoFactory);
     }
 
     @Test
     public void testOnReferenceValueChangedWhenValueIsIncorrect() throws Exception {
-
         presenter.referenceValueChanged(INCORRECT_REFERENCE);
 
         view.setCheckoutButEnableState(eq(false));
@@ -90,7 +69,6 @@ public class CheckoutReferenceTest extends BaseTest {
 
     @Test
     public void testOnReferenceValueChangedWhenValueIsCorrect() throws Exception {
-
         presenter.referenceValueChanged(CORRECT_REFERENCE);
 
         view.setCheckoutButEnableState(eq(true));
@@ -98,8 +76,7 @@ public class CheckoutReferenceTest extends BaseTest {
 
     @Test
     public void testShowDialog() throws Exception {
-
-        presenter.showDialog();
+        presenter.showDialog(project);
 
         verify(view).setCheckoutButEnableState(eq(false));
         verify(view).showDialog();
@@ -121,7 +98,7 @@ public class CheckoutReferenceTest extends BaseTest {
         presenter.onEnterClicked();
 
         verify(view, never()).close();
-        verify(service, never()).checkout(eq(devMachine), anyObject(), anyObject(), anyObject());
+        verify(service, never()).checkout(anyObject(), any(Path.class), any(CheckoutRequest.class));
     }
 
     @Test
@@ -130,111 +107,23 @@ public class CheckoutReferenceTest extends BaseTest {
         when(checkoutRequest.withName(anyString())).thenReturn(checkoutRequest);
         when(checkoutRequest.withCreateNew(anyBoolean())).thenReturn(checkoutRequest);
         reset(service);
+        when(service.checkout(anyObject(), any(Path.class), any(CheckoutRequest.class))).thenReturn(voidPromise);
+        when(voidPromise.then(any(Operation.class))).thenReturn(voidPromise);
+        when(voidPromise.catchError(any(Operation.class))).thenReturn(voidPromise);
         when(view.getReference()).thenReturn(CORRECT_REFERENCE);
 
+        presenter.showDialog(project);
         presenter.onEnterClicked();
 
+        verify(voidPromise).then(voidPromiseCaptor.capture());
+        voidPromiseCaptor.getValue().apply(null);
+
+        verify(synchronizePromise).then(synchronizeCaptor.capture());
+        synchronizeCaptor.getValue().apply(new Resource[0]);
+
         verify(view).close();
-        verify(service).checkout(eq(devMachine), anyObject(), anyObject(), anyObject());
+        verify(service).checkout(anyObject(), any(Path.class), any(CheckoutRequest.class));
         verify(checkoutRequest).withName(CORRECT_REFERENCE);
-        verify(checkoutRequest).withCreateNew(false);
         verifyNoMoreInteractions(checkoutRequest);
-    }
-
-    @Test
-    public void testOnCheckoutClickedWhenCheckoutIsSuccessful() throws Exception {
-        VirtualFile virtualFile = mock(VirtualFile.class);
-
-        List<EditorPartPresenter> partPresenterList = new ArrayList<>();
-        partPresenterList.add(partPresenter);
-
-        when(editorAgent.getOpenedEditors()).thenReturn(partPresenterList);
-        when(partPresenter.getEditorInput()).thenReturn(editorInput);
-
-        when(editorInput.getFile()).thenReturn(virtualFile);
-        when(virtualFile.getPath()).thenReturn("/foo");
-
-        when(dtoFactory.createDto(CheckoutRequest.class)).thenReturn(checkoutRequest);
-        when(checkoutRequest.withName(anyString())).thenReturn(checkoutRequest);
-        when(checkoutRequest.withCreateNew(anyBoolean())).thenReturn(checkoutRequest);
-        reset(service);
-        when(view.getReference()).thenReturn(CORRECT_REFERENCE);
-        when(rootProjectConfig.getPath()).thenReturn(PROJECT_PATH);
-
-        presenter.onEnterClicked();
-
-        verify(service).checkout(eq(devMachine), anyObject(), anyObject(), asyncCallbackCaptor.capture());
-        AsyncRequestCallback<String> callback = asyncCallbackCaptor.getValue();
-        GwtReflectionUtils.callOnSuccess(callback, "");
-
-        verify(checkoutRequest).withName(CORRECT_REFERENCE);
-        verify(checkoutRequest).withCreateNew(false);
-        verifyNoMoreInteractions(checkoutRequest);
-        verify(view).close();
-        verify(projectServiceClient).getProject(mock(DevMachine.class), eq(PROJECT_PATH), projectDescriptorCaptor.capture());
-        AsyncRequestCallback<ProjectConfigDto> asyncRequestCallback = projectDescriptorCaptor.getValue();
-        GwtReflectionUtils.callOnSuccess(asyncRequestCallback, projectConfig);
-        verify(projectConfig).getProblems();
-        verify(projectExplorer).reloadChildren();
-        verify(editorAgent).getOpenedEditors();
-        verify(partPresenter).getEditorInput();
-        verify(editorInput).getFile();
-        verify(eventBus).fireEvent(Matchers.<FileContentUpdateEvent>anyObject());
-    }
-
-    @Test
-    public void testOnCheckoutClickedWhenCheckoutIsSuccessfulButProjectIsNotConfigurated() throws Exception {
-        List<ProjectProblemDto> problemList = Collections.singletonList(mock(ProjectProblemDto.class));
-        when(projectConfig.getProblems()).thenReturn(problemList);
-
-        when(dtoFactory.createDto(CheckoutRequest.class)).thenReturn(checkoutRequest);
-        when(checkoutRequest.withName(anyString())).thenReturn(checkoutRequest);
-        when(checkoutRequest.withCreateNew(anyBoolean())).thenReturn(checkoutRequest);
-        reset(service);
-        when(view.getReference()).thenReturn(CORRECT_REFERENCE);
-        when(rootProjectConfig.getPath()).thenReturn(PROJECT_PATH);
-
-        presenter.onEnterClicked();
-
-        verify(service).checkout(eq(devMachine), anyObject(), anyObject(), asyncCallbackCaptor.capture());
-        AsyncRequestCallback<String> callback = asyncCallbackCaptor.getValue();
-        GwtReflectionUtils.callOnSuccess(callback, "");
-
-        verify(checkoutRequest).withName(CORRECT_REFERENCE);
-        verify(checkoutRequest).withCreateNew(false);
-        verifyNoMoreInteractions(checkoutRequest);
-        verify(view).close();
-        verify(projectServiceClient).getProject(mock(DevMachine.class), eq(PROJECT_PATH), projectDescriptorCaptor.capture());
-        AsyncRequestCallback<ProjectConfigDto> asyncRequestCallback = projectDescriptorCaptor.getValue();
-        GwtReflectionUtils.callOnSuccess(asyncRequestCallback, projectConfig);
-        verify(projectConfig).getProblems();
-        verify(eventBus).fireEvent(Matchers.<OpenProjectEvent>anyObject());
-    }
-
-    @Test
-    public void testOnCheckoutClickedWhenCheckoutIsFailed() throws Exception {
-        when(dtoFactory.createDto(CheckoutRequest.class)).thenReturn(checkoutRequest);
-        when(checkoutRequest.withName(anyString())).thenReturn(checkoutRequest);
-        when(checkoutRequest.withCreateNew(anyBoolean())).thenReturn(checkoutRequest);
-
-        reset(service);
-        when(view.getReference()).thenReturn(CORRECT_REFERENCE);
-        when(rootProjectConfig.getPath()).thenReturn(PROJECT_PATH);
-
-        presenter.onEnterClicked();
-
-        verify(service).checkout(eq(devMachine), anyObject(), anyObject(), asyncCallbackCaptor.capture());
-        AsyncRequestCallback<String> callback = asyncCallbackCaptor.getValue();
-        GwtReflectionUtils.callOnFailure(callback, mock(Throwable.class));
-
-        verify(checkoutRequest).withName(CORRECT_REFERENCE);
-        verify(checkoutRequest).withCreateNew(false);
-        verifyNoMoreInteractions(checkoutRequest);
-        verify(view).close();
-        verify(eventBus, never()).fireEvent(Matchers.<OpenProjectEvent>anyObject());
-        verify(gitOutputConsoleFactory).create(CHECKOUT_COMMAND_NAME);
-        verify(console).printError(anyString());
-        verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
-        verify(notificationManager).notify(anyString(), rootProjectConfig);
     }
 }

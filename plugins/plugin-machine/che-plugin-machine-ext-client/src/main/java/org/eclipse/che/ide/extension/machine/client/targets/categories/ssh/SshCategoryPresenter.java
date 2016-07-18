@@ -435,7 +435,7 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
                                                .withLimits(limitsDto)
                                                .withType(getCategory());
 
-        Promise<MachineDto> machinePromise = workspaceServiceClient.createMachine(appContext.getWorkspace().getId(), configDto);
+        Promise<MachineDto> machinePromise = workspaceServiceClient.createMachine(appContext.getDevMachine().getId(), configDto);
 
         machinePromise.then(new Operation<MachineDto>() {
             @Override
@@ -566,7 +566,7 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
      *         mane of the machine to subscribe
      */
     private void subscribeToMachineChannel(final String machineName) {
-        String channel = "machine:status:" + appContext.getWorkspace().getId() + ':' + machineName;
+        String channel = "machine:status:" + appContext.getDevMachine().getId() + ':' + machineName;
 
         if (subscriptions.containsKey(channel)) {
             return;
@@ -652,7 +652,7 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
      *         name of the machine to unsubscribe
      */
     private void unsubscribeFromMachineChannel(String machineName) {
-        String channel = "machine:status:" + appContext.getWorkspace().getId() + ':' + machineName;
+        String channel = "machine:status:" + appContext.getDevMachine().getId() + ':' + machineName;
 
         SubscriptionHandler<MachineStatusEvent> statusHandler = subscriptions.remove(channel);
         if (statusHandler != null) {

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.project.wizard;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.WizardPage;
 import com.google.inject.Provider;
 
@@ -34,5 +34,5 @@ public interface ImportWizardRegistrar {
 
     /** Returns pages that should be used in project import wizard. */
     @NotNull
-    List<Provider<? extends WizardPage<ProjectConfigDto>>> getWizardPages();
+    List<Provider<? extends WizardPage<MutableProjectConfig>>> getWizardPages();
 }

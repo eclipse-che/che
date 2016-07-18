@@ -17,26 +17,25 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.Remote;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.BranchSearcher;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.websocket.WebSocketException;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_LOCAL;
 import static org.eclipse.che.api.git.shared.BranchListRequest.LIST_REMOTE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -48,13 +47,13 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  * Presenter for fetching changes from remote repository.
  *
  * @author Ann Zhuleva
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class FetchPresenter implements FetchView.ActionDelegate {
     public static final String FETCH_COMMAND_NAME = "Git fetch";
 
     private final DtoFactory              dtoFactory;
-    private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
     private final NotificationManager     notificationManager;
     private final BranchSearcher          branchSearcher;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
@@ -64,7 +63,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
     private final AppContext              appContext;
     private final GitLocalizationConstant constant;
 
-    private CurrentProject project;
+    private Project project;
 
     @Inject
     public FetchPresenter(DtoFactory dtoFactory,
@@ -73,13 +72,11 @@ public class FetchPresenter implements FetchView.ActionDelegate {
                           AppContext appContext,
                           GitLocalizationConstant constant,
                           NotificationManager notificationManager,
-                          DtoUnmarshallerFactory dtoUnmarshallerFactory,
                           BranchSearcher branchSearcher,
                           GitOutputConsoleFactory gitOutputConsoleFactory,
                           ConsolesPanelPresenter consolesPanelPresenter) {
         this.dtoFactory = dtoFactory;
         this.view = view;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.branchSearcher = branchSearcher;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
         this.consolesPanelPresenter = consolesPanelPresenter;
@@ -91,8 +88,8 @@ public class FetchPresenter implements FetchView.ActionDelegate {
     }
 
     /** Show dialog. */
-    public void showDialog() {
-        project = appContext.getCurrentProject();
+    public void showDialog(Project project) {
+        this.project = project;
         view.setRemoveDeleteRefs(false);
         view.setFetchAllBranches(true);
         updateRemotes();
@@ -103,25 +100,24 @@ public class FetchPresenter implements FetchView.ActionDelegate {
      * local).
      */
     private void updateRemotes() {
-        service.remoteList(appContext.getDevMachine(), project.getRootProject(), null, true,
-                           new AsyncRequestCallback<List<Remote>>(dtoUnmarshallerFactory.newListUnmarshaller(Remote.class)) {
-                               @Override
-                               protected void onSuccess(List<Remote> result) {
-                                   view.setRepositories(result);
-                                   updateBranches(LIST_REMOTE);
-                                   view.setEnableFetchButton(!result.isEmpty());
-                                   view.showDialog();
-                               }
-
-                               @Override
-                               protected void onFailure(Throwable exception) {
-                                   GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
-                                   console.printError(constant.remoteListFailed());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                   notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE, project.getRootProject());
-                                   view.setEnableFetchButton(false);
-                               }
-                           });
+        service.remoteList(appContext.getDevMachine(), project.getLocation(), null, true).then(new Operation<List<Remote>>() {
+            @Override
+            public void apply(List<Remote> remotes) throws OperationException {
+                view.setRepositories(remotes);
+                updateBranches(LIST_REMOTE);
+                view.setEnableFetchButton(!remotes.isEmpty());
+                view.showDialog();
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
+                console.printError(constant.remoteListFailed());
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                notificationManager.notify(constant.remoteListFailed(), FAIL, FLOAT_MODE);
+                view.setEnableFetchButton(false);
+            }
+        });
     }
 
     /**
@@ -131,69 +127,60 @@ public class FetchPresenter implements FetchView.ActionDelegate {
      *         is a remote mode
      */
     private void updateBranches(@NotNull final String remoteMode) {
-        service.branchList(appContext.getDevMachine(), project.getRootProject(), remoteMode,
-                           new AsyncRequestCallback<List<Branch>>(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class)) {
-                               @Override
-                               protected void onSuccess(List<Branch> result) {
-                                   if (LIST_REMOTE.equals(remoteMode)) {
-                                       view.setRemoteBranches(branchSearcher.getRemoteBranchesToDisplay(view.getRepositoryName(), result));
-                                       updateBranches(LIST_LOCAL);
-                                   } else {
-                                       view.setLocalBranches(branchSearcher.getLocalBranchesToDisplay(result));
-                                       for (Branch branch : result) {
-                                           if (branch.isActive()) {
-                                               view.selectRemoteBranch(branch.getDisplayName());
-                                               break;
-                                           }
-                                       }
-                                   }
-                               }
-
-                               @Override
-                               protected void onFailure(Throwable exception) {
-                                   String errorMessage =
-                                           exception.getMessage() != null ? exception.getMessage() : constant.branchesListFailed();
-                                   GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
-                                   console.printError(errorMessage);
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE, project.getRootProject());
-                                   view.setEnableFetchButton(false);
-                               }
-                           });
+        service.branchList(appContext.getDevMachine(), project.getLocation(), remoteMode).then(new Operation<List<Branch>>() {
+            @Override
+            public void apply(List<Branch> branches) throws OperationException {
+                if (LIST_REMOTE.equals(remoteMode)) {
+                    view.setRemoteBranches(branchSearcher.getRemoteBranchesToDisplay(view.getRepositoryName(), branches));
+                    updateBranches(LIST_LOCAL);
+                } else {
+                    view.setLocalBranches(branchSearcher.getLocalBranchesToDisplay(branches));
+                    for (Branch branch : branches) {
+                        if (branch.isActive()) {
+                            view.selectRemoteBranch(branch.getDisplayName());
+                            break;
+                        }
+                    }
+                }
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                final String errorMessage = error.getMessage() != null ? error.getMessage() : constant.branchesListFailed();
+                GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
+                console.printError(errorMessage);
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
+                view.setEnableFetchButton(false);
+            }
+        });
     }
 
     /** {@inheritDoc} */
     @Override
     public void onFetchClicked() {
         final String remoteUrl = view.getRepositoryUrl();
-        String remoteName = view.getRepositoryName();
-        boolean removeDeletedRefs = view.isRemoveDeletedRefs();
 
-        final StatusNotification notification =
-                notificationManager.notify(constant.fetchProcess(), PROGRESS, FLOAT_MODE, project.getRootProject());
+        final StatusNotification notification = notificationManager.notify(constant.fetchProcess(), PROGRESS, FLOAT_MODE);
         final GitOutputConsole console = gitOutputConsoleFactory.create(FETCH_COMMAND_NAME);
-        try {
-            service.fetch(appContext.getDevMachine(), project.getRootProject(), remoteName, getRefs(), removeDeletedRefs,
-                          new RequestCallback<String>() {
-                              @Override
-                              protected void onSuccess(String result) {
-                                  console.print(constant.fetchSuccess(remoteUrl));
-                                  consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                  notification.setStatus(SUCCESS);
-                                  notification.setTitle(constant.fetchSuccess(remoteUrl));
-                              }
 
-                              @Override
-                              protected void onFailure(Throwable exception) {
-                                  handleError(exception, remoteUrl, notification, console);
-                                  consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                              }
-                          }
-                         );
-        } catch (WebSocketException e) {
-            handleError(e, remoteUrl, notification, console);
-            consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-        }
+        service.fetch(appContext.getDevMachine(), project.getLocation(), view.getRepositoryName(), getRefs(), view.isRemoveDeletedRefs())
+                .then(new Operation<Void>() {
+                    @Override
+                    public void apply(Void ignored) throws OperationException {
+                        console.print(constant.fetchSuccess(remoteUrl));
+                        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                        notification.setStatus(SUCCESS);
+                        notification.setTitle(constant.fetchSuccess(remoteUrl));
+                    }
+                })
+                .catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        handleError(error.getCause(), remoteUrl, notification, console);
+                        consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                    }
+                });
         view.close();
     }
 
@@ -201,7 +188,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
     @NotNull
     private List<String> getRefs() {
         if (view.isFetchAllBranches()) {
-            return new ArrayList<>();
+            return emptyList();
         }
 
         String localBranch = view.getLocalBranch();
@@ -209,7 +196,7 @@ public class FetchPresenter implements FetchView.ActionDelegate {
         String remoteName = view.getRepositoryName();
         String refs = localBranch.isEmpty() ? remoteBranch
                                             : "refs/heads/" + localBranch + ":" + "refs/remotes/" + remoteName + "/" + remoteBranch;
-        return new ArrayList<>(Arrays.asList(refs));
+        return singletonList(refs);
     }
 
     /**

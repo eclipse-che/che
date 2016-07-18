@@ -13,23 +13,18 @@ package org.eclipse.che.ide.search.presentation;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
-import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
-import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
-import org.eclipse.che.ide.ui.smartTree.UniqueKeyProvider;
+import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Implementation for FindResult view.
@@ -50,21 +45,16 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
         setTitle(localizationConstant.actionFullTextSearch());
         this.findResultNodeFactory = findResultNodeFactory;
 
-        UniqueKeyProvider<Node> nodeIdProvider = new NodeUniqueKeyProvider() {
-            @NotNull
-            @Override
-            public String getKey(@NotNull Node item) {
-                if (item instanceof HasStorablePath) {
-                    return ((HasStorablePath)item).getStorablePath();
-                } else {
-                    return String.valueOf(item.hashCode());
-                }
-            }
-        };
-
-        NodeStorage nodeStorage = new NodeStorage(nodeIdProvider);
+        NodeStorage nodeStorage = new NodeStorage();
         NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
         tree = new Tree(nodeStorage, loader);
+
+        tree.getSelectionModel().addSelectionChangedHandler(new SelectionChangedEvent.SelectionChangedHandler() {
+            @Override
+            public void onSelectionChanged(SelectionChangedEvent event) {
+                delegate.onSelectionChanged(event.getSelection());
+            }
+        });
 
         setContentWidget(tree);
 
@@ -79,11 +69,16 @@ class FindResultViewImpl extends BaseView<FindResultView.ActionDelegate> impleme
 
     /** {@inheritDoc} */
     @Override
-    public void showResults(List<ItemReference> nodes, String request) {
+    public void showResults(Resource[] resources, String request) {
         tree.getNodeStorage().clear();
-        tree.getNodeStorage().add(findResultNodeFactory.newResultNode(nodes, request));
+        tree.getNodeStorage().add(findResultNodeFactory.newResultNode(resources, request));
         tree.expandAll();
         tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
         focusView();
+    }
+
+    @Override
+    public Tree getTree() {
+        return tree;
     }
 }

@@ -12,9 +12,7 @@
 
 import {CreateProjectCtrl} from './create-project/create-project.controller';
 import {CreateProjectSvc} from './create-project/create-project.service.js';
-import {ListProjectsCtrl} from './list-projects/list-projects.controller';
 import {CreateProjectGithubCtrl} from './create-project/github/create-project-github.controller';
-import {ListProjectsWorkspaceFilter} from './list-projects/list-projects-filter-workspace.filter';
 
 import {CreateProjectGit} from './create-project/git/create-project-git.directive';
 import {CreateProjectGitCtrl} from './create-project/git/create-project-git.controller';
@@ -44,12 +42,10 @@ export class ProjectsConfig {
 
   constructor(register) {
 
-    new ListProjectsWorkspaceFilter(register);
     new CreateProjectSamplesFilter(register);
     new CreateProjectSamplesNameFilter(register);
     new CreateProjectSamplesTagFilter(register);
 
-    register.controller('ListProjectsCtrl', ListProjectsCtrl);
 
     register.controller('ProjectDetailsController', ProjectDetailsController);
 
@@ -85,6 +81,7 @@ export class ProjectsConfig {
 
 
     let locationCreateProjectProvider = {
+      title: 'New Project',
       templateUrl: 'app/projects/create-project/create-project.html',
       controller: 'CreateProjectCtrl',
       controllerAs: 'createProjectCtrl'
@@ -92,12 +89,8 @@ export class ProjectsConfig {
 
     // config routes
     register.app.config(function ($routeProvider) {
-      $routeProvider.accessWhen('/projects', {
-        templateUrl: 'app/projects/list-projects/list-projects.html',
-        controller: 'ListProjectsCtrl',
-        controllerAs: 'listProjectsCtrl'
-      })
-        .accessWhen('/project/:workspaceId/:projectName', {
+      $routeProvider.accessWhen('/project/:namespace/:workspaceName/:projectName', {
+          title: (params) => {return params.workspaceName + ' | ' + params.projectName},
           templateUrl: 'app/projects/project-details/project-details.html',
           controller: 'ProjectDetailsController',
           controllerAs: 'projectDetailsController'
