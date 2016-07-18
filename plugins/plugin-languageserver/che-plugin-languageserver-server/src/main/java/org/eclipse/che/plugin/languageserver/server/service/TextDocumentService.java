@@ -171,7 +171,8 @@ public class TextDocumentService {
     @Path("formatting")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends TextEdit> formatting(DocumentFormattingParamsDTO params) throws InterruptedException, ExecutionException {
+    public List<? extends TextEdit> formatting(DocumentFormattingParamsDTO params)
+            throws InterruptedException, ExecutionException, LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {
@@ -185,7 +186,8 @@ public class TextDocumentService {
     @Path("rangeFormatting")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends TextEdit> rangeFormatting(DocumentRangeFormattingParamsDTO params) throws InterruptedException, ExecutionException {
+    public List<? extends TextEdit> rangeFormatting(DocumentRangeFormattingParamsDTO params)
+            throws InterruptedException, ExecutionException, LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {
@@ -199,7 +201,8 @@ public class TextDocumentService {
     @Path("onTypeFormatting")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<? extends TextEdit> onTypeFormatting(DocumentOnTypeFormattingParamsDTO params) throws InterruptedException, ExecutionException {
+    public List<? extends TextEdit> onTypeFormatting(DocumentOnTypeFormattingParamsDTO params)
+            throws InterruptedException, ExecutionException, LanguageServerException {
         params.getTextDocument().setUri(prefixURI(params.getTextDocument().getUri()));
         LanguageServer server = getServer(params.getTextDocument().getUri());
         if (server == null) {

@@ -65,7 +65,7 @@ public class WorkspaceService {
         informations.forEach(o -> {
             Location location = o.getLocation();
             if (location instanceof LocationImpl) {
-                ((LocationImpl)location).setUri(TextDocumentServiceImpl.removePrefixUri(location.getUri()));
+                ((LocationImpl)location).setUri(TextDocumentService.removePrefixUri(location.getUri()));
             }
         });
         return informations;
