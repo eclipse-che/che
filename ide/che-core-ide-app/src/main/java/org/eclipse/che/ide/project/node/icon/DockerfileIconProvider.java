@@ -14,6 +14,7 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.ide.api.resources.Resource;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -31,8 +32,8 @@ public class DockerfileIconProvider implements NodeIconProvider {
     }
 
     @Override
-    public SVGResource getIcon(String fileName) {
-        return "Dockerfile".equals(fileName) ? icons.dockerfile() : null;
+    public SVGResource getIcon(Resource resource) {
+        return "Dockerfile".equals(resource.getName()) ? icons.dockerfile() : null;
     }
 
     protected interface Icons extends ClientBundle {

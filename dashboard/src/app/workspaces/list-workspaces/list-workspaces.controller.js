@@ -286,7 +286,6 @@ export class ListWorkspacesCtrl {
     }
     let confirm = this.$mdDialog.confirm()
       .title(confirmTitle)
-      .content('Please confirm for the removal.')
       .ariaLabel('Remove workspaces')
       .ok('Delete!')
       .cancel('Cancel')

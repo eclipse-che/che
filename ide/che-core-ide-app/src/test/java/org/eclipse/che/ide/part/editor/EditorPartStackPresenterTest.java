@@ -21,8 +21,6 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
-import org.eclipse.che.ide.api.event.project.CloseCurrentProjectEvent;
-import org.eclipse.che.ide.api.event.project.CloseCurrentProjectHandler;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
@@ -90,8 +88,6 @@ public class EditorPartStackPresenterTest {
     @Mock
     private SVGResource              resource2;
     @Mock
-    private CloseCurrentProjectEvent closeProjectEvent;
-    @Mock
     private ProjectConfigDto         descriptor;
     @Mock
     private EditorPartPresenter      editorPartPresenter;
@@ -106,8 +102,6 @@ public class EditorPartStackPresenterTest {
 
     @Captor
     private ArgumentCaptor<ListItem>                   itemCaptor;
-    @Captor
-    private ArgumentCaptor<CloseCurrentProjectHandler> closeProjectHandlerCaptor;
     @Captor
     private ArgumentCaptor<AsyncCallback<Void>>        argumentCaptor;
 

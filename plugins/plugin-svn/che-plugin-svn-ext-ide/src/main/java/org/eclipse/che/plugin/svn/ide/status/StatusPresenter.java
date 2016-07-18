@@ -13,12 +13,15 @@ package org.eclipse.che.plugin.svn.ide.status;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -26,8 +29,7 @@ import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
-import java.util.List;
-
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
@@ -37,51 +39,47 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 @Singleton
 public class StatusPresenter extends SubversionActionPresenter {
 
-    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
     private final NotificationManager                      notificationManager;
     private final SubversionClientService                  service;
     private final SubversionExtensionLocalizationConstants constants;
 
     @Inject
-    protected StatusPresenter(final AppContext appContext,
-                              final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                              final NotificationManager notificationManager,
-                              final SubversionOutputConsoleFactory consoleFactory,
-                              final SubversionClientService service,
-                              final SubversionExtensionLocalizationConstants constants,
-                              final ConsolesPanelPresenter consolesPanelPresenter,
-                              final ProjectExplorerPresenter projectExplorerPart,
-                              final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
+    protected StatusPresenter(AppContext appContext,
+                              NotificationManager notificationManager,
+                              SubversionOutputConsoleFactory consoleFactory,
+                              SubversionClientService service,
+                              SubversionExtensionLocalizationConstants constants,
+                              ConsolesPanelPresenter consolesPanelPresenter,
+                              StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
 
         this.service = service;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.notificationManager = notificationManager;
         this.constants = constants;
     }
 
     public void showStatus() {
-        final List<String> selectedPaths = getSelectedPaths();
-        final String projectPath = getCurrentProjectPath();
+        final Project project = appContext.getRootProject();
 
-        if (projectPath == null) {
-            return;
-        }
+        checkState(project != null);
 
-        service.status(projectPath, selectedPaths, null, false, false, false, true, false, null,
-                       new AsyncRequestCallback<CLIOutputResponse>(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class)) {
-                           @Override
-                           protected void onSuccess(final CLIOutputResponse response) {
-                               printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(),
-                                             constants.commandStatus());
-                           }
+        final Resource[] resources = appContext.getResources();
 
-                           @Override
-                           protected void onFailure(final Throwable exception) {
-                               String errorMessage = exception.getMessage();
-                               notificationManager.notify(constants.statusFailed() + " - " + errorMessage, FAIL, FLOAT_MODE);
-                           }
-                       });
+        checkState(!Arrays.isNullOrEmpty(resources));
+
+        service.status(project.getLocation(), toRelative(project, resources), null, false, false, false, true, false, null)
+                .then(new Operation<CLIOutputResponse>() {
+                    @Override
+                    public void apply(CLIOutputResponse response) throws OperationException {
+                        printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandStatus());
+                    }
+                })
+                .catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        notificationManager.notify(constants.statusFailed(), FAIL, FLOAT_MODE);
+                    }
+                });
     }
 
 }

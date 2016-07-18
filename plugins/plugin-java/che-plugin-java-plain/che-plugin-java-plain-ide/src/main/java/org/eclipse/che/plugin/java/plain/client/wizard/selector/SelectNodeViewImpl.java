@@ -22,24 +22,21 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
+import org.eclipse.che.ide.resources.tree.SkipHiddenNodesInterceptor;
 import org.eclipse.che.ide.search.selectpath.FolderNodeInterceptor;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
-import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
-import org.eclipse.che.ide.ui.smartTree.UniqueKeyProvider;
 import org.eclipse.che.ide.ui.window.Window;
 
-import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
+import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.MULTI;
 
 /**
  * Implementation of {@link SelectNodeView}.
@@ -49,9 +46,10 @@ import static org.eclipse.che.ide.ui.smartTree.SelectionModel.Mode.SINGLE;
 @Singleton
 public class SelectNodeViewImpl extends Window implements SelectNodeView {
     private final FolderNodeInterceptor folderNodeInterceptor;
+    private SkipHiddenNodesInterceptor skipHiddenNodesInterceptor;
 
-    private Tree                     tree;
-    private ActionDelegate           delegate;
+    private Tree           tree;
+    private ActionDelegate delegate;
 
     private Button acceptButton;
     private Button cancelButton;
@@ -65,31 +63,22 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
     @Inject
     public SelectNodeViewImpl(CoreLocalizationConstant locale,
                               FolderNodeInterceptor folderNodeInterceptor,
-                              SelectPathViewImplUiBinder uiBinder) {
+                              SelectPathViewImplUiBinder uiBinder,
+                              SkipHiddenNodesInterceptor skipHiddenNodesInterceptor) {
         this.folderNodeInterceptor = folderNodeInterceptor;
+        this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
         setTitle(locale.selectPathWindowTitle());
 
         Widget widget = uiBinder.createAndBindUi(this);
         setWidget(widget);
 
-        UniqueKeyProvider<Node> uniqueKeyProvider = new NodeUniqueKeyProvider() {
-            @NotNull
-            @Override
-            public String getKey(@NotNull Node item) {
-                if (item instanceof HasStorablePath) {
-                    return ((HasStorablePath)item).getStorablePath();
-                } else {
-                    return String.valueOf(item.hashCode());
-                }
-            }
-        };
         Set<NodeInterceptor> interceptors = new HashSet<>();
         NodeLoader loader = new NodeLoader(interceptors);
-        NodeStorage nodeStorage = new NodeStorage(uniqueKeyProvider);
+        NodeStorage nodeStorage = new NodeStorage();
 
         tree = new Tree(nodeStorage, loader);
         tree.setAutoSelect(true);
-        tree.getSelectionModel().setSelectionMode(SINGLE);
+        tree.getSelectionModel().setSelectionMode(MULTI);
         treeContainer.add(tree);
 
         KeyboardNavigationHandler handler = new KeyboardNavigationHandler() {
@@ -151,6 +140,7 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
         tree.getNodeStorage().clear();
         tree.getNodeLoader().getNodeInterceptors().clear();
         tree.getNodeLoader().getNodeInterceptors().add(folderNodeInterceptor);
+        tree.getNodeLoader().getNodeInterceptors().add(skipHiddenNodesInterceptor);
         for (Node node : nodes) {
             tree.getNodeStorage().add(node);
         }
@@ -161,9 +151,8 @@ public class SelectNodeViewImpl extends Window implements SelectNodeView {
         if (nodes.isEmpty()) {
             return;
         }
-        Node selectedNode = nodes.get(0);
 
-        delegate.setSelectedNode(((HasStorablePath)selectedNode).getStorablePath());
+        delegate.setSelectedNode(nodes);
 
         hide();
     }

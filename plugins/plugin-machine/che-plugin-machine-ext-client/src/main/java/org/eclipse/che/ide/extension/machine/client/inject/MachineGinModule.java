@@ -22,6 +22,8 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.Perspective;
+import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
+import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClientImpl;
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsView;
@@ -36,9 +38,6 @@ import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFacto
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.WidgetsFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineManagerImpl;
-import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsoleToolbar;
-import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsoleView;
-import org.eclipse.che.ide.extension.machine.client.machine.console.MachineConsoleViewImpl;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineView;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineViewImpl;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
@@ -56,6 +55,8 @@ import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.head
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeaderImpl;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelView;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelViewImpl;
+import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerView;
+import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerViewImpl;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.extension.machine.client.targets.BaseTarget;
 import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
@@ -71,7 +72,6 @@ import org.eclipse.che.ide.extension.machine.client.targets.categories.docker.Do
 import org.eclipse.che.ide.extension.machine.client.targets.categories.ssh.SshCategoryPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.categories.ssh.SshView;
 import org.eclipse.che.ide.extension.machine.client.targets.categories.ssh.SshViewImpl;
-import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 
 import static org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective.OPERATIONS_PERSPECTIVE_ID;
 
@@ -91,9 +91,6 @@ public class MachineGinModule extends AbstractGinModule {
         GinMapBinder<String, Perspective> perspectiveBinder = GinMapBinder.newMapBinder(binder(), String.class, Perspective.class);
         perspectiveBinder.addBinding(OPERATIONS_PERSPECTIVE_ID).to(OperationsPerspective.class);
 
-        bind(ToolbarPresenter.class).annotatedWith(MachineConsoleToolbar.class).to(ToolbarPresenter.class).in(Singleton.class);
-        bind(MachineConsoleView.class).to(MachineConsoleViewImpl.class).in(Singleton.class);
-
         bind(CreateMachineView.class).to(CreateMachineViewImpl.class);
         bind(OutputConsoleView.class).to(OutputConsoleViewImpl.class);
         install(new GinFactoryModuleBuilder()
@@ -101,7 +98,8 @@ public class MachineGinModule extends AbstractGinModule {
                         .implement(OutputConsole.class, Names.named("default"), DefaultOutputConsole.class)
                         .build(CommandConsoleFactory.class));
 
-        bind(ConsolesPanelView.class).to(ConsolesPanelViewImpl.class).in(Singleton.class);
+        bind(ConsolesPanelView.class).to(ConsolesPanelViewImpl.class);
+        bind(ConsolesContainerView.class).to(ConsolesContainerViewImpl.class).in(Singleton.class);
 
         bind(EditCommandsView.class).to(EditCommandsViewImpl.class).in(Singleton.class);
 
@@ -132,6 +130,8 @@ public class MachineGinModule extends AbstractGinModule {
         bind(DevelopmentView.class).to(DevelopmentViewImpl.class);
 
         bind(Target.class).to(BaseTarget.class);
+
+        bind(RecipeScriptDownloadServiceClient.class).to(RecipeScriptDownloadServiceClientImpl.class).in(Singleton.class);
 
         final GinMultibinder<CategoryPage> categoryPageBinder = GinMultibinder.newSetBinder(binder(), CategoryPage.class);
         categoryPageBinder.addBinding().to(SshCategoryPresenter.class);

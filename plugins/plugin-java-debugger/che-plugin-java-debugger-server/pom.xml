@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-debugger-server</artifactId>
     <packaging>jar</packaging>
@@ -38,6 +38,10 @@
             <artifactId>antlr-runtime</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.birt.runtime</groupId>
+            <artifactId>org.eclipse.equinox.common</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-debug</artifactId>
         </dependency>
@@ -51,7 +55,33 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-jdt-core-repack</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.eclipse.jdt.core</artifactId>
+                    <groupId>org.eclipse.tycho</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>org.eclipse.jdt.ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.text</groupId>
+            <artifactId>org.eclipse.text</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -62,6 +92,31 @@
             <artifactId>tools</artifactId>
             <scope>system</scope>
             <systemPath>${java.home}/../lib/tools.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockitong</groupId>
+            <artifactId>mockitong</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

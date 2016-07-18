@@ -21,9 +21,15 @@
 .popupMenuTable {
     border: 1px solid popupBorderColor;
     position: relative;
+    table-layout: fixed;
     left: 0px;
     top: 0px;
     border-radius: 0px 0px 3px 3px;
+}
+
+.popupMenuTable tbody,  .popupMenuTable tr, .popupMenuTable td, .popupMenuTable nobr {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .popupMenuCheckField,

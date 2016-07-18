@@ -112,7 +112,6 @@ public class WorkspaceServiceTest {
     private static final ApiExceptionMapper MAPPER      = new ApiExceptionMapper();
     private static final String             NAMESPACE   = "user";
     private static final String             USER_ID     = "user123";
-    private static final String             IDE_CONTEXT = "ws";
     @SuppressWarnings("unused")
     private static final EnvironmentFilter  FILTER      = new EnvironmentFilter();
 
@@ -130,7 +129,7 @@ public class WorkspaceServiceTest {
         service = new WorkspaceService(wsManager,
                                        machineManager,
                                        validator,
-                                       new WorkspaceServiceLinksInjector(IDE_CONTEXT, new MachineServiceLinksInjector()));
+                                       new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
     }
 
     @Test
@@ -502,6 +501,7 @@ public class WorkspaceServiceTest {
                                               + "/environment/" + envDto.getName());
 
         assertEquals(response.getStatusCode(), 200);
+        assertEquals(workspace.getConfig().getEnvironments().size(), 1);
         verify(validator).validateConfig(workspace.getConfig());
         verify(wsManager).updateWorkspace(any(), any());
     }

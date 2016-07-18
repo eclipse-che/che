@@ -12,59 +12,51 @@ package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.project.shared.dto.ItemReference;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.api.selection.SelectionAgent;
-import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.project.node.FolderReferenceNode;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.projecttype.wizard.presenter.ProjectWizardPresenter;
+import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
 
-import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * The special action which allows call business logic which can convert folder to project.
  *
- * @author Dmitry Shnurenko
+ * @author Valeriy Svydenko
  */
 public class ConvertFolderToProjectAction extends AbstractPerspectiveAction {
-    private final SelectionAgent         selectionAgent;
+    private final AppContext             appContext;
     private final ProjectWizardPresenter projectConfigWizard;
-    private final DtoFactory             dtoFactory;
 
     @Inject
     public ConvertFolderToProjectAction(CoreLocalizationConstant locale,
-                                        SelectionAgent selectionAgent,
-                                        ProjectWizardPresenter projectConfigWizard,
-                                        DtoFactory dtoFactory) {
-        super(Arrays.asList(PROJECT_PERSPECTIVE_ID),
+                                        AppContext appContext,
+                                        ProjectWizardPresenter projectConfigWizard) {
+        super(singletonList(PROJECT_PERSPECTIVE_ID),
               locale.actionConvertFolderToProject(),
               locale.actionConvertFolderToProjectDescription(),
               null,
               null);
-        this.selectionAgent = selectionAgent;
+        this.appContext = appContext;
         this.projectConfigWizard = projectConfigWizard;
-        this.dtoFactory = dtoFactory;
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        boolean isVisible = getSelectedItem() != null;
-
-        event.getPresentation().setEnabledAndVisible(isVisible);
+        event.getPresentation().setEnabledAndVisible(getSelectedItem() != null);
     }
 
-    private ItemReference getSelectedItem() {
-        Selection<?> selection = selectionAgent.getSelection();
-        if (!selection.isEmpty() && selection.getHeadElement() instanceof FolderReferenceNode) {
-            return ((FolderReferenceNode)selection.getHeadElement()).getData();
+    private Resource getSelectedItem() {
+        Resource resource = appContext.getResource();
+        if (resource != null && resource.isFolder()) {
+            return resource;
         }
 
         return null;
@@ -72,13 +64,20 @@ public class ConvertFolderToProjectAction extends AbstractPerspectiveAction {
 
     @Override
     public void actionPerformed(ActionEvent event) {
-        ItemReference itemReference = getSelectedItem();
-        ProjectConfigDto configDto = dtoFactory.createDto(ProjectConfigDto.class)
-                                               .withPath(itemReference.getPath())
-                                               .withName(itemReference.getName())
-                                               .withLinks(itemReference.getLinks())
-                                               .withType(itemReference.getType());
+        Resource folder = getSelectedItem();
+        if (folder == null) {
+            return;
+        }
 
-        projectConfigWizard.show(configDto, UPDATE);
+        Path location = folder.getLocation();
+        if (location == null) {
+            return;
+        }
+
+        MutableProjectConfig mutableProjectConfig = new MutableProjectConfig();
+        mutableProjectConfig.setPath(location.toString());
+        mutableProjectConfig.setName(folder.getName());
+
+        projectConfigWizard.show(mutableProjectConfig);
     }
 }

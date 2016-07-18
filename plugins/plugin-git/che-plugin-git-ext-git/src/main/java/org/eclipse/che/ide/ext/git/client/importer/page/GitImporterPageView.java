@@ -28,6 +28,9 @@ public interface GitImporterPageView extends View<GitImporterPageView.ActionDele
         /** Performs any actions appropriate in response to the user having changed the project's URL. */
         void projectUrlChanged(@NotNull String url);
 
+        /** Performs any actions appropriate in response to the user has selected recursive checkbox. */
+        void onRecursiveSelected(boolean recursiveSelected);
+
         /** Performs any actions appropriate in response to the user having changed the project's description. */
         void projectDescriptionChanged(@NotNull String projectDescriptionValue);
 
@@ -171,7 +174,7 @@ public interface GitImporterPageView extends View<GitImporterPageView.ActionDele
     /**
      * Focuses directory name field.
      */
-    void focusDirectoryNameFiend();
+    void focusDirectoryNameField();
 
     /**
      * Sets new value of Branch name field.
@@ -207,4 +210,9 @@ public interface GitImporterPageView extends View<GitImporterPageView.ActionDele
      * @param enable true or false to enable or disable the field
      */
     void enableBranchNameField(boolean enable);
+
+    /**
+     * Focuses Branch name field.
+     */
+    void focusBranchNameField();
 }

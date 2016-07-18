@@ -13,22 +13,20 @@ package org.eclipse.che.ide.ext.git.client.remote;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.Remote;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.ext.git.client.remote.add.AddRemoteRepositoryPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -40,17 +38,14 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  * Presenter for working with remote repository list (view, add and delete).
  *
  * @author Ann Zhuleva
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class RemotePresenter implements RemoteView.ActionDelegate {
     public static final String REMOTE_REPO_COMMAND_NAME = "Git list of remotes";
 
-    private final EventBus                eventBus;
-    private final ProjectServiceClient    projectService;
-    private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
-    private final GitOutputConsoleFactory gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
-
+    private final GitOutputConsoleFactory      gitOutputConsoleFactory;
+    private final ConsolesPanelPresenter       consolesPanelPresenter;
     private final RemoteView                   view;
     private final GitServiceClient             service;
     private final AppContext                   appContext;
@@ -58,25 +53,19 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
     private final AddRemoteRepositoryPresenter addRemoteRepositoryPresenter;
     private final NotificationManager          notificationManager;
 
-    private Remote           selectedRemote;
-    private ProjectConfigDto project;
+    private Remote  selectedRemote;
+    private Project project;
 
     @Inject
     public RemotePresenter(RemoteView view,
                            GitServiceClient service,
                            AppContext appContext,
-                           EventBus eventBus,
                            GitLocalizationConstant constant,
-                           ProjectServiceClient projectService,
                            AddRemoteRepositoryPresenter addRemoteRepositoryPresenter,
                            NotificationManager notificationManager,
-                           DtoUnmarshallerFactory dtoUnmarshallerFactory,
                            GitOutputConsoleFactory gitOutputConsoleFactory,
                            ConsolesPanelPresenter consolesPanelPresenter) {
         this.view = view;
-        this.eventBus = eventBus;
-        this.projectService = projectService;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
         this.consolesPanelPresenter = consolesPanelPresenter;
         this.view.setDelegate(this);
@@ -90,8 +79,8 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
     /**
      * Show dialog.
      */
-    public void showDialog() {
-        project = appContext.getCurrentProject().getRootProject();
+    public void showDialog(Project project) {
+        this.project = project;
         getRemotes();
     }
 
@@ -100,24 +89,22 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
      * then get the list of branches (remote and local).
      */
     private void getRemotes() {
-        service.remoteList(appContext.getDevMachine(), project, null, true,
-                           new AsyncRequestCallback<List<Remote>>(dtoUnmarshallerFactory.newListUnmarshaller(Remote.class)) {
-                               @Override
-                               protected void onSuccess(List<Remote> result) {
-                                   view.setEnableDeleteButton(selectedRemote != null);
-                                   view.setRemotes(result);
-                                   if (!view.isShown()) {
-                                       view.showDialog();
-                                   }
-                               }
-
-                               @Override
-                               protected void onFailure(Throwable exception) {
-                                   String errorMessage =
-                                           exception.getMessage() != null ? exception.getMessage() : constant.remoteListFailed();
-                                   handleError(errorMessage);
-                               }
-                           });
+        service.remoteList(appContext.getDevMachine(), project.getLocation(), null, true).then(new Operation<List<Remote>>() {
+            @Override
+            public void apply(List<Remote> remotes) throws OperationException {
+                view.setEnableDeleteButton(selectedRemote != null);
+                view.setRemotes(remotes);
+                if (!view.isShown()) {
+                    view.showDialog();
+                }
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                String errorMessage = error.getMessage() != null ? error.getMessage() : constant.remoteListFailed();
+                handleError(errorMessage);
+            }
+        });
     }
 
     /**
@@ -137,7 +124,8 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
             @Override
             public void onSuccess(Void result) {
                 getRemotes();
-                refreshProject();
+
+                project.synchronize();
             }
 
             @Override
@@ -146,7 +134,7 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
                 GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
                 console.printError(errorMessage);
                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.remoteAddFailed(), FAIL, FLOAT_MODE, project);
+                notificationManager.notify(constant.remoteAddFailed(), FAIL, FLOAT_MODE);
             }
         });
     }
@@ -161,21 +149,21 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
             return;
         }
 
-        final String name = selectedRemote.getName();
-        service.remoteDelete(appContext.getDevMachine(), project, name, new AsyncRequestCallback<String>() {
+        service.remoteDelete(appContext.getDevMachine(), project.getLocation(), selectedRemote.getName()).then(new Operation<Void>() {
             @Override
-            protected void onSuccess(String result) {
+            public void apply(Void ignored) throws OperationException {
                 getRemotes();
-                refreshProject();
-            }
 
+                project.synchronize();
+            }
+        }).catchError(new Operation<PromiseError>() {
             @Override
-            protected void onFailure(Throwable exception) {
-                String errorMessage = exception.getMessage() != null ? exception.getMessage() : constant.remoteDeleteFailed();
+            public void apply(PromiseError error) throws OperationException {
+                String errorMessage = error.getMessage() != null ? error.getMessage() : constant.remoteDeleteFailed();
                 GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
                 console.printError(errorMessage);
                 consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                notificationManager.notify(constant.remoteDeleteFailed(), FAIL, FLOAT_MODE, project);
+                notificationManager.notify(constant.remoteDeleteFailed(), FAIL, FLOAT_MODE);
             }
         });
     }
@@ -193,21 +181,6 @@ public class RemotePresenter implements RemoteView.ActionDelegate {
         GitOutputConsole console = gitOutputConsoleFactory.create(REMOTE_REPO_COMMAND_NAME);
         console.printError(errorMessage);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-        notificationManager.notify(errorMessage, project);
-    }
-
-    private void refreshProject() {
-        projectService.getProject(appContext.getDevMachine(), project.getName(), new AsyncRequestCallback<ProjectConfigDto>(
-                dtoUnmarshallerFactory.newUnmarshaller(ProjectConfigDto.class)) {
-            @Override
-            protected void onSuccess(ProjectConfigDto result) {
-                eventBus.fireEvent(new ProjectUpdatedEvent(project.getPath(), result));
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                notificationManager.notify(exception.getLocalizedMessage(), FAIL, FLOAT_MODE, project);
-            }
-        });
+        notificationManager.notify(errorMessage);
     }
 }

@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-plain</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.4.0-RC1-SNAPSHOT</version>
+        <version>4.5.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-plain-ide</artifactId>
     <packaging>jar</packaging>
@@ -37,10 +37,6 @@
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

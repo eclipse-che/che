@@ -10,18 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projecttype.wizard;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
-
-import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 
 /**
  * Helps to create new instances of {@link ProjectWizard}.
  *
  * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskyi
  */
 public interface ProjectWizardFactory {
-    ProjectWizard newWizard(@NotNull ProjectConfigDto dataObject,
-                            @NotNull ProjectWizardMode mode,
-                            @NotNull String projectPath);
+    ProjectWizard newWizard(MutableProjectConfig dataObject, ProjectWizardMode mode);
 }

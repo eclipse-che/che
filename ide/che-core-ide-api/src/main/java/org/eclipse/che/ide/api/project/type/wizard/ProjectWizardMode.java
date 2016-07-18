@@ -21,9 +21,7 @@ public enum ProjectWizardMode {
 
     /** Project wizard opened for creating new project. */
     CREATE("create"),
-    /** Project wizard opened for creating module from existing folder. */
-    CREATE_MODULE("create_module"),
-    /** Project wizard opened for updating existing project. */
+    /** Project wizard opened for updating existing project or creating configuration for the existed folder. */
     UPDATE("update"),
     /** Project wizard opened for creating new project from template. */
     IMPORT("import");

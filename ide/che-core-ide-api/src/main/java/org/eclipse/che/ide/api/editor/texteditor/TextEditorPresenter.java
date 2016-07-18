@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.texteditor;
 
+import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -22,7 +23,11 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.debug.BreakpointRendererFactory;
@@ -73,8 +78,13 @@ import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
+import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -85,6 +95,12 @@ import java.util.Map;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.DERIVED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
+import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 /**
  * Presenter part for the editor implementations.
@@ -118,6 +134,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     private final QuickAssistantFactory       quickAssistantFactory;
     private final WorkspaceAgent              workspaceAgent;
     private final NotificationManager         notificationManager;
+    private final AppContext                  appContext;
 
     /** The editor handle for this editor. */
     private final EditorHandle handle;
@@ -137,6 +154,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     private BreakpointRenderer       breakpointRenderer;
     private List<String>             fileTypes;
     private TextPosition             cursorPosition;
+    private HandlerRegistration      resourceChangeHandler;
 
     @AssistedInject
     public TextEditorPresenter(final CodeAssistantFactory codeAssistantFactory,
@@ -152,7 +170,9 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
                                final FileTypeIdentifier fileTypeIdentifier,
                                final QuickAssistantFactory quickAssistantFactory,
                                final WorkspaceAgent workspaceAgent,
-                               final NotificationManager notificationManager) {
+                               final NotificationManager notificationManager,
+                               final AppContext appContext
+                              ) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.breakpointManager = breakpointManager;
         this.breakpointRendererFactory = breakpointRendererFactory;
@@ -167,6 +187,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         this.quickAssistantFactory = quickAssistantFactory;
         this.workspaceAgent = workspaceAgent;
         this.notificationManager = notificationManager;
+        this.appContext = appContext;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
         handle = new EditorHandle() {
@@ -266,14 +287,96 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     }
 
     private void setupFileContentUpdateHandler() {
+
+        resourceChangeHandler =
+                generalEventBus.addHandler(ResourceChangedEvent.getType(), new ResourceChangedEvent.ResourceChangedHandler() {
+                    @Override
+                    public void onResourceChanged(ResourceChangedEvent event) {
+                        final ResourceDelta delta = event.getDelta();
+
+                        switch (delta.getKind()) {
+                            case ADDED:
+                                onResourceCreated(delta);
+                                break;
+                            case REMOVED:
+                                onResourceRemoved(delta);
+                                break;
+                            case UPDATED:
+                                onResourceUpdated(delta);
+                        }
+                    }
+                });
+
         this.generalEventBus.addHandler(FileContentUpdateEvent.TYPE, new FileContentUpdateHandler() {
             @Override
             public void onFileContentUpdate(final FileContentUpdateEvent event) {
-                if (event.getFilePath() != null && event.getFilePath().equals(document.getFile().getPath())) {
+                if (event.getFilePath() != null && Path.valueOf(event.getFilePath()).equals(document.getFile().getLocation())) {
                     updateContent();
                 }
             }
         });
+    }
+
+    private void onResourceCreated(ResourceDelta delta) {
+        if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) == 0) {
+            return;
+        }
+
+        //file moved directly
+        if (delta.getFromPath().equals(document.getFile().getLocation())) {
+            final Resource resource = delta.getResource();
+            final Path movedFrom = delta.getFromPath();
+
+            if (document.getFile().getLocation().equals(movedFrom)) {
+                document.setFile((File)resource);
+                input.setFile((File)resource);
+            }
+
+            updateContent();
+        } else if (delta.getFromPath().isPrefixOf(document.getFile().getLocation())) { //directory where file moved
+            final Path relPath = document.getFile().getLocation().removeFirstSegments(delta.getFromPath().segmentCount());
+            final Path newPath = delta.getToPath().append(relPath);
+
+            appContext.getWorkspaceRoot().getFile(newPath).then(new Operation<Optional<File>>() {
+                @Override
+                public void apply(Optional<File> file) throws OperationException {
+                    if (file.isPresent()) {
+                        document.setFile(file.get());
+                        input.setFile(file.get());
+
+                        updateContent();
+                    }
+                }
+            });
+        }
+
+
+    }
+
+    private void onResourceRemoved(ResourceDelta delta) {
+        if ((delta.getFlags() & DERIVED) == 0) {
+            return;
+        }
+
+        final Resource resource = delta.getResource();
+
+        if (resource.isFile() && document.getFile().getLocation().equals(resource.getLocation())) {
+            if (resourceChangeHandler != null) {
+                resourceChangeHandler.removeHandler();
+                resourceChangeHandler = null;
+            }
+            close(false);
+        }
+    }
+
+    private void onResourceUpdated(ResourceDelta delta) {
+        if ((delta.getFlags() & DERIVED) == 0) {
+            return;
+        }
+
+        if (delta.getResource().isFile() && document.getFile().getLocation().equals(delta.getResource().getLocation())) {
+            updateContent();
+        }
     }
 
     private void updateContent() {
@@ -337,6 +440,8 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         if (reconciler != null) {
             reconciler.uninstall();
         }
+
+        workspaceAgent.removePart(this);
     }
 
     @Inject
@@ -397,6 +502,16 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     }
 
     @Override
+    protected void handleClose() {
+        if (resourceChangeHandler != null) {
+            resourceChangeHandler.removeHandler();
+            resourceChangeHandler = null;
+        }
+
+        super.handleClose();
+    }
+
+    @Override
     public TextEditorPartView getView() {
         return this.editorView;
     }
@@ -418,10 +533,8 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
             return;
         }
 
-        final String eventFilePath = event.getFile().getPath();
-        final String filePath = input.getFile().getPath();
-        if (filePath.equals(eventFilePath)) {
-            workspaceAgent.removePart(this);
+        if (input.getFile().equals(event.getFile())) {
+            close(false);
         }
     }
 

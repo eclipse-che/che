@@ -36,6 +36,8 @@ import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
@@ -71,7 +73,9 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class SelectCommandComboBox extends AbstractPerspectiveAction implements CustomComponentAction,
                                                                                 EditCommandsPresenter.ConfigurationChangedListener,
                                                                                 WsAgentStateHandler,
-                                                                                MachineStateEvent.Handler {
+                                                                                MachineStateEvent.Handler,
+                                                                                WorkspaceStartedEvent.Handler,
+                                                                                WorkspaceStoppedEvent.Handler {
 
     public static final String GROUP_COMMANDS = "CommandsGroup";
     public static final String GROUP_MACHINES = "MachinesGroup";
@@ -89,6 +93,8 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
     private final String                      workspaceId;
     private final DefaultActionGroup          commandActions;
     private final DefaultActionGroup          machinesActions;
+
+    private boolean workspaceRunning = false;
 
     @Inject
     public SelectCommandComboBox(MachineLocalizationConstant locale,
@@ -129,10 +135,13 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, this);
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
     }
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
+        event.getPresentation().setVisible(workspaceRunning);
     }
 
     @Override
@@ -312,12 +321,6 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
         loadCommands(command);
     }
 
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-        loadCommands(null);
-        loadMachines();
-    }
-
     private void loadMachines() {
         machineServiceClient.getMachines(workspaceId).then(new Operation<List<MachineDto>>() {
             @Override
@@ -327,6 +330,12 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
         });
     }
 
+    @Override
+    public void onWsAgentStarted(WsAgentStateEvent event) {
+        workspaceRunning = true;
+        loadCommands(null);
+        loadMachines();
+    }
 
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
@@ -418,6 +427,18 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
             return locale.devMachineCategory();
         }
         return machineConfig.getType();
+    }
+
+    @Override
+    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+        workspaceRunning = true;
+    }
+
+    @Override
+    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        machinesListWidget.selectElement(null, null);
+        registeredMachineMap.clear();
+        workspaceRunning = false;
     }
 
     private class MachineDtoListEntryComparator implements Comparator<Map.Entry<String, MachineDto>> {

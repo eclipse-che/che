@@ -18,11 +18,10 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.navigation.NavigateToFilePresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -30,25 +29,23 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  *
  * @author Ann Shumilova
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class NavigateToFileAction extends AbstractPerspectiveAction {
 
     private final NavigateToFilePresenter  presenter;
-    private final ProjectExplorerPresenter projectExplorerPresenter;
 
     @Inject
     public NavigateToFileAction(NavigateToFilePresenter presenter,
                                 Resources resources,
-                                ProjectExplorerPresenter projectExplorerPresenter,
                                 CoreLocalizationConstant localizationConstant) {
-        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+        super(singletonList(PROJECT_PERSPECTIVE_ID),
               localizationConstant.actionNavigateToFileText(),
               localizationConstant.actionNavigateToFileDescription(),
               null,
               resources.navigateToFile());
         this.presenter = presenter;
-        this.projectExplorerPresenter = projectExplorerPresenter;
     }
 
     @Override
@@ -58,6 +55,6 @@ public class NavigateToFileAction extends AbstractPerspectiveAction {
 
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setEnabled(!projectExplorerPresenter.getRootNodes().isEmpty());
+        event.getPresentation().setEnabledAndVisible(true);
     }
 }

@@ -12,27 +12,22 @@ package org.eclipse.che.ide.ext.git.client.merge;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.MergeResult;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 
@@ -52,6 +47,7 @@ import static org.eclipse.che.ide.ext.git.client.merge.Reference.RefType.REMOTE_
  * Presenter to perform merge reference with current HEAD commit.
  *
  * @author Ann Zhuleva
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class MergePresenter implements MergeView.ActionDelegate {
@@ -59,100 +55,88 @@ public class MergePresenter implements MergeView.ActionDelegate {
     public static final String LOCAL_BRANCHES_TITLE  = "Local Branches";
     public static final String REMOTE_BRANCHES_TITLE = "Remote Branches";
 
-    private final DtoUnmarshallerFactory   dtoUnmarshallerFactory;
-    private final MergeView                view;
-    private final DialogFactory            dialogFactory;
-    private final ProjectExplorerPresenter projectExplorer;
-    private final GitOutputConsoleFactory  gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter   consolesPanelPresenter;
-    private final GitServiceClient         service;
-    private final EventBus                 eventBus;
-    private final GitLocalizationConstant  constant;
-    private final EditorAgent              editorAgent;
-    private final AppContext               appContext;
-    private final NotificationManager      notificationManager;
+    private final MergeView               view;
+    private final DialogFactory           dialogFactory;
+    private final GitOutputConsoleFactory gitOutputConsoleFactory;
+    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final GitServiceClient        service;
+    private final GitLocalizationConstant constant;
+    private final AppContext              appContext;
+    private final NotificationManager     notificationManager;
 
     private Reference selectedReference;
+    private Project   project;
 
     @Inject
     public MergePresenter(MergeView view,
-                          EventBus eventBus,
-                          EditorAgent editorAgent,
                           GitServiceClient service,
                           GitLocalizationConstant constant,
                           AppContext appContext,
                           NotificationManager notificationManager,
                           DialogFactory dialogFactory,
-                          DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                          ProjectExplorerPresenter projectExplorer,
                           GitOutputConsoleFactory gitOutputConsoleFactory,
                           ConsolesPanelPresenter consolesPanelPresenter) {
         this.view = view;
         this.dialogFactory = dialogFactory;
-        this.projectExplorer = projectExplorer;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
         this.consolesPanelPresenter = consolesPanelPresenter;
         this.view.setDelegate(this);
         this.service = service;
-        this.eventBus = eventBus;
         this.constant = constant;
-        this.editorAgent = editorAgent;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
+
     }
 
     /** Show dialog. */
-    public void showDialog() {
-        final ProjectConfigDto project = appContext.getCurrentProject().getRootProject();
+    public void showDialog(Project project) {
+        this.project = project;
         final GitOutputConsole console = gitOutputConsoleFactory.create(MERGE_COMMAND_NAME);
         selectedReference = null;
         view.setEnableMergeButton(false);
 
-        service.branchList(appContext.getDevMachine(), project, LIST_LOCAL,
-                           new AsyncRequestCallback<List<Branch>>(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class)) {
-                               @Override
-                               protected void onSuccess(List<Branch> result) {
-                                   List<Reference> references = new ArrayList<>();
-                                   for (Branch branch : result) {
-                                       if (!branch.isActive()) {
-                                           Reference reference = new Reference(branch.getName(), branch.getDisplayName(), LOCAL_BRANCH);
-                                           references.add(reference);
-                                       }
-                                   }
-                                   view.setLocalBranches(references);
-                               }
+        service.branchList(appContext.getDevMachine(), project.getLocation(), LIST_LOCAL).then(new Operation<List<Branch>>() {
+            @Override
+            public void apply(List<Branch> branches) throws OperationException {
+                List<Reference> references = new ArrayList<>();
+                for (Branch branch : branches) {
+                    if (!branch.isActive()) {
+                        Reference reference = new Reference(branch.getName(), branch.getDisplayName(), LOCAL_BRANCH);
+                        references.add(reference);
+                    }
+                }
+                view.setLocalBranches(references);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                console.printError(error.getMessage());
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
+            }
+        });
 
-                               @Override
-                               protected void onFailure(Throwable exception) {
-                                   console.printError(exception.getMessage());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE, project);
-                               }
-                           });
-
-        service.branchList(appContext.getDevMachine(), project, LIST_REMOTE,
-                           new AsyncRequestCallback<List<Branch>>(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class)) {
-                               @Override
-                               protected void onSuccess(List<Branch> result) {
-                                   List<Reference> references = new ArrayList<>();
-                                   for (Branch branch : result) {
-                                       if (!branch.isActive()) {
-                                           Reference reference =
-                                                   new Reference(branch.getName(), branch.getDisplayName(), REMOTE_BRANCH);
-                                           references.add(reference);
-                                       }
-                                   }
-                                   view.setRemoteBranches(references);
-                               }
-
-                               @Override
-                               protected void onFailure(Throwable exception) {
-                                   console.printError(exception.getMessage());
-                                   consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                                   notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE, project);
-                               }
-                           });
+        service.branchList(appContext.getDevMachine(), project.getLocation(), LIST_REMOTE).then(new Operation<List<Branch>>() {
+            @Override
+            public void apply(List<Branch> branches) throws OperationException {
+                List<Reference> references = new ArrayList<>();
+                for (Branch branch : branches) {
+                    if (!branch.isActive()) {
+                        Reference reference =
+                                new Reference(branch.getName(), branch.getDisplayName(), REMOTE_BRANCH);
+                        references.add(reference);
+                    }
+                }
+                view.setRemoteBranches(references);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                console.printError(error.getMessage());
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                notificationManager.notify(constant.branchesListFailed(), FAIL, FLOAT_MODE);
+            }
+        });
 
         view.showDialog();
     }
@@ -169,49 +153,36 @@ public class MergePresenter implements MergeView.ActionDelegate {
         view.close();
 
         final GitOutputConsole console = gitOutputConsoleFactory.create(MERGE_COMMAND_NAME);
-        service.merge(appContext.getDevMachine(), appContext.getCurrentProject().getRootProject(), selectedReference.getDisplayName(),
-                      new AsyncRequestCallback<MergeResult>(dtoUnmarshallerFactory.newUnmarshaller(MergeResult.class)) {
-                          @Override
-                          protected void onSuccess(final MergeResult result) {
-                              console.print(formMergeMessage(result));
-                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                              notificationManager.notify(formMergeMessage(result), appContext.getCurrentProject().getRootProject());
-                              refreshProject(editorAgent.getOpenedEditors());
-                          }
 
-                          @Override
-                          protected void onFailure(Throwable exception) {
-                              if (exception instanceof ServerException &&
-                                  ((ServerException)exception).getErrorCode() == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
-                                  dialogFactory.createMessageDialog(constant.mergeTitle(), constant.committerIdentityInfoEmpty(),
-                                                                    new ConfirmCallback() {
-                                                                        @Override
-                                                                        public void accepted() {
-                                                                            //do nothing
-                                                                        }
-                                                                    }).show();
-                                  return;
-                              }
-                              console.printError(exception.getMessage());
-                              consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-                              notificationManager
-                                      .notify(constant.mergeFailed(), FAIL, FLOAT_MODE, appContext.getCurrentProject().getRootProject());
-                          }
-                      });
-    }
+        service.merge(appContext.getDevMachine(), project.getLocation(), selectedReference.getDisplayName())
+               .then(new Operation<MergeResult>() {
+                   @Override
+                   public void apply(MergeResult result) throws OperationException {
+                       console.print(formMergeMessage(result));
+                       consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                       notificationManager.notify(formMergeMessage(result));
 
-    /**
-     * Refresh project.
-     *
-     * @param openedEditors
-     *         editors that corresponds to open files
-     */
-    private void refreshProject(final List<EditorPartPresenter> openedEditors) {
-        projectExplorer.reloadChildren();
-        for (EditorPartPresenter partPresenter : openedEditors) {
-            final VirtualFile file = partPresenter.getEditorInput().getFile();
-            eventBus.fireEvent(new FileContentUpdateEvent(file.getPath()));
-        }
+                       project.synchronize();
+                   }
+               }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                if (error.getCause() instanceof ServerException &&
+                    ((ServerException)error.getCause()).getErrorCode() == ErrorCodes.NO_COMMITTER_NAME_OR_EMAIL_DEFINED) {
+                    dialogFactory.createMessageDialog(constant.mergeTitle(), constant.committerIdentityInfoEmpty(),
+                                                      new ConfirmCallback() {
+                                                          @Override
+                                                          public void accepted() {
+                                                              //do nothing
+                                                          }
+                                                      }).show();
+                    return;
+                }
+                console.printError(error.getMessage());
+                consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
+                notificationManager.notify(constant.mergeFailed(), FAIL, FLOAT_MODE);
+            }
+        });
     }
 
     /**

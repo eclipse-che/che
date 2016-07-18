@@ -32,8 +32,6 @@ public class StandardComponent implements Component {
 
     @Override
     public void start(final Callback<Component, Exception> callback) {
-        Log.info(StandardComponent.class, "All services have been successfully initialized.");
-
         // initialize standard components
         try {
             initializer.initialize();

@@ -12,8 +12,12 @@ package org.eclipse.che.plugin.cpp.ide.action;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.plugin.cpp.ide.CppLocalizationConstant;
 import org.eclipse.che.plugin.cpp.ide.CppResources;
 
@@ -37,10 +41,19 @@ public class CreateCSourceFileAction extends NewClikeResourceAction {
     @Inject
     public CreateCSourceFileAction(CppLocalizationConstant localizationConstant,
                                    CppResources cppResources,
-                                   AppContext appContext) {
+                                   DialogFactory dialogFactory,
+                                   CoreLocalizationConstant coreLocalizationConstant,
+                                   EventBus eventBus,
+                                   AppContext appContext,
+                                   NotificationManager notificationManager) {
         super(localizationConstant.createCFileActionTitle(),
               localizationConstant.createCFileActionDescription(),
-              cppResources.cFile(), appContext);
+              cppResources.cFile(),
+              dialogFactory,
+              coreLocalizationConstant,
+              eventBus,
+              appContext,
+              notificationManager);
     }
 
     @Override

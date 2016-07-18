@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedHandler;
 import org.eclipse.che.ide.api.ConnectionClosedInformer;
 import org.eclipse.che.ide.api.event.HttpSessionDestroyedEvent;
 import org.eclipse.che.ide.util.loging.Log;
@@ -41,7 +40,7 @@ public class WsConnectionListener implements ConnectionClosedHandler, Connection
         this.eventBus = eventBus;
         this.connectionClosedInformer = connectionClosedInformer;
 
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedHandler() {
+        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedEvent.Handler() {
             @Override
             public void onWorkspaceStarted(WorkspaceStartedEvent workspace) {
                 messageBus = messageBusProvider.getMessageBus();

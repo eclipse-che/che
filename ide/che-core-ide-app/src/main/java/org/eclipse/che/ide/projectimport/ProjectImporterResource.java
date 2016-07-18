@@ -13,7 +13,6 @@ package org.eclipse.che.ide.projectimport;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 
-import org.eclipse.che.ide.projectimport.local.LocalZipImporterPageViewImpl;
 import org.eclipse.che.ide.projectimport.zip.ZipImporterPageViewImpl;
 
 /**
@@ -27,7 +26,4 @@ public interface ProjectImporterResource extends ClientBundle {
 
     @Source({"org/eclipse/che/ide/projectimport/ImporterPage.css", "org/eclipse/che/ide/api/ui/style.css"})
     ZipImporterPageViewImpl.Style zipImporterPageStyle();
-
-    @Source({"org/eclipse/che/ide/projectimport/ImporterPage.css", "org/eclipse/che/ide/ui/Styles.css", "org/eclipse/che/ide/api/ui/style.css"})
-    LocalZipImporterPageViewImpl.Style localZipImporterPageStyle();
 }

@@ -67,6 +67,10 @@ class IdeSvc {
     }
     this.lastWorkspace = workspace;
 
+    if (this.openedWorkspace && this.openedWorkspace.id === workspace.id) {
+      this.openedWorkspace = null;
+    }
+
     this.updateRecentWorkspace(workspace.id);
 
     let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
@@ -140,8 +144,8 @@ class IdeSvc {
           // need to show the error
           this.$mdDialog.show(
             this.$mdDialog.alert()
-              .title('Unable to start workspace')
-              .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
+              .title('Unable to start the workspace runtime')
+              .content('Your workspace runtime is no longer available. It was either destroyed or ran out of memory.')
               .ariaLabel('Workspace start')
               .ok('OK')
           );
@@ -223,11 +227,6 @@ class IdeSvc {
     this.$rootScope.hideNavbar = false;
 
     this.updateRecentWorkspace(workspaceId);
-
-    if (this.openedWorkspace && this.openedWorkspace.id === workspaceId) {
-      this.restoreIDE();
-      return;
-    }
 
     let inDevMode = this.userDashboardConfig.developmentMode;
     let randVal = Math.floor((Math.random() * 1000000) + 1);

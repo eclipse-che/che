@@ -18,9 +18,9 @@ import com.google.gwt.user.client.ui.Widget;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.editor.text.Position;
-import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
+import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
-import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.ext.java.shared.dto.LinkedData;
 import org.eclipse.che.ide.ext.java.shared.dto.LinkedModeModel;
@@ -43,6 +43,8 @@ import org.eclipse.che.ide.util.loging.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
+
 /**
  * @author Evgen Vidolob
  */
@@ -53,10 +55,10 @@ public class JavaCompletionProposal implements CompletionProposal, CompletionPro
     private final Icon                 icon;
     private final JavaCodeAssistClient client;
     private final RefactoringUpdater   refactoringUpdater;
-    private final EditorAgent editorAgent;
+    private final EditorAgent          editorAgent;
 
-    private String              sessionId;
-    private HasLinkedMode       linkedEditor;
+    private String        sessionId;
+    private HasLinkedMode linkedEditor;
 
     public JavaCompletionProposal(final int id,
                                   final String display,
@@ -115,17 +117,15 @@ public class JavaCompletionProposal implements CompletionProposal, CompletionPro
             @Override
             public void onSuccess(ProposalApplyResult result) {
                 callback.onCompletion(new CompletionImpl(result.getChanges(), result.getSelection(), result.getLinkedModeModel()));
-                ArrayList selectedItems = new ArrayList(1);
-                selectedItems.add(editorAgent.getActiveEditor().getEditorInput().getFile());
-                RefactorInfo refactorInfo = RefactorInfo.of(RefactoredItemType.JAVA_ELEMENT, selectedItems);
 
-                ChangeInfo changeInfo = result.getChangeInfo();
-                if (changeInfo == null) {
-                    return;
+                final VirtualFile file = editorAgent.getActiveEditor().getEditorInput().getFile();
+
+                if (file instanceof Resource) {
+                    final ChangeInfo changeInfo = result.getChangeInfo();
+                    if (changeInfo != null) {
+                        refactoringUpdater.updateAfterRefactoring(singletonList(changeInfo));
+                    }
                 }
-                ArrayList<ChangeInfo> changes = new ArrayList<>(1);
-                changes.add(changeInfo);
-                refactoringUpdater.updateAfterRefactoring(refactorInfo, changes);
             }
         });
     }

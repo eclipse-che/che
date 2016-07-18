@@ -31,12 +31,15 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.WebsocketLineConsumer;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
+import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
@@ -260,7 +263,9 @@ public class MachineManager {
                                                             machine,
                                                             machineLogger);
                                          } catch (MachineException | NotFoundException e) {
-                                             LOG.error(e.getLocalizedMessage(), e);
+                                             if (!(e.getCause() instanceof InvalidRecipeException)) {
+                                                 LOG.error(e.getLocalizedMessage(), e);
+                                             }
                                              // todo what should we do in that case?
                                          }
                                      })),
@@ -277,6 +282,7 @@ public class MachineManager {
                    ConflictException,
                    BadRequestException,
                    MachineException {
+        final MachineSourceImpl sourceCopy = machineConfig.getSource();
         final InstanceProvider instanceProvider = machineInstanceProviders.getProvider(machineConfig.getType());
 
         // Backward compatibility for source type 'Recipe'.
@@ -329,10 +335,25 @@ public class MachineManager {
                 .getOutput());
 
         try {
-            machineRegistry.addMachine(machine);
-
-            instanceCreator.createInstance(instanceProvider, machine, machineLogger);
-
+            try {
+                machineRegistry.addMachine(machine);
+                instanceCreator.createInstance(instanceProvider, machine, machineLogger);
+            } catch (MachineException ex) {
+                if (snapshot == null) {
+                    throw ex;
+                }
+                if (ex.getCause() instanceof SourceNotFoundException) {
+                    final LineConsumer logger = getMachineLogger(machineId,
+                                                                 getMachineChannels(machine.getConfig().getName(),
+                                                                                    machine.getWorkspaceId(),
+                                                                                    machine.getEnvName()).getOutput());
+                    LOG.error("Image of snapshot for machine " + machineConfig.getName() + " not found. " +
+                              "Machine will be created from origin source");
+                    machine.getConfig().setSource(sourceCopy);
+                    machineRegistry.addMachine(machine);
+                    instanceCreator.createInstance(instanceProvider, machine, logger);
+                }
+            }
             return machine;
         } catch (ConflictException e) {
             try {

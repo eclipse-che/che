@@ -97,4 +97,18 @@ public class FontAwesome {
      */
     public static final String EXCLAMATION_TRIANGLE = "<i class=\"fa fa-exclamation-triangle\"></i>";
 
+    /**
+     * http://fontawesome.io/icon/columns/
+     */
+    public static final String COLUMNS = "<i class=\"fa fa-columns\"></i>";
+
+    /**
+     * http://fontawesome.io/icon/minus-square-o/
+     */
+    public static final String MINUS_SQUARE_O = "<i class=\"fa fa-minus-square-o\"></i>";
+
+    /**
+     * http://fontawesome.io/icon/square-o/
+     */
+    public static final String SQUARE_O = "<i class=\"fa fa-square-o\"></i>";
 }

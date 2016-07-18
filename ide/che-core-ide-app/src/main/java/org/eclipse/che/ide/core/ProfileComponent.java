@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.core;
 
+import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
-import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
@@ -40,10 +40,10 @@ public class ProfileComponent implements Component {
 
     @Override
     public void start(final Callback<Component, Exception> callback) {
-        AsyncRequestCallback<ProfileDescriptor> asyncRequestCallback = new AsyncRequestCallback<ProfileDescriptor>(
-                dtoUnmarshallerFactory.newUnmarshaller(ProfileDescriptor.class)) {
+        AsyncRequestCallback<ProfileDto> asyncRequestCallback = new AsyncRequestCallback<ProfileDto>(
+                dtoUnmarshallerFactory.newUnmarshaller(ProfileDto.class)) {
             @Override
-            protected void onSuccess(final ProfileDescriptor profile) {
+            protected void onSuccess(final ProfileDto profile) {
                 currentUser.setProfile(profile);
                 callback.onSuccess(ProfileComponent.this);
             }

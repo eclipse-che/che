@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.add.AddPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn add" command.
@@ -29,13 +28,11 @@ public class AddAction extends SubversionAction {
     private final AddPresenter presenter;
 
     @Inject
-    public AddAction(final AppContext appContext,
-                     final ProjectExplorerPresenter projectExplorerPresenter,
-                     final SubversionExtensionLocalizationConstants constants,
-                     final SubversionExtensionResources resources,
-                     final AddPresenter presenter) {
-        super(constants.addTitle(), constants.addDescription(), resources.add(), appContext,
-              constants, resources, projectExplorerPresenter);
+    public AddAction(AppContext appContext,
+                     SubversionExtensionLocalizationConstants constants,
+                     SubversionExtensionResources resources,
+                     AddPresenter presenter) {
+        super(constants.addTitle(), constants.addDescription(), resources.add(), appContext, constants, resources);
         this.presenter = presenter;
     }
 
@@ -43,10 +40,4 @@ public class AddAction extends SubversionAction {
     public void actionPerformed(final ActionEvent e) {
         presenter.showAdd();
     }
-
-    @Override
-    protected boolean isSelectionRequired() {
-        return true;
-    }
-
 }

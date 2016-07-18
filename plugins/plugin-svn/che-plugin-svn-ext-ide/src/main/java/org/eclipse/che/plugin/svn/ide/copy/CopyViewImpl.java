@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.copy;
 
-import elemental.events.KeyboardEvent;
-import elemental.events.MouseEvent;
-
 import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 import com.google.gwt.animation.client.Animation;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -25,7 +23,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DeckPanel;
@@ -37,23 +34,27 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.tree.AbstractTreeNode;
-import org.eclipse.che.ide.api.project.tree.TreeNode;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
-import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
-import org.eclipse.che.plugin.svn.ide.common.filteredtree.ProjectTreeNodeDataAdapter;
-import org.eclipse.che.plugin.svn.ide.merge.ProjectTreeNodeRenderer;
-import org.eclipse.che.ide.project.node.ResourceBasedNode;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.resources.tree.ContainerNode;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
+import org.eclipse.che.ide.resources.tree.SkipHiddenNodesInterceptor;
+import org.eclipse.che.ide.resources.tree.SkipLeafsInterceptor;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.menu.PositionController;
-import org.eclipse.che.ide.ui.tree.Tree;
-import org.eclipse.che.ide.ui.tree.TreeNodeElement;
+import org.eclipse.che.ide.ui.smartTree.NodeLoader;
+import org.eclipse.che.ide.ui.smartTree.NodeStorage;
+import org.eclipse.che.ide.ui.smartTree.SelectionModel;
+import org.eclipse.che.ide.ui.smartTree.Tree;
+import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.window.Window;
-import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.vectomatic.dom.svg.OMSVGSVGElement;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
+
 
 /**
  * Implementation of {@link CopyView}.
@@ -104,10 +105,11 @@ public class CopyViewImpl extends Window implements CopyView {
     SubversionExtensionResources             resources;
     @UiField(provided = true)
     SubversionExtensionLocalizationConstants constants;
+    private final ResourceNode.NodeFactory nodeFactory;
+    private final SettingsProvider         settingsProvider;
 
     private CopyView.ActionDelegate delegate;
-    private Tree<TreeNode<?>>       tree;
-    private AbstractTreeNode<?>     rootNode;
+    private Tree                    tree;
     private OMSVGSVGElement         alertMarker;
 
     private static final String PLACEHOLDER       = "placeholder";
@@ -116,13 +118,16 @@ public class CopyViewImpl extends Window implements CopyView {
     private static final int ANIMATION_DURATION = 350;
 
     @Inject
-
     public CopyViewImpl(SubversionExtensionResources resources,
                         SubversionExtensionLocalizationConstants constants,
-                        ProjectTreeNodeRenderer projectTreeNodeRenderer,
-                        org.eclipse.che.ide.Resources coreResources) {
+                        SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
+                        SkipLeafsInterceptor skipLeafsInterceptor,
+                        ResourceNode.NodeFactory nodeFactory,
+                        SettingsProvider settingsProvider) {
         this.resources = resources;
         this.constants = constants;
+        this.nodeFactory = nodeFactory;
+        this.settingsProvider = settingsProvider;
 
         this.ensureDebugId("svn-copy-window");
 
@@ -151,89 +156,29 @@ public class CopyViewImpl extends Window implements CopyView {
         getFooter().getElement().appendChild(alertMarker.getElement());
         alertMarker.getStyle().setVisibility(Style.Visibility.HIDDEN);
 
-        rootNode = new AbstractTreeNode<Void>(null, null, null, null) {
-            /** {@inheritDoc} */
-            @NotNull
-            @Override
-            public String getId() {
-                return "ROOT";
-            }
+        tree = new Tree(new NodeStorage(), new NodeLoader(Sets.newHashSet(skipHiddenNodesInterceptor, skipLeafsInterceptor)));
 
-            /** {@inheritDoc} */
-            @NotNull
-            @Override
-            public String getDisplayName() {
-                return "ROOT";
-            }
+        tree.getSelectionModel().setSelectionMode(SelectionModel.Mode.SINGLE);
 
-            /** {@inheritDoc} */
+        tree.getSelectionModel().addSelectionChangedHandler(new SelectionChangedEvent.SelectionChangedHandler() {
             @Override
-            public boolean isLeaf() {
-                return false;
-            }
+            public void onSelectionChanged(SelectionChangedEvent event) {
+                final List<Node> selection = event.getSelection();
 
-            /** {@inheritDoc} */
-            @Override
-            public void refreshChildren(AsyncCallback<TreeNode<?>> callback) {
-            }
-        };
+                if (selection == null || selection.isEmpty()) {
+                    return;
+                }
 
-        tree = Tree.create(coreResources, new ProjectTreeNodeDataAdapter(), projectTreeNodeRenderer);
-        tree.setTreeEventHandler(new Tree.Listener<TreeNode<?>>() {
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeAction(TreeNodeElement<TreeNode<?>> treeNodeElement) {
-            }
+                final Node node = selection.get(0);
 
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeClosed(TreeNodeElement<TreeNode<?>> treeNodeElement) {
-            }
+                if (node instanceof ResourceNode) {
+                    delegate.onNodeSelected(((ResourceNode)node).getData());
+                }
 
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeContextMenu(int i, int i1, TreeNodeElement<TreeNode<?>> treeNodeElement) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeDragStart(TreeNodeElement<TreeNode<?>> treeNodeElement, MouseEvent mouseEvent) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeDragDrop(TreeNodeElement<TreeNode<?>> treeNodeElement, MouseEvent mouseEvent) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeExpanded(TreeNodeElement<TreeNode<?>> treeNodeElement) {
-                //delegate.onNodeExpanded(treeNodeElement.getData());
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onNodeSelected(TreeNodeElement<TreeNode<?>> treeNodeElement, SignalEvent signalEvent) {
-               // delegate.onNodeSelected(treeNodeElement.getData());
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onRootContextMenu(int i, int i1) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onRootDragDrop(MouseEvent mouseEvent) {
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public void onKeyboard(KeyboardEvent keyboardEvent) {
             }
         });
 
-        treeContainer.add(tree.asWidget());
+        treeContainer.add(tree);
     }
 
     /** {@inheritDoc} */
@@ -287,7 +232,7 @@ public class CopyViewImpl extends Window implements CopyView {
         delegate.onTargetCheckBoxChanged();
 
         new SlideAnimation().showWidget(commentDeckPanel.getWidget(targetCheckBox.getValue() ? 1 : 0),
-                commentDeckPanel.getWidget(targetCheckBox.getValue() ? 0 : 1));
+                                        commentDeckPanel.getWidget(targetCheckBox.getValue() ? 0 : 1));
 
     }
 
@@ -326,53 +271,30 @@ public class CopyViewImpl extends Window implements CopyView {
 
     /** {@inheritDoc} */
     @Override
-    public void setProjectNodes(List<ResourceBasedNode<?>> rootNodes) {
-        tree.getSelectionModel().clearSelections();
-        tree.getModel().setRoot(rootNode);
-        tree.renderTree(0);
+    public void setProjectNode(Project project) {
+        final ContainerNode node = nodeFactory.newContainerNode(project, settingsProvider.getSettings());
 
-        if (rootNodes.isEmpty()) {
-            delegate.onNodeSelected(null);
-        }
+        tree.getNodeStorage().clear();
+        tree.getNodeStorage().add(node);
+
+        tree.setExpanded(node, true);
     }
 
     /** {@inheritDoc} */
     @Override
     public void show() {
-        // TODO uncomment next two lines, clean following two once CHE-941 is fixed
-//      new SlideAnimation().showWidget(null, deckPanel.getWidget(0));
-//      new SlideAnimation().showWidget(commentDeckPanel.getWidget(0), commentDeckPanel.getWidget(1));
-        new SlideAnimation().showWidget(null, deckPanel.getWidget(1));
-        new SlideAnimation().showWidget(null, commentDeckPanel.getWidget(0));
+        new SlideAnimation().showWidget(null, deckPanel.getWidget(0));
 
         sourceLabel.setText("Path:");
         newNameTextBox.setText(null);
         sourceCheckBox.setValue(false);
 
-        // TODO setValue(false) and clean setEnabled(false) once CHE-941 is fixed
-        targetCheckBox.setValue(true);
-        targetCheckBox.setEnabled(false);
+        targetCheckBox.setValue(false);
 
         targetUrlTextBox.setText(null);
         targetUrlTextBox.getElement().setAttribute(PLACEHOLDER, PLACEHOLDER_DUMMY);
 
         super.show();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void updateProjectNode(@NotNull ResourceBasedNode<?> oldNode, @NotNull ResourceBasedNode<?> newNode) {
-        // get currently selected node
-        final List<TreeNode<?>> selectedNodes = tree.getSelectionModel().getSelectedNodes();
-        TreeNode<?> selectedNode = null;
-        if (!selectedNodes.isEmpty()) {
-            selectedNode = selectedNodes.get(0);
-        }
-
-        // restore selected node
-        if (selectedNode != null) {
-            tree.getSelectionModel().selectSingleNode(selectedNode);
-        }
     }
 
     /** {@inheritDoc} */

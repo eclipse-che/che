@@ -11,8 +11,12 @@
 package org.eclipse.che.ide.resource;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Objects;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -407,10 +411,11 @@ public final class Path {
     private int computeHashCode() {
         int hash = device == null ? 17 : device.hashCode();
         int segmentCount = segments.length;
-        for (String segment : segments) {
+        for (int i = 0; i < segmentCount; i++) {
             //this function tends to given a fairly even distribution
-            hash = hash * 37 + segment.hashCode();
+            hash = hash * 37 + segments[i].hashCode();
         }
+
         return hash;
     }
 
@@ -578,7 +583,7 @@ public final class Path {
      * Computes the hash code for this object.
      */
     public int hashCode() {
-        return separators & HASH_MASK;
+        return Objects.hashCode(segments);
     }
 
     /**
@@ -1012,7 +1017,7 @@ public final class Path {
         int newSize = segments.length - count;
         String[] newSegments = new String[newSize];
         System.arraycopy(this.segments, 0, newSegments, 0, newSize);
-        return new Path(device, newSegments, separators);
+        return new Path(device, newSegments, separators & (HAS_LEADING | IS_UNC));
     }
 
     /**
@@ -1188,5 +1193,36 @@ public final class Path {
         String[] newSegments = new String[count];
         System.arraycopy(segments, 0, newSegments, 0, count);
         return new Path(device, newSegments, separators);
+    }
+
+    /**
+     * Returns a copy of this path with removed last segment.
+     *
+     * @return the new path
+     * @since 4.4.0
+     */
+    public Path parent() {
+        return segmentCount() == 1 ? Path.ROOT : this.removeLastSegments(1);
+    }
+
+    /**
+     * Converts given input array of paths into the list.
+     *
+     * @param paths
+     *         the input array of paths
+     * @return the converted list
+     * @since 4.4.0
+     */
+    public static List<String> toList(Path[] paths) {
+        if (paths == null || paths.length == 0) {
+            return Collections.emptyList();
+        }
+
+        List<String> list = new ArrayList<>(paths.length);
+        for (Path path : paths) {
+            list.add(path.toString());
+        }
+
+        return list;
     }
 }

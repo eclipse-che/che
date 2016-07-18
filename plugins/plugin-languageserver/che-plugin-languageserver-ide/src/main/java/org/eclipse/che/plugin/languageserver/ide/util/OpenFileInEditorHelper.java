@@ -10,22 +10,26 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.util;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
+import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.project.node.FileReferenceNode;
 import org.eclipse.che.ide.resource.Path;
 
 /**
@@ -37,15 +41,18 @@ public class OpenFileInEditorHelper {
 
     private final EditorAgent              editorAgent;
     private final ProjectExplorerPresenter projectExplorer;
+    private final AppContext appContext;
 
     @Inject
     public OpenFileInEditorHelper(EditorAgent editorAgent,
-                                  ProjectExplorerPresenter projectExplorer) {
+                                  ProjectExplorerPresenter projectExplorer,
+                                  AppContext appContext) {
         this.editorAgent = editorAgent;
         this.projectExplorer = projectExplorer;
+        this.appContext = appContext;
     }
 
-    public void openFile(String filePath, TextRange selectionRange) {
+    public void openFile(final String filePath, final TextRange selectionRange) {
         if (Strings.isNullOrEmpty(filePath)) {
             return;
         }
@@ -57,9 +64,21 @@ public class OpenFileInEditorHelper {
             return;
         }
 
-        projectExplorer.getNodeByPath(new HasStorablePath.StorablePath(filePath))
-                       .then(selectNode())
-                       .then(openNode(selectionRange));
+        appContext.getWorkspaceRoot().getFile(filePath).then(new Operation<Optional<File>>() {
+            @Override
+            public void apply(Optional<File> file) throws OperationException {
+                if (file.isPresent()) {
+                    selectNode();
+                }
+            }
+        }).then(new Operation<Optional<File>>() {
+            @Override
+            public void apply(Optional<File> file) throws OperationException {
+                if (file.isPresent()) {
+                    openNode(selectionRange);
+                }
+            }
+        });
     }
 
     public void openFile(String filePath) {
@@ -70,7 +89,7 @@ public class OpenFileInEditorHelper {
         return new Function<Node, Node>() {
             @Override
             public Node apply(Node node) {
-                if (node instanceof FileReferenceNode) {
+                if (node instanceof VirtualFile) {
                     openFile((VirtualFile)node, selectionRange);
                 }
                 return node;
@@ -81,8 +100,8 @@ public class OpenFileInEditorHelper {
     private Function<Node, Node> selectNode() {
         return new Function<Node, Node>() {
             @Override
-            public Node apply(Node node){
-                projectExplorer.select(node, false);
+            public Node apply(Node node) {
+                projectExplorer.setSelection(new Selection<>(node));
                 return node;
             }
         };

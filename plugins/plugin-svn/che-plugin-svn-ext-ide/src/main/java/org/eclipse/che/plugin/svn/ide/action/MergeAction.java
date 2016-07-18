@@ -18,7 +18,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 import org.eclipse.che.plugin.svn.ide.merge.MergePresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 
 /**
  * Extension of {@link SubversionAction} for implementing the "svn merge" command.
@@ -29,20 +28,13 @@ public class MergeAction extends SubversionAction {
     private final MergePresenter presenter;
 
     @Inject
-    public MergeAction(final AppContext appContext,
-                       final ProjectExplorerPresenter projectExplorerPresenter,
-                       final SubversionExtensionLocalizationConstants constants,
-                       final SubversionExtensionResources resources,
-                       final MergePresenter presenter) {
-        super(constants.mergeTitle(), constants.mergeDescription(), resources.merge(), appContext,
-              constants, resources, projectExplorerPresenter);
+    public MergeAction(AppContext appContext,
+                       SubversionExtensionLocalizationConstants constants,
+                       SubversionExtensionResources resources,
+                       MergePresenter presenter) {
+        super(constants.mergeTitle(), constants.mergeDescription(), resources.merge(), appContext, constants, resources);
 
         this.presenter = presenter;
-    }
-
-    @Override
-    protected boolean isSelectionRequired() {
-        return true;
     }
 
     @Override

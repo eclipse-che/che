@@ -45,6 +45,8 @@ public interface MavenAttributes {
     String DEFAULT_VERSION               = "1.0-SNAPSHOT";
     String DEFAULT_PACKAGING             = "jar";
 
+    String POM_XML = "pom.xml";
+
     /** Name of WebSocket chanel */
     String MAVEN_CHANEL_NAME = "maven:workspace";
 }

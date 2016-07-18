@@ -20,8 +20,9 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent.WorkspaceReadyHandler;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedHandler;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -31,7 +32,6 @@ import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.project.event.ProjectExplorerLoadedEvent;
 import org.eclipse.che.ide.statepersistance.dto.ActionDescriptor;
 import org.eclipse.che.ide.statepersistance.dto.AppState;
 import org.eclipse.che.ide.statepersistance.dto.WorkspaceState;
@@ -51,9 +51,9 @@ import java.util.Set;
  */
 @Singleton
 public class AppStateManager implements WindowActionHandler,
-                                        WorkspaceStoppedHandler,
+                                        WorkspaceStoppedEvent.Handler,
                                         WsAgentStateHandler,
-                                        ProjectExplorerLoadedEvent.ProjectExplorerLoadedHandler {
+                                        WorkspaceReadyHandler {
 
     /** The name of the property for the mappings in user preferences. */
     public static final String PREFERENCE_PROPERTY_NAME = "IdeAppState";
@@ -88,7 +88,7 @@ public class AppStateManager implements WindowActionHandler,
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(WindowActionEvent.TYPE, this);
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
-        eventBus.addHandler(ProjectExplorerLoadedEvent.getType(), this);
+        eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
 
         readStateFromPreferences();
     }
@@ -121,6 +121,11 @@ public class AppStateManager implements WindowActionHandler,
     }
 
     @Override
+    public void onWorkspaceReady(WorkspaceReadyEvent event) {
+        restoreWorkspaceState();
+    }
+
+    @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
         persistWorkspaceState();
     }
@@ -131,10 +136,10 @@ public class AppStateManager implements WindowActionHandler,
     }
 
     private void persistWorkspaceState() {
-        appState.setRecentWorkspaceId(appContext.getWorkspace().getId());
+        appState.setRecentWorkspaceId(appContext.getDevMachine().getId());
 
         final WorkspaceState workspaceState = dtoFactory.createDto(WorkspaceState.class);
-        appState.getWorkspaces().put(appContext.getWorkspace().getId(), workspaceState);
+        appState.getWorkspaces().put(appContext.getDevMachine().getId(), workspaceState);
 
         final List<ActionDescriptor> actions = workspaceState.getActions();
         for (PersistenceComponent persistenceComponent : persistenceComponents) {
@@ -155,13 +160,8 @@ public class AppStateManager implements WindowActionHandler,
         });
     }
 
-    @Override
-    public void onProjectsLoaded(ProjectExplorerLoadedEvent event) {
-        restoreWorkspaceState();
-    }
-
     private void restoreWorkspaceState() {
-        final WorkspaceState workspaceState = appState.getWorkspaces().get(appContext.getWorkspace().getId());
+        final WorkspaceState workspaceState = appState.getWorkspaces().get(appContext.getDevMachine().getId());
         if (workspaceState == null) {
             return;
         }

@@ -20,12 +20,10 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Image;
@@ -44,6 +42,7 @@ import org.eclipse.che.ide.api.action.Separator;
 import org.eclipse.che.ide.api.action.ToggleAction;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.util.input.KeyMapUtil;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -51,6 +50,8 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
+import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.util.dom.Elements.disableTextSelection;
 
 /**
@@ -103,6 +104,8 @@ public class PopupMenu extends Composite {
     private String              itemIdPrefix;
     private List<Action>        list;
 
+    private boolean showTooltips = false;
+
     private Timer openSubPopupTimer = new Timer() {
         @Override
         public void run() {
@@ -126,12 +129,16 @@ public class PopupMenu extends Composite {
 
 
     /**
-     * Create PopupMenu
+     * Creates new popup.
      *
-     * @param lockLayer
-     *         - lock layer, uses as rot for attaching this popup menu.
-     * @param actionSelectedHandler
-     *         - callback, uses for notifying parent menu when menu item is selected.
+     * @param actionGroup action group
+     * @param actionManager action manager
+     * @param managerProvider manager provider
+     * @param presentationFactory presentation factory
+     * @param lockLayer lock layer, uses as root for attaching this popup menu
+     * @param actionSelectedHandler handler for action selected event
+     * @param keyBindingAgent agent for key binding
+     * @param itemIdPrefix id prefix of the item
      */
     public PopupMenu(ActionGroup actionGroup,
                      ActionManager actionManager,
@@ -143,6 +150,56 @@ public class PopupMenu extends Composite {
                      String itemIdPrefix) {
         this.actionManager = actionManager;
         this.managerProvider = managerProvider;
+
+        initPopupMenu(actionGroup, presentationFactory, lockLayer, actionSelectedHandler, keyBindingAgent, itemIdPrefix);
+        redraw();
+    }
+
+    /**
+     * Creates new popup.
+     *
+     * @param actionGroup action group
+     * @param actionManager action manager
+     * @param managerProvider manager provider
+     * @param presentationFactory presentation factory
+     * @param lockLayer lock layer, uses as root for attaching this popup menu
+     * @param actionSelectedHandler handler for action selected event
+     * @param keyBindingAgent agent for key binding
+     * @param itemIdPrefix id prefix of the item
+     * @param showTooltips indicates whether tooltips should be shown on hover
+     */
+    public PopupMenu(ActionGroup actionGroup,
+                     ActionManager actionManager,
+                     Provider<PerspectiveManager> managerProvider,
+                     PresentationFactory presentationFactory,
+                     MenuLockLayer lockLayer,
+                     ActionSelectedHandler actionSelectedHandler,
+                     KeyBindingAgent keyBindingAgent,
+                     String itemIdPrefix, boolean showTooltips) {
+        this.actionManager = actionManager;
+        this.managerProvider = managerProvider;
+        this.showTooltips = showTooltips;
+
+        initPopupMenu(actionGroup, presentationFactory, lockLayer, actionSelectedHandler, keyBindingAgent, itemIdPrefix);
+        redraw();
+    }
+
+    /**
+     * Initialize popup menu.
+     *
+     * @param actionGroup action group
+     * @param presentationFactory presentation factory
+     * @param lockLayer lock layer, uses as root for attaching this popup menu
+     * @param actionSelectedHandler handler for action selected event
+     * @param keyBindingAgent agent for key binding
+     * @param itemIdPrefix id prefix of the item
+     */
+    private void initPopupMenu(ActionGroup actionGroup,
+                               PresentationFactory presentationFactory,
+                               MenuLockLayer lockLayer,
+                               ActionSelectedHandler actionSelectedHandler,
+                               KeyBindingAgent keyBindingAgent,
+                               String itemIdPrefix) {
         this.presentationFactory = presentationFactory;
         this.keyBindingAgent = keyBindingAgent;
         this.itemIdPrefix = itemIdPrefix;
@@ -178,8 +235,6 @@ public class PopupMenu extends Composite {
         popupMenuPanel.setStyleName(POPUP_RESOURCES.popup().popupMenuMain());
 
         hasCheckedItems = hasCheckedItems();
-
-        redraw();
     }
 
     private boolean isRowEnabled(Element tr) {
@@ -248,11 +303,9 @@ public class PopupMenu extends Composite {
                 } else if (presentation.getSVGResource() != null) {
                     SVGImage image = new SVGImage(presentation.getSVGResource());
                     table.setWidget(i, 0, image);
-
                 } else if (presentation.getHTMLResource() != null) {
                     table.setHTML(i, 0, presentation.getHTMLResource());
                 }
-
                 table.getCellFormatter().setStyleName(i, 0, presentation.isEnabled() ? POPUP_RESOURCES.popup().popupMenuIconField()
                                                                                : POPUP_RESOURCES.popup().popupMenuIconFieldDisabled());
 
@@ -275,7 +328,12 @@ public class PopupMenu extends Composite {
 
                 table.setHTML(i, work, "<nobr id=\"" + idPrefix + presentation.getText() + "\">" + presentation.getText() + "</nobr>");
                 table.getCellFormatter().setStyleName(i, work, presentation.isEnabled() ? POPUP_RESOURCES.popup().popupMenuTitleField()
-                                                                               : POPUP_RESOURCES.popup().popupMenuTitleFieldDisabled());
+                                                                                        : POPUP_RESOURCES.popup()
+                                                                                                         .popupMenuTitleFieldDisabled());
+                if (showTooltips) {
+                    Tooltip.create((elemental.dom.Element)table.getCellFormatter().getElement(i, work), BOTTOM,
+                                   MIDDLE, presentation.getText());
+                }
 
                 work++;
                 String hotKey = KeyMapUtil.getShortcutText(keyBindingAgent.getKeyBinding(actionManager.getId(menuItem)));

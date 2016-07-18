@@ -26,11 +26,11 @@ export class CheNavBarCtrl {
     this.links = [{href: '#/create-workspace', name: 'New Workspace'}];
 
     this.profile = cheAPI.getProfile().getProfile();
-    if (this.profile.attributes) {
-      this.email = this.profile.attributes.email;
+    if (this.profile.email) {
+      this.email = this.profile.email;
     } else {
       this.profile.$promise.then(() => {
-        this.email = this.profile.attributes.email ? this.profile.attributes.email : 'N/A ';
+        this.email = this.profile.email ? this.profile.email : 'N/A ';
       }, () => {
         this.email = 'N/A ';
       });
@@ -38,7 +38,6 @@ export class CheNavBarCtrl {
 
     this.menuItemUrl = {
       dashboard: '#/',
-      projects: '#/projects',
       workspaces: '#/workspaces',
       administration: '#/administration',
       // subsections
@@ -72,10 +71,6 @@ export class CheNavBarCtrl {
 
   getWorkspacesNumber() {
     return this.cheAPI.cheWorkspace.getWorkspaces().length;
-  }
-
-  getProjectsNumber() {
-    return this.cheAPI.cheWorkspace.getAllProjects().length;
   }
 
   openLinkInNewTab(url) {

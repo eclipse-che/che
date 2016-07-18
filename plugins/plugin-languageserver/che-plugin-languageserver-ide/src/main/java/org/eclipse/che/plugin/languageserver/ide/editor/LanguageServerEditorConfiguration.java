@@ -1,32 +1,19 @@
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
-import org.eclipse.che.ide.api.editor.annotation.AnnotationModelImpl;
 import org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor;
-import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
-import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
-import org.eclipse.che.ide.api.editor.partition.ConstantPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
-import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.plugin.languageserver.ide.editor.codeassist.LanguageServerCodeAssistProcessor;
-import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.DidChangeTextDocumentParamsDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.PositionDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.RangeDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.TextDocumentContentChangeEventDTOImpl;
-import org.eclipse.che.plugin.languageserver.shared.dto.DtoClientImpls.VersionedTextDocumentIdentifierDTOImpl;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LanguageServerEditorConfiguration extends DefaultTextEditorConfiguration {
 

@@ -1,32 +1,30 @@
-FROM ubuntu
-RUN apt-get update && apt-get -y install curl sudo procps wget && \
-    echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
-    useradd -u 1000 -G users,sudo -d /home/user --shell /bin/bash -m user && \
-    echo "secret\nsecret" | passwd user && \
-    curl -sSL https://get.docker.com/ | sh && \
-    usermod -aG docker user && sudo apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+FROM alpine:3.4
+
+ENV LANG=C.UTF-8 \
+    JAVA_HOME=/usr/lib/jvm/default-jvm/jre \
+    PATH=${PATH}:${JAVA_HOME}/bin \
+    CHE_HOME=/home/user/che
+
+RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
+    apk upgrade --update && \
+    apk add --update docker openjdk8 sudo bash && \
+    addgroup -S user -g 1000 && \
+    adduser -S user -h /home/user -s /bin/bash -G root -u 1000 -D && \
+    adduser user docker && \
+    adduser user user && \
+    addgroup -g 50 -S docker4mac && \
+    adduser user docker4mac && \
+    echo "%root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+    rm -rf /tmp/* /var/cache/apk/*
+
+EXPOSE 8000 8080
 
 USER user
 
-ENV JAVA_VERSION=8u65 \
-    JAVA_VERSION_PREFIX=1.8.0_65 \
-    CHE_LOCAL_CONF_DIR=/home/user/.che
+ADD /assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
 
-RUN mkdir /home/user/.che && \
-    wget \
-   --no-cookies \
-   --no-check-certificate \
-   --header "Cookie: oraclelicense=accept-securebackup-cookie" \
-   -qO- \
-   "http://download.oracle.com/otn-pub/java/jdk/$JAVA_VERSION-b17/jre-$JAVA_VERSION-linux-x64.tar.gz" | sudo tar -zx -C /opt/
-
-ENV JAVA_HOME /opt/jre$JAVA_VERSION_PREFIX
-ENV PATH $JAVA_HOME/bin:$PATH
-
-EXPOSE 8080
-
-ADD /assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che
 ENV CHE_HOME /home/user/che
 
 ENTRYPOINT [ "/home/user/che/bin/che.sh", "-c" ]
+
 CMD [ "run" ]

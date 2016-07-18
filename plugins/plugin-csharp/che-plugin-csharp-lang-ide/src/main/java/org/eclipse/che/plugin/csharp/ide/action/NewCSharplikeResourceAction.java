@@ -10,16 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.csharp.ide.action;
 
-import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.app.CurrentProject;
-import org.eclipse.che.ide.api.selection.Selection;
-import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
-import org.eclipse.che.plugin.csharp.shared.Constants;
-import org.vectomatic.dom.svg.ui.SVGResource;
+import com.google.web.bindery.event.shared.EventBus;
 
-import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.newresource.AbstractNewResourceAction;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Base class for ne C# resource
@@ -41,25 +39,15 @@ public abstract class NewCSharplikeResourceAction extends AbstractNewResourceAct
      *         action's description
      * @param svgIcon
      */
-    public NewCSharplikeResourceAction(String title, String description, @Nullable SVGResource svgIcon, AppContext appContext) {
-        super(title, description, svgIcon);
+    public NewCSharplikeResourceAction(String title,
+                                       String description,
+                                       SVGResource svgIcon,
+                                       DialogFactory dialogFactory,
+                                       CoreLocalizationConstant coreLocalizationConstant,
+                                       EventBus eventBus,
+                                       AppContext appContext,
+                                       NotificationManager notificationManager) {
+        super(title, description, svgIcon, dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
         this.appContext = appContext;
-    }
-
-    @Override
-    public void updateInPerspective(@NotNull ActionEvent e) {
-        CurrentProject project = appContext.getCurrentProject();
-        if (project == null || !(Constants.CSHARP_PROJECT_TYPE_ID.equals(project.getRootProject().getType()))) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
-        }
-
-        Selection<?> selection = projectExplorer.getSelection();
-        if (selection == null) {
-            e.getPresentation().setEnabledAndVisible(false);
-            return;
-        }
-
-        e.getPresentation().setEnabledAndVisible(true);
     }
 }

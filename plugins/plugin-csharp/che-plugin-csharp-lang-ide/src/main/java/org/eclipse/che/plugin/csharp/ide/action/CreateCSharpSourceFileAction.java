@@ -12,11 +12,16 @@ package org.eclipse.che.plugin.csharp.ide.action;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.plugin.csharp.shared.Constants;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.plugin.csharp.ide.CSharpLocalizationConstant;
 import org.eclipse.che.plugin.csharp.ide.CSharpResources;
+import org.eclipse.che.plugin.csharp.shared.Constants;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Action to create new C# source file.
@@ -42,11 +47,20 @@ public class CreateCSharpSourceFileAction extends NewCSharplikeResourceAction {
 
     @Inject
     public CreateCSharpSourceFileAction(CSharpLocalizationConstant localizationConstant,
+                                        CSharpResources resources,
+                                        DialogFactory dialogFactory,
+                                        CoreLocalizationConstant coreLocalizationConstant,
+                                        EventBus eventBus,
                                         AppContext appContext,
-                                        CSharpResources csharpResources) {
+                                        NotificationManager notificationManager) {
         super(localizationConstant.createCSharpFileActionTitle(),
               localizationConstant.createCSharpFileActionDescription(),
-              csharpResources.csharpFile(), appContext);
+              resources.csharpFile(),
+              dialogFactory,
+              coreLocalizationConstant,
+              eventBus,
+              appContext,
+              notificationManager);
     }
 
     @Override

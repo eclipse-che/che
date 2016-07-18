@@ -82,8 +82,6 @@ describe('CheProfile', function () {
 
       // expecting GETs
       httpBackend.expectGET('/api/profile');
-      httpBackend.expectGET('/api/profile/prefs');
-
       // flush command
       httpBackend.flush();
 
@@ -92,7 +90,7 @@ describe('CheProfile', function () {
 
       // check id, email, firstName and lastName in profile attributes
       expect(profile.id).toEqual(profileId);
-      expect(profile.attributes.email).toEqual(email);
+      expect(profile.email).toEqual(email);
       expect(profile.attributes.firstName).toEqual(firstName);
       expect(profile.attributes.lastName).toEqual(lastName);
     }
@@ -112,8 +110,8 @@ describe('CheProfile', function () {
       // fetch profile
       factory.setAttributes(testAttributes);
 
-      // expecting a POST
-      httpBackend.expectPOST('/api/profile');
+      // expecting a PUT
+      httpBackend.expectPUT('/api/profile/attributes');
 
       // flush command
       httpBackend.flush();

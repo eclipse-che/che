@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.recipe;
 
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.util.loging.Log;
@@ -33,11 +32,13 @@ import javax.validation.constraints.NotNull;
  */
 public class RecipeTabPresenter implements TabPresenter {
 
-    private final RecipeView view;
+    private final RecipeView                        view;
+    private final RecipeScriptDownloadServiceClient recipeScriptClient;
 
     @Inject
-    public RecipeTabPresenter(RecipeView view) {
+    public RecipeTabPresenter(RecipeView view, RecipeScriptDownloadServiceClient recipeScriptClient) {
         this.view = view;
+        this.recipeScriptClient = recipeScriptClient;
     }
 
     /**
@@ -46,30 +47,19 @@ public class RecipeTabPresenter implements TabPresenter {
      * @param machine
      *         machine for which need update information
      */
-    public void updateInfo(@NotNull Machine machine) {
-        String scriptLocation = machine.getRecipeUrl();
-
-        if (scriptLocation.isEmpty()) {
-            return;
-        }
-
-        RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, scriptLocation);
-
-        try {
-            requestBuilder.sendRequest(null, new RequestCallback() {
-                @Override
-                public void onResponseReceived(Request request, Response response) {
-                    view.setScript(response.getText());
-                }
-
-                @Override
-                public void onError(Request request, Throwable exception) {
-
-                }
-            });
-        } catch (RequestException exception) {
-            Log.error(getClass(), exception);
-        }
+    public void updateInfo(@NotNull final Machine machine) {
+        recipeScriptClient.getRecipeScript(machine).then(new Operation<String>() {
+                    @Override
+                    public void apply(String recipe) throws OperationException {
+                        view.setScript(recipe);
+                    }
+                }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                Log.error(RecipeTabPresenter.class,
+                          "Failed to get recipe script for machine " + machine.getId() + ": " + error.getMessage());
+            }
+        });
     }
 
     /** {@inheritDoc} */

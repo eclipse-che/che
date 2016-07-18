@@ -15,8 +15,8 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
-import org.eclipse.che.ide.api.selection.Selection;
+import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
 import org.eclipse.che.ide.reference.ShowReferencePresenter;
 import org.junit.Before;
@@ -25,12 +25,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @RunWith(GwtMockitoTestRunner.class)
 public class ShowReferenceActionTest {
@@ -43,23 +43,22 @@ public class ShowReferenceActionTest {
     private CoreLocalizationConstant locale;
 
     @Mock
-    private ActionEvent     event;
+    private ActionEvent  event;
     @Mock
-    private Selection       selection;
+    private Presentation presentation;
     @Mock
-    private Presentation    presentation;
+    private AppContext   appContext;
     @Mock
-    private HasStorablePath hasStorablePathNode;
+    private Resource     resource;
 
     @InjectMocks
     private ShowReferenceAction action;
 
     @Before
     public void setUp() {
-        //noinspection unchecked
-        when(selectionAgent.getSelection()).thenReturn(selection);
         when(event.getPresentation()).thenReturn(presentation);
-        when(selection.getHeadElement()).thenReturn(hasStorablePathNode);
+        when(appContext.getResource()).thenReturn(resource);
+        when(appContext.getResources()).thenReturn(new Resource[]{resource});
     }
 
     @Test
@@ -68,38 +67,33 @@ public class ShowReferenceActionTest {
     }
 
     @Test
-    public void presentationShouldNotBeUpdatedWhenSelectionIsEmpty() {
-        when(selectionAgent.getSelection()).thenReturn(null);
-
-        action.update(event);
-
-        verify(selection, never()).getHeadElement();
-    }
-
-    @Test
     public void presentationShouldNotBeVisibleWhenSelectedElementIsNull() {
-        when(selection.getHeadElement()).thenReturn(null);
+        when(appContext.getResource()).thenReturn(null);
+        when(appContext.getResources()).thenReturn(null);
 
         action.update(event);
 
-        verify(presentation).setEnabledAndVisible(false);
+        verify(presentation).setVisible(true);
+        verify(presentation).setEnabled(false);
     }
 
     @Test
     public void presentationShouldBeVisibleWhenSelectedElementIsHasStorablePathNode() {
         action.update(event);
 
-        verify(presentation).setEnabledAndVisible(true);
+        verify(presentation).setVisible(true);
+        verify(presentation).setEnabled(true);
     }
 
     @Test
     public void actionShouldBePerformed() {
         action.update(event);
 
-        verify(presentation).setEnabledAndVisible(true);
+        verify(presentation).setVisible(true);
+        verify(presentation).setEnabled(true);
 
         action.actionPerformed(event);
 
-        verify(showReferencePresenter).show(hasStorablePathNode);
+        verify(showReferencePresenter).show(resource);
     }
 }

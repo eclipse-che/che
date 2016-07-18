@@ -13,22 +13,24 @@ package org.eclipse.che.plugin.svn.ide.add;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
-import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
+import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
-import java.util.List;
-
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
@@ -40,63 +42,59 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class AddPresenter extends SubversionActionPresenter {
 
-    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
     private final NotificationManager                      notificationManager;
     private final SubversionClientService                  service;
     private final SubversionExtensionLocalizationConstants constants;
 
     @Inject
-    protected AddPresenter(final AppContext appContext,
-                           final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                           final NotificationManager notificationManager,
-                           final SubversionOutputConsoleFactory consoleFactory,
-                           final SubversionExtensionLocalizationConstants constants,
-                           final SubversionClientService service,
-                           final ConsolesPanelPresenter consolesPanelPresenter,
-                           final ProjectExplorerPresenter projectExplorerPart,
-                           final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
+    protected AddPresenter(AppContext appContext,
+                           NotificationManager notificationManager,
+                           SubversionOutputConsoleFactory consoleFactory,
+                           SubversionExtensionLocalizationConstants constants,
+                           SubversionClientService service,
+                           ConsolesPanelPresenter consolesPanelPresenter,
+                           StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
 
         this.service = service;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.notificationManager = notificationManager;
         this.constants = constants;
     }
 
     public void showAdd() {
-        final String projectPath = getCurrentProjectPath();
-        if (projectPath == null) {
-            return;
-        }
+        final Project project = appContext.getRootProject();
 
-        final List<String> selectedPaths = getSelectedPaths();
-        final StatusNotification notification = new StatusNotification(constants.addStarted(selectedPaths.size()), PROGRESS, FLOAT_MODE);
+        checkState(project != null);
+
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+
+        final StatusNotification notification = new StatusNotification(constants.addStarted(resources.length), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        service.add(projectPath, selectedPaths, null, false, true, false, false,
-                    new AsyncRequestCallback<CLIOutputResponse>(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class)) {
-                        @Override
-                        protected void onSuccess(final CLIOutputResponse response) {
+        service.add(project.getLocation(), toRelative(project, resources), null, false, true, false, false)
+               .then(new Operation<CLIOutputResponse>() {
+                    @Override
+                    public void apply(CLIOutputResponse response) throws OperationException {
+                        printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandAdd());
 
-                            printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandAdd());
-
-                            if (response.getErrOutput() == null || response.getErrOutput().size() == 0) {
-                                notification.setTitle(constants.addSuccessful());
-                                notification.setStatus(SUCCESS);
-                            } else {
-                                notification.setTitle(constants.addWarning());
-                                notification.setStatus(FAIL);
-                            }
-                        }
-
-                        @Override
-                        protected void onFailure(final Throwable exception) {
-                            String errorMessage = exception.getMessage();
-
-                            notification.setTitle(constants.addFailed() + ": " + errorMessage);
+                        if (response.getErrOutput() == null || response.getErrOutput().size() == 0) {
+                            notification.setTitle(constants.addSuccessful());
+                            notification.setStatus(SUCCESS);
+                        } else {
+                            notification.setTitle(constants.addWarning());
                             notification.setStatus(FAIL);
                         }
-                    });
+                    }
+                })
+                .catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        notification.setTitle(constants.addFailed() + ": " + error.getMessage());
+                        notification.setStatus(FAIL);
+                    }
+                });
     }
 
 }

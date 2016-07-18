@@ -53,9 +53,9 @@ public interface IWorkingSet extends /*IPersistableElement,*/ IAdaptable {
      * Currently, this is one of the icons specified in the extensions 
      * of the org.eclipse.ui.workingSets extension point. 
      * The extension is identified using the value returned by
-     * <code>getId()</code>. 
+     * <code>getUserId()</code>.
      * Returns <code>null</code> if no icon has been specified in the 
-     * extension or if <code>getId()</code> returns <code>null</code>. 
+     * extension or if <code>getUserId()</code> returns <code>null</code>.
      * 
      * @return the working set icon or <code>null</code>.
      * @since 2.1 
@@ -69,9 +69,9 @@ public interface IWorkingSet extends /*IPersistableElement,*/ IAdaptable {
      * Currently, this is one of the icons specified in the extensions 
      * of the org.eclipse.ui.workingSets extension point. 
      * The extension is identified using the value returned by
-     * <code>getId()</code>. 
+     * <code>getUserId()</code>.
      * Returns <code>null</code> if no icon has been specified in the 
-     * extension or if <code>getId()</code> returns <code>null</code>. 
+     * extension or if <code>getUserId()</code> returns <code>null</code>.
      * 
      * @return the working set icon or <code>null</code>.
      * @since 3.3

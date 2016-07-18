@@ -10,343 +10,242 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.project;
 
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
+import org.eclipse.che.ide.resource.Path;
 
 import java.util.List;
 
 /**
- * Client for Project service.
+ * Serves the connections with the server side project service.
+ * <p/>
+ * By design this service is laid on the lowest business level which is operating only with data transfer objects (DTO).
+ * This interface is not intended to implementing by the third party components or using it directly.
  *
  * @author Vitaly Parfonov
  * @author Artem Zatsarynnyi
+ * @author Vlad Zhukovskyi
  */
 public interface ProjectServiceClient {
-
     /**
-     * Get all projects in current workspace.
+     * Returns the projects list. If there is no projects were found on server, empty list is returned.
      *
-     * @param devMachine
-     *         of current devMachine
-     * @param callback
-     *         the callback to use for the response
+     * @return {@link Promise} with list of project configuration
+     * @see ProjectConfigDto
+     * @since 4.4.0
      */
-    void getProjects(DevMachine devMachine, AsyncRequestCallback<List<ProjectConfigDto>> callback);
+    Promise<List<ProjectConfigDto>> getProjects();
 
     /**
-     * Get all projects in current workspace.
+     * Returns the specific project by given {@code path}. Path to project should be an absolute.
      *
-     * @param devMachine
-     *         of current devMachine
-     * @return a promise that will provide a list of {@link ProjectConfigDto}s, or rejects with an error
-     */
-    Promise<List<ProjectConfigDto>> getProjects(DevMachine devMachine);
-
-    /**
-     * Get project.
-     *
-     * @param devMachine
-     *         of current devMachine
      * @param path
-     *         path to the project to get
-     * @param callback
-     *         the callback to use for the response
+     *         path to project
+     * @return {@link Promise} with project configuration
+     * @see ProjectConfigDto
+     * @see Path
+     * @since 4.4.0
      */
-    void getProject(DevMachine devMachine, String path, AsyncRequestCallback<ProjectConfigDto> callback);
+    Promise<ProjectConfigDto> getProject(Path path);
 
     /**
-     * Get project.
+     * Creates the file by given {@code path} with given {@code content}. Content may be an empty.
      *
-     * @param devMachine
-     *         of current devMachine
      * @param path
-     *         path to the project
-     * @return a promise that resolves to the {@link ProjectConfigDto}, or rejects with an error
+     *         path to the future file
+     * @param content
+     *         the file content
+     * @return {@link Promise} with the {@link ItemReference}
+     * @see ItemReference
+     * @see Path
+     * @since 4.4.0
      */
-    Promise<ProjectConfigDto> getProject(DevMachine devMachine, String path);
+    Promise<ItemReference> createFile(Path path, String content);
 
     /**
-     * Get item.
+     * Creates the folder by given {@code path}.
      *
-     * @param devMachine
-     *         of current devMachine
      * @param path
-     *         path to the item to get
-     * @param callback
-     *         the callback to use for the response
+     *         path to the future folder
+     * @return {@link Promise} with the {@link ItemReference}
+     * @see ItemReference
+     * @see Path
+     * @since 4.4.0
      */
-    void getItem(DevMachine devMachine, String path, AsyncRequestCallback<ItemReference> callback);
+    Promise<ItemReference> createFolder(Path path);
 
     /**
-     * Create project.
+     * Creates the project with given {@code configuration}.
      *
-     * @param devMachine
-     *         of current devMachine
-     * @param projectConfig
-     *         descriptor of the project to create
-     * @param callback
-     *         the callback to use for the response
+     * @param configuration
+     *         the project configuration
+     * @return {@link Promise} with the {@link ProjectConfigDto}
+     * @see ProjectConfigDto
+     * @since 4.4.0
      */
-    void createProject(DevMachine devMachine, ProjectConfigDto projectConfig, AsyncRequestCallback<ProjectConfigDto> callback);
-
+    Promise<ProjectConfigDto> createProject(ProjectConfigDto configuration);
 
     /**
-     * Estimates if the folder supposed to be project of certain type.
+     * Returns the item description by given {@code path}.
      *
-     * @param devMachine
-     *         of current devMachine
      * @param path
-     *         path of the project to estimate
-     * @param projectType
-     *         Project Type ID to estimate against
-     * @param callback
-     *         the callback to use for the response
+     *         path to the item
+     * @return {@link Promise} with the {@link ItemReference}
+     * @see Path
+     * @see ItemReference
+     * @since 4.4.0
      */
-    void estimateProject(DevMachine devMachine, String path, String projectType, AsyncRequestCallback<SourceEstimation> callback);
+    Promise<ItemReference> getItem(Path path);
 
+    /**
+     * Estimates the given {@code path} to be applied to specified {@code pType} (project type).
+     *
+     * @param path
+     *         path to the folder
+     * @param pType
+     *         project type to estimate
+     * @return {@link Promise} with the {@link SourceEstimation}
+     * @see Path
+     * @see SourceEstimation
+     * @since 4.4.0
+     */
+    Promise<SourceEstimation> estimate(Path path, String pType);
+
+    /**
+     * Updates the project with the new {@code configuration} or creates the new one from existed folder on server side.
+     *
+     * @param configuration
+     *         configuration which which be applied to the existed project
+     * @return {@link Promise} with the applied {@link ProjectConfigDto}
+     * @see ProjectConfigDto
+     * @since 4.4.0
+     */
+    Promise<ProjectConfigDto> updateProject(ProjectConfigDto configuration);
+
+    /**
+     * Reads the file content by given {@code path}.
+     *
+     * @param path
+     *         path to the file
+     * @return {@link Promise} with file content
+     * @see Path
+     * @since 4.4.0
+     */
+    Promise<String> getFileContent(Path path);
+
+    /**
+     * Writes the file {@code content} by given {@code path}.
+     *
+     * @param path
+     *         path to the file
+     * @param content
+     *         the file content
+     * @return {@link Promise} with empty response
+     * @see Path
+     * @since 4.4.0
+     */
+    Promise<Void> setFileContent(Path path, String content);
+
+    /**
+     * Removes the item by given {@code path} from the server.
+     *
+     * @param path
+     *         path to the item
+     * @return {@link Promise} with empty response
+     * @see Path
+     * @since 4.4.0
+     */
+    Promise<Void> deleteItem(Path path);
+
+    /**
+     * Copies the {@code source} item to given {@code target} with {@code newName}.
+     *
+     * @param source
+     *         the source path to be copied
+     * @param target
+     *         the target path, should be a container (project or folder)
+     * @param newName
+     *         the new name of the copied item
+     * @param overwrite
+     *         overwrite target is such has already exists
+     * @return {@link Promise} with empty response
+     * @see Path
+     * @since 4.4.0
+     */
+    Promise<Void> copy(Path source, Path target, String newName, boolean overwrite);
+
+    /**
+     * Moves the {@code source} item to given {@code target} with {@code newName}.
+     *
+     * @param source
+     *         the source path to be moved
+     * @param target
+     *         the target path, should be a container (project or folder)
+     * @param newName
+     *         the new name of the moved item
+     * @param overwrite
+     *         overwrite target is such has already exists
+     * @return {@link Promise} with empty response
+     * @see Path
+     * @since 4.4.0
+     */
+    Promise<Void> move(Path source, Path target, String newName, boolean overwrite);
+
+    /**
+     * Imports the new project by given {@code source} configuration.
+     *
+     * @param path
+     *         path to the future project
+     * @param source
+     *         source configuration
+     * @return a promise that will resolve when the project has been imported, or rejects with an error
+     * @see Path
+     * @see SourceStorageDto
+     * @since 4.4.0
+     */
+    Promise<Void> importProject(Path path, SourceStorageDto source);
+
+    /**
+     * Reads the project tree starting from {@code path} with given {@code depth}.
+     *
+     * @param path
+     *         the start point path where read should start
+     * @param depth
+     *         the depth to read, e.g. -1, 0 or less than {@link Integer#MAX_VALUE}
+     * @param includeFiles
+     *         include files into response
+     * @return {@link Promise} with tree response
+     * @see Path
+     * @see TreeElement
+     * @since 4.4.0
+     */
+    Promise<TreeElement> getTree(Path path, int depth, boolean includeFiles);
+
+    /**
+     * Searches an item(s) with the specified criteria given by {@code expression}.
+     *
+     * @param expression
+     *         search query expression
+     * @return {@link Promise} with the list of found items
+     * @see QueryExpression
+     * @see ItemReference
+     * @since 4.4.0
+     */
+    Promise<List<ItemReference>> search(QueryExpression expression);
 
     /**
      * Gets list of {@link SourceEstimation} for all supposed project types.
      *
-     * @param devMachine
-     *         of current devMachine
      * @param path
      *         path of the project to resolve
-     * @param callback
-     *         the callback to use for the response
-     *
-     * @deprecated instead of this method should use {@link ProjectServiceClient#resolveSources(String, String)}
+     * @return {@link Promise} with the list of resolved estimations
+     * @see Path
+     * @see SourceEstimation
+     * @since 4.4.0
      */
-    void resolveSources(DevMachine devMachine, String path, AsyncRequestCallback<List<SourceEstimation>> callback);
-
-     /**
-      * Gets list of {@link SourceEstimation} for all supposed project types.
-      *
-      * @param devMachine
-      *         of current devMachine
-      * @param path
-      *         path of the project to resolve
-      * @return a promise that will provide a list of {@code SourceEstimation} for the given {@code workspaceId} and {@code path},
-      *         or rejects with on error
-      */
-    Promise<List<SourceEstimation>> resolveSources(DevMachine devMachine, String path);
-
-    /**
-     * Update project.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to the project to get
-     * @param descriptor
-     *         descriptor of the project to update
-     * @param callback
-     *         the callback to use for the response
-     *
-     * @deprecated instead of this method should use {@link ProjectServiceClient#updateProject(String, String, ProjectConfigDto)}
-     */
-    void updateProject(DevMachine devMachine, String path, ProjectConfigDto descriptor, AsyncRequestCallback<ProjectConfigDto> callback);
-
-    /**
-     * Update project.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to the project to get
-     * @param descriptor
-     *         descriptor of the project to update
-     * @return a promise that will provide updated {@link ProjectConfigDto} for {@code workspaceId}, {@code path}, {@code descriptor}
-     *         or rejects with an error
-     */
-    Promise<ProjectConfigDto> updateProject(DevMachine devMachine, String path, ProjectConfigDto descriptor);
-
-    /**
-     * Create new file in the specified folder.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param parentPath
-     *         path to parent for new file
-     * @param name
-     *         file name
-     * @param content
-     *         file content
-     * @param callback
-     *         the callback to use for the response
-     */
-    void createFile(DevMachine devMachine, String parentPath, String name, String content, AsyncRequestCallback<ItemReference> callback);
-
-    /**
-     * Get file content.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to file
-     * @param callback
-     *         the callback to use for the response
-     */
-    void getFileContent(DevMachine devMachine, String path, AsyncRequestCallback<String> callback);
-
-    /**
-     * Update file content.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to file
-     * @param content
-     *         new content of file
-     * @param callback
-     *         the callback to use for the response
-     */
-    void updateFile(DevMachine devMachine, String path, String content, AsyncRequestCallback<Void> callback);
-
-    /**
-     * Create new folder in the specified folder.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to parent for new folder
-     * @param callback
-     *         the callback to use for the response
-     */
-    void createFolder(DevMachine devMachine, String path, AsyncRequestCallback<ItemReference> callback);
-
-    /**
-     * Delete item.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to item to delete
-     * @param callback
-     *         the callback to use for the response
-     */
-    void delete(DevMachine devMachine, String path, AsyncRequestCallback<Void> callback);
-
-     /**
-     * Copy an item with new name to the specified target path. Original item name is used if new name isn't set.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to the item to copy
-     * @param newParentPath
-     *         path to the target item
-     * @param newName
-     *         new resource name. Set <code>null</code> to copy without renaming
-     * @param callback
-     *         the callback to use for the response
-     */
-    void copy(DevMachine devMachine, String path, String newParentPath, String newName, AsyncRequestCallback<Void> callback);
-
-    /**
-     * Move an item to the specified target path. Set new name to rename the resource when moving.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to the item to move
-     * @param newParentPath
-     *         path to the target item
-     * @param newName
-     *         new resource name. Set <code>null</code> to move without renaming
-     * @param callback
-     *         the callback to use for the response
-     */
-    void move(DevMachine devMachine, String path, String newParentPath, String newName, AsyncRequestCallback<Void> callback);
-
-    /**
-     * Rename and/or set new media type for item.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to the item to rename
-     * @param newName
-     *         new name
-     * @param newMediaType
-     *         new media type. May be <code>null</code>
-     * @param callback
-     *         the callback to use for the response
-     */
-    void rename(DevMachine devMachine, String path, String newName, String newMediaType, AsyncRequestCallback<Void> callback);
-
-    /**
-     * Import sources into project.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to the project to import sources
-     * @param force
-     *         set true for force rewrite existed project
-     * @param sourceStorage
-     *         {@link SourceStorageDto}
-     * @param callback
-     *         the callback to use for the response
-     */
-    void importProject(DevMachine devMachine, String path, boolean force, SourceStorageDto sourceStorage, RequestCallback<Void> callback);
-
-    /**
-     * Import sources into project.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to the project to import sources
-     * @param force
-     *         if it's true then rewrites existing project
-     * @param sourceStorage
-     *         {@link SourceStorageDto}
-     * @return a promise that will resolve when the project has been imported, or rejects with an error
-     */
-    Promise<Void> importProject(DevMachine devMachine, String path, boolean force, SourceStorageDto sourceStorage);
-
-    /**
-     * Get children for the specified path.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to get its children
-     * @param callback
-     *         the callback to use for the response
-     */
-    void getChildren(DevMachine devMachine, String path, AsyncRequestCallback<List<ItemReference>> callback);
-
-    /**
-     * Get folders tree starts from the specified path.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param path
-     *         path to get its folder tree
-     * @param depth
-     *         depth for discover children
-     * @param callback
-     *         the callback to use for the response
-     */
-    void getTree(DevMachine devMachine, String path, int depth, AsyncRequestCallback<TreeElement> callback);
-
-    /**
-     * Search an item(s) by the specified criteria.
-     *
-     * @param devMachine
-     *         of current devMachine
-     * @param expression
-     *         search query expression
-     * @return a promise that will provide a list of {@link ItemReference}s, or rejects with an error
-     */
-    Promise<List<ItemReference>> search(DevMachine devMachine, QueryExpression expression);
+    Promise<List<SourceEstimation>> resolveSources(Path path);
 }

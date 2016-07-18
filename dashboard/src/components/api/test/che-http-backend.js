@@ -61,11 +61,14 @@ export class CheHttpBackend {
 
     //profiles
     this.httpBackend.when('GET', '/api/profile').respond(this.defaultProfile);
-    this.httpBackend.when('GET', '/api/profile/prefs').respond(this.defaultProfilePrefs);
     var profileKeys = this.profilesMap.keys();
     for (let key of profileKeys) {
       this.httpBackend.when('GET', '/api/profile/' + key).respond(this.profilesMap.get(key));
     }
+
+    //preferences
+    this.httpBackend.when('GET', '/api/preferences').respond(this.defaultPreferences);
+    this.httpBackend.when('DELETE', '/api/preferences').respond();
 
     /// project details
     var projectDetailsKeys = this.projectDetailsMap.keys();
@@ -178,6 +181,23 @@ export class CheHttpBackend {
   }
 
   /**
+   * Add the given preferences
+   * @param preferences
+   */
+  addDefaultPreferences(preferences) {
+    this.defaultPreferences = preferences;
+  }
+
+  /**
+   * Add the given preferences
+   * @param preferences
+   */
+  setPreferences(preferences) {
+    this.httpBackend.when('POST', '/api/preferences').respond(preferences);
+    this.defaultPreferences = preferences;
+  }
+
+  /**
    * Add the given profile
    * @param profile
    */
@@ -191,7 +211,7 @@ export class CheHttpBackend {
    * @param attributes
    */
   setAttributes(attributes) {
-    this.httpBackend.when('POST', '/api/profile').respond(attributes);
+    this.httpBackend.when('PUT', '/api/profile/attributes').respond(attributes);
     this.defaultProfile.attributes = attributes;
   }
 
@@ -312,4 +332,3 @@ export class CheHttpBackend {
   }
 
 }
-

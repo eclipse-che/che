@@ -14,14 +14,17 @@ import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.project.node.HasStorablePath;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -31,7 +34,7 @@ import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 
 import java.util.List;
 
-import static com.google.common.base.Strings.emptyToNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -46,31 +49,25 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class ExportPresenter extends SubversionActionPresenter implements ExportView.ActionDelegate {
 
-    private final AppContext appContext;
-    private final ExportView view;
-    private final DtoUnmarshallerFactory                   dtoUnmarshallerFactory;
-    private final SubversionClientService                  subversionClientService;
+    private final AppContext                               appContext;
+    private final ExportView                               view;
+    private final SubversionClientService                  service;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
-
-    private HasStorablePath selectedNode;
 
     @Inject
     public ExportPresenter(AppContext appContext,
                            SubversionOutputConsoleFactory consoleFactory,
                            ConsolesPanelPresenter consolesPanelPresenter,
-                           ProjectExplorerPresenter projectExplorerPart,
                            ExportView view,
-                           DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                           SubversionClientService subversionClientService,
+                           SubversionClientService service,
                            NotificationManager notificationManager,
                            SubversionExtensionLocalizationConstants constants,
-                           final StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, projectExplorerPart, statusColors);
+                           StatusColors statusColors) {
+        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
         this.appContext = appContext;
         this.view = view;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.subversionClientService = subversionClientService;
+        this.service = service;
         this.notificationManager = notificationManager;
         this.constants = constants;
         this.view.setDelegate(this);
@@ -78,9 +75,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
 
     }
 
-    public void showExport(HasStorablePath selectedNode) {
-        this.selectedNode = selectedNode;
-
+    public void showExport() {
         view.onShow();
     }
 
@@ -93,83 +88,75 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
     /** {@inheritDoc} */
     @Override
     public void onExportClicked() {
-        final String projectPath = getCurrentProjectPath();
+        final Project project = appContext.getRootProject();
 
-        if (projectPath == null) {
-            notificationManager.notify(constants.exportFailedNoProjectPath(), FAIL, FLOAT_MODE);
-            return;
-        }
+        checkState(project != null);
 
-        final String nullableExportPath = emptyToNull(relPath(projectPath, selectedNode.getStorablePath()));
-        final String exportPath = (nullableExportPath != null ? nullableExportPath : ".");
+        final Resource[] resources = appContext.getResources();
+
+        checkState(!Arrays.isNullOrEmpty(resources));
+        checkState(resources.length == 1);
+
         final String givenRevision = view.isRevisionSpecified() ? view.getRevision() : null;
 
-        final StatusNotification notification = new StatusNotification(constants.exportStarted(exportPath), PROGRESS, FLOAT_MODE);
+        final StatusNotification notification = new StatusNotification(constants.exportStarted(resources[0].getLocation().toString()), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
         view.onClose();
 
         if (!isNullOrEmpty(givenRevision)) {
-            final String path = getSelectedPaths().get(0);
-            subversionClientService.getRevisions(getActiveProject().getRootProject().getPath(), path, "1:HEAD",
-                                                 new AsyncRequestCallback<GetRevisionsResponse>(
-                                                         dtoUnmarshallerFactory.newUnmarshaller(GetRevisionsResponse.class)) {
-                                                     @Override
-                                                     protected void onSuccess(GetRevisionsResponse result) {
-                                                         final List<String> pathRevisions = result.getRevisions();
+            service.getRevisions(project.getLocation(), toRelative(project, resources[0]), "1:HEAD")
+                   .then(new Operation<GetRevisionsResponse>() {
+                        @Override
+                        public void apply(GetRevisionsResponse response) throws OperationException {
+                            final List<String> pathRevisions = response.getRevisions();
 
-                                                         if (pathRevisions.size() > 0) {
-                                                             final String pathFirstRevision = pathRevisions.get(0);
-                                                             final String pathLastRevision = pathRevisions.get(pathRevisions.size() - 1);
+                            if (pathRevisions.size() > 0) {
+                                final String pathFirstRevision = pathRevisions.get(0);
+                                final String pathLastRevision = pathRevisions.get(pathRevisions.size() - 1);
 
-                                                             final int givenRevisionNb = Integer.valueOf(givenRevision);
-                                                             final int pathFirstRevisionNb =
-                                                                     Integer.valueOf(pathFirstRevision.substring(1));
-                                                             final int pathLastRevisionNb = Integer.valueOf(pathLastRevision.substring(1));
+                                final int givenRevisionNb = Integer.valueOf(givenRevision);
+                                final int pathFirstRevisionNb =
+                                        Integer.valueOf(pathFirstRevision.substring(1));
+                                final int pathLastRevisionNb = Integer.valueOf(pathLastRevision.substring(1));
 
-                                                             final List<String> errOutput = result.getErrOutput();
-                                                             if (errOutput != null && !errOutput.isEmpty()) {
-                                                                 printErrors(errOutput, constants.commandInfo());
-                                                                 notification.setTitle(constants.exportCommandExecutionError());
-                                                                 notification.setStatus(FAIL);
+                                final List<String> errOutput = response.getErrOutput();
+                                if (errOutput != null && !errOutput.isEmpty()) {
+                                    printErrors(errOutput, constants.commandInfo());
+                                    notification.setTitle(constants.exportCommandExecutionError());
+                                    notification.setStatus(FAIL);
 
-                                                             } else if (givenRevisionNb < pathFirstRevisionNb ||
-                                                                        givenRevisionNb > pathLastRevisionNb) {
-                                                                 notification.setTitle(
-                                                                         constants.exportRevisionDoNotExistForPath(givenRevision, path));
-                                                                 notification.setStatus(FAIL);
+                                } else if (givenRevisionNb < pathFirstRevisionNb ||
+                                           givenRevisionNb > pathLastRevisionNb) {
+                                    notification.setTitle(constants.exportRevisionDoNotExistForPath(givenRevision, toRelative(project, resources[0]).toString()));
+                                    notification.setStatus(FAIL);
 
-                                                             } else {
-                                                                 openExportPopup(projectPath, exportPath, givenRevision, notification);
-                                                             }
-                                                         } else {
-                                                             notification.setTitle(constants.exportNoRevisionForPath(exportPath));
-                                                             notification.setStatus(FAIL);
-                                                         }
-                                                     }
-
-                                                     @Override
-                                                     protected void onFailure(Throwable exception) {
-                                                         notification.setTitle(constants.exportCommandExecutionError() + "\n" +
-                                                                               exception.getLocalizedMessage());
-                                                         notification.setStatus(FAIL);
-                                                     }
-                                                 });
+                                } else {
+                                    openExportPopup(project.getLocation(), toRelative(project, resources[0]), givenRevision, notification);
+                                }
+                            } else {
+                                notification.setTitle(constants.exportNoRevisionForPath(toRelative(project, resources[0]).toString()));
+                                notification.setStatus(FAIL);
+                            }
+                        }
+                    })
+            .catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError error) throws OperationException {
+                    notification.setTitle(constants.exportCommandExecutionError() + "\n" + error.getMessage());
+                    notification.setStatus(FAIL);
+                }
+            });
         } else {
-            openExportPopup(projectPath, exportPath, notification);
+            openExportPopup(project.getLocation(), toRelative(project, resources[0]), null, notification);
         }
     }
 
-    private void openExportPopup(final String projectPath, final String exportPath, final StatusNotification notification) {
-        openExportPopup(projectPath, exportPath, null, notification);
-    }
-
-    private void openExportPopup(final String projectPath, final String exportPath, final String revision,
-                                 final StatusNotification notification) {
+    private void openExportPopup(Path project, Path exportPath, String revision, StatusNotification notification) {
         final StringBuilder url = new StringBuilder(appContext.getDevMachine().getWsAgentBaseUrl() + "/svn/"
-                                                    + appContext.getWorkspaceId() + "/export" + projectPath);
+                                                    + appContext.getDevMachine().getId() + "/export" + project.toString());
         char separator = '?';
-        if (!".".equals(exportPath)) {
+        if (!".".equals(exportPath.toString())) {
             url.append(separator).append("path").append('=').append(exportPath);
             separator = '&';
         }
@@ -179,7 +166,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
         }
 
         Window.open(url.toString(), "_self", "");
-        notification.setTitle(constants.exportSuccessful(exportPath));
+        notification.setTitle(constants.exportSuccessful(exportPath.toString()));
         notification.setStatus(SUCCESS);
     }
 
@@ -195,13 +182,4 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
 
     }
 
-    private String relPath(String base, String path) {
-        if (!path.startsWith(base)) {
-            return null;
-        }
-
-        final String temp = path.substring(base.length());
-
-        return temp.startsWith("/") ? temp.substring(1) : temp;
-    }
 }

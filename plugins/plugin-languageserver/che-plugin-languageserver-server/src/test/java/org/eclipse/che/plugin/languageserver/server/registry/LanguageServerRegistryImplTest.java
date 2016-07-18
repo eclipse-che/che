@@ -74,7 +74,7 @@ public class LanguageServerRegistryImplTest {
 
         when(completableFuture.get()).thenReturn(initializeResult);
         when(initializeResult.getCapabilities()).thenReturn(serverCapabilities);
-        when(serverCapabilities.isMultiplyProjectsProvider()).thenReturn(true);
+//        when(serverCapabilities.isMultiplyProjectsProvider()).thenReturn(true);
 
         when(languageServerFactory.getLanguageDescription()).thenReturn(languageDescription);
         when(languageDescription.getLanguageId()).thenReturn(JsonLanguageServerFactory.LANGUAGE_ID);

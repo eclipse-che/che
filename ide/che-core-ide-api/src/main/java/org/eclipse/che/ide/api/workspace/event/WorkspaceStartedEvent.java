@@ -10,39 +10,51 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.workspace.event;
 
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 
 /**
  * The class contains information about started workspace and provides ability to handle events when workspace starts.
  *
  * @author Dmitry Shnurenko
  */
-public class WorkspaceStartedEvent extends GwtEvent<WorkspaceStartedHandler> {
+public class WorkspaceStartedEvent extends GwtEvent<WorkspaceStartedEvent.Handler> {
 
-    public static final Type<WorkspaceStartedHandler> TYPE = new Type<>();
+    public interface Handler extends EventHandler {
+        /**
+         * Performs some actions when workspace started.
+         *
+         * @param event
+         *         contains information about started workspace
+         */
+        void onWorkspaceStarted(WorkspaceStartedEvent event);
+    }
 
-    private final WorkspaceDto workspace;
+    public static final Type<WorkspaceStartedEvent.Handler> TYPE = new Type<>();
 
-    public WorkspaceStartedEvent(WorkspaceDto workspace) {
+    private final Workspace workspace;
+
+    public WorkspaceStartedEvent(Workspace workspace) {
         this.workspace = workspace;
     }
 
     /** Returns started workspace. */
-    public WorkspaceDto getWorkspace() {
+    public Workspace getWorkspace() {
         return workspace;
     }
 
     /** {@inheritDoc} */
     @Override
-    public Type<WorkspaceStartedHandler> getAssociatedType() {
+    public Type<WorkspaceStartedEvent.Handler> getAssociatedType() {
         return TYPE;
     }
 
     /** {@inheritDoc} */
     @Override
-    protected void dispatch(WorkspaceStartedHandler handler) {
+    protected void dispatch(WorkspaceStartedEvent.Handler handler) {
         handler.onWorkspaceStarted(this);
     }
+
 }

@@ -26,6 +26,7 @@ export class DashboardLastProjectsController {
   constructor(cheWorkspace, lodash) {
     this.cheWorkspace = cheWorkspace;
     this.lodash = lodash;
+    this.workspacesById = cheWorkspace.getWorkspacesById();
 
     this.projects = [];
     this.state = 'loading';
@@ -57,4 +58,12 @@ export class DashboardLastProjectsController {
     return this.projects;
   }
 
+  /**
+   * Gets the workspace based on its ID
+   * @param workspaceId
+   * @returns {workspace|*}
+   */
+  getWorkspace(workspaceId) {
+    return this.workspacesById.get(workspaceId);
+  }
 }

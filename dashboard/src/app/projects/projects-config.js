@@ -12,9 +12,7 @@
 
 import {CreateProjectCtrl} from './create-project/create-project.controller';
 import {CreateProjectSvc} from './create-project/create-project.service.js';
-import {ListProjectsCtrl} from './list-projects/list-projects.controller';
 import {CreateProjectGithubCtrl} from './create-project/github/create-project-github.controller';
-import {ListProjectsWorkspaceFilter} from './list-projects/list-projects-filter-workspace.filter';
 
 import {CreateProjectGit} from './create-project/git/create-project-git.directive';
 import {CreateProjectGitCtrl} from './create-project/git/create-project-git.controller';
@@ -35,7 +33,7 @@ import {CreateProjectPopup} from './create-project/popup/create-project-popup.di
 
 import {CreateProjectZip} from './create-project/zip/create-project-zip.directive';
 import {CreateProjectConfFile} from './create-project/config-file/create-project-conf-file.directive';
-import {ProjectDetailsCtrl} from './project-details/project-details.controller';
+import {ProjectDetailsController} from './project-details/project-details.controller';
 import {ProjectRepositoryConfig} from './project-details/repository/project-repository-config';
 import {CheProjectItem} from './list-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './list-projects/project-item/project-item.controller';
@@ -44,14 +42,12 @@ export class ProjectsConfig {
 
   constructor(register) {
 
-    new ListProjectsWorkspaceFilter(register);
     new CreateProjectSamplesFilter(register);
     new CreateProjectSamplesNameFilter(register);
     new CreateProjectSamplesTagFilter(register);
 
-    register.controller('ListProjectsCtrl', ListProjectsCtrl);
 
-    register.controller('ProjectDetailsCtrl', ProjectDetailsCtrl);
+    register.controller('ProjectDetailsController', ProjectDetailsController);
 
     register.controller('CreateProjectPopupCtrl', CreateProjectPopupCtrl);
     register.directive('createProjectPopup', CreateProjectPopup);
@@ -85,6 +81,7 @@ export class ProjectsConfig {
 
 
     let locationCreateProjectProvider = {
+      title: 'New Project',
       templateUrl: 'app/projects/create-project/create-project.html',
       controller: 'CreateProjectCtrl',
       controllerAs: 'createProjectCtrl'
@@ -92,15 +89,11 @@ export class ProjectsConfig {
 
     // config routes
     register.app.config(function ($routeProvider) {
-      $routeProvider.accessWhen('/projects', {
-        templateUrl: 'app/projects/list-projects/list-projects.html',
-        controller: 'ListProjectsCtrl',
-        controllerAs: 'listProjectsCtrl'
-      })
-        .accessWhen('/project/:workspaceId/:projectName', {
+      $routeProvider.accessWhen('/project/:namespace/:workspaceName/:projectName', {
+          title: (params) => {return params.workspaceName + ' | ' + params.projectName},
           templateUrl: 'app/projects/project-details/project-details.html',
-          controller: 'ProjectDetailsCtrl',
-          controllerAs: 'projectDetailsCtrl'
+          controller: 'ProjectDetailsController',
+          controllerAs: 'projectDetailsController'
         })
         .accessWhen('/create-project', locationCreateProjectProvider)
         .accessWhen('/create-project/:tabName', locationCreateProjectProvider);

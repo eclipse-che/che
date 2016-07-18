@@ -22,8 +22,9 @@ export class ProjectItemCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location) {
+  constructor($location, cheWorkspace) {
     this.$location = $location;
+    this.cheWorkspace = cheWorkspace;
   }
 
 
@@ -38,7 +39,7 @@ export class ProjectItemCtrl {
 
 
   redirectToProjectDetails() {
-    this.$location.path('/project/' + this.workspaceId + '/' + this.project.name);
+    this.$location.path('/project/' + this.workspace.namespace + '/' + this.workspace.config.name + '/' + this.project.name);
   }
 
 }

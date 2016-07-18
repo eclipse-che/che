@@ -15,7 +15,7 @@
  * @author Florent Benoit
  * @author Oleksii Orel
  */
-export class ProjectDetailsCtrl {
+export class ProjectDetailsController {
 
   /**
    * Default constructor that is using resource injection
@@ -29,25 +29,24 @@ export class ProjectDetailsCtrl {
     this.$location = $location;
     this.lodash = lodash;
 
-    this.workspaceId = $route.current.params.workspaceId;
+    this.namespace = $route.current.params.namespace;
+    this.workspaceName = $route.current.params.workspaceName;
     this.projectName = $route.current.params.projectName;
     this.projectPath = '/' + this.projectName;
 
     this.loading = true;
 
-    this.workspacesById = cheAPI.getWorkspace().getWorkspacesById();
     cheAPI.getWorkspace().fetchWorkspaces();
 
-    this.workspace = cheAPI.getWorkspace().getWorkspaceById(this.workspaceId);
+    this.workspace = cheAPI.getWorkspace().getWorkspaceByName(this.namespace, this.workspaceName);
 
     if (!this.workspace || !this.workspace.runtime) {
-      cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspaceId).then(() => {
-        this.workspace = cheAPI.getWorkspace().getWorkspaceById(this.workspaceId);
+      cheAPI.getWorkspace().fetchWorkspaceDetails(this.namespace + ':' + this.workspaceName).then(() => {
+        this.workspace = cheAPI.getWorkspace().getWorkspaceByName(this.namespace, this.workspsaceName);
         if (this.workspace && this.workspace.runtime) {
          this.fetchProjectDetails();
         } else {
           this.loading = false;
-          this.noWorkspaceRuntime = true;
         }
       }, (error) => {
         this.cheNotification.showError(error.data.message ? error.data.message : 'Failed to get runtime of the project workspace.');
@@ -59,36 +58,41 @@ export class ProjectDetailsCtrl {
   }
 
   fetchProjectDetails() {
-    this.projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspaceId).getProject();
+    this.loading = true;
 
-    if (!this.projectService.getProjectDetailsByKey(this.projectPath)) {
-      let promise = this.projectService.fetchProjectDetails(this.workspaceId, this.projectPath);
-      promise.then(() => {
+    if (this.workspace.status !== 'STARTING' && this.workspace.status !== 'RUNNING') {
+      this.loading = false;
+      return;
+    }
+
+    this.cheAPI.getWorkspace().fetchStatusChange(this.workspace.id, 'RUNNING').then(() => {
+      return this.cheAPI.getWorkspace().fetchWorkspaceDetails(this.workspace.id);
+    }).then(() => {
+
+      this.projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(this.workspace.id).getProject();
+
+      if (this.projectService.getProjectDetailsByKey(this.projectPath)) {
+        this.loading = false;
         this.updateProjectDetails();
-      }, (error) => {
-        if (error.status === 304) {
-          this.updateProjectDetails();
-        } else {
+      } else {
+        this.projectService.fetchProjectDetails(this.workspace.id, this.projectPath).then(() => {
           this.loading = false;
-          this.invalidProject = error.statusText + error.status;
-        }
+          this.updateProjectDetails();
+        }, (error) => {
+          if (error.status === 304) {
+            this.loading = false;
+            this.updateProjectDetails();
+          } else {
+            this.$log.error(error);
+            this.loading = false;
+            this.invalidProject = error.statusText + error.status;
+          }
+        });
+      }
+    }, (error) => {
+      this.$log.error(error);
+      this.loading = false;
     });
-    } else {
-      this.updateProjectDetails();
-    }
-  }
-
-  /**
-   * Gets the name of the workspace based on its ID
-   * @param workspaceId
-   * @returns {CheWorkspace.name|*}
-   */
-  getWorkspaceName(workspaceId) {
-    let workspace = this.workspacesById.get(workspaceId);
-    if (workspace && workspace.config) {
-      return workspace.config.name;
-    }
-    return '';
   }
 
   updateProjectDetails() {
@@ -102,7 +106,7 @@ export class ProjectDetailsCtrl {
     if (this.$location.path().endsWith(this.projectDetails.name)) {
       return;
     }
-    this.$location.path('/project/' + this.projectDetails.workspaceId + '/' + this.projectDetails.name);
+    this.$location.path('/project/' + this.namespace + '/' + this.workspaceName + '/' + this.projectDetails.name);
   }
 
   setProjectDetails(projectDetails) {
@@ -155,7 +159,7 @@ export class ProjectDetailsCtrl {
         if (!this.isDescriptionChanged()) {
           this.cheNotification.showInfo('Project information successfully updated.');
           this.updateLocation();
-          this.projectService.fetchProjectDetails(this.workspaceId, this.projectPath).then(() => {
+          this.projectService.fetchProjectDetails(this.workspace.id, this.projectPath).then(() => {
             this.updateProjectDetails();
           });
         } else {
@@ -184,7 +188,7 @@ export class ProjectDetailsCtrl {
       // remove it !
       let promise = this.projectService.remove(this.projectDetails.name);
       promise.then(() => {
-        this.$location.path('/projects');
+        this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name + '/projects');
       }, (error) => {
         this.$log.log('error', error);
       });
@@ -196,9 +200,20 @@ export class ProjectDetailsCtrl {
    * @returns {*|Array}
    */
   getWorkspaceProjects() {
-    let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspaceId];
+    let projects = this.cheAPI.getWorkspace().getWorkspaceProjects()[this.workspace.id];
     let _projects = this.lodash.filter(projects, (project) => { return project.name !== this.projectName});
     return _projects;
   }
 
+  /**
+   * Returns current status of workspace
+   * @returns {String}
+   */
+  getWorkspaceStatus() {
+    if (!this.workspace) {
+      return 'unknown';
+    }
+    let workspace = this.cheAPI.getWorkspace().getWorkspaceById(this.workspace.id);
+    return workspace ? workspace.status : 'unknown';
+  }
 }

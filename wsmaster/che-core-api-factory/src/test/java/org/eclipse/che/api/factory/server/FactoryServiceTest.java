@@ -26,8 +26,8 @@ import org.eclipse.che.api.factory.shared.dto.Button;
 import org.eclipse.che.api.factory.shared.dto.ButtonAttributes;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -161,7 +161,11 @@ public class FactoryServiceTest {
         factoryBuilder = spy(new FactoryBuilder(new SourceStorageParametersValidator()));
         doNothing().when(factoryBuilder).checkValid(any(Factory.class));
         when(factoryParametersResolverHolder.getFactoryParametersResolvers()).thenReturn(factoryParametersResolvers);
-        when(userDao.getById(anyString())).thenReturn(new User().withName(JettyHttpServer.ADMIN_USER_NAME));
+        when(userDao.getById(anyString())).thenReturn(new UserImpl(null,
+                                                                   null,
+                                                                   JettyHttpServer.ADMIN_USER_NAME,
+                                                                   null,
+                                                                   null));
         factoryService = new FactoryService(factoryStore,
                                             createValidator,
                                             acceptValidator,
@@ -918,7 +922,7 @@ public class FactoryServiceTest {
 
         assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
         assertEquals(dto.createDtoFromJson(response.getBody().asString(), ServiceError.class).getMessage(),
-                     "The updating factory shouldn't be null");
+                     "The factory information is not updateable");
 
     }
 

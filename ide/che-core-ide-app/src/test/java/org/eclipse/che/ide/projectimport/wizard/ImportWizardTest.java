@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projectimport.wizard;
 
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,11 +28,11 @@ import static org.mockito.Mockito.verify;
 public class ImportWizardTest {
 
     @Mock
-    private ProjectImporter  importer;
+    private ProjectImporter      importer;
     @Mock
-    private ProjectConfigDto projectConfig;
+    private MutableProjectConfig projectConfig;
     @Mock
-    private CompleteCallback completeCallback;
+    private CompleteCallback     completeCallback;
 
     @InjectMocks
     private ImportWizard wizard;

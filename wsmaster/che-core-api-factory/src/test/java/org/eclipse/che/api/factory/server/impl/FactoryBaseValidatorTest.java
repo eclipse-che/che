@@ -26,9 +26,9 @@ import org.eclipse.che.api.factory.shared.dto.OnAppClosed;
 import org.eclipse.che.api.factory.shared.dto.OnAppLoaded;
 import org.eclipse.che.api.factory.shared.dto.OnProjectsLoaded;
 import org.eclipse.che.api.factory.shared.dto.Policies;
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
-import org.eclipse.che.api.user.server.dao.User;
-import org.eclipse.che.api.user.server.dao.UserDao;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
@@ -86,7 +86,7 @@ public class FactoryBaseValidatorTest {
                 .withCreator(newDto(Author.class)
                                      .withUserId("userid"));
 
-        User user = new User().withId("userid");
+        UserImpl user = new UserImpl("userid");
 
         when(userDao.getById("userid")).thenReturn(user);
         validator = new TesterFactoryBaseValidator(preferenceDao);

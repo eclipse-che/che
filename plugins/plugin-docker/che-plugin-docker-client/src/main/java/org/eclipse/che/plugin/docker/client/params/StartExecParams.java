@@ -97,18 +97,34 @@ public class StartExecParams {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        StartExecParams that = (StartExecParams)o;
-        return Objects.equals(execId, that.execId) &&
-               Objects.equals(detach, that.detach) &&
-               Objects.equals(tty, that.tty);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof StartExecParams)) {
+            return false;
+        }
+        final StartExecParams that = (StartExecParams)obj;
+        return Objects.equals(execId, that.execId)
+               && Objects.equals(detach, that.detach)
+               && Objects.equals(tty, that.tty);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(execId, detach, tty);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(execId);
+        hash = 31 * hash + Objects.hashCode(detach);
+        hash = 31 * hash + Objects.hashCode(tty);
+        return hash;
     }
 
+    @Override
+    public String toString() {
+        return "StartExecParams{" +
+               "execId='" + execId + '\'' +
+               ", detach=" + detach +
+               ", tty=" + tty +
+               '}';
+    }
 }

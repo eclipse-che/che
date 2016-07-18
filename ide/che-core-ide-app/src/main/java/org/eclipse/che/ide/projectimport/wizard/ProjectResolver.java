@@ -10,126 +10,79 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projectimport.wizard;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
+import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.project.shared.Constants;
-import org.eclipse.che.api.project.shared.dto.ProjectTypeDto;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.ProjectTypeRegistry;
-import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
-import org.eclipse.che.ide.api.wizard.Wizard.CompleteCallback;
-import org.eclipse.che.ide.rest.AsyncRequestCallback;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.rest.Unmarshallable;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.projecttype.wizard.presenter.ProjectWizardPresenter;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
-import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Iterables.getFirst;
-import static com.google.common.collect.Iterables.size;
-import static com.google.common.collect.Iterables.transform;
-import static org.eclipse.che.ide.util.StringUtils.isNullOrEmpty;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * The class contains business logic which allows resolve project type and call updater.
  *
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @Singleton
 public class ProjectResolver {
 
-    private final DtoUnmarshallerFactory        dtoUnmarshallerFactory;
-    private final ProjectServiceClient          projectService;
-    private final ProjectTypeRegistry           projectTypeRegistry;
-    private final AppContext                    appContext;
-    private final ProjectNotificationSubscriber projectNotificationSubscriber;
-    private final ProjectUpdater                projectUpdater;
+    private final ProjectTypeRegistry    projectTypeRegistry;
+    private final PromiseProvider        promiseProvider;
+    private final ProjectWizardPresenter projectWizard;
 
     @Inject
-    public ProjectResolver(DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                           ProjectServiceClient projectService,
-                           ProjectTypeRegistry projectTypeRegistry,
-                           AppContext appContext,
-                           ProjectNotificationSubscriber projectNotificationSubscriber,
-                           ProjectUpdater projectUpdater) {
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.projectService = projectService;
+    public ProjectResolver(ProjectTypeRegistry projectTypeRegistry,
+                           PromiseProvider promiseProvider,
+                           ProjectWizardPresenter projectWizard) {
         this.projectTypeRegistry = projectTypeRegistry;
-        this.appContext = appContext;
-        this.projectNotificationSubscriber = projectNotificationSubscriber;
-        this.projectUpdater = projectUpdater;
+        this.promiseProvider = promiseProvider;
+        this.projectWizard = projectWizard;
     }
 
-    /**
-     * The method defines project type of passed project and take resolution should project be configured or not.
-     *
-     * @param callback
-     *         callback which is necessary to inform that resolving completed
-     * @param projectConfig
-     *         project which will be resolved
-     */
-    public void resolveProject(@NotNull final CompleteCallback callback, @NotNull final ProjectConfigDto projectConfig) {
-        final String projectName = projectConfig.getName();
-        final String projectPath = projectConfig.getPath();
-
-        String path = projectPath == null ? projectName : projectPath;
-        Unmarshallable<List<SourceEstimation>> unmarshaller = dtoUnmarshallerFactory.newListUnmarshaller(SourceEstimation.class);
-        projectService.resolveSources(appContext.getDevMachine(), path, new AsyncRequestCallback<List<SourceEstimation>>(unmarshaller) {
-
-            Function<SourceEstimation, ProjectTypeDto> estimateToType = new Function<SourceEstimation, ProjectTypeDto>() {
-                @Nullable
-                @Override
-                public ProjectTypeDto apply(@Nullable SourceEstimation input) {
-                    if (input != null) {
-                        return projectTypeRegistry.getProjectType(input.getType());
-                    }
-
-                    return null;
-                }
-            };
-
-            Predicate<ProjectTypeDto> isPrimaryable = new Predicate<ProjectTypeDto>() {
-                @Override
-                public boolean apply(@Nullable ProjectTypeDto input) {
-                    return input != null && input.isPrimaryable();
-
-                }
-            };
-
+    public Promise<Project> resolve(final Project project) {
+        return project.resolve().thenPromise(new Function<List<SourceEstimation>, Promise<Project>>() {
             @Override
-            protected void onSuccess(List<SourceEstimation> result) {
-                Iterable<ProjectTypeDto> types = filter(transform(result, estimateToType), isPrimaryable);
+            public Promise<Project> apply(List<SourceEstimation> estimations) throws FunctionException {
+                if (estimations == null || estimations.isEmpty()) {
+                    return promiseProvider.resolve(project);
+                }
 
-                if (size(types) == 1) {
-                    ProjectTypeDto typeDto = getFirst(types, null);
-
-                    if (typeDto != null) {
-                        projectConfig.withType(typeDto.getId());
+                final List<String> primeTypes = newArrayList();
+                for (SourceEstimation estimation : estimations) {
+                    if (projectTypeRegistry.getProjectType(estimation.getType()).isPrimaryable()) {
+                        primeTypes.add(estimation.getType());
                     }
                 }
 
-                boolean configRequire = false;
+                final MutableProjectConfig config = new MutableProjectConfig(project);
+                final SourceStorage source = project.getSource();
 
-                if (isNullOrEmpty(projectConfig.getType())) {
-                    projectConfig.withType(Constants.BLANK_ID);
-                    configRequire = true;
+                if (source != null && source.getParameters() != null && source.getParameters().containsKey("keepDir")) {
+                    config.setType(Constants.BLANK_ID);
+                } else if (primeTypes.isEmpty()) {
+                    return promiseProvider.resolve(project);
+                } else if (primeTypes.size() == 1) {
+                    config.setType(primeTypes.get(0));
+                } else {
+                    config.setType(Constants.BLANK_ID);
+                    projectWizard.show(config);
+
+                    return promiseProvider.resolve(project);
                 }
 
-                projectUpdater.updateProject(callback, projectConfig, configRequire);
-            }
-
-            @Override
-            protected void onFailure(Throwable exception) {
-                projectNotificationSubscriber.onFailure(exception.getMessage());
-                callback.onFailure(new Exception(exception.getMessage()));
+                return project.update().withBody(config).send();
             }
         });
     }

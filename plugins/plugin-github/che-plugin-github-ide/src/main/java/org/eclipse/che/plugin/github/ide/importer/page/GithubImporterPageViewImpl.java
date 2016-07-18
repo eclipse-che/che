@@ -78,6 +78,9 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
     TextBox projectUrl;
 
     @UiField
+    CheckBox recursive;
+
+    @UiField
     FlowPanel bottomPanel;
 
     @UiField
@@ -97,6 +100,12 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
 
     @UiField
     TextBox directoryName;
+
+    @UiField
+    CheckBox branchSelection;
+
+    @UiField
+    TextBox branch;
 
     private ActionDelegate delegate;
 
@@ -192,12 +201,17 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
             return;
         }
 
-        delegate.projectNameChanged(projectName.getValue());
+        delegate.onProjectNameChanged(projectName.getValue());
     }
 
     @UiHandler("projectUrl")
     void onProjectUrlChanged(KeyUpEvent event) {
-        delegate.projectUrlChanged(projectUrl.getValue());
+        delegate.onProjectUrlChanged(projectUrl.getValue());
+    }
+
+    @UiHandler("recursive")
+    void recursiveHandler(ValueChangeEvent<Boolean> event) {
+        delegate.onRecursiveSelected(event.getValue());
     }
 
     @UiHandler("projectDescription")
@@ -205,7 +219,7 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
         if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
             return;
         }
-        delegate.projectDescriptionChanged(projectDescription.getValue());
+        delegate.onProjectDescriptionChanged(projectDescription.getValue());
     }
 
     @UiHandler("accountName")
@@ -215,7 +229,7 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
 
     @UiHandler({"keepDirectory"})
     void keepDirectoryHandler(ValueChangeEvent<Boolean> event) {
-        delegate.keepDirectorySelected(event.getValue());
+        delegate.onKeepDirectorySelected(event.getValue());
     }
 
     @UiHandler("directoryName")
@@ -224,13 +238,26 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
             return;
         }
 
-        delegate.keepDirectoryNameChanged(directoryName.getValue());
+        delegate.onKeepDirectoryNameChanged(directoryName.getValue());
+    }
+
+    @UiHandler({"branchSelection"})
+    void branchSelectedHandler(ValueChangeEvent<Boolean> event) {
+        delegate.onBranchCheckBoxSelected(event.getValue());
+    }
+
+    @UiHandler("branch")
+    void onBranchNameChanged(KeyUpEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+            return;
+        }
+        delegate.onBranchNameChanged(branch.getValue());
     }
 
     @Override
     public void setProjectUrl(@NotNull String url) {
         projectUrl.setText(url);
-        delegate.projectUrlChanged(url);
+        delegate.onProjectUrlChanged(url);
     }
 
     @Override
@@ -288,13 +315,13 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
     @Override
     public void setProjectName(@NotNull String projectName) {
         this.projectName.setValue(projectName);
-        delegate.projectNameChanged(projectName);
+        delegate.onProjectNameChanged(projectName);
     }
 
     @Override
     public void setProjectDescription(@NotNull String projectDescription) {
         this.projectDescription.setText(projectDescription);
-        delegate.projectDescriptionChanged(projectDescription);
+        delegate.onProjectDescriptionChanged(projectDescription);
     }
 
     @Override
@@ -348,12 +375,48 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
     }
 
     @Override
-    public void focusDirectoryNameFiend() {
+    public void focusDirectoryNameField() {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
                 directoryName.setFocus(true);
                 directoryName.selectAll();
+            }
+        });
+    }
+
+    @Override
+    public void setBranchName(String branchName) {
+        branch.setValue(branchName);
+    }
+
+    @Override
+    public String getBranchName() {
+        return branch.getValue();
+    }
+
+    @Override
+    public void setBranchCheckBoxSelected(boolean selected) {
+        branchSelection.setValue(selected);
+    }
+
+    @Override
+    public boolean isBranchCheckBoxSelected() {
+        return branchSelection.getValue();
+    }
+
+    @Override
+    public void enableBranchNameField(boolean enable) {
+        branch.setEnabled(enable);
+    }
+
+    @Override
+    public void focusBranchNameField() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                branch.setFocus(true);
+                branch.selectAll();
             }
         });
     }

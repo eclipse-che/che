@@ -636,6 +636,11 @@ public class SelectionModel implements HasSelectionHandlers<Node>, HasBeforeSele
         }
 
         for (Node node : nodes) {
+
+            if (tree.getNodeDescriptor(node) == null) {
+                continue;
+            }
+
             boolean isSelected = isSelected(node);
             if (!suppressEvent && !isSelected) {
                 BeforeSelectionEvent<Node> evt = BeforeSelectionEvent.fire(this, node);
@@ -777,15 +782,7 @@ public class SelectionModel implements HasSelectionHandlers<Node>, HasBeforeSele
     }
 
     protected void onRemove(Node model) {
-        if (selectionStorage.remove(model)) {
-            if (lastSelectedNode == model) {
-                lastSelectedNode = null;
-            }
-            if (getLastFocused() == model) {
-                setLastFocused(null);
-            }
-            fireSelectionChange();
-        }
+        selectionStorage.remove(model);
     }
 
     public List<Node> getSelectedNodes() {

@@ -10,15 +10,22 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.recipe;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Valeriy Svydenko
@@ -26,9 +33,17 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class RecipeTabPresenterTest {
     @Mock
-    private RecipeView view;
+    private RecipeView                        view;
     @Mock
-    private Machine    machine;
+    private Machine                           machine;
+    @Mock
+    private RecipeScriptDownloadServiceClient recipeScriptClient;
+
+    @Mock
+    private Promise<String> recipePromise;
+
+    @Captor
+    private ArgumentCaptor<Operation<String>> argumentCaptor;
 
     @InjectMocks
     private RecipeTabPresenter presenter;
@@ -50,6 +65,18 @@ public class RecipeTabPresenterTest {
         presenter.setVisible(true);
 
         verify(view).setVisible(true);
+    }
+
+    @Test
+    public void tabGetScriptAsContent() throws Exception {
+        when(recipeScriptClient.getRecipeScript(any(Machine.class))).thenReturn(recipePromise);
+        when(recipePromise.then(any(Operation.class))).thenReturn(recipePromise);
+
+        presenter.updateInfo(machine);
+
+        verify(recipePromise).then(argumentCaptor.capture());
+        argumentCaptor.getValue().apply("test content");
+        verify(view).setScript("test content");
     }
 
 

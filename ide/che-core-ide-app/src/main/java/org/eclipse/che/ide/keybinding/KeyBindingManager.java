@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.ide.keybinding;
 
-import com.google.inject.Provider;
 import elemental.dom.Element;
 import elemental.events.Event;
 import elemental.events.EventListener;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.AreaElement;
+import com.google.gwt.dom.client.InputElement;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -31,7 +35,6 @@ import org.eclipse.che.ide.util.input.SignalEvent;
 import org.eclipse.che.ide.util.input.SignalEventUtils;
 
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.commons.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -68,6 +71,16 @@ public class KeyBindingManager implements KeyBindingAgent {
             public void handleEvent(Event event) {
                 SignalEvent signalEvent = SignalEventUtils.create(event, false);
                 if (signalEvent == null) {
+                    return;
+                }
+
+                /*
+                  Temporary solution to prevent calling actions if focus is in input element.
+                  The problem in that, some actions, may be bound to Ctrl+C/X/V/Z or Delete so
+                  We should allow browser to process event natively instead of calling actions.
+                  Need to be reworked in nearest future. */
+                final JavaScriptObject jso = (JavaScriptObject)event.getTarget();
+                if (InputElement.is(jso) || AreaElement.is(jso)) {
                     return;
                 }
 

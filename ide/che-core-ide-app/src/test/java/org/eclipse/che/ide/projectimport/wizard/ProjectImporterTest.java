@@ -10,49 +10,39 @@
  *******************************************************************************/
 package org.eclipse.che.ide.projectimport.wizard;
 
-import com.google.gwt.event.shared.EventBus;
-import com.google.web.bindery.event.shared.Event;
-
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.project.ProjectServiceClient;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
+import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
+import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.wizard.Wizard;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Dmitry Shnurenko
+ * @author Vlad Zhukovskyi
  */
 @RunWith(MockitoJUnitRunner.class)
 public class ProjectImporterTest {
-    private static final String PROJECT_NAME = "project";
-    private static final String ID           = "id";
 
     //constructors mocks
-    @Mock
-    private ProjectServiceClient                       projectServiceClient;
     @Mock
     private CoreLocalizationConstant                   localizationConstant;
     @Mock
@@ -60,64 +50,62 @@ public class ProjectImporterTest {
     @Mock
     private AppContext                                 appContext;
     @Mock
-    private DevMachine                                 devMachine;
-    @Mock
     private ProjectResolver                            resolver;
 
     //additional mocks
     @Mock
-    private ProjectNotificationSubscriber subscriber;
+    private ProjectNotificationSubscriber             subscriber;
     @Mock
-    private ProjectConfigDto              projectConfig;
+    private MutableProjectConfig                      projectConfig;
     @Mock
-    private EventBus                      eventBus;
+    private MutableProjectConfig.MutableSourceStorage source;
     @Mock
-    private SourceStorageDto              source;
+    private Wizard.CompleteCallback                   completeCallback;
     @Mock
-    private Wizard.CompleteCallback       completeCallback;
+    private Container                                 workspaceRoot;
     @Mock
-    private Promise<Void>                 importPromise;
+    private Project.ProjectRequest                    importRequest;
     @Mock
-    private OAuth2AuthenticatorRegistry   oAuth2AuthenticatorRegistry;
+    private Promise<Project>                          importPromise;
+    @Mock
+    private Project                                   importedProject;
 
     @Captor
-    private ArgumentCaptor<Operation<Void>> voidOperationCaptor;
+    private ArgumentCaptor<Function<Project, Promise<Project>>>            importProjectCaptor;
 
     private ProjectImporter importer;
 
     @Before
     public void setUp() {
-        when(appContext.getDevMachine()).thenReturn(devMachine);
-        when(devMachine.getWsAgentBaseUrl()).thenReturn("/ext");
-        when(projectConfig.getName()).thenReturn(PROJECT_NAME);
-        when(projectConfig.getPath()).thenReturn('/' + PROJECT_NAME);
+        when(appContext.getWorkspaceRoot()).thenReturn(workspaceRoot);
+        when(workspaceRoot.importProject()).thenReturn(importRequest);
+        when(importRequest.withBody(any(ProjectConfig.class))).thenReturn(importRequest);
+        when(importRequest.send()).thenReturn(importPromise);
+        when(importPromise.thenPromise(any(Function.class))).thenReturn(importPromise);
+        when(projectConfig.getPath()).thenReturn("/foo");
         when(projectConfig.getSource()).thenReturn(source);
         when(subscriberFactory.createSubscriber()).thenReturn(subscriber);
-        when(projectServiceClient.importProject(devMachine, '/' + PROJECT_NAME, false, source)).thenReturn(importPromise);
-        when(importPromise.then(Matchers.<Operation<Void>>anyObject())).thenReturn(importPromise);
-        when(importPromise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(importPromise);
+        when(projectConfig.getSource()).thenReturn(source);
+        when(importPromise.catchErrorPromise(any(Function.class))).thenReturn(importPromise);
+        when(importPromise.then(any(Function.class))).thenReturn(importPromise);
+        when(importPromise.then(any(Operation.class))).thenReturn(importPromise);
 
-        importer = new ProjectImporter(projectServiceClient,
-                                       localizationConstant,
+        importer = new ProjectImporter(localizationConstant,
                                        subscriberFactory,
                                        appContext,
                                        resolver,
                                        null,
-                                       null,
-                                       oAuth2AuthenticatorRegistry,
-                                       eventBus);
+                                       null);
     }
 
     @Test
-    public void importShouldBeSuccessAndProjectStartsResolving() throws OperationException {
+    public void importShouldBeSuccessAndProjectStartsResolving() throws Exception {
         importer.importProject(completeCallback, projectConfig);
 
-        //first time called in abstract importer
-        verify(importPromise, times(2)).then(voidOperationCaptor.capture());
-        voidOperationCaptor.getAllValues().get(0).apply(null);
+        verify(importPromise).thenPromise(importProjectCaptor.capture());
+        importProjectCaptor.getValue().apply(importedProject);
 
-        verify(eventBus).fireEvent(Matchers.<Event>anyObject());
-        verify(resolver).resolveProject(completeCallback, projectConfig);
         verify(subscriber).onSuccess();
+        verify(resolver).resolve(eq(importedProject));
     }
 }

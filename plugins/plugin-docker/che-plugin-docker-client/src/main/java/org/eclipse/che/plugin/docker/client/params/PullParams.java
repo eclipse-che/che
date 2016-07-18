@@ -14,11 +14,9 @@ import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY;
 import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 
 /**
@@ -146,4 +144,13 @@ public class PullParams {
         return Objects.hash(image, tag, registry, authConfigs);
     }
 
+    @Override
+    public String toString() {
+        return "PullParams{" +
+               "image='" + image + '\'' +
+               ", tag='" + tag + '\'' +
+               ", registry='" + registry + '\'' +
+               ", authConfigs=" + authConfigs +
+               '}';
+    }
 }

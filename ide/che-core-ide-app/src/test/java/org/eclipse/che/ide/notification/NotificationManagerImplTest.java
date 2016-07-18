@@ -127,9 +127,9 @@ public class NotificationManagerImplTest {
         StatusNotification notification = new StatusNotification("Title", "Message", SUCCESS, NOT_EMERGE_MODE, null, listener);
 
         manager.onClick(notification);
-        verify(listener).onClick();
-        verify(listener, never()).onClose();
-        verify(listener, never()).onDoubleClick();
+        verify(listener).onClick(eq(notification));
+        verify(listener, never()).onClose(eq(notification));
+        verify(listener, never()).onDoubleClick(eq(notification));
     }
 
     @Test
@@ -138,9 +138,9 @@ public class NotificationManagerImplTest {
         StatusNotification notification = new StatusNotification("Title", "Message", SUCCESS, NOT_EMERGE_MODE, null, listener);
 
         manager.onDoubleClick(notification);
-        verify(listener, never()).onClick();
-        verify(listener, never()).onClose();
-        verify(listener).onDoubleClick();
+        verify(listener, never()).onClick(eq(notification));
+        verify(listener, never()).onClose(eq(notification));
+        verify(listener).onDoubleClick(eq(notification));
     }
 
     @Test
@@ -149,9 +149,9 @@ public class NotificationManagerImplTest {
         StatusNotification notification = new StatusNotification("Title", "Message", SUCCESS, NOT_EMERGE_MODE, null, listener);
 
         manager.onClose(notification);
-        verify(listener, never()).onClick();
-        verify(listener).onClose();
-        verify(listener, never()).onDoubleClick();
+        verify(listener, never()).onClick(eq(notification));
+        verify(listener).onClose(eq(notification));
+        verify(listener, never()).onDoubleClick(eq(notification));
     }
 
     @Test

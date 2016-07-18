@@ -79,6 +79,8 @@
     <inherits name="org.eclipse.che.api.debug.Debug"/>
     <inherits name="org.eclipse.che.api.ssh.Ssh"/>
 
+    <inherits name="org.eclipse.che.plugin.svn.Subversion"/>
+
     <stylesheet src="IDE.css"/>
 
     <!-- Specify the app entry point class.                         -->

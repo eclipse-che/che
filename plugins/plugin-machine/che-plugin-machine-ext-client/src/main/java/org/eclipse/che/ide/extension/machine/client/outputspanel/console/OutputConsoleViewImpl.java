@@ -239,6 +239,16 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     }
 
     @Override
+    public void setReRunButtonVisible(boolean visible) {
+        reRunProcessButton.setVisible(visible);
+    }
+
+    @Override
+    public void setStopButtonVisible(boolean visible) {
+        stopProcessButton.setVisible(visible);
+    }
+
+    @Override
     public void enableStopButton(boolean enable) {
         if (enable) {
             stopProcessButton.getElement().removeAttribute("disabled");

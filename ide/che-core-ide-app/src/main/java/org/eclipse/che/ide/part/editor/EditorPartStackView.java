@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.ResizeComposite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView;
@@ -222,6 +223,10 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
 
         contentPanel.showWidget(viewIndex);
         setActiveTab(partPresenter);
+
+        if (partPresenter instanceof TextEditorPresenter) {
+            ((TextEditorPresenter)partPresenter).activate();
+        }
     }
 
     /**
