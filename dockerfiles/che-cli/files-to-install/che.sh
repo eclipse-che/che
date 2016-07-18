@@ -20,10 +20,10 @@ init_global_variables() {
   # User configurable variables
   DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
-  
+
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
-  
+
   USAGE="
 Usage:
   che [COMMAND]
@@ -98,13 +98,13 @@ execute_command_with_progress() {
   local progress=$1
   local command=$2
   shift 2
-      
+
   local pid=""
-  printf "\n"     
+  printf "\n"
 
   case "$progress" in
     extended)
-      $command "$@"  
+      $command "$@"
       ;;
     basic|*)
       $command "$@" &>/dev/null &
@@ -117,7 +117,7 @@ execute_command_with_progress() {
       printf "\n"
     ;;
   esac
-  printf "\n"     
+  printf "\n"
 }
 
 update_che_launcher() {
@@ -127,9 +127,9 @@ update_che_launcher() {
 
   CURRENT_IMAGE=$(docker images -q ${CHE_LAUNCHER_IMAGE_NAME}:${CHE_VERSION})
 
-  if [ "${CURRENT_IMAGE}" != "" ]; then 
+  if [ "${CURRENT_IMAGE}" != "" ]; then
     info "ECLIPSE CHE: ALREADY HAVE IMAGE ${CHE_LAUNCHER_IMAGE_NAME}:${CHE_VERSION}"
-  else 
+  else
     info "ECLIPSE CHE: PULLING IMAGE ${CHE_LAUNCHER_IMAGE_NAME}:${CHE_VERSION}"
     execute_command_with_progress extended docker pull ${CHE_LAUNCHER_IMAGE_NAME}:${CHE_VERSION}
     info "ECLIPSE CHE: IMAGE ${CHE_LAUNCHER_IMAGE_NAME}:${CHE_VERSION} INSTALLED"

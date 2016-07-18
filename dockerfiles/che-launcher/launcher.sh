@@ -1,4 +1,13 @@
 #!/bin/sh
+# Copyright (c) 2012-2016 Codenvy, S.A., Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#   Mario Loriedo - Initial implementation
+#
 
 init_logging() {
   BLUE='\033[1;34m'
@@ -10,8 +19,8 @@ init_logging() {
 init_global_variables() {
 
   CHE_SERVER_CONTAINER_NAME="che-server"
-  CHE_SERVER_IMAGE_NAME="codenvy/che"
-  CHE_LAUNCER_IMAGE_NAME="codenvy/che-launcher"
+  CHE_SERVER_IMAGE_NAME="codenvy/che-server"
+  CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
 
   # Possible Docker install types are:
   #     native, boot2docker or moby
@@ -22,7 +31,7 @@ init_global_variables() {
   DEFAULT_CHE_HOSTNAME=$(get_che_hostname)
   DEFAULT_CHE_PORT="8080"
   DEFAULT_CHE_VERSION="latest"
-  DEFAULT_CHE_RESTART_POLICY="always"
+  DEFAULT_CHE_RESTART_POLICY="no"
   DEFAULT_CHE_USER="root"
   DEFAULT_CHE_LOG_LEVEL="info"
   DEFAULT_CHE_DATA_FOLDER="/home/user/che"
@@ -42,9 +51,24 @@ init_global_variables() {
   CHE_CONF_ARGS=${CHE_CONF_FOLDER:+-v ${CHE_CONF_FOLDER}:/conf -e \"CHE_LOCAL_CONF_DIR=/conf\"}
   CHE_LOCAL_BINARY_ARGS=${CHE_LOCAL_BINARY:+-v ${CHE_LOCAL_BINARY}:/home/user/che}
 
+  if is_docker_for_mac || is_docker_for_windows; then
+    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v ${CHE_DATA_FOLDER}/storage:/home/user/che/storage \
+                                        -e \"CHE_WORKSPACE_STORAGE=${CHE_DATA_FOLDER}/workspaces\" \
+                                        -e \"CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false\"}
+  else
+    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v ${CHE_DATA_FOLDER}/storage:/home/user/che/storage \
+                                        -v ${CHE_DATA_FOLDER}/workspaces:/home/user/che/workspaces}
+  fi
+
+  if [ "${CHE_LOG_LEVEL}" = "debug" ]; then
+    CHE_DEBUG_OPTION="--debug --log_level:debug"
+  else
+    CHE_DEBUG_OPTION=""
+  fi
+
   USAGE="
 Usage:
-  docker run -v /var/run/docker.sock:/var/run/docker.sock ${CHE_LAUNCER_IMAGE_NAME} [COMMAND]
+  docker run -v /var/run/docker.sock:/var/run/docker.sock ${CHE_LAUNCHER_IMAGE_NAME} [COMMAND]
      start                              Starts Che server
      stop                               Stops Che server
      restart                            Restart Che server
@@ -115,11 +139,46 @@ print_debug_info() {
   debug "---------------------------------------"
 }
 
-get_docker_install_type() {
+is_boot2docker() {
   if uname -r | grep -q 'boot2docker'; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+has_docker_for_windows_ip() {
+  DOCKER_HOST_IP=$(get_docker_host_ip)
+  if [ "${DOCKER_HOST_IP}" = "10.0.75.2" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_docker_for_mac() {
+  if uname -r | grep -q 'moby' && ! has_docker_for_windows_ip; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_docker_for_windows() {
+  if uname -r | grep -q 'moby' && has_docker_for_windows_ip; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+get_docker_install_type() {
+  if is_boot2docker; then
     echo "boot2docker"
-  elif uname -r | grep -q 'moby'; then
-    echo "moby"
+  elif is_docker_for_windows; then
+    echo "docker4windows"
+  elif is_docker_for_mac; then
+    echo "docker4mac"
   else
     echo "native"
   fi
@@ -127,8 +186,7 @@ get_docker_install_type() {
 
 get_docker_host_ip() {
   NETWORK_IF="eth0"
-  INSTALL_TYPE=$(get_docker_install_type)
-  if [ "${INSTALL_TYPE}" = "boot2docker" ]; then
+  if is_boot2docker; then
     NETWORK_IF="eth1"
   fi
 
@@ -142,12 +200,9 @@ get_docker_host_ip() {
 
 get_che_hostname() {
   INSTALL_TYPE=$(get_docker_install_type)
-  CHE_IP=$(get_docker_host_ip)
-
-  if [ "${INSTALL_TYPE}" = "boot2docker" ]; then
-    echo "${CHE_IP}"
-  elif [[ "${INSTALL_TYPE}" = "moby" && "${CHE_IP}" = "10.0.75.2" ]]; then
-    echo "${CHE_IP}"
+  if [ "${INSTALL_TYPE}" = "boot2docker" ] ||
+     [ "${INSTALL_TYPE}" = "docker4windows" ]; then
+    get_docker_host_ip
   else
     echo "localhost"
   fi
@@ -200,10 +255,12 @@ wait_until_container_is_running() {
 }
 
 server_is_booted() {
-  if ! curl -v http://"${CHE_HOST_IP}":"${CHE_PORT}"/dashboard > /dev/null 2>&1 ; then
-    return 1
-  else
+  HTTP_STATUS_CODE=$(curl -I http://"${CHE_HOST_IP}":"${CHE_PORT}"/api/  \
+                     -s -o /dev/null --write-out "%{http_code}")
+  if [ "${HTTP_STATUS_CODE}" = "200" ]; then
     return 0
+  else
+    return 1
   fi
 }
 
@@ -245,37 +302,37 @@ start_che_server() {
     error_exit "A container named \"${CHE_SERVER_CONTAINER_NAME}\" already exists. Please remove it manually (docker rm -f ${CHE_SERVER_CONTAINER_NAME}) and try again."
   fi
 
-  CURRENT_IMAGE=$(docker images -q ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION})
+  CURRENT_IMAGE=$(docker images -q "${CHE_SERVER_IMAGE_NAME}":"${CHE_VERSION}")
 
-  if [ "${CURRENT_IMAGE}" != "" ]; then 
+  if [ "${CURRENT_IMAGE}" != "" ]; then
     info "ECLIPSE CHE: ALREADY HAVE IMAGE ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}"
-  else 
+  else
     update_che_server
   fi
 
   info "ECLIPSE CHE: CONTAINER STARTING"
   docker run -d --name "${CHE_SERVER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    -v "${CHE_DATA_FOLDER}"/lib:/home/user/che/lib-copy \
-    -v "${CHE_DATA_FOLDER}"/workspaces:/home/user/che/workspaces \
-    -v "${CHE_DATA_FOLDER}"/storage:/home/user/che/storage \
+    -v /home/user/che/lib:/home/user/che/lib-copy \
     ${CHE_LOCAL_BINARY_ARGS} \
     -p "${CHE_PORT}":8080 \
     --restart="${CHE_RESTART_POLICY}" \
     --user="${CHE_USER}" \
     ${CHE_CONF_ARGS} \
+    ${CHE_STORAGE_ARGS} \
     "${CHE_SERVER_IMAGE_NAME}":"${CHE_VERSION}" \
                 --remote:"${CHE_HOST_IP}" \
                 -s:uid \
                 -s:client \
-                run > /dev/null # 2>&1
+                ${CHE_DEBUG_OPTION} \
+                run > /dev/null
 
   wait_until_container_is_running 10
   if ! che_container_is_running; then
     error_exit "ECLIPSE CHE: Timeout waiting Che container to start."
   fi
 
-  info "ECLIPSE CHE: SERVER LOGS AT \"docker logs -f che\""
+  info "ECLIPSE CHE: SERVER LOGS AT \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
   info "ECLIPSE CHE: SERVER BOOTING..."
   wait_until_server_is_booted 20
 
@@ -283,21 +340,21 @@ start_che_server() {
     info "ECLIPSE CHE: BOOTED AND REACHABLE"
     info "ECLIPSE CHE: http://${CHE_HOSTNAME}:${CHE_PORT}"
   else
-    error_exit "ECLIPSE CHE: Timeout waiting Che server to boot. Run \"docker logs che\" to see the logs."
+    error_exit "ECLIPSE CHE: Timeout waiting Che server to boot. Run \"docker logs ${CHE_SERVER_CONTAINER_NAME}\" to see the logs."
   fi
 }
 
 execute_command_with_progress() {
-  local progress=$1
-  local command=$2
+  progress=$1
+  command=$2
   shift 2
-      
-  local pid=""
-  printf "\n"     
+
+  pid=""
+  printf "\n"
 
   case "$progress" in
     extended)
-      $command "$@"  
+      $command "$@"
       ;;
     basic|*)
       $command "$@" &>/dev/null &
@@ -310,7 +367,7 @@ execute_command_with_progress() {
       printf "\n"
     ;;
   esac
-  printf "\n"     
+  printf "\n"
 }
 
 stop_che_server() {

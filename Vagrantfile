@@ -106,9 +106,9 @@ Vagrant.configure(2) do |config|
       local progress=$1
       local command=$2
       shift 2
-      
+
       local pid=""
-      
+
       case "$progress" in
         extended)
           # simulate tty environment to get full output of progress bars and percentages
@@ -125,7 +125,7 @@ Vagrant.configure(2) do |config|
           ;;
       esac
     }
-    
+
     echo "------------------------------------"
     echo "ECLIPSE CHE: UPGRADING DOCKER ENGINE"
     echo "------------------------------------"
@@ -136,7 +136,7 @@ Vagrant.configure(2) do |config|
     perform $PROVISION_PROGRESS sudo yum -y update docker-engine
 
     echo $(docker --version)
- 
+
     # Add the 'vagrant' user to the 'docker' group
     usermod -aG docker vagrant &>/dev/null
 
@@ -178,7 +178,7 @@ Vagrant.configure(2) do |config|
               `codenvy/che:${CHE_VERSION} --remote:${IP} --port:${PORT} run &>/dev/null
   SHELL
 
-  config.vm.provision "shell" do |s| 
+  config.vm.provision "shell" do |s|
     s.inline = $script
     s.args = [$http_proxy, $https_proxy, $no_proxy, $che_version, $ip, $containerPort, $provisionProgress]
   end
@@ -198,20 +198,19 @@ Vagrant.configure(2) do |config|
     CHE_URL="http://${IP}:${PORT}"
 
     # Test the default dashboard page to see when it returns a non-error value.
-    # Che is active once it returns success        
+    # Che is active once it returns success
     while [ true ]; do
       printf "#"
-      curl -v ${CHE_URL}/dashboard &>/dev/null
-      exitcode=$?
-      if [ $exitcode == "0" ]; then
+      http_status_code=$(curl -I ${CHE_URL}/api/ -s -o /dev/null --write-out "%{http_code}")
+      if [ "$http_status_code" == "200" ]; then
         echo "${CHE_URL}" > /home/user/che/.che_url
         echo "${MAPPED_PORT}" > /home/user/che/.che_host_port
         echo "---------------------------------------"
         echo "ECLIPSE CHE: BOOTED AND REACHABLE"
         echo "ECLIPSE CHE: ${CHE_URL}      "
         echo "---------------------------------------"
-        exit 0             
-      fi 
+        exit 0
+      fi
       sleep 10
     done
   SHELL
