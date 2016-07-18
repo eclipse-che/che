@@ -35,6 +35,8 @@ import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -160,5 +162,23 @@ public class EditorTabWidgetTest {
         verify(editorPartPresenter).getEditorInput();
         verify(fileTypeRegistry).getFileTypeByFile(file);
         verify(tab.iconPanel).setWidget(Matchers.<SVGImage>anyObject());
+    }
+
+    @Test
+    public void virtualFileShouldBeUpdated() throws Exception {
+        EditorInput editorInput = mock(EditorInput.class);
+        FileType fileType = mock(FileType.class);
+        VirtualFile newFile = mock(VirtualFile.class);
+
+        when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
+        when(fileTypeRegistry.getFileTypeByFile(newFile)).thenReturn(fileType);
+        when(fileType.getImage()).thenReturn(icon);
+        when(editorInput.getFile()).thenReturn(newFile);
+
+        assertNotEquals(tab.getFile(), newFile);
+
+        tab.update(editorPartPresenter);
+
+        assertEquals(tab.getFile(), newFile);
     }
 }
