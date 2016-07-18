@@ -36,7 +36,6 @@ public class JpaPreferenceDao implements PreferenceDao {
     private Provider<EntityManager> managerProvider;
 
     @Override
-    @Transactional
     public void setPreferences(String userId, Map<String, String> preferences) throws ServerException {
         requireNonNull(userId);
         requireNonNull(preferences);
@@ -45,13 +44,7 @@ public class JpaPreferenceDao implements PreferenceDao {
             remove(userId);
         } else {
             try {
-                final EntityManager manager = managerProvider.get();
-                final PreferenceEntity existing = manager.find(PreferenceEntity.class, userId);
-                if (existing != null) {
-                    manager.merge(prefs);
-                } else {
-                    manager.persist(prefs);
-                }
+                doSetPreference(prefs);
             } catch (RuntimeException ex) {
                 throw new ServerException(ex.getLocalizedMessage(), ex);
             }
@@ -99,17 +92,32 @@ public class JpaPreferenceDao implements PreferenceDao {
     }
 
     @Override
-    @Transactional
     public void remove(String userId) throws ServerException {
         requireNonNull(userId);
         try {
-            final EntityManager manager = managerProvider.get();
-            final PreferenceEntity prefs = manager.find(PreferenceEntity.class, userId);
-            if (prefs != null) {
-                manager.remove(prefs);
-            }
+            doRemove(userId);
         } catch (RuntimeException ex) {
             throw new ServerException(ex);
+        }
+    }
+
+    @Transactional
+    protected void doSetPreference(PreferenceEntity prefs) {
+        final EntityManager manager = managerProvider.get();
+        final PreferenceEntity existing = manager.find(PreferenceEntity.class, prefs.getUserId());
+        if (existing != null) {
+            manager.merge(prefs);
+        } else {
+            manager.persist(prefs);
+        }
+    }
+
+    @Transactional
+    protected void doRemove(String userId) {
+        final EntityManager manager = managerProvider.get();
+        final PreferenceEntity prefs = manager.find(PreferenceEntity.class, userId);
+        if (prefs != null) {
+            manager.remove(prefs);
         }
     }
 }
