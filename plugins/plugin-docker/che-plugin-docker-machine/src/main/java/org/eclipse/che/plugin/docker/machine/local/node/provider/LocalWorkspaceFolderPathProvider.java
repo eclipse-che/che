@@ -42,7 +42,8 @@ import static java.lang.String.format;
 @Singleton
 public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProvider {
 
-    public static final String ALLOW_FOLDERS_CREATION_ENV_VARIABLE = "CHE_CREATE_WS_FOLDERS";
+    public static final String ALLOW_FOLDERS_CREATION_ENV_VARIABLE = "CHE_WORKSPACE_STORAGE_CREATE_FOLDERS";
+    public static final String WORKSPACE_STORAGE_PATH_ENV_VARIABLE = "CHE_WORKSPACE_STORAGE";
 
     private final Provider<WorkspaceManager> workspaceManager;
     private final boolean                    isWindows;
@@ -85,10 +86,6 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
         this.workspacesMountPoint = workspacesMountPoint;
         this.workspaceManager = workspaceManager;
         this.isWindows = SystemInfo.isWindows();
-        String allowFoldersCreationEnvVar = System.getenv(ALLOW_FOLDERS_CREATION_ENV_VARIABLE);
-        if ("false".equalsIgnoreCase(allowFoldersCreationEnvVar)) {
-            createFolders = false;
-        }
     }
 
     @VisibleForTesting
@@ -129,12 +126,34 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
     @VisibleForTesting
     @PostConstruct
     void init() throws IOException {
+        // check folders creation flag from environment variable
+        String allowFoldersCreationEnvVar = System.getenv(ALLOW_FOLDERS_CREATION_ENV_VARIABLE);
+        if ("false".equalsIgnoreCase(allowFoldersCreationEnvVar)) {
+            createFolders = false;
+        }
+
+        // Priority of workspace storage path sources:
+        // If Che is running on Windows
+        //     che-home-location/vfs
+        // Otherwise
+        //     If environment variable for storage location is set
+        //         use value of that variable
+        //     Otherwise
+        //         If old property of workspace storage is set
+        //             use value of that property for backward compatibility
+        //         Otherwise
+        //             use up-to-date property
         // find root directory for projects in workspaces
         if (isWindows) {
             final Path vfs = WindowsHostUtils.getCheHome().resolve("vfs");
             workspacesMountPoint = vfs.toString();
-        } else if (oldWorkspacesMountPoint != null) {
-            workspacesMountPoint = oldWorkspacesMountPoint;
+        } else {
+            String workspaceStorageFromEnv = System.getenv(WORKSPACE_STORAGE_PATH_ENV_VARIABLE);
+            if (workspaceStorageFromEnv != null) {
+                workspacesMountPoint = workspaceStorageFromEnv;
+            } else if (oldWorkspacesMountPoint != null) {
+                workspacesMountPoint = oldWorkspacesMountPoint;
+            }
         }
 
         // create directories if needed
