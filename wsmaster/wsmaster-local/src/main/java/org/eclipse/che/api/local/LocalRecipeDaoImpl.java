@@ -94,6 +94,9 @@ public class LocalRecipeDaoImpl implements RecipeDao {
             if (update.getScript() != null) {
                 target.setScript(update.getScript());
             }
+            if (update.getCreator() != null) {
+                target.setCreator(update.getCreator());
+            }
             if (update.getDescription() != null) {
                 target.setDescription(update.getDescription());
             }

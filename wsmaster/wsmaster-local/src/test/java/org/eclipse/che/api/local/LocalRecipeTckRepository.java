@@ -28,7 +28,7 @@ public class LocalRecipeTckRepository implements TckRepository<RecipeImpl> {
     @Override
     public void createAll(Collection<? extends RecipeImpl> recipes) throws TckRepositoryException {
         for (RecipeImpl recipe : recipes) {
-            recipeDao.recipes.put(recipe.getId(), recipe);
+            recipeDao.recipes.put(recipe.getId(), new RecipeImpl(recipe));
         }
     }
 
