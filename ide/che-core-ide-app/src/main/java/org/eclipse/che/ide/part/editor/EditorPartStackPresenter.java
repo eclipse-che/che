@@ -211,8 +211,6 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
         ListItem listItem = getListItemByTab(tab);
         listButton.removeListItem(listItem);
         items.remove(listItem);
-
-        eventBus.fireEvent(new FileEvent(((EditorTab) tab).getFile(), CLOSE));
     }
 
     /** {@inheritDoc} */
