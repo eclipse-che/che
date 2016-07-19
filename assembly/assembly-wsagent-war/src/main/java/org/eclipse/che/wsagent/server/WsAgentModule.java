@@ -66,6 +66,7 @@ public class WsAgentModule extends AbstractModule {
         install(new ProjectApiModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
         install(new org.eclipse.che.api.debugger.server.DebuggerModule());
+        install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
 
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(JGitConnectionFactory.class);
@@ -80,6 +81,7 @@ public class WsAgentModule extends AbstractModule {
 
         bind(String.class).annotatedWith(Names.named("event.bus.url")).toProvider(EventBusURLProvider.class);
         bind(ApiEndpointAccessibilityChecker.class);
+        bind(WsAgentAnalyticsAddresser.class);
 
         bind(String.class).annotatedWith(Names.named("wsagent.endpoint"))
                           .toProvider(WsAgentURLProvider.class);

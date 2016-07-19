@@ -83,6 +83,7 @@ public class WsMasterModule extends AbstractModule {
                 .to(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.class);
 
         bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
+        bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
         Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
