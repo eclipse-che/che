@@ -194,7 +194,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
             bindConstant().annotatedWith(Names.named("machine.docker.memory_swap_multiplier")).to(1.0);
             bindConstant().annotatedWith(Names.named("che.machine.projects.internal.storage")).to("/tmp");
             bindConstant().annotatedWith(Names.named("machine.docker.machine_extra_hosts")).to("");
-            bindConstant().annotatedWith(Names.named("host.workspaces.root")).to("/tmp");
+            bindConstant().annotatedWith(Names.named("che.workspace.storage")).to("/tmp");
             install(new DockerMachineModule());
 
             install(new AllowOfflineMachineCreationModule());
