@@ -31,6 +31,7 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.WebsocketLineConsumer;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
+import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
@@ -262,7 +263,9 @@ public class MachineManager {
                                                             machine,
                                                             machineLogger);
                                          } catch (MachineException | NotFoundException e) {
-                                             LOG.error(e.getLocalizedMessage(), e);
+                                             if (!(e.getCause() instanceof InvalidRecipeException)) {
+                                                 LOG.error(e.getLocalizedMessage(), e);
+                                             }
                                              // todo what should we do in that case?
                                          }
                                      })),

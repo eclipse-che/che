@@ -311,6 +311,7 @@ export class CreateProjectCtrl {
       this.importProjectData.source.type = 'git';
     } else if ('zip' === tab) {
       this.importProjectData.project.type = '';
+      this.importProjectData.source.type = 'zip';
     } else if ('config' === tab) {
       this.importProjectData.project.type = 'blank';
       this.importProjectData.source.type = 'git';

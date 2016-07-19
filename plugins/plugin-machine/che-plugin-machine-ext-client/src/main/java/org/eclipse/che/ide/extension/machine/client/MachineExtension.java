@@ -51,6 +51,7 @@ import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProce
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
@@ -89,7 +90,8 @@ public class MachineExtension {
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
                             IconRegistry iconRegistry,
-                            CustomCommandType arbitraryCommandType) {
+                            CustomCommandType arbitraryCommandType,
+                            final ProjectExplorerPresenter projectExplorerPresenter) {
         machineResources.getCss().ensureInjected();
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
@@ -99,8 +101,10 @@ public class MachineExtension {
                 /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
                     consolesPanelPresenter.newTerminal();
-                    workspaceAgent.setActivePart(consolesContainerPresenter);
+                    workspaceAgent.openPart(consolesContainerPresenter, PartStackType.INFORMATION);
                 }
+
+                workspaceAgent.setActivePart(projectExplorerPresenter);
             }
 
             @Override

@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>4.5.0-RC1-SNAPSHOT</version>
+        <version>4.6.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>4.5.0-RC1-SNAPSHOT</version>
+    <version>4.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -40,8 +40,8 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.lib.version>4.5.0-RC1-SNAPSHOT</che.lib.version>
-        <che.version>4.5.0-RC1-SNAPSHOT</che.version>
+        <che.lib.version>4.6.0-SNAPSHOT</che.lib.version>
+        <che.version>4.6.0-SNAPSHOT</che.version>
         <com.h2database.version>1.4.186</com.h2database.version>
         <org.eclipse.persistence.eclipselink.version>2.6.2</org.eclipse.persistence.eclipselink.version>
         <org.eclipse.persistence.version>2.1.1</org.eclipse.persistence.version>

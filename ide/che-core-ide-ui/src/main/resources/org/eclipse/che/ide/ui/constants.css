@@ -37,7 +37,7 @@
 @def dropdownZIndex 200;
 @def statusMessageZIndex 20010;
 @def contextMenuZIndex 20020;
-@def tooltipZIndex 20030;
+@def tooltipZIndex 2147483643;
 @def contactsCompleterZIndex 20040;
 
 /* Opacity */

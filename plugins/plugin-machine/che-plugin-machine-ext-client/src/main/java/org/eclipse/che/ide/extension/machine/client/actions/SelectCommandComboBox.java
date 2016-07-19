@@ -436,6 +436,8 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+        machinesListWidget.selectElement(null, null);
+        registeredMachineMap.clear();
         workspaceRunning = false;
     }
 

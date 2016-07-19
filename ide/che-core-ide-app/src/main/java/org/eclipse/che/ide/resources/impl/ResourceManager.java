@@ -203,9 +203,14 @@ public final class ResourceManager {
                         Project[] tmpProjects = copyOf(projects, projects.length + 1);
                         tmpProjects[projects.length] = project;
                         projects = tmpProjects;
-
-                        eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED | DERIVED)));
                     }
+                }
+
+                /* We need to guarantee that list of projects would be sorted by the logic provided in compareTo method implementation. */
+                java.util.Arrays.sort(projects);
+
+                for (Project project : projects) {
+                    eventBus.fireEvent(new ResourceChangedEvent(new ResourceDeltaImpl(project, ADDED | DERIVED)));
                 }
 
                 return projects;
@@ -283,7 +288,15 @@ public final class ResourceManager {
 
                 checkState(resource instanceof Container, "Outdated resource is not a container");
 
-                return synchronize((Container)resource).then(new Function<Resource[], Project>() {
+                Container container = (Container)resource;
+
+                if (resource instanceof Folder) {
+                    Optional<Container> parent = resource.getParent();
+                    checkState(parent.isPresent(), "Parent of the resource wasn't found");
+                    container = parent.get();
+                }
+
+                return synchronize(container).then(new Function<Resource[], Project>() {
                     @Override
                     public Project apply(Resource[] synced) throws FunctionException {
                         final Optional<Resource> updatedProject = store.getResource(path);
@@ -581,7 +594,16 @@ public final class ResourceManager {
 
         final Optional<Resource[]> descendants = store.getAll(container.getLocation());
 
-        return ps.getTree(container.getLocation(), depth, includeFiles).then(new Function<TreeElement, Resource[]>() {
+        int depthToReload = depth;
+        if (descendants.isPresent()) {
+            for (Resource resource : descendants.get()) {
+                if (resource.getLocation().segmentCount() - container.getLocation().segmentCount() > depth) {
+                    depthToReload = resource.getLocation().segmentCount() - container.getLocation().segmentCount();
+                }
+            }
+        }
+
+        return ps.getTree(container.getLocation(), depthToReload, includeFiles).then(new Function<TreeElement, Resource[]>() {
             @Override
             public Resource[] apply(TreeElement tree) throws FunctionException {
 
