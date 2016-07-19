@@ -20,5 +20,4 @@
     <inherits name="org.eclipse.che.api.workspace.Workspace"/>
     <source path='shared'/>
     <source path='templates'/>
-    <source path='vfs/impl/file'/>
 </module>
