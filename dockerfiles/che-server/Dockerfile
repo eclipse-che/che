@@ -1,3 +1,16 @@
+# Copyright (c) 2012-2016 Codenvy, S.A., Red Hat, Inc
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#   Mario Loriedo
+#
+# To build it, run in the repository root:
+#  `docker build -t codenvy/che-server -f $(pwd)/dockerfiles/che-server/Dockerfile .`
+#
+
 FROM alpine:3.4
 
 ENV LANG=C.UTF-8 \
@@ -21,7 +34,7 @@ EXPOSE 8000 8080
 
 USER user
 
-ADD /assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
+ADD assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
 
 ENV CHE_HOME /home/user/che
 
