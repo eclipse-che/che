@@ -15,15 +15,21 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.actions.RefreshPathAction;
+import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.action.ActionManager;
+import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.HasAttributes;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.data.tree.settings.HasSettings;
+import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.parts.base.ToolButton;
 import org.eclipse.che.ide.api.resources.Project;
@@ -44,6 +50,7 @@ import org.eclipse.che.ide.ui.smartTree.TreeStyles;
 import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent;
 import org.eclipse.che.ide.ui.smartTree.event.GoIntoStateEvent.GoIntoStateHandler;
 import org.eclipse.che.ide.ui.smartTree.presentation.DefaultPresentationRenderer;
+import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
 
 import java.util.Comparator;
 import java.util.List;
@@ -71,6 +78,7 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
 
     private static final String GO_BACK_BUTTON_ID      = "goBackButton";
     private static final String COLLAPSE_ALL_BUTTON_ID = "collapseAllButton";
+    private static final String REFRESH_BUTTON_ID      = "refreshSelectedPath";
     private static final String PROJECT_TREE_WIDGET_ID = "projectTree";
 
     @Inject
@@ -78,7 +86,11 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
                                    final ContextMenu contextMenu,
                                    final CoreLocalizationConstant coreLocalizationConstant,
                                    final Set<NodeInterceptor> nodeInterceptorSet,
-                                   SkipHiddenNodesInterceptor skipHiddenNodesInterceptor) {
+                                   final SkipHiddenNodesInterceptor skipHiddenNodesInterceptor,
+                                   final RefreshPathAction refreshPathAction,
+                                   final PresentationFactory presentationFactory,
+                                   final Provider<PerspectiveManager> managerProvider,
+                                   final ActionManager actionManager) {
         super(resources);
         this.skipHiddenNodesInterceptor = skipHiddenNodesInterceptor;
 
@@ -137,6 +149,31 @@ public class ProjectExplorerViewImpl extends BaseView<ProjectExplorerView.Action
         collapseAllButton.ensureDebugId(COLLAPSE_ALL_BUTTON_ID);
         collapseAllButton.setVisible(true);
         addToolButton(collapseAllButton);
+
+        ToolButton refreshPathButton = new ToolButton(FontAwesome.REFRESH);
+        refreshPathButton.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                final Presentation presentation = presentationFactory.getPresentation(refreshPathAction);
+                final ActionEvent actionEvent = new ActionEvent(presentation, actionManager, managerProvider.get(), null);
+
+                refreshPathAction.update(actionEvent);
+
+                if (presentation.isEnabled() && presentation.isVisible()) {
+                    refreshPathAction.actionPerformed(actionEvent);
+                }
+            }
+        });
+
+        Tooltip.create((elemental.dom.Element)collapseAllButton.getElement(), BOTTOM, MIDDLE, "Refresh selected path");
+        refreshPathButton.ensureDebugId(REFRESH_BUTTON_ID);
+        refreshPathButton.setVisible(true);
+        addToolButton(refreshPathButton);
+    }
+
+    @Override
+    protected void focusView() {
+        tree.setFocus(true);
     }
 
     @Override

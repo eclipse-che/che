@@ -10,113 +10,246 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.local.node.provider;
 
-
 import com.google.inject.Provider;
 
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.plugin.docker.machine.WindowsHostUtils;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 @Listeners(value = {MockitoTestNGListener.class})
 public class LocalWorkspaceFolderPathProviderTest  {
+    private static final String WS_ID   = "testWsId";
+    private static final String WS_NAME = "testWsName";
 
     @Mock
-    Provider<WorkspaceManager> workspaceManagerProvider;
+    private WorkspaceManager            workspaceManager;
 
-    @Mock
-    WorkspaceManager            workspaceManager;
+    private Provider<WorkspaceManager> workspaceManagerProvider = new TestProvider();
 
-    @Test(expectedExceptions = IOException.class)
-    public void shouldFailWithBothNullPrams() throws IOException {
-        new LocalWorkspaceFolderPathProvider(null, null, workspaceManagerProvider);
-    }
+    private String singleFolderForAllWorkspaces;
+    private String oldWorkspacesRoot;
+    private File workspacesRootFile;
+    private String workspacesRoot;
 
-
-    @Test(expectedExceptions = IOException.class)
-    public void shouldFailWithParamsToWorkspacesFolderLocationAsFile() throws IOException {
-        final String tempFile = Files.createTempFile(null, null).toString();
-        new LocalWorkspaceFolderPathProvider(tempFile, null, workspaceManagerProvider);
-    }
-
-    @Test(expectedExceptions = IOException.class)
-    public void shouldFailWithParamsToProjectLocationAsFile() throws IOException {
-        final String tempFile = Files.createTempFile(null, null).toString();
-        new LocalWorkspaceFolderPathProvider(null, tempFile, workspaceManagerProvider);
-    }
-
-
-    @Test
-    public void shouldReturnSameLocationWithUsedHostedProjectParams() throws IOException {
-        final String hostProjectsFile = Files.createTempDirectory("my-projects").toString();
-        final LocalWorkspaceFolderPathProvider provider =
-                new LocalWorkspaceFolderPathProvider(null, hostProjectsFile, workspaceManagerProvider);
-        final String pathToWs = provider.getPath(UUID.randomUUID().toString());
-        final String pathToWs2 = provider.getPath(UUID.randomUUID().toString());
-        assertEquals(pathToWs, pathToWs2);
-
-    }
-
-    @Test
-    public void shouldReturnLocationDependOnWorkspaceId() throws IOException, ServerException, BadRequestException, NotFoundException {
-        final String workspaceId = UUID.randomUUID().toString();
-        final String workspaceId2 = UUID.randomUUID().toString();
-        final String workspaceName = UUID.randomUUID().toString();
-        final String workspaceName2 = UUID.randomUUID().toString();
+    @BeforeMethod
+    public void setUp() throws Exception {
         WorkspaceImpl workspace = mock(WorkspaceImpl.class);
         WorkspaceConfigImpl workspaceConfig = mock(WorkspaceConfigImpl.class);
+        when(workspaceManager.getWorkspace(WS_ID)).thenReturn(workspace);
         when(workspace.getConfig()).thenReturn(workspaceConfig);
-        when(workspaceConfig.getName()).thenReturn(workspaceName);
-        WorkspaceImpl workspace2 = mock(WorkspaceImpl.class);
-        WorkspaceConfigImpl workspaceConfig2 = mock(WorkspaceConfigImpl.class);
-        when(workspace2.getConfig()).thenReturn(workspaceConfig2);
-        when(workspaceConfig2.getName()).thenReturn(workspaceName2);
-        when(workspaceManagerProvider.get()).thenReturn(workspaceManager);
-        when(workspaceManager.getWorkspace(workspaceId)).thenReturn(workspace);
-        when(workspaceManager.getWorkspace(workspaceId2)).thenReturn(workspace2);
-        final String workspacesPath = Files.createTempDirectory("my-workspaces").toString();
-        final LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesPath, null,
-                                                                                               workspaceManagerProvider);
-        final String pathToWs = provider.getPath(workspaceId);
-        final String pathToWs2 = provider.getPath(workspaceId2);
-        assertNotEquals(pathToWs, pathToWs2);
-        assertEquals(pathToWs, Paths.get(workspacesPath).resolve(workspaceName).toString());
-        assertEquals(pathToWs2, Paths.get(workspacesPath).resolve(workspaceName2).toString());
+        when(workspaceConfig.getName()).thenReturn(WS_NAME);
+
+        Path tempDirectory = Files.createTempDirectory(getClass().getSimpleName());
+        workspacesRoot = tempDirectory.toString();
+        workspacesRootFile = tempDirectory.toFile();
+        singleFolderForAllWorkspaces = Paths.get(workspacesRoot, "singleFolderForAllWorkspaces").toString();
+        oldWorkspacesRoot = Paths.get(workspacesRoot, "oldWorkspacesRoot").toString();
     }
 
     @Test
-    public void shouldReturnLocationToHostProjectPathAlwaysIfItConfigure() throws IOException {
-        final String workspacesPath = Files.createTempDirectory("my-workspaces").toString();
-        final String hostProjectsPath = Files.createTempDirectory("my-projects").toString();
-        final LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesPath,
-                                                                                               hostProjectsPath,
-                                                                                               workspaceManagerProvider);
-        final String workspaceId = UUID.randomUUID().toString();
-        final String workspaceId2 = UUID.randomUUID().toString();
-        final String pathToWs = provider.getPath(workspaceId);
-        final String pathToWs2 = provider.getPath(workspaceId2);
-        assertEquals(pathToWs, pathToWs2);
+    public void createsFoldersByDefault() throws Exception {
+        assertTrue(workspacesRootFile.delete());
+
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         workspaceManagerProvider);
+
+        provider.init();
+
+        assertTrue(workspacesRootFile.exists());
+        assertTrue(workspacesRootFile.isDirectory());
+
+        String providerPath = provider.getPath(WS_ID);
+
+        assertTrue(new File(providerPath).exists());
+        assertTrue(new File(providerPath).isDirectory());
     }
 
+    @Test
+    public void returnSpecificFolderOnOnWindows() throws Exception {
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         oldWorkspacesRoot,
+                                                                                         singleFolderForAllWorkspaces,
+                                                                                         workspaceManagerProvider,
+                                                                                         false,// with true can not be tested on other OSes
+                                                                                         true);
+
+        provider.init();
+        String providerPath = provider.getPath(WS_ID);
+
+        assertEquals(providerPath, WindowsHostUtils.getCheHome().resolve("vfs").resolve(WS_NAME).toString());
+    }
 
     @Test
-    public void test() {
-        System.out.println(System.getProperty("user.home"));
+    public void returnsSingleFolderForAllWorkspacesIfConfigured() throws Exception {
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         oldWorkspacesRoot,
+                                                                                         singleFolderForAllWorkspaces,
+                                                                                         workspaceManagerProvider,
+                                                                                         false,
+                                                                                         false);
+
+        provider.init();
+        String providerPath = provider.getPath(WS_ID);
+
+        assertEquals(providerPath, singleFolderForAllWorkspaces);
+    }
+
+    @Test
+    public void useOlderFolderIfConfigured() throws Exception {
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         oldWorkspacesRoot,
+                                                                                         null,
+                                                                                         workspaceManagerProvider,
+                                                                                         false,
+                                                                                         false);
+
+        provider.init();
+        String providerPath = provider.getPath(WS_ID);
+
+        assertEquals(providerPath, Paths.get(oldWorkspacesRoot, WS_NAME).toString());
+    }
+
+    @Test
+    public void neitherCheckNorCreateFoldersIfCreationIsDisabled() throws Exception {
+        assertTrue(workspacesRootFile.delete());
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         null,
+                                                                                         null,
+                                                                                         workspaceManagerProvider,
+                                                                                         false,
+                                                                                         false);
+
+        provider.init();
+        String providerPath = provider.getPath(WS_ID);
+
+        assertFalse(workspacesRootFile.exists());
+        assertFalse(new File(providerPath).exists());
+    }
+
+    @Test
+    public void createsFoldersIfConfigured() throws Exception {
+        assertTrue(workspacesRootFile.delete());
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         null,
+                                                                                         null,
+                                                                                         workspaceManagerProvider,
+                                                                                         true,
+                                                                                         false);
+
+        provider.init();
+
+        assertTrue(workspacesRootFile.exists());
+        assertTrue(workspacesRootFile.isDirectory());
+
+        String providerPath = provider.getPath(WS_ID);
+
+        assertTrue(new File(providerPath).exists());
+        assertTrue(new File(providerPath).isDirectory());
+    }
+
+    @Test
+    public void worksIfWorkspaceFolderExists() throws Exception {
+        assertTrue(Paths.get(workspacesRoot, WS_NAME).toFile().mkdir());
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         null,
+                                                                                         null,
+                                                                                         workspaceManagerProvider,
+                                                                                         true,
+                                                                                         false);
+
+        provider.init();
+
+        assertTrue(workspacesRootFile.exists());
+        assertTrue(workspacesRootFile.isDirectory());
+
+        String providerPath = provider.getPath(WS_ID);
+
+        assertTrue(new File(providerPath).exists());
+        assertTrue(new File(providerPath).isDirectory());
+    }
+
+    @Test(expectedExceptions = IOException.class,
+          expectedExceptionsMessageRegExp = "Workspace folder '.*' is not directory")
+    public void throwsExceptionIfFileIsFoundByWorkspacesPath() throws Exception {
+        assertTrue(Paths.get(workspacesRoot, WS_NAME).toFile().createNewFile());
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         null,
+                                                                                         null,
+                                                                                         workspaceManagerProvider,
+                                                                                         true,
+                                                                                         false);
+
+        provider.init();
+        provider.getPath(WS_ID);
+    }
+
+    @Test(expectedExceptions = IOException.class,
+          expectedExceptionsMessageRegExp = "Workspace folder '.*' is not directory. Check .* configuration property")
+    public void throwsExceptionIfFileIsFoundByWorkspacesRootPath() throws Exception {
+        Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(tempFile.toString(),
+                                                                                         null,
+                                                                                         null,
+                                                                                         workspaceManagerProvider,
+                                                                                         true,
+                                                                                         false);
+
+        provider.init();
+    }
+
+    @Test(expectedExceptions = IOException.class,
+          expectedExceptionsMessageRegExp = "Workspace folder '.*' is not directory. Check .* configuration property")
+    public void throwsExceptionIfFileIsFoundBySingleWorkspacePath() throws Exception {
+        Path tempFile = Files.createTempFile(getClass().getSimpleName(), null);
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         oldWorkspacesRoot,
+                                                                                         tempFile.toString(),
+                                                                                         workspaceManagerProvider,
+                                                                                         true,
+                                                                                         false);
+
+        provider.init();
+        provider.getPath(WS_ID);
+    }
+
+    @Test(expectedExceptions = IOException.class,
+          expectedExceptionsMessageRegExp = "expected test exception")
+    public void throwsIOExceptionIfWorkspaceRetrievalFails() throws Exception {
+        when(workspaceManager.getWorkspace(WS_ID)).thenThrow(new ServerException("expected test exception"));
+        LocalWorkspaceFolderPathProvider provider = new LocalWorkspaceFolderPathProvider(workspacesRoot,
+                                                                                         null,
+                                                                                         null,
+                                                                                         workspaceManagerProvider,
+                                                                                         true,
+                                                                                         false);
+
+        provider.init();
+        provider.getPath(WS_ID);
+    }
+
+    private class TestProvider implements Provider<WorkspaceManager> {
+        @Override
+        public WorkspaceManager get() {
+            return workspaceManager;
+        }
     }
 }

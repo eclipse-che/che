@@ -65,38 +65,36 @@ public class ClasspathProvider implements CommandPropertyValueProvider {
 
         final Resource[] resources = appContext.getResources();
 
-        if (resources != null && resources.length == 1) {
-
-            final Resource resource = resources[0];
-            final Optional<Project> project = resource.getRelatedProject();
-
-            if (JavaUtil.isJavaProject(project.get())) {
-                return classpathContainer.getClasspathEntries(project.get().getLocation().toString()).then(
-                        new Function<List<ClasspathEntryDto>, String>() {
-                            @Override
-                            public String apply(List<ClasspathEntryDto> arg) throws FunctionException {
-                                classpathResolver.resolveClasspathEntries(arg);
-                                Set<String> sources = classpathResolver.getSources();
-                                StringBuilder classpath = new StringBuilder("");
-                                for (String source : sources) {
-                                    classpath.append(source);
-                                }
-
-                                if (classpath.toString().isEmpty()) {
-                                    classpath.append(appContext.getProjectsRoot().toString()).append(project.get().getLocation().toString());
-                                }
-
-                                classpath.append(':');
-
-                                return classpath.toString();
-                            }
-                        });
-            } else {
-                return promises.resolve("");
-            }
+        if (resources == null || resources.length != 1) {
+            return promises.resolve("");
         }
 
-        return promises.resolve("");
+        final Resource resource = resources[0];
+        final Optional<Project> project = resource.getRelatedProject();
+
+        if (!JavaUtil.isJavaProject(project.get())) {
+            return promises.resolve("");
+        }
+
+        final String projectPath = project.get().getLocation().toString();
+
+        return classpathContainer.getClasspathEntries(projectPath).then(new Function<List<ClasspathEntryDto>, String>() {
+            @Override
+            public String apply(List<ClasspathEntryDto> arg) throws FunctionException {
+                classpathResolver.resolveClasspathEntries(arg);
+                Set<String> libs = classpathResolver.getLibs();
+                StringBuilder classpath = new StringBuilder();
+                for (String lib : libs) {
+                    classpath.append(lib).append(':');
+                }
+
+                if (classpath.toString().isEmpty()) {
+                    classpath.append(appContext.getProjectsRoot().toString()).append(projectPath).append(':');
+                }
+
+                return classpath.toString();
+            }
+        });
     }
 
 }

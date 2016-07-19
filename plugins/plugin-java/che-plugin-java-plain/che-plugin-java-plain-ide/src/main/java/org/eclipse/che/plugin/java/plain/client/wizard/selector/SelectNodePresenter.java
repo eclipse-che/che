@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.java.plain.client.wizard.selector;
 
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
-import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 
 import java.util.Collections;
@@ -56,15 +59,16 @@ public class SelectNodePresenter implements SelectNodeView.ActionDelegate {
     public void show(SelectionDelegate selectionDelegate, String projectName) {
         this.selectionDelegate = selectionDelegate;
 
-        final Project project = appContext.getRootProject();
+        appContext.getWorkspaceRoot().getContainer(projectName).then(new Operation<Optional<Container>>() {
+            @Override
+            public void apply(Optional<Container> container) throws OperationException {
+                if (container.isPresent()) {
+                    view.setStructure(Collections.<Node>singletonList(nodeFactory.newContainerNode(container.get(), settingsProvider.getSettings())));
 
-        if (project == null) {
-            return;
-        }
-
-        view.setStructure(Collections.<Node>singletonList(nodeFactory.newContainerNode(project, settingsProvider.getSettings())));
-
-        view.show();
+                    view.show();
+                }
+            }
+        });
     }
 
     /** {@inheritDoc} */

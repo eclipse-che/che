@@ -106,7 +106,7 @@ public class InitialAuthConfig {
 
         String propertyIdentifier = parts[1];
         if (!URL.equals(propertyIdentifier) && !USER_NAME.equals(propertyIdentifier) && !PASSWORD.equals(propertyIdentifier)) {
-            LOG.warn("Set unused property: {}.", propertyName);
+            LOG.warn("Set unused property: '{}'.", propertyName);
         }
 
         return CONFIG_PREFIX + parts[0] + ".";

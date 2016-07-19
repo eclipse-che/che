@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.plugin.docker.client.DockerApiVersionPathPrefixProvider;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.DockerConnectorConfiguration;
 import org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver;
@@ -53,7 +54,8 @@ public class DockerProcessTest {
                                                                         new DefaultNetworkFinder());
         docker = new DockerConnector(dockerConnectorConfiguration,
                                      new DockerConnectionFactory(dockerConnectorConfiguration),
-                                     new DockerRegistryAuthResolver(null));
+                                     new DockerRegistryAuthResolver(null),
+                                     new DockerApiVersionPathPrefixProvider("1.18"));
 
         final ContainerCreated containerCreated = docker.createContainer(
                 CreateContainerParams.create(new ContainerConfig().withImage("ubuntu")
@@ -91,7 +93,8 @@ public class DockerProcessTest {
                                                                             new DefaultNetworkFinder());
             docker = new DockerConnector(dockerConnectorConfiguration,
                                          new DockerConnectionFactory(dockerConnectorConfiguration),
-                                         new DockerRegistryAuthResolver(null));
+                                         new DockerRegistryAuthResolver(null),
+                                         new DockerApiVersionPathPrefixProvider(""));
         }
         Command command = new CommandImpl("tailf", "tail -f /dev/null", "mvn");
         final DockerProcess dockerProcess = new DockerProcess(docker,

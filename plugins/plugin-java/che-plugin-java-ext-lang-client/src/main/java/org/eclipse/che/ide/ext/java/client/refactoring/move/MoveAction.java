@@ -72,6 +72,12 @@ public class MoveAction extends Action {
         final Resource resource = resources[0];
 
         final Optional<Project> project = resource.getRelatedProject();
+
+        if (!project.isPresent()) {
+            event.getPresentation().setEnabled(false);
+            return;
+        }
+
         final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
 
         if (resource.getResourceType() == FILE) {

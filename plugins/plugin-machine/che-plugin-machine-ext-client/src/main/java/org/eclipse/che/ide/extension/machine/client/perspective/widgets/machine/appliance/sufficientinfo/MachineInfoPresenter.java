@@ -17,8 +17,8 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.user.shared.dto.ProfileDto;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
-import org.eclipse.che.api.user.shared.dto.ProfileDescriptor;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
@@ -66,11 +66,11 @@ public class MachineInfoPresenter implements TabPresenter {
      */
     public void update(@NotNull Machine machine) {
 
-        Unmarshallable<ProfileDescriptor> profileUnMarshaller = unmarshallerFactory.newUnmarshaller(ProfileDescriptor.class);
+        Unmarshallable<ProfileDto> profileUnMarshaller = unmarshallerFactory.newUnmarshaller(ProfileDto.class);
 
-        userProfile.getCurrentProfile(new AsyncRequestCallback<ProfileDescriptor>(profileUnMarshaller) {
+        userProfile.getCurrentProfile(new AsyncRequestCallback<ProfileDto>(profileUnMarshaller) {
             @Override
-            protected void onSuccess(ProfileDescriptor result) {
+            protected void onSuccess(ProfileDto result) {
                 Map<String, String> attributes = result.getAttributes();
 
                 String firstName = attributes.get(FIRST_NAME_KEY);

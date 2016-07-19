@@ -31,18 +31,15 @@ import org.eclipse.che.ide.api.event.EditorDirtyStateChangedEvent;
 import org.eclipse.che.ide.api.event.EditorDirtyStateChangedHandler;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.File;
-import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.resources.SyntheticFile;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
+import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
+import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
-import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
 
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
-import static org.eclipse.che.ide.ext.java.shared.JarEntry.JarEntryType.CLASS_FILE;
 
 /**
  * Responsible to open files in editor when debugger stopped at breakpoint.
@@ -52,24 +49,24 @@ import static org.eclipse.che.ide.ext.java.shared.JarEntry.JarEntryType.CLASS_FI
 public class JavaDebuggerFileHandler implements ActiveFileHandler {
 
     private final EditorAgent           editorAgent;
-    private final DtoFactory            dtoFactory;
     private final EventBus              eventBus;
     private final JavaNavigationService service;
     private final AppContext            appContext;
+    private final JavaNodeFactory       nodeFactory;
 
     private HandlerRegistration handler;
 
     @Inject
     public JavaDebuggerFileHandler(EditorAgent editorAgent,
-                                   DtoFactory dtoFactory,
                                    AppContext appContext,
                                    EventBus eventBus,
-                                   JavaNavigationService service) {
+                                   JavaNavigationService service,
+                                   JavaNodeFactory nodeFactory) {
         this.editorAgent = editorAgent;
-        this.dtoFactory = dtoFactory;
         this.appContext = appContext;
         this.eventBus = eventBus;
         this.service = service;
+        this.nodeFactory = nodeFactory;
     }
 
     @Override
@@ -113,48 +110,41 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
     }
 
     private void openExternalResource(final Location location, final AsyncCallback<VirtualFile> callback) {
-        JarEntry jarEntry = dtoFactory.createDto(JarEntry.class);
-
         final String className = extractOuterClassFqn(location.getTarget());
-        jarEntry.setPath(className);
-        jarEntry.setName(className.substring(className.lastIndexOf(".") + 1) + ".class");
-        jarEntry.setType(CLASS_FILE);
+        final int libId = location.getExternalResourceId();
+        final Path projectPath = new Path(location.getResourceProjectPath());
 
-        final Resource resource = appContext.getResource();
+        service.getEntry(projectPath, libId, className)
+               .then(new Operation<JarEntry>() {
+                   @Override
+                   public void apply(final JarEntry jarEntry) throws OperationException {
+                       final JarFileNode file = nodeFactory.newJarFileNode(jarEntry, libId, projectPath, null);
+                       AsyncCallback<VirtualFile> downloadSourceCallback = new AsyncCallback<VirtualFile>() {
+                           @Override
+                           public void onSuccess(final VirtualFile result) {
+                               if (file.isContentGenerated()) {
+                                   handleContentGeneratedResource(file, location, callback);
+                               } else {
+                                   handleActivatedFile(file, callback, location.getLineNumber());
+                               }
+                           }
 
-        if (resource == null) {
-            callback.onFailure(new IllegalStateException());
-            return;
-        }
+                           @Override
+                           public void onFailure(Throwable caught) {
+                               callback.onFailure(caught);
+                           }
+                       };
 
-        final Project project = resource.getRelatedProject().get();
-
-        service.getContent(project.getLocation(), className).then(new Operation<ClassContent>() {
-            @Override
-            public void apply(final ClassContent content) throws OperationException {
-                final VirtualFile file =
-                        new SyntheticFile(className.substring(className.lastIndexOf(".") + 1) + ".class", content.getContent());
-
-                AsyncCallback<VirtualFile> downloadSourceCallback = new AsyncCallback<VirtualFile>() {
-                    @Override
-                    public void onSuccess(final VirtualFile result) {
-                        if (content.isGenerated()) {
-                            handleContentGeneratedResource(result, location, callback);
-                        } else {
-                            handleActivatedFile(file, callback, location.getLineNumber());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        callback.onFailure(caught);
-                    }
-                };
-
-                handleActivatedFile(file, downloadSourceCallback, location.getLineNumber());
-                eventBus.fireEvent(new FileEvent(file, OPEN));
-            }
-        });
+                       handleActivatedFile(file, downloadSourceCallback, location.getLineNumber());
+                       eventBus.fireEvent(new FileEvent(file, OPEN));
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError arg) throws OperationException {
+                       callback.onFailure(arg.getCause());
+                   }
+               });
     }
 
     private String extractOuterClassFqn(String fqn) {

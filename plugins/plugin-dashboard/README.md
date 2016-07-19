@@ -1,4 +1,4 @@
-Dashboard Plugin for Codenvy
+Dashboard Plugin for Che
 ===============================
 
-Plugin that add redirect to Dashboard button to the main menu.
+Plugin registers an Open Dashboard button and adds it to be displayed in the main menu.

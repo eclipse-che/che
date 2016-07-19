@@ -13,16 +13,18 @@ package org.eclipse.che.plugin.maven.client.wizard;
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.client.MavenArchetype;
 import org.eclipse.che.plugin.maven.client.MavenExtension;
 
@@ -56,17 +58,17 @@ import static org.eclipse.che.plugin.maven.shared.MavenAttributes.VERSION;
  */
 public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig> implements MavenPageView.ActionDelegate {
 
-    protected final MavenPageView view;
-    protected final EventBus      eventBus;
-    private final   AppContext    appContext;
+    private final MavenPageView view;
+    private final DialogFactory dialogFactory;
+    private final AppContext    appContext;
 
     @Inject
     public MavenPagePresenter(MavenPageView view,
-                              EventBus eventBus,
+                              DialogFactory dialogFactory,
                               AppContext appContext) {
         super();
         this.view = view;
-        this.eventBus = eventBus;
+        this.dialogFactory = dialogFactory;
         this.appContext = appContext;
         view.setDelegate(this);
     }
@@ -88,7 +90,6 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
     }
 
     private void estimateAndSetAttributes() {
-
         appContext.getWorkspaceRoot().getContainer(dataObject.getPath()).then(new Operation<Optional<Container>>() {
             @Override
             public void apply(Optional<Container> container) throws OperationException {
@@ -127,6 +128,12 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
                         }
 
                         updateDelegate.updateControls();
+                    }
+                }).catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError arg) throws OperationException {
+                        dialogFactory.createMessageDialog("Not valid Maven project", arg.getMessage(), null).show();
+                        Log.error(MavenPagePresenter.class, arg);
                     }
                 });
             }

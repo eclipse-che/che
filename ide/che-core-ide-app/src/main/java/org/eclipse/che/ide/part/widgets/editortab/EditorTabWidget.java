@@ -151,8 +151,8 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         title.setText(part.getTitle());
 
         if (part instanceof EditorPartPresenter) {
-            VirtualFile changedFile = ((EditorPartPresenter)part).getEditorInput().getFile();
-            FileType fileType = fileTypeRegistry.getFileTypeByFile(changedFile);
+            file = ((EditorPartPresenter)part).getEditorInput().getFile();
+            FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
             icon = fileType.getImage();
             iconPanel.setWidget(getIcon());
         }
@@ -287,6 +287,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
 
             if (file.getLocation().equals(movedFrom)) {
                 file = (VirtualFile)resource;
+                title.setText(file.getDisplayName());
             }
         } else if (delta.getKind() == UPDATED) {
             if (!delta.getResource().isFile()) {

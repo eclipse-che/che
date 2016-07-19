@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.impl;
 
-import org.eclipse.che.api.user.server.dao.PreferenceDao;
+import org.eclipse.che.api.user.server.spi.PreferenceDao;
 
 /**
  * @author Sergii Kabashniuk

@@ -24,7 +24,6 @@ import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -32,8 +31,8 @@ import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.HasView;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
-import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -53,7 +52,6 @@ import org.eclipse.che.ide.extension.machine.client.perspective.terminal.Termina
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.util.loging.Log;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -77,13 +75,14 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPanelView.ActionDelegate,
+public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
                                                                      HasView,
                                                                      ProcessFinishedEvent.Handler,
                                                                      OutputConsole.ConsoleOutputListener,
                                                                      WorkspaceStartingEvent.Handler,
                                                                      WorkspaceStoppedEvent.Handler,
-                                                                     MachineStateEvent.Handler {
+                                                                     MachineStateEvent.Handler,
+                                                                     DevMachineStateEvent.Handler {
 
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
 
@@ -102,6 +101,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     private final MachineServiceClient          machineService;
     private final WorkspaceAgent                workspaceAgent;
     private final CommandTypeRegistry           commandTypeRegistry;
+    private final Map<String, ProcessTreeNode>  machineNodes;
     private final Map<OutputConsole, String>    consoleCommands;
     private final ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
 
@@ -110,8 +110,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     @VisibleForTesting
     final ProcessTreeNode                rootNode;
     @VisibleForTesting
-    final Map<String, ProcessTreeNode>   machineNodes;
-    @VisibleForTesting
     final Map<String, TerminalPresenter> terminals;
     @VisibleForTesting
     final Map<String, OutputConsole>     consoles;
@@ -119,6 +117,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
     private OutputConsole   workspaceConsole;
     private ProcessTreeNode selectedTreeNode;
     private ProcessTreeNode contextTreeNode;
+    private PartPresenter   parent;
 
     @Inject
     public ConsolesPanelPresenter(ConsolesPanelView view,
@@ -158,7 +157,6 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         this.machineNodes = new HashMap<>();
 
         this.view.setDelegate(this);
-        this.view.setTitle(localizationConstant.viewConsolesTitle());
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
@@ -173,46 +171,27 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         fetchMachines();
     }
 
+    public void setParent(PartPresenter parent) {
+        this.parent = parent;
+    }
+
     @Override
     public View getView() {
         return view;
     }
 
-    @NotNull
-    @Override
-    public String getTitle() {
-        return localizationConstant.viewConsolesTitle();
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        view.setVisible(visible);
-    }
-
-    @Nullable
-    @Override
-    public SVGResource getTitleImage() {
-        return resources.terminal();
-    }
-
-    @Override
-    public String getTitleToolTip() {
-        return localizationConstant.viewProcessesTooltip();
-    }
-
-    @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
     }
 
     @Override
     public void onMachineCreating(MachineStateEvent event) {
-        workspaceAgent.setActivePart(this);
+        workspaceAgent.setActivePart(parent);
     }
 
     @Override
     public void onMachineRunning(MachineStateEvent event) {
-        workspaceAgent.setActivePart(this);
+        workspaceAgent.setActivePart(parent);
 
         machineService.getMachine(event.getMachineId()).then(new Operation<MachineDto>() {
             @Override
@@ -254,7 +233,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
 
                 view.selectNode(devMachineTreeNode);
 
-                workspaceAgent.setActivePart(ConsolesPanelPresenter.this);
+                workspaceAgent.setActivePart(parent);
             }
         });
     }
@@ -359,10 +338,10 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         updateCommandOutput(commandId, outputConsole);
 
         resfreshStopButtonState(commandId);
-        workspaceAgent.setActivePart(this);
+        workspaceAgent.setActivePart(parent);
     }
 
-    private void updateCommandOutput(@NotNull final String command, @NotNull OutputConsole outputConsole) {
+    protected void updateCommandOutput(@NotNull final String command, @NotNull OutputConsole outputConsole) {
         consoles.put(command, outputConsole);
         consoleCommands.put(outputConsole, command);
 
@@ -381,7 +360,7 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
      * Opens new terminal for the selected machine.
      */
     public void newTerminal() {
-        workspaceAgent.setActivePart(this);
+        workspaceAgent.setActivePart(parent);
 
         if (selectedTreeNode == null) {
             if (appContext.getDevMachine() != null) {
@@ -741,5 +720,4 @@ public class ConsolesPanelPresenter extends BasePresenter implements ConsolesPan
         view.selectNode(null);
         view.setProcessesData(rootNode);
     }
-
 }

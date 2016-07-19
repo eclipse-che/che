@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.5.0-RC1-SNAPSHOT</version>
+        <version>4.6.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-project</artifactId>
     <packaging>jar</packaging>
@@ -97,7 +97,7 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-project-shared</artifactId>
-            <version>4.5.0-RC1-SNAPSHOT</version>
+            <version>4.6.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

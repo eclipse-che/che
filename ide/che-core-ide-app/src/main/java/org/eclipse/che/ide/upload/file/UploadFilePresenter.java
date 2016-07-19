@@ -20,7 +20,6 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationListener;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -29,6 +28,7 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
@@ -45,10 +45,10 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 public class UploadFilePresenter implements UploadFileView.ActionDelegate {
 
     private final UploadFileView           view;
+    private final AppContext               appContext;
     private final EventBus                 eventBus;
     private final NotificationManager      notificationManager;
     private final CoreLocalizationConstant locale;
-    private final DevMachine               devMachine;
     private       Container                container;
 
     @Inject
@@ -57,7 +57,7 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
                                EventBus eventBus,
                                NotificationManager notificationManager,
                                CoreLocalizationConstant locale) {
-        devMachine = appContext.getDevMachine();
+        this.appContext = appContext;
         this.eventBus = eventBus;
         this.view = view;
         this.locale = locale;
@@ -72,7 +72,7 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
     public void showDialog(Container container) {
         this.container = container;
         view.showDialog();
-        view.setAction(devMachine.getWsAgentBaseUrl() + "/project/uploadfile" + container.getLocation());
+        view.setAction(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/uploadfile" + container.getLocation());
     }
 
     /** {@inheritDoc} */
@@ -95,6 +95,7 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
             public void apply(final Optional<File> file) throws OperationException {
 
                 if (file.isPresent()) {
+                    eventBus.fireEvent(new RevealResourceEvent(file.get()));
 
                     final NotificationListener notificationListener = new NotificationListener() {
                         boolean clicked = false;

@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.editor.codeassist;
 import org.eclipse.che.ide.api.autocomplete.AutoCompleteResources;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 
 import com.google.gwt.core.client.GWT;
 import com.google.inject.assistedinject.Assisted;
@@ -21,25 +22,27 @@ import com.google.inject.assistedinject.AssistedInject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+
 /**
  * Implementation of CodeAssistant.
  */
 public class CodeAssistantImpl implements CodeAssistant {
 
     private final Map<String, CodeAssistProcessor> processors;
-
-    private final TextEditor textEditor;
-
-    private String lastErrorMessage;
-
-    private final DocumentPartitioner partitioner;
-
+    private final TextEditor                       textEditor;
+    private final DocumentPartitioner              partitioner;
+    private final NotificationManager              notificationManager;
+    private       String                           lastErrorMessage;
 
     public static final AutoCompleteResources res = GWT.create(AutoCompleteResources.class);
 
     @AssistedInject
     public CodeAssistantImpl(@Assisted final DocumentPartitioner partitioner,
-                             @Assisted TextEditor textEditor) {
+                             @Assisted TextEditor textEditor,
+                             NotificationManager notificationManager) {
+        this.notificationManager = notificationManager;
         processors = new HashMap<>();
         res.defaultSimpleListCss().ensureInjected();
         res.autocompleteComponentCss().ensureInjected();
@@ -57,6 +60,7 @@ public class CodeAssistantImpl implements CodeAssistant {
             processor.computeCompletionProposals(textEditor, offset, callback);
             this.lastErrorMessage = processor.getErrorMessage();
             if (this.lastErrorMessage != null) {
+                notificationManager.notify("", lastErrorMessage, FAIL, EMERGE_MODE);
                 this.textEditor.showMessage(this.lastErrorMessage);
             }
         } else {

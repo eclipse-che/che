@@ -311,6 +311,7 @@ export class CreateProjectCtrl {
       this.importProjectData.source.type = 'git';
     } else if ('zip' === tab) {
       this.importProjectData.project.type = '';
+      this.importProjectData.source.type = 'zip';
     } else if ('config' === tab) {
       this.importProjectData.project.type = 'blank';
       this.importProjectData.source.type = 'git';
@@ -856,13 +857,6 @@ export class CreateProjectCtrl {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
       this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
-    }
-    // do we have projects ?
-    let projects = this.cheAPI.getWorkspace().getAllProjects();
-    if (projects.length > 1) {
-      // we have projects, show notification first and redirect to the list of projects
-      this.createProjectSvc.showPopup();
-      this.$location.path('/projects');
     }
   }
 

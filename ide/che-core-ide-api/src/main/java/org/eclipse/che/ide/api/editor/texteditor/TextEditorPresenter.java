@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.texteditor;
 
+import com.google.common.base.Optional;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -24,6 +25,9 @@ import com.google.inject.assistedinject.AssistedInject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.debug.BreakpointRendererFactory;
@@ -130,6 +134,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     private final QuickAssistantFactory       quickAssistantFactory;
     private final WorkspaceAgent              workspaceAgent;
     private final NotificationManager         notificationManager;
+    private final AppContext                  appContext;
 
     /** The editor handle for this editor. */
     private final EditorHandle handle;
@@ -165,7 +170,9 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
                                final FileTypeIdentifier fileTypeIdentifier,
                                final QuickAssistantFactory quickAssistantFactory,
                                final WorkspaceAgent workspaceAgent,
-                               final NotificationManager notificationManager) {
+                               final NotificationManager notificationManager,
+                               final AppContext appContext
+                              ) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.breakpointManager = breakpointManager;
         this.breakpointRendererFactory = breakpointRendererFactory;
@@ -180,6 +187,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         this.quickAssistantFactory = quickAssistantFactory;
         this.workspaceAgent = workspaceAgent;
         this.notificationManager = notificationManager;
+        this.appContext = appContext;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
         handle = new EditorHandle() {
@@ -280,23 +288,24 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
 
     private void setupFileContentUpdateHandler() {
 
-        resourceChangeHandler = generalEventBus.addHandler(ResourceChangedEvent.getType(), new ResourceChangedEvent.ResourceChangedHandler() {
-            @Override
-            public void onResourceChanged(ResourceChangedEvent event) {
-                final ResourceDelta delta = event.getDelta();
+        resourceChangeHandler =
+                generalEventBus.addHandler(ResourceChangedEvent.getType(), new ResourceChangedEvent.ResourceChangedHandler() {
+                    @Override
+                    public void onResourceChanged(ResourceChangedEvent event) {
+                        final ResourceDelta delta = event.getDelta();
 
-                switch (delta.getKind()) {
-                    case ADDED:
-                        onResourceCreated(delta);
-                        break;
-                    case REMOVED:
-                        onResourceRemoved(delta);
-                        break;
-                    case UPDATED:
-                        onResourceUpdated(delta);
-                }
-            }
-        });
+                        switch (delta.getKind()) {
+                            case ADDED:
+                                onResourceCreated(delta);
+                                break;
+                            case REMOVED:
+                                onResourceRemoved(delta);
+                                break;
+                            case UPDATED:
+                                onResourceUpdated(delta);
+                        }
+                    }
+                });
 
         this.generalEventBus.addHandler(FileContentUpdateEvent.TYPE, new FileContentUpdateHandler() {
             @Override
@@ -309,19 +318,39 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     }
 
     private void onResourceCreated(ResourceDelta delta) {
-        if (!delta.getResource().isFile() || (delta.getFlags() & (MOVED_FROM | MOVED_TO)) == 0) {
+        if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) == 0) {
             return;
         }
 
-        final Resource resource = delta.getResource();
-        final Path movedFrom = delta.getFromPath();
+        //file moved directly
+        if (delta.getFromPath().equals(document.getFile().getLocation())) {
+            final Resource resource = delta.getResource();
+            final Path movedFrom = delta.getFromPath();
 
-        if (document.getFile().getLocation().equals(movedFrom)) {
-            document.setFile((File)resource);
-            input.setFile((File)resource);
+            if (document.getFile().getLocation().equals(movedFrom)) {
+                document.setFile((File)resource);
+                input.setFile((File)resource);
+            }
+
+            updateContent();
+        } else if (delta.getFromPath().isPrefixOf(document.getFile().getLocation())) { //directory where file moved
+            final Path relPath = document.getFile().getLocation().removeFirstSegments(delta.getFromPath().segmentCount());
+            final Path newPath = delta.getToPath().append(relPath);
+
+            appContext.getWorkspaceRoot().getFile(newPath).then(new Operation<Optional<File>>() {
+                @Override
+                public void apply(Optional<File> file) throws OperationException {
+                    if (file.isPresent()) {
+                        document.setFile(file.get());
+                        input.setFile(file.get());
+
+                        updateContent();
+                    }
+                }
+            });
         }
 
-        updateContent();
+
     }
 
     private void onResourceRemoved(ResourceDelta delta) {

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.part.explorer.project;
 
 import com.google.common.base.MoreObjects;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -220,6 +221,15 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             final Node node1 = getProjectNode(delta.getFromPath());
             final Node node2 = getProjectNode(delta.getToPath());
 
+            //TODO: brutal fix for CHE-1535 just avoid NPE here
+            if (node1 == null && node2 == null) {
+                final Node node = tree.getSelectionModel().getSelectedNodes().get(0);
+                if (node != null) {
+                    tree.refresh(node);
+                }
+                return;
+            }
+
             if (node1.equals(node2)) {
                 if (tree.isExpanded(node1)) {
                     tree.getNodeLoader().loadChildren(node1, true);
@@ -275,20 +285,36 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
         final Tree tree = view.getTree();
         final Resource resource = delta.getResource();
 
-        if (resource.getLocation().segmentCount() == 1) {
-            final Node projectNode = getNode(resource.getLocation());
+        final Node node = getNode(resource.getLocation());
 
-            if (projectNode != null) {
-                tree.getNodeStorage().remove(projectNode);
-            }
-
+        if (node == null) {
             return;
         }
 
-        final Node node = getParentNode(delta.getResource().getLocation());
+        if (resource.getLocation().segmentCount() == 1) {
+                tree.getNodeStorage().remove(node);
+            return;
+        }
 
-        if (node != null && tree.isExpanded(node)) {
-            tree.getNodeLoader().loadChildren(node, true);
+        final Node parentNode = getParentNode(resource.getLocation());
+
+        if (parentNode == null) {
+            return;
+        }
+
+        final Path parentLocation = ((ResourceNode)parentNode).getData().getLocation();
+
+        if (resource.getLocation().parent().equals(parentLocation)) {
+            tree.getNodeStorage().remove(node);
+        } else {
+            tree.getNodeStorage().remove(node);
+
+            Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                @Override
+                public void execute() {
+                    tree.getNodeLoader().loadChildren(parentNode, true);
+                }
+            });
         }
     }
 

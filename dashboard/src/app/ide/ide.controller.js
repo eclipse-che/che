@@ -42,7 +42,7 @@ class IdeCtrl {
 
     let ideAction = $routeParams.action;
     let ideParams = $routeParams.ideParams;
-    let selectedWorkspaceIdeUrl = this.cheWorkspace.getIdeUrl(this.selectedWorkspaceName);
+    let selectedWorkspaceIdeUrl = this.cheWorkspace.getIdeUrl(namespace, this.selectedWorkspaceName);
     if (ideAction) {
       // send action
       this.ideSvc.setIDEAction(ideAction);

@@ -41,6 +41,8 @@ import org.eclipse.che.ide.api.project.ProjectTypeServiceClient;
 import org.eclipse.che.ide.api.project.ProjectTypeServiceClientImpl;
 import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.api.ssh.SshServiceClientImpl;
+import org.eclipse.che.ide.api.user.PreferencesServiceClient;
+import org.eclipse.che.ide.api.user.PreferencesServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserProfileServiceClient;
 import org.eclipse.che.ide.api.user.UserProfileServiceClientImpl;
 import org.eclipse.che.ide.api.user.UserServiceClient;
@@ -97,6 +99,7 @@ import org.eclipse.che.ide.api.project.wizard.ImportWizardRegistry;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
+import org.eclipse.che.ide.part.explorer.project.RevealNodesPersistenceComponent;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.resources.impl.ClipboardManagerImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
@@ -286,6 +289,7 @@ public class CoreGinModule extends AbstractGinModule {
                 GinMultibinder.newSetBinder(binder(), PersistenceComponent.class);
         persistenceComponentsMultibinder.addBinding().to(ShowHiddenFilesPersistenceComponent.class);
         persistenceComponentsMultibinder.addBinding().to(OpenedFilesPersistenceComponent.class);
+        persistenceComponentsMultibinder.addBinding().to(RevealNodesPersistenceComponent.class);
 
         install(new GinFactoryModuleBuilder().implement(RecipeWidget.class, RecipeWidgetImpl.class)
                                              .implement(WorkspaceWidget.class, WorkspaceWidgetImpl.class)
@@ -333,6 +337,7 @@ public class CoreGinModule extends AbstractGinModule {
     private void configurePlatformApiGwtClients() {
         bind(UserServiceClient.class).to(UserServiceClientImpl.class).in(Singleton.class);
         bind(UserProfileServiceClient.class).to(UserProfileServiceClientImpl.class).in(Singleton.class);
+        bind(PreferencesServiceClient.class).to(PreferencesServiceClientImpl.class).in(Singleton.class);
         bind(GitServiceClient.class).to(GitServiceClientImpl.class).in(Singleton.class);
         bind(OAuthServiceClient.class).to(OAuthServiceClientImpl.class).in(Singleton.class);
         bind(FactoryServiceClient.class).to(FactoryServiceClientImpl.class).in(Singleton.class);

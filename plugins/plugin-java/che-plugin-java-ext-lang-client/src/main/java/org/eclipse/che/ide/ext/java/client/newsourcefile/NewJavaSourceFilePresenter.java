@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.resources.Folder;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
 import java.util.Arrays;
 import java.util.List;
@@ -195,6 +196,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
                         @Override
                         public void apply(File file) throws OperationException {
                             eventBus.fireEvent(new FileEvent(file, OPEN));
+                            eventBus.fireEvent(new RevealResourceEvent(file));
                         }
                     });
                 }
@@ -204,6 +206,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
                 @Override
                 public void apply(File file) throws OperationException {
                     eventBus.fireEvent(new FileEvent(file, OPEN));
+                    eventBus.fireEvent(new RevealResourceEvent(file));
                 }
             });
         }
