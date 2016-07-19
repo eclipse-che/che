@@ -27,7 +27,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
@@ -42,6 +41,7 @@ import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
 import javax.validation.constraints.NotNull;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -163,10 +163,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
                 terminal.on(DATA_EVENT_NAME, new Operation<String>() {
                     @Override
                     public void apply(String arg) throws OperationException {
-                        Jso jso = Jso.create();
-                        jso.addField("type", "data");
-                        jso.addField("data", arg);
-                        socket.send(jso.serialize());
+                        sendCommand(arg);
                     }
                 });
                 socket.setOnMessageHandler(new MessageReceivedHandler() {
@@ -197,15 +194,20 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     }
 
     /**
-     * Sends 'exit' command on server side to stop terminal.
+     * Sends 'Ctrl+C' & 'exit' command on server side to stop current process and terminal respectively.
      */
     public void stopTerminal() {
         if (isTerminalConnected) {
-            Jso jso = Jso.create();
-            jso.addField("type", "data");
-            jso.addField("data", "exit\n");
-            socket.send(jso.serialize());
+            sendCommand("\u0003"); // Ctrl+C
+            sendCommand("exit\n");
         }
+    }
+
+    private void sendCommand(String cmd) {
+        Jso jso = Jso.create();
+        jso.addField("type", "data");
+        jso.addField("data", cmd);
+        socket.send(jso.serialize());
     }
 
     /** {@inheritDoc} */
