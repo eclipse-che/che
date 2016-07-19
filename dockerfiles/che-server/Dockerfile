@@ -16,13 +16,18 @@ FROM alpine:3.4
 ENV LANG=C.UTF-8 \
     JAVA_HOME=/usr/lib/jvm/default-jvm/jre \
     PATH=${PATH}:${JAVA_HOME}/bin \
-    CHE_HOME=/home/user/che
+    CHE_HOME=/home/user/che \
+    DOCKER_VERSION=1.6.0 \
+    DOCKER_BUCKET=get.docker.com
 
 RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
     apk upgrade --update && \
-    apk add --update docker openjdk8 sudo bash && \
+    apk add --update ca-certificates curl openssl openjdk8 sudo bash && \
+    curl -sSL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-${DOCKER_VERSION}" -o /usr/bin/docker && \
+    chmod +x /usr/bin/docker && \
     addgroup -S user -g 1000 && \
     adduser -S user -h /home/user -s /bin/bash -G root -u 1000 -D && \
+    addgroup -S docker -g 101 && \
     adduser user docker && \
     adduser user user && \
     addgroup -g 50 -S docker4mac && \
