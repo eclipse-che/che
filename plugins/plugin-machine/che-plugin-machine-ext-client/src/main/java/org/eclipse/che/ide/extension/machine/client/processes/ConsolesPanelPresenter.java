@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes;
 
+import com.google.api.client.repackaged.com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
@@ -25,8 +27,6 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
@@ -102,19 +102,22 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
     private final WorkspaceAgent                workspaceAgent;
     private final CommandTypeRegistry           commandTypeRegistry;
     private final Map<String, ProcessTreeNode>  machineNodes;
+    private final Map<OutputConsole, String>    consoleCommands;
     private final ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
 
+    @VisibleForTesting
     final List<ProcessTreeNode>          rootNodes;
+    @VisibleForTesting
+    final ProcessTreeNode                rootNode;
+    @VisibleForTesting
     final Map<String, TerminalPresenter> terminals;
+    @VisibleForTesting
     final Map<String, OutputConsole>     consoles;
-    final Map<OutputConsole, String>     consoleCommands;
 
-    private OutputConsole workspaceConsole;
-
-    ProcessTreeNode rootNode;
-    ProcessTreeNode selectedTreeNode;
-    ProcessTreeNode contextTreeNode;
-    PartPresenter   parent;
+    private OutputConsole   workspaceConsole;
+    private ProcessTreeNode selectedTreeNode;
+    private ProcessTreeNode contextTreeNode;
+    private PartPresenter   parent;
 
     @Inject
     public ConsolesPanelPresenter(ConsolesPanelView view,
@@ -159,7 +162,6 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
-        eventBus.addHandler(DevMachineStateEvent.TYPE, this);
 
         rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootNodes);
 
@@ -213,14 +215,6 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         onStopCommandProcess(destroyedMachineNode);
 
         view.setProcessesData(rootNode);
-    }
-
-    @Override
-    public void onDevMachineStarted(DevMachineStateEvent event) {
-    }
-
-    @Override
-    public void onDevMachineDestroyed(DevMachineStateEvent event) {
     }
 
     /** Get the list of all available machines. */

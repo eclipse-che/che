@@ -29,7 +29,6 @@ import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
@@ -45,6 +44,9 @@ import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINE_LOGS_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINE_STATUS_CHANNEL;
@@ -78,10 +80,11 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
     private boolean    isMachineRestarting;
 
     private String                                  wsAgentLogChannel;
-    private String                                  statusChannel;
-    private String                                  outputChannel;
     private SubscriptionHandler<MachineStatusEvent> statusHandler;
     private SubscriptionHandler<String>             outputHandler;
+
+    private List<String>                            statusChannels = new ArrayList<>();
+    private List<String>                            outputChannels = new ArrayList<>();
 
     @Inject
     public MachineManagerImpl(DtoUnmarshallerFactory dtoUnmarshallerFactory,
@@ -121,7 +124,6 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
                     case RUNNING:
                         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), SUCCESS);
                         onMachineRunning(event.getMachineId());
-                        eventBus.fireEvent(new DevMachineStateEvent(event));
                         break;
 
                     case ERROR:
@@ -151,17 +153,24 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-        if (statusChannel != null && messageBus.isHandlerSubscribed(statusHandler, statusChannel)) {
-            unsubscribeChannel(statusChannel, statusHandler);
-        }
-
-        if (outputChannel != null && messageBus.isHandlerSubscribed(outputHandler, outputChannel)) {
-            unsubscribeChannel(outputChannel, outputHandler);
-        }
-
         if (wsAgentLogChannel != null && messageBus.isHandlerSubscribed(outputHandler, wsAgentLogChannel)) {
             unsubscribeChannel(wsAgentLogChannel, outputHandler);
         }
+
+        for (String statusChannel : statusChannels) {
+            if (messageBus.isHandlerSubscribed(statusHandler, statusChannel)) {
+                unsubscribeChannel(statusChannel, statusHandler);
+            }
+        }
+
+        for (String outputChannel : outputChannels) {
+            if (messageBus.isHandlerSubscribed(outputHandler, outputChannel)) {
+                unsubscribeChannel(outputChannel, outputHandler);
+            }
+        }
+
+        statusChannels.clear();
+        outputChannels.clear();
     }
 
     @Override
@@ -279,16 +288,12 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
                                              .getDefaultValue(),
                                    outputHandler);
 
-                RunningListener runningListener = null;
-
-                if (isDev) {
-                    runningListener = new RunningListener() {
-                        @Override
-                        public void onRunning() {
-                            onMachineRunning(machineDto.getId());
-                        }
-                    };
-                }
+                RunningListener runningListener = new RunningListener() {
+                    @Override
+                    public void onRunning() {
+                        onMachineRunning(machineDto.getId());
+                    }
+                };
 
                 machineStatusNotifier.trackMachine(machineDto, runningListener, operationType);
             }
@@ -300,12 +305,15 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
         machineServiceClient.getMachine(machineId).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto machineDto) throws OperationException {
-                DevMachine devMachine = new DevMachine(machineDto);
+                if (machineDto.getConfig().isDev()) {
+                    DevMachine devMachine = new DevMachine(machineDto);
 
-                if (appContext instanceof AppContextImpl) {
-                    ((AppContextImpl)appContext).setDevMachine(devMachine);
-                    ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(machineDto.getRuntime().projectsRoot()));
+                    if (appContext instanceof AppContextImpl) {
+                        ((AppContextImpl)appContext).setDevMachine(devMachine);
+                        ((AppContextImpl)appContext).setProjectsRoot(Path.valueOf(machineDto.getRuntime().projectsRoot()));
+                    }
                 }
+                eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.RUNNING));
             }
         });
     }
@@ -329,23 +337,37 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
     public void onDevMachineCreating(MachineConfigDto machineConfig) {
         initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), IN_PROGRESS);
 
+        wsAgentLogChannel = "workspace:" + appContext.getWorkspaceId() + ":ext-server:output";
+        subscribeToChannel(wsAgentLogChannel, outputHandler);
+
+        subscribeToOutputStatusChannels(machineConfig);
+    }
+
+    @Override
+    public void onMachineCreating(MachineConfigDto machineConfig) {
+        subscribeToOutputStatusChannels(machineConfig);
+    }
+
+    private void subscribeToOutputStatusChannels(MachineConfigDto machineConfig){
+        String outputChannel = null;
+        String statusChannel = null;
         if (machineConfig.getLink(LINK_REL_GET_MACHINE_LOGS_CHANNEL) != null &&
             machineConfig.getLink(LINK_REL_GET_MACHINE_STATUS_CHANNEL) != null) {
-            final LinkParameter logsChannelLinkParameter = machineConfig.getLink(LINK_REL_GET_MACHINE_LOGS_CHANNEL).getParameter("channel");
+            LinkParameter logsChannelLinkParameter = machineConfig.getLink(LINK_REL_GET_MACHINE_LOGS_CHANNEL).getParameter("channel");
             if (logsChannelLinkParameter != null) {
                 outputChannel = logsChannelLinkParameter.getDefaultValue();
             }
-            final LinkParameter statusChannelLinkParameter =
-                    machineConfig.getLink(LINK_REL_GET_MACHINE_STATUS_CHANNEL).getParameter("channel");
+            LinkParameter statusChannelLinkParameter = machineConfig.getLink(LINK_REL_GET_MACHINE_STATUS_CHANNEL).getParameter("channel");
             if (statusChannelLinkParameter != null) {
                 statusChannel = statusChannelLinkParameter.getDefaultValue();
             }
         }
         if (outputChannel != null && statusChannel != null) {
-            wsAgentLogChannel = "workspace:" + appContext.getWorkspaceId() + ":ext-server:output";
-            subscribeToChannel(wsAgentLogChannel, outputHandler);
             subscribeToChannel(outputChannel, outputHandler);
             subscribeToChannel(statusChannel, statusHandler);
+
+            outputChannels.add(outputChannel);
+            statusChannels.add(statusChannel);
         } else {
             initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), ERROR);
         }

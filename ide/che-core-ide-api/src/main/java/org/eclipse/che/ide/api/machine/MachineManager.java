@@ -35,6 +35,14 @@ public interface MachineManager {
     void onDevMachineCreating(MachineConfigDto machineConfig);
 
     /**
+     * Performs some actions when machine is creating.
+     *
+     * @param machineConfig
+     *         contains information about machine configuration
+     */
+    void onMachineCreating(MachineConfigDto machineConfig);
+
+    /**
      * Performs some actions when machine is running.
      *
      * @param machineId
