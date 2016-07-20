@@ -40,7 +40,7 @@ EXPOSE 8000 8080
 
 USER user
 
-ADD ../../assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
+ADD assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
 
 ENV CHE_HOME /home/user/che
 
