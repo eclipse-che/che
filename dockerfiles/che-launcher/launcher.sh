@@ -30,7 +30,7 @@ init_global_variables() {
   DEFAULT_DOCKER_HOST_IP=$(get_docker_host_ip)
   DEFAULT_CHE_HOSTNAME=$(get_che_hostname)
   DEFAULT_CHE_PORT="8080"
-  DEFAULT_CHE_VERSION="latest"
+  DEFAULT_CHE_VERSION=$(get_che_launcher_version)
   DEFAULT_CHE_RESTART_POLICY="no"
   DEFAULT_CHE_USER="root"
   DEFAULT_CHE_LOG_LEVEL="info"
@@ -137,6 +137,16 @@ print_debug_info() {
   debug "---------------------------------------"
   debug "---------------------------------------"
   debug "---------------------------------------"
+}
+
+get_che_launcher_container_id() {
+  hostname
+}
+
+get_che_launcher_version() {
+  LAUNCHER_CONTAINER_ID=$(get_che_launcher_container_id)
+  LAUNCHER_IMAGE_NAME=$(docker inspect --format='{{.Config.Image}}' "${LAUNCHER_CONTAINER_ID}")
+  echo "${LAUNCHER_IMAGE_NAME}" | cut -d : -f2
 }
 
 is_boot2docker() {
@@ -428,3 +438,6 @@ case ${CHE_SERVER_ACTION} in
     print_debug_info
   ;;
 esac
+
+# This container will self destruct after execution
+docker rm -f "$(get_che_launcher_container_id)" > /dev/null 2>&1
