@@ -17,7 +17,6 @@ import com.google.inject.name.Names;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.user.server.ProfileService;
 import org.eclipse.che.inject.DynaModule;
-import org.everrest.guice.ServiceBindingHelper;
 
 /** @author andrew00x */
 @DynaModule
@@ -37,9 +36,6 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
         bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
         bind(org.eclipse.che.api.workspace.server.event.WorkspaceMessenger.class).asEagerSingleton();
-        bind(org.everrest.core.impl.async.AsynchronousJobPool.class).to(org.eclipse.che.everrest.CheAsynchronousJobPool.class);
-        bind(ServiceBindingHelper.bindingKey(org.everrest.core.impl.async.AsynchronousJobService.class, "/async/{ws-id}"))
-                .to(org.everrest.core.impl.async.AsynchronousJobService.class);
         bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineExtServerChecker.class);
         bind(org.eclipse.che.plugin.docker.machine.ext.DockerMachineTerminalChecker.class);
         bind(org.eclipse.che.everrest.EverrestDownloadFileResponseFilter.class);
