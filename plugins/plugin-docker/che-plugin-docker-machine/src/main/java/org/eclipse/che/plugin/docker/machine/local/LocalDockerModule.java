@@ -21,8 +21,6 @@ import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.plugin.docker.machine.DockerInstance;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 import org.eclipse.che.plugin.docker.machine.DockerProcess;
-import org.eclipse.che.plugin.docker.machine.local.interceptor.AllowOfflineMachineCreationModule;
-import org.eclipse.che.plugin.docker.machine.local.provider.CheHostVfsRootDirProvider;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 
 /**
@@ -50,9 +48,6 @@ public class LocalDockerModule extends AbstractModule {
 
         bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
                 .to(org.eclipse.che.plugin.docker.machine.local.node.provider.LocalWorkspaceFolderPathProvider.class);
-
-        bind(String.class).annotatedWith(Names.named("host.workspaces.root"))
-                          .toProvider(CheHostVfsRootDirProvider.class);
 
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryChecker.class).asEagerSingleton();
 
