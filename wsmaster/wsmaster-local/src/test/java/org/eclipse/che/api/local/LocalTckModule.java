@@ -21,6 +21,9 @@ import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
+import org.eclipse.che.api.ssh.server.spi.SshDao;
+import org.eclipse.che.api.user.server.jpa.PreferenceEntity;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
@@ -37,6 +40,7 @@ import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -79,6 +83,7 @@ public class LocalTckModule extends TckModule {
         bind(new TypeLiteral<TckRepository<Pair<String, Map<String, String>>>>() {}).to(LocalPreferenceTckRepository.class);
         bind(new TypeLiteral<TckRepository<StackImpl>>() {}).to(LocalStackTckRepository.class);
         bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).to(SnapshotTckRepository.class);
+        bind(new TypeLiteral<TckRepository<SshPairImpl>>() {}).to(LocalSshTckRepository.class);
 
         bind(UserDao.class).to(LocalUserDaoImpl.class);
         bind(ProfileDao.class).to(LocalProfileDaoImpl.class);
@@ -87,6 +92,7 @@ public class LocalTckModule extends TckModule {
         bind(PreferenceDao.class).to(LocalPreferenceDaoImpl.class);
         bind(StackDao.class).to(LocalStackDaoImpl.class);
         bind(SnapshotDao.class).to(LocalSnapshotDaoImpl.class);
+        bind(SshDao.class).to(LocalSshDaoImpl.class);
     }
 
     @Singleton
@@ -143,6 +149,14 @@ public class LocalTckModule extends TckModule {
         @Inject
         public LocalPreferenceTckRepository(LocalPreferenceDaoImpl localDao) {
             super(localDao.preferences, (map, entity) -> map.put(entity.first, entity.second), Map::clear);
+        }
+    }
+
+    @Singleton
+    private static class LocalSshTckRepository extends LocalTckRepository<List<SshPairImpl>, SshPairImpl> {
+        @Inject
+        public LocalSshTckRepository(LocalSshDaoImpl sshDao) {
+            super(sshDao.pairs, List::add, List::clear);
         }
     }
 }

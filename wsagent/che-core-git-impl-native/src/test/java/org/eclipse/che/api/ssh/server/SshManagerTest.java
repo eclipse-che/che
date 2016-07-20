@@ -52,7 +52,7 @@ public class SshManagerTest {
     public void shouldGenerateSshPair() throws Exception {
         SshPairImpl generatedPair = sshManager.generatePair(OWNER, "service", "name");
 
-        verify(sshDao).create(eq(OWNER), sshPairCaptor.capture());
+        verify(sshDao).create(sshPairCaptor.capture());
         SshPairImpl storedSshPair = sshPairCaptor.getValue();
         assertEquals(generatedPair, storedSshPair);
         assertEquals(generatedPair.getName(), "name");
@@ -65,9 +65,9 @@ public class SshManagerTest {
     @Test
     public void shouldCreateSshPair() throws Exception {
         SshPairImpl sshPair = createSshPair();
-        sshManager.createPair(OWNER, sshPair);
+        sshManager.createPair(sshPair);
 
-        verify(sshDao).create(eq(OWNER), eq(sshPair));
+        verify(sshDao).create(eq(sshPair));
     }
 
     @Test
@@ -101,7 +101,8 @@ public class SshManagerTest {
     }
 
     private SshPairImpl createSshPair() {
-        return new SshPairImpl("service",
+        return new SshPairImpl(OWNER,
+                               "service",
                                "name",
                                "publicKey",
                                "privateKey");
