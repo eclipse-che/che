@@ -28,8 +28,6 @@ public interface SshDao {
     /**
      * Creates new ssh pair for specified user.
      *
-     * @param owner
-     *         the id of the user who will be the owner of the ssh pair
      * @param sshPair
      *         ssh pair to create
      * @throws ConflictException
@@ -37,7 +35,7 @@ public interface SshDao {
      * @throws ServerException
      *         when any other error occurs during ssh pair creating
      */
-    void create(String owner, SshPairImpl sshPair) throws ServerException, ConflictException;
+    void create(SshPairImpl sshPair) throws ServerException, ConflictException;
 
     /**
      * Returns ssh pairs by owner and service.

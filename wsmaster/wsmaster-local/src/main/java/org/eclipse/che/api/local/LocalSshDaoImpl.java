@@ -45,28 +45,31 @@ import static java.lang.String.format;
  */
 @Singleton
 public class LocalSshDaoImpl implements SshDao {
-    private final ListMultimap<String, SshPairImpl> pairs;
+
     private final ReadWriteLock                     lock;
     private final LocalStorage                      sshStorage;
 
+    @VisibleForTesting
+    final List<SshPairImpl> pairs;
+
     @Inject
     public LocalSshDaoImpl(LocalStorageFactory storageFactory) throws IOException {
-        pairs = ArrayListMultimap.create();
+        pairs = new ArrayList<>();
         lock = new ReentrantReadWriteLock();
         sshStorage = storageFactory.create("ssh.json");
     }
 
     @Override
-    public void create(String owner, SshPairImpl usersSshPair) throws ConflictException {
+    public void create(SshPairImpl sshPair) throws ConflictException {
         lock.writeLock().lock();
         try {
-            final Optional<SshPairImpl> any = find(owner, usersSshPair.getService(), usersSshPair.getName());
+            final Optional<SshPairImpl> any = find(sshPair.getName(), sshPair.getService(), sshPair.getName());
             if (any.isPresent()) {
                 throw new ConflictException(format("Ssh pair with service '%s' and name %s already exist.",
-                                                   usersSshPair.getService(),
-                                                   usersSshPair.getName()));
+                                                   sshPair.getService(),
+                                                   sshPair.getName()));
             }
-            pairs.put(owner, usersSshPair);
+            pairs.add(sshPair);
         } finally {
             lock.writeLock().unlock();
         }
@@ -94,7 +97,7 @@ public class LocalSshDaoImpl implements SshDao {
             if (!any.isPresent()) {
                 throw new NotFoundException(format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
             }
-            pairs.remove(owner, any.get());
+            pairs.remove(any.get());
         } finally {
             lock.writeLock().unlock();
         }
@@ -104,19 +107,20 @@ public class LocalSshDaoImpl implements SshDao {
     public List<SshPairImpl> get(String owner, String service) {
         lock.readLock().lock();
         try {
-            return pairs.get(owner)
-                        .stream()
-                        .filter(sshPair -> sshPair.getService().equals(service))
+            return pairs.stream()
+                        .filter(sshPair -> sshPair.getOwner().equals(owner)
+                                           && sshPair.getService().equals(service))
                         .collect(Collectors.toList());
         } finally {
             lock.readLock().unlock();
         }
     }
 
+
     private Optional<SshPairImpl> find(String owner, String service, String name) {
-        return pairs.get(owner)
-                    .stream()
-                    .filter(sshPair -> sshPair.getService().equals(service)
+        return pairs.stream()
+                    .filter(sshPair -> sshPair.getOwner().equals(owner)
+                                       && sshPair.getService().equals(service)
                                        && sshPair.getName().equals(name))
                     .findAny();
     }
@@ -126,12 +130,7 @@ public class LocalSshDaoImpl implements SshDao {
     void loadSshPairs() {
         lock.writeLock().lock();
         try {
-            final Map<String, List<SshPairImpl>> ownerToPairs = sshStorage.loadMap(new TypeToken<Map<String, List<SshPairImpl>>>() {});
-            for (Map.Entry<String, List<SshPairImpl>> stringListEntry : ownerToPairs.entrySet()) {
-                for (SshPairImpl sshPair : stringListEntry.getValue()) {
-                    pairs.put(stringListEntry.getKey(), sshPair);
-                }
-            }
+            pairs.addAll(sshStorage.loadList(new TypeToken<List<SshPairImpl>>() {}));
         } finally {
             lock.writeLock().unlock();
         }
@@ -142,12 +141,7 @@ public class LocalSshDaoImpl implements SshDao {
     void saveSshPairs() throws IOException {
         lock.readLock().lock();
         try {
-            final HashMap<String, List<SshPairImpl>> ownerToPairs = new HashMap<>();
-            for (Map.Entry<String, SshPairImpl> entry : pairs.entries()) {
-                ownerToPairs.computeIfAbsent(entry.getKey(), s -> new ArrayList<>());
-                ownerToPairs.get(entry.getKey()).add(entry.getValue());
-            }
-            sshStorage.store(ownerToPairs);
+            sshStorage.store(pairs);
         } finally {
             lock.readLock().unlock();
         }
