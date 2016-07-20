@@ -7,7 +7,7 @@
 
 https://www.eclipse.org/che/. Next-generation Eclipse platform, developer workspace server and cloud IDE. Che defines workspaces that include their dependencies including embedded containerized runtimes, Web IDE, and project code. This makes workspaces distributed, collaborative, and portable to run anywhere on a desktop or a server ... [Read More](https://www.eclipse.org/che/features/)
 
-![Eclipse Che](https://www.eclipse.org/che/images/hero-home@2x.jpg "Eclipse Che")
+![Eclipse Che](https://www.eclipse.org/che/images/banner@2x.png "Eclipse Che")
 
 ### Getting Started
 You can run Che in the public cloud, a private cloud, or install it on any OS. Che has been tested on Ubuntu, Linux, MacOS and Windows. The [step by step guide](http://eclipse.org/che/getting-started/) will get you going.
