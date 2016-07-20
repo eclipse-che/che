@@ -18,13 +18,15 @@ import org.eclipse.che.api.core.rest.shared.ParameterType;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceDescriptor;
+import org.everrest.core.ApplicationContext;
 import org.everrest.core.ResourceBinder;
-import org.everrest.core.impl.ApplicationContextImpl;
 import org.everrest.core.impl.ApplicationProviderBinder;
 import org.everrest.core.impl.ContainerResponse;
 import org.everrest.core.impl.EverrestConfiguration;
 import org.everrest.core.impl.EverrestProcessor;
 import org.everrest.core.impl.ProviderBinder;
+import org.everrest.core.impl.RequestDispatcher;
+import org.everrest.core.impl.RequestHandlerImpl;
 import org.everrest.core.impl.ResourceBinderImpl;
 import org.everrest.core.tools.DependencySupplierImpl;
 import org.everrest.core.tools.ResourceLauncher;
@@ -40,11 +42,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.everrest.core.ApplicationContext.anApplicationContext;
 
 /** @author <a href="mailto:andrew00x@gmail.com">Andrey Parfonov</a> */
 public class ServiceDescriptorTest {
@@ -91,11 +94,14 @@ public class ServiceDescriptorTest {
         DependencySupplierImpl dependencies = new DependencySupplierImpl();
         ResourceBinder resources = new ResourceBinderImpl();
         ProviderBinder providers = new ApplicationProviderBinder();
-        EverrestProcessor processor = new EverrestProcessor(resources,providers,dependencies,new EverrestConfiguration(), null);
+        EverrestProcessor processor = new EverrestProcessor(new EverrestConfiguration(),
+                                                            dependencies,
+                                                            new RequestHandlerImpl(new RequestDispatcher(resources), providers),
+                                                            null);
         launcher = new ResourceLauncher(processor);
         processor.addApplication(new Deployer());
-        ApplicationContextImpl.setCurrent(new ApplicationContextImpl(null, null, ProviderBinder.getInstance()));
-        System.out.println("initilize");
+        ApplicationContext.setCurrent(anApplicationContext().withProviders(providers).build());
+        System.out.println("initialized");
     }
 
     @Test
