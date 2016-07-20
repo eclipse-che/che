@@ -17,8 +17,7 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 import org.everrest.core.ApplicationContext;
 import org.everrest.core.impl.method.MethodInvokerDecorator;
 import org.everrest.core.method.MethodInvoker;
-import org.everrest.core.resource.GenericMethodResource;
-import org.everrest.websockets.ServerContainerInitializeListener;
+import org.everrest.core.resource.GenericResourceMethod;
 import org.everrest.websockets.WSConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,7 @@ class WebSocketMethodInvokerDecorator extends MethodInvokerDecorator {
     }
 
     @Override
-    public Object invokeMethod(Object resource, GenericMethodResource genericMethodResource, ApplicationContext context) {
+    public Object invokeMethod(Object resource, GenericResourceMethod genericMethodResource, ApplicationContext context) {
         WSConnection wsConnection = (WSConnection)org.everrest.core.impl.EnvironmentContext.getCurrent().get(WSConnection.class);
         if (wsConnection != null) {
 

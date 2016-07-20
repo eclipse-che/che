@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.method.MethodInvokerFilter;
-import org.everrest.core.resource.GenericMethodResource;
+import org.everrest.core.resource.GenericResourceMethod;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -33,7 +33,7 @@ import javax.ws.rs.core.Response;
  */
 public abstract class CheMethodInvokerFilter implements MethodInvokerFilter {
     @Override
-    public void accept(GenericMethodResource genericMethodResource, Object[] arguments) throws WebApplicationException {
+    public void accept(GenericResourceMethod genericMethodResource, Object[] arguments) throws WebApplicationException {
         try {
             filter(genericMethodResource, arguments);
         } catch (ApiException exception) {
@@ -83,11 +83,11 @@ public abstract class CheMethodInvokerFilter implements MethodInvokerFilter {
      * Check does supplied method can be invoked.
      *
      * @param genericMethodResource
-     *         See {@link GenericMethodResource}
+     *         See {@link GenericResourceMethod}
      * @param arguments
      *         actual method arguments that were created from request
      * @throws ApiException
      *         if method can not be invoked cause current environment context, e.g. for current user, with current request attributes, etc.
      */
-    protected abstract void filter(GenericMethodResource genericMethodResource, Object[] arguments) throws ApiException;
+    protected abstract void filter(GenericResourceMethod genericMethodResource, Object[] arguments) throws ApiException;
 }
