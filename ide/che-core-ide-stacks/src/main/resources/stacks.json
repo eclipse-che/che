@@ -436,6 +436,74 @@
     }
   },
   {
+    "id": "hadoop-default",
+    "creator": "ide",
+    "name": "Hadoop",
+    "description": "Default Hadoop Stack with JDK 8, Maven and Tomcat.",
+    "scope": "advanced",
+    "tags": [
+      "Hadoop"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      },
+      {
+        "name": "Hadoop"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/hadoop-dev"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    },
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "search"
+        ]
+      }
+    ],
+    "stackIcon": {
+      "name": "type-hadoop.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "node-default",
     "creator": "ide",
     "name": "Node",
