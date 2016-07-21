@@ -53,8 +53,8 @@ init_global_variables() {
 
   if is_docker_for_mac || is_docker_for_windows; then
     CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v ${CHE_DATA_FOLDER}/storage:/home/user/che/storage \
-                                        -e \"CHE_WORKSPACE_STORAGE=${CHE_DATA_FOLDER}/workspaces\" \
-                                        -e \"CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false\"}
+                                        -e CHE_WORKSPACE_STORAGE=${CHE_DATA_FOLDER}/workspaces \
+                                        -e CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false}
   else
     CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v ${CHE_DATA_FOLDER}/storage:/home/user/che/storage \
                                         -v ${CHE_DATA_FOLDER}/workspaces:/home/user/che/workspaces}
