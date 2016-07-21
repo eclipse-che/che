@@ -8,6 +8,9 @@
 # Contributors:
 #   Mario Loriedo - Initial implementation
 #
+# To run the tests:
+#   docker run -w /tests/ -v $PWD:/tests dduportal/bats:0.4.0 /tests/launcher_test.bats
+#
 
 source ./launcher_funcs.sh
 
