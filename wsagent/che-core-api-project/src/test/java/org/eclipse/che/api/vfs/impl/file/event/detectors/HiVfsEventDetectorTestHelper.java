@@ -8,9 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event;
+package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
+import org.eclipse.che.api.vfs.impl.file.event.EventTreeNode;
+import org.eclipse.che.api.vfs.impl.file.event.LoEvent;
 import org.eclipse.che.api.vfs.impl.file.event.LoEvent.ItemType;
 
 import static org.eclipse.che.api.vfs.impl.file.event.EventTreeHelper.addEventAndCreatePrecedingNodes;
@@ -19,7 +21,6 @@ import static org.eclipse.che.api.vfs.impl.file.event.LoEvent.newInstance;
 
 /**
  * @author Dmitry Kuleshov
- *
  * @since 4.5
  */
 abstract class HiVfsEventDetectorTestHelper {
@@ -35,12 +36,11 @@ abstract class HiVfsEventDetectorTestHelper {
                   FileWatcherEventType eventType,
                   ItemType itemType) {
 
-        LoEvent loEvent = newInstance()
-                .withName(name)
-                .withPath(path)
-                .withEventType(eventType)
-                .withItemType(itemType)
-                .withTime(System.currentTimeMillis());
+        LoEvent loEvent = newInstance().withName(name)
+                                       .withPath(path)
+                                       .withEventType(eventType)
+                                       .withItemType(itemType)
+                                       .withTime(System.currentTimeMillis());
 
         addEventAndCreatePrecedingNodes(root, loEvent);
     }

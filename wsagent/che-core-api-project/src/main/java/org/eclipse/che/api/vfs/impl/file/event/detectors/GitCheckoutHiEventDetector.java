@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event;
+package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
 import com.google.common.annotations.Beta;
 
@@ -17,6 +17,11 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.shared.dto.event.GitBranchCheckoutEventDto;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.EventTreeNode;
+import org.eclipse.che.api.vfs.impl.file.event.HiEvent;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventBroadcaster;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventClientBroadcaster;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

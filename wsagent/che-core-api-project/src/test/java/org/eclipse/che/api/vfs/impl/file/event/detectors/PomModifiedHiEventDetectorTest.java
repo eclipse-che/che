@@ -8,9 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event;
+package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
 import org.eclipse.che.api.project.shared.dto.event.PomModifiedEventDto;
+import org.eclipse.che.api.vfs.impl.file.event.HiEvent;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventServerPublisher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +35,6 @@ import static org.junit.Assert.assertTrue;
  * Test for {@link PomModifiedHiEventDetector}
  *
  * @author Dmitry Kuleshov
- *
  * @since 4.5
  */
 @RunWith(MockitoJUnitRunner.class)

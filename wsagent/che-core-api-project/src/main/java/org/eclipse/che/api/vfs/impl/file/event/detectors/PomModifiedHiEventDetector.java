@@ -8,12 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event;
+package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.project.shared.dto.event.PomModifiedEventDto;
+import org.eclipse.che.api.vfs.impl.file.event.EventTreeNode;
+import org.eclipse.che.api.vfs.impl.file.event.HiEvent;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventBroadcaster;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventServerPublisher;
 
 import java.util.Optional;
 
