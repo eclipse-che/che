@@ -48,7 +48,7 @@ init_global_variables() {
   # CHE_CONF_ARGS are the Docker run options that need to be used if users set CHE_CONF_FOLDER:
   #   - empty if CHE_CONF_FOLDER is not set
   #   - -v ${CHE_CONF_FOLDER}:/conf -e "CHE_LOCAL_CONF_DIR=/conf" if CHE_CONF_FOLDER is set
-  CHE_CONF_ARGS=${CHE_CONF_FOLDER:+-v ${CHE_CONF_FOLDER}:/conf -e \"CHE_LOCAL_CONF_DIR=/conf\"}
+  CHE_CONF_ARGS=${CHE_CONF_FOLDER:+-v ${CHE_CONF_FOLDER}:/conf -e CHE_LOCAL_CONF_DIR=/conf}
   CHE_LOCAL_BINARY_ARGS=${CHE_LOCAL_BINARY:+-v ${CHE_LOCAL_BINARY}:/home/user/che}
 
   if is_docker_for_mac || is_docker_for_windows; then
