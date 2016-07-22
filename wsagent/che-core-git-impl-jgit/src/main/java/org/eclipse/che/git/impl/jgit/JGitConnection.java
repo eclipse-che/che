@@ -1620,7 +1620,6 @@ class JGitConnection implements GitConnection {
                                                                     "authenticated", Boolean.toString(credentials != null)));
                 }
                 throw new UnauthorizedException(exception.getMessage(), ErrorCodes.UNAUTHORIZED_GIT_OPERATION);
-
             } else {
                 throw exception;
             }
