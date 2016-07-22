@@ -12,6 +12,7 @@ package org.eclipse.che.ide.context;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -23,6 +24,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
 import org.eclipse.che.ide.api.data.HasDataObject;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.SelectionChangedEvent;
 import org.eclipse.che.ide.api.event.SelectionChangedHandler;
 import org.eclipse.che.ide.api.event.project.ProjectUpdatedEvent;
@@ -37,8 +40,10 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.ResourcePathComparator;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.impl.ResourceDeltaImpl;
 import org.eclipse.che.ide.resources.impl.ResourceManager;
@@ -92,11 +97,14 @@ public class AppContextImpl implements AppContext,
     private Resource[] currentResources;
 
     @Inject
-    public AppContextImpl(EventBus eventBus, BrowserQueryFieldRenderer browserQueryFieldRenderer,
-                          ResourceManager.ResourceManagerFactory resourceManagerFactory) {
+    public AppContextImpl(EventBus eventBus,
+                          BrowserQueryFieldRenderer browserQueryFieldRenderer,
+                          ResourceManager.ResourceManagerFactory resourceManagerFactory,
+                          Provider<EditorAgent> editorAgentProvider) {
         this.eventBus = eventBus;
         this.browserQueryFieldRenderer = browserQueryFieldRenderer;
         this.resourceManagerFactory = resourceManagerFactory;
+        this.editorAgentProvider = editorAgentProvider;
 
         projectsInImport = new ArrayList<>();
 
@@ -353,6 +361,7 @@ public class AppContextImpl implements AppContext,
 
     private final EventBus                               eventBus;
     private final ResourceManager.ResourceManagerFactory resourceManagerFactory;
+    private final Provider<EditorAgent>                  editorAgentProvider;
 
     private ResourceManager resourceManager;
     private Project[]       projects;
@@ -381,12 +390,28 @@ public class AppContextImpl implements AppContext,
 
     @Override
     public Project getRootProject() {
-        if (currentResource == null) {
-            return null;
-        }
+        if (currentResource == null || currentResources == null) {
 
-        if (currentResources == null) {
-            return null;
+            EditorAgent editorAgent = editorAgentProvider.get();
+            if (editorAgent == null) {
+                return null;
+            }
+
+            final EditorPartPresenter editor = editorAgent.getActiveEditor();
+            if (editor == null) {
+                return null;
+            }
+
+            final VirtualFile file = editor.getEditorInput().getFile();
+
+            if (file instanceof SyntheticNode) {
+                final Path projectPath = ((SyntheticNode)file).getProject();
+                for (Project project : projects) {
+                    if (project.getLocation().equals(projectPath)) {
+                        return project;
+                    }
+                }
+            }
         }
 
         Project root = null;

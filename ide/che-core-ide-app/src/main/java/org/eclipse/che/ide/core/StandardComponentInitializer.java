@@ -19,17 +19,12 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.actions.CloseActiveEditor;
 import org.eclipse.che.ide.actions.CollapseAllAction;
 import org.eclipse.che.ide.actions.CompleteAction;
-import org.eclipse.che.ide.actions.RefreshPathAction;
-import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
-import org.eclipse.che.ide.resources.action.RevealResourceAction;
-import org.eclipse.che.ide.resources.action.CopyResourceAction;
-import org.eclipse.che.ide.resources.action.CutResourceAction;
-import org.eclipse.che.ide.resources.action.PasteResourceAction;
-import org.eclipse.che.ide.actions.ShowReferenceAction;
+import org.eclipse.che.ide.actions.ConvertFolderToProjectAction;
 import org.eclipse.che.ide.actions.CreateProjectAction;
 import org.eclipse.che.ide.actions.DeleteResourceAction;
 import org.eclipse.che.ide.actions.DownloadProjectAction;
 import org.eclipse.che.ide.actions.DownloadResourceAction;
+import org.eclipse.che.ide.actions.EditFileAction;
 import org.eclipse.che.ide.actions.ExpandEditorAction;
 import org.eclipse.che.ide.actions.FormatterAction;
 import org.eclipse.che.ide.actions.FullTextSearchAction;
@@ -39,16 +34,15 @@ import org.eclipse.che.ide.actions.ImportProjectAction;
 import org.eclipse.che.ide.actions.LoaderAction;
 import org.eclipse.che.ide.actions.NavigateToFileAction;
 import org.eclipse.che.ide.actions.OpenFileAction;
-import org.eclipse.che.ide.actions.EditFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
 import org.eclipse.che.ide.actions.RedoAction;
+import org.eclipse.che.ide.actions.RefreshPathAction;
 import org.eclipse.che.ide.actions.RenameItemAction;
 import org.eclipse.che.ide.actions.SaveAction;
 import org.eclipse.che.ide.actions.SaveAllAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
-import org.eclipse.che.ide.editor.SwitchPreviousEditorAction;
-import org.eclipse.che.ide.editor.SwitchNextEditorAction;
+import org.eclipse.che.ide.actions.ShowReferenceAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
@@ -68,6 +62,8 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.connection.WsConnectionListener;
+import org.eclipse.che.ide.editor.SwitchNextEditorAction;
+import org.eclipse.che.ide.editor.SwitchPreviousEditorAction;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
@@ -78,6 +74,11 @@ import org.eclipse.che.ide.part.editor.actions.CloseOtherAction;
 import org.eclipse.che.ide.part.editor.actions.PinEditorTabAction;
 import org.eclipse.che.ide.part.editor.actions.ReopenClosedFileAction;
 import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
+import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
+import org.eclipse.che.ide.resources.action.CopyResourceAction;
+import org.eclipse.che.ide.resources.action.CutResourceAction;
+import org.eclipse.che.ide.resources.action.PasteResourceAction;
+import org.eclipse.che.ide.resources.action.RevealResourceAction;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoaderResources;
 import org.eclipse.che.ide.ui.popup.PopupResources;
 import org.eclipse.che.ide.ui.toolbar.MainToolbar;
@@ -213,6 +214,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private CreateProjectAction createProjectAction;
+
+    @Inject
+    private ConvertFolderToProjectAction convertFolderToProjectAction;
 
     @Inject
     private FullTextSearchAction fullTextSearchAction;
@@ -416,6 +420,9 @@ public class StandardComponentInitializer {
         actionManager.registerAction("uploadFolder", uploadFolderAction);
         projectGroup.add(uploadFolderAction);
 
+        actionManager.registerAction("convertFolderToProject", convertFolderToProjectAction);
+        projectGroup.add(convertFolderToProjectAction);
+
         projectGroup.add(downloadProjectAction);
 
         actionManager.registerAction("showHideHiddenFiles", showHiddenFilesAction);
@@ -525,6 +532,8 @@ public class StandardComponentInitializer {
         resourceOperation.addSeparator();
         resourceOperation.add(downloadResourceAction);
         resourceOperation.add(refreshPathAction);
+        resourceOperation.addSeparator();
+        resourceOperation.add(convertFolderToProjectAction);
         resourceOperation.addSeparator();
 
         DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_CONTEXT_MENU);

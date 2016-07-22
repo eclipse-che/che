@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-cpp-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.5.0-RC1-SNAPSHOT</version>
+        <version>4.6.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-cpp-lang-ide</artifactId>
     <packaging>jar</packaging>

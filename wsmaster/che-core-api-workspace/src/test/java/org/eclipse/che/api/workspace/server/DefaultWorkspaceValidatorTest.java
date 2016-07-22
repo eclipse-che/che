@@ -515,6 +515,32 @@ public class DefaultWorkspaceValidatorTest {
         wsValidator.validateConfig(config);
     }
 
+    @Test(expectedExceptions = BadRequestException.class,
+          expectedExceptionsMessageRegExp = "Environment dev-env contains machine with invalid source location: localhost")
+    public void shouldFailValidationIfLocationIsInvalidUrl() throws Exception {
+        final WorkspaceConfigDto config = createConfig();
+        config.getEnvironments()
+              .get(0)
+              .getMachineConfigs()
+              .get(0)
+              .withSource(newDto(MachineSourceDto.class).withType("dockerfile").withLocation("localhost"));
+
+        wsValidator.validateConfig(config);
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+          expectedExceptionsMessageRegExp = "Environment dev-env contains machine with invalid source location protocol: ftp://localhost")
+    public void shouldFailValidationIfLocationHasInvalidProtocol() throws Exception {
+        final WorkspaceConfigDto config = createConfig();
+        config.getEnvironments()
+              .get(0)
+              .getMachineConfigs()
+              .get(0)
+              .withSource(newDto(MachineSourceDto.class).withType("dockerfile").withLocation("ftp://localhost"));
+
+        wsValidator.validateConfig(config);
+    }
+
     private static WorkspaceConfigDto createConfig() {
         final WorkspaceConfigDto workspaceConfigDto = newDto(WorkspaceConfigDto.class).withName("ws-name")
                                                                                       .withDefaultEnv("dev-env");
@@ -530,7 +556,7 @@ public class DefaultWorkspaceValidatorTest {
         MachineConfigDto devMachine = newDto(MachineConfigDto.class).withDev(true)
                                                                     .withName("dev-machine")
                                                                     .withType("docker")
-                                                                    .withSource(newDto(MachineSourceDto.class).withLocation("location")
+                                                                    .withSource(newDto(MachineSourceDto.class).withLocation("http://location")
                                                                                                               .withType("dockerfile"))
                                                                     .withServers(serversConf)
                                                                     .withEnvVariables(new HashMap<>(singletonMap("key1", "value1")));
