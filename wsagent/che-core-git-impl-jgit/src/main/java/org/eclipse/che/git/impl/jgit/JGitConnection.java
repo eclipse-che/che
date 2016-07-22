@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.jgit;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -51,6 +52,7 @@ import org.eclipse.che.api.git.shared.LsRemoteRequest;
 import org.eclipse.che.api.git.shared.MergeRequest;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.MoveRequest;
+import org.eclipse.che.api.git.shared.ProviderInfo;
 import org.eclipse.che.api.git.shared.PullRequest;
 import org.eclipse.che.api.git.shared.PullResponse;
 import org.eclipse.che.api.git.shared.PushRequest;
@@ -170,6 +172,8 @@ import static java.nio.file.attribute.PosixFilePermission.OWNER_READ;
 import static java.nio.file.attribute.PosixFilePermission.OWNER_WRITE;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
+import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
@@ -1564,12 +1568,12 @@ class JGitConnection implements GitConnection {
      */
     private Object executeRemoteCommand(String remoteUrl, TransportCommand command)
             throws GitException, GitAPIException, UnauthorizedException {
-        String sshKeyDirectoryPath = "";
+        File keyDirectory = null;
+        UserCredential credentials = null;
         try {
             if (GitUrlUtils.isSSH(remoteUrl)) {
-                File keyDirectory = Files.createTempDir();
-                sshKeyDirectoryPath = keyDirectory.getPath();
-                File sshKey = writePrivateKeyFile(remoteUrl, keyDirectory);
+                keyDirectory =  Files.createTempDir();
+                final File sshKey = writePrivateKeyFile(remoteUrl, keyDirectory);
 
                 SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
                     @Override
@@ -1593,7 +1597,7 @@ class JGitConnection implements GitConnection {
                     }
                 });
             } else {
-                UserCredential credentials = credentialsLoader.getUserCredential(remoteUrl);
+                credentials = credentialsLoader.getUserCredential(remoteUrl);
                 if (credentials != null) {
                     command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(credentials.getUserName(),
                                                                                            credentials.getPassword()));
@@ -1604,16 +1608,25 @@ class JGitConnection implements GitConnection {
 
             return command.call();
         } catch (GitException | TransportException exception) {
-            if ("Unable get private ssh key".equals(exception.getMessage())
-                || exception.getMessage().contains(ERROR_AUTHENTICATION_REQUIRED)) {
-                throw new UnauthorizedException(exception.getMessage());
+            if ("Unable get private ssh key".equals(exception.getMessage())) {
+                throw new UnauthorizedException(exception.getMessage(), ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY);
+            } else if (exception.getMessage().contains(ERROR_AUTHENTICATION_REQUIRED)) {
+                final ProviderInfo info = credentialsLoader.getProviderInfo(remoteUrl);
+                if (info != null) {
+                    throw new UnauthorizedException(exception.getMessage(),
+                                                    ErrorCodes.UNAUTHORIZED_GIT_OPERATION,
+                                                    ImmutableMap.of(PROVIDER_NAME, info.getProviderName(),
+                                                                    AUTHENTICATE_URL, info.getAuthenticateUrl(),
+                                                                    "authenticated", Boolean.toString(credentials != null)));
+                }
+                throw new UnauthorizedException(exception.getMessage(), ErrorCodes.UNAUTHORIZED_GIT_OPERATION);
             } else {
                 throw exception;
             }
         } finally {
-            if (!sshKeyDirectoryPath.isEmpty()) {
+            if (keyDirectory != null && keyDirectory.exists()) {
                 try {
-                    FileUtils.delete(new File(sshKeyDirectoryPath), FileUtils.RECURSIVE);
+                    FileUtils.delete(keyDirectory, FileUtils.RECURSIVE);
                 } catch (IOException exception) {
                     throw new GitException("Can't remove SSH key directory", exception);
                 }
