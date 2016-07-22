@@ -284,7 +284,7 @@ class MessageBus { // jshint ignore:line
       if (subscribers) {
         subscribers.forEach((subscriber) => {
           try {
-            subscriber(JSON.parse(jsonMessage.body));
+            subscriber(angular.fromJson(jsonMessage.body));
           } catch (e) {
             subscriber(jsonMessage.body);
           }
