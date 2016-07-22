@@ -64,7 +64,7 @@ public class WsMasterModule extends AbstractModule {
 
         bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
-                          "sudo chown -R $(id -u -n) /projects && " +
+                          "sudo sh -c \"chown -R $(id -u -n) /projects || true\" && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
         bindConstant().annotatedWith(Names.named(org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
                       .to("mkdir -p ~/che " +
