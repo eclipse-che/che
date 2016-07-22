@@ -32,6 +32,7 @@
         <module>samples</module>
         <module>dashboard</module>
         <module>assembly</module>
+        <module>bom</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>

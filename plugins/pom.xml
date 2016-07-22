@@ -25,6 +25,7 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Parent</name>
     <modules>
+        <module>che-bom-maven-plugin</module>
         <module>plugin-product-info</module>
         <module>plugin-help</module>
         <module>plugin-docker</module>
