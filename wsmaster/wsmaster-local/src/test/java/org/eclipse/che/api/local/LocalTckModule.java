@@ -10,14 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import com.google.inject.Inject;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.local.storage.stack.StackLocalStorage;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
@@ -67,19 +70,68 @@ public class LocalTckModule extends TckModule {
 
         bind(new TypeLiteral<Set<UserImpl>>() {}).annotatedWith(Names.named("codenvy.local.infrastructure.users")).toInstance(emptySet());
 
-        bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(LocalUserTckRepository.class).in(Singleton.class);
-        bind(new TypeLiteral<TckRepository<ProfileImpl>>() {}).to(LocalProfileTckRepository.class).in(Singleton.class);
-        bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).to(LocalRecipeTckRepository.class).in(Singleton.class);
-        bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).to(LocalWorkspaceTckRepository.class).in(Singleton.class);
-        bind(new TypeLiteral<TckRepository<Pair<String, Map<String, String>>>>() {}).to(LocalPreferenceTckRepository.class)
-                                                                                    .in(Singleton.class);
-        bind(new TypeLiteral<TckRepository<StackImpl>>(){}).to(LocalStackTcKRepository.class).in(Singleton.class);
+        bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(LocalUserTckRepository.class);
+        bind(new TypeLiteral<TckRepository<ProfileImpl>>() {}).to(LocalProfileTckRepository.class);
+        bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).to(LocalRecipeTckRepository.class);
+        bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).to(LocalWorkspaceTckRepository.class);
+        bind(new TypeLiteral<TckRepository<Pair<String, Map<String, String>>>>() {}).to(LocalPreferenceTckRepository.class);
+        bind(new TypeLiteral<TckRepository<StackImpl>>() {}).to(LocalStackTckRepository.class);
+        bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).to(SnapshotTckRepository.class);
 
-        bind(UserDao.class).to(LocalUserDaoImpl.class).in(Singleton.class);
-        bind(ProfileDao.class).to(LocalProfileDaoImpl.class).in(Singleton.class);
-        bind(RecipeDao.class).to(LocalRecipeDaoImpl.class).in(Singleton.class);
-        bind(WorkspaceDao.class).to(LocalWorkspaceDaoImpl.class).in(Singleton.class);
-        bind(PreferenceDao.class).to(LocalPreferenceDaoImpl.class).in(Singleton.class);
-        bind(StackDao.class).to(LocalStackDaoImpl.class).in(Singleton.class);
+        bind(UserDao.class).to(LocalUserDaoImpl.class);
+        bind(ProfileDao.class).to(LocalProfileDaoImpl.class);
+        bind(RecipeDao.class).to(LocalRecipeDaoImpl.class);
+        bind(WorkspaceDao.class).to(LocalWorkspaceDaoImpl.class);
+        bind(PreferenceDao.class).to(LocalPreferenceDaoImpl.class);
+        bind(StackDao.class).to(LocalStackDaoImpl.class);
+        bind(SnapshotDao.class).to(LocalSnapshotDaoImpl.class);
+    }
+
+    @Singleton
+    private static class SnapshotTckRepository extends LocalTckRepository<SnapshotImpl> {
+        @Inject
+        public SnapshotTckRepository(LocalSnapshotDaoImpl snapshotDao) {
+            super(snapshotDao.snapshots, SnapshotImpl::getId);
+        }
+    }
+
+    @Singleton
+    private static class LocalUserTckRepository extends LocalTckRepository<UserImpl> {
+        @Inject
+        public LocalUserTckRepository(LocalUserDaoImpl userDao) {
+            super(userDao.users, UserImpl::getId);
+        }
+    }
+
+    @Singleton
+    private static class LocalProfileTckRepository extends LocalTckRepository<ProfileImpl> {
+        @Inject
+        public LocalProfileTckRepository(LocalProfileDaoImpl profileDao) {
+            super(profileDao.profiles, ProfileImpl::getUserId);
+        }
+    }
+
+    @Singleton
+    private static class LocalRecipeTckRepository extends LocalTckRepository<RecipeImpl> {
+        @Inject
+        public LocalRecipeTckRepository(LocalRecipeDaoImpl recipeDao) {
+            super(recipeDao.recipes, RecipeImpl::getId);
+        }
+    }
+
+    @Singleton
+    private static class LocalWorkspaceTckRepository extends LocalTckRepository<WorkspaceImpl> {
+        @Inject
+        public LocalWorkspaceTckRepository(LocalWorkspaceDaoImpl workspaceDao) {
+            super(workspaceDao.workspaces, WorkspaceImpl::getId);
+        }
+    }
+
+    @Singleton
+    private static class LocalStackTckRepository extends LocalTckRepository<StackImpl> {
+        @Inject
+        public LocalStackTckRepository(LocalStackDaoImpl stackDao) {
+            super(stackDao.stacks, StackImpl::getId);
+        }
     }
 }

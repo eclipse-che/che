@@ -131,7 +131,6 @@ public final class DtoConverter {
                                         .withCreationDate(snapshot.getCreationDate())
                                         .withDev(snapshot.isDev())
                                         .withId(snapshot.getId())
-                                        .withNamespace(snapshot.getNamespace())
                                         .withWorkspaceId(snapshot.getWorkspaceId())
                                         .withLinks(null);
     }

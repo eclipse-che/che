@@ -19,7 +19,10 @@ import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.commons.test.tck.TckModule;
+import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 
@@ -39,8 +42,10 @@ public class JpaTckModule extends TckModule {
         bind(JpaInitializer.class).asEagerSingleton();
 
         bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).to(RecipeJpaTckRepository.class);
+        bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).toInstance(new JpaTckRepository<>(SnapshotImpl.class));
 
         bind(RecipeDao.class).to(JpaRecipeDao.class);
+        bind(SnapshotDao.class).to(JpaSnapshotDao.class);
     }
 
     @Transactional

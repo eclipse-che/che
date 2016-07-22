@@ -179,7 +179,6 @@ public final class DtoConverter {
                                         .withCreationDate(snapshot.getCreationDate())
                                         .withDescription(snapshot.getDescription())
                                         .withDev(snapshot.isDev())
-                                        .withNamespace(snapshot.getNamespace())
                                         .withType(snapshot.getType())
                                         .withWorkspaceId(snapshot.getWorkspaceId())
                                         .withEnvName(snapshot.getEnvName())

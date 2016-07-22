@@ -32,7 +32,6 @@ import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.NewSnapshotDescriptor;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
-import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
@@ -146,7 +145,7 @@ public class MachineService extends Service {
 
         requiredNotNull(workspaceId, "Parameter workspace");
 
-        final List<SnapshotImpl> snapshots = machineManager.getSnapshots(EnvironmentContext.getCurrent().getSubject().getUserId(), workspaceId);
+        final List<SnapshotImpl> snapshots = machineManager.getSnapshots(workspaceId);
 
         return snapshots.stream()
                         .map(DtoConverter::asDto)
@@ -175,9 +174,6 @@ public class MachineService extends Service {
 
         requiredNotNull(newSnapshotDescriptor, "Snapshot description");
         return linksInjector.injectLinks(DtoConverter.asDto(machineManager.save(machineId,
-                                                                                EnvironmentContext.getCurrent()
-                                                                                                  .getSubject()
-                                                                                                  .getUserId(),
                                                                                 newSnapshotDescriptor.getDescription())),
                                          getServiceContext());
     }
