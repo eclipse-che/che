@@ -9,6 +9,10 @@
 #   Mario Loriedo - Initial implementation
 #
 
+launcher_dir="$(dirname "$0")"
+source "$launcher_dir/launcher_funcs.sh"
+source "$launcher_dir/launcher_cmds.sh"
+
 init_logging() {
   BLUE='\033[1;34m'
   GREEN='\033[0;32m'
@@ -36,6 +40,10 @@ init_global_variables() {
   DEFAULT_CHE_LOG_LEVEL="info"
   DEFAULT_CHE_DATA_FOLDER="/home/user/che"
 
+  # Clean eventual user provided paths
+  CHE_CONF_FOLDER=${CHE_CONF_FOLDER:+$(get_clean_path ${CHE_CONF_FOLDER})}
+  CHE_DATA_FOLDER=${CHE_DATA_FOLDER:+$(get_clean_path ${CHE_DATA_FOLDER})}
+
   CHE_HOSTNAME=${CHE_HOSTNAME:-${DEFAULT_CHE_HOSTNAME}}
   CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
@@ -48,16 +56,16 @@ init_global_variables() {
   # CHE_CONF_ARGS are the Docker run options that need to be used if users set CHE_CONF_FOLDER:
   #   - empty if CHE_CONF_FOLDER is not set
   #   - -v ${CHE_CONF_FOLDER}:/conf -e "CHE_LOCAL_CONF_DIR=/conf" if CHE_CONF_FOLDER is set
-  CHE_CONF_ARGS=${CHE_CONF_FOLDER:+-v ${CHE_CONF_FOLDER}:/conf -e CHE_LOCAL_CONF_DIR=/conf}
+  CHE_CONF_ARGS=${CHE_CONF_FOLDER:+-v "${CHE_CONF_FOLDER}":/conf -e "CHE_LOCAL_CONF_DIR=/conf"}
   CHE_LOCAL_BINARY_ARGS=${CHE_LOCAL_BINARY:+-v ${CHE_LOCAL_BINARY}:/home/user/che}
 
   if is_docker_for_mac || is_docker_for_windows; then
-    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v ${CHE_DATA_FOLDER}/storage:/home/user/che/storage \
-                                        -e \"CHE_WORKSPACE_STORAGE=${CHE_DATA_FOLDER}/workspaces\" \
-                                        -e \"CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false\"}
+    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v "${CHE_DATA_FOLDER}/storage":/home/user/che/storage \
+                                        -e "CHE_WORKSPACE_STORAGE=${CHE_DATA_FOLDER}/workspaces" \
+                                        -e "CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false"}
   else
-    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v ${CHE_DATA_FOLDER}/storage:/home/user/che/storage \
-                                        -v ${CHE_DATA_FOLDER}/workspaces:/home/user/che/workspaces}
+    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v "${CHE_DATA_FOLDER}/storage":/home/user/che/storage \
+                                        -v "${CHE_DATA_FOLDER}/workspaces":/home/user/che/workspaces}
   fi
 
   if [ "${CHE_LOG_LEVEL}" = "debug" ]; then
@@ -274,19 +282,10 @@ server_is_booted() {
   fi
 }
 
-wait_until_server_is_booted () {
-  SERVER_BOOT_TIMEOUT=${1}
-
-  ELAPSED=0
-  until server_is_booted || [ ${ELAPSED} -eq "${SERVER_BOOT_TIMEOUT}" ]; do
-    sleep 1
-    ELAPSED=$((ELAPSED+1))
-  done
-}
-
 parse_command_line () {
   if [ $# -eq 0 ]; then
     usage
+    container_self_destruction
     exit
   fi
 
@@ -297,6 +296,7 @@ parse_command_line () {
       ;;
       -h|--help)
         usage
+        container_self_destruction
         exit
       ;;
       *)
@@ -305,111 +305,6 @@ parse_command_line () {
       ;;
     esac
   done
-}
-
-start_che_server() {
-  if che_container_exist; then
-    error_exit "A container named \"${CHE_SERVER_CONTAINER_NAME}\" already exists. Please remove it manually (docker rm -f ${CHE_SERVER_CONTAINER_NAME}) and try again."
-  fi
-
-  CURRENT_IMAGE=$(docker images -q "${CHE_SERVER_IMAGE_NAME}":"${CHE_VERSION}")
-
-  if [ "${CURRENT_IMAGE}" != "" ]; then
-    info "ECLIPSE CHE: ALREADY HAVE IMAGE ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}"
-  else
-    update_che_server
-  fi
-
-  info "ECLIPSE CHE: CONTAINER STARTING"
-  docker run -d --name "${CHE_SERVER_CONTAINER_NAME}" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v /home/user/che/lib:/home/user/che/lib-copy \
-    ${CHE_LOCAL_BINARY_ARGS} \
-    -p "${CHE_PORT}":8080 \
-    --restart="${CHE_RESTART_POLICY}" \
-    --user="${CHE_USER}" \
-    ${CHE_CONF_ARGS} \
-    ${CHE_STORAGE_ARGS} \
-    "${CHE_SERVER_IMAGE_NAME}":"${CHE_VERSION}" \
-                --remote:"${CHE_HOST_IP}" \
-                -s:uid \
-                -s:client \
-                ${CHE_DEBUG_OPTION} \
-                run > /dev/null
-
-  wait_until_container_is_running 10
-  if ! che_container_is_running; then
-    error_exit "ECLIPSE CHE: Timeout waiting Che container to start."
-  fi
-
-  info "ECLIPSE CHE: SERVER LOGS AT \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
-  info "ECLIPSE CHE: SERVER BOOTING..."
-  wait_until_server_is_booted 20
-
-  if server_is_booted; then
-    info "ECLIPSE CHE: BOOTED AND REACHABLE"
-    info "ECLIPSE CHE: http://${CHE_HOSTNAME}:${CHE_PORT}"
-  else
-    error_exit "ECLIPSE CHE: Timeout waiting Che server to boot. Run \"docker logs ${CHE_SERVER_CONTAINER_NAME}\" to see the logs."
-  fi
-}
-
-execute_command_with_progress() {
-  progress=$1
-  command=$2
-  shift 2
-
-  pid=""
-  printf "\n"
-
-  case "$progress" in
-    extended)
-      $command "$@"
-      ;;
-    basic|*)
-      $command "$@" &>/dev/null &
-      pid=$!
-      while kill -0 "$pid" >/dev/null 2>&1; do
-        printf "#"
-        sleep 10
-      done
-      wait $pid # return pid's exit code
-      printf "\n"
-    ;;
-  esac
-  printf "\n"
-}
-
-stop_che_server() {
-  if ! che_container_is_running; then
-    info "-------------------------------------------------------"
-    info "ECLIPSE CHE: CONTAINER IS NOT RUNNING. NOTHING TO DO."
-    info "-------------------------------------------------------"
-  else
-    info "ECLIPSE CHE: STOPPING SERVER..."
-    docker exec ${CHE_SERVER_CONTAINER_NAME} /home/user/che/bin/che.sh -c stop > /dev/null 2>&1
-    sleep 5
-    info "ECLIPSE CHE: REMOVING CONTAINER"
-    docker rm -f ${CHE_SERVER_CONTAINER_NAME} > /dev/null 2>&1
-    info "ECLIPSE CHE: STOPPED"
-  fi
-}
-
-restart_che_server() {
-  if che_container_is_running; then
-    stop_che_server
-  fi
-  start_che_server
-}
-
-update_che_server() {
-  if [ -z "${CHE_VERSION}" ]; then
-    CHE_VERSION=${DEFAULT_CHE_VERSION}
-  fi
-
-  info "ECLIPSE CHE: PULLING IMAGE ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}"
-  execute_command_with_progress extended docker pull ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}
-  info "ECLIPSE CHE: IMAGE ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} INSTALLED"
 }
 
 # See: https://sipb.mit.edu/doc/safe-shell/
@@ -440,4 +335,4 @@ case ${CHE_SERVER_ACTION} in
 esac
 
 # This container will self destruct after execution
-docker rm -f "$(get_che_launcher_container_id)" > /dev/null 2>&1
+container_self_destruction
