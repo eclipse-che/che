@@ -28,7 +28,7 @@ public class LocalWorkspaceTckRepository implements TckRepository<WorkspaceImpl>
     @Override
     public void createAll(Collection<? extends WorkspaceImpl> entities) throws TckRepositoryException {
         for (WorkspaceImpl workspace : entities) {
-            workspaceDao.workspaces.put(workspace.getId(), workspace);
+            workspaceDao.workspaces.put(workspace.getId(), new WorkspaceImpl(workspace));
         }
     }
 

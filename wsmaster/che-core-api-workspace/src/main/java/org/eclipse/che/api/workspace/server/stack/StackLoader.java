@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -84,7 +85,7 @@ public class StackLoader {
         setIconData(stack, stackIconFolderPath);
         try {
             stackDao.update(stack);
-        } catch (NotFoundException | ServerException e) {
+        } catch (NotFoundException | ConflictException | ServerException e) {
             try {
                 stackDao.create(stack);
             } catch (Exception ex) {

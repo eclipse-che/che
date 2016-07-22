@@ -37,14 +37,11 @@ public class AclEntryImpl implements AclEntry {
     @GeneratedValue
     private String id;
 
-    @Column
+    @Column(name = "user_id")
     private String user;
 
     @ManyToOne
-    @JoinColumn(insertable = false,
-                updatable = false,
-                name = "user",
-                referencedColumnName = "id")
+    @JoinColumn(insertable = false, updatable = false, name = "user_id")
     private UserImpl userEntity;
 
     @ElementCollection

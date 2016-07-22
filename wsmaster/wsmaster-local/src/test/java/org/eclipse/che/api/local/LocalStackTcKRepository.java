@@ -10,32 +10,30 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
-import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 
 import javax.inject.Inject;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * @author Anton Korneta
+ * @author Yevhenii Voevodin
  */
-public class LocalPreferenceTckRepository implements TckRepository<Pair<String, Map<String, String>>> {
+public class LocalStackTcKRepository implements TckRepository<StackImpl> {
 
     @Inject
-    private LocalPreferenceDaoImpl preferenceDao;
+    private LocalStackDaoImpl stackDao;
 
     @Override
-    public void createAll(Collection<? extends Pair<String, Map<String, String>>> entities) throws TckRepositoryException {
-        for (Pair<String, Map<String, String>> entity : entities) {
-            preferenceDao.preferences.put(entity.first, new HashMap<>(entity.second));
+    public void createAll(Collection<? extends StackImpl> entities) throws TckRepositoryException {
+        for (StackImpl stack : entities) {
+            stackDao.stacks.put(stack.getId(), new StackImpl(stack));
         }
     }
 
     @Override
     public void removeAll() throws TckRepositoryException {
-        preferenceDao.preferences.clear();
+        stackDao.stacks.clear();
     }
 }

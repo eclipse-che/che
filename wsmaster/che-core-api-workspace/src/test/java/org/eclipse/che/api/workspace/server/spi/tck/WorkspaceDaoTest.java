@@ -52,7 +52,10 @@ import static org.testng.Assert.assertTrue;
  * @author Yevhenii Voevodin
  */
 @Guice(moduleFactory = TckModuleFactory.class)
+@Test(suiteName = WorkspaceDaoTest.SUITE_NAME)
 public class WorkspaceDaoTest {
+
+    public static final String SUITE_NAME = "WorkspaceDaoTck";
 
     private static final int COUNT_OF_WORKSPACES = 5;
 

@@ -15,6 +15,7 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
+import org.eclipse.che.api.local.storage.stack.StackLocalStorage;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
@@ -23,6 +24,8 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.tck.TckModule;
@@ -57,6 +60,11 @@ public class LocalTckModule extends TckModule {
         }
         bind(LocalStorageFactory.class).toInstance(factory);
 
+        // Configure stack local storage to deal with mocks
+        final StackLocalStorage stackStorage = mock(StackLocalStorage.class);
+        when(stackStorage.loadMap()).thenReturn(Collections.emptyMap());
+        bind(StackLocalStorage.class).toInstance(stackStorage);
+
         bind(new TypeLiteral<Set<UserImpl>>() {}).annotatedWith(Names.named("codenvy.local.infrastructure.users")).toInstance(emptySet());
 
         bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(LocalUserTckRepository.class).in(Singleton.class);
@@ -65,11 +73,13 @@ public class LocalTckModule extends TckModule {
         bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).to(LocalWorkspaceTckRepository.class).in(Singleton.class);
         bind(new TypeLiteral<TckRepository<Pair<String, Map<String, String>>>>() {}).to(LocalPreferenceTckRepository.class)
                                                                                     .in(Singleton.class);
+        bind(new TypeLiteral<TckRepository<StackImpl>>(){}).to(LocalStackTcKRepository.class).in(Singleton.class);
 
         bind(UserDao.class).to(LocalUserDaoImpl.class).in(Singleton.class);
         bind(ProfileDao.class).to(LocalProfileDaoImpl.class).in(Singleton.class);
         bind(RecipeDao.class).to(LocalRecipeDaoImpl.class).in(Singleton.class);
         bind(WorkspaceDao.class).to(LocalWorkspaceDaoImpl.class).in(Singleton.class);
         bind(PreferenceDao.class).to(LocalPreferenceDaoImpl.class).in(Singleton.class);
+        bind(StackDao.class).to(LocalStackDaoImpl.class).in(Singleton.class);
     }
 }
