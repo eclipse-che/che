@@ -30,7 +30,7 @@ public class WsMasterAnalyticsAddresser {
     void send() {
         HttpURLConnection connection = null;
         try {
-            final URL url = new URL("https://install.codenvycorp.com/che/telemetry/master");
+            final URL url = new URL("https://install.codenvycorp.com/che/init/server");
             connection = (HttpsURLConnection)url.openConnection();
             connection.getResponseCode();
         } catch (IOException e) {
