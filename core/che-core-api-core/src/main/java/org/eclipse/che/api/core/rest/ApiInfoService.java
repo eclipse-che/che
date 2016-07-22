@@ -20,7 +20,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.ObjectFactory;
 import org.everrest.core.ResourceBinder;
-import org.everrest.core.resource.AbstractResourceDescriptor;
+import org.everrest.core.resource.ResourceDescriptor;
 import org.everrest.services.RestServicesList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,11 +85,11 @@ public class ApiInfoService {
     public RestServicesList.RootResourcesList listJSON(@Context ServletContext context) {
         ResourceBinder binder = (ResourceBinder)context.getAttribute(ResourceBinder.class.getName());
         return new RestServicesList.RootResourcesList(FluentIterable.from(binder.getResources()).transform(
-                new Function<ObjectFactory<AbstractResourceDescriptor>, RestServicesList.RootResource>() {
+                new Function<ObjectFactory<ResourceDescriptor>, RestServicesList.RootResource>() {
                     @Nullable
                     @Override
-                    public RestServicesList.RootResource apply(ObjectFactory<AbstractResourceDescriptor> input) {
-                        AbstractResourceDescriptor descriptor = input.getObjectModel();
+                    public RestServicesList.RootResource apply(ObjectFactory<ResourceDescriptor> input) {
+                        ResourceDescriptor descriptor = input.getObjectModel();
                         return new RestServicesList.RootResource(descriptor.getObjectClass().getName(), //
                                                                  descriptor.getPathValue().getPath(), //
                                                                  descriptor.getUriPattern().getRegex());
