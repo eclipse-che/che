@@ -11,13 +11,22 @@
 package org.eclipse.che.api.machine.server.jpa;
 
 import com.google.inject.TypeLiteral;
+import com.google.inject.persist.Transactional;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
+import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
+import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.persistence.EntityManager;
+import java.util.Collection;
 
 /**
  * @author Anton Korneta
@@ -32,5 +41,32 @@ public class JpaTckModule extends TckModule {
         bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).to(RecipeJpaTckRepository.class);
 
         bind(RecipeDao.class).to(JpaRecipeDao.class);
+    }
+
+    @Transactional
+    public static class RecipeJpaTckRepository implements TckRepository<RecipeImpl> {
+
+        @Inject
+        private Provider<EntityManager> managerProvider;
+
+        @Override
+        public void createAll(Collection<? extends RecipeImpl> entities) throws TckRepositoryException {
+            final EntityManager manager = managerProvider.get();
+            for (RecipeImpl recipe : entities) {
+                for (AclEntryImpl acl : recipe.getAcl()) {
+                    manager.persist(new UserImpl(acl.getUser(), "email_" + acl.getUser(), "name_" + acl.getUser()));
+                }
+            }
+            entities.stream().forEach(manager::persist);
+        }
+
+        @Override
+        public void removeAll() throws TckRepositoryException {
+            final EntityManager manager = managerProvider.get();
+            manager.createQuery("SELECT recipe FROM Recipe recipe", RecipeImpl.class)
+                   .getResultList()
+                   .forEach(manager::remove);
+            manager.createQuery("DELETE FROM \"User\"").executeUpdate();
+        }
     }
 }

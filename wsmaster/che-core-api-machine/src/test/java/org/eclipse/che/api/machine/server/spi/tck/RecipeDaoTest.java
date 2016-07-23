@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.spi.tck;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
@@ -25,6 +28,7 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -151,17 +155,27 @@ public class RecipeDaoTest {
 
     @Test
     public void shouldFindRecipeByUser() throws Exception {
-        final List<RecipeImpl> result = recipeDao.search(recipes.get(0).getAcl().get(0).getUser(), null, null, 0, recipes.size());
+        final List<RecipeImpl> result = recipeDao.search(recipes.get(0).getAcl().get(0).getUser(),
+                                                         null,
+                                                         null,
+                                                         0,
+                                                         recipes.size());
 
         assertTrue(result.contains(recipes.get(0)));
     }
 
     @Test(dependsOnMethods = "shouldFindRecipeByUser")
     public void shouldFindingRecipesByTags() throws Exception {
-        final RecipeImpl recipe = recipes.get(0);
-        final List<RecipeImpl> result = recipeDao.search(recipe.getAcl().get(0).getUser(), recipe.getTags(), null, 0, recipes.size());
+        final List<String> tags = ImmutableList.of("search-by1", "search-by2");
+        recipes.get(0).getTags().addAll(tags);
+        recipes.get(1).getTags().add(tags.get(0));
+        recipes.get(2).getTags().add(tags.get(1));
+        recipes.get(4).getTags().clear();
+        updateAll();
 
-        assertTrue(result.contains(recipe));
+        final List<RecipeImpl> result = recipeDao.search(null, tags, null, 0, recipes.size());
+
+        assertEquals(new HashSet<>(result), ImmutableSet.of(recipes.get(0)));
     }
 
     @Test(dependsOnMethods = "shouldFindRecipeByUser")
@@ -195,5 +209,11 @@ public class RecipeDaoTest {
                               "recipe description",
                               new ArrayList<>(singletonList(new AclEntryImpl("userId_" + index, asList("read", "search", "update")))),
                               new ArrayList<>(asList("read", "update")));
+    }
+
+    private void updateAll() throws Exception {
+        for (RecipeImpl recipe : recipes) {
+            recipeDao.update(recipe);
+        }
     }
 }

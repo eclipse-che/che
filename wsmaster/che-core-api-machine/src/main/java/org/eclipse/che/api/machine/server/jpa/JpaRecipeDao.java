@@ -25,7 +25,12 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.Collections;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -77,6 +82,7 @@ public class JpaRecipeDao implements RecipeDao {
     }
 
     @Override
+    @Transactional
     public RecipeImpl getById(String id) throws NotFoundException, ServerException {
         requireNonNull(id);
 
@@ -93,23 +99,36 @@ public class JpaRecipeDao implements RecipeDao {
     }
 
     @Override
+    @Transactional
     public List<RecipeImpl> search(String user,
                                    List<String> tags,
                                    String type,
                                    int skipCount,
                                    int maxItems) throws ServerException {
-
         try {
             final EntityManager manager = managerProvider.get();
-            tags = tags == null ? Collections.emptyList() : tags;
-            final TypedQuery<RecipeImpl> query = manager.createNamedQuery("Recipe.search", RecipeImpl.class)
-                                                        .setParameter("user", user)
-                                                        .setParameter("tags", tags)
-                                                        .setParameter("recipeType", type)
-                                                        .setParameter("requiredCount", tags.size());
-            return query.setFirstResult(skipCount)
-                        .setMaxResults(maxItems)
-                        .getResultList();
+            final CriteriaBuilder cb = manager.getCriteriaBuilder();
+            final CriteriaQuery<RecipeImpl> query = cb.createQuery(RecipeImpl.class);
+            final Root<RecipeImpl> fromRecipe = query.from(RecipeImpl.class);
+            final ParameterExpression<String> typeParam = cb.parameter(String.class, "recipeType");
+            final Predicate checkType = cb.or(cb.isNull(typeParam),
+                                              cb.equal(fromRecipe.get("type"), typeParam));
+            final TypedQuery<RecipeImpl> typedQuery;
+            if (tags != null && !tags.isEmpty()) {
+                final Join<RecipeImpl, String> tag = fromRecipe.join("tags");
+                query.select(cb.construct(RecipeImpl.class, tag.getParent()))
+                     .where(cb.and(checkType, tag.in(tags)))
+                     .groupBy(fromRecipe.get("id"))
+                     .having(cb.equal(cb.count(tag), tags.size()));
+                typedQuery = manager.createQuery(query)
+                                    .setParameter("tags", tags);
+            } else {
+                typedQuery = manager.createQuery(query.where(checkType));
+            }
+            return typedQuery.setParameter("recipeType", type)
+                             .setFirstResult(skipCount)
+                             .setMaxResults(maxItems)
+                             .getResultList();
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }

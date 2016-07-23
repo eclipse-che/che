@@ -15,13 +15,12 @@ import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 
 import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,21 +35,6 @@ import static javax.persistence.CascadeType.ALL;
  * @author Anton Korneta
  */
 @Entity(name = "Recipe")
-@NamedQueries(
-        {
-                @NamedQuery(
-                        name = "Recipe.search",
-                        query = "SELECT DISTINCT rec FROM Recipe rec " +
-                                "WHERE (EXISTS (SELECT publicAction FROM rec.publicActions publicAction WHERE publicAction = 'search') " +
-                                "           OR (EXISTS (SELECT userAction FROM rec.acl acl, acl.actions userAction " +
-                                "                       WHERE userAction = 'search' AND acl.user =:user))) " +
-                                "  AND (:recipeType IS NULL OR rec.type = :recipeType) " +
-                                "  AND (:requiredCount = 0 OR :requiredCount = (SELECT COUNT(tag) " +
-                                "                                               FROM Recipe recipe JOIN recipe.tags tag " +
-                                "                                               WHERE tag IN :tags AND rec.id = recipe.id))"
-                )
-        }
-)
 public class RecipeImpl implements ManagedRecipe {
 
     @Id
@@ -75,6 +59,8 @@ public class RecipeImpl implements ManagedRecipe {
     private List<AclEntryImpl> acl;
 
     @ElementCollection
+    @Column(name = "tag")
+    @CollectionTable(indexes = @Index(columnList = "tag"))
     private List<String> tags;
 
     @ElementCollection
