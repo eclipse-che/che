@@ -96,7 +96,7 @@ export class NavbarDropdownMenu {
       // iterate elements under cursor
       let limit = 50,
         nextTargetEl;
-      while (elementMouseIsOver.tagName !== 'MD-MENU' && limit > 0){
+      while (elementMouseIsOver && elementMouseIsOver.tagName !== 'BODY' && elementMouseIsOver.tagName !== 'MD-MENU' && limit > 0){
         elementMouseIsOver = self.$document[0].elementFromPoint(x, y);
 
         // break when top of tree is reached
@@ -120,7 +120,7 @@ export class NavbarDropdownMenu {
       // click on menu's backdrop to hide menu
       backdropEl.triggerHandler('click');
 
-      if (elementMouseIsOver.tagName === 'MD-MENU') {
+      if (elementMouseIsOver && elementMouseIsOver.tagName === 'MD-MENU') {
         // if menu is found then
         // check if click is caught over the same menu
         if(elementMouseIsOver === this.$rootScope.navbarDropdownActiveMenu) {
