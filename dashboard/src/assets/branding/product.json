@@ -4,7 +4,7 @@
   "logoFile": "che-logo.svg",
   "logoTextFile": "che-logo-text.svg",
   "favicon": "favicon.ico",
-  "ideResources": "/ide/_app/",
+  "ideResources": "/_app/",
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",
   "supportEmail": "wish@codenvy.com",
