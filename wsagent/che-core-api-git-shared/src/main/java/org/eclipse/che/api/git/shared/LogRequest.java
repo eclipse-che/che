@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.git.shared;
 
-import java.util.List;
-
 import org.eclipse.che.dto.shared.DTO;
+import java.util.List;
 
 /**
  * Request to get commit logs.
@@ -21,21 +20,96 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @DTO
 public interface LogRequest extends GitRequest {
-    /** Filter revisions list by range of files. */
-    List<String> getFileFilter();
 
-    void setFileFilter(List<String> fileFilter);
-
-    LogRequest withFileFilter(List<String> fileFilter);
-    
     /** @return revision range since */
     String getRevisionRangeSince();
-    /** @return revision range since */
-    String getRevisionRangeUntil();
-    
+
+    /** @set revision range since */
     void setRevisionRangeSince(String revisionRangeSince);
-    void setRevisionRangeUntil(String revisionRangeUntil);	
-    // private List<String> fileFilter;
-    // private boolean noRenames = true;
-    // private int renameLimit;
+
+    /**
+     * Create a LogRequest object based on a given revision range since.
+     *
+     * @param revisionRangeSince
+     *         revision range since
+     * @return a LogRequest object
+     */
+    LogRequest withRevisionRangeSince(String revisionRangeSince);
+
+    /** @return revision range until */
+    String getRevisionRangeUntil();
+
+    /** @set revision range until */
+    void setRevisionRangeUntil(String revisionRangeUntil);
+
+    /**
+     * Create a LogRequest object based on a given revision range until.
+     *
+     * @param revisionRangeUntil
+     *         revision range until
+     * @return a LogRequest object
+     */
+    LogRequest withRevisionRangeUntil(String revisionRangeUntil);
+
+    /** @return the integer value of the number of commits that will be skipped when calling log API */
+    int getSkip();
+
+    /**  set the integer value of the number of commits that will be skipped when calling log API */
+    void setSkip(int skip);
+
+    /**
+     * Create a LogRequest object based on a given integer value of the number of commits that
+     * will be skipped when calling log API
+     *
+     * @param skip
+     *         integer value of the number of commits that will be skipped when calling log API
+     * @return a LogRequest object
+     */
+    LogRequest withSkip(int skip);
+
+    /** @return the integer value of the number of commits that will be returned when calling log API */
+    int getMaxCount();
+
+    /**  set the integer value of the number of commits that will be returned when calling log API */
+    void setMaxCount(int maxCount);
+
+    /**
+     * Create a LogRequest object based on a given integer value of the number of commits that
+     * will be returned when calling log API
+     *
+     * @param maxCount
+     *         integer value of the number of commits that will be returned when calling log API
+     * @return a LogRequest object
+     */
+    LogRequest withMaxCount(int maxCount);
+
+    /** @return the file/folder path used when calling the log API */
+    String getFilePath();
+
+    /** set the file/folder path used when calling the log API */
+    void setFilePath(String filePath);
+
+    /**
+     * Create a LogRequest object based on a given file/folder path used when calling the log API
+     *
+     * @param filePath
+     *         file/folder path used when calling the log API
+     * @return a LogRequest object
+     */
+    LogRequest withFilePath(String filePath);
+
+    /** @return Filter revisions list by range of files. */
+    List<String> getFileFilter();
+
+    /** @set range of files */
+    void setFileFilter(List<String> fileFilter);
+
+    /**
+     * Create a LogRequest object based on a given range of files
+     *
+     * @param fileFilter
+     *         range of files
+     * @return a LogRequest object
+     */
+    LogRequest withFileFilter(List<String> fileFilter);
 }
