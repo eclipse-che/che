@@ -251,6 +251,7 @@ class JGitConnection implements GitConnection {
         this.credentialsLoader = credentialsLoader;
         this.sshKeyProvider = sshKeyProvider;
         this.userResolver = userResolver;
+        UserAgent.set(USER_AGENT);
     }
 
     @Override
@@ -1608,7 +1609,6 @@ class JGitConnection implements GitConnection {
             }
 
             ProxyAuthenticator.initAuthenticator(remoteUrl);
-            UserAgent.set(USER_AGENT);
             return command.call();
         } catch (GitException | TransportException exception) {
             if ("Unable get private ssh key".equals(exception.getMessage())) {
