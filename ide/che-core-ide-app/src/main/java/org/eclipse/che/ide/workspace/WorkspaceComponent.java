@@ -257,8 +257,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
             @Override
             public void apply(List<SnapshotDto> snapshots) throws OperationException {
                 if (snapshots.isEmpty()) {
-                    handleWsStart(workspaceServiceClient.startById(workspace.getId(),
-                            workspace.getConfig().getDefaultEnv()));
+                    handleWsStart(workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), false));
                 } else {
                     showRecoverWorkspaceConfirmDialog(workspace);
                 }
@@ -275,32 +274,30 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
 
     /**
      * Shows workspace recovering confirm dialog.
-     *
-     * <p> When "Ok" button is pressed - {@link WorkspaceServiceClient#recoverWorkspace(String, String, String) recovers workspace}
-     * <br>When "Cancel" button is pressed - {@link WorkspaceServiceClient#startById(String, String) starts workspace}
      */
     private void showRecoverWorkspaceConfirmDialog(final WorkspaceDto workspace) {
         dialogFactory.createConfirmDialog("Workspace recovering",
-                "Do you want to recover the workspace from snapshot?",
-                "Yes",
-                "No",
-                new ConfirmCallback() {
-                    @Override
-                    public void accepted() {
-                        handleWsStart(workspaceServiceClient.recoverWorkspace(workspace.getId(),
-                                workspace.getConfig()
-                                        .getDefaultEnv(),
-                                null));
-                    }
-                },
-                new CancelCallback() {
-                    @Override
-                    public void cancelled() {
-                        handleWsStart(workspaceServiceClient.startById(workspace.getId(),
-                                workspace.getConfig()
-                                        .getDefaultEnv()));
-                    }
-                })
+                                          "Do you want to recover the workspace from snapshot?",
+                                          "Yes",
+                                          "No",
+                                          new ConfirmCallback() {
+                                              @Override
+                                              public void accepted() {
+                                                  handleWsStart(workspaceServiceClient.startById(workspace.getId(),
+                                                                                                        workspace.getConfig()
+                                                                                                                 .getDefaultEnv(),
+                                                                                                        true));
+                                              }
+                                          },
+                                          new CancelCallback() {
+                                              @Override
+                                              public void cancelled() {
+                                                  handleWsStart(workspaceServiceClient.startById(workspace.getId(),
+                                                                                                 workspace.getConfig()
+                                                                                                          .getDefaultEnv(),
+                                                                                                 false));
+                                              }
+                                          })
                      .show();
 
         notifyShowIDE();
