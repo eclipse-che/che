@@ -30,15 +30,15 @@ public class WsAgentAnalyticsAddresser {
     void send() {
         HttpURLConnection connection = null;
         try {
-            final URL url = new URL("https://install.codenvycorp.com/che/telemetry/workspace");
+            final URL url = new URL("https://install.codenvycorp.com/che/init/workspace");
             connection = (HttpsURLConnection)url.openConnection();
             connection.getResponseCode();
         } catch (IOException e) {
             LOG.error("Failed to send agent analytics", e);
         } finally {
-          if (connection != null) {
-              connection.disconnect();
-          }
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 }

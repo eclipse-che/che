@@ -8,12 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.local.filters;
+package org.eclipse.che.filters;
 
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 
+import javax.inject.Singleton;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -27,12 +28,12 @@ import java.io.IOException;
 import java.security.Principal;
 
 /**
- * The  class contains commons business logic for all environment workspace id initialization filters. The filters are necessary to set
- * workspace meta information to environment context.
+ * Fills environment context with information about current subject.
  *
  * @author Dmitry Shnurenko
  */
-public abstract class AbstractEnvironmentInitializationFilter implements Filter {
+@Singleton
+public class EnvironmentInitializationFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -50,22 +51,11 @@ public abstract class AbstractEnvironmentInitializationFilter implements Filter 
 
         try {
             environmentContext.setSubject(subject);
-            environmentContext.setWorkspaceId(getWorkspaceId(request));
-
             filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
         } finally {
             EnvironmentContext.reset();
         }
     }
-
-    /**
-     * Extracts workspace id from request.
-     *
-     * @param request
-     *         request which contains workspace id
-     * @return workspace id
-     */
-    protected abstract String getWorkspaceId(ServletRequest request);
 
     private HttpServletRequest addUserInRequest(final HttpServletRequest httpRequest, final Subject subject) {
         return new HttpServletRequestWrapper(httpRequest) {
@@ -76,12 +66,7 @@ public abstract class AbstractEnvironmentInitializationFilter implements Filter 
 
             @Override
             public Principal getUserPrincipal() {
-                return new Principal() {
-                    @Override
-                    public String getName() {
-                        return subject.getUserName();
-                    }
-                };
+                return () -> subject.getUserName();
             }
         };
     }
