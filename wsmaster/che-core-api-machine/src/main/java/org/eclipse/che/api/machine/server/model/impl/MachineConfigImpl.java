@@ -200,7 +200,7 @@ public class MachineConfigImpl implements MachineConfig {
     @Override
     public String toString() {
         return "MachineConfigImpl{" +
-               "isDev=" + dev +
+               "dev=" + dev +
                ", name='" + name + '\'' +
                ", type='" + type + '\'' +
                ", source=" + source +
@@ -217,7 +217,7 @@ public class MachineConfigImpl implements MachineConfig {
      */
     public static class MachineConfigImplBuilder {
 
-        private boolean                    isDev;
+        private boolean                    dev;
         private String                     name;
         private String                     type;
         private MachineSource              source;
@@ -226,7 +226,7 @@ public class MachineConfigImpl implements MachineConfig {
         private Map<String, String>        envVariables;
 
         public MachineConfigImpl build() {
-            return new MachineConfigImpl(isDev,
+            return new MachineConfigImpl(dev,
                                          name,
                                          type,
                                          source,
@@ -236,7 +236,7 @@ public class MachineConfigImpl implements MachineConfig {
         }
 
         public MachineConfigImplBuilder fromConfig(MachineConfig machineConfig) {
-            isDev = machineConfig.isDev();
+            dev = machineConfig.isDev();
             name = machineConfig.getName();
             type = machineConfig.getType();
             source = machineConfig.getSource();
@@ -246,8 +246,8 @@ public class MachineConfigImpl implements MachineConfig {
             return this;
         }
 
-        public MachineConfigImplBuilder setDev(boolean isDev) {
-            this.isDev = isDev;
+        public MachineConfigImplBuilder setDev(boolean dev) {
+            this.dev = dev;
             return this;
         }
 

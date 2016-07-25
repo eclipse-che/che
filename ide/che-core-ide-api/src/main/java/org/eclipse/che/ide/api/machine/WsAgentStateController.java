@@ -41,6 +41,7 @@ import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STARTED;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STOPPED;
 import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.WS_AGENT_BOOTING;
@@ -66,8 +67,8 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     private MessageBus                messageBus;
     private WsAgentState              state;
-    private AsyncCallback<MessageBus> messageBusCallback;
-    private AsyncCallback<DevMachine> devMachineCallback;
+    private List<AsyncCallback<MessageBus>> messageBusCallbacks = newArrayList();
+    private List<AsyncCallback<DevMachine>> devMachineCallbacks = newArrayList();
 
     @Inject
     public WsAgentStateController(EventBus eventBus,
@@ -111,7 +112,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     @Override
     public void onOpen() {
         messageBus.removeOnOpenHandler(this);
-        MessageBus.ReadyState readyState = messageBus.getReadyState();
         //need to make sure ready state equals 1 (OPEN) in same situations after opening it still equals 0 (CONNECTING)
         new Timer() {
             @Override
@@ -129,12 +129,16 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         initialLoadingInfo.setOperationStatus(WS_AGENT_BOOTING.getValue(), SUCCESS);
         loader.hide();
 
-        if (messageBusCallback != null) {
-            messageBusCallback.onSuccess(messageBus);
+        for (AsyncCallback<MessageBus> callback : messageBusCallbacks) {
+        	callback.onSuccess(messageBus);
+		}
+        messageBusCallbacks = null;
+        
+        for (AsyncCallback<DevMachine> callback : devMachineCallbacks) {
+        	callback.onSuccess(devMachine);
         }
-        if (devMachineCallback != null) {
-            devMachineCallback.onSuccess(devMachine);
-        }
+        devMachineCallbacks = null;
+        
         eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
     }
 
@@ -149,7 +153,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
                 if (messageBus != null) {
                     callback.onSuccess(messageBus);
                 } else {
-                    WsAgentStateController.this.messageBusCallback = callback;
+                    WsAgentStateController.this.messageBusCallbacks.add(callback);
                 }
             }
         });
@@ -163,7 +167,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
                 if (messageBus != null) {
                     callback.onSuccess(devMachine);
                 } else {
-                    WsAgentStateController.this.devMachineCallback = callback;
+                    WsAgentStateController.this.devMachineCallbacks.add(callback);
                 }
             }
         });

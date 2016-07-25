@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import org.eclipse.che.WorkspaceIdProvider;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -42,13 +41,10 @@ import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.vfs.VirtualFile;
-import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.search.Searcher;
-import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -57,16 +53,17 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
-import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
+import org.everrest.core.ApplicationContext;
 import org.everrest.core.ResourceBinder;
-import org.everrest.core.impl.ApplicationContextImpl;
-import org.everrest.core.impl.ApplicationProviderBinder;
 import org.everrest.core.impl.ContainerResponse;
 import org.everrest.core.impl.EverrestConfiguration;
 import org.everrest.core.impl.EverrestProcessor;
 import org.everrest.core.impl.ProviderBinder;
+import org.everrest.core.impl.RequestDispatcher;
+import org.everrest.core.impl.RequestHandlerImpl;
 import org.everrest.core.impl.ResourceBinderImpl;
 import org.everrest.core.tools.ByteArrayContainerResponseWriter;
 import org.everrest.core.tools.DependencySupplierImpl;
@@ -114,6 +111,7 @@ import static javax.ws.rs.HttpMethod.PUT;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.eclipse.che.commons.lang.ws.rs.ExtMediaType.APPLICATION_ZIP;
+import static org.everrest.core.ApplicationContext.anApplicationContext;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -249,16 +247,19 @@ public class ProjectServiceTest {
         DependencySupplierImpl dependencies = new DependencySupplierImpl();
 
 
-        dependencies.addComponent(ProjectTypeRegistry.class, ptRegistry);
-        dependencies.addComponent(UserDao.class, userDao);
-        dependencies.addComponent(ProjectManager.class, pm);
-        dependencies.addComponent(ProjectImporterRegistry.class, importerRegistry);
-        dependencies.addComponent(ProjectHandlerRegistry.class, phRegistry);
-        dependencies.addComponent(EventService.class, eventService);
+        dependencies.addInstance(ProjectTypeRegistry.class, ptRegistry);
+        dependencies.addInstance(UserDao.class, userDao);
+        dependencies.addInstance(ProjectManager.class, pm);
+        dependencies.addInstance(ProjectImporterRegistry.class, importerRegistry);
+        dependencies.addInstance(ProjectHandlerRegistry.class, phRegistry);
+        dependencies.addInstance(EventService.class, eventService);
 
         ResourceBinder resources = new ResourceBinderImpl();
-        ProviderBinder providers = new ApplicationProviderBinder();
-        EverrestProcessor processor = new EverrestProcessor(resources, providers, dependencies, new EverrestConfiguration(), null);
+        ProviderBinder providers = ProviderBinder.getInstance();
+        EverrestProcessor processor = new EverrestProcessor(new EverrestConfiguration(),
+                                                            dependencies,
+                                                            new RequestHandlerImpl(new RequestDispatcher(resources), providers),
+                                                            null);
         launcher = new ResourceLauncher(processor);
 
         processor.addApplication(new Application() {
@@ -273,7 +274,7 @@ public class ProjectServiceTest {
             }
         });
 
-        ApplicationContextImpl.setCurrent(new ApplicationContextImpl(null, null, ProviderBinder.getInstance()));
+        ApplicationContext.setCurrent(anApplicationContext().withProviders(providers).build());
 
         env = org.eclipse.che.commons.env.EnvironmentContext.getCurrent();
     }
