@@ -17,6 +17,7 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Anton Korneta
  */
+@Singleton
 public class JpaPreferenceDao implements PreferenceDao {
 
     @Inject
