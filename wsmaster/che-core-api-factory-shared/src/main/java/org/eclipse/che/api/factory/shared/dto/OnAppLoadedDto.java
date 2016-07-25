@@ -11,6 +11,7 @@
 package org.eclipse.che.api.factory.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.factory.OnAppLoaded;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
@@ -23,14 +24,16 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
  * @author Sergii Kabashniuk
  */
 @DTO
-public interface OnAppLoaded {
+public interface OnAppLoadedDto extends OnAppLoaded {
+
     /**
      * @return actions for current event.
      */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
-    List<Action> getActions();
+    List<IdeActionDto> getActions();
 
-    void setActions(List<Action> actions);
+    void setActions(List<IdeActionDto> actions);
 
-    OnAppLoaded withActions(List<Action> actions);
+    OnAppLoadedDto withActions(List<IdeActionDto> actions);
 }

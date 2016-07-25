@@ -11,6 +11,7 @@
 package org.eclipse.che.api.factory.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.dto.shared.DTO;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
@@ -19,32 +20,23 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
  * @author Alexander Garagatyi
  */
 @DTO
-public interface ButtonAttributes {
+public interface ButtonDto extends Button {
+
+    /** Type of the button */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
-    String getColor();
+    Type getType();
 
-    void setColor(String color);
+    void setType(Type type);
 
-    ButtonAttributes withColor(String color);
+    ButtonDto withType(Type type);
 
+    /** Button attributes */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
-    Boolean getCounter();
+    ButtonAttributesDto getAttributes();
 
-    void setCounter(Boolean counter);
+    void setAttributes(ButtonAttributesDto attributes);
 
-    ButtonAttributes withCounter(Boolean counter);
-
-    @FactoryParameter(obligation = OPTIONAL)
-    String getLogo();
-
-    void setLogo(String logo);
-
-    ButtonAttributes withLogo(String logo);
-
-    @FactoryParameter(obligation = OPTIONAL)
-    String getStyle();
-
-    void setStyle(String style);
-
-    ButtonAttributes withStyle(String style);
+    ButtonDto withAttributes(ButtonAttributesDto attributes);
 }

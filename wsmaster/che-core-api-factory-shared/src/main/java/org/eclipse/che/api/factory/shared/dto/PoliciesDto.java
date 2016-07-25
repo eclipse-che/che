@@ -11,9 +11,11 @@
 package org.eclipse.che.api.factory.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.factory.Policies;
 import org.eclipse.che.dto.shared.DTO;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
+
 /**
  * Describe restrictions of the factory
  *
@@ -21,55 +23,60 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
  * @author Alexander Garagatyi
  */
 @DTO
-public interface Policies {
+public interface PoliciesDto extends Policies {
     /**
      * Restrict access if referer header doesn't match this field
      */
     // Do not change referer to referrer
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
     String getReferer();
 
     void setReferer(String referer);
 
-    Policies withReferer(String referer);
+    PoliciesDto withReferer(String referer);
 
     /**
      * Restrict access for factories used earlier then author supposes
      */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
     Long getSince();
 
     void setSince(Long since);
 
-    Policies withSince(Long since);
+    PoliciesDto withSince(Long since);
 
     /**
      * Restrict access for factories used later then author supposes
      */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
     Long getUntil();
 
     void setUntil(Long until);
 
-    Policies withUntil(Long until);
+    PoliciesDto withUntil(Long until);
 
     /**
      * Re-open project on factory 2-nd click
      */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
     String getMatch();
 
     void setMatch(String match);
 
-    Policies withMatch(String match);
+    PoliciesDto withMatch(String match);
 
     /**
      * Workspace creation strategy
      */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
     String getCreate();
 
     void setCreate(String create);
 
-    Policies withCreate(String create);
+    PoliciesDto withCreate(String create);
 }
