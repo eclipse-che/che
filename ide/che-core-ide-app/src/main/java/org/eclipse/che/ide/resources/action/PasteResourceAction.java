@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
+import org.eclipse.che.ide.api.selection.Selection;
 
 import javax.validation.constraints.NotNull;
 
@@ -74,7 +75,8 @@ public class PasteResourceAction extends AbstractPerspectiveAction {
     public void updateInPerspective(@NotNull ActionEvent event) {
         event.getPresentation().setVisible(true);
         event.getPresentation().setEnabled(clipboardManager.getPasteProvider().isPastePossible(appContext)
-                                           && !(partPresenter instanceof TextEditor));
+                                           && !(partPresenter instanceof TextEditor)
+                                           && !(partPresenter.getSelection() instanceof Selection.NoSelectionProvided));
     }
 
     /** {@inheritDoc} */
