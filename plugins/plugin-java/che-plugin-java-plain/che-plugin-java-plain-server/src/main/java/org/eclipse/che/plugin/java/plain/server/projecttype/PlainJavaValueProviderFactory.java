@@ -27,7 +27,6 @@ import org.eclipse.jdt.internal.core.JavaModel;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -90,7 +89,9 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
             IJavaProject project = model.getJavaProject(projectPath);
 
             try {
-                return Collections.singletonList(project.getOutputLocation().toOSString());
+                String outputDirPath = project.getOutputLocation().toOSString();
+                return outputDirPath.startsWith(projectPath) ? singletonList(outputDirPath.substring(projectPath.length() + 1))
+                                                             : singletonList(outputDirPath);
             } catch (JavaModelException e) {
                 throw new ValueStorageException("Can't get output location: " + e.getMessage());
             }
@@ -111,7 +112,7 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
                     String entryPath = entry.getPath().toOSString();
                     if (CPE_SOURCE == entry.getEntryKind() && !entryPath.equals(projectPath)) {
                         if (entryPath.startsWith(projectPath)) {
-                            sourceFolders.add(entryPath.substring(projectPath.length()));
+                            sourceFolders.add(entryPath.substring(projectPath.length() + 1));
                         } else {
                             sourceFolders.add(entryPath);
                         }
