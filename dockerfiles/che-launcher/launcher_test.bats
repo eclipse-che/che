@@ -38,3 +38,21 @@ source ./launcher_funcs.sh
   result="$(get_clean_path \"/some\"/path\")"
   [ "$result" = "/some/path" ]
 }
+
+@test "wait for che container that never stops" {
+  export CHE_SERVER_CONTAINER_NAME="wait-for-che-test1"
+  docker run -d --name ${CHE_SERVER_CONTAINER_NAME} alpine:3.4 ping localhost
+  wait_until_container_is_stopped 2
+  run che_container_is_stopped
+  docker rm -f ${CHE_SERVER_CONTAINER_NAME}
+  [ "$status" -eq 1 ]
+}
+
+@test "wait for che container that stops" {
+  export CHE_SERVER_CONTAINER_NAME="wait-for-che-test2"
+  docker run -d --name ${CHE_SERVER_CONTAINER_NAME} alpine:3.4 ping -c 2 localhost
+  wait_until_container_is_stopped 3
+  run che_container_is_stopped
+  docker rm -f ${CHE_SERVER_CONTAINER_NAME}
+  [ "$status" -eq 0 ]
+}
