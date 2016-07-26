@@ -1499,4 +1499,16 @@ public class DarkTheme implements Theme {
     public String editorPreferenceCategoryBackgroundColor() {
         return "rgba(215, 215, 215, 0.10)";
     }
+
+    /********************************************************************************************
+     *
+     * Resource monitors
+     *
+     ********************************************************************************************/
+
+    @Override
+    public String resourceMonitorBarBackground() {
+        return "rgb(76, 76, 76)";
+    }
+
 }

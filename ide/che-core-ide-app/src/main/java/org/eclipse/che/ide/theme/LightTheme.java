@@ -1476,4 +1476,16 @@ public class LightTheme implements Theme {
     public String editorPreferenceCategoryBackgroundColor() {
         return "rgba(27, 27, 27, 0.10)";
     }
+
+    /********************************************************************************************
+     *
+     * Resource monitors
+     *
+     ********************************************************************************************/
+
+    @Override
+    public String resourceMonitorBarBackground() {
+        return "#e0e0e0";
+    }
+
 }

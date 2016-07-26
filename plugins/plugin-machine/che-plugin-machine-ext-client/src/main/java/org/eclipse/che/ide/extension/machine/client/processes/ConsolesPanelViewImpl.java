@@ -275,7 +275,7 @@ public class ConsolesPanelViewImpl extends Composite implements ConsolesPanelVie
 
         processTree.asWidget().setVisible(true);
         processTree.getModel().setRoot(root);
-        processTree.renderTree(-1);
+        processTree.renderTree();
 
         for (ProcessTreeNode processTreeNode : processTreeNodes.values()) {
             if (!processTreeNode.getId().equals(activeProcessId) && processTreeNode.hasUnreadContent()) {
