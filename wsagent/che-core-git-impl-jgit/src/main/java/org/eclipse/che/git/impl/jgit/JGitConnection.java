@@ -135,7 +135,6 @@ import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.TrackingRefUpdate;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
-import org.eclipse.jgit.transport.UserAgent;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
@@ -231,8 +230,6 @@ class JGitConnection implements GitConnection {
     private static final String MESSAGE_COMMIT_NOT_POSSIBLE       = "Commit is not possible because repository state is '%s'";
     private static final String MESSAGE_COMMIT_AMEND_NOT_POSSIBLE = "Amend is not possible because repository state is '%s'";
 
-    private static final String USER_AGENT = "git/2.1.0";
-
     private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
 
     private Git                 git;
@@ -251,7 +248,6 @@ class JGitConnection implements GitConnection {
         this.credentialsLoader = credentialsLoader;
         this.sshKeyProvider = sshKeyProvider;
         this.userResolver = userResolver;
-        UserAgent.set(USER_AGENT);
     }
 
     @Override

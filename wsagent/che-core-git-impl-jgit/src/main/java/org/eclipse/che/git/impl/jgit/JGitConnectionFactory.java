@@ -20,6 +20,7 @@ import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.UserAgent;
 
 import javax.inject.Inject;
 import javax.net.ssl.HttpsURLConnection;
@@ -37,6 +38,8 @@ import java.security.NoSuchAlgorithmException;
  * @author Tareq Sharafy (tareq.sha@gmail.com)
  */
 public class JGitConnectionFactory extends GitConnectionFactory {
+
+    private static final String USER_AGENT = "git/2.1.0";
 
     private final CredentialsLoader credentialsLoader;
     private final SshKeyProvider    sshKeyProvider;
@@ -67,6 +70,7 @@ public class JGitConnectionFactory extends GitConnectionFactory {
             };
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+            UserAgent.set(USER_AGENT);
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new GitException(e);
         }
