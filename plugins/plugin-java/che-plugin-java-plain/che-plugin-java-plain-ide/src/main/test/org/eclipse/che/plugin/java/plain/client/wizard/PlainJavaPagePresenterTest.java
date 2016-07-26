@@ -13,9 +13,13 @@ package org.eclipse.che.plugin.java.plain.client.wizard;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.wizard.Wizard;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.plugin.java.plain.client.wizard.selector.SelectNodePresenter;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +40,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -155,5 +162,33 @@ public class PlainJavaPagePresenterTest {
         page.onBrowseSourceButtonClicked();
 
         verify(selectNodePresenter).show(page, "name");
+    }
+
+    @Test
+    public void selectedNodeShouldBeWithRelativePath() throws Exception {
+        when(view.getLibraryFolder()).thenReturn("lib1,   lib2");
+        when(view.getSourceFolder()).thenReturn("src1,   src2");
+        List<Node> selectedNodes = new ArrayList<>();
+        ResourceNode selectedNode1 = mock(ResourceNode.class);
+        ResourceNode selectedNode2 = mock(ResourceNode.class);
+        Resource resource1 = mock(Resource.class);
+        Resource resource2 = mock(Resource.class);
+
+        selectedNodes.add(selectedNode1);
+        selectedNodes.add(selectedNode2);
+
+        when(selectedNode1.getData()).thenReturn(resource1);
+        when(resource1.getLocation()).thenReturn(Path.valueOf("projectName/folder1/folder2"));
+
+        when(selectedNode2.getData()).thenReturn(resource2);
+        when(resource2.getLocation()).thenReturn(Path.valueOf("projectName/folder"));
+
+        when(dataObject.getName()).thenReturn("projectName");
+
+        page.setUpdateDelegate(updateDelegate);
+        page.init(dataObject);
+        page.onNodeSelected(selectedNodes);
+
+        verify(view).setLibraryFolder(eq("folder1/folder2,   folder"));
     }
 }
