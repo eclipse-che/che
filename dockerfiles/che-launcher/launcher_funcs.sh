@@ -117,6 +117,14 @@ get_docker_host_ip() {
             awk '{ print $2}'
 }
 
+get_docker_host_os() {
+  echo $(docker info | grep "Operating System:" | sed "s/^Operating System: //")  
+}
+
+get_docker_daemon_version() {
+  echo $(docker version | grep "Server version:" | sed "s/^Server version: //")
+}
+
 get_che_hostname() {
   INSTALL_TYPE=$(get_docker_install_type)
   if [ "${INSTALL_TYPE}" = "boot2docker" ] ||
@@ -161,6 +169,38 @@ che_container_is_stopped() {
   else
     return 0
   fi
+}
+
+
+get_che_container_host_bind_folder() {
+  BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${CHE_SERVER_CONTAINER_NAME}" | cut -d '[' -f 2 | cut -d ']' -f 1)
+
+  for SINGLE_BIND in $BINDS; do
+    case $SINGLE_BIND in
+      *$1*)
+        echo $(echo $SINGLE_BIND | cut -f1 -d":")
+      ;;
+      *)
+      ;;
+    esac
+  done
+}
+
+get_che_container_conf_folder() {
+  FOLDER=$(get_che_container_host_bind_folder "/conf")
+  echo "${FOLDER:=not set}"
+}
+
+get_che_container_data_folder() {
+  get_che_container_host_bind_folder "/home/user/che/workspaces"
+}
+
+get_che_container_image_name() {
+  echo $(docker inspect --format="{{.Config.Image}}" "${CHE_SERVER_CONTAINER_NAME}")
+}
+
+get_che_server_container_id() {
+  echo $(docker ps -qa -f "name=${CHE_SERVER_CONTAINER_NAME}")
 }
 
 wait_until_container_is_running() {
