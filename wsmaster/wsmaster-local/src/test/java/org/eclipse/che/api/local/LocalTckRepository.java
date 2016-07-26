@@ -10,30 +10,39 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 
-import javax.inject.Inject;
 import java.util.Collection;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
- * @author Anton Korneta
+ * Simplifies implementation of TckRepository for local data access objects.
+ *
+ * @param <T>
+ *         the type of the repository
+ * @author Yevhenii Voevodin
  */
-public class LocalRecipeTckRepository implements TckRepository<RecipeImpl> {
+public class LocalTckRepository<T> implements TckRepository<T> {
 
-    @Inject
-    private LocalRecipeDaoImpl recipeDao;
+    private final Map<String, T>      storage;
+    private final Function<T, String> keyMapper;
+
+    public LocalTckRepository(Map<String, T> storage, Function<T, String> keyMapper) {
+        this.storage = storage;
+        this.keyMapper = keyMapper;
+    }
 
     @Override
-    public void createAll(Collection<? extends RecipeImpl> recipes) throws TckRepositoryException {
-        for (RecipeImpl recipe : recipes) {
-            recipeDao.recipes.put(recipe.getId(), new RecipeImpl(recipe));
+    public void createAll(Collection<? extends T> entities) throws TckRepositoryException {
+        for (T entity : entities) {
+            storage.put(keyMapper.apply(entity), entity);
         }
     }
 
     @Override
     public void removeAll() throws TckRepositoryException {
-        recipeDao.recipes.clear();
+        storage.clear();
     }
 }

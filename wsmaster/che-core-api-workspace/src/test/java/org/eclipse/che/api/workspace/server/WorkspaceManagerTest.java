@@ -346,7 +346,7 @@ public class WorkspaceManagerTest {
     public void shouldRecoverWorkspaceIfAutoRestoreAttributeIsSetAndSnapshotExists() throws Exception {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
         workspace.getAttributes().put(AUTO_RESTORE_FROM_SNAPSHOT, "true");
-        when(machineManager.getSnapshots(any(), any())).thenReturn(singletonList(mock(SnapshotImpl.class)));
+        when(machineManager.getSnapshots( any())).thenReturn(singletonList(mock(SnapshotImpl.class)));
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
 
@@ -516,7 +516,7 @@ public class WorkspaceManagerTest {
         final RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
         when(runtimes.get(any())).thenReturn(descriptor);
         // force createSnapshotSync to return true
-        when(machineManager.saveSync(anyString(), anyString(), anyString())).thenThrow(new MachineException("test"));
+        when(machineManager.saveSync(anyString(), anyString())).thenThrow(new MachineException("test"));
 
         workspaceManager.stopWorkspace(workspace.getId());
 
@@ -555,7 +555,7 @@ public class WorkspaceManagerTest {
         final String wsId = "workspace123";
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE, "account");
         when(workspaceDao.get(wsId)).thenReturn(workspace);
-        when(machineManager.getSnapshots(NAMESPACE, wsId)).thenReturn(singletonList(any()));
+        when(machineManager.getSnapshots(wsId)).thenReturn(singletonList(any()));
 
         final List<SnapshotImpl> snapshots = workspaceManager.getSnapshot("workspace123");
 
@@ -590,7 +590,7 @@ public class WorkspaceManagerTest {
                                                     false,
                                                     true));
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
-        when(machineManager.getSnapshots(any(), any())).thenReturn(singletonList(mock(SnapshotImpl.class)));
+        when(machineManager.getSnapshots(any())).thenReturn(singletonList(mock(SnapshotImpl.class)));
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
 

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -29,11 +30,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -44,8 +45,10 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class LocalSnapshotDaoImpl implements SnapshotDao {
 
-    private final Map<String, SnapshotImpl> snapshots;
-    private final LocalStorage              snapshotStorage;
+    @VisibleForTesting
+    final Map<String, SnapshotImpl> snapshots;
+
+    private final LocalStorage snapshotStorage;
 
     @Inject
     public LocalSnapshotDaoImpl(LocalStorageFactory storageFactory) throws IOException {
@@ -56,6 +59,9 @@ public class LocalSnapshotDaoImpl implements SnapshotDao {
     @Override
     public synchronized SnapshotImpl getSnapshot(String workspaceId, String envName, String machineName) throws NotFoundException,
                                                                                                                 SnapshotException {
+        requireNonNull(workspaceId, "Required non-null workspace id");
+        requireNonNull(envName, "Required non-null environment name");
+        requireNonNull(machineName, "Required non-null machine name");
         final Optional<SnapshotImpl> snapshotOpt = doGetSnapshot(workspaceId, envName, machineName);
         if (!snapshotOpt.isPresent()) {
             throw new NotFoundException(format("Snapshot with workspace id '%s', environment name '%s', machine name %s doesn't exist",
@@ -66,6 +72,7 @@ public class LocalSnapshotDaoImpl implements SnapshotDao {
 
     @Override
     public synchronized SnapshotImpl getSnapshot(String snapshotId) throws NotFoundException, SnapshotException {
+        requireNonNull(snapshotId, "Required non-null snapshot id");
         final SnapshotImpl snapshot = snapshots.get(snapshotId);
         if (snapshot == null) {
             throw new NotFoundException("Snapshot with id '" + snapshotId + "' doesn't exist");
@@ -75,24 +82,35 @@ public class LocalSnapshotDaoImpl implements SnapshotDao {
 
     @Override
     public synchronized void saveSnapshot(SnapshotImpl snapshot) throws SnapshotException {
-        Objects.requireNonNull(snapshot, "Required non-null snapshot");
+        requireNonNull(snapshot, "Required non-null snapshot");
+        if (snapshots.containsKey(snapshot.getWorkspaceId())) {
+            throw new SnapshotException(format("Snapshot with id '%s' already exists", snapshot.getId()));
+        }
         final Optional<SnapshotImpl> opt = doGetSnapshot(snapshot.getWorkspaceId(), snapshot.getEnvName(), snapshot.getMachineName());
         if (opt.isPresent()) {
-            snapshots.remove(opt.get().getId());
+            throw new SnapshotException(format("Snapshot for machine '%s:%s:%s' already exists",
+                                               snapshot.getWorkspaceId(),
+                                               snapshot.getEnvName(),
+                                               snapshot.getMachineName()));
         }
         snapshots.put(snapshot.getId(), snapshot);
     }
 
     @Override
-    public synchronized List<SnapshotImpl> findSnapshots(String namespace, String workspaceId) throws SnapshotException {
+    public synchronized List<SnapshotImpl> findSnapshots(String workspaceId) throws SnapshotException {
+        requireNonNull(workspaceId, "Required non-null workspace id");
         return snapshots.values()
                         .stream()
-                        .filter(snapshot -> snapshot.getNamespace().equals(namespace) && snapshot.getWorkspaceId().equals(workspaceId))
+                        .filter(snapshot -> snapshot.getWorkspaceId().equals(workspaceId))
                         .collect(toList());
     }
 
     @Override
     public synchronized void removeSnapshot(String snapshotId) throws NotFoundException, SnapshotException {
+        requireNonNull(snapshotId, "Required non-null snapshot id");
+        if (!snapshots.containsKey(snapshotId)) {
+            throw new NotFoundException(format("Snapshot with id '%s' doesn't exist", snapshotId));
+        }
         snapshots.remove(snapshotId);
     }
 

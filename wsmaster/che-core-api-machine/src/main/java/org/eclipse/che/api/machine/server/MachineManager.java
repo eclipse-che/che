@@ -492,13 +492,12 @@ public class MachineManager {
      * @throws MachineException
      *         if other error occur
      */
-    public SnapshotImpl save(String machineId, String namespace, String description)
+    public SnapshotImpl save(String machineId, String description)
             throws NotFoundException, MachineException {
         final Instance machine = getInstance(machineId);
         final SnapshotImpl snapshot = SnapshotImpl.builder()
                                                   .generateId()
                                                   .setType(machine.getConfig().getType())
-                                                  .setNamespace(namespace)
                                                   .setWorkspaceId(machine.getWorkspaceId())
                                                   .setDescription(description)
                                                   .setDev(machine.getConfig().isDev())
@@ -521,8 +520,6 @@ public class MachineManager {
      *
      * @param machineId
      *         id of machine for saving
-     * @param namespace
-     *         snapshot namespace (e.g. owner)
      * @param description
      *         optional description that should help to understand purpose of new snapshot in future
      * @return {@link SnapshotImpl} that will be stored in background
@@ -533,14 +530,13 @@ public class MachineManager {
      * @throws MachineException
      *         if other error occur
      */
-    public SnapshotImpl saveSync(String machineId, String namespace, String description) throws MachineException,
-                                                                                            SnapshotException,
-                                                                                            NotFoundException {
+    public SnapshotImpl saveSync(String machineId, String description) throws MachineException,
+                                                                              SnapshotException,
+                                                                              NotFoundException {
         final Instance machine = getInstance(machineId);
         final SnapshotImpl snapshot = SnapshotImpl.builder()
                                                   .generateId()
                                                   .setType(machine.getConfig().getType())
-                                                  .setNamespace(namespace)
                                                   .setWorkspaceId(machine.getWorkspaceId())
                                                   .setDescription(description)
                                                   .setDev(machine.getConfig().isDev())
@@ -569,16 +565,14 @@ public class MachineManager {
     /**
      * Gets list of Snapshots by project.
      *
-     * @param owner
-     *         id of owner of machine
      * @param workspaceId
      *         workspace binding
      * @return list of Snapshots
      * @throws SnapshotException
      *         if error occur
      */
-    public List<SnapshotImpl> getSnapshots(String owner, String workspaceId) throws SnapshotException {
-        return snapshotDao.findSnapshots(owner, workspaceId);
+    public List<SnapshotImpl> getSnapshots(String workspaceId) throws SnapshotException {
+        return snapshotDao.findSnapshots(workspaceId);
     }
 
     /**
@@ -601,17 +595,15 @@ public class MachineManager {
     }
 
     /**
-     * Removes Snapshots by owner, workspace and project.
+     * Removes Snapshots workspace.
      *
-     * @param owner
-     *         owner of required snapshots
      * @param workspaceId
      *         workspace binding
      * @throws SnapshotException
      *         error occur
      */
-    public void removeSnapshots(String owner, String workspaceId) throws SnapshotException {
-        for (SnapshotImpl snapshot : snapshotDao.findSnapshots(owner, workspaceId)) {
+    public void removeSnapshots(String workspaceId) throws SnapshotException {
+        for (SnapshotImpl snapshot : snapshotDao.findSnapshots(workspaceId)) {
             try {
                 removeSnapshot(snapshot.getId());
             } catch (NotFoundException ignored) {
@@ -824,7 +816,7 @@ public class MachineManager {
                      machine.getId());
 
             snapshotWithKey = new SnapshotImpl(snapshot);
-            snapshotWithKey.setMachineSourceImpl(machine.saveToSnapshot(machine.getOwner()));
+            snapshotWithKey.setMachineSource(new MachineSourceImpl(machine.saveToSnapshot(machine.getOwner())));
 
             try {
                 SnapshotImpl oldSnapshot = snapshotDao.getSnapshot(snapshot.getWorkspaceId(),
@@ -833,7 +825,7 @@ public class MachineManager {
                 snapshotDao.removeSnapshot(oldSnapshot.getId());
                 machineInstanceProviders.getProvider(oldSnapshot.getType()).removeInstanceSnapshot(oldSnapshot.getMachineSource());
             } catch (NotFoundException ignored) {
-               //DO nothing if we has no snapshots or when provider not found
+                //DO nothing if we has no snapshots or when provider not found
             } catch (SnapshotException se) {
                 LOG.error("Failed to delete snapshot: {}, because {}",
                           snapshot,

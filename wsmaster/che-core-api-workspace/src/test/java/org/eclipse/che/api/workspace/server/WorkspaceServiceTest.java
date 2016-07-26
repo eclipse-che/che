@@ -295,7 +295,7 @@ public class WorkspaceServiceTest {
                                          .delete(SECURE_PATH + "/workspace/" + workspace.getId());
 
         assertEquals(response.getStatusCode(), 204);
-        verify(machineManager).removeSnapshots(NAMESPACE, workspace.getId());
+        verify(machineManager).removeSnapshots(workspace.getId());
         verify(wsManager).removeWorkspace(workspace.getId());
     }
 

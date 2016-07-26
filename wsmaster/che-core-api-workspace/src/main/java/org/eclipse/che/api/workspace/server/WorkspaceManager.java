@@ -510,7 +510,7 @@ public class WorkspaceManager {
         requireNonNull(workspaceId, "Required non-null workspace id");
         // check if workspace exists
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
-        return machineManager.getSnapshots(workspace.getNamespace(), workspaceId);
+        return machineManager.getSnapshots(workspaceId);
     }
 
     /** Asynchronously starts given workspace. */
@@ -625,7 +625,7 @@ public class WorkspaceManager {
         String devMachineSnapshotFailMessage = null;
         for (MachineImpl machine : runtime.getMachines()) {
             try {
-                machineManager.saveSync(machine.getId(), namespace, runtime.getActiveEnv());
+                machineManager.saveSync(machine.getId(), runtime.getActiveEnv());
             } catch (ApiException apiEx) {
                 if (machine.getConfig().isDev()) {
                     devMachineSnapshotFailMessage = apiEx.getLocalizedMessage();

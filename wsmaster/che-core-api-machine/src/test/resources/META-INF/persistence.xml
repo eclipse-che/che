@@ -16,6 +16,7 @@
     <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>org.eclipse.che.api.machine.server.recipe.RecipeImpl</class>
+        <class>org.eclipse.che.api.machine.server.model.impl.SnapshotImpl</class>
         <class>org.eclipse.che.api.machine.server.model.impl.AclEntryImpl</class>
         <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>

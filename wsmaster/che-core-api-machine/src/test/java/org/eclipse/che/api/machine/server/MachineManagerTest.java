@@ -337,7 +337,6 @@ public class MachineManagerTest {
                            .fromConfig(createMachineConfig())
                            .setWorkspaceId(WS_ID)
                            .setEnvName(ENVIRONMENT_NAME)
-                           .setNamespace(NAMESPACE)
                            .setMachineSource(new MachineSourceImpl("snapshot").setLocation("location"))
                            .setDev(true)
                            .build();

@@ -25,6 +25,7 @@
         <class>org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl</class>
         <class>org.eclipse.che.api.machine.server.model.impl.CommandImpl</class>
         <class>org.eclipse.che.api.machine.server.model.impl.AclEntryImpl</class>
+        <class>org.eclipse.che.api.machine.server.model.impl.SnapshotImpl</class>
         <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
