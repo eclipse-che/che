@@ -2,28 +2,20 @@
   flex-wrap wrap
 
 .workspace-list-content
-  margin-top 50px
-  padding 15px 0 15px 0
-
-.workspace-list-content .workspace-empty-list
-  overflow visible
-  min-height calc(100vh - 246px)
-
-.workspace-list-title md-icon
-  font-size 24px
-  height auto
-  width auto
-  color $label-info-color
-  line-height 24px
+  margin 0
 
 md-progress-linear.workspaces-list-progress
   height 10px
 
-.workspace-list-title
-  margin-left 5px
-
 .workspace-list-empty
-  font-size 12px
+  width 100%
+  text-align center
+  float left
+
+  *
+    font-size 14px
+    line-height 60px
+    color $label-info-color
 
 .workspace-resources-locked
   background-color red
@@ -33,7 +25,6 @@ md-progress-linear.workspaces-list-progress
 
 .header-column
   margin-left 12px
-  line-height 50px
   text-transform uppercase
   color $frame-subscription-color
 

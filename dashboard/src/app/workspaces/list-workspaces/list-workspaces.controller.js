@@ -33,7 +33,6 @@ export class ListWorkspacesCtrl {
     this.state = 'loading';
     this.isInfoLoading = true;
     this.workspaceFilter = {config: {name: ''}};
-    this.workspaceOrderBy = 'config.name';
 
     //Map of all workspaces with additional info by id:
     this.workspacesById = new Map();
@@ -43,37 +42,9 @@ export class ListWorkspacesCtrl {
     this.getUserWorkspaces();
 
     this.workspacesSelectedStatus = {};
-    this.menuOptions = [
-      {
-        title: 'Select all workspaces',
-        onclick: () => {
-          this.selectAllWorkspaces();
-        },
-        disabled: () => {
-          return this.isAllWorkspacesSelected();
-        }
-      },
-      {
-        title: 'Deselect all workspaces',
-        onclick: () => {
-          this.deselectAllWorkspaces();
-        },
-        disabled: () => {
-          return this.isNoWorkspacesSelected();
-        }
-      },
-      {
-        title: 'Delete selected workspaces',
-        onclick: () => {
-          this.deleteSelectedWorkspaces();
-        },
-        disabled: () => {
-          return this.isNoWorkspacesSelected();
-        }
-      }
-    ];
 
     this.isBulkChecked = false;
+    this.isNoSelected = true;
     $rootScope.showIDE = false;
   }
 
@@ -153,7 +124,7 @@ export class ListWorkspacesCtrl {
   /**
    * return true if all workspaces in list are checked
    * @returns {boolean}
-     */
+   */
   isAllWorkspacesSelected() {
     let disabled = true;
     for (let key of this.workspacesById.keys()) {
@@ -168,7 +139,7 @@ export class ListWorkspacesCtrl {
   /**
    * returns true if all workspaces in list are not checked
    * @returns {boolean}
-     */
+   */
   isNoWorkspacesSelected() {
     let workspaceIds = Object.keys(this.workspacesSelectedStatus);
     if (!workspaceIds.length) {
@@ -187,7 +158,6 @@ export class ListWorkspacesCtrl {
     for (let key of this.workspacesById.keys()) {
       this.workspacesSelectedStatus[key] = true;
     }
-    this.isBulkChecked = true;
   }
 
   /**
@@ -197,7 +167,6 @@ export class ListWorkspacesCtrl {
     Object.keys(this.workspacesSelectedStatus).forEach((key) => {
       this.workspacesSelectedStatus[key] = false;
     });
-    this.isBulkChecked = false;
   }
 
   /**
@@ -206,9 +175,26 @@ export class ListWorkspacesCtrl {
   changeBulkSelection() {
     if (this.isBulkChecked) {
       this.deselectAllWorkspaces();
+      this.isBulkChecked = false;
       return;
     }
     this.selectAllWorkspaces();
+    this.isBulkChecked = true;
+  }
+
+  /**
+   * Update workspace selected status
+   */
+  updateSelectedStatus() {
+    this.isNoSelected = this.isNoWorkspacesSelected();
+    if (this.isNoSelected) {
+      this.isBulkChecked = false;
+      return;
+    }
+
+    if (this.isAllWorkspacesSelected()) {
+      this.isBulkChecked = true;
+    }
   }
 
   /**
@@ -290,7 +276,7 @@ export class ListWorkspacesCtrl {
    * Show confirmation popup before workspaces to delete
    * @param numberToDelete
    * @returns {*}
-     */
+   */
   showDeleteWorkspacesConfirmation(numberToDelete) {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
@@ -307,5 +293,7 @@ export class ListWorkspacesCtrl {
       .clickOutsideToClose(true);
 
     return this.$mdDialog.show(confirm);
-  };
+  }
+
+;
 }

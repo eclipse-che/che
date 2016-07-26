@@ -11,7 +11,7 @@
 'use strict';
 
 /**
- * Defines a directive for creating List Header.
+ * Defines a directive for creating header for list.
  * @author Oleksii Orel
  */
 export class CheListHeader {
@@ -20,10 +20,23 @@ export class CheListHeader {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict='E';
-    this.replace= true;
-    this.transclude= true;
+  constructor() {
+    this.restrict = 'E';
+    this.replace = true;
+    this.transclude = true;
     this.templateUrl = 'components/widget/list/che-list-header.html';
+
+    // scope values
+    this.scope = {
+      inputPlaceholder: '@?cheInputPlaceholder',
+      inputValue: '=?cheSearchModel',
+      addButtonTitle: '@?cheAddButtonTitle',
+      addButtonHref: '@?cheAddButtonHref',
+      deleteButtonTitle: '@?cheDeleteButtonTitle',
+      onDelete: '&?cheOnDelete',
+      hideDelete: '=?cheHideDelete',
+      hideSearch: '=?cheHideSearch',
+      hideHeader:'=?cheHideHeader'
+    };
   }
 }

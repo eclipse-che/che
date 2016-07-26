@@ -1,49 +1,62 @@
 .workspace-item-row
   min-height 40px
 
-.workspace-item-row div
+.workspace-item-row *
   outline none
 
 .workspace-item-details
   line-height 22px
+  font-size 12px
   cursor pointer
 
-  & > *:last-child
-    margin-right 10px
-
   & .che-xs-header
-    text-transform uppercase
-    color $frame-subscription-color
     display inline-block
-    line-height 22px
+    float left
+    text-transform uppercase
+    vertical-align middle
+    color $primary-color
     min-width 65px
 
-  div
-    display flex
-
 .workspace-item-name
-  font-size 1em
   color $label-primary-color
 
+  & > *
+   display inline-block
+   line-height 22px
+   font-size 12px
+   float left
+
+  .spinner > *
+    float left
+
 .workspace-actions
-  width 100%
   margin-right 10px
   display inline-block
-  color $label-info-color
+  vertical-align middle
+  color $list-action-color
 
   *
-    float right
+    text-decoration none
+    color inherit
+
+  & > *:hover
+    color $list-action-hover-color
+
+  & > *:not(.tooltip)
+    display inline-block
+    float left
+    height 16px
+    margin-right 10px
+
+  .tooltip
+    color $white-color
 
   *:before
-    vertical-align middle
-    font-size 22px
-    position relative
-    top 2px
+    font-size 16px
 
-  a
-    text-decoration none
-    display inline-flex
-    color inherit
+  .fa-plus-square-o:before
+    position relative
+    yop .5px
 
 .workspace-item-temp
   color $label-info-color
@@ -54,15 +67,11 @@
   padding 5px 10px
   border-radius 5px
 
-.workspace-consumed-value, .workspace-no-consumed-value
+.workspace-consumed-value
+  line-height initial
   font-size 12px
   font-weight bold
-
-.workspace-consumed-value
-  color #4e5a96
-
-.workspace-no-consumed-value
-  color $label-info-color
+  color $list-blue-color
 
 .workspace-list-item-arrow md-icon
   height 32px !important
@@ -79,5 +88,5 @@
   .che-list-item-checkbox-main md-icon
     display none
 
-.workspace-list-item-checkbox > div
+.workspace-list-item-checkbox > *
   width 100px

@@ -1,19 +1,19 @@
 .che-list-header-column
-  line-height 50px
+  display inherit
+  line-height inherit
+  margin 0 !important
   text-transform uppercase
-  color $frame-subscription-color
+  color $list-blue-color
 
   .header-sort-direction
-    position relative
+    margin-left 4px
     text-align center
-    margin-left 5px
-    display inline
-    top 4px
-
-    *:first-child
-      position inherit
-      top 3px
+    vertical-align middle
 
     *::before
-      font-size 20px
+      position relative
+      font-size 12px
       color $menu-bg-color
+
+    .fa-sort-asc::before
+      top 3px
