@@ -279,6 +279,7 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
                 for (MachineProcessDto machineProcessDto : arg) {
                     final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
                                                             .withName(machineProcessDto.getName())
+                                                            .withAttributes(machineProcessDto.getAttributes())
                                                             .withCommandLine(machineProcessDto.getCommandLine())
                                                             .withType(machineProcessDto.getType());
 

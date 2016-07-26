@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.model.machine.MachineProcess;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Describes process created from {@link Command} in machine
@@ -24,7 +25,7 @@ import java.util.List;
  * @author andrew00x
  */
 @DTO
-public interface MachineProcessDto extends MachineProcess, Hyperlinks {
+public interface MachineProcessDto extends CommandDto, MachineProcess, Hyperlinks {
     void setPid(int pid);
 
     MachineProcessDto withPid(int pid);
@@ -51,4 +52,6 @@ public interface MachineProcessDto extends MachineProcess, Hyperlinks {
 
     @Override
     MachineProcessDto withLinks(List<Link> links);
+
+    MachineProcessDto withAttributes(Map<String, String> attributes);
 }
