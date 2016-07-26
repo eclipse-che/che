@@ -127,9 +127,6 @@ public class WorkspaceManager {
      *         the workspace config to create the new workspace instance
      * @param namespace
      *         workspace name is unique in this namespace
-     * @param accountId
-     *         the account id, which is used to verify if the user has required
-     *         permissions to create the new workspace
      * @return new workspace instance
      * @throws NullPointerException
      *         when either {@code config} or {@code owner} is null
@@ -139,21 +136,19 @@ public class WorkspaceManager {
      *         when any conflict occurs (e.g Workspace with such name already exists for {@code owner})
      * @throws ServerException
      *         when any other error occurs
-     * @see WorkspaceHooks#beforeCreate(Workspace, String)
-     * @see WorkspaceHooks#afterCreate(Workspace, String)
+     * @see WorkspaceHooks#beforeCreate(Workspace)
+     * @see WorkspaceHooks#afterCreate(Workspace)
      */
     public WorkspaceImpl createWorkspace(WorkspaceConfig config,
-                                         String namespace,
-                                         @Nullable String accountId) throws ServerException,
-                                                                            ConflictException,
-                                                                            NotFoundException {
+                                         String namespace) throws ServerException,
+                                                                  ConflictException,
+                                                                  NotFoundException {
         requireNonNull(config, "Required non-null config");
         requireNonNull(namespace, "Required non-null namespace");
         return normalizeState(doCreateWorkspace(config,
                                                 namespace,
                                                 emptyMap(),
-                                                false,
-                                                accountId));
+                                                false));
     }
 
     /**
@@ -166,9 +161,6 @@ public class WorkspaceManager {
      *         workspace name is unique in this namespace
      * @param attributes
      *         workspace instance attributes
-     * @param accountId
-     *         the account id, which is used to verify if the user has required
-     *         permissions to create the new workspace
      * @return new workspace instance
      * @throws NullPointerException
      *         when either {@code config} or {@code owner} is null
@@ -178,23 +170,21 @@ public class WorkspaceManager {
      *         when any conflict occurs (e.g Workspace with such name already exists for {@code owner})
      * @throws ServerException
      *         when any other error occurs
-     * @see WorkspaceHooks#beforeCreate(Workspace, String)
-     * @see WorkspaceHooks#afterCreate(Workspace, String)
+     * @see WorkspaceHooks#beforeCreate(Workspace)
+     * @see WorkspaceHooks#afterCreate(Workspace)
      */
     public WorkspaceImpl createWorkspace(WorkspaceConfig config,
                                          String namespace,
-                                         Map<String, String> attributes,
-                                         @Nullable String accountId) throws ServerException,
-                                                                            NotFoundException,
-                                                                            ConflictException {
+                                         Map<String, String> attributes) throws ServerException,
+                                                                                NotFoundException,
+                                                                                ConflictException {
         requireNonNull(config, "Required non-null config");
         requireNonNull(namespace, "Required non-null namespace");
         requireNonNull(attributes, "Required non-null attributes");
         return normalizeState(doCreateWorkspace(config,
                                                 namespace,
                                                 attributes,
-                                                false,
-                                                accountId));
+                                                false));
     }
 
     /**
@@ -352,9 +342,6 @@ public class WorkspaceManager {
      *         identifier of workspace which should be started
      * @param envName
      *         name of environment or null, when default environment should be used
-     * @param accountId
-     *         account which should be used for this runtime workspace or null when
-     *         it should be automatically detected
      * @param restore
      *         if <code>true</code> workspace will be restored from snapshot if snapshot exists,
      *         otherwise (if snapshot does not exist) workspace will be started from default source.
@@ -372,13 +359,12 @@ public class WorkspaceManager {
      *         when {@code workspaceId} is null
      * @throws NotFoundException
      *         when workspace with given {@code workspaceId} doesn't exist, or
-     *         {@link WorkspaceHooks#beforeStart(Workspace, String, String)} throws this exception
+     *         {@link WorkspaceHooks#beforeStart(Workspace, String)} throws this exception
      * @throws ServerException
      *         when any other error occurs during workspace start
      */
     public WorkspaceImpl startWorkspace(String workspaceId,
                                         @Nullable String envName,
-                                        @Nullable String accountId,
                                         @Nullable Boolean restore) throws NotFoundException,
                                                                           ServerException,
                                                                           ConflictException {
@@ -387,7 +373,7 @@ public class WorkspaceManager {
         final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
         final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
         final boolean snapshotExists = !getSnapshot(workspaceId).isEmpty();
-        return performAsyncStart(workspace, envName, firstNonNull(restore, autoRestore) && snapshotExists, accountId);
+        return performAsyncStart(workspace, envName, firstNonNull(restore, autoRestore) && snapshotExists);
     }
 
     /**
@@ -397,32 +383,27 @@ public class WorkspaceManager {
      *         workspace configuration from which workspace is created and started
      * @param namespace
      *         workspace name is unique in this namespace
-     * @param accountId
-     *         account which should be used for this runtime workspace or null when
-     *         it should be automatically detected
      * @return starting workspace
      * @throws NullPointerException
      *         when {@code workspaceId} is null
      * @throws NotFoundException
      *         when workspace with given {@code workspaceId} doesn't exist, or
-     *         {@link WorkspaceHooks#beforeStart(Workspace, String, String)} throws this exception
+     *         {@link WorkspaceHooks#beforeStart(Workspace, String)} throws this exception
      * @throws ServerException
      *         when any other error occurs during workspace start
      */
     public WorkspaceImpl startWorkspace(WorkspaceConfig config,
                                         String namespace,
-                                        boolean isTemporary,
-                                        @Nullable String accountId) throws ServerException,
-                                                                           NotFoundException,
-                                                                           ConflictException {
+                                        boolean isTemporary) throws ServerException,
+                                                                    NotFoundException,
+                                                                    ConflictException {
         requireNonNull(config, "Required non-null configuration");
         requireNonNull(namespace, "Required non-null namespace");
         final WorkspaceImpl workspace = doCreateWorkspace(config,
                                                           namespace,
                                                           emptyMap(),
-                                                          isTemporary,
-                                                          accountId);
-        performAsyncStart(workspace, workspace.getConfig().getDefaultEnv(), false, accountId);
+                                                          isTemporary);
+        performAsyncStart(workspace, workspace.getConfig().getDefaultEnv(), false);
         return normalizeState(workspace);
     }
 
@@ -550,8 +531,7 @@ public class WorkspaceManager {
     @VisibleForTesting
     WorkspaceImpl performAsyncStart(WorkspaceImpl workspace,
                                     String envName,
-                                    boolean recover,
-                                    @Nullable String accountId) throws ConflictException, NotFoundException, ServerException {
+                                    boolean recover) throws ConflictException, NotFoundException, ServerException {
         if (envName != null && !workspace.getConfig()
                                          .getEnvironments()
                                          .stream()
@@ -580,7 +560,7 @@ public class WorkspaceManager {
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
                 final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
-                hooks.beforeStart(workspace, env, accountId);
+                hooks.beforeStart(workspace, env);
                 runtimes.start(workspace, env, recover);
                 LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
                          workspace.getNamespace(),
@@ -722,10 +702,9 @@ public class WorkspaceManager {
     private WorkspaceImpl doCreateWorkspace(WorkspaceConfig config,
                                             String namespace,
                                             Map<String, String> attributes,
-                                            boolean isTemporary,
-                                            @Nullable String accountId) throws NotFoundException,
-                                                                               ServerException,
-                                                                               ConflictException {
+                                            boolean isTemporary) throws NotFoundException,
+                                                                        ServerException,
+                                                                        ConflictException {
         final WorkspaceImpl workspace = WorkspaceImpl.builder()
                                                      .generateId()
                                                      .setConfig(config)
@@ -734,9 +713,9 @@ public class WorkspaceManager {
                                                      .setTemporary(isTemporary)
                                                      .build();
         workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-        hooks.beforeCreate(workspace, accountId);
+        hooks.beforeCreate(workspace);
         workspaceDao.create(workspace);
-        hooks.afterCreate(workspace, accountId);
+        hooks.afterCreate(workspace);
         LOG.info("Workspace '{}:{}' with id '{}' created by user '{}'",
                  namespace,
                  workspace.getConfig().getName(),
@@ -764,13 +743,13 @@ public class WorkspaceManager {
     /** No-operations workspace hooks. Each method does nothing */
     private static class NoopWorkspaceHooks implements WorkspaceHooks {
         @Override
-        public void beforeStart(Workspace workspace, String evnName, String accountId) throws NotFoundException, ServerException {}
+        public void beforeStart(Workspace workspace, String evnName) throws NotFoundException, ServerException {}
 
         @Override
-        public void beforeCreate(Workspace workspace, String accountId) throws NotFoundException, ServerException {}
+        public void beforeCreate(Workspace workspace) throws NotFoundException, ServerException {}
 
         @Override
-        public void afterCreate(Workspace workspace, String accountId) throws ServerException {}
+        public void afterCreate(Workspace workspace) throws ServerException {}
 
         @Override
         public void afterRemove(String workspaceId) {}

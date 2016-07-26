@@ -15,6 +15,7 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence persistence_1_0.xsd" version="1.0">
     <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        <class>org.eclipse.che.account.spi.AccountImpl</class>
         <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
         <class>org.eclipse.che.api.user.server.model.impl.ProfileImpl</class>
         <class>org.eclipse.che.api.user.server.jpa.PreferenceEntity</class>

@@ -16,6 +16,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.account.api.AccountModule;
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
@@ -50,6 +51,7 @@ public class WsMasterModule extends AbstractModule {
         install(new UserJpaModule());
         install(new SshJpaModule());
         install(new WorkspaceJpaModule());
+        install(new AccountModule());
         install(new MachineJpaModule());
         bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
 
@@ -92,11 +94,13 @@ public class WsMasterModule extends AbstractModule {
                    .toInstance("predefined-recipes.json");
 
 
-        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
+        bindConstant().annotatedWith(
+                Names.named(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
                           "sudo sh -c \"chown -R $(id -u -n) /projects || true\" && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
-        bindConstant().annotatedWith(Names.named(org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
+        bindConstant().annotatedWith(
+                Names.named(org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
                       .to("mkdir -p ~/che " +
                           "&& cp /mnt/che/terminal -R ~/che" +
                           "&& ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");

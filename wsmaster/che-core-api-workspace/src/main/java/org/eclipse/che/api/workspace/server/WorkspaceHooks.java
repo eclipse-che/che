@@ -31,8 +31,6 @@ public interface WorkspaceHooks {
      *
      * @param workspace
      *         workspace which is going to be started
-     * @param accountId
-     *         account identifier indicates the account which should be used for runtime workspace
      * @param envName
      *         the name of environment which is going to be started
      * @throws NotFoundException
@@ -44,35 +42,31 @@ public interface WorkspaceHooks {
      * @throws NullPointerException
      *         when either {@code workspace} or {@code envName} is null
      */
-    void beforeStart(Workspace workspace, String envName, @Nullable String accountId) throws NotFoundException,
-                                                                                             ForbiddenException,
-                                                                                             ServerException;
+    void beforeStart(Workspace workspace, String envName) throws NotFoundException,
+                                                                 ForbiddenException,
+                                                                 ServerException;
 
     /**
      * Called before creating workspace.
      *
      * @param workspace
      *         workspace instance
-     * @param accountId
-     *         related to workspace account identifier, it is optional and may be null
      * @throws NotFoundException
      *         when any not found error occurs
      * @throws ServerException
      *         when any other error occurs
      */
-    void beforeCreate(Workspace workspace, @Nullable String accountId) throws NotFoundException, ServerException;
+    void beforeCreate(Workspace workspace) throws NotFoundException, ServerException;
 
     /**
      * Called after workspace is created.
      *
      * @param workspace
      *         workspace which was created
-     * @param accountId
-     *         related to workspace account identifier, it is optional and may be null
      * @throws ServerException
      *         when any other error occurs
      */
-    void afterCreate(Workspace workspace, @Nullable String accountId) throws ServerException;
+    void afterCreate(Workspace workspace) throws ServerException;
 
     /**
      * Called after workspace is removed.

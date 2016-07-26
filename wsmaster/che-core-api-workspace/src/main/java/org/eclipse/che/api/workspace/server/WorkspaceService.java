@@ -66,6 +66,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_BY_NAMESPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACES;
 
 /**
@@ -78,8 +79,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSP
 @Path("/workspace")
 public class WorkspaceService extends Service {
 
-    private final WorkspaceManager   workspaceManager;
-    private final WorkspaceValidator validator;
+    private final WorkspaceManager              workspaceManager;
+    private final WorkspaceValidator            validator;
     private final WorkspaceServiceLinksInjector linksInjector;
 
     @Context
@@ -121,9 +122,9 @@ public class WorkspaceService extends Service {
                            @QueryParam("start-after-create")
                            @DefaultValue("false")
                            Boolean startAfterCreate,
-                           @ApiParam("The account id related to this operation")
-                           @QueryParam("account")
-                           String accountId) throws ConflictException,
+                           @ApiParam("Namespace where workspace should be created")
+                           @QueryParam("namespace")
+                           String namespace) throws ConflictException,
                                                     ServerException,
                                                     BadRequestException,
                                                     ForbiddenException,
@@ -132,12 +133,14 @@ public class WorkspaceService extends Service {
         final Map<String, String> attributes = parseAttrs(attrsList);
         validator.validateAttributes(attributes);
         validator.validateConfig(config);
+        if (namespace == null) {
+            namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
+        }
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(config,
-                                                                         EnvironmentContext.getCurrent().getSubject().getUserName(),
-                                                                         attributes,
-                                                                         accountId);
+                                                                         namespace,
+                                                                         attributes);
         if (startAfterCreate) {
-            workspaceManager.startWorkspace(workspace.getId(), null, accountId, false);
+            workspaceManager.startWorkspace(workspace.getId(), null, false);
         }
         return Response.status(201)
                        .entity(linksInjector.injectLinks(asDto(workspace), getServiceContext()))
@@ -189,6 +192,29 @@ public class WorkspaceService extends Service {
                                             String status) throws ServerException, BadRequestException {
         //TODO add maxItems & skipCount to manager
         return workspaceManager.getWorkspaces(EnvironmentContext.getCurrent().getSubject().getUserId())
+                               .stream()
+                               .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
+                               .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))
+                               .collect(toList());
+    }
+
+    @GET
+    @Path("/namespace/{namespace}")
+    @Produces(APPLICATION_JSON)
+    @GenerateLink(rel = LINK_REL_GET_BY_NAMESPACE)
+    @ApiOperation(value = "Get workspaces by given namespace",
+                  notes = "This operation can be performed only by authorized user",
+                  response = WorkspaceDto.class,
+                  responseContainer = "List")
+    @ApiResponses({@ApiResponse(code = 200, message = "The workspaces successfully fetched"),
+                   @ApiResponse(code = 500, message = "Internal server error occurred during workspaces fetching")})
+    public List<WorkspaceDto> getByNamespace(@ApiParam("Workspace status")
+                                             @QueryParam("status")
+                                             String status,
+                                             @ApiParam("The namespace")
+                                             @PathParam("namespace")
+                                             String namespace) throws ServerException, BadRequestException {
+        return workspaceManager.getByNamespace(namespace)
                                .stream()
                                .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
                                .map(workspace -> linksInjector.injectLinks(asDto(workspace), getServiceContext()))
@@ -259,9 +285,6 @@ public class WorkspaceService extends Service {
                                   @ApiParam("The name of the workspace environment that should be used for start")
                                   @QueryParam("environment")
                                   String envName,
-                                  @ApiParam("The account id related to this operation")
-                                  @QueryParam("accountId")
-                                  String accountId,
                                   @ApiParam("Restore workspace from snapshot")
                                   @QueryParam("restore")
                                   Boolean restore) throws ServerException,
@@ -269,8 +292,7 @@ public class WorkspaceService extends Service {
                                                           NotFoundException,
                                                           ForbiddenException,
                                                           ConflictException {
-
-        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, accountId, restore)),
+        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, restore)),
                                          getServiceContext());
     }
 
@@ -294,19 +316,21 @@ public class WorkspaceService extends Service {
                                         @ApiParam("Weather this workspace is temporary or not")
                                         @QueryParam("temporary")
                                         Boolean isTemporary,
-                                        @ApiParam("The account id related to this operation")
-                                        @QueryParam("account")
-                                        String accountId) throws BadRequestException,
+                                        @ApiParam("Namespace where workspace should be created")
+                                        @QueryParam("namespace")
+                                        String namespace) throws BadRequestException,
                                                                  ForbiddenException,
                                                                  NotFoundException,
                                                                  ServerException,
                                                                  ConflictException {
         requiredNotNull(cfg, "Workspace configuration");
         validator.validateConfig(cfg);
+        if (namespace == null) {
+            namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
+        }
         return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(cfg,
-                                                                               EnvironmentContext.getCurrent().getSubject().getUserName(),
-                                                                               firstNonNull(isTemporary, false),
-                                                                               accountId)), getServiceContext());
+                                                                               namespace,
+                                                                               firstNonNull(isTemporary, false))), getServiceContext());
     }
 
     @DELETE
