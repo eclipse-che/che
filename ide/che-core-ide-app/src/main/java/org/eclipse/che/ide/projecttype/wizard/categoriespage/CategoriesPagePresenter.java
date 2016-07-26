@@ -192,10 +192,13 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
                 originParent = path;
                 dataObject.setPath(!isNullOrEmpty(dataObject.getName()) ? path.append(dataObject.getName()).toString() : path.toString());
                 view.setParentPath(path);
+
+                view.focusSelectPathButton();
             }
 
             @Override
             public void onSelectionCancelled() {
+                view.focusSelectPathButton();
             }
         });
     }

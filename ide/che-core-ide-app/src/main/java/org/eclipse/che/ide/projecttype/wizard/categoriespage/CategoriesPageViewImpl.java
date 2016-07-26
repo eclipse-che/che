@@ -287,6 +287,16 @@ public class CategoriesPageViewImpl implements CategoriesPageView {
     }
 
     @Override
+    public void focusSelectPathButton() {
+        new Timer() {
+            @Override
+            public void run() {
+                selectPath.setFocus(true);
+            }
+        }.schedule(300);
+    }
+
+    @Override
     public void focusName() {
         new Timer() {
             @Override

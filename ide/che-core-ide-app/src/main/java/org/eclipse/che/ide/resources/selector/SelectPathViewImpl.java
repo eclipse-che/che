@@ -12,6 +12,7 @@ package org.eclipse.che.ide.resources.selector;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
@@ -31,6 +32,7 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.ide.resources.tree.SkipHiddenNodesInterceptor;
 import org.eclipse.che.ide.resources.tree.SkipLeafsInterceptor;
+import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.Tree;
@@ -64,6 +66,9 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
 
     private Tree                          tree;
     private SelectPathView.ActionDelegate delegate;
+
+    private Button submitBtn;
+    private Button cancelButton;
 
     @Inject
     public SelectPathViewImpl(Styles styles,
@@ -122,7 +127,18 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
 
         content.add(tree);
 
-        final Button submitBtn = new Button("Select");
+        KeyboardNavigationHandler handler = new KeyboardNavigationHandler() {
+            @Override
+            public void onEnter(NativeEvent evt) {
+                evt.preventDefault();
+                hide();
+                delegate.onSubmit();
+            }
+        };
+
+        handler.bind(tree);
+
+        submitBtn = new Button("Select");
         submitBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -132,7 +148,7 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
         });
         addButtonToFooter(submitBtn);
 
-        final Button cancelButton = new Button("Cancel");
+        cancelButton = new Button("Cancel");
         cancelButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -146,6 +162,20 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
         setTitle("Select Path");
         getWidget().setStyleName(styles.css().window());
         hideCrossButton();
+    }
+
+    @Override
+    protected void onEnterClicked() {
+        if (isWidgetFocused(submitBtn)) {
+            delegate.onSubmit();
+            hide();
+            return;
+        }
+
+        if (isWidgetFocused(cancelButton)) {
+            delegate.onCancel();
+            hide();
+        }
     }
 
     @Override
@@ -163,6 +193,21 @@ public class SelectPathViewImpl extends Window implements SelectPathView {
 
         tree.getNodeStorage().clear();
         tree.getNodeStorage().add(nodes);
+    }
+
+    @Override
+    public void show() {
+        super.show(tree);
+        super.setHideOnEscapeEnabled(true);
+
+        if (!tree.getRootNodes().isEmpty()) {
+            tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
+        }
+    }
+
+    @Override
+    protected void onClose() {
+        delegate.onCancel();
     }
 
     public interface Styles extends ClientBundle {
