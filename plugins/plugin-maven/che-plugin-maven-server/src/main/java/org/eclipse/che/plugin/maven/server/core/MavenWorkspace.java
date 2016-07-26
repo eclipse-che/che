@@ -33,9 +33,11 @@ import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.jdom.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,6 +195,11 @@ public class MavenWorkspace {
 
             IPath projectPath = project.getProject().getFullPath();
             RegisteredProject registeredProject = projectRegistryProvider.get().getProject(projectPath.toOSString());
+
+            if (registeredProject == null) {
+                throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.CORE_EXCEPTION,
+                                                                 "Project " + projectPath.toOSString() + " doesn't exist"));
+            }
 
             List<String> sourceFolders = registeredProject.getAttributes().get(Constants.SOURCE_FOLDER);
             List<String> testSourceFolders = registeredProject.getAttributes().get(MavenAttributes.TEST_SOURCE_FOLDER);

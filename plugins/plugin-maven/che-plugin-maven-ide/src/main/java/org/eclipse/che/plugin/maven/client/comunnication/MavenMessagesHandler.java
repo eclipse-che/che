@@ -15,28 +15,28 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.ide.websocket.MessageBus;
+import org.eclipse.che.ide.websocket.WebSocketException;
+import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.plugin.maven.client.comunnication.progressor.background.BackgroundLoaderPresenter;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 import org.eclipse.che.plugin.maven.shared.MessageType;
 import org.eclipse.che.plugin.maven.shared.dto.NotificationMessage;
 import org.eclipse.che.plugin.maven.shared.dto.ProjectsUpdateMessage;
 import org.eclipse.che.plugin.maven.shared.dto.StartStopNotification;
-import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MessageBus;
-import org.eclipse.che.ide.websocket.WebSocketException;
-import org.eclipse.che.ide.websocket.events.MessageHandler;
 
 import java.util.HashSet;
 import java.util.List;
@@ -139,18 +139,29 @@ public class MavenMessagesHandler {
         Set<String> projectToRefresh = computeUniqueHiLevelProjects(updatedProjects);
         for (final String path : projectToRefresh) {
             appContext.getWorkspaceRoot().getContainer(path).then(new Operation<Optional<Container>>() {
-                  @Override
-                  public void apply(Optional<Container> container) throws OperationException {
-                      if (container.isPresent()) {
-                          container.get().synchronize();
-                      }
-                  }
-              });
+                @Override
+                public void apply(Optional<Container> container) throws OperationException {
+                    if (container.isPresent()) {
+                        container.get().synchronize();
+                    }
+                }
+            });
         }
+
+        int updatedNumber = 0;
+        String deletedProject = "";
+
         for (String path : dto.getDeletedProjects()) {
             if (!updatedProjects.contains(path)) {
-                notificationManager.notify("Maven", "Module was deleted: " + path, StatusNotification.Status.SUCCESS, EMERGE_MODE);
+                updatedNumber++;
+                deletedProject = path;
             }
+        }
+
+        if (updatedNumber > 1) {
+            notificationManager.notify("Maven", updatedNumber + " modules were deleted", StatusNotification.Status.SUCCESS, EMERGE_MODE);
+        } else if (updatedNumber == 1) {
+            notificationManager.notify("Maven", "Module was deleted: " + deletedProject, StatusNotification.Status.SUCCESS, EMERGE_MODE);
         }
 
         pomEditorReconciler.reconcilePoms(updatedProjects);

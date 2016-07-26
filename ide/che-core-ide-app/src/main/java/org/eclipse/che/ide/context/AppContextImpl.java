@@ -414,10 +414,14 @@ public class AppContextImpl implements AppContext,
             }
         }
 
+        if (currentResource == null) {
+            return null;
+        }
+
         Project root = null;
 
         for (Project project : projects) {
-            if (project.getLocation().isPrefixOf(currentResources[0].getLocation())) {
+            if (project.getLocation().isPrefixOf(currentResource.getLocation())) {
                 root = project;
             }
         }
