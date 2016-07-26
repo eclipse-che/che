@@ -24,6 +24,7 @@ import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
+import org.eclipse.che.ide.extension.machine.client.processes.monitoring.MachineMonitors;
 import org.eclipse.che.ide.ui.Tooltip;
 import org.eclipse.che.ide.ui.tree.NodeRenderer;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
@@ -59,13 +60,17 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
     private       AddTerminalClickHandler     addTerminalClickHandler;
     private       PreviewSshClickHandler      previewSshClickHandler;
     private       StopProcessHandler          stopProcessHandler;
+    private final MachineMonitors             machineMonitors;
 
     @Inject
-    public ProcessTreeRenderer(MachineResources resources, MachineLocalizationConstant locale,
-                               PartStackUIResources partStackUIResources) {
+    public ProcessTreeRenderer(MachineResources resources,
+                               MachineLocalizationConstant locale,
+                               PartStackUIResources partStackUIResources,
+                               MachineMonitors machineMonitors) {
         this.resources = resources;
         this.locale = locale;
         this.partStackUIResources = partStackUIResources;
+        this.machineMonitors = machineMonitors;
     }
 
     @Override
@@ -190,6 +195,13 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         newTerminalButton.addEventListener(Event.CLICK, blockMouseListener, true);
         newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
 
+        Element monitorsElement = Elements.createSpanElement();
+        monitorsElement.getStyle().setProperty("float", "right");
+        monitorsElement.getStyle().setProperty("cursor", "default");
+        root.appendChild(monitorsElement);
+
+        Node monitorNode = (Node)machineMonitors.getMonitorWidget(machine.getId(), this).getElement();
+        monitorsElement.appendChild(monitorNode);
 
         Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
         nameElement.setTextContent(machine.getConfig().getName());

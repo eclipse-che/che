@@ -51,7 +51,7 @@ public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
     /**
      * Type class used to register this event.
      */
-    public static Type<MachineStateEvent.Handler> TYPE = new Type<>();
+    public static final Type<MachineStateEvent.Handler> TYPE = new Type<>();
 
     private final org.eclipse.che.api.core.model.machine.Machine machine;
 

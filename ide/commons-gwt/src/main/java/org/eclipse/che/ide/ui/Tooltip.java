@@ -125,6 +125,23 @@ public class Tooltip extends AutoHideComponent<AutoHideView<Void>, AutoHideCompo
                 new SimpleStringRenderer(tooltipText)).build();
     }
 
+    /** Static factory method for creating a simple tooltip with given element as content. */
+    public static Tooltip create(Element targetElement, PositionController.VerticalAlign vAlign,
+                                 PositionController.HorizontalAlign hAlign, final Element tooltipContent) {
+        return new Builder(targetElement, new TooltipPositionerBuilder().setVerticalAlign(vAlign)
+                .setHorizontalAlign(hAlign)
+                .buildAnchorPositioner(targetElement)).setTooltipRenderer(
+
+                new TooltipRenderer() {
+                    @Override
+                    public Element renderDom() {
+                        return tooltipContent;
+                    }
+                }
+
+        ).build();
+    }
+
     /** The Tooltip is a flyweight that uses a singleton View base element. */
     private static AutoHideView<Void> getViewInstance(Css css) {
         if (tooltipViewInstance == null) {
