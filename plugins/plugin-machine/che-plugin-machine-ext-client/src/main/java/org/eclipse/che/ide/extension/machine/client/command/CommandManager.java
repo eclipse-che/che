@@ -115,6 +115,7 @@ public class CommandManager {
             public void apply(String arg) throws OperationException {
                 final CommandDto command = dtoFactory.createDto(CommandDto.class)
                                                      .withName(configuration.getName())
+                                                     .withAttributes(configuration.getAttributes())
                                                      .withCommandLine(arg)
                                                      .withType(configuration.getType().getId());
 
