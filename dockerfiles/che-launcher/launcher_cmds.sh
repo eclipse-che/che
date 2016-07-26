@@ -63,10 +63,14 @@ stop_che_server() {
     info "-------------------------------------------------------"
   else
     info "ECLIPSE CHE: STOPPING SERVER..."
-    docker exec ${CHE_SERVER_CONTAINER_NAME} /home/user/che/bin/che.sh -c stop > /dev/null 2>&1
-    sleep 5
+    docker exec ${CHE_SERVER_CONTAINER_NAME} /home/user/che/bin/che.sh -c -s:uid stop > /dev/null
+    wait_until_container_is_stopped 60
+    if che_container_is_running; then
+      error_exit "ECLIPSE CHE: Timeout waiting Che container to stop."
+    fi
+
     info "ECLIPSE CHE: REMOVING CONTAINER"
-    docker rm -f ${CHE_SERVER_CONTAINER_NAME} > /dev/null 2>&1
+    docker rm ${CHE_SERVER_CONTAINER_NAME} > /dev/null
     info "ECLIPSE CHE: STOPPED"
   fi
 }
