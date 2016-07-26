@@ -51,6 +51,7 @@ public class JGitConnectionFactory extends GitConnectionFactory {
         this.sshKeyProvider = sshKeyProvider;
         this.userResolver = userResolver;
 
+        UserAgent.set(USER_AGENT);
         // Install the all-trusting trust manager
         try {
             SSLContext sslContext = SSLContext.getInstance("SSL");
@@ -70,7 +71,6 @@ public class JGitConnectionFactory extends GitConnectionFactory {
             };
             sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-            UserAgent.set(USER_AGENT);
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             throw new GitException(e);
         }
