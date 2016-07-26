@@ -177,7 +177,7 @@ public class WorkspaceServiceTest {
                      "&attribute=custom:custom:value" +
                      "&start-after-create=true");
 
-        verify(wsManager).startWorkspace(workspace.getId(), null, null);
+        verify(wsManager).startWorkspace(workspace.getId(), null, null, false);
         verify(wsManager).createWorkspace(anyObject(),
                                           anyString(),
                                           eq(ImmutableMap.of("stackId", "stack123",
@@ -302,7 +302,7 @@ public class WorkspaceServiceTest {
     @Test
     public void shouldStartWorkspace() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        when(wsManager.startWorkspace(any(), any(), any())).thenReturn(workspace);
+        when(wsManager.startWorkspace(any(), any(), any(), any())).thenReturn(workspace);
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
 
         final Response response = given().auth()
@@ -313,8 +313,41 @@ public class WorkspaceServiceTest {
 
         assertEquals(response.getStatusCode(), 200);
         assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
-        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
-        verify(wsManager, never()).recoverWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
+        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null, null);
+    }
+
+    @Test
+    public void shouldRestoreWorkspace() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.startWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime" +
+                                               "?environment=" + workspace.getConfig().getDefaultEnv() + "&restore=true");
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
+        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null, true);
+    }
+
+    @Test
+    public void shouldNotRestoreWorkspace() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.startWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime" +
+                                               "?environment=" + workspace.getConfig().getDefaultEnv() + "&restore=false");
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
+        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null, false);
     }
 
     @Test
@@ -336,23 +369,6 @@ public class WorkspaceServiceTest {
 
         assertEquals(response.getStatusCode(), 200);
         verify(validator).validateConfig(any());
-    }
-
-    @Test
-    public void shouldRecoverWorkspace() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        when(wsManager.recoverWorkspace(any(), any(), any())).thenReturn(workspace);
-        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .when()
-                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime/snapshot" +
-                                               "?environment=" + workspace.getConfig().getDefaultEnv());
-
-        assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
-        verify(wsManager).recoverWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
     }
 
     @Test

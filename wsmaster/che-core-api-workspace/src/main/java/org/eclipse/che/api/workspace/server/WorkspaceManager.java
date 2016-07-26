@@ -72,6 +72,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author gazarenkov
  * @author Alexander Garagatyi
  * @author Yevhenii Voevodin
+ * @author Igor Vinokur
  */
 @Singleton
 public class WorkspaceManager {
@@ -352,6 +353,18 @@ public class WorkspaceManager {
      * @param accountId
      *         account which should be used for this runtime workspace or null when
      *         it should be automatically detected
+     * @param restore
+     *         if <code>true</code> workspace will be restored from snapshot if snapshot exists,
+     *         otherwise (if snapshot does not exist) workspace will be started from default source.
+     *         If <code>false</code> workspace will be started from default source,
+     *         even if auto-restore is enabled and snapshot exists.
+     *         If <code>null</code> workspace will be restored from snapshot
+     *         only if workspace has `auto-restore` attribute set to <code>true</code>,
+     *         or system wide parameter `auto-restore` is enabled and snapshot exists.
+     *         <p>
+     *         This parameter has the highest priority to define if it is needed to restore from snapshot or not.
+     *         If it is not defined workspace `auto-restore` attribute will be checked, then if last is not defined
+     *         system wide `auto-restore` parameter will be checked.
      * @return starting workspace
      * @throws NullPointerException
      *         when {@code workspaceId} is null
@@ -363,15 +376,16 @@ public class WorkspaceManager {
      */
     public WorkspaceImpl startWorkspace(String workspaceId,
                                         @Nullable String envName,
-                                        @Nullable String accountId) throws NotFoundException,
-                                                                           ServerException,
-                                                                           ConflictException {
+                                        @Nullable String accountId,
+                                        @Nullable Boolean restore) throws NotFoundException,
+                                                                          ServerException,
+                                                                          ConflictException {
         requireNonNull(workspaceId, "Required non-null workspace id");
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
         final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
         final boolean snapshotExists = !getSnapshot(workspaceId).isEmpty();
-        return performAsyncStart(workspace, envName, snapshotExists && autoRestore, accountId);
+        return performAsyncStart(workspace, envName, firstNonNull(restore, autoRestore) && snapshotExists, accountId);
     }
 
     /**
@@ -408,38 +422,6 @@ public class WorkspaceManager {
                                                           accountId);
         performAsyncStart(workspace, workspace.getConfig().getDefaultEnv(), false, accountId);
         return normalizeState(workspace);
-    }
-
-    /**
-     * Asynchronously recovers the workspace from the snapshot.
-     *
-     * @param workspaceId
-     *         workspace id
-     * @param envName
-     *         environment name or null if default one should be used
-     * @param accountId
-     *         account which should be used for this runtime workspace or null when
-     *         it should be automatically detected
-     * @return starting workspace instance
-     * @throws NullPointerException
-     *         when {@code workspaceId} is null
-     * @throws NotFoundException
-     *         when workspace with such id doesn't exist
-     * @throws ServerException
-     *         when any server error occurs
-     * @throws ConflictException
-     *         when workspace with such id is not stopped
-     * @throws ForbiddenException
-     *         when user doesn't have access to start the new workspace
-     */
-    public WorkspaceImpl recoverWorkspace(String workspaceId,
-                                          @Nullable String envName,
-                                          @Nullable String accountId) throws NotFoundException,
-                                                                             ServerException,
-                                                                             ConflictException,
-                                                                             ForbiddenException {
-        requireNonNull(workspaceId, "Required non-null workspace id");
-        return performAsyncStart(workspaceDao.get(workspaceId), envName, true, accountId);
     }
 
     /**
