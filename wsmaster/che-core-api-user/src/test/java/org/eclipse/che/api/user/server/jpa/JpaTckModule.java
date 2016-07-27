@@ -14,6 +14,7 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -28,7 +29,6 @@ import org.eclipse.che.security.SHA512PasswordEncryptor;
 
 import java.util.Map;
 
-
 /**
  * @author Yevhenii Voevodin
  */
@@ -38,6 +38,7 @@ public class JpaTckModule extends TckModule {
     protected void configure() {
         install(new JpaPersistModule("main"));
         bind(JpaInitializer.class).asEagerSingleton();
+        bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
 
         bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(UserJpaTckRepository.class);
         bind(new TypeLiteral<TckRepository<ProfileImpl>>() {}).to(ProfileJpaTckRepository.class);

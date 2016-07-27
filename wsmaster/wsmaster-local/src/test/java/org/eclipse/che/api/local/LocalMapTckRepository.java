@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 import java.util.Map;
 import java.util.function.Function;
 
@@ -22,7 +24,7 @@ import java.util.function.Function;
  */
 public class LocalMapTckRepository<T> extends LocalTckRepository<Map<String, T>, T> {
 
-    public LocalMapTckRepository(Map<String, T> storage, Function<T, String> keyMapper) {
-        super(storage, (s, entity) -> storage.put(keyMapper.apply(entity), entity), Map::clear);
+    public LocalMapTckRepository(Map<String, T> storage, Function<T, String> keyMapper, @Nullable Object mutex) {
+        super(storage, (s, entity) -> storage.put(keyMapper.apply(entity), entity), Map::clear, mutex);
     }
 }

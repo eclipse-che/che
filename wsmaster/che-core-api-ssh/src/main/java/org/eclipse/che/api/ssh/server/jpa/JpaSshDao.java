@@ -16,24 +16,35 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
  * JPA based implementation of {@link SshDao}.
  *
  * @author Mihail Kuznyetsov
+ * @author Yevhenii Voevodin
  */
 @Singleton
 public class JpaSshDao implements SshDao {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JpaSshDao.class);
 
     @Inject
     private Provider<EntityManager> managerProvider;
@@ -44,9 +55,9 @@ public class JpaSshDao implements SshDao {
         try {
             doCreate(sshPair);
         } catch (DuplicateKeyException e) {
-            throw new ConflictException(String.format("Ssh pair with service '%s' and name '%s' already exists",
-                                                      sshPair.getService(),
-                                                      sshPair.getName()));
+            throw new ConflictException(format("Ssh pair with service '%s' and name '%s' already exists",
+                                               sshPair.getService(),
+                                               sshPair.getName()));
         } catch (RuntimeException e) {
             throw new ServerException(e);
         }
@@ -59,10 +70,7 @@ public class JpaSshDao implements SshDao {
         requireNonNull(service);
         try {
             return managerProvider.get()
-                                  .createQuery("SELECT pair " +
-                                               "FROM SshKeyPair pair " +
-                                               "WHERE pair.owner = :owner " +
-                                               "  AND pair.service = :service", SshPairImpl.class)
+                                  .createNamedQuery("SshKeyPair.getByOwnerAndService", SshPairImpl.class)
                                   .setParameter("owner", owner)
                                   .setParameter("service", service)
                                   .getResultList();
@@ -80,7 +88,7 @@ public class JpaSshDao implements SshDao {
         try {
             SshPairImpl result = managerProvider.get().find(SshPairImpl.class, new SshPairPrimaryKey(owner, service, name));
             if (result == null) {
-                throw new NotFoundException(String.format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
+                throw new NotFoundException(format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
             }
             return result;
         } catch (RuntimeException e) {
@@ -100,6 +108,20 @@ public class JpaSshDao implements SshDao {
         }
     }
 
+    @Override
+    @Transactional
+    public List<SshPairImpl> get(String owner) throws ServerException {
+        requireNonNull(owner, "Required non-null owner");
+        try {
+            return managerProvider.get()
+                                  .createNamedQuery("SshKeyPair.getByOwner", SshPairImpl.class)
+                                  .setParameter("owner", owner)
+                                  .getResultList();
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
     @Transactional
     protected void doCreate(SshPairImpl entity) {
         managerProvider.get().persist(entity);
@@ -110,8 +132,37 @@ public class JpaSshDao implements SshDao {
         EntityManager manager = managerProvider.get();
         SshPairImpl entity = manager.find(SshPairImpl.class, new SshPairPrimaryKey(owner, service, name));
         if (entity == null) {
-            throw new NotFoundException(String.format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
+            throw new NotFoundException(format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
         }
         manager.remove(entity);
+    }
+
+    @Singleton
+    public static class RemoveSshKeysBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+        @Inject
+        private SshDao       sshDao;
+        @Inject
+        private EventService eventService;
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this);
+        }
+
+        @Override
+        public void onEvent(BeforeUserRemovedEvent event) {
+            try {
+                for (SshPairImpl sshPair : sshDao.get(event.getUser().getId())) {
+                    sshDao.remove(sshPair.getOwner(), sshPair.getService(), sshPair.getName());
+                }
+            } catch (Exception x) {
+                LOG.error(format("Couldn't remove ssh keys before user '%s' is removed", event.getUser().getId()), x);
+            }
+        }
     }
 }

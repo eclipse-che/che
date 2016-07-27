@@ -40,6 +40,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * In-memory implementation of {@link SnapshotDao}.
  *
+ * <p>The implementation is thread-safe guarded by this instance.
+ * Clients may use instance locking to perform extra, thread-safe operation.
+ *
  * @author Yevhenii Voevodin
  */
 @Singleton

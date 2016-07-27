@@ -207,7 +207,7 @@ public class UserManager {
     }
 
     /**
-     * Removes user and his dependencies by given {@code id}.
+     * Removes user by given {@code id}.
      *
      * @param id
      *         user identifier
@@ -220,8 +220,6 @@ public class UserManager {
      */
     public void remove(String id) throws ServerException, ConflictException {
         requireNonNull(id, "Required non-null id");
-        profileDao.remove(id);
-        preferencesDao.remove(id);
         userDao.remove(id);
     }
 }

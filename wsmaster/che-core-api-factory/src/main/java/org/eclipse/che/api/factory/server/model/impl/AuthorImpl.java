@@ -15,8 +15,6 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.persistence.Basic;
 import javax.persistence.Embeddable;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import java.util.Objects;
 
 /**
@@ -32,10 +30,6 @@ public class AuthorImpl implements Author {
 
     @Basic
     private String userId;
-
-    @OneToOne
-    @JoinColumn(insertable = false, updatable = false, name = "userId", referencedColumnName = "id")
-    private UserImpl userEntity;
 
     public AuthorImpl() {}
 

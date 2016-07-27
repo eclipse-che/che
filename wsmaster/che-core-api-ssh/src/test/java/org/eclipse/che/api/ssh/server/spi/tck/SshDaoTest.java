@@ -36,13 +36,16 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 /**
+ * Tests {@link SshDao} interface contract.
+ *
  * @author Mihail Kuznyetsov.
+ * @author Yevhenii Voevodin
  */
 @Guice(moduleFactory = TckModuleFactory.class)
 @Test(suiteName = SshDaoTest.SUITE_NAME)
 public class SshDaoTest {
     public static final String SUITE_NAME   = "SshDaoTck";
-    private static final int COUNT_OF_PAIRS = 5;
+    private static final int COUNT_OF_PAIRS = 6;
     private static final int COUNT_OF_USERS = 3;
 
     SshPairImpl[] pairs;
@@ -70,9 +73,8 @@ public class SshDaoTest {
         pairs = new SshPairImpl[COUNT_OF_PAIRS];
 
         for (int i = 0; i < COUNT_OF_PAIRS; i++) {
-            // 2 pairs share same owner and service
-            pairs[i] = new SshPairImpl("owner" + i/2,
-                                       "service" + i/2,
+            pairs[i] = new SshPairImpl("owner" + i/3, // 3 each pairs share the same owner
+                                       "service" + i/2, // each 2 pairs share the same service
                                        "name" + i,
                                        NameGenerator.generate("publicKey-", 20),
                                        NameGenerator.generate("privateKey-", 20));
@@ -88,7 +90,7 @@ public class SshDaoTest {
         userRepository.removeAll();
     }
 
-    @Test
+    @Test(dependsOnMethods = "shouldGetSshPairByNameOwnerAndService")
     public void shouldCreateSshKeyPair() throws Exception {
         SshPairImpl pair = new SshPairImpl("owner1", "service", "name", "publicKey", "privateKey");
         sshDao.create(pair);
@@ -160,16 +162,30 @@ public class SshDaoTest {
         sshDao.get("owner", null);
     }
 
-    @Test
+    @Test(expectedExceptions = NotFoundException.class,
+          dependsOnMethods = "shouldThrowNotFoundExceptionIfPairWithSuchNameOwnerAndServiceDoesNotExist")
     public void shouldRemoveSshKeyPair() throws Exception {
-        sshDao.remove(pairs[4].getOwner(), pairs[4].getService(), pairs[4].getName());
+        final SshPairImpl pair = pairs[4];
 
         try {
-            sshDao.get(pairs[4].getOwner(), pairs[4].getService(), pairs[4].getName());
-            fail("Object is still present in database");
-        } catch (NotFoundException e) {
+            sshDao.remove(pair.getOwner(), pair.getService(), pair.getName());
+        } catch (NotFoundException x) {
+            fail("SshKeyPair should be removed");
         }
 
+        sshDao.get(pair.getOwner(), pair.getService(), pair.getName());
+    }
+
+    @Test
+    public void shouldGetSshPairByOwner() throws Exception {
+        final List<SshPairImpl> sshPairs = sshDao.get(pairs[0].getOwner());
+
+        assertEquals(new HashSet<>(sshPairs), new HashSet<>(asList(pairs[0], pairs[1], pairs[2])));
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void shouldThrowNpeWhenGettingByNullOwner() throws Exception {
+        sshDao.get(null);
     }
 
     @Test(expectedExceptions = NotFoundException.class)

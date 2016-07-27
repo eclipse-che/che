@@ -15,6 +15,7 @@ import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
@@ -28,23 +29,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
- * In-memory implementation of {@link SshDao}
+ * In-memory implementation of {@link SshDao}.
+ *
+ * <p>The implementation is thread-safe guarded by this instance.
+ * Clients may use instance locking to perform extra, thread-safe operation.
  *
  * @author Sergii Leschenko
+ * @author Yevhenii Voevodin
  */
 @Singleton
 public class LocalSshDaoImpl implements SshDao {
 
-    private final ReadWriteLock                     lock;
-    private final LocalStorage                      sshStorage;
+    private final LocalStorage sshStorage;
 
     @VisibleForTesting
     final List<SshPairImpl> pairs;
@@ -52,76 +54,76 @@ public class LocalSshDaoImpl implements SshDao {
     @Inject
     public LocalSshDaoImpl(LocalStorageFactory storageFactory) throws IOException {
         pairs = new ArrayList<>();
-        lock = new ReentrantReadWriteLock();
         sshStorage = storageFactory.create("ssh.json");
     }
 
     @Override
-    public void create(SshPairImpl sshPair) throws ConflictException {
+    public synchronized void create(SshPairImpl sshPair) throws ConflictException {
         requireNonNull(sshPair);
-        lock.writeLock().lock();
-        try {
-            final Optional<SshPairImpl> any = find(sshPair.getOwner(), sshPair.getService(), sshPair.getName());
-            if (any.isPresent()) {
-                throw new ConflictException(format("Ssh pair with service '%s' and name %s already exist.",
-                                                   sshPair.getService(),
-                                                   sshPair.getName()));
-            }
-            pairs.add(sshPair);
-        } finally {
-            lock.writeLock().unlock();
+        final Optional<SshPairImpl> any = find(sshPair.getOwner(), sshPair.getService(), sshPair.getName());
+        if (any.isPresent()) {
+            throw new ConflictException(format("Ssh pair with service '%s' and name %s already exist.",
+                                               sshPair.getService(),
+                                               sshPair.getName()));
         }
+        pairs.add(sshPair);
     }
 
     @Override
-    public SshPairImpl get(String owner, String service, String name) throws NotFoundException {
+    public synchronized SshPairImpl get(String owner, String service, String name) throws NotFoundException {
         requireNonNull(owner);
         requireNonNull(service);
         requireNonNull(name);
-        lock.readLock().lock();
-        try {
-            final Optional<SshPairImpl> any = find(owner, service, name);
-            if (any.isPresent()) {
-                return any.get();
-            }
+        final Optional<SshPairImpl> any = find(owner, service, name);
+        if (any.isPresent()) {
+            return new SshPairImpl(any.get());
+        }
+        throw new NotFoundException(format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
+    }
+
+    @Override
+    public synchronized void remove(String owner, String service, String name) throws NotFoundException {
+        requireNonNull(owner);
+        requireNonNull(service);
+        requireNonNull(name);
+        final Optional<SshPairImpl> any = find(owner, service, name);
+        if (!any.isPresent()) {
             throw new NotFoundException(format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
-        } finally {
-            lock.readLock().unlock();
         }
+        pairs.remove(any.get());
     }
 
     @Override
-    public void remove(String owner, String service, String name) throws NotFoundException {
-        requireNonNull(owner);
-        requireNonNull(service);
-        requireNonNull(name);
-        lock.writeLock().lock();
-        try {
-            final Optional<SshPairImpl> any = find(owner, service, name);
-            if (!any.isPresent()) {
-                throw new NotFoundException(format("Ssh pair with service '%s' and name '%s' was not found.", service, name));
-            }
-            pairs.remove(any.get());
-        } finally {
-            lock.writeLock().unlock();
-        }
+    public synchronized List<SshPairImpl> get(String owner) throws ServerException {
+        requireNonNull(owner, "Required non-null owner");
+        return pairs.stream()
+                    .filter(p -> p.getOwner().equals(owner))
+                    .map(SshPairImpl::new)
+                    .collect(Collectors.toList());
     }
 
     @Override
-    public List<SshPairImpl> get(String owner, String service) {
+    public synchronized List<SshPairImpl> get(String owner, String service) {
         requireNonNull(owner);
         requireNonNull(service);
-        lock.readLock().lock();
-        try {
-            return pairs.stream()
-                        .filter(sshPair -> sshPair.getOwner().equals(owner)
-                                           && sshPair.getService().equals(service))
-                        .collect(Collectors.toList());
-        } finally {
-            lock.readLock().unlock();
-        }
+        return pairs.stream()
+                    .filter(sshPair -> sshPair.getOwner().equals(owner)
+                                       && sshPair.getService().equals(service))
+                    .map(SshPairImpl::new)
+                    .collect(Collectors.toList());
     }
 
+    @PostConstruct
+    @VisibleForTesting
+    synchronized void loadSshPairs() {
+        pairs.addAll(sshStorage.loadList(new TypeToken<List<SshPairImpl>>() {}));
+    }
+
+    @PreDestroy
+    @VisibleForTesting
+    synchronized void saveSshPairs() throws IOException {
+        sshStorage.store(pairs);
+    }
 
     private Optional<SshPairImpl> find(String owner, String service, String name) {
         return pairs.stream()
@@ -129,27 +131,5 @@ public class LocalSshDaoImpl implements SshDao {
                                        && sshPair.getService().equals(service)
                                        && sshPair.getName().equals(name))
                     .findAny();
-    }
-
-    @PostConstruct
-    @VisibleForTesting
-    void loadSshPairs() {
-        lock.writeLock().lock();
-        try {
-            pairs.addAll(sshStorage.loadList(new TypeToken<List<SshPairImpl>>() {}));
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    @PreDestroy
-    @VisibleForTesting
-    void saveSshPairs() throws IOException {
-        lock.readLock().lock();
-        try {
-            sshStorage.store(pairs);
-        } finally {
-            lock.readLock().unlock();
-        }
     }
 }

@@ -90,4 +90,18 @@ public interface SshDao {
      *         when any other error occurs during ssh pair removing
      */
     void remove(String owner, String service, String name) throws ServerException, NotFoundException;
+
+    /**
+     * Gets ssh pairs by owner.
+     *
+     * @param owner
+     *         the owner of the ssh key
+     * @return the list of the ssh key  pairs owned by the {@code owner}, or empty list if
+     * there are no ssh key pairs by the given {@code owner}
+     * @throws NullPointerException
+     *         when {@code owner} is null
+     * @throws ServerException
+     *         when any error occurs(e.g. database connection error)
+     */
+    List<SshPairImpl> get(String owner) throws ServerException;
 }
