@@ -16,7 +16,7 @@ $ip            = ENV['CHE_IP'] || "192.168.28.100"
 $hostPort      = (ENV['CHE_PORT'] || 8080).to_i
 $containerPort = (ENV['CHE_CONTAINER_PORT'] || ($hostPort == -1 ? 8080 : $hostPort)).to_i
 $user_data     = ENV['CHE_DATA'] || "."
-
+$vm_name       = ENV['CHE_VM_NAME'] || "eclipse-che-vm"
 $provisionProgress = ENV['PROVISION_PROGRESS'] || "basic"
 
 Vagrant.configure(2) do |config|
@@ -53,7 +53,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "4096"
-    vb.name = "eclipse-che-vm"
+    vb.name = $vm_name
   end
 
   $script = <<-'SHELL'
