@@ -16,6 +16,7 @@ import io.typefox.lsapi.InitializeResult;
 import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 
+import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -23,6 +24,8 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -54,8 +57,8 @@ public class LanguageServerRegistry {
     private final EventBus                            eventBus;
     private final LanguageServerRegistryServiceClient client;
 
-    private final Map<ProjectExtensionKey, InitializeResult> projectToInitResult;
-    private final Map<String, InitializeResult>              extensionToInitResult;
+    private final Map<ProjectExtensionKey, InitializeResult>                      projectToInitResult;
+    private final Map<ProjectExtensionKey, Callback<InitializeResult, Throwable>> callbackMap;
 
     @Inject
     public LanguageServerRegistry(EventBus eventBus,
@@ -63,7 +66,7 @@ public class LanguageServerRegistry {
         this.eventBus = eventBus;
         this.client = client;
         this.projectToInitResult = new HashMap<>();
-        this.extensionToInitResult = new HashMap<>();
+        this.callbackMap = new HashMap<>();
     }
 
     /**
@@ -72,8 +75,30 @@ public class LanguageServerRegistry {
     protected void register(String projectPath, LanguageDescription languageDescription, ServerCapabilities capabilities) {
         InitializeResult initializeResult = new InitializeResultImpl(capabilities, languageDescription);
         for (String ext : languageDescription.getFileExtensions()) {
-            projectToInitResult.put(createProjectKey(projectPath, ext), initializeResult);
-            extensionToInitResult.put(ext, initializeResult);
+            ProjectExtensionKey key = createProjectKey(projectPath, ext);
+            projectToInitResult.put(key, initializeResult);
+
+            if (callbackMap.containsKey(key)) {
+                Callback<InitializeResult, Throwable> callback = callbackMap.remove(key);
+                callback.onSuccess(initializeResult);
+            }
+        }
+    }
+
+    public Promise<InitializeResult> getOrInitializeServer(String projectPath, String ext, String filePath) {
+        final ProjectExtensionKey key = createProjectKey(projectPath, ext);
+        if (projectToInitResult.containsKey(key)) {
+            return Promises.resolve(projectToInitResult.get(key));
+        } else {
+            //call initialize service
+            client.initializeServer(filePath);
+            //wait for response
+            return CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<InitializeResult, Throwable>() {
+                @Override
+                public void makeCall(Callback<InitializeResult, Throwable> callback) {
+                    callbackMap.put(key, callback);
+                }
+            });
         }
     }
 
@@ -139,7 +164,6 @@ public class LanguageServerRegistry {
             @Override
             public void onWsAgentStopped(WsAgentStateEvent event) {
                 projectToInitResult.clear();
-                extensionToInitResult.clear();
             }
         });
     }

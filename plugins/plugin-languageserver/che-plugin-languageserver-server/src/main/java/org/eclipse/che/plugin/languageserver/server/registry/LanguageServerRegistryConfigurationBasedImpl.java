@@ -58,7 +58,7 @@ import static org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey.c
 public class LanguageServerRegistryConfigurationBasedImpl implements LanguageServerRegistry, ServerInitializerObserver {
     public static final String CONFIGURATION_URL = "https://codenvy.com/update/repository/public/download/language-server-configurations";
 
-    private final static String PROJECT_FOLDER_PATH = "/projects";
+    public final static String PROJECT_FOLDER_PATH = "/projects";
     private final static Logger LOG                 = LoggerFactory.getLogger(LanguageServerRegistryConfigurationBasedImpl.class);
 
     /**

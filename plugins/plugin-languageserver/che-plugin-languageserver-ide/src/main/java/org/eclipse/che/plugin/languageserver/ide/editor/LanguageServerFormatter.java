@@ -10,14 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
+import io.typefox.lsapi.ServerCapabilities;
+
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
@@ -27,6 +33,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.FormattingOptionsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
@@ -44,14 +51,19 @@ public class LanguageServerFormatter implements ContentFormatter {
     private final TextDocumentServiceClient client;
     private final DtoFactory                dtoFactory;
     private final NotificationManager       manager;
+    private final ServerCapabilities        capabilities;
     private       int                       tabWidth;
-    private TextEditor editor;
+    private       TextEditor                editor;
 
     @Inject
-    public LanguageServerFormatter(TextDocumentServiceClient client, DtoFactory dtoFactory, NotificationManager manager) {
+    public LanguageServerFormatter(TextDocumentServiceClient client,
+                                   DtoFactory dtoFactory,
+                                   NotificationManager manager,
+                                   @Assisted ServerCapabilities capabilities) {
         this.client = client;
         this.dtoFactory = dtoFactory;
         this.manager = manager;
+        this.capabilities = capabilities;
     }
 
     public void setTabWidth(int tabWidth) {
@@ -60,20 +72,52 @@ public class LanguageServerFormatter implements ContentFormatter {
 
     @Override
     public void format(Document document) {
+
         TextRange selectedRange = document.getSelectedTextRange();
-        if (selectedRange != null && !selectedRange.getFrom().equals(selectedRange.getTo())) {
+        if (selectedRange != null && !selectedRange.getFrom().equals(selectedRange.getTo()) &&
+            capabilities.isDocumentRangeFormattingProvider()) {
             //selection formatting
             formatRange(selectedRange, document);
-        } else {
+        } else if (capabilities.isDocumentFormattingProvider()) {
             //full document formatting
             formatFullDocument(document);
         }
+
 
     }
 
     @Override
     public void install(TextEditor editor) {
         this.editor = editor;
+        if (capabilities.getDocumentOnTypeFormattingProvider() != null &&
+            capabilities.getDocumentOnTypeFormattingProvider().getFirstTriggerCharacter() != null) {
+            editor.getDocument().getDocumentHandle().getDocEventBus().addHandler(DocumentChangeEvent.TYPE, new DocumentChangeHandler() {
+                @Override
+                public void onDocumentChange(DocumentChangeEvent event) {
+                    if (capabilities.getDocumentOnTypeFormattingProvider().getFirstTriggerCharacter().equals(event.getText())) {
+                        Document document = event.getDocument().getDocument();
+
+                        DocumentOnTypeFormattingParamsDTO params = dtoFactory.createDto(DocumentOnTypeFormattingParamsDTO.class);
+                        TextDocumentIdentifierDTO identifier = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
+                        identifier.setUri(document.getFile().getLocation().toString());
+                        params.setTextDocument(identifier);
+                        params.setOptions(getFormattingOptions());
+                        params.setCh(event.getText());
+
+                        TextPosition position = document.getPositionFromIndex(event.getOffset());
+
+                        PositionDTO start = dtoFactory.createDto(PositionDTO.class);
+                        start.setLine(position.getLine());
+                        start.setCharacter(position.getCharacter());
+                        params.setPosition(start);
+
+                        Promise<List<TextEditDTO>> promise = client.onTypeFormatting(params);
+                        handleFormatting(promise, document);
+
+                    }
+                }
+            });
+        }
     }
 
     private void formatFullDocument(Document document) {

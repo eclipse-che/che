@@ -14,7 +14,9 @@ package org.eclipse.che.plugin.languageserver.server.registry;
 
 import io.typefox.lsapi.InitializeParamsImpl;
 import io.typefox.lsapi.InitializeResult;
+import io.typefox.lsapi.InitializeResultImpl;
 import io.typefox.lsapi.LanguageDescription;
+import io.typefox.lsapi.LanguageDescriptionImpl;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
 
@@ -86,6 +88,10 @@ public class ServerInitializerImpl implements ServerInitializer {
                 server = doInitialize(factory, projectPath);
                 languageIdToServers.put(languageId, server);
             }
+            InitializeResult initializeResult = serversToInitResult.get(server);
+            if(initializeResult instanceof InitializeResultImpl){
+                ((InitializeResultImpl)initializeResult).setSupportedLanguages(Collections.singletonList((LanguageDescriptionImpl)factory.getLanguageDescription()));
+            }
             onServerInitialized(server, serversToInitResult.get(server).getCapabilities(), factory.getLanguageDescription(), projectPath);
             return server;
         }
@@ -141,7 +147,7 @@ public class ServerInitializerImpl implements ServerInitializer {
                                        ServerCapabilities capabilities,
                                        LanguageDescription languageDescription,
                                        String projectPath) {
-        observers.stream().forEach(observer -> observer.onServerInitialized(server, capabilities, languageDescription, projectPath));
+        observers.forEach(observer -> observer.onServerInitialized(server, capabilities, languageDescription, projectPath));
     }
 
     private static int getProcessId() {

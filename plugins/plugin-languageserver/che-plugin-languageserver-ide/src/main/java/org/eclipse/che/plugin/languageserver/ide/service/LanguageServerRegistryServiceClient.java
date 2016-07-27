@@ -55,4 +55,9 @@ public class LanguageServerRegistryServiceClient {
                                   .send(unmarshallerFactory.newListUnmarshaller(InitializeResultDTO.class));
     }
 
+    public void initializeServer(String path) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + BASE_URI + "/initialize?path=" + path;
+        asyncRequestFactory.createPostRequest(requestUrl, null).send();
+    }
+
 }

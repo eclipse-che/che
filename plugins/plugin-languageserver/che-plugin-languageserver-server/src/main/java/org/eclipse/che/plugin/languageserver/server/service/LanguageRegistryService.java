@@ -16,14 +16,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.plugin.languageserver.server.DtoConverter;
+import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
+import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryConfigurationBasedImpl;
 import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.InitializeResultDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
@@ -70,7 +74,8 @@ public class LanguageRegistryService {
 													 .collect(toList());
 
 						   InitializeResultDTO dto = newDto(InitializeResultDTO.class);
-						   dto.setProject(projectExtensionKey.getProject());
+						   dto.setProject(projectExtensionKey.getProject().substring(
+								   LanguageServerRegistryConfigurationBasedImpl.PROJECT_FOLDER_PATH.length()));
 						   dto.setSupportedLanguages(languageDescriptionDTOs);
 						   dto.setCapabilities(asDto(initializeResult.getCapabilities()));
 						   return dto;
@@ -78,4 +83,11 @@ public class LanguageRegistryService {
 					   .collect(toList());
 
 	}
+
+	@POST
+    @Path("initialize")
+	public void initialize(@QueryParam("path") String path) throws LanguageServerException {
+        //in most cases starts new LS if not already started
+        registry.findServer(TextDocumentService.prefixURI(path));
+    }
 }

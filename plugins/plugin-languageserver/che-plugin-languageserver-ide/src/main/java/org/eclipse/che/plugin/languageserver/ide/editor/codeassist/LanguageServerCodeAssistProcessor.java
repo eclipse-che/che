@@ -1,6 +1,9 @@
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
+import io.typefox.lsapi.ServerCapabilities;
+
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -27,6 +30,7 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     private final DtoFactory                dtoFactory;
     private final LanguageServerResources   resources;
     private final CompletionImageProvider   imageProvider;
+    private final ServerCapabilities serverCapabilities;
     private       TextDocumentServiceClient documentServiceClient;
     private String lastErrorMessage;
 
@@ -34,11 +38,13 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
     public LanguageServerCodeAssistProcessor(TextDocumentServiceClient documentServiceClient,
                                              DtoFactory dtoFactory,
                                              LanguageServerResources resources,
-                                             CompletionImageProvider imageProvider) {
+                                             CompletionImageProvider imageProvider,
+                                             @Assisted ServerCapabilities serverCapabilities) {
         this.documentServiceClient = documentServiceClient;
         this.dtoFactory = dtoFactory;
         this.resources = resources;
         this.imageProvider = imageProvider;
+        this.serverCapabilities = serverCapabilities;
     }
 
     @Override
@@ -64,7 +70,8 @@ public class LanguageServerCodeAssistProcessor implements CodeAssistProcessor {
                                                                             documentServiceClient,
                                                                             documentId,
                                                                             resources,
-                                                                            imageProvider.getIcon(item.getKind())));
+                                                                            imageProvider.getIcon(item.getKind()),
+                                                                            serverCapabilities));
                 }
                 callback.proposalComputed(proposals);
             }

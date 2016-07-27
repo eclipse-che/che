@@ -15,7 +15,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.editor.AsyncEditorProvider;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
@@ -167,31 +171,49 @@ public class EditorAgentImpl implements EditorAgent,
             workspaceAgent.setActivePart(openedEditor, EDITING);
             callback.onEditorActivated(openedEditor);
         } else {
-            FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
+            final FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
             EditorProvider editorProvider = editorRegistry.getEditor(fileType);
+            if (editorProvider instanceof AsyncEditorProvider) {
+                AsyncEditorProvider provider = (AsyncEditorProvider)editorProvider;
+                Promise<EditorPartPresenter> promise = provider.createEditor(file);
+                if (promise != null) {
+                    promise.then(new Operation<EditorPartPresenter>() {
+                        @Override
+                        public void apply(EditorPartPresenter arg) throws OperationException {
+                            initEditor(file, callback, fileType, arg);
+                        }
+                    });
+                    return;
+                }
+            }
             final EditorPartPresenter editor = editorProvider.getEditor();
 
-            editor.init(new EditorInputImpl(fileType, file), callback);
-            editor.addCloseHandler(this);
-
-            workspaceAgent.openPart(editor, EDITING);
-            openedEditors.add(editor);
-
-            workspaceAgent.setActivePart(editor);
-            editor.addPropertyListener(new PropertyListener() {
-                @Override
-                public void propertyChanged(PartPresenter source, int propId) {
-                    if (propId == EditorPartPresenter.PROP_INPUT) {
-                        if (editor instanceof HasReadOnlyProperty) {
-                            ((HasReadOnlyProperty)editor).setReadOnly(file.isReadOnly());
-                        }
-
-                        callback.onEditorOpened(editor);
-                        eventBus.fireEvent(new EditorOpenedEvent(file, editor));
-                    }
-                }
-            });
+            initEditor(file, callback, fileType, editor);
         }
+    }
+
+    private void initEditor(final VirtualFile file, final OpenEditorCallback callback, FileType fileType,
+                            final EditorPartPresenter editor) {
+        editor.init(new EditorInputImpl(fileType, file), callback);
+        editor.addCloseHandler(this);
+
+        workspaceAgent.openPart(editor, EDITING);
+        openedEditors.add(editor);
+
+        workspaceAgent.setActivePart(editor);
+        editor.addPropertyListener(new PropertyListener() {
+            @Override
+            public void propertyChanged(PartPresenter source, int propId) {
+                if (propId == EditorPartPresenter.PROP_INPUT) {
+                    if (editor instanceof HasReadOnlyProperty) {
+                        ((HasReadOnlyProperty)editor).setReadOnly(file.isReadOnly());
+                    }
+
+                    callback.onEditorOpened(editor);
+                    eventBus.fireEvent(new EditorOpenedEvent(file, editor));
+                }
+            }
+        });
     }
 
     @Override

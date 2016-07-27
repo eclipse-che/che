@@ -1,5 +1,7 @@
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
+import io.typefox.lsapi.ServerCapabilities;
+
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Label;
@@ -27,17 +29,20 @@ class CompletionItemBasedCompletionProposal implements CompletionProposal {
     private final TextDocumentIdentifierDTO documentId;
     private final LanguageServerResources   resources;
     private final Icon                      icon;
+    private final ServerCapabilities        serverCapabilities;
     private       CompletionItemDTO         completionItem;
 
     CompletionItemBasedCompletionProposal(CompletionItemDTO completionItem,
                                           TextDocumentServiceClient documentServiceClient,
                                           TextDocumentIdentifierDTO documentId,
-                                          LanguageServerResources resources, Icon icon) {
+                                          LanguageServerResources resources, Icon icon,
+                                          ServerCapabilities serverCapabilities) {
         this.completionItem = completionItem;
         this.documentServiceClient = documentServiceClient;
         this.documentId = documentId;
         this.resources = resources;
         this.icon = icon;
+        this.serverCapabilities = serverCapabilities;
     }
 
     @Override
@@ -71,9 +76,8 @@ class CompletionItemBasedCompletionProposal implements CompletionProposal {
 
     @Override
     public void getCompletion(final CompletionCallback callback) {
-        //call resolve only if we dont have TextEdit in CompletionItem
-        //TODO we need to  check also CompletionItem#getInsertText();
-        if (completionItem.getTextEdit() == null) {
+
+        if (serverCapabilities.getCompletionProvider().getResolveProvider()) {
             completionItem.setTextDocumentIdentifier(documentId);
             documentServiceClient.resolveCompletionItem(completionItem).then(new Operation<CompletionItemDTO>() {
                 @Override
@@ -84,7 +88,7 @@ class CompletionItemBasedCompletionProposal implements CompletionProposal {
                 @Override
                 public void apply(PromiseError arg) throws OperationException {
                     Log.error(getClass(), arg);
-                    //TODO we need to respect server capabilities, some LS don't supports resolve completion item
+                    //try to apply with default text
                     callback.onCompletion(new CompletionImpl(completionItem));
                 }
             });
