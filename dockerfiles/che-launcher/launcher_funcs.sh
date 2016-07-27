@@ -224,7 +224,7 @@ wait_until_container_is_stopped() {
 }
 
 server_is_booted() {
-  HTTP_STATUS_CODE=$(curl -I http://$(docker inspect -f '{{.NetworkSettings.IPAddress}}' che-server):8080/api/ \
+  HTTP_STATUS_CODE=$(curl -I http://$(docker inspect -f '{{.NetworkSettings.IPAddress}}' "${CHE_SERVER_CONTAINER_NAME}"):8080/api/ \
                      -s -o /dev/null --write-out "%{http_code}")
   if [ "${HTTP_STATUS_CODE}" = "200" ]; then
     return 0
