@@ -20,6 +20,7 @@ import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.UserAgent;
 
 import javax.inject.Inject;
 import javax.net.ssl.HttpsURLConnection;
@@ -38,6 +39,8 @@ import java.security.NoSuchAlgorithmException;
  */
 public class JGitConnectionFactory extends GitConnectionFactory {
 
+    private static final String USER_AGENT = "git/2.1.0";
+
     private final CredentialsLoader credentialsLoader;
     private final SshKeyProvider    sshKeyProvider;
     private final GitUserResolver   userResolver;
@@ -48,6 +51,7 @@ public class JGitConnectionFactory extends GitConnectionFactory {
         this.sshKeyProvider = sshKeyProvider;
         this.userResolver = userResolver;
 
+        UserAgent.set(USER_AGENT);
         // Install the all-trusting trust manager
         try {
             SSLContext sslContext = SSLContext.getInstance("SSL");

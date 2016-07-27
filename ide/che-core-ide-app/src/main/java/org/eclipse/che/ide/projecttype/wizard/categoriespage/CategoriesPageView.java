@@ -46,6 +46,9 @@ public interface CategoriesPageView extends View<CategoriesPageView.ActionDelega
 
     void showNameError();
 
+    /**Sets focus to the Select Path button.*/
+    void focusSelectPathButton();
+
     void focusName();
 
     void setProjectTypes(List<ProjectTypeDto> availableProjectTypes);

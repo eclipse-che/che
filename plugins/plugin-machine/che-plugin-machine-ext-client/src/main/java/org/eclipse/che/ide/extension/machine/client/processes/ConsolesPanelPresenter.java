@@ -26,7 +26,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
@@ -81,8 +80,7 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
                                                                      OutputConsole.ConsoleOutputListener,
                                                                      WorkspaceStartingEvent.Handler,
                                                                      WorkspaceStoppedEvent.Handler,
-                                                                     MachineStateEvent.Handler,
-                                                                     DevMachineStateEvent.Handler {
+                                                                     MachineStateEvent.Handler {
 
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
 
@@ -153,13 +151,12 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         this.consoleCommands = new HashMap<>();
         this.machineNodes = new HashMap<>();
 
-        this.view.setDelegate(this);
+        view.setDelegate(this);
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
-        eventBus.addHandler(DevMachineStateEvent.TYPE, this);
 
         rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootNodes);
 
@@ -215,14 +212,6 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         view.setProcessesData(rootNode);
     }
 
-    @Override
-    public void onDevMachineStarted(DevMachineStateEvent event) {
-    }
-
-    @Override
-    public void onDevMachineDestroyed(DevMachineStateEvent event) {
-    }
-
     /** Get the list of all available machines. */
     public void fetchMachines() {
         machineService.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
@@ -262,9 +251,11 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
     }
 
     private ProcessTreeNode addMachineNode(MachineDto machine) {
-        List<ProcessTreeNode> processTreeNodes = new ArrayList<ProcessTreeNode>();
+        if (machineNodes.containsKey(machine.getId())) {
+            return machineNodes.get(machine.getId());
+        }
 
-        ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, processTreeNodes);
+        ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, new ArrayList<ProcessTreeNode>());
         machineNode.setRunning(true);
         machineNodes.put(machine.getId(), machineNode);
 
@@ -288,6 +279,7 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
                 for (MachineProcessDto machineProcessDto : arg) {
                     final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
                                                             .withName(machineProcessDto.getName())
+                                                            .withAttributes(machineProcessDto.getAttributes())
                                                             .withCommandLine(machineProcessDto.getCommandLine())
                                                             .withType(machineProcessDto.getType());
 

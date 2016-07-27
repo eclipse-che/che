@@ -1,0 +1,202 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <ui:with field="machineResources" type="org.eclipse.che.ide.extension.machine.client.MachineResources"/>
+
+    <ui:style>
+
+        @eval outputBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.outputBackgroundColor();
+
+        @eval resourceMonitorBarBackground org.eclipse.che.ide.api.theme.Style.theme.resourceMonitorBarBackground();
+
+        .monitor {
+            width: 22px;
+            height: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cpu,
+        .mem,
+        .disk {
+            position: absolute;
+            overflow: hidden;
+            width: 3px;
+            height: 12px;
+            background-color: resourceMonitorBarBackground;
+            top: 3px;
+        }
+
+        .cpu {
+            left: 4px;
+        }
+
+        .mem {
+            left: 9px;
+        }
+
+        .disk {
+            left: 14px;
+        }
+
+        .cpu > div,
+        .mem > div,
+        .disk > div {
+            position: absolute;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+        }
+
+        .cpu > div {
+            background-color: #46af00;
+        }
+
+        .mem > div {
+            background-color: #f2b043;
+        }
+
+        .disk > div {
+            background-color: #d0021b;
+        }
+
+        .tooltip {
+            width: 210px;
+            height: 75px;
+            background-color: outputBackgroundColor;
+            font-size: 11px;
+        }
+
+        .rowCPU,
+        .rowMEM,
+        .rowDISK {
+            position: absolute;
+            left: 0px;
+            width: 100%;
+            height: 25px;
+            overflow: hidden;
+        }
+
+        .rowCPU {
+            top: 2px;
+        }
+        .rowMEM {
+            top: 30px;
+        }
+        .rowDISK {
+            top: 58px;
+        }
+
+        .labelCell {
+            position: absolute;
+            left: 10px;
+            top: 0px;
+            width: 35px;
+            height: 25px;
+            line-height: 25px;
+        }
+
+        .indicatorCell {
+            position: absolute;
+            left: 45px;
+            top: 2px;
+            width: 7px;
+            height: 21px;
+            background-color: resourceMonitorBarBackground;
+            overflow: hidden;
+        }
+
+        .valueCell {
+            position: absolute;
+            left: 60px;
+            top: 0px;
+            width: 35px;
+            height: 25px;
+            line-height: 25px;
+        }
+
+        .descriptionCell {
+            position: absolute;
+            left: 97px;
+            top: 0px;
+            width: 130px;
+            height: 25px;
+            line-height: 25px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .indicatorCPU {
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            width: 100%;
+            height: 52%;
+            background-color: #46af00;
+        }
+
+        .indicatorMEM {
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            width: 100%;
+            height: 82%;
+            background-color: #f2b043;
+        }
+
+        .indicatorDISK {
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            width: 100%;
+            height: 92%;
+            background-color: #d0021b;
+        }
+
+    </ui:style>
+
+    <g:FlowPanel styleName="{style.monitor}" visible="false">
+
+        <g:FlowPanel ui:field="cpuBar" styleName="{style.cpu}" debugId="cpuBar"><g:FlowPanel /></g:FlowPanel>
+        <g:FlowPanel ui:field="memBar" styleName="{style.mem}" debugId="memBar"><g:FlowPanel /></g:FlowPanel>
+        <g:FlowPanel ui:field="diskBar" styleName="{style.disk}" debugId="diskBar"><g:FlowPanel /></g:FlowPanel>
+
+        <!-- The element has to be detached from its parent just after creation -->
+        <g:HTMLPanel ui:field="tooltip" styleName="{style.tooltip}">
+            <div class="{style.rowCPU}">
+                <div class="{style.labelCell}">CPU</div>
+                <div class="{style.indicatorCell}"><div ui:field="tooltipCpuBar" class="{style.indicatorCPU}" /></div>
+                <div class="{style.valueCell}" ui:field="tooltipCpuValue">52%</div>
+                <div class="{style.descriptionCell}"></div>
+            </div>
+
+            <div class="{style.rowMEM}">
+                <div class="{style.labelCell}">MEM</div>
+                <div class="{style.indicatorCell}"><div ui:field="tooltipMemBar" class="{style.indicatorMEM}" /></div>
+                <div class="{style.valueCell}" ui:field="tooltipMemValue">82%</div>
+                <div class="{style.descriptionCell}" ui:field="tooltipMemDescription">- 350000MB / 400000MB</div>
+            </div>
+
+            <div class="{style.rowDISK}">
+                <div class="{style.labelCell}">DISK</div>
+                <div class="{style.indicatorCell}"><div ui:field="tooltipDiskBar" class="{style.indicatorDISK}" /></div>
+                <div class="{style.valueCell}" ui:field="tooltipDiskValue">92%</div>
+                <div class="{style.descriptionCell}" ui:field="tooltipDiskDescription">- 1.7 G / 15 G</div>
+            </div>
+        </g:HTMLPanel>
+    </g:FlowPanel>
+
+</ui:UiBinder>

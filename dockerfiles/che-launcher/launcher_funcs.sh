@@ -140,7 +140,7 @@ inside the container. Verify the syntax of the \"docker run\" command."
 }
 
 che_container_exist() {
-  if [ "$(docker ps -aq  -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" = "0" ]; then
+  if [ "$(docker ps -aq  -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" -eq 0 ]; then
     return 1
   else
     return 0
@@ -148,7 +148,7 @@ che_container_exist() {
 }
 
 che_container_is_running() {
-  if [ "$(docker ps -qa -f "status=running" -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" = "0" ]; then
+  if [ "$(docker ps -qa -f "status=running" -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" -eq 0 ]; then
     return 1
   else
     return 0
@@ -156,7 +156,7 @@ che_container_is_running() {
 }
 
 che_container_is_stopped() {
-  if [ "$(docker ps -qa -f "status=exited" -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" = "0" ]; then
+  if [ "$(docker ps -qa -f "status=exited" -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" -eq 0 ]; then
     return 1
   else
     return 0
@@ -168,6 +168,16 @@ wait_until_container_is_running() {
 
   ELAPSED=0
   until che_container_is_running || [ ${ELAPSED} -eq "${CONTAINER_START_TIMEOUT}" ]; do
+    sleep 1
+    ELAPSED=$((ELAPSED+1))
+  done
+}
+
+wait_until_container_is_stopped() {
+  CONTAINER_STOP_TIMEOUT=${1}
+
+  ELAPSED=0
+  until che_container_is_stopped || [ ${ELAPSED} -eq "${CONTAINER_STOP_TIMEOUT}" ]; do
     sleep 1
     ELAPSED=$((ELAPSED+1))
   done

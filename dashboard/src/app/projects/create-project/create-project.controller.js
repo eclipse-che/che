@@ -21,7 +21,7 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory, $window) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -36,16 +36,9 @@ export class CreateProjectCtrl {
     this.cheNotification = cheNotification;
     this.$q = $q;
     this.$document = $document;
+    this.$window = $window;
 
-    if ($routeParams.resetProgress) {
-      this.resetCreateProgress();
-
-      routeHistory.popCurrentPath();
-
-      // remove param
-      $location.search({});
-      $location.replace();
-    }
+    this.resetCreateProgress();
 
     // JSON used for import data
     this.importProjectData = this.getDefaultProjectJson();
@@ -507,6 +500,16 @@ export class CreateProjectCtrl {
 
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.createProjectSvc.setCurrentProgressStep(4);
+
+      // redirect to IDE from crane loader page
+      let currentPath = this.$location.path();
+      if (/create-project/.test(currentPath)) {
+        let link = this.getIDELink();
+        if (link.indexOf('#') === 0) {
+          link = link.substring(1, link.length);
+        }
+        this.$location.path(link);
+      }
     }, (error) => {
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
@@ -553,10 +556,6 @@ export class CreateProjectCtrl {
       let fetchTypePromise = projectTypeService.fetchTypes();
       fetchTypePromise.then(() => {
         let projectTypesByCategory = projectTypeService.getProjectTypesIDs();
-        // now try the estimate for each source
-        let deferredEstimate = this.$q.defer();
-        let deferredEstimatePromise = deferredResolve.promise;
-
 
         let estimatePromises = [];
         let estimateTypes = [];
@@ -813,8 +812,6 @@ export class CreateProjectCtrl {
     this.resetCreateProgress();
     this.setCreateProjectInProgress();
 
-    this.createProjectSvc.createPopup();
-
     // logic to decide if we create workspace based on a stack or reuse existing workspace
     let option;
 
@@ -912,7 +909,7 @@ export class CreateProjectCtrl {
    * @param workspace workspace for listening status
    */
   subscribeStatusChannel(workspace) {
-    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then(() => {
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then((message) => {
       this.createProjectSvc.setCurrentProgressStep(2);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
       // need to show the error
@@ -1058,10 +1055,6 @@ export class CreateProjectCtrl {
 
   setCreateProjectInProgress() {
     this.createProjectSvc.setCreateProjectInProgress(true);
-  }
-
-  hideCreateProjectPanel() {
-    this.createProjectSvc.showPopup();
   }
 
   getWorkspaceOfProject() {
@@ -1216,7 +1209,7 @@ export class CreateProjectCtrl {
     this.getCreationSteps().forEach((step) => {
       logs += step.logs + '\n';
     });
-    window.open('data:text/csv,' + encodeURIComponent(logs));
+    this.$window.open('data:text/csv,' + encodeURIComponent(logs));
   }
 
   getCreateButtonTitle() {

@@ -25,13 +25,13 @@
     display: inline-block;
     position: relative;
     margin: 0;
-    max-width: 200px;
+    max-width: 250px;
 }
 
-    /*
-     * Imageless triangles can be made using only css by adding a large border on one side,
-     * then transparent borders on the two adjacent sides.
-     */
+/*
+ * Imageless triangles can be made using only css by adding a large border on one side,
+ * then transparent borders on the two adjacent sides.
+ */
 .triangle {
     position: absolute;
     width: 0px;
@@ -52,7 +52,7 @@
     margin-left: -4px;
 }
 
-    /* A tooltip that is below but right aligned */
+/* A tooltip that is below but right aligned */
 .tooltipBelowRightAligned {
     margin-top: 7px;
 }
