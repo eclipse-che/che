@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.plugin.languageserver.server.DtoConverter;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
-import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryConfigurationBasedImpl;
+import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.InitializeResultDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
@@ -74,8 +74,7 @@ public class LanguageRegistryService {
 													 .collect(toList());
 
 						   InitializeResultDTO dto = newDto(InitializeResultDTO.class);
-						   dto.setProject(projectExtensionKey.getProject().substring(
-								   LanguageServerRegistryConfigurationBasedImpl.PROJECT_FOLDER_PATH.length()));
+						   dto.setProject(projectExtensionKey.getProject().substring(LanguageServerRegistryImpl.PROJECT_FOLDER_PATH.length()));
 						   dto.setSupportedLanguages(languageDescriptionDTOs);
 						   dto.setCapabilities(asDto(initializeResult.getCapabilities()));
 						   return dto;

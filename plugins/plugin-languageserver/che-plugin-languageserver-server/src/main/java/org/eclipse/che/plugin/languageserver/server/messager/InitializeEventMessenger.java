@@ -16,7 +16,7 @@ import io.typefox.lsapi.services.LanguageServer;
 
 import com.google.gson.Gson;
 
-import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryConfigurationBasedImpl;
+import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.plugin.languageserver.server.registry.ServerInitializer;
 import org.eclipse.che.plugin.languageserver.server.registry.ServerInitializerObserver;
 import org.eclipse.che.plugin.languageserver.shared.event.LanguageServerInitializeEventDto;
@@ -58,7 +58,7 @@ public class InitializeEventMessenger implements ServerInitializerObserver {
         LanguageServerInitializeEventDto initializeEventDto = newDto(LanguageServerInitializeEventDto.class);
         initializeEventDto.setSupportedLanguages(asDto(languageDescription));
         initializeEventDto.setServerCapabilities(asDto(serverCapabilities));
-        initializeEventDto.setProjectPath(projectPath.substring(LanguageServerRegistryConfigurationBasedImpl.PROJECT_FOLDER_PATH.length()));
+        initializeEventDto.setProjectPath(projectPath.substring(LanguageServerRegistryImpl.PROJECT_FOLDER_PATH.length()));
 
         send(initializeEventDto);
     }

@@ -41,7 +41,7 @@ import static org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey.c
 
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry, ServerInitializerObserver {
-    private final static String PROJECT_FOLDER_PATH = "/projects";
+    public final static String PROJECT_FOLDER_PATH = "/projects";
 
     /**
      * Available {@link LanguageServerFactory} by extension.
@@ -76,8 +76,6 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
 
     @Override
     public LanguageServer findServer(String fileUri) throws LanguageServerException {
-        new LanguageServerRegistryConfigurationBasedImpl(initializer, projectManager);
-
         String path = URI.create(fileUri).getPath();
 
         String extension = getFileExtension(path);
