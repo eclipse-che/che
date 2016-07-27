@@ -39,6 +39,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static java.util.Collections.emptySet;
 import static org.mockito.Matchers.any;
@@ -88,7 +90,7 @@ public class LocalTckModule extends TckModule {
     }
 
     @Singleton
-    private static class SnapshotTckRepository extends LocalTckRepository<SnapshotImpl> {
+    private static class SnapshotTckRepository extends LocalMapTckRepository<SnapshotImpl> {
         @Inject
         public SnapshotTckRepository(LocalSnapshotDaoImpl snapshotDao) {
             super(snapshotDao.snapshots, SnapshotImpl::getId);
@@ -96,7 +98,7 @@ public class LocalTckModule extends TckModule {
     }
 
     @Singleton
-    private static class LocalUserTckRepository extends LocalTckRepository<UserImpl> {
+    private static class LocalUserTckRepository extends LocalMapTckRepository<UserImpl> {
         @Inject
         public LocalUserTckRepository(LocalUserDaoImpl userDao) {
             super(userDao.users, UserImpl::getId);
@@ -104,7 +106,7 @@ public class LocalTckModule extends TckModule {
     }
 
     @Singleton
-    private static class LocalProfileTckRepository extends LocalTckRepository<ProfileImpl> {
+    private static class LocalProfileTckRepository extends LocalMapTckRepository<ProfileImpl> {
         @Inject
         public LocalProfileTckRepository(LocalProfileDaoImpl profileDao) {
             super(profileDao.profiles, ProfileImpl::getUserId);
@@ -112,7 +114,7 @@ public class LocalTckModule extends TckModule {
     }
 
     @Singleton
-    private static class LocalRecipeTckRepository extends LocalTckRepository<RecipeImpl> {
+    private static class LocalRecipeTckRepository extends LocalMapTckRepository<RecipeImpl> {
         @Inject
         public LocalRecipeTckRepository(LocalRecipeDaoImpl recipeDao) {
             super(recipeDao.recipes, RecipeImpl::getId);
@@ -120,7 +122,7 @@ public class LocalTckModule extends TckModule {
     }
 
     @Singleton
-    private static class LocalWorkspaceTckRepository extends LocalTckRepository<WorkspaceImpl> {
+    private static class LocalWorkspaceTckRepository extends LocalMapTckRepository<WorkspaceImpl> {
         @Inject
         public LocalWorkspaceTckRepository(LocalWorkspaceDaoImpl workspaceDao) {
             super(workspaceDao.workspaces, WorkspaceImpl::getId);
@@ -128,10 +130,19 @@ public class LocalTckModule extends TckModule {
     }
 
     @Singleton
-    private static class LocalStackTckRepository extends LocalTckRepository<StackImpl> {
+    private static class LocalStackTckRepository extends LocalMapTckRepository<StackImpl> {
         @Inject
         public LocalStackTckRepository(LocalStackDaoImpl stackDao) {
             super(stackDao.stacks, StackImpl::getId);
+        }
+    }
+
+    @Singleton
+    private static class LocalPreferenceTckRepository
+            extends LocalTckRepository<Map<String, Map<String, String>>, Pair<String, Map<String, String>>> {
+        @Inject
+        public LocalPreferenceTckRepository(LocalPreferenceDaoImpl localDao) {
+            super(localDao.preferences, (map, entity) -> map.put(entity.first, entity.second), Map::clear);
         }
     }
 }
