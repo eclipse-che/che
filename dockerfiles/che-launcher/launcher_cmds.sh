@@ -105,19 +105,18 @@ print_debug_info() {
   debug ""
   debug ""
   debug "--------- CHE INSTANCE INFO  ----------" 
-  #VAL=$(if che_container_exist;then echo "YES"; else echo "NO"; fi)
   debug "CHE CONTAINER EXISTS      = $(che_container_exist && echo "YES" || echo "NO")"
-  VAL=$(if che_container_is_running;then echo "running"; else echo "stopped"; fi)
-  debug "CHE CONTAINER STATUS      = ${VAL}"
-  VAL=$(if server_is_booted;then echo "running"; else echo "stopped"; fi)
-  debug "CHE SERVER IS STATUS      = ${VAL}"
-  debug "CHE IMAGE                 = $(get_che_container_image_name)"
-  debug "CHE SERVER CONTAINER ID   = $(get_che_server_container_id)"
-  debug "CHE CONF FOLDER           = $(get_che_container_conf_folder)"
-  debug "CHE DATA FOLDER           = $(get_che_container_data_folder)"
-  debug "CHE DASHBOARD URL         = http://${CHE_HOSTNAME}:{CHE_PORT}"
-  debug "CHE API URL               = http://${CHE_HOSTNAME}:{CHE_PORT}/api"
-  debug 'CHE LOGS                  = run `docker logs -f '${CHE_SERVER_CONTAINER_NAME}'`'
+  debug "CHE CONTAINER STATUS      = $(che_container_is_running && echo "running" || echo "stopped")"
+  if che_container_is_running; then
+    debug "CHE SERVER STATUS         = $(server_is_booted && echo "running" || echo "stopped")"
+    debug "CHE IMAGE                 = $(get_che_container_image_name)"
+    debug "CHE SERVER CONTAINER ID   = $(get_che_server_container_id)"
+    debug "CHE CONF FOLDER           = $(get_che_container_conf_folder)"
+    debug "CHE DATA FOLDER           = $(get_che_container_data_folder)"
+    debug "CHE DASHBOARD URL         = http://${CHE_HOSTNAME}:${CHE_PORT}"
+    debug "CHE API URL               = http://${CHE_HOSTNAME}:${CHE_PORT}/api"
+    debug 'CHE LOGS                  = run `docker logs -f '${CHE_SERVER_CONTAINER_NAME}'`'
+  fi
   debug ""
   debug ""
   debug "----  CURRENT COMMAND LINE OPTIONS  ---" 

@@ -118,11 +118,11 @@ get_docker_host_ip() {
 }
 
 get_docker_host_os() {
-  echo $(docker info | grep "Operating System:" | sed "s/^Operating System: //")  
+  docker info | grep "Operating System:" | sed "s/^Operating System: //"
 }
 
 get_docker_daemon_version() {
-  echo $(docker version | grep "Server version:" | sed "s/^Server version: //")
+  docker version | grep -i "server version:" | sed "s/^server version: //I"
 }
 
 get_che_hostname() {
@@ -178,7 +178,7 @@ get_che_container_host_bind_folder() {
   for SINGLE_BIND in $BINDS; do
     case $SINGLE_BIND in
       *$1*)
-        echo $(echo $SINGLE_BIND | cut -f1 -d":")
+        echo $SINGLE_BIND | cut -f1 -d":"
       ;;
       *)
       ;;
@@ -196,11 +196,11 @@ get_che_container_data_folder() {
 }
 
 get_che_container_image_name() {
-  echo $(docker inspect --format="{{.Config.Image}}" "${CHE_SERVER_CONTAINER_NAME}")
+  docker inspect --format="{{.Config.Image}}" "${CHE_SERVER_CONTAINER_NAME}"
 }
 
 get_che_server_container_id() {
-  echo $(docker ps -qa -f "name=${CHE_SERVER_CONTAINER_NAME}")
+  docker ps -qa -f "name=${CHE_SERVER_CONTAINER_NAME}"
 }
 
 wait_until_container_is_running() {
@@ -224,7 +224,7 @@ wait_until_container_is_stopped() {
 }
 
 server_is_booted() {
-  HTTP_STATUS_CODE=$(curl -I http://"${CHE_HOST_IP}":"${CHE_PORT}"/api/  \
+  HTTP_STATUS_CODE=$(curl -I http://$(docker inspect -f '{{.NetworkSettings.IPAddress}}' che-server):8080/api/ \
                      -s -o /dev/null --write-out "%{http_code}")
   if [ "${HTTP_STATUS_CODE}" = "200" ]; then
     return 0
