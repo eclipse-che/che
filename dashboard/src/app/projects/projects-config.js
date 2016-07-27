@@ -28,9 +28,6 @@ import {CreateProjectSamplesFilter} from './create-project/samples/create-projec
 import {CreateProjectSamplesNameFilter} from './create-project/samples/create-project-samples-name.filter';
 import {CreateProjectSamplesTagFilter} from './create-project/samples/create-project-samples-tag.filter';
 
-import {CreateProjectPopupCtrl} from './create-project/popup/create-project-popup.controller';
-import {CreateProjectPopup} from './create-project/popup/create-project-popup.directive';
-
 import {CreateProjectZip} from './create-project/zip/create-project-zip.directive';
 import {CreateProjectConfFile} from './create-project/config-file/create-project-conf-file.directive';
 import {ProjectDetailsController} from './project-details/project-details.controller';
@@ -48,9 +45,6 @@ export class ProjectsConfig {
 
 
     register.controller('ProjectDetailsController', ProjectDetailsController);
-
-    register.controller('CreateProjectPopupCtrl', CreateProjectPopupCtrl);
-    register.directive('createProjectPopup', CreateProjectPopup);
 
     register.controller('CreateProjectGitCtrl', CreateProjectGitCtrl);
     register.directive('createProjectGit', CreateProjectGit);
