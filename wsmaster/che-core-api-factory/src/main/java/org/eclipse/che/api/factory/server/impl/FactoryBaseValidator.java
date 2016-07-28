@@ -11,16 +11,13 @@
 package org.eclipse.che.api.factory.server.impl;
 
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryConstants;
-import org.eclipse.che.api.factory.shared.dto.Action;
-import org.eclipse.che.api.factory.shared.dto.Factory;
-import org.eclipse.che.api.factory.shared.dto.Ide;
-import org.eclipse.che.api.factory.shared.dto.OnAppLoaded;
-import org.eclipse.che.api.factory.shared.dto.OnProjectsLoaded;
-import org.eclipse.che.api.factory.shared.dto.Policies;
-import org.eclipse.che.api.user.server.spi.PreferenceDao;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.factory.shared.dto.IdeActionDto;
+import org.eclipse.che.api.factory.shared.dto.IdeDto;
+import org.eclipse.che.api.factory.shared.dto.OnAppLoadedDto;
+import org.eclipse.che.api.factory.shared.dto.OnProjectsLoadedDto;
+import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 import java.io.UnsupportedEncodingException;
@@ -31,7 +28,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.Boolean.parseBoolean;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 
@@ -44,12 +40,6 @@ import static java.lang.System.currentTimeMillis;
 public abstract class FactoryBaseValidator {
     private static final Pattern PROJECT_NAME_VALIDATOR = Pattern.compile("^[\\\\\\w\\\\\\d]+[\\\\\\w\\\\\\d_.-]*$");
 
-    private final PreferenceDao preferenceDao;
-
-    public FactoryBaseValidator(PreferenceDao preferenceDao) {
-        this.preferenceDao = preferenceDao;
-    }
-
     /**
      * Validates source parameter of factory.
      *
@@ -58,7 +48,7 @@ public abstract class FactoryBaseValidator {
      * @throws BadRequestException
      *         when source projects in the factory is invalid
      */
-    protected void validateProjects(Factory factory) throws BadRequestException {
+    protected void validateProjects(FactoryDto factory) throws BadRequestException {
         for (ProjectConfigDto project : factory.getWorkspace().getProjects()) {
             final String projectName = project.getName();
             if (null != projectName && !PROJECT_NAME_VALIDATOR.matcher(projectName)
@@ -90,31 +80,6 @@ public abstract class FactoryBaseValidator {
     }
 
     /**
-     * Validates that creator of factory is really owner of account specified in it.
-     *
-     * @param factory
-     *         factory to validate
-     * @throws ServerException
-     *         when any server errors occurs
-     * @throws ForbiddenException
-     *         when user does not have required rights
-     */
-    protected void validateAccountId(Factory factory) throws ServerException, ForbiddenException {
-        // TODO do we need check if user is temporary?
-        final String userId = factory.getCreator() != null ? factory.getCreator().getUserId() : null;
-
-        if (userId == null) {
-            return;
-        }
-
-        final Map<String, String> preferences = preferenceDao.getPreferences(userId);
-        if (parseBoolean(preferences.get("temporary"))) {
-            throw new ForbiddenException("Current user is not allowed to use this method.");
-        }
-
-    }
-
-    /**
      * Validates that factory can be used at present time (used on accept)
      *
      * @param factory
@@ -124,8 +89,8 @@ public abstract class FactoryBaseValidator {
      * @throws BadRequestException
      *         if until date less than current date<br/>
      */
-    protected void validateCurrentTimeBetweenSinceUntil(Factory factory) throws BadRequestException {
-        final Policies policies = factory.getPolicies();
+    protected void validateCurrentTimeBetweenSinceUntil(FactoryDto factory) throws BadRequestException {
+        final PoliciesDto policies = factory.getPolicies();
         if (policies == null) {
             return;
         }
@@ -148,14 +113,14 @@ public abstract class FactoryBaseValidator {
      * @param factory
      *         factory to validate
      * @throws BadRequestException
-     *         if since date greater or equal than until date<br/>
+     *         if since date greater or equal than until date
      * @throws BadRequestException
-     *         if since date less than current date<br/>
+     *         if since date less than current date
      * @throws BadRequestException
-     *         if until date less than current date<br/>
+     *         if until date less than current date
      */
-    protected void validateCurrentTimeAfterSinceUntil(Factory factory) throws BadRequestException {
-        final Policies policies = factory.getPolicies();
+    protected void validateCurrentTimeAfterSinceUntil(FactoryDto factory) throws BadRequestException {
+        final PoliciesDto policies = factory.getPolicies();
         if (policies == null) {
             return;
         }
@@ -185,13 +150,13 @@ public abstract class FactoryBaseValidator {
      * @throws BadRequestException
      *         when factory actions is invalid
      */
-    protected void validateProjectActions(Factory factory) throws BadRequestException {
-        final Ide ide = factory.getIde();
+    protected void validateProjectActions(FactoryDto factory) throws BadRequestException {
+        final IdeDto ide = factory.getIde();
         if (ide == null) {
             return;
         }
 
-        final List<Action> applicationActions = new ArrayList<>();
+        final List<IdeActionDto> applicationActions = new ArrayList<>();
         if (ide.getOnAppClosed() != null) {
             applicationActions.addAll(ide.getOnAppClosed().getActions());
         }
@@ -199,16 +164,16 @@ public abstract class FactoryBaseValidator {
             applicationActions.addAll(ide.getOnAppLoaded().getActions());
         }
 
-        for (Action applicationAction : applicationActions) {
+        for (IdeActionDto applicationAction : applicationActions) {
             String id = applicationAction.getId();
             if ("openFile".equals(id) || "findReplace".equals(id) || "runCommand".equals(id) || "newTerminal".equals(id)) {
                 throw new BadRequestException(format(FactoryConstants.INVALID_ACTION_SECTION, id));
             }
         }
 
-        final OnAppLoaded onAppLoaded = ide.getOnAppLoaded();
+        final OnAppLoadedDto onAppLoaded = ide.getOnAppLoaded();
         if (onAppLoaded != null) {
-            for (Action action : onAppLoaded.getActions()) {
+            for (IdeActionDto action : onAppLoaded.getActions()) {
                 final Map<String, String> properties = action.getProperties();
                 if ("openWelcomePage".equals(action.getId()) && isNullOrEmpty(properties.get("greetingContentUrl"))) {
                     throw new BadRequestException(FactoryConstants.INVALID_WELCOME_PAGE_ACTION);
@@ -216,10 +181,10 @@ public abstract class FactoryBaseValidator {
             }
         }
 
-        final OnProjectsLoaded onLoaded = ide.getOnProjectsLoaded();
+        final OnProjectsLoadedDto onLoaded = ide.getOnProjectsLoaded();
         if (onLoaded != null) {
-            final List<Action> onProjectOpenedActions = onLoaded.getActions();
-            for (Action applicationAction : onProjectOpenedActions) {
+            final List<IdeActionDto> onProjectOpenedActions = onLoaded.getActions();
+            for (IdeActionDto applicationAction : onProjectOpenedActions) {
                 final String id = applicationAction.getId();
                 final Map<String, String> properties = applicationAction.getProperties();
 
@@ -229,7 +194,7 @@ public abstract class FactoryBaseValidator {
                             throw new BadRequestException(FactoryConstants.INVALID_OPENFILE_ACTION);
                         }
                         break;
-                        
+
                     case "runCommand":
                         if (isNullOrEmpty(properties.get("name"))) {
                             throw new BadRequestException(FactoryConstants.INVALID_RUNCOMMAND_ACTION);

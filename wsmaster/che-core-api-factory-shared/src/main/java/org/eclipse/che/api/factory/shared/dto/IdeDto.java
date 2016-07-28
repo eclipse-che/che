@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.shared.dto;
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.factory.Ide;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -21,36 +22,39 @@ import org.eclipse.che.dto.shared.DTO;
  * @author Sergii Kabashniuk
  */
 @DTO
-public interface Ide {
+public interface IdeDto extends Ide {
 
     /**
      * @return configuration of IDE on application loaded event.
      */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
-    OnAppLoaded getOnAppLoaded();
+    OnAppLoadedDto getOnAppLoaded();
 
-    void setOnAppLoaded(OnAppLoaded onAppLoaded);
+    void setOnAppLoaded(OnAppLoadedDto onAppLoaded);
 
-    Ide withOnAppLoaded(OnAppLoaded onAppLoaded);
+    IdeDto withOnAppLoaded(OnAppLoadedDto onAppLoaded);
 
     /**
      * @return configuration of IDE on application closed event.
      */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
-    OnAppClosed getOnAppClosed();
+    OnAppClosedDto getOnAppClosed();
 
-    void setOnAppClosed(OnAppClosed onAppClosed);
+    void setOnAppClosed(OnAppClosedDto onAppClosed);
 
-    Ide withOnAppClosed(OnAppClosed onAppClosed);
+    IdeDto withOnAppClosed(OnAppClosedDto onAppClosed);
 
     /**
      * @return configuration of IDE on projects loaded event.
      */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
-    OnProjectsLoaded getOnProjectsLoaded();
+    OnProjectsLoadedDto getOnProjectsLoaded();
 
-    void setOnProjectsLoaded(OnProjectsLoaded onProjectsLoaded);
+    void setOnProjectsLoaded(OnProjectsLoadedDto onProjectsLoaded);
 
-    Ide withOnProjectsLoaded(OnProjectsLoaded onProjectsLoaded);
+    IdeDto withOnProjectsLoaded(OnProjectsLoadedDto onProjectsLoaded);
 
 }

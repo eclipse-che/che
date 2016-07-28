@@ -11,6 +11,7 @@
 package org.eclipse.che.api.factory.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.factory.OnAppClosed;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
@@ -23,15 +24,16 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
  * @author Sergii Kabashniuk
  */
 @DTO
-public interface OnAppClosed {
+public interface OnAppClosedDto extends OnAppClosed {
 
     /**
      * @return actions for current event.
      */
+    @Override
     @FactoryParameter(obligation = OPTIONAL)
-    List<Action> getActions();
+    List<IdeActionDto> getActions();
 
-    void setActions(List<Action> actions);
+    void setActions(List<IdeActionDto> actions);
 
-    OnAppClosed withActions(List<Action> actions);
+    OnAppClosedDto withActions(List<IdeActionDto> actions);
 }

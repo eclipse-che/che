@@ -8,29 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.dto;
-
-import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.api.core.model.factory;
 
 import java.util.List;
 
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
-
 /**
- * Describe IDE look and feel on project opened event.
+ * Defines IDE look and feel on project opened event.
  *
- * @author Sergii Kabashniuk
+ * @author Anton Korneta
  */
-@DTO
 public interface OnProjectsLoaded {
+
     /**
-     * @return actions for current event.
+     * Returns actions for current event.
      */
-    @FactoryParameter(obligation = OPTIONAL)
-    List<Action> getActions();
-
-    void setActions(List<Action> actions);
-
-    OnProjectsLoaded withActions(List<Action> actions);
+    List<? extends Action> getActions();
 }

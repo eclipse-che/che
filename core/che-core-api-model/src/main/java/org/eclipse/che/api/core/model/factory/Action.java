@@ -8,42 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.factory.shared.dto;
-
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
-
-import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.dto.shared.DTO;
+package org.eclipse.che.api.core.model.factory;
 
 import java.util.Map;
 
 /**
- * Describe ide action.
+ * Defines the contract for the factory action instance.
  *
- * @author Sergii Kabashniuk
+ * @author Anton Korneta
  */
-@DTO
 public interface Action {
+
     /**
-     * Action Id
-     *
-     * @return id of action.
+     * Returns the IDE specific identifier of action e.g. ('openFile', 'editFile')
      */
-    @FactoryParameter(obligation = OPTIONAL)
     String getId();
 
-    void setId(String id);
-
-    Action withId(String id);
-
-    /***
-     *
-     * @return Action properties
+    /**
+     * Returns properties of this action instance
      */
-    @FactoryParameter(obligation = OPTIONAL)
     Map<String, String> getProperties();
-
-    void setProperties(Map<String, String> properties);
-
-    Action withProperties(Map<String, String> properties);
 }
