@@ -98,19 +98,19 @@
             <artifactId>che-core-commons-schedule</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-shared</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-jdt-core-repack</artifactId>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>org-eclipse-jdt-core-repack</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>org.eclipse.jdt.core</artifactId>
                     <groupId>org.eclipse.tycho</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-ext-lang-shared</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
