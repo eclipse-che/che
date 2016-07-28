@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server.factory;
+package org.eclipse.che.plugin.languageserver.server.launcher;
 
 import io.typefox.lsapi.services.LanguageServer;
 
@@ -20,10 +20,10 @@ import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerExce
  * @author Anatolii Bazko
  */
 @Singleton
-public abstract class LanguageServerFactoryTemplate implements LanguageServerFactory {
+public abstract class LanguageServerLauncherTemplate implements LanguageServerLauncher {
 
     @Override
-    public LanguageServer create(String projectPath) throws LanguageServerException {
+    public LanguageServer launch(String projectPath) throws LanguageServerException {
         Process languageServerProcess = startLanguageServerProcess(projectPath);
         return connectToLanguageServer(languageServerProcess);
     }

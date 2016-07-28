@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server.factory;
+package org.eclipse.che.plugin.languageserver.server.launcher;
 
 import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.LanguageDescriptionImpl;
@@ -27,7 +27,7 @@ import static java.util.Arrays.asList;
  * @author Evgen Vidolob
  */
 @Singleton
-public class JsonLanguageServerFactory extends LanguageServerFactoryTemplate {
+public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
 
     public static final String   LANGUAGE_ID = "json";
     public static final String[] EXTENSIONS  = new String[] {"json", "bowerrc", "jshintrc", "jscsrc", "eslintrc", "babelrc"};

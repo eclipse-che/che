@@ -17,7 +17,7 @@ import io.typefox.lsapi.InitializeResult;
 import io.typefox.lsapi.services.LanguageServer;
 
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
-import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 
 import java.util.Map;
 
@@ -30,7 +30,7 @@ public interface ServerInitializer extends ServerInitializerObservable {
     /**
      * Initialize new {@link LanguageServer} with given project path.
      */
-    LanguageServer initialize(LanguageServerFactory factory, String projectPath) throws LanguageServerException;
+    LanguageServer initialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException;
 
     /**
      * Returns initialized servers.

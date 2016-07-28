@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server.factory;
+package org.eclipse.che.plugin.languageserver.server.launcher;
 
 import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.services.LanguageServer;
@@ -30,9 +30,9 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 @Singleton
-public class FatJarBasedLanguageServerFactory extends LanguageServerFactoryTemplate {
+public class FatJarBasedLanguageServerLauncher extends LanguageServerLauncherTemplate {
 
-    private final static Logger LOG       = LoggerFactory.getLogger(FatJarBasedLanguageServerFactory.class);
+    private final static Logger LOG       = LoggerFactory.getLogger(FatJarBasedLanguageServerLauncher.class);
     private final static String JAVA_EXEC = System.getProperty("java.home") + "/bin/java";
 
     @Override

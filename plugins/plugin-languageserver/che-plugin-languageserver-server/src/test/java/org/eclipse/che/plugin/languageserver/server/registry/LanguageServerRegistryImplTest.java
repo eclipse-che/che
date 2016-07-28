@@ -18,8 +18,8 @@ import io.typefox.lsapi.services.LanguageServer;
 import io.typefox.lsapi.services.TextDocumentService;
 import io.typefox.lsapi.services.WindowService;
 
-import org.eclipse.che.plugin.languageserver.server.factory.JsonLanguageServerFactory;
-import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.launcher.JsonLanguageServerLauncher;
+import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -54,7 +54,7 @@ public class LanguageServerRegistryImplTest {
     @Mock
     private ServerInitializer                   initializer;
     @Mock
-    private LanguageServerFactory               languageServerFactory;
+    private LanguageServerLauncher              languageServerLauncher;
     @Mock
     private LanguageDescription                 languageDescription;
     @Mock
@@ -74,20 +74,20 @@ public class LanguageServerRegistryImplTest {
         when(initializeResult.getCapabilities()).thenReturn(serverCapabilities);
 //        when(serverCapabilities.isMultiplyProjectsProvider()).thenReturn(true);
 
-        when(languageServerFactory.getLanguageDescription()).thenReturn(languageDescription);
-        when(languageDescription.getLanguageId()).thenReturn(JsonLanguageServerFactory.LANGUAGE_ID);
-        when(languageDescription.getFileExtensions()).thenReturn(asList(JsonLanguageServerFactory.EXTENSIONS));
-        when(languageDescription.getMimeTypes()).thenReturn(asList(JsonLanguageServerFactory.MIME_TYPES));
+        when(languageServerLauncher.getLanguageDescription()).thenReturn(languageDescription);
+        when(languageDescription.getLanguageId()).thenReturn(JsonLanguageServerLauncher.LANGUAGE_ID);
+        when(languageDescription.getFileExtensions()).thenReturn(asList(JsonLanguageServerLauncher.EXTENSIONS));
+        when(languageDescription.getMimeTypes()).thenReturn(asList(JsonLanguageServerLauncher.MIME_TYPES));
 
         when(languageServer.getTextDocumentService()).thenReturn(mock(TextDocumentService.class));
         when(languageServer.getWindowService()).thenReturn(mock(WindowService.class));
         when(languageServer.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
 
-        registry = spy(new LanguageServerRegistryImpl(Collections.singleton(languageServerFactory),
+        registry = spy(new LanguageServerRegistryImpl(Collections.singleton(languageServerLauncher),
                                                       null,
                                                       initializer));
 
-        when(initializer.initialize(any(LanguageServerFactory.class), anyString())).thenAnswer(invocation -> {
+        when(initializer.initialize(any(LanguageServerLauncher.class), anyString())).thenAnswer(invocation -> {
             Object[] arguments = invocation.getArguments();
             registry.onServerInitialized(languageServer, serverCapabilities, languageDescription, (String)arguments[1]);
             return languageServer;
@@ -102,7 +102,7 @@ public class LanguageServerRegistryImplTest {
 
         assertNotNull(server);
         assertEquals(server, languageServer);
-        verify(initializer).initialize(eq(languageServerFactory), eq(PROJECT_PATH));
+        verify(initializer).initialize(eq(languageServerLauncher), eq(PROJECT_PATH));
         verify(registry).onServerInitialized(eq(languageServer), eq(serverCapabilities), eq(languageDescription), eq(PROJECT_PATH));
     }
 }

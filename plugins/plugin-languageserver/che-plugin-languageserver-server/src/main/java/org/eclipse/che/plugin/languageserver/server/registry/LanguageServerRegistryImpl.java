@@ -24,7 +24,7 @@ import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
-import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
 
 import java.net.URI;
@@ -44,9 +44,9 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     public final static String PROJECT_FOLDER_PATH = "/projects";
 
     /**
-     * Available {@link LanguageServerFactory} by extension.
+     * Available {@link LanguageServerLauncher} by extension.
      */
-    private final ConcurrentHashMap<String, List<LanguageServerFactory>> extensionToFactory;
+    private final ConcurrentHashMap<String, List<LanguageServerLauncher>> extensionToFactory;
 
     /**
      * Started {@link LanguageServer} by project.
@@ -57,7 +57,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     private final ServerInitializer      initializer;
 
     @Inject
-    public LanguageServerRegistryImpl(Set<LanguageServerFactory> languageServerFactories,
+    public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerFactories,
                                       ProjectManager projectManager,
                                       ServerInitializer initializer) {
         this.projectManager = projectManager;
@@ -66,7 +66,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
         this.projectToServer = new ConcurrentHashMap<>();
         this.initializer.addObserver(this);
 
-        for (LanguageServerFactory factory : languageServerFactories) {
+        for (LanguageServerLauncher factory : languageServerFactories) {
             for (String extension : factory.getLanguageDescription().getFileExtensions()) {
                 extensionToFactory.putIfAbsent(extension, new ArrayList<>());
                 extensionToFactory.get(extension).add(factory);
@@ -88,7 +88,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     protected LanguageServer findServer(String extension, String projectPath) throws LanguageServerException {
         ProjectExtensionKey projectKey = createProjectKey(projectPath, extension);
 
-        for (LanguageServerFactory factory : extensionToFactory.get(extension)) {
+        for (LanguageServerLauncher factory : extensionToFactory.get(extension)) {
             if (!projectToServer.containsKey(projectKey)) {
                 synchronized (factory) {
                     if (!projectToServer.containsKey(projectKey)) {
@@ -109,7 +109,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
         return extensionToFactory.values()
                                  .stream()
                                  .flatMap(Collection::stream)
-                                 .map(LanguageServerFactory::getLanguageDescription)
+                                 .map(LanguageServerLauncher::getLanguageDescription)
                                  .collect(Collectors.toList());
     }
 

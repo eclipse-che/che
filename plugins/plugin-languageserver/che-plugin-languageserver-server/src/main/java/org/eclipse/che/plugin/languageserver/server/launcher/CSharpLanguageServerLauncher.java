@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.languageserver.server.factory;
+package org.eclipse.che.plugin.languageserver.server.launcher;
 
 import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.LanguageDescriptionImpl;
@@ -29,7 +29,7 @@ import static java.util.Arrays.asList;
  * @author Evgen Vidolob
  */
 @Singleton
-public class CSharpLanguageServerFactory extends LanguageServerFactoryTemplate {
+public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate {
 
     public static final String   LANGUAGE_ID = "csharp";
     public static final String[] EXTENSIONS  = new String[] {"cs", "csx"};
