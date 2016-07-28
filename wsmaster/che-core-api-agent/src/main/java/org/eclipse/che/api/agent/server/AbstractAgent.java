@@ -10,22 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server;
 
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Joiner;
+
+import org.eclipse.che.api.agent.shared.model.AgentConfig;
 
 /**
- * @author Anatoliy Bazko
+ * @author Anatolii Bazko
  */
-public interface Agent {
-    String getFqn();
+public abstract class AbstractAgent implements Agent {
+    private final AgentConfig agentConfig;
 
-    Map<String, String> getEnvVariables();
+    public AbstractAgent(AgentConfig agentConfig) {
+        this.agentConfig = agentConfig;
+    }
 
-    List<String> getVolumes();
+    @Override
+    public final String getFqn() {
+        return agentConfig.getFqn();
+    }
 
-    List<String> getPorts();
-
-    List<String> getDependencies();
-
-    String getScript();
+    @Override
+    public String getScript() {
+        return Joiner.on('\n').join(agentConfig.getScript());
+    }
 }
+
