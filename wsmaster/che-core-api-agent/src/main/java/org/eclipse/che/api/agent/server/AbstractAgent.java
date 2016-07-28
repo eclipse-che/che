@@ -18,7 +18,7 @@ import org.eclipse.che.api.agent.shared.model.AgentConfig;
  * @author Anatolii Bazko
  */
 public abstract class AbstractAgent implements Agent {
-    private final AgentConfig agentConfig;
+    protected final AgentConfig agentConfig;
 
     public AbstractAgent(AgentConfig agentConfig) {
         this.agentConfig = agentConfig;
