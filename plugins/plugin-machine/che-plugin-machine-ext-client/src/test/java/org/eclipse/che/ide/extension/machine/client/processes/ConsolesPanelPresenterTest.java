@@ -16,9 +16,6 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -28,6 +25,11 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.events.DevMachineStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
@@ -47,8 +49,6 @@ import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,6 +66,7 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.ROOT_NODE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -186,6 +187,7 @@ public class ConsolesPanelPresenterTest {
         when(commandDto.withName(anyString())).thenReturn(commandDto);
         when(commandDto.withCommandLine(anyString())).thenReturn(commandDto);
         when(commandDto.withType(anyString())).thenReturn(commandDto);
+        when(commandDto.withAttributes(anyMap())).thenReturn(commandDto);
 
         MachineProcessDto machineProcessDto = mock(MachineProcessDto.class);
         when(machineProcessDto.getOutputChannel()).thenReturn(OUTPUT_CHANNEL);
@@ -225,10 +227,7 @@ public class ConsolesPanelPresenterTest {
 
         when(appContext.getWorkspaceId()).thenReturn("workspaceID");
         DevMachineStateEvent devMachineStateEvent = mock(DevMachineStateEvent.class);
-        verify(eventBus, times(5)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
-
-        DevMachineStateEvent.Handler devMachineStateHandler = devMachineStateHandlerCaptor.getAllValues().get(0);
-        devMachineStateHandler.onDevMachineStarted(devMachineStateEvent);
+        verify(eventBus, times(4)).addHandler(anyObject(), devMachineStateHandlerCaptor.capture());
 
         verify(machineService).getMachines(eq(WORKSPACE_ID));
         verify(machinesPromise).then(machinesCaptor.capture());

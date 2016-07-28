@@ -41,11 +41,6 @@ export class CreateProjectSvc {
             {text: 'Project created', inProgressText: 'Opening project', logs: '', hasError: false}
         ];
 
-
-        this.popupVisible = false;
-        this.initPopup = false;
-
-
     }
 
 
@@ -73,19 +68,6 @@ export class CreateProjectSvc {
     hasInit() {
         return this.init;
     }
-
-    isShowPopup() {
-        return this.popupVisible;
-    }
-
-    showPopup() {
-        this.popupVisible = true;
-    }
-
-    hidePopup() {
-        this.popupVisible = false;
-    }
-
 
     resetCreateProgress() {
         this.creationSteps.forEach((step) => {
@@ -129,23 +111,6 @@ export class CreateProjectSvc {
     getProject() {
         return this.project;
     }
-
-    createPopup() {
-        if (!this.initPopup) {
-            this.initPopup = true;
-            // The new element to be added
-            var $div = $('<create-project-popup></create-project-popup>');
-
-            // The parent of the new element
-            var $target = $('body');
-
-            let $scope = angular.element($target).scope();
-            let insertHtml = this.$compile($div)($scope);
-            $target.append(insertHtml);
-        }
-
-    }
-
 
   hasIdeAction() {
     return this.getIDEAction().length > 0;

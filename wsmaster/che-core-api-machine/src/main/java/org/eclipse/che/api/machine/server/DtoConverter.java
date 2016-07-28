@@ -143,6 +143,7 @@ public final class DtoConverter {
                                               .withCommandLine(machineProcess.getCommandLine())
                                               .withAlive(machineProcess.isAlive())
                                               .withName(machineProcess.getName())
+                                              .withAttributes(machineProcess.getAttributes())
                                               .withType(machineProcess.getType())
                                               .withOutputChannel(machineProcess.getOutputChannel())
                                               .withLinks(null);

@@ -117,6 +117,14 @@ get_docker_host_ip() {
             awk '{ print $2}'
 }
 
+get_docker_host_os() {
+  docker info | grep "Operating System:" | sed "s/^Operating System: //"
+}
+
+get_docker_daemon_version() {
+  docker version | grep -i "server version:" | sed "s/^server version: //I"
+}
+
 get_che_hostname() {
   INSTALL_TYPE=$(get_docker_install_type)
   if [ "${INSTALL_TYPE}" = "boot2docker" ] ||
@@ -140,7 +148,7 @@ inside the container. Verify the syntax of the \"docker run\" command."
 }
 
 che_container_exist() {
-  if [ "$(docker ps -aq  -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" = "0" ]; then
+  if [ "$(docker ps -aq  -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" -eq 0 ]; then
     return 1
   else
     return 0
@@ -148,7 +156,7 @@ che_container_exist() {
 }
 
 che_container_is_running() {
-  if [ "$(docker ps -qa -f "status=running" -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" = "0" ]; then
+  if [ "$(docker ps -qa -f "status=running" -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" -eq 0 ]; then
     return 1
   else
     return 0
@@ -156,11 +164,43 @@ che_container_is_running() {
 }
 
 che_container_is_stopped() {
-  if [ "$(docker ps -qa -f "status=exited" -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" = "0" ]; then
+  if [ "$(docker ps -qa -f "status=exited" -f "name=${CHE_SERVER_CONTAINER_NAME}" | wc -l)" -eq 0 ]; then
     return 1
   else
     return 0
   fi
+}
+
+
+get_che_container_host_bind_folder() {
+  BINDS=$(docker inspect --format="{{.HostConfig.Binds}}" "${CHE_SERVER_CONTAINER_NAME}" | cut -d '[' -f 2 | cut -d ']' -f 1)
+
+  for SINGLE_BIND in $BINDS; do
+    case $SINGLE_BIND in
+      *$1*)
+        echo $SINGLE_BIND | cut -f1 -d":"
+      ;;
+      *)
+      ;;
+    esac
+  done
+}
+
+get_che_container_conf_folder() {
+  FOLDER=$(get_che_container_host_bind_folder "/conf")
+  echo "${FOLDER:=not set}"
+}
+
+get_che_container_data_folder() {
+  get_che_container_host_bind_folder "/home/user/che/workspaces"
+}
+
+get_che_container_image_name() {
+  docker inspect --format="{{.Config.Image}}" "${CHE_SERVER_CONTAINER_NAME}"
+}
+
+get_che_server_container_id() {
+  docker ps -qa -f "name=${CHE_SERVER_CONTAINER_NAME}"
 }
 
 wait_until_container_is_running() {
@@ -173,8 +213,18 @@ wait_until_container_is_running() {
   done
 }
 
+wait_until_container_is_stopped() {
+  CONTAINER_STOP_TIMEOUT=${1}
+
+  ELAPSED=0
+  until che_container_is_stopped || [ ${ELAPSED} -eq "${CONTAINER_STOP_TIMEOUT}" ]; do
+    sleep 1
+    ELAPSED=$((ELAPSED+1))
+  done
+}
+
 server_is_booted() {
-  HTTP_STATUS_CODE=$(curl -I http://"${CHE_HOST_IP}":"${CHE_PORT}"/api/  \
+  HTTP_STATUS_CODE=$(curl -I http://$(docker inspect -f '{{.NetworkSettings.IPAddress}}' "${CHE_SERVER_CONTAINER_NAME}"):8080/api/ \
                      -s -o /dev/null --write-out "%{http_code}")
   if [ "${HTTP_STATUS_CODE}" = "200" ]; then
     return 0

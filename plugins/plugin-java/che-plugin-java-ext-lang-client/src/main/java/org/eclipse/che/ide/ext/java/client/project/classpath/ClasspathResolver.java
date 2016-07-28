@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.java.client.project.classpath;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -22,7 +21,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -35,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
@@ -105,9 +104,11 @@ public class ClasspathResolver {
 
         final Resource resource = appContext.getResource();
 
-        Preconditions.checkState(resource != null);
+        checkState(resource != null);
 
-        final Optional<Project> project = resource.getRelatedProject();
+        final Optional<Project> optProject = resource.getRelatedProject();
+
+        checkState(optProject.isPresent());
 
         final List<ClasspathEntryDto> entries = new ArrayList<>();
         for (String path : libs) {
@@ -122,16 +123,20 @@ public class ClasspathResolver {
         for (String path : projects) {
             entries.add(dtoFactory.createDto(ClasspathEntryDto.class).withPath(path).withEntryKind(PROJECT));
         }
-        Promise<Void> promise = classpathUpdater.setRawClasspath(project.get().getLocation().toString(), entries);
+
+        final Project project = optProject.get();
+
+        Promise<Void> promise = classpathUpdater.setRawClasspath(project.getLocation().toString(), entries);
 
         promise.then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                eventBus.fireEvent(new ClasspathChangedEvent(project.get().getLocation().toString(), entries));
-                final Optional<Container> parent = resource.getParent();
-                if (parent.isPresent()) {
-                    parent.get().synchronize();
-                }
+                project.synchronize().then(new Operation<Resource[]>() {
+                    @Override
+                    public void apply(Resource[] arg) throws OperationException {
+                        eventBus.fireEvent(new ClasspathChangedEvent(project.getLocation().toString(), entries));
+                    }
+                });
             }
         }).catchError(new Operation<PromiseError>() {
             @Override

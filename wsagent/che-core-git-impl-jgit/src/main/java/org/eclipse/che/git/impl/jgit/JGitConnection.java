@@ -1605,7 +1605,6 @@ class JGitConnection implements GitConnection {
             }
 
             ProxyAuthenticator.initAuthenticator(remoteUrl);
-
             return command.call();
         } catch (GitException | TransportException exception) {
             if ("Unable get private ssh key".equals(exception.getMessage())) {
