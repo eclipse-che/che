@@ -335,6 +335,11 @@
                 <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>org-eclipse-jdt-core-repack</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-cpp-lang-ide</artifactId>
                 <version>${che.version}</version>
@@ -447,11 +452,6 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-ext-lang-shared</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-java-jdt-core-repack</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

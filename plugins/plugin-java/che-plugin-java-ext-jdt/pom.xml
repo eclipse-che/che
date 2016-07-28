@@ -29,7 +29,6 @@
         <module>org-eclipse-core-filebuffers</module>
         <module>org-eclipse-search</module>
         <module>org-eclipse-ui-ide</module>
-        <module>che-plugin-java-jdt-core-repack</module>
         <module>org-eclipse-jdt-ui</module>
         <module>org-eclipse-ltk-core-refactoring</module>
     </modules>
