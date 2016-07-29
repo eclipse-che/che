@@ -151,7 +151,6 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
             public void propertyChanged(PartPresenter source, int propId) {
                 switch (propId) {
                     case PROP_INPUT:
-                        setReadOnlyProperty(file);
                         view.showEditor(editor);
                         break;
                     case PROP_DIRTY:
@@ -172,12 +171,6 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
         editor.initialize(new DefaultTextEditorConfiguration());
 
         return editor;
-    }
-
-    private void setReadOnlyProperty(VirtualFile file) {
-        if (editor instanceof HasReadOnlyProperty) {
-            ((HasReadOnlyProperty)editor).setReadOnly(file.isReadOnly());
-        }
     }
 
     private boolean validateUndoOperation() {
