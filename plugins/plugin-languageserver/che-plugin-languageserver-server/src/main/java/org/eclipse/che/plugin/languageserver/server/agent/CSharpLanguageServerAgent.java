@@ -10,25 +10,39 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server.agent;
 
-import com.google.inject.Singleton;
-
-import org.eclipse.che.api.agent.server.Agent;
-import org.eclipse.che.api.agent.server.AgentException;
-import org.eclipse.che.api.agent.server.AgentFactory;
+import org.eclipse.che.api.agent.server.AbstractAgent;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Anatolii Bazko
  */
-@Singleton
-public class JsonLanguageServerAgentFactory implements AgentFactory {
-    @Override
-    public String getFqn() {
-        return "org.eclipse.che.ls.json";
+public class CSharpLanguageServerAgent extends AbstractAgent {
+
+    public CSharpLanguageServerAgent(AgentConfig agentConfig) {
+        super(agentConfig);
     }
 
     @Override
-    public Agent create(AgentConfig agentConfig) throws AgentException {
-        return new JsonLanguageServerAgent(agentConfig);
+    public Map<String, String> getEnvVariables() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public List<String> getVolumes() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<String> getPorts() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<String> getDependencies() {
+        return Collections.emptyList();
     }
 }

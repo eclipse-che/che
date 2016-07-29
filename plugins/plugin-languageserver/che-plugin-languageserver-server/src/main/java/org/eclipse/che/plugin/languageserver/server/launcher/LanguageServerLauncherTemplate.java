@@ -12,14 +12,11 @@ package org.eclipse.che.plugin.languageserver.server.launcher;
 
 import io.typefox.lsapi.services.LanguageServer;
 
-import com.google.inject.Singleton;
-
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 
 /**
  * @author Anatolii Bazko
  */
-@Singleton
 public abstract class LanguageServerLauncherTemplate implements LanguageServerLauncher {
 
     @Override

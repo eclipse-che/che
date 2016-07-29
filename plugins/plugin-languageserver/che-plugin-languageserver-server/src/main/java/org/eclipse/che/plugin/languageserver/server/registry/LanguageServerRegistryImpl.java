@@ -46,7 +46,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     /**
      * Available {@link LanguageServerLauncher} by extension.
      */
-    private final ConcurrentHashMap<String, List<LanguageServerLauncher>> extensionToFactory;
+    private final ConcurrentHashMap<String, List<LanguageServerLauncher>> extensionToLauncher;
 
     /**
      * Started {@link LanguageServer} by project.
@@ -57,19 +57,19 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     private final ServerInitializer      initializer;
 
     @Inject
-    public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerFactories,
+    public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers,
                                       ProjectManager projectManager,
                                       ServerInitializer initializer) {
         this.projectManager = projectManager;
         this.initializer = initializer;
-        this.extensionToFactory = new ConcurrentHashMap<>();
+        this.extensionToLauncher = new ConcurrentHashMap<>();
         this.projectToServer = new ConcurrentHashMap<>();
         this.initializer.addObserver(this);
 
-        for (LanguageServerLauncher factory : languageServerFactories) {
-            for (String extension : factory.getLanguageDescription().getFileExtensions()) {
-                extensionToFactory.putIfAbsent(extension, new ArrayList<>());
-                extensionToFactory.get(extension).add(factory);
+        for (LanguageServerLauncher launcher : languageServerLaunchers) {
+            for (String extension : launcher.getLanguageDescription().getFileExtensions()) {
+                extensionToLauncher.putIfAbsent(extension, new ArrayList<>());
+                extensionToLauncher.get(extension).add(launcher);
             }
         }
     }
@@ -88,11 +88,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     protected LanguageServer findServer(String extension, String projectPath) throws LanguageServerException {
         ProjectExtensionKey projectKey = createProjectKey(projectPath, extension);
 
-        for (LanguageServerLauncher factory : extensionToFactory.get(extension)) {
+        for (LanguageServerLauncher launcher : extensionToLauncher.get(extension)) {
             if (!projectToServer.containsKey(projectKey)) {
-                synchronized (factory) {
+                synchronized (launcher) {
                     if (!projectToServer.containsKey(projectKey)) {
-                        LanguageServer server = initializer.initialize(factory, projectPath);
+                        LanguageServer server = initializer.initialize(launcher, projectPath);
                         projectToServer.put(projectKey, server);
                     }
                 }
@@ -106,11 +106,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
 
     @Override
     public List<LanguageDescription> getSupportedLanguages() {
-        return extensionToFactory.values()
-                                 .stream()
-                                 .flatMap(Collection::stream)
-                                 .map(LanguageServerLauncher::getLanguageDescription)
-                                 .collect(Collectors.toList());
+        return extensionToLauncher.values()
+                                  .stream()
+                                  .flatMap(Collection::stream)
+                                  .map(LanguageServerLauncher::getLanguageDescription)
+                                  .collect(Collectors.toList());
     }
 
     @Override

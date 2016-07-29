@@ -1,0 +1,8 @@
+{
+  "name": "org.eclipse.che.ls.csharp",
+  "version": "1.0",
+  "dependencies": [],
+  "properties": {},
+  "script": [
+  ]
+}

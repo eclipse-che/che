@@ -1,0 +1,14 @@
+{
+  "name": "org.eclipse.che.ls.json",
+  "version": "1.0",
+  "dependencies": [],
+  "properties": {},
+  "script": [
+    "curl -s --output \"/tmp/language-server-json.zip\" -L \"https://codenvy.com/update/repository/public/download/language-server-json-binaries\"",
+    "if [ ! -d \"$HOME/ls/json\" ];  then mkdir -p \"$HOME/ls/json\" ; fi",
+    "unzip \"/tmp/language-server-json.zip\" -d \"$HOME/ls/json\"",
+    "curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -",
+    "sudo apt-get install -y nodejs",
+    "node \"$HOME/ls/json/vscode-json-server/server.js\""
+  ]
+}

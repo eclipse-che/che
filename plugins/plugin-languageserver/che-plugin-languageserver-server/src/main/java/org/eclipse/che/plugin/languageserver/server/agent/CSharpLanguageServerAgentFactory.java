@@ -21,14 +21,14 @@ import org.eclipse.che.api.agent.shared.model.AgentConfig;
  * @author Anatolii Bazko
  */
 @Singleton
-public class JsonLanguageServerAgentFactory implements AgentFactory {
+public class CSharpLanguageServerAgentFactory implements AgentFactory {
     @Override
     public String getFqn() {
-        return "org.eclipse.che.ls.json";
+        return "org.eclipse.che.ls.csharp";
     }
 
     @Override
     public Agent create(AgentConfig agentConfig) throws AgentException {
-        return new JsonLanguageServerAgent(agentConfig);
+        return new CSharpLanguageServerAgent(agentConfig);
     }
 }
