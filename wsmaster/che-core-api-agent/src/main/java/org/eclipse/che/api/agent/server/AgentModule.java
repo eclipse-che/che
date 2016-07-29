@@ -11,10 +11,12 @@
 package org.eclipse.che.api.agent.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.agent.server.impl.AgentProviderImpl;
 import org.eclipse.che.api.agent.server.impl.AgentRegistryImpl;
+import org.eclipse.che.api.agent.server.impl.BaseAgentFactory;
 
 import static java.lang.String.format;
 
@@ -26,6 +28,9 @@ public class AgentModule extends AbstractModule {
     protected void configure() {
         bind(AgentRegistry.class).to(AgentRegistryImpl.class);
         bind(AgentProvider.class).to(AgentProviderImpl.class);
+
+        Multibinder<AgentFactory> agentFactoryMultibinder = Multibinder.newSetBinder(binder(), AgentFactory.class);
+        agentFactoryMultibinder.addBinding().to(BaseAgentFactory.class);
 
         bindConstant().annotatedWith(Names.named("che.agent.url"))
                       .to(format("https://codenvy.com/update/repository/public/download/%s/%s",

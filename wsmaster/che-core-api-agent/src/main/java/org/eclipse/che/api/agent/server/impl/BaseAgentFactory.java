@@ -8,30 +8,27 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server;
+package org.eclipse.che.api.agent.server.impl;
 
-import com.google.common.base.Joiner;
+import com.google.inject.Singleton;
 
+import org.eclipse.che.api.agent.server.Agent;
+import org.eclipse.che.api.agent.server.AgentException;
+import org.eclipse.che.api.agent.server.AgentFactory;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 
 /**
  * @author Anatolii Bazko
  */
-public abstract class AbstractAgent implements Agent {
-    protected final AgentConfig agentConfig;
-
-    public AbstractAgent(AgentConfig agentConfig) {
-        this.agentConfig = agentConfig;
+@Singleton
+public class BaseAgentFactory implements AgentFactory {
+    @Override
+    public String getFqn() {
+        return "org.eclipse.che.base";
     }
 
     @Override
-    public final String getFqn() {
-        return agentConfig.getFqn();
-    }
-
-    @Override
-    public String getScript() {
-        return Joiner.on('\n').join(agentConfig.getScript());
+    public Agent create(AgentConfig agentConfig) throws AgentException {
+        return new BaseAgent(agentConfig);
     }
 }
-
