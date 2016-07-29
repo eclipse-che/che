@@ -13,22 +13,14 @@ package org.eclipse.che.ide.statepersistance;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
-import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent.WorkspaceReadyHandler;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.WindowActionEvent;
-import org.eclipse.che.ide.api.event.WindowActionHandler;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -50,17 +42,13 @@ import java.util.Set;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class AppStateManager implements WindowActionHandler,
-                                        WorkspaceStoppedEvent.Handler,
-                                        WsAgentStateHandler,
-                                        WorkspaceReadyHandler {
+public class AppStateManager {
 
     /** The name of the property for the mappings in user preferences. */
     public static final String PREFERENCE_PROPERTY_NAME = "IdeAppState";
 
     private final Set<PersistenceComponent>    persistenceComponents;
     private final PreferencesManager           preferencesManager;
-    private final AppContext                   appContext;
     private final DtoFactory                   dtoFactory;
     private final ActionManager                actionManager;
     private final PresentationFactory          presentationFactory;
@@ -71,24 +59,16 @@ public class AppStateManager implements WindowActionHandler,
     @Inject
     public AppStateManager(Set<PersistenceComponent> persistenceComponents,
                            PreferencesManager preferencesManager,
-                           AppContext appContext,
                            DtoFactory dtoFactory,
                            ActionManager actionManager,
                            PresentationFactory presentationFactory,
-                           Provider<PerspectiveManager> perspectiveManagerProvider,
-                           EventBus eventBus) {
+                           Provider<PerspectiveManager> perspectiveManagerProvider) {
         this.persistenceComponents = persistenceComponents;
         this.preferencesManager = preferencesManager;
-        this.appContext = appContext;
         this.dtoFactory = dtoFactory;
         this.actionManager = actionManager;
         this.presentationFactory = presentationFactory;
         this.perspectiveManagerProvider = perspectiveManagerProvider;
-
-        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
-        eventBus.addHandler(WindowActionEvent.TYPE, this);
-        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
-        eventBus.addHandler(WorkspaceReadyEvent.getType(), this);
 
         readStateFromPreferences();
     }
@@ -107,52 +87,25 @@ public class AppStateManager implements WindowActionHandler,
         }
     }
 
-    @Override
-    public void onWindowClosing(WindowActionEvent event) {
-        persistWorkspaceState();
-    }
-
-    @Override
-    public void onWindowClosed(WindowActionEvent event) {
-    }
-
-    @Override
-    public void onWsAgentStarted(WsAgentStateEvent event) {
-    }
-
-    @Override
-    public void onWorkspaceReady(WorkspaceReadyEvent event) {
-        restoreWorkspaceState();
-    }
-
-    @Override
-    public void onWsAgentStopped(WsAgentStateEvent event) {
-        persistWorkspaceState();
-    }
-
-    @Override
-    public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-        persistWorkspaceState();
-    }
-
-    private void persistWorkspaceState() {
-        appState.setRecentWorkspaceId(appContext.getDevMachine().getId());
+    public Promise<Void> persistWorkspaceState(String wsId) {
+        appState.setRecentWorkspaceId(wsId);
 
         final WorkspaceState workspaceState = dtoFactory.createDto(WorkspaceState.class);
-        appState.getWorkspaces().put(appContext.getDevMachine().getId(), workspaceState);
+        appState.getWorkspaces().put(wsId, workspaceState);
 
         final List<ActionDescriptor> actions = workspaceState.getActions();
         for (PersistenceComponent persistenceComponent : persistenceComponents) {
             actions.addAll(persistenceComponent.getActions());
         }
 
-        writeStateToPreferences();
+        return writeStateToPreferences();
     }
 
-    private void writeStateToPreferences() {
+    private Promise<Void> writeStateToPreferences() {
         final String json = dtoFactory.toJson(appState);
+        Log.info(getClass(), "write: " + json);
         preferencesManager.setValue(PREFERENCE_PROPERTY_NAME, json);
-        preferencesManager.flushPreferences().catchError(new Operation<PromiseError>() {
+        return preferencesManager.flushPreferences().catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 Log.error(AppStateManager.class, "Failed to store app's state to user's preferences");
@@ -160,8 +113,9 @@ public class AppStateManager implements WindowActionHandler,
         });
     }
 
-    private void restoreWorkspaceState() {
-        final WorkspaceState workspaceState = appState.getWorkspaces().get(appContext.getDevMachine().getId());
+    public void restoreWorkspaceState(String wsId) {
+        final WorkspaceState workspaceState = appState.getWorkspaces().get(wsId);
+
         if (workspaceState == null) {
             return;
         }
