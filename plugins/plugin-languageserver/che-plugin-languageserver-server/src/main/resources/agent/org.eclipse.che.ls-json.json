@@ -1,14 +1,30 @@
 {
   "name": "org.eclipse.che.ls.json",
-  "version": "1.0",
-  "dependencies": [],
+  "version": "1.0.0",
+  "dependencies": [
+    "org.eclipse.che.base"
+  ],
   "properties": {},
   "script": [
-    "curl -s --output \"/tmp/language-server-json.zip\" -L \"https://codenvy.com/update/repository/public/download/language-server-json-binaries\"",
-    "if [ ! -d \"$HOME/ls/json\" ];  then mkdir -p \"$HOME/ls/json\" ; fi",
-    "unzip \"/tmp/language-server-json.zip\" -d \"$HOME/ls/json\"",
-    "curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -",
-    "sudo apt-get install -y nodejs",
-    "node \"$HOME/ls/json/vscode-json-server/server.js\""
+    "DIR=$HOME/che/ls-json",
+    "if [ ! -d \"$DIR\" ];  then mkdir -p $DIR; fi",
+    "",
+    "LS=vscode-json-server",
+    "wget -O $DIR/$LS.tar.gz https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.json.binaries",
+    "tar xvzf $DIR/$LS.tar.gz -C $DIR",
+    "",
+    "MACHINE_TYPE=`uname -m`",
+    "if [ ${MACHINE_TYPE} == 'x86_64' ]; then",
+    "    NODEJS=node-v0.12.9-linux-x64",
+    "else",
+    "    NODEJS=node-v0.12.9-linux-x86",
+    "fi",
+    "",
+    "wget -O $DIR/$NODEJS.tar.gz https://nodejs.org/dist/v0.12.9/$NODEJS.tar.gz",
+    "tar xvzf $DIR/$NODEJS.tar.gz -C $DIR",
+    "",
+    "touch $DIR/launch.sh",
+    "echo \"$DIR/$NODEJS/bin/node $DIR/$LS/server.js\" > $DIR/launch.sh",
+    "chmod +x $DIR/launch.sh"
   ]
 }

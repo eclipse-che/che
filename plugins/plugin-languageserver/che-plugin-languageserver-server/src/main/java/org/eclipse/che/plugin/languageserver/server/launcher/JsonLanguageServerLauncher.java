@@ -54,7 +54,7 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
     }
 
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-        ProcessBuilder processBuilder = new ProcessBuilder("node", "/projects/vscode-json-server/server.js");
+        ProcessBuilder processBuilder = new ProcessBuilder("$HOME/che/ls-json/launch.sh");
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
         processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
         try {
