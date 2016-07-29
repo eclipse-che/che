@@ -14,15 +14,12 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -108,19 +105,10 @@ public class AppStateManagerTest {
 
         appStateManager = new AppStateManager(persistenceComponents,
                                               preferencesManager,
-                                              appContext,
                                               dtoFactory,
                                               actionManager,
                                               presentationFactory,
-                                              perspectiveManagerProvider,
-                                              eventBus);
-    }
-
-    @Test
-    public void shouldSubscribeOnEventBus() {
-        verify(eventBus).addHandler(WorkspaceStoppedEvent.TYPE, appStateManager);
-        verify(eventBus).addHandler(WindowActionEvent.TYPE, appStateManager);
-        verify(eventBus).addHandler(WsAgentStateEvent.TYPE, appStateManager);
+                                              perspectiveManagerProvider);
     }
 
     @Test
