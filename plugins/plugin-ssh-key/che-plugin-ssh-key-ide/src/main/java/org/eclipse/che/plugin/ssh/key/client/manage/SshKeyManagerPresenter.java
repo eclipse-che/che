@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.ssh.key.client.manage;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -24,6 +25,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
+import org.eclipse.che.ide.ui.TextBox;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
 import org.eclipse.che.plugin.ssh.key.client.upload.UploadSshKeyPresenter;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
@@ -50,11 +52,12 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
     public static final String GITHUB_HOST     = "github.com";
     public static final String VCS_SSH_SERVICE = "vcs";
 
-    private final AppContext                 appContext;
-    private final DialogFactory              dialogFactory;
-    private final SshKeyManagerView          view;
-    private final SshServiceClient           service;
-    private final SshKeyUploaderRegistry     registry;
+    private final AppContext             appContext;
+    private final DialogFactory          dialogFactory;
+    private final SshKeyManagerView      view;
+    private final SshServiceClient       service;
+    private final SshKeyUploaderRegistry registry;
+    private final ShowSshKeyView showSshKeyView;
     private final SshKeyLocalizationConstant constant;
     private final UploadSshKeyPresenter      uploadSshKeyPresenter;
     private final NotificationManager        notificationManager;
@@ -67,13 +70,15 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                                   UploadSshKeyPresenter uploadSshKeyPresenter,
                                   NotificationManager notificationManager,
                                   DialogFactory dialogFactory,
-                                  SshKeyUploaderRegistry registry) {
+                                  SshKeyUploaderRegistry registry,
+                                  ShowSshKeyView showSshKeyView) {
         super(constant.sshManagerTitle(), constant.sshManagerCategory());
 
         this.view = view;
         this.appContext = appContext;
         this.dialogFactory = dialogFactory;
         this.registry = registry;
+        this.showSshKeyView = showSshKeyView;
         this.view.setDelegate(this);
         this.service = service;
         this.constant = constant;
@@ -84,7 +89,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
     /** {@inheritDoc} */
     @Override
     public void onViewClicked(@NotNull final SshPairDto pair) {
-        dialogFactory.createMessageDialog(constant.publicSshKeyField() + pair.getName(), pair.getPublicKey(), null).show();
+        showSshKeyView.show(pair.getName(), pair.getPublicKey());
     }
 
     /** {@inheritDoc} */
