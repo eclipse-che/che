@@ -92,8 +92,6 @@ public class WorkspaceManagerTest {
     @Mock
     private MachineManager                client;
     @Mock
-    private WorkspaceHooks                workspaceHooks;
-    @Mock
     private MachineManager                machineManager;
     @Mock
     private WorkspaceRuntimes             runtimes;
@@ -110,7 +108,6 @@ public class WorkspaceManagerTest {
                                                     machineManager,
                                                     false,
                                                     false));
-        workspaceManager.setHooks(workspaceHooks);
 
         when(workspaceDao.create(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
         when(workspaceDao.update(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
@@ -136,8 +133,6 @@ public class WorkspaceManagerTest {
         assertFalse(workspace.isTemporary());
         assertEquals(workspace.getStatus(), STOPPED);
         assertNotNull(workspace.getAttributes().get(CREATED_ATTRIBUTE_NAME));
-        verify(workspaceHooks).beforeCreate(workspace);
-        verify(workspaceHooks).afterCreate(workspace);
         verify(workspaceDao).create(workspace);
     }
 
@@ -318,7 +313,6 @@ public class WorkspaceManagerTest {
         workspaceManager.removeWorkspace(workspace.getId());
 
         verify(workspaceDao).remove(workspace.getId());
-        verify(workspaceHooks).afterRemove(workspace.getId());
     }
 
     @Test(expectedExceptions = ConflictException.class)
@@ -340,7 +334,6 @@ public class WorkspaceManagerTest {
                                         null);
 
         verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
-        verify(workspaceHooks, timeout(2000)).beforeStart(workspace, workspace.getConfig().getDefaultEnv());
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -357,7 +350,6 @@ public class WorkspaceManagerTest {
                                         null);
 
         verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), true);
-        verify(workspaceHooks, timeout(2000)).beforeStart(workspace, workspace.getConfig().getDefaultEnv());
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -373,7 +365,6 @@ public class WorkspaceManagerTest {
                                         true);
 
         verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), true);
-        verify(workspaceHooks, timeout(2000)).beforeStart(workspace, workspace.getConfig().getDefaultEnv());
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -389,7 +380,6 @@ public class WorkspaceManagerTest {
                                         null);
 
         verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
-        verify(workspaceHooks, timeout(2000)).beforeStart(workspace, workspace.getConfig().getDefaultEnv());
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -404,7 +394,6 @@ public class WorkspaceManagerTest {
                                         true);
 
         verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
-        verify(workspaceHooks, timeout(2000)).beforeStart(workspace, workspace.getConfig().getDefaultEnv());
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -421,7 +410,6 @@ public class WorkspaceManagerTest {
                                         false);
 
         verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), false);
-        verify(workspaceHooks, timeout(2000)).beforeStart(workspace, workspace.getConfig().getDefaultEnv());
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
 
@@ -497,9 +485,6 @@ public class WorkspaceManagerTest {
                               .get(0)
                               .getMachineConfigs()
                               .get(0));
-        verify(workspaceHooks).beforeCreate(captured);
-        verify(workspaceHooks).afterCreate(runtime);
-        verify(workspaceHooks).beforeStart(captured, config.getDefaultEnv());
         verify(workspaceManager).performAsyncStart(captured, captured.getConfig().getDefaultEnv(), false);
     }
 

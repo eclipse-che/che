@@ -17,7 +17,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
@@ -94,8 +93,6 @@ public class WorkspaceManager {
     private final boolean           defaultAutoSnapshot;
     private final boolean           defaultAutoRestore;
 
-    private WorkspaceHooks hooks = new NoopWorkspaceHooks();
-
     @Inject
     public WorkspaceManager(WorkspaceDao workspaceDao,
                             WorkspaceRuntimes workspaceRegistry,
@@ -115,11 +112,6 @@ public class WorkspaceManager {
                                                                            .build());
     }
 
-    @Inject(optional = true)
-    public void setHooks(WorkspaceHooks hooks) {
-        this.hooks = hooks;
-    }
-
     /**
      * Creates a new {@link WorkspaceImpl} instance based on the given configuration.
      *
@@ -136,8 +128,6 @@ public class WorkspaceManager {
      *         when any conflict occurs (e.g Workspace with such name already exists for {@code owner})
      * @throws ServerException
      *         when any other error occurs
-     * @see WorkspaceHooks#beforeCreate(Workspace)
-     * @see WorkspaceHooks#afterCreate(Workspace)
      */
     public WorkspaceImpl createWorkspace(WorkspaceConfig config,
                                          String namespace) throws ServerException,
@@ -170,8 +160,6 @@ public class WorkspaceManager {
      *         when any conflict occurs (e.g Workspace with such name already exists for {@code owner})
      * @throws ServerException
      *         when any other error occurs
-     * @see WorkspaceHooks#beforeCreate(Workspace)
-     * @see WorkspaceHooks#afterCreate(Workspace)
      */
     public WorkspaceImpl createWorkspace(WorkspaceConfig config,
                                          String namespace,
@@ -322,7 +310,6 @@ public class WorkspaceManager {
      *         when any server error occurs
      * @throws NullPointerException
      *         when {@code workspaceId} is null
-     * @see WorkspaceHooks#afterRemove(String)
      */
     public void removeWorkspace(String workspaceId) throws ConflictException, ServerException {
         requireNonNull(workspaceId, "Required non-null workspace id");
@@ -330,7 +317,6 @@ public class WorkspaceManager {
             throw new ConflictException("The workspace '" + workspaceId + "' is currently running and cannot be removed.");
         }
         workspaceDao.remove(workspaceId);
-        hooks.afterRemove(workspaceId);
         eventService.publish(new WorkspaceRemovedEvent(workspaceId));
         LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUserNameOr("undefined"));
     }
@@ -358,8 +344,7 @@ public class WorkspaceManager {
      * @throws NullPointerException
      *         when {@code workspaceId} is null
      * @throws NotFoundException
-     *         when workspace with given {@code workspaceId} doesn't exist, or
-     *         {@link WorkspaceHooks#beforeStart(Workspace, String)} throws this exception
+     *         when workspace with given {@code workspaceId} doesn't exist
      * @throws ServerException
      *         when any other error occurs during workspace start
      */
@@ -387,8 +372,7 @@ public class WorkspaceManager {
      * @throws NullPointerException
      *         when {@code workspaceId} is null
      * @throws NotFoundException
-     *         when workspace with given {@code workspaceId} doesn't exist, or
-     *         {@link WorkspaceHooks#beforeStart(Workspace, String)} throws this exception
+     *         when workspace with given {@code workspaceId} doesn't exist
      * @throws ServerException
      *         when any other error occurs during workspace start
      */
@@ -560,14 +544,13 @@ public class WorkspaceManager {
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             try {
                 final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
-                hooks.beforeStart(workspace, env);
                 runtimes.start(workspace, env, recover);
                 LOG.info("Workspace '{}:{}' with id '{}' started by user '{}'",
                          workspace.getNamespace(),
                          workspace.getConfig().getName(),
                          workspace.getId(),
                          sessionUserNameOr("undefined"));
-            } catch (RuntimeException | ServerException | NotFoundException | ConflictException | ForbiddenException ex) {
+            } catch (RuntimeException | ServerException | NotFoundException | ConflictException ex) {
                 if (workspace.isTemporary()) {
                     try {
                         removeWorkspace(workspace.getId());
@@ -713,9 +696,7 @@ public class WorkspaceManager {
                                                      .setTemporary(isTemporary)
                                                      .build();
         workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-        hooks.beforeCreate(workspace);
         workspaceDao.create(workspace);
-        hooks.afterCreate(workspace);
         LOG.info("Workspace '{}:{}' with id '{}' created by user '{}'",
                  namespace,
                  workspace.getConfig().getName(),
@@ -738,20 +719,5 @@ public class WorkspaceManager {
         final String wsName = parts[1];
         final String namespace = nsPart.isEmpty() ? sessionUser().getUserName() : nsPart;
         return workspaceDao.get(wsName, namespace);
-    }
-
-    /** No-operations workspace hooks. Each method does nothing */
-    private static class NoopWorkspaceHooks implements WorkspaceHooks {
-        @Override
-        public void beforeStart(Workspace workspace, String evnName) throws NotFoundException, ServerException {}
-
-        @Override
-        public void beforeCreate(Workspace workspace) throws NotFoundException, ServerException {}
-
-        @Override
-        public void afterCreate(Workspace workspace) throws ServerException {}
-
-        @Override
-        public void afterRemove(String workspaceId) {}
     }
 }
