@@ -20,23 +20,23 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.JsPromiseError;
-import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.CancelCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.api.dialogs.InputDialog;
+import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
-import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
-import org.eclipse.che.plugin.ssh.key.client.upload.UploadSshKeyPresenter;
-import org.eclipse.che.plugin.ssh.key.client.SshResources;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.api.dialogs.CancelCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
-import org.eclipse.che.ide.api.dialogs.InputDialog;
-import org.eclipse.che.ide.api.dialogs.MessageDialog;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
+import org.eclipse.che.plugin.ssh.key.client.SshResources;
+import org.eclipse.che.plugin.ssh.key.client.upload.UploadSshKeyPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -110,6 +110,8 @@ public class SshKeyManagerPresenterTest {
     @Mock
     private SshServiceClient           service;
     @Mock
+    private ShowSshKeyView             showSshKeyView;
+    @Mock
     private SshKeyLocalizationConstant constant;
     @Mock
     private SshResources               resources;
@@ -160,13 +162,13 @@ public class SshKeyManagerPresenterTest {
     @Test
     public void testOnViewClickedWhenGetPublicKeyIsSuccess() {
         when(sshPairDto.getPublicKey()).thenReturn("publicKey");
+        when(sshPairDto.getName()).thenReturn("name");
         MessageDialog messageDialog = mock(MessageDialog.class);
         when(dialogFactory.createMessageDialog(anyString(), anyString(), (ConfirmCallback)anyObject())).thenReturn(messageDialog);
 
         presenter.onViewClicked(sshPairDto);
 
-        verify(dialogFactory).createMessageDialog(anyString(), eq("publicKey"), (ConfirmCallback)anyObject());
-        verify(messageDialog).show();
+        verify(showSshKeyView).show("name", "publicKey");
     }
 
     @Test

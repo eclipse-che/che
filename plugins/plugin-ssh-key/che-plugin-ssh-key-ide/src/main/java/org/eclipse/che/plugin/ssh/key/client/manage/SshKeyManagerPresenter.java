@@ -12,28 +12,26 @@ package org.eclipse.che.plugin.ssh.key.client.manage;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
-import com.google.gwt.user.client.ui.Label;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
-import org.eclipse.che.ide.ui.TextBox;
-import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
-import org.eclipse.che.plugin.ssh.key.client.upload.UploadSshKeyPresenter;
-import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
-import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
+import org.eclipse.che.plugin.ssh.key.client.upload.UploadSshKeyPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -52,12 +50,12 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
     public static final String GITHUB_HOST     = "github.com";
     public static final String VCS_SSH_SERVICE = "vcs";
 
-    private final AppContext             appContext;
-    private final DialogFactory          dialogFactory;
-    private final SshKeyManagerView      view;
-    private final SshServiceClient       service;
-    private final SshKeyUploaderRegistry registry;
-    private final ShowSshKeyView showSshKeyView;
+    private final AppContext                 appContext;
+    private final DialogFactory              dialogFactory;
+    private final SshKeyManagerView          view;
+    private final SshServiceClient           service;
+    private final SshKeyUploaderRegistry     registry;
+    private final ShowSshKeyView             showSshKeyView;
     private final SshKeyLocalizationConstant constant;
     private final UploadSshKeyPresenter      uploadSshKeyPresenter;
     private final NotificationManager        notificationManager;
