@@ -19,7 +19,7 @@ import {CreateProjectGitCtrl} from './create-project/git/create-project-git.cont
 import {CreateProjectGithub} from './create-project/github/create-project-github.directive';
 import {AddSecretKeyNotificationCtrl} from './create-project/add-ssh-key-notification/add-ssh-key-notification.controller';
 import {NoGithubOauthDialogController} from './create-project/github/oauth-dialog/no-github-oauth-dialog.controller';
-import {CreateProjectSamplesCtrl} from './create-project/samples/create-project-samples.controller';
+import {CreateProjectSamplesController} from './create-project/samples/create-project-samples.controller';
 import {CreateProjectSamples} from './create-project/samples/create-project-samples.directive';
 import {CreateProjectWorkspacesController} from './create-project/workspaces/create-project-workspaces.controller';
 import {CreateProjectWorkspaces} from './create-project/workspaces/create-project-workspaces.directive';
@@ -56,7 +56,7 @@ export class ProjectsConfig {
 
     register.controller('AddSecretKeyNotificationCtrl', AddSecretKeyNotificationCtrl);
 
-    register.controller('CreateProjectSamplesCtrl', CreateProjectSamplesCtrl);
+    register.controller('CreateProjectSamplesController', CreateProjectSamplesController);
     register.directive('createProjectSamples', CreateProjectSamples);
 
     register.controller('CreateProjectWorkspacesController', CreateProjectWorkspacesController);

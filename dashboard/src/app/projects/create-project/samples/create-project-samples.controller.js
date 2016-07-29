@@ -14,16 +14,17 @@
  * This class is handling the controller for the samples part
  * @author Florent Benoit
  */
-export class CreateProjectSamplesCtrl {
+export class CreateProjectSamplesController {
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($rootScope, cheAPI, $timeout) {
+  constructor($rootScope, cheAPI, $timeout, lodash) {
     this.$rootScope = $rootScope;
     this.cheAPI = cheAPI;
     this.$timeout = $timeout;
+    this.lodash = lodash;
 
     // ask to load che templates
     let promise = cheAPI.getProjectTemplate().fetchTemplates();
@@ -87,14 +88,23 @@ export class CreateProjectSamplesCtrl {
   /**
    * Select the first element in the list
    */
-  initItem($first, template, createProjectCtrl) {
-    if ($first && createProjectCtrl.selectSourceOption === 'select-source-new') {
+  initItem(templateName, createProjectCtrl) {
+    if (createProjectCtrl.selectSourceOption === 'select-source-new') {
+      let template = this.lodash.find(this.templates, (template) => {return template.name === templateName;});
       this.$timeout(() => {
         this.selectTemplate(template, createProjectCtrl);
       });
     }
   }
 
+  /**
+   * Returns true if template is already selected
+   * @param templateName
+   * @returns {boolean}
+   */
+  isTemplateSelected(templateName) {
+    return this.selectedTemplateName === templateName;
+  }
 
   /**
    * Helper method used to get the length of keys of the given object
