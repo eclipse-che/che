@@ -19,7 +19,6 @@ import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class JpaFactoryDao implements FactoryDao {
     public FactoryImpl create(FactoryImpl factory) throws ConflictException, ServerException {
         requireNonNull(factory);
         try {
-            return doCreate(factory);
+            doCreate(factory);
         } catch (DuplicateKeyException ex) {
             throw new ConflictException(ex.getLocalizedMessage());
         } catch (IntegrityConstraintViolationException ex) {
@@ -56,6 +56,7 @@ public class JpaFactoryDao implements FactoryDao {
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
+        return factory;
     }
 
     @Override
@@ -102,37 +103,35 @@ public class JpaFactoryDao implements FactoryDao {
                                             List<Pair<String, String>> attributes) throws ServerException {
         try {
             LOG.info("FactoryDao#getByAttributes #maxItems: {} #skipCount: {}, #attributes: {}", maxItems, skipCount, attributes);
-            final Map<String, Pair<String, String>> params = new HashMap<>();
-            for (Pair<String, String> attribute : attributes) {
-                params.put(NameGenerator.generate("att", 3), attribute);
-            }
-            String query = "Select factory From Factory factory%1$2s %2$2s";
-            if (!params.isEmpty()) {
-                final StringJoiner from = new StringJoiner(", ", ", ", "");
-                final StringJoiner where = new StringJoiner(" AND ", "Where ", " ");
-                for (Map.Entry<String, Pair<String, String>> entry : params.entrySet()) {
-                    from.add(format("factory.%1$2s %2$2s", entry.getValue().first, entry.getKey()));
-                    where.add(entry.getKey() + " = '" + entry.getValue().second + "'");
+            final Map<String, String> params = new HashMap<>();
+            String query = "SELECT factory FROM Factory factory";
+            if (!attributes.isEmpty()) {
+                final StringJoiner matcher = new StringJoiner(" AND ", " WHERE ", " ");
+                int i = 0;
+                for (Pair<String, String> attribute : attributes) {
+                    final String parameterName = "parameterName" + i++;
+                    params.put(parameterName, attribute.second);
+                    matcher.add("factory." + attribute.first + " = :" + parameterName);
                 }
-                query = format(query, from, where);
-            } else {
-                query = format(query, "", "");
+                query = query + matcher;
             }
-            return managerProvider.get()
-                                  .createQuery(query, FactoryImpl.class)
-                                  .setFirstResult(skipCount)
-                                  .setMaxResults(maxItems)
-                                  .getResultList();
+            final TypedQuery<FactoryImpl> typedQuery = managerProvider.get()
+                                                                      .createQuery(query, FactoryImpl.class)
+                                                                      .setFirstResult(skipCount)
+                                                                      .setMaxResults(maxItems);
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                typedQuery.setParameter(entry.getKey(), entry.getValue());
+            }
+            return typedQuery.getResultList();
         } catch (RuntimeException ex) {
             throw new ServerException(ex.getLocalizedMessage(), ex);
         }
     }
 
     @Transactional
-    protected FactoryImpl doCreate(FactoryImpl factory) {
+    protected void doCreate(FactoryImpl factory) {
         final EntityManager manager = managerProvider.get();
         manager.persist(factory);
-        return manager.find(FactoryImpl.class, factory.getId());
     }
 
     @Transactional
