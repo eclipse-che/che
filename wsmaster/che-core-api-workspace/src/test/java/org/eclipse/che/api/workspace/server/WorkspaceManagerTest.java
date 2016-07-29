@@ -364,7 +364,7 @@ public class WorkspaceManagerTest {
     @Test
     public void shouldRecoverWorkspaceWhenRecoverParameterIsTrueAndSnapshotExists() throws Exception {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
-        when(machineManager.getSnapshots(any(), any())).thenReturn(singletonList(mock(SnapshotImpl.class)));
+        when(machineManager.getSnapshots(any())).thenReturn(singletonList(mock(SnapshotImpl.class)));
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
 
@@ -415,7 +415,7 @@ public class WorkspaceManagerTest {
     public void shouldNotRecoverWorkspaceWhenRecoverParameterIsFalseAndAutoRestoreAttributeIsSetAndSnapshotExists() throws Exception {
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
         workspace.getAttributes().put(AUTO_RESTORE_FROM_SNAPSHOT, "true");
-        when(machineManager.getSnapshots(any(), any())).thenReturn(singletonList(mock(SnapshotImpl.class)));
+        when(machineManager.getSnapshots(any())).thenReturn(singletonList(mock(SnapshotImpl.class)));
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));
 
