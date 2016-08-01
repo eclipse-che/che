@@ -20,7 +20,7 @@ class IdeSvc {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, $location, routeHistory, $q, $log, cheWorkspace) {
+  constructor(cheAPI, $rootScope, lodash, $mdDialog, userDashboardConfig, $timeout, $websocket, $sce, proxySettings, $location, routeHistory, $q, $log, cheWorkspace, urlAdapter) {
     this.cheAPI = cheAPI;
     this.$rootScope = $rootScope;
     this.lodash = lodash;
@@ -35,6 +35,7 @@ class IdeSvc {
     this.$q = $q;
     this.$log = $log;
     this.cheWorkspace = cheWorkspace;
+    this.urlAdapter = urlAdapter;
 
     this.ideParams = new Map();
 
@@ -295,7 +296,7 @@ class IdeSvc {
     while (i < links.length) {
       let link = links[i];
       if (link.rel === name) {
-        return link.href;
+        return this.urlAdapter.fixHostName(link.href);
       }
       i++;
     }
@@ -311,6 +312,7 @@ class IdeSvc {
   updateRecentWorkspace(workspaceId) {
     this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
+
 }
 
 export default IdeSvc;
