@@ -24,6 +24,7 @@ public class SystemInfo {
     public static final String DRIVER_STATE_DATA_SPACE_USED      = "Data Space Used";
     public static final String DRIVER_STATE_METADATA_SPACE_TOTAL = "Metadata Space Total";
     public static final String DRIVER_STATE_METADATA_SPACE_USED  = "Metadata Space Used";
+    public static final String RAM_USAGE                         = " └ Reserved Memory";
 
     // Fields are sorted in alphabetical order to eas comparison with docker docs and output
     //Architecture
@@ -156,6 +157,14 @@ public class SystemInfo {
             return -1;
         }
         return Size.parseSize(str);
+    }
+
+    /**
+     * Gets information about RAM usage in format - [ram used]/ [total ram size], or {@code null} if required information is not available
+     * from docker API or has unexpected format. All values are introduced with data size format eg B, KiB, MiB, GiB, TiB.
+     */
+    public String ramUsage() {
+        return statusField(RAM_USAGE);
     }
     // --------------------------------------------------------------------------- //
 
