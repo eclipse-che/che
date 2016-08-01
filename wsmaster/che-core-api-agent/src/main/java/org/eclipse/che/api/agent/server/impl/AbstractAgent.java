@@ -15,6 +15,8 @@ import com.google.common.base.Joiner;
 import org.eclipse.che.api.agent.server.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 
+import java.util.List;
+
 /**
  * @author Anatolii Bazko
  */
@@ -28,6 +30,16 @@ public abstract class AbstractAgent implements Agent {
     @Override
     public final String getFqn() {
         return agentConfig.getFqn();
+    }
+
+    @Override
+    public String getVersion() {
+        return agentConfig.getVersion();
+    }
+
+    @Override
+    public List<String> getDependencies() {
+        return agentConfig.getDependencies();
     }
 
     @Override
