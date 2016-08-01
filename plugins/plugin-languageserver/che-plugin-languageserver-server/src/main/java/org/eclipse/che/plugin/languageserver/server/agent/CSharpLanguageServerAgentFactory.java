@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.agent.server.Agent;
 import org.eclipse.che.api.agent.server.AgentException;
 import org.eclipse.che.api.agent.server.AgentFactory;
+import org.eclipse.che.api.agent.server.impl.SimpleAgent;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 
 /**
@@ -29,6 +30,6 @@ public class CSharpLanguageServerAgentFactory implements AgentFactory {
 
     @Override
     public Agent create(AgentConfig agentConfig) throws AgentException {
-        return new CSharpLanguageServerAgent(agentConfig);
+        return new SimpleAgent(agentConfig);
     }
 }
