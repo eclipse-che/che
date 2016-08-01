@@ -17,15 +17,38 @@ import java.util.Map;
  * @author Anatoliy Bazko
  */
 public interface Agent {
+    /**
+     * @return the fqn of the agent
+     */
     String getFqn();
 
+    /**
+     * @return the version of the agent
+     */
+    String getVersion();
+
+    /**
+     * @return environment variables to be set
+     */
     Map<String, String> getEnvVariables();
 
+    /**
+     * @return volumes to be mounted
+     */
     List<String> getVolumes();
 
+    /**
+     * @return ports to be exposed
+     */
     List<String> getPorts();
 
+    /**
+     * @return depending agents to be started before
+     */
     List<String> getDependencies();
 
+    /**
+     * @return script to execute inside machine
+     */
     String getScript();
 }

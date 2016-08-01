@@ -29,6 +29,6 @@ public class BaseAgentFactory implements AgentFactory {
 
     @Override
     public Agent create(AgentConfig agentConfig) throws AgentException {
-        return new BaseAgent(agentConfig);
+        return new SimpleAgent(agentConfig);
     }
 }

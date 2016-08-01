@@ -19,9 +19,9 @@ import java.util.Map;
 /**
  * @author Anatolii Bazko
  */
-public class BaseAgent extends AbstractAgent {
+public class SimpleAgent extends AbstractAgent {
 
-    public BaseAgent(AgentConfig agentConfig) {
+    public SimpleAgent(AgentConfig agentConfig) {
         super(agentConfig);
     }
 
@@ -37,11 +37,6 @@ public class BaseAgent extends AbstractAgent {
 
     @Override
     public List<String> getPorts() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public List<String> getDependencies() {
         return Collections.emptyList();
     }
 }
