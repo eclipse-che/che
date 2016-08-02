@@ -23,26 +23,22 @@
 #
 # INTERNAL SYNC SCRIPT
 #   /bin/synch.sh <ip> <ws-port>
+FROM alpine:3.4
 
-FROM centos
+ENV UNISON_VERSION=2.48.4
 
-RUN rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-7.noarch.rpm && \
-    yum -y install fuse-sshfs && \
+RUN apk add --update build-base curl bash sshfs && \
+    apk add ocaml --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted && \
+    curl -L https://www.seas.upenn.edu/~bcpierce/unison//download/releases/unison-$UNISON_VERSION/unison-$UNISON_VERSION.tar.gz | tar xzv -C /tmp && \
+    cd /tmp/src && \
+    sed -i -e 's/GLIBC_SUPPORT_INOTIFY 0/GLIBC_SUPPORT_INOTIFY 1/' fsmonitor/linux/inotify_stubs.c && \
+    make && \
+    cp /tmp/src/unison /usr/local/bin && \
+    apk del ocaml curl build-base bash && \
+    rm -rf /tmp /var/cache/apk/* && \
     mkdir /mntssh && \
     mkdir /mnthost
 
-RUN yum install -y yum install -y ocaml ocaml-camlp4-devel ctags ctags-etags make && \
-    mkdir -p /opt/unison && \
-    cd /opt/unison && \
-    curl -O http://www.seas.upenn.edu/~bcpierce/unison//download/releases/stable/unison-2.48.4.tar.gz && \
-    tar xzvf unison-2.48.4.tar.gz && \
-    cd src && \
-    make && \
-    cp unison /usr/local/sbin/ && \
-    cp unison /usr/bin/ && \
-    cd /opt && \
-    rm -rf src/
-
-COPY sync.sh /bin
+COPY /sync.sh /bin/sync.sh
 
 ENTRYPOINT ["/bin/sync.sh"]
