@@ -134,7 +134,7 @@ public class FactoryBuilderTest {
     public static Object[][] notValidParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
         Factory factory = prepareFactory();
         EnvironmentDto environmentDto = factory.getWorkspace().getEnvironments().get(0);
-        environmentDto.getMachineConfigs().add(dto.createDto(MachineConfigDto.class).withName(null));
+        environmentDto.getMachineConfigs().add(dto.createDto(MachineConfigDto.class).withType(null));
         return new Object[][] {
                 {dto.clone(factory).withWorkspace(factory.getWorkspace().withDefaultEnv(null)) },
                 {dto.clone(factory).withWorkspace(factory.getWorkspace().withEnvironments(Collections.singletonList(environmentDto))) }
