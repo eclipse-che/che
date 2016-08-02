@@ -52,7 +52,7 @@ public class DockerContainerNameGenerator {
 
     /**
      * Parse machine's {@code containerName} to get information about this container (like workspaceId, machineId).
-     * Notice: method doesn't of information about userName or machineName, because we do not give guarantees
+     * Notice: method doesn't parse information about userName or machineName, because we do not give guarantees
      * about the integrity of this data(see more {@link #generateContainerName(String, String, String, String)})
      * Notice: container name can contains node host (e.g. "/node-host.dev.box/workspacebbx2_machineic3_user321_ws-machine)
      *
