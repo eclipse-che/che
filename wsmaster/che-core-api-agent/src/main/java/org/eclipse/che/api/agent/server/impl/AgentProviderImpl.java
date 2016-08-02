@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.agent.server.Agent;
 import org.eclipse.che.api.agent.server.AgentException;
 import org.eclipse.che.api.agent.server.AgentFactory;
+import org.eclipse.che.api.agent.server.AgentKey;
 import org.eclipse.che.api.agent.server.AgentProvider;
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
@@ -37,6 +38,15 @@ public class AgentProviderImpl implements AgentProvider {
     public AgentProviderImpl(Set<AgentFactory> factories, AgentRegistry agentRegistry) {
         this.agentRegistry = agentRegistry;
         this.factories = factories.stream().collect(Collectors.toMap(AgentFactory::getFqn, f -> f));
+    }
+
+    @Override
+    public Agent createAgent(AgentKey agentKey) throws AgentException {
+        AgentConfig agentConfig = agentKey.getVersion() != null
+                                  ? agentRegistry.getConfig(agentKey.getFqn(), agentKey.getVersion())
+                                  : agentRegistry.getConfig(agentKey.getFqn());
+
+        return doCreateAgent(agentConfig);
     }
 
     @Override

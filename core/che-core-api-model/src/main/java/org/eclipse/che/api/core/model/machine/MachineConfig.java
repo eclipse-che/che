@@ -57,4 +57,10 @@ public interface MachineConfig {
      * Get predefined environment variables of machine.
      */
     Map<String, String> getEnvVariables();
+
+    /**
+     * List of injected agents respecting format {@code fqn:version}.
+     * The version part can be omitted.
+     */
+    List<String> getAgents();
 }

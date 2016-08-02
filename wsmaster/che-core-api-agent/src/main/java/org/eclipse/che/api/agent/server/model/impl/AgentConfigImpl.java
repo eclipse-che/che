@@ -24,13 +24,13 @@ public class AgentConfigImpl implements AgentConfig {
     private final String              version;
     private final List<String>        dependencies;
     private final Map<String, String> properties;
-    private final List<String>        script;
+    private final String              script;
 
     public AgentConfigImpl(String fqn,
                            String version,
                            List<String> dependencies,
                            Map<String, String> properties,
-                           List<String> script) {
+                           String script) {
         this.fqn = fqn;
         this.version = version;
         this.dependencies = dependencies;
@@ -67,7 +67,7 @@ public class AgentConfigImpl implements AgentConfig {
     }
 
     @Override
-    public List<String> getScript() {
+    public String getScript() {
         return script;
     }
 

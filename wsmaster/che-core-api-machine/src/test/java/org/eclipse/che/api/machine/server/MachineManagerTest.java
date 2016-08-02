@@ -164,7 +164,8 @@ public class MachineManagerTest {
                                                                                              "9090/udp",
                                                                                              "someprotocol",
                                                                                              "/some/path")),
-                                                            Collections.singletonMap("key1", "value1"));
+                                                            Collections.singletonMap("key1", "value1"),
+                                                            Collections.singletonList("agent"));
         String workspaceId = "wsId";
         String environmentName = "env1";
 
@@ -328,7 +329,8 @@ public class MachineManagerTest {
                                                                       "9090/udp",
                                                                       "someprotocol",
                                                                       "/some/path")),
-                                     Collections.singletonMap("key1", "value1"));
+                                     Collections.singletonMap("key1", "value1"),
+                                     Collections.singletonList("agent"));
     }
 
     private SnapshotImpl createSnapshot() {

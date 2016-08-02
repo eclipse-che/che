@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
-import com.google.common.base.Joiner;
-
 import org.eclipse.che.api.agent.server.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 
@@ -44,7 +42,7 @@ public abstract class AbstractAgent implements Agent {
 
     @Override
     public String getScript() {
-        return Joiner.on('\n').join(agentConfig.getScript());
+        return agentConfig.getScript();
     }
 }
 

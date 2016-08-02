@@ -19,7 +19,19 @@ public interface AgentProvider {
 
     /**
      * Creates a new agent. {@link AgentConfig} might be located at some remote storage.
-     * How to fetch it is implementation specific.
+     * How to fetch config is implementation specific.
+     *
+     * @param agentKey
+     *      {@link AgentKey}
+     * @return a new {@link Agent} instance
+     * @throws AgentException
+     *      if agent can't be created or other unexpected error occurred
+     */
+    Agent createAgent(AgentKey agentKey) throws AgentException;
+
+    /**
+     * Creates a new agent. {@link AgentConfig} might be located at some remote storage.
+     * How to fetch config is implementation specific.
      *
      * @param fqn
      *      the agent fqn
@@ -33,7 +45,7 @@ public interface AgentProvider {
 
     /**
      * Creates a new agent. {@link AgentConfig} might be located at some remote storage.
-     * How to fetch it is implementation specific.
+     * How to fetch config is implementation specific.
      * The agent version is not defined, that's mean the latest agent version.
      *
      * @param fqn

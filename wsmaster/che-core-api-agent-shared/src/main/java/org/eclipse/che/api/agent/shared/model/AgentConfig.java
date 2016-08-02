@@ -36,7 +36,7 @@ public interface AgentConfig {
     /**
      * @return the script to be applied when machine is started
      */
-    List<String> getScript();
+    String getScript();
 
     /**
      * @return any machine specific properties

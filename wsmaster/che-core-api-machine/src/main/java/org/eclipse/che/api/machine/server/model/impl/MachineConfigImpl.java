@@ -40,6 +40,7 @@ public class MachineConfigImpl implements MachineConfig {
     private LimitsImpl           limits;
     private List<ServerConfImpl> servers;
     private Map<String, String>  envVariables;
+    private List<String>         agents;
 
     public MachineConfigImpl() {
     }
@@ -50,7 +51,8 @@ public class MachineConfigImpl implements MachineConfig {
                              MachineSource source,
                              Limits limits,
                              List<? extends ServerConf> servers,
-                             Map<String, String> envVariables) {
+                             Map<String, String> envVariables,
+                             List<String> agents) {
         this.dev = dev;
         this.name = name;
         this.type = type;
@@ -64,6 +66,7 @@ public class MachineConfigImpl implements MachineConfig {
             this.source = new MachineSourceImpl(source);
         }
         this.limits = new LimitsImpl(limits);
+        this.agents = agents;
 
     }
 
@@ -74,7 +77,8 @@ public class MachineConfigImpl implements MachineConfig {
              machineCfg.getSource(),
              machineCfg.getLimits(),
              machineCfg.getServers(),
-             machineCfg.getEnvVariables());
+             machineCfg.getEnvVariables(),
+             machineCfg.getAgents());
     }
 
     @Override
@@ -126,6 +130,11 @@ public class MachineConfigImpl implements MachineConfig {
         return envVariables;
     }
 
+    @Override
+    public List<String> getAgents() {
+        return agents;
+    }
+
     public void setLimits(Limits limits) {
         this.limits = new LimitsImpl(limits);
     }
@@ -141,7 +150,8 @@ public class MachineConfigImpl implements MachineConfig {
                Objects.equals(limits, other.limits) &&
                Objects.equals(type, other.type) &&
                Objects.equals(getServers(), other.getServers()) &&
-               Objects.equals(getEnvVariables(), other.getEnvVariables());
+               Objects.equals(getEnvVariables(), other.getEnvVariables()) &&
+               Objects.equals(getAgents(), other.getAgents());
     }
 
     @Override
@@ -154,6 +164,7 @@ public class MachineConfigImpl implements MachineConfig {
         hash = hash * 31 + Objects.hashCode(limits);
         hash = hash * 31 + Objects.hashCode(getServers());
         hash = hash * 31 + Objects.hashCode(getEnvVariables());
+        hash = hash * 31 + Objects.hashCode(getAgents());
         return hash;
     }
 
@@ -167,6 +178,7 @@ public class MachineConfigImpl implements MachineConfig {
                ", limits=" + limits +
                ", servers=" + getServers() +
                ", envVariables=" + getEnvVariables() +
+               ", agents=" + getAgents() +
                '}';
     }
 
@@ -184,6 +196,7 @@ public class MachineConfigImpl implements MachineConfig {
         private Limits                     limits;
         private List<? extends ServerConf> servers;
         private Map<String, String>        envVariables;
+        private List<String>               agents;
 
         public MachineConfigImpl build() {
             return new MachineConfigImpl(dev,
@@ -192,7 +205,8 @@ public class MachineConfigImpl implements MachineConfig {
                                          source,
                                          limits,
                                          servers,
-                                         envVariables);
+                                         envVariables,
+                                         agents);
         }
 
         public MachineConfigImplBuilder fromConfig(MachineConfig machineConfig) {
@@ -203,6 +217,7 @@ public class MachineConfigImpl implements MachineConfig {
             limits = machineConfig.getLimits();
             servers = machineConfig.getServers();
             envVariables = machineConfig.getEnvVariables();
+            agents = machineConfig.getAgents();
             return this;
         }
 
@@ -238,6 +253,11 @@ public class MachineConfigImpl implements MachineConfig {
 
         public MachineConfigImplBuilder setEnvVariables(Map<String, String> envVariables) {
             this.envVariables = envVariables;
+            return this;
+        }
+
+        public MachineConfigImplBuilder setAgents(List<String> agents) {
+            this.agents = agents;
             return this;
         }
     }
