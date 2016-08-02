@@ -245,8 +245,8 @@ public class FactoryService extends Service {
         if (factory == null) {
             throw new BadRequestException("Not null factory required");
         }
-        processDefaults(factory);
         factoryBuilder.checkValid(factory);
+        processDefaults(factory);
         createValidator.validateOnCreate(factory);
         final Factory storedFactory = factoryStore.getFactory(factoryStore.saveFactory(factory, null));
         return storedFactory.withLinks(createLinks(storedFactory, null, uriInfo));
