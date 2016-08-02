@@ -102,6 +102,12 @@ public class FactoryBuilderTest {
         factoryBuilder.checkValid(factory);
     }
 
+    @Test(dataProvider = "setByServerParamsProvider")
+    public void shouldAllowUsingParamsThatCanBeSetOnlyByServerDuringUpdate(Factory factory)
+            throws InvocationTargetException, IllegalAccessException, ApiException, NoSuchMethodException {
+        factoryBuilder.checkValid(factory, true);
+    }
+
     @DataProvider(name = "setByServerParamsProvider")
     public static Object[][] setByServerParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
         Factory factory = prepareFactory();
