@@ -17,7 +17,6 @@ import org.eclipse.che.plugin.docker.client.DockerFileException;
 import org.eclipse.che.plugin.docker.client.parser.DockerImageIdentifier;
 import org.eclipse.che.plugin.docker.client.parser.DockerImageIdentifierParser;
 
-import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY;
 import static org.eclipse.che.plugin.docker.client.DockerRegistryAuthResolver.DEFAULT_REGISTRY_SYNONYMS;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_IMAGE_TYPE;
 
@@ -51,7 +50,7 @@ public class DockerMachineSource extends MachineSourceImpl {
 
     /**
      * Build a dedicated docker image source based on a given machine source object.
-     * @param machineSource the machine source used to of data.
+     * @param machineSource the machine source used to parse data.
      */
     public DockerMachineSource(MachineSource machineSource) throws MachineException {
         super();
@@ -62,7 +61,7 @@ public class DockerMachineSource extends MachineSourceImpl {
         }
         setType(DOCKER_IMAGE_TYPE);
 
-        // of location
+        // parse location
         final DockerImageIdentifier dockerImageIdentifier;
         try {
             dockerImageIdentifier = DockerImageIdentifierParser.parse(machineSource.getLocation());
