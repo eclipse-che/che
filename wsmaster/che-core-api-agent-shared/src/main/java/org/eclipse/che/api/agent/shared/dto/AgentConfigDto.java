@@ -33,9 +33,9 @@ public interface AgentConfigDto extends AgentConfig {
 
     void setDependencies(List<String> dependencies);
 
-    List<String> getScript();
+    String getScript();
 
-    void setScript(List<String> script);
+    void setScript(String script);
 
     Map<String, String> getProperties();
 

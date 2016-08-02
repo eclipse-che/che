@@ -126,6 +126,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     private final DockerContainerNameGenerator                  containerNameGenerator;
     private final RecipeRetriever                               recipeRetriever;
     private final WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
+    private final DockerAgentsApplier                           dockerAgentsApplier;
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegeMode;
     private final Set<String>                                   supportedRecipeTypes;
@@ -149,6 +150,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                   DockerInstanceStopDetector dockerInstanceStopDetector,
                                   DockerContainerNameGenerator containerNameGenerator,
                                   RecipeRetriever recipeRetriever,
+                                  DockerAgentsApplier dockerAgentsApplier,
                                   @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
                                   @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                   @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
@@ -174,6 +176,7 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.supportedRecipeTypes = Sets.newHashSet(DOCKER_FILE_TYPE, DOCKER_IMAGE_TYPE);
         this.projectFolderPath = projectFolderPath;
         this.snapshotUseRegistry = snapshotUseRegistry;
+        this.dockerAgentsApplier = dockerAgentsApplier;
         // usecases:
         //  -1  enable unlimited swap
         //  0   disable swap
@@ -329,10 +332,12 @@ public class DockerInstanceProvider implements InstanceProvider {
             throw new UnsupportedRecipeException("The type '" + sourceType + "' is not supported");
         }
 
-        return createInstance(containerName,
-                              machine,
-                              imageName,
-                              creationLogsOutput);
+        Instance instance = createInstance(containerName,
+                                           machine,
+                                           imageName,
+                                           creationLogsOutput);
+        dockerAgentsApplier.apply(instance);
+        return instance;
     }
 
     protected void pullImage(MachineConfig machineConfig,

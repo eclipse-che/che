@@ -43,7 +43,7 @@ import static org.testng.Assert.assertEquals;
 public class AgentRegistryImplTest {
 
     @SuppressWarnings("unused")
-    private TestService service;
+    private RegistryService service;
 
     private AgentRegistry agentRegistry;
 
@@ -52,7 +52,7 @@ public class AgentRegistryImplTest {
         Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
         agentRegistry = new AgentRegistryImpl("http://localhost:" + port + "/rest/registry/agent/${fqn}/${version}",
                                               "http://localhost:" + port + "/rest/registry/agent/${fqn}");
-        service = new TestService();
+        service = new RegistryService();
     }
 
     @Test
@@ -78,7 +78,7 @@ public class AgentRegistryImplTest {
     }
 
     @Path("registry")
-    public class TestService {
+    public class RegistryService {
 
         @GET
         @Path("agent/{artifact}/{version}")

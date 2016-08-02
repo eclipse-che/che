@@ -26,6 +26,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
+import org.eclipse.che.plugin.docker.machine.DockerAgentsApplier;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
 import org.eclipse.che.plugin.docker.machine.DockerMachineModule;
@@ -76,6 +77,8 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
     private Recipe                                        recipe;
     @Mock
     private Supplier<Boolean>                             doForcePullOnBuildFlagProvider;
+    @Mock
+    private DockerAgentsApplier                           dockerAgentsApplier;
 
 
     private DockerInstanceProvider                     dockerInstanceProvider;
@@ -187,6 +190,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
             bind(WorkspaceManager.class).toInstance(workspaceManager);
             bind(RecipeRetriever.class).toInstance(recipeRetriever);
             bind(RecipeDownloader.class).toInstance(mock(RecipeDownloader.class));
+            bind(DockerAgentsApplier.class).toInstance(dockerAgentsApplier);
 
             bindConstant().annotatedWith(Names.named("machine.docker.privilege_mode")).to(false);
             bindConstant().annotatedWith(Names.named("machine.docker.pull_image")).to(true);

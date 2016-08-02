@@ -51,7 +51,7 @@ public class DockerMachineSource extends MachineSourceImpl {
 
     /**
      * Build a dedicated docker image source based on a given machine source object.
-     * @param machineSource the machine source used to parse data.
+     * @param machineSource the machine source used to of data.
      */
     public DockerMachineSource(MachineSource machineSource) throws MachineException {
         super();
@@ -62,7 +62,7 @@ public class DockerMachineSource extends MachineSourceImpl {
         }
         setType(DOCKER_IMAGE_TYPE);
 
-        // parse location
+        // of location
         final DockerImageIdentifier dockerImageIdentifier;
         try {
             dockerImageIdentifier = DockerImageIdentifierParser.parse(machineSource.getLocation());
