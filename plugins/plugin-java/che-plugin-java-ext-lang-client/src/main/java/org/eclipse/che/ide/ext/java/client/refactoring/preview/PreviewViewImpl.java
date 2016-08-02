@@ -12,15 +12,22 @@ package org.eclipse.che.ide.ext.java.client.refactoring.preview;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Tree;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -41,12 +48,17 @@ import org.eclipse.che.ide.orion.compare.CompareConfig;
 import org.eclipse.che.ide.orion.compare.CompareFactory;
 import org.eclipse.che.ide.orion.compare.CompareWidget;
 import org.eclipse.che.ide.orion.compare.FileOptions;
-import org.eclipse.che.ide.ui.cellview.CellTreeResources;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.window.Window;
 
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.google.gwt.dom.client.Style.Float.LEFT;
+import static com.google.gwt.dom.client.Style.Unit.PX;
+import static org.eclipse.che.ide.api.theme.Style.getEditorSelectionColor;
 
 /**
  * @author Dmitry Shnurenko
@@ -79,17 +91,17 @@ final class PreviewViewImpl extends Window implements PreviewView {
     private CompareWidget  compare;
     private ThemeAgent     themeAgent;
 
-    private final CellTreeResources cellTreeResources;
-    private final LoaderFactory     loaderFactory;
-    private final CompareFactory    compareFactory;
+    private final LoaderFactory  loaderFactory;
+    private final CompareFactory compareFactory;
+
+    private Map<TreeItem, RefactoringPreview> containerChanges = new HashMap<>();
+    private Element selectedElement;
 
     @Inject
     public PreviewViewImpl(JavaLocalizationConstant locale,
-                           CellTreeResources cellTreeResources,
                            LoaderFactory loaderFactory,
                            CompareFactory compareFactory, ThemeAgent themeAgent) {
         this.locale = locale;
-        this.cellTreeResources = cellTreeResources;
         this.loaderFactory = loaderFactory;
         this.compareFactory = compareFactory;
         this.themeAgent = themeAgent;
@@ -140,6 +152,8 @@ final class PreviewViewImpl extends Window implements PreviewView {
         errorLabel.setText("");
         diff.clear();
         compare = null;
+        treePanel.clear();
+        containerChanges.clear();
 
         super.show();
     }
@@ -166,9 +180,122 @@ final class PreviewViewImpl extends Window implements PreviewView {
             }
         });
 
-        CellTree tree = new CellTree(new PreviewChangesModel(changes, selectionModel, delegate), null, cellTreeResources);
-        treePanel.clear();
+        Tree tree = new Tree();
+
+        tree.getElement().setId("tree-of-changes");
+
+        for (RefactoringPreview parentChange : changes.getChildrens()) {
+            TreeItem treeItem = new TreeItem();
+            containerChanges.put(treeItem, parentChange);
+            createTreeElement(treeItem, parentChange.getText(), parentChange.getChildrens());
+            tree.addItem(treeItem);
+        }
+
+        tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
+            @Override
+            public void onSelection(SelectionEvent<TreeItem> event) {
+                if (selectedElement != null) {
+                    selectedElement.getStyle().setProperty("background", "transparent");
+                }
+
+                selectedElement = event.getSelectedItem().getWidget().getElement();
+                selectedElement.getStyle().setProperty("background", getEditorSelectionColor());
+            }
+        });
+
         treePanel.add(tree);
+    }
+
+    private void createTreeElement(final TreeItem root, String changeName, List<RefactoringPreview> children) {
+        FlowPanel element = new FlowPanel();
+        element.getElement().getStyle().setFloat(LEFT);
+        CheckBox itemCheckBox = new CheckBox();
+        itemCheckBox.setValue(true);
+        itemCheckBox.getElement().getStyle().setFloat(LEFT);
+        itemCheckBox.getElement().getStyle().setMarginTop(3, PX);
+        Label name = new Label(changeName);
+        name.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                delegate.onSelectionChanged(containerChanges.get(root));
+                root.setSelected(true);
+            }
+        });
+        name.getElement().getStyle().setFloat(LEFT);
+        element.add(itemCheckBox);
+        element.add(name);
+
+        root.setWidget(element);
+
+        itemCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                checkChildrenState(root, event.getValue());
+                checkParentState(root, event.getValue());
+
+                RefactoringPreview change = containerChanges.get(root);
+                change.setEnabled(event.getValue());
+
+                delegate.onEnabledStateChanged(change);
+            }
+        });
+
+        if (children.isEmpty()) {
+            return;
+        }
+
+        for (RefactoringPreview child : children) {
+            TreeItem treeItem = new TreeItem();
+            containerChanges.put(treeItem, child);
+            createTreeElement(treeItem, child.getText(), child.getChildrens());
+            root.addItem(treeItem);
+        }
+    }
+
+    private void checkParentState(TreeItem treeItem, Boolean value) {
+        TreeItem parentItem = treeItem.getParentItem();
+
+        if (parentItem == null) {
+            return;
+        }
+
+        if (!(parentItem.getWidget() instanceof FlowPanel)) {
+            return;
+        }
+        FlowPanel parentChangeContainer = (FlowPanel)parentItem.getWidget();
+
+        if (!(parentChangeContainer.getWidget(0) instanceof CheckBox)) {
+            return;
+        }
+        CheckBox parentCheckBox = (CheckBox)parentChangeContainer.getWidget(0);
+
+        if (value && !parentCheckBox.getValue()) {
+            parentCheckBox.setValue(true);
+            checkParentState(parentItem, true);
+        }
+    }
+
+    private void checkChildrenState(TreeItem treeItem, Boolean value) {
+        int childCount = treeItem.getChildCount();
+        if (childCount == 0) {
+            return;
+        }
+
+        for (int i = 0; i < childCount; i++) {
+            TreeItem childItem = treeItem.getChild(i);
+            if (!(childItem.getWidget() instanceof FlowPanel)) {
+                return;
+            }
+            FlowPanel childItemContainer = (FlowPanel)childItem.getWidget();
+
+            if (!(childItemContainer.getWidget(0) instanceof CheckBox)) {
+                return;
+            }
+            CheckBox childCheckBox = (CheckBox)childItemContainer.getWidget(0);
+
+            childCheckBox.setValue(value);
+            checkChildrenState(childItem, value);
+        }
     }
 
     private void showDiffPanel(boolean isVisible) {
