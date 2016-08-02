@@ -55,6 +55,7 @@ import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
@@ -78,6 +79,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -504,6 +506,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                     final String imageName,
                                     final LineConsumer outputConsumer)
             throws MachineException {
+        Optional<String> containerIdOptional = null;
         try {
             final Map<String, Map<String, String>> portsToExpose;
             final String[] volumes;
@@ -554,7 +557,8 @@ public class DockerInstanceProvider implements InstanceProvider {
 
             final String containerId = docker.createContainer(CreateContainerParams.create(config)
                                                                                    .withContainerName(containerName))
-                                             .getId();
+                                                                                   .getId();
+            containerIdOptional = Optional.ofNullable(containerId);
 
             docker.startContainer(StartContainerParams.create(containerId));
 
@@ -597,7 +601,22 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                        node,
                                                        outputConsumer);
         } catch (IOException e) {
+            cleanUpContainer(containerIdOptional);
             throw new MachineException(e.getLocalizedMessage(), e);
+        } catch (MachineException e) {
+            cleanUpContainer(containerIdOptional);
+            throw e;
+        }
+    }
+
+    private void cleanUpContainer(Optional<String> containerIdOptional) {
+        try {
+            if (containerIdOptional.isPresent()) {
+                String containerId = containerIdOptional.get();
+                docker.removeContainer(RemoveContainerParams.create(containerId).withRemoveVolumes(true).withForce(true));
+            }
+        } catch (Exception ex) {
+            LOG.error("Failed to remove docker container.", ex);
         }
     }
 
