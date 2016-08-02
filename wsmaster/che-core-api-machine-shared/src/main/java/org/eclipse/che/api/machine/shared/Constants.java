@@ -44,7 +44,8 @@ public class Constants {
 
     public static final String WS_AGENT_PORT = "4401/tcp";
 
+    public static final String WS_MACHINE_NAME = "default";
+
     private Constants() {
     }
-
 }

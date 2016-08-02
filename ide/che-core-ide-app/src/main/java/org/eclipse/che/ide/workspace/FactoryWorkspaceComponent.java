@@ -26,7 +26,6 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
@@ -43,7 +42,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
@@ -85,8 +83,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
                                      InitialLoadingInfo initialLoadingInfo,
-                                     WorkspaceSnapshotCreator snapshotCreator,
-                                     LoaderFactory loaderFactory) {
+                                     WorkspaceEventsNotifier workspaceEventsNotifier) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -103,8 +100,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
               preferencesManager,
               dtoFactory,
               initialLoadingInfo,
-              snapshotCreator,
-              loaderFactory);
+              workspaceEventsNotifier);
         this.factoryServiceClient = factoryServiceClient;
     }
 
