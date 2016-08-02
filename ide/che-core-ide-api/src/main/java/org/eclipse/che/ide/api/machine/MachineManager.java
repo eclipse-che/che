@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.promises.client.Promise;
 
 /**
@@ -20,27 +19,6 @@ import org.eclipse.che.api.promises.client.Promise;
  * @author Roman Nikitenko
  */
 public interface MachineManager {
-
-    /** The set of machine operation types */
-    enum MachineOperationType {
-        START, RESTART, DESTROY
-    }
-
-    /**
-     * Performs some actions when dev machine is creating.
-     *
-     * @param machineConfig
-     *         contains information about dev machine configuration
-     */
-    void onDevMachineCreating(MachineConfigDto machineConfig);
-
-    /**
-     * Performs some actions when machine is running.
-     *
-     * @param machineId
-     *         ID of machine
-     */
-    void onMachineRunning(String machineId);
 
     /**
      * Start new machine as dev-machine (bind workspace to running machine).
