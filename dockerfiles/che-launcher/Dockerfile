@@ -6,15 +6,16 @@
 #
 # Contributors:
 #   Mario Loriedo - Initial implementation
+#   Tyler Jewell  - Improve debug output
 #
 # To build, in this directory:
 #  `docker build -t codenvy/che-launcher .`
 #
 # To use it:
-#  `docker run -v /var/run/docker.sock:/var/run/docker.sock codenvy/che start`
-#  `docker run -v /var/run/docker.sock:/var/run/docker.sock codenvy/che stop`
-#  `docker run -v /var/run/docker.sock:/var/run/docker.sock codenvy/che restart`
-#  `docker run -v /var/run/docker.sock:/var/run/docker.sock codenvy/che update`
+#  `docker run -t -v /var/run/docker.sock:/var/run/docker.sock codenvy/che start`
+#  `docker run -t -v /var/run/docker.sock:/var/run/docker.sock codenvy/che stop`
+#  `docker run -t -v /var/run/docker.sock:/var/run/docker.sock codenvy/che restart`
+#  `docker run -t -v /var/run/docker.sock:/var/run/docker.sock codenvy/che update`
 #
 
 FROM alpine:3.4
