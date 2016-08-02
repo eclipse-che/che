@@ -47,7 +47,8 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter implements SshKeyManagerView.ActionDelegate {
     public static final String SSH_SERVICE = "machine";
 
-    private final DialogFactory           dialogFactory;
+    private final DialogFactory dialogFactory;
+    private final ShowSshKeyView showSshKeyView;
     private final SshKeyManagerView       view;
     private final SshServiceClient        service;
     private final SshLocalizationConstant constant;
@@ -60,11 +61,13 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                                   SshLocalizationConstant constant,
                                   UploadSshKeyPresenter uploadSshKeyPresenter,
                                   NotificationManager notificationManager,
-                                  DialogFactory dialogFactory) {
+                                  DialogFactory dialogFactory,
+                                  ShowSshKeyView showSshKeyView) {
         super(constant.sshManagerTitle(), constant.sshManagerCategory());
 
         this.view = view;
         this.dialogFactory = dialogFactory;
+        this.showSshKeyView = showSshKeyView;
         this.view.setDelegate(this);
         this.service = service;
         this.constant = constant;
@@ -74,7 +77,8 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
 
     @Override
     public void onViewClicked(@NotNull final SshPairDto pair) {
-        dialogFactory.createMessageDialog(constant.publicSshKeyField() + pair.getName(), pair.getPublicKey(), null).show();
+        showSshKeyView.show(pair.getName(), pair.getPublicKey());
+//        dialogFactory.createMessageDialog(constant.publicSshKeyField() + pair.getName(), pair.getPublicKey(), null).show();
     }
 
     @Override

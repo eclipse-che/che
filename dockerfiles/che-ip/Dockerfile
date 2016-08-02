@@ -12,6 +12,6 @@
 
 FROM alpine:3.4
 
-ADD getip.sh /bin/getip.sh
+COPY getip.sh /bin/getip.sh
 
-CMD /bin/getip.sh
+CMD ["/bin/getip.sh"]

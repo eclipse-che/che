@@ -162,7 +162,7 @@ public class GithubImporterPageViewImpl extends Composite implements GithubImpor
             public SafeHtml getValue(final ProjectData item) {
                 return new SafeHtmlBuilder()
                         .appendHtmlConstant("<span>")
-                        .appendEscaped(item.getDescription())
+                        .appendEscaped(item.getDescription() == null ? "" : item.getDescription())
                         .appendHtmlConstant("</span>")
                         .toSafeHtml();
             }

@@ -18,20 +18,20 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
-import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
-import org.eclipse.che.plugin.ssh.key.client.upload.UploadSshKeyPresenter;
-import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
-import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
 import org.eclipse.che.ide.api.dialogs.CancelCallback;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.preferences.AbstractPreferencePagePresenter;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploader;
+import org.eclipse.che.plugin.ssh.key.client.SshKeyUploaderRegistry;
+import org.eclipse.che.plugin.ssh.key.client.upload.UploadSshKeyPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -55,6 +55,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
     private final SshKeyManagerView          view;
     private final SshServiceClient           service;
     private final SshKeyUploaderRegistry     registry;
+    private final ShowSshKeyView             showSshKeyView;
     private final SshKeyLocalizationConstant constant;
     private final UploadSshKeyPresenter      uploadSshKeyPresenter;
     private final NotificationManager        notificationManager;
@@ -67,13 +68,15 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
                                   UploadSshKeyPresenter uploadSshKeyPresenter,
                                   NotificationManager notificationManager,
                                   DialogFactory dialogFactory,
-                                  SshKeyUploaderRegistry registry) {
+                                  SshKeyUploaderRegistry registry,
+                                  ShowSshKeyView showSshKeyView) {
         super(constant.sshManagerTitle(), constant.sshManagerCategory());
 
         this.view = view;
         this.appContext = appContext;
         this.dialogFactory = dialogFactory;
         this.registry = registry;
+        this.showSshKeyView = showSshKeyView;
         this.view.setDelegate(this);
         this.service = service;
         this.constant = constant;
@@ -84,7 +87,7 @@ public class SshKeyManagerPresenter extends AbstractPreferencePagePresenter impl
     /** {@inheritDoc} */
     @Override
     public void onViewClicked(@NotNull final SshPairDto pair) {
-        dialogFactory.createMessageDialog(constant.publicSshKeyField() + pair.getName(), pair.getPublicKey(), null).show();
+        showSshKeyView.show(pair.getName(), pair.getPublicKey());
     }
 
     /** {@inheritDoc} */

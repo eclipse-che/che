@@ -26,6 +26,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
@@ -79,6 +81,7 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
                                                                      ProcessFinishedEvent.Handler,
                                                                      OutputConsole.ConsoleOutputListener,
                                                                      WorkspaceStartingEvent.Handler,
+                                                                     WsAgentStateHandler,
                                                                      WorkspaceStoppedEvent.Handler,
                                                                      MachineStateEvent.Handler {
 
@@ -156,6 +159,7 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
+        eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
 
         rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootNodes);
@@ -266,8 +270,6 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         rootNodes.add(machineNode);
 
         view.setProcessesData(rootNode);
-
-        restoreState(machine);
 
         return machineNode;
     }
@@ -717,5 +719,22 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
         view.clear();
         view.selectNode(null);
         view.setProcessesData(rootNode);
+    }
+
+    @Override
+    public void onWsAgentStarted(WsAgentStateEvent event) {
+        machineService.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
+            @Override
+            public void apply(List<MachineDto> machines) throws OperationException {
+                for (MachineDto machine : machines) {
+                    restoreState(machine);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onWsAgentStopped(WsAgentStateEvent event) {
+        //do nothing
     }
 }
