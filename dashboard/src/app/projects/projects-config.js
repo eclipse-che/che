@@ -19,7 +19,7 @@ import {CreateProjectGitCtrl} from './create-project/git/create-project-git.cont
 import {CreateProjectGithub} from './create-project/github/create-project-github.directive';
 import {AddSecretKeyNotificationCtrl} from './create-project/add-ssh-key-notification/add-ssh-key-notification.controller';
 import {NoGithubOauthDialogController} from './create-project/github/oauth-dialog/no-github-oauth-dialog.controller';
-import {CreateProjectSamplesCtrl} from './create-project/samples/create-project-samples.controller';
+import {CreateProjectSamplesController} from './create-project/samples/create-project-samples.controller';
 import {CreateProjectSamples} from './create-project/samples/create-project-samples.directive';
 import {CreateProjectWorkspacesController} from './create-project/workspaces/create-project-workspaces.controller';
 import {CreateProjectWorkspaces} from './create-project/workspaces/create-project-workspaces.directive';
@@ -27,9 +27,6 @@ import {CreateProjectWorkspaces} from './create-project/workspaces/create-projec
 import {CreateProjectSamplesFilter} from './create-project/samples/create-project-samples.filter';
 import {CreateProjectSamplesNameFilter} from './create-project/samples/create-project-samples-name.filter';
 import {CreateProjectSamplesTagFilter} from './create-project/samples/create-project-samples-tag.filter';
-
-import {CreateProjectPopupCtrl} from './create-project/popup/create-project-popup.controller';
-import {CreateProjectPopup} from './create-project/popup/create-project-popup.directive';
 
 import {CreateProjectZip} from './create-project/zip/create-project-zip.directive';
 import {CreateProjectConfFile} from './create-project/config-file/create-project-conf-file.directive';
@@ -49,9 +46,6 @@ export class ProjectsConfig {
 
     register.controller('ProjectDetailsController', ProjectDetailsController);
 
-    register.controller('CreateProjectPopupCtrl', CreateProjectPopupCtrl);
-    register.directive('createProjectPopup', CreateProjectPopup);
-
     register.controller('CreateProjectGitCtrl', CreateProjectGitCtrl);
     register.directive('createProjectGit', CreateProjectGit);
 
@@ -62,7 +56,7 @@ export class ProjectsConfig {
 
     register.controller('AddSecretKeyNotificationCtrl', AddSecretKeyNotificationCtrl);
 
-    register.controller('CreateProjectSamplesCtrl', CreateProjectSamplesCtrl);
+    register.controller('CreateProjectSamplesController', CreateProjectSamplesController);
     register.directive('createProjectSamples', CreateProjectSamples);
 
     register.controller('CreateProjectWorkspacesController', CreateProjectWorkspacesController);

@@ -39,9 +39,11 @@ import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STARTED;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STOPPED;
 import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.WS_AGENT_BOOTING;
@@ -132,12 +134,12 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         for (AsyncCallback<MessageBus> callback : messageBusCallbacks) {
         	callback.onSuccess(messageBus);
 		}
-        messageBusCallbacks = null;
-        
+        messageBusCallbacks.clear();
+
         for (AsyncCallback<DevMachine> callback : devMachineCallbacks) {
         	callback.onSuccess(devMachine);
         }
-        devMachineCallbacks = null;
+        devMachineCallbacks.clear();
         
         eventBus.fireEvent(WsAgentStateEvent.createWsAgentStartedEvent());
     }

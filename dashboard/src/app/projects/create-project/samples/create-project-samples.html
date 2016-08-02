@@ -12,16 +12,17 @@
 -->
 <md-content flex class="projects-create-project-samples">
   <div
-    ng-repeat="templatesByCategory in filteredItems = (createProjectSamplesCtrl.templates | sampleTagFilter:createProjectCtrl.currentStackTags | sampleFilterProjectType:createProjectSamplesCtrl.filterProjectType | sampleNameFilter:createProjectSamplesCtrl.projectNameFilter | orderBy:'projectType' | groupBy:'category') ">
+    ng-repeat="templatesByCategory in filteredItems = (createProjectSamplesController.templates | sampleTagFilter:createProjectCtrl.currentStackTags | sampleFilterProjectType:createProjectSamplesController.filterProjectType | sampleNameFilter:createProjectSamplesController.projectNameFilter | orderBy:'projectType' | groupBy:'category') ">
 
       <che-list class="projects-create-project-samples-list">
         <div ng-repeat="lstTemplate in templatesByCategory | orderBy:'displayName' | groupBy:'projectType'">
           <che-list-item ng-repeat="template in lstTemplate" flex>
             <div layout-gt-sm="row" flex layout-align="start center">
               <div class="projects-create-project-samples-list-item"
-                   ng-class="{'projects-create-project-samples-list-item-active' : template.name === createProjectSamplesCtrl.selectedTemplateName}"
-                   ng-click="createProjectSamplesCtrl.selectTemplate(template, createProjectCtrl)"
-                   ng-init="createProjectSamplesCtrl.initItem($first, template, createProjectCtrl)" layout="column" flex>
+                   ng-class="{'projects-create-project-samples-list-item-active' : template.name === createProjectSamplesController.selectedTemplateName}"
+                   ng-click="createProjectSamplesController.selectTemplate(template, createProjectCtrl)"
+                   data-template-name="{{template.name}}"
+                   layout="column" flex>
                 <div class="projects-create-project-samples-list-samplename">{{template.displayName}}</div>
                 <div class="projects-create-project-samples-list-sampledescription">{{template.description}}</div>
               </div>
@@ -31,7 +32,7 @@
       </che-list>
 
   </div>
-  <div ng-show="createProjectSamplesCtrl.getItemsSize(filteredItems) === 0">
+  <div ng-show="createProjectSamplesController.getItemsSize(filteredItems) === 0">
     No matching sample.
   </div>
 </md-content>

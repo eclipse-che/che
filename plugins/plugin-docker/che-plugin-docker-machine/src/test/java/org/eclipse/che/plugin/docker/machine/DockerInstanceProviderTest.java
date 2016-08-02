@@ -40,6 +40,7 @@ import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
@@ -54,6 +55,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,6 +74,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -390,6 +393,45 @@ public class DockerInstanceProviderTest {
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
         assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPrivileged());
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldRemoveContainerInCaseFailedBindWorkspaceOnCreateInstance() throws Exception {
+        doThrow(MachineException.class).when(dockerNode).bindWorkspace();
+        final boolean isDev = true;
+        final String hostProjectsFolder = "/tmp/projects";
+        when(dockerNode.getProjectsFolder()).thenReturn(hostProjectsFolder);
+
+        createInstanceFromRecipe(isDev, WORKSPACE_ID);
+
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldRemoveContainerInCaseFailedStartContainer() throws Exception {
+        doThrow(IOException.class).when(dockerConnector).startContainer(StartContainerParams.create(CONTAINER_ID));
+
+        createInstanceFromRecipe(false, WORKSPACE_ID);
+
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldRemoveContainerInCaseFailedGetCreateNode() throws Exception {
+        doThrow(IOException.class).when(dockerMachineFactory).createNode(any(), any());
+
+        createInstanceFromRecipe(false, WORKSPACE_ID);
+
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldRemoveContainerInCaseFailedCreateInstanceOnTheDockerMachineFactory() throws Exception {
+        doThrow(IOException.class).when(dockerMachineFactory).createInstance(any(), any(), any(), any(), any());
+
+        createInstanceFromRecipe(false, WORKSPACE_ID);
+
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
     }
 
     @Test
