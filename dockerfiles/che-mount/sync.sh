@@ -1,4 +1,4 @@
-#!/bin/sh                                                                                          
+#!/bin/sh
 # Copyright (c) 2012-2016 Codenvy, S.A., Red Hat, Inc
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
@@ -66,10 +66,6 @@ set -u
 init_logging
 init_global_variables
 parse_command_line "$@"
-
-# Cleanup old ssh mount just incase
-#OUTPUT=$(fusermount -u /mntssh) #> /dev/null 2>&1)
-#echo $OUTPUT
 
 sshfs user@$1:/projects /mntssh -p $2
 unison /mntssh /mnthost -batch -fat -silent -auto -prefer=newer > /dev/null 2>&1
