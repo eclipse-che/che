@@ -11,6 +11,7 @@
 
 import {WorkspaceDto} from './dto/workspacedto';
 import {AuthData} from "./auth-data";
+import {Log} from "./log";
 
 /**
  * Workspace class allowing to manage a workspace, like create/start/stop, etc operations
@@ -71,7 +72,7 @@ export class Workspace {
             });
 
             req.on('error', (err) => {
-                console.log('rejecting as we got error', err);
+                Log.getLogger().error('rejecting as we got error', err);
                 reject('HTTP error: ' + err);
             });
 
@@ -125,7 +126,7 @@ export class Workspace {
             var req = this.http.request(options,  (res) => {
 
                 res.on('error',  (body)=> {
-                    console.log('got the following error', body.toString());
+                    Log.getLogger().error('got the following error', body.toString());
                     reject(body);
                 });
 
