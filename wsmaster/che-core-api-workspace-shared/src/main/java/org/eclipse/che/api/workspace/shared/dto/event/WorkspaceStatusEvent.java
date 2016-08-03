@@ -18,7 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  *
  * @author Alexander Garagatyi
  */
-@EventOrigin("machine")
+@EventOrigin("workspace")
 @DTO
 public interface WorkspaceStatusEvent {
     enum EventType {

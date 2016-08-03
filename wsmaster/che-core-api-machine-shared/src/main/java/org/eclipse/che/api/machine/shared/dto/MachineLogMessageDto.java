@@ -8,20 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.util;
+package org.eclipse.che.api.machine.shared.dto;
 
-import java.io.Closeable;
-import java.io.IOException;
+import org.eclipse.che.api.core.model.machine.MachineLogMessage;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Consumes text line by line for analysing, writing, storing, etc.
- *
- * @author andrew00x
- * @see AbstractLineConsumer
+ * @author Alexander Garagatyi
  */
-public interface LineConsumer extends Closeable {
-    /** Consumes single line. */
-    void writeLine(String line) throws IOException;
+@DTO
+public interface MachineLogMessageDto extends MachineLogMessage {
+    void setContent(String content);
 
-    LineConsumer DEV_NULL = new AbstractLineConsumer() {};
+    MachineLogMessageDto withContent(String content);
+
+    void setMachineName(String machineName);
+
+    MachineLogMessageDto withMachineName(String machineName);
 }

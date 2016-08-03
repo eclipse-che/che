@@ -10,18 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.util;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * Consumes text line by line for analysing, writing, storing, etc.
+ * No-op implementation of {@link LineConsumer}
  *
- * @author andrew00x
- * @see AbstractLineConsumer
+ * @author Alexander Garagatyi
  */
-public interface LineConsumer extends Closeable {
-    /** Consumes single line. */
-    void writeLine(String line) throws IOException;
+public abstract class AbstractLineConsumer implements LineConsumer {
+    @Override
+    public void writeLine(String line) throws IOException {}
 
-    LineConsumer DEV_NULL = new AbstractLineConsumer() {};
+    @Override
+    public void close() throws IOException {}
 }

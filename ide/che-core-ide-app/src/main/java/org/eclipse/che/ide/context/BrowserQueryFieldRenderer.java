@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.collections.Jso;
@@ -120,7 +120,7 @@ public class BrowserQueryFieldRenderer {
     public void setProjectName(String projectName) {
         String workspaceName = "";
         String namespace = "";
-        WorkspaceDto workspaceDto = appContextProvider.get().getWorkspace();
+        Workspace workspaceDto = appContextProvider.get().getWorkspace();
         if (workspaceDto != null) {
             workspaceName = workspaceDto.getConfig().getName();
             namespace  = workspaceDto.getNamespace();

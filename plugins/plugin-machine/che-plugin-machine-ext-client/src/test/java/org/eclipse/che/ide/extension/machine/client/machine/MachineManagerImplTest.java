@@ -21,7 +21,6 @@ import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
@@ -122,13 +121,6 @@ public class MachineManagerImplTest {
         Promise<Void> promiseThen = mock(Promise.class);
         when(machineServiceClient.destroyMachine(eq(ID))).thenReturn(promise);
         when(promise.then(Matchers.<Operation<Void>>anyObject())).thenReturn(promiseThen);
-        machineManager.restartMachine(machineState);
-
-        verify(promiseThen).then(operationArgumentCaptor.capture());
-        operationArgumentCaptor.getValue().apply(null);
-
-        verify(eventBus).addHandler(eq(MachineStateEvent.TYPE), startWorkspaceHandlerCaptor.capture());
-        MachineStateEvent.Handler handler = startWorkspaceHandlerCaptor.getValue();
 
         MachineSource machineSource = mock(MachineSource.class);
         MachineConfig machineConfig = mock(MachineConfig.class);
@@ -139,16 +131,11 @@ public class MachineManagerImplTest {
         when(machineSource.getType()).thenReturn(SOURCE_TYPE);
         when(machineSource.getLocation()).thenReturn(SOURCE_LOCATION);
         when(machineSource.getContent()).thenReturn(SOURCE_CONTENT);
-
-
         MachineSourceDto machineSourceDto = mock(MachineSourceDto.class);
         when(machineSourceDto.withType(eq(SOURCE_TYPE))).thenReturn(machineSourceDto);
         when(machineSourceDto.withLocation(eq(SOURCE_LOCATION))).thenReturn(machineSourceDto);
         when(machineSourceDto.withContent(eq(SOURCE_CONTENT))).thenReturn(machineSourceDto);
-
         when(dtoFactory.createDto(MachineSourceDto.class)).thenReturn(machineSourceDto);
-
-
         LimitsDto limitsDto = mock(LimitsDto.class);
         when(dtoFactory.createDto(LimitsDto.class)).thenReturn(limitsDto);
         when(limitsDto.withRam(anyInt())).thenReturn(limitsDto);
@@ -161,9 +148,7 @@ public class MachineManagerImplTest {
         when(machineConfigDto.withLimits(limitsDto)).thenReturn(machineConfigDto);
         when(machineConfigDto.withType(anyString())).thenReturn(machineConfigDto);
 
-        WorkspaceDto workspaceDto = mock(WorkspaceDto.class);
-        when(appContext.getWorkspace()).thenReturn(workspaceDto);
-        when(workspaceDto.getId()).thenReturn(ID);
+        when(appContext.getWorkspaceId()).thenReturn(ID);
         DevMachine devMachine = mock(DevMachine.class);
         when(appContext.getDevMachine()).thenReturn(devMachine);
         when(devMachine.getId()).thenReturn(ID);
@@ -171,7 +156,11 @@ public class MachineManagerImplTest {
         Promise<MachineDto> promiseEmpty = mock(Promise.class);
         when(workspaceServiceClient.createMachine(anyString(), any(MachineConfigDto.class))).thenReturn(promiseEmpty);
 
-        handler.onMachineDestroyed(null);
+        machineManager.restartMachine(machineState);
+
+        verify(promiseThen).then(operationArgumentCaptor.capture());
+        operationArgumentCaptor.getValue().apply(null);
+
         verify(workspaceServiceClient).createMachine(eq(ID), machineConfigDtoArgumentCaptor.capture());
         verify(machineSourceDto).withType(eq(SOURCE_TYPE));
         verify(machineSourceDto).withLocation(eq(SOURCE_LOCATION));

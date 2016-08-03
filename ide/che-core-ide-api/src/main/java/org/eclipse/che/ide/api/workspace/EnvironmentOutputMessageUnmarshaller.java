@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.machine;
+package org.eclipse.che.ide.api.workspace;
 
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
@@ -18,7 +18,7 @@ import org.eclipse.che.ide.websocket.rest.Unmarshallable;
  *
  * @author Artem Zatsarynnyi
  */
-public class OutputMessageUnmarshaller implements Unmarshallable<String> {
+public class EnvironmentOutputMessageUnmarshaller implements Unmarshallable<String> {
     private String payload;
 
     @Override

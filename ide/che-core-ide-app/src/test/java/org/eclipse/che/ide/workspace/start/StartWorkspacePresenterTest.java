@@ -116,7 +116,7 @@ public class StartWorkspacePresenterTest {
         presenter.onStartWorkspaceClicked();
 
         verify(wsComponentProvider).get();
-        verify(workspaceComponent).startWorkspaceById(workspaceDto, callback);
+        verify(workspaceComponent).startWorkspace(workspaceDto, callback);
         verify(view).hide();
     }
 
@@ -175,7 +175,7 @@ public class StartWorkspacePresenterTest {
 
         verify(wsComponentProvider).get();
 
-        verify(workspaceComponent).startWorkspaceById(workspaceDto, callback);
+        verify(workspaceComponent).startWorkspace(workspaceDto, callback);
 
         verify(view).hide();
     }
