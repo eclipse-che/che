@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.util;
 
-import org.everrest.core.impl.provider.json.JsonUtils;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;
@@ -36,7 +35,7 @@ public class WebsocketLineConsumer implements LineConsumer {
     public void writeLine(String line) throws IOException {
         final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
         bm.setChannel(channel);
-        bm.setBody(JsonUtils.getJsonString(line));
+        bm.setBody(line);
         try {
             WSConnectionContext.sendMessage(bm);
         } catch (Exception e) {

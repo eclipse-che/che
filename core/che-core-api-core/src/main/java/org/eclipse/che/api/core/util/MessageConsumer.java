@@ -14,14 +14,10 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * Consumes text line by line for analysing, writing, storing, etc.
+ * Consumes messages one by one for analysing, writing, storing, etc.
  *
- * @author andrew00x
- * @see AbstractLineConsumer
+ * @author Alexander Garagatyi
  */
-public interface LineConsumer extends Closeable {
-    /** Consumes single line. */
-    void writeLine(String line) throws IOException;
-
-    LineConsumer DEV_NULL = new AbstractLineConsumer() {};
+public interface MessageConsumer<T> extends Closeable {
+    void consume(T message) throws IOException;
 }
