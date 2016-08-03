@@ -35,8 +35,8 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier.RunningListener;
+import org.eclipse.che.ide.extension.machine.client.newpanel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.util.loging.Log;
@@ -67,7 +67,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
     private final DtoUnmarshallerFactory  dtoUnmarshallerFactory;
     private final MachineServiceClient    machineServiceClient;
     private final WorkspaceServiceClient  workspaceServiceClient;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
     private final MachineStatusNotifier   machineStatusNotifier;
     private final InitialLoadingInfo      initialLoadingInfo;
     private final AppContext              appContext;
@@ -87,7 +87,7 @@ public class MachineManagerImpl implements MachineManager, WorkspaceStoppedEvent
     public MachineManagerImpl(DtoUnmarshallerFactory dtoUnmarshallerFactory,
                               MachineServiceClient machineServiceClient,
                               WorkspaceServiceClient workspaceServiceClient,
-                              ConsolesPanelPresenter consolesPanelPresenter,
+                              ProcessesPanelPresenter consolesPanelPresenter,
                               MachineStatusNotifier machineStatusNotifier,
                               final MessageBusProvider messageBusProvider,
                               final InitialLoadingInfo initialLoadingInfo,

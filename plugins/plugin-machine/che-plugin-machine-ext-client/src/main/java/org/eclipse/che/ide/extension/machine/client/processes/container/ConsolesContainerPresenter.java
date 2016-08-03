@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.HasView;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -32,7 +31,7 @@ import javax.validation.constraints.NotNull;
  * @author Roman Nikitenko
  */
 @Singleton
-public class ConsolesContainerPresenter extends BasePresenter implements ConsolesContainerView.ActionDelegate, HasView {
+public class ConsolesContainerPresenter extends BasePresenter implements ConsolesContainerView.ActionDelegate {
 
     private final ConsolesPanelPresenter      consolesPanelPresenter;
     private final TerminalsPanelPresenter     terminalsPanelPresenter;

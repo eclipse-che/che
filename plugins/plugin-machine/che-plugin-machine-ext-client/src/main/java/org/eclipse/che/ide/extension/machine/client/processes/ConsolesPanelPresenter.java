@@ -31,7 +31,6 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
-import org.eclipse.che.ide.api.parts.HasView;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
@@ -77,7 +76,6 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  */
 @Singleton
 public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
-                                                                     HasView,
                                                                      ProcessFinishedEvent.Handler,
                                                                      OutputConsole.ConsoleOutputListener,
                                                                      WorkspaceStartingEvent.Handler,
@@ -172,11 +170,6 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
 
     public void setParent(PartPresenter parent) {
         this.parent = parent;
-    }
-
-    @Override
-    public View getView() {
-        return view;
     }
 
     public void go(AcceptsOneWidget container) {

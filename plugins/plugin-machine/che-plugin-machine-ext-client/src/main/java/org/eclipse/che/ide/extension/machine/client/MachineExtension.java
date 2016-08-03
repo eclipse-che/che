@@ -16,8 +16,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
@@ -29,6 +27,8 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -37,19 +37,18 @@ import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;
+import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
+import org.eclipse.che.ide.extension.machine.client.newpanel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
-import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
@@ -73,7 +72,6 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Extension(title = "Machine", version = "1.0.0")
 public class MachineExtension {
 
-    public static final String GROUP_MACHINE_CONSOLE_TOOLBAR = "MachineConsoleToolbar";
     public static final String GROUP_MACHINE_TOOLBAR         = "MachineGroupToolbar";
     public static final String GROUP_COMMANDS_DROPDOWN       = "CommandsSelector";
     public static final String GROUP_COMMANDS_LIST           = "CommandsListGroup";
@@ -85,8 +83,7 @@ public class MachineExtension {
                             final EventBus eventBus,
                             final WorkspaceAgent workspaceAgent,
                             final AppContext   appContext,
-                            final ConsolesContainerPresenter consolesContainerPresenter,
-                            final ConsolesPanelPresenter consolesPanelPresenter,
+                            final ProcessesPanelPresenter processesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
                             IconRegistry iconRegistry,
@@ -100,8 +97,8 @@ public class MachineExtension {
                 machinePortProvider.get();
                 /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
-                    consolesPanelPresenter.newTerminal();
-                    workspaceAgent.openPart(consolesContainerPresenter, PartStackType.INFORMATION);
+                    processesPanelPresenter.newTerminal();
+                    workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 }
 
                 workspaceAgent.setActivePart(projectExplorerPresenter);
@@ -119,15 +116,15 @@ public class MachineExtension {
                  * OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
                  */
 
-                /* Add Consoles to Operation perspective */
+                /* Add Processes part to Operation perspective */
                 perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
-                workspaceAgent.openPart(consolesContainerPresenter, PartStackType.INFORMATION);
+//                workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
 
-                /* Add Consoles to Project perspective */
+                /* Add Processes part to Project perspective */
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
-                workspaceAgent.openPart(consolesContainerPresenter, PartStackType.INFORMATION);
+                workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 if (appContext.getFactory() == null) {
-                     workspaceAgent.setActivePart(consolesContainerPresenter);
+                     workspaceAgent.setActivePart(processesPanelPresenter);
                 }
             }
         });

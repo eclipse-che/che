@@ -7,18 +7,15 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- *******************************************************************************/
-package org.eclipse.che.ide.api.parts;
-
-import org.eclipse.che.ide.api.mvp.View;
+ ******************************************************************************/
+package org.eclipse.che.ide.api.multisplitpanel;
 
 /**
- * Determines an object containing View.
+ * //
  *
- * @author Vitaliy Guliy
+ * @author Artem Zatsarynnyi
  */
-public interface HasView<V extends View> {
+public interface TabItem {
 
-    V getView();
-
+    String getTitle();
 }
