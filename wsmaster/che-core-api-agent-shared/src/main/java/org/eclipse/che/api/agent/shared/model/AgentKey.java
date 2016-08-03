@@ -10,14 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.shared.model;
 
-import java.util.List;
-import java.util.Map;
-
 /**
- * @author Anatoliy Bazko
+ * @author Anatolii Bazko
  */
-public interface AgentConfig extends AgentKey {
-
+public interface AgentKey {
     /**
      * @return fqn of the agent
      */
@@ -27,19 +23,4 @@ public interface AgentConfig extends AgentKey {
      * @return the version of the agent
      */
     String getVersion();
-
-    /**
-     * @return the depending agents, that must be applied before
-     */
-    List<String> getDependencies();
-
-    /**
-     * @return the script to be applied when machine is started
-     */
-    String getScript();
-
-    /**
-     * @return any machine specific properties
-     */
-    Map<String, String> getProperties();
 }

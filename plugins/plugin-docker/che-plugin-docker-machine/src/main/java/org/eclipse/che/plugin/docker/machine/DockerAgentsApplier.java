@@ -14,9 +14,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.server.Agent;
-import org.eclipse.che.api.agent.server.AgentException;
-import org.eclipse.che.api.agent.server.AgentKey;
 import org.eclipse.che.api.agent.server.AgentProvider;
+import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.impl.BaseAgentFactory;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
@@ -25,6 +26,7 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -37,6 +39,8 @@ import static com.google.common.base.Strings.emptyToNull;
  */
 @Singleton
 public class DockerAgentsApplier {
+
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DockerAgentsApplier.class);
 
     private final AgentProvider agentProvider;
 
@@ -55,8 +59,12 @@ public class DockerAgentsApplier {
         HashSet<String> agentsInProgress = new HashSet<>();
 
         for (String agentKey : machine.getConfig().getAgents()) {
-            apply(machine, AgentKey.of(agentKey), agentsCompleted, agentsInProgress);
+            apply(machine, AgentKeyImpl.of(agentKey), agentsCompleted, agentsInProgress);
         }
+
+        // TODO: TO TEST
+        BaseAgentFactory baseAgentFactory = new BaseAgentFactory();
+        apply(machine, AgentKeyImpl.of(baseAgentFactory.getFqn()), agentsCompleted, agentsInProgress);
     }
 
     /**
@@ -65,10 +73,12 @@ public class DockerAgentsApplier {
      * @param agentKey
      *      the agent to be applied
      * @param agentsCompleted
+     *      completed agents, to avoid applying the same agent twice
      * @param agentsInProgress
+     *      pending agents to apply, to avoid circular dependency
      */
     private void apply(Instance machine,
-                       AgentKey agentKey,
+                       AgentKeyImpl agentKey,
                        Set<String> agentsCompleted,
                        Set<String> agentsInProgress) throws MachineException {
         if (agentsCompleted.contains(agentKey.getFqn())) {
@@ -87,9 +97,10 @@ public class DockerAgentsApplier {
         }
 
         for (String dependency : agent.getDependencies()) {
-            apply(machine, AgentKey.of(dependency), agentsCompleted, agentsInProgress);
+            apply(machine, AgentKeyImpl.of(dependency), agentsCompleted, agentsInProgress);
         }
 
+        LOG.info("Starting {} agent", agentKey.toString());
         startProcess(machine, new CommandImpl(agentKey.toString(), agent.getScript(), "agent"));
 
         agentsInProgress.remove(agentKey.getFqn());
@@ -125,6 +136,8 @@ public class DockerAgentsApplier {
 
         @Override
         public void writeLine(String line) throws IOException {
+            LOG.info("[AGENT] " + line);
+
             if (line.startsWith("[STDERR]")) {
                 errorMsg = line.substring("[STDERR]".length());
                 status = 1;

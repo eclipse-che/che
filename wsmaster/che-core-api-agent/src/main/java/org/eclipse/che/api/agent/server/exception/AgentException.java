@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server;
+package org.eclipse.che.api.agent.server.exception;
 
 /**
  * @author Anatoliy Bazko

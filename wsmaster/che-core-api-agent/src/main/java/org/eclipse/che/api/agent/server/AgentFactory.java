@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server;
 
+import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 
 /**

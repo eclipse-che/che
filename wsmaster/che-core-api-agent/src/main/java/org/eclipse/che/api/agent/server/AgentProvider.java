@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server;
 
+import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
+
+import java.util.List;
 
 /**
  * @author Anatoliy Bazko
@@ -22,12 +27,12 @@ public interface AgentProvider {
      * How to fetch config is implementation specific.
      *
      * @param agentKey
-     *      {@link AgentKey}
+     *      {@link AgentKeyImpl}
      * @return a new {@link Agent} instance
      * @throws AgentException
      *      if agent can't be created or other unexpected error occurred
      */
-    Agent createAgent(AgentKey agentKey) throws AgentException;
+    Agent createAgent(AgentKeyImpl agentKey) throws AgentException;
 
     /**
      * Creates a new agent. {@link AgentConfig} might be located at some remote storage.
@@ -55,4 +60,15 @@ public interface AgentProvider {
      *      if agent can't be created or other unexpected error occurred
      */
     Agent createAgent(String fqn) throws AgentException;
+
+    /**
+     * Provides list of agents can be created.
+     *
+     * @see AgentKey
+     *
+     * @return list of available agents
+     * @throws AgentException
+     *      if unexpected error occurred
+     */
+    List<AgentKey> getAgents() throws AgentException;
 }
