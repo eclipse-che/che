@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.shared.model;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /**
  * @author Anatolii Bazko
  */
@@ -22,5 +24,6 @@ public interface AgentKey {
     /**
      * @return the version of the agent
      */
+    @Nullable
     String getVersion();
 }
