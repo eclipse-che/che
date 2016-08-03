@@ -43,6 +43,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBo
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier;
 import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
@@ -81,18 +82,20 @@ public class MachineExtension {
     public static final String GROUP_MACHINES_LIST           = "MachinesListGroup";
 
     @Inject
-    public MachineExtension(MachineResources machineResources,
+    public MachineExtension(final MachineResources machineResources,
                             final EventBus eventBus,
                             final WorkspaceAgent workspaceAgent,
-                            final AppContext   appContext,
+                            final AppContext appContext,
                             final ConsolesContainerPresenter consolesContainerPresenter,
                             final ConsolesPanelPresenter consolesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
-                            IconRegistry iconRegistry,
-                            CustomCommandType arbitraryCommandType,
+                            final IconRegistry iconRegistry,
+                            final CustomCommandType arbitraryCommandType,
+                            final Provider<MachineStatusNotifier> machineStatusNotifierProvider,
                             final ProjectExplorerPresenter projectExplorerPresenter) {
         machineResources.getCss().ensureInjected();
+        machineStatusNotifierProvider.get();
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
