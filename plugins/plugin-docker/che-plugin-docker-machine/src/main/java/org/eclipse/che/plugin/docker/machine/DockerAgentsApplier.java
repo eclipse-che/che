@@ -16,7 +16,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.agent.server.Agent;
 import org.eclipse.che.api.agent.server.AgentProvider;
 import org.eclipse.che.api.agent.server.exception.AgentException;
-import org.eclipse.che.api.agent.server.impl.BaseAgentFactory;
 import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 import org.eclipse.che.api.core.ConflictException;
@@ -61,10 +60,6 @@ public class DockerAgentsApplier {
         for (String agentKey : machine.getConfig().getAgents()) {
             apply(machine, AgentKeyImpl.of(agentKey), agentsCompleted, agentsInProgress);
         }
-
-        // TODO: TO TEST
-        BaseAgentFactory baseAgentFactory = new BaseAgentFactory();
-        apply(machine, AgentKeyImpl.of(baseAgentFactory.getFqn()), agentsCompleted, agentsInProgress);
     }
 
     /**
@@ -136,11 +131,13 @@ public class DockerAgentsApplier {
 
         @Override
         public void writeLine(String line) throws IOException {
-            LOG.info("[AGENT] " + line);
-
             if (line.startsWith("[STDERR]")) {
                 errorMsg = line.substring("[STDERR]".length());
                 status = 1;
+
+                LOG.error(line);
+            } else {
+                LOG.debug(line);
             }
         }
 

@@ -31,7 +31,6 @@ public class AgentKeyImpl implements AgentKey {
         return fqn;
     }
 
-    @Nullable
     public String getVersion() {
         return version;
     }
