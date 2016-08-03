@@ -108,7 +108,6 @@ docker_exec() {
   if is_boot2docker || is_docker_for_windows; then
     MSYS_NO_PATHCONV=1 docker.exe "$@"
   else
-    echo $(get_docker_install_type)
     "$(which docker)" "$@"
   fi
 }
@@ -137,7 +136,9 @@ parse_command_line () {
 }
 
 is_boot2docker() {
-  if uname -r | grep -q 'boot2docker'; then
+  UNAME=$(docker run --rm alpine sh -c "uname -r")
+
+  if [[ $UNAME == *"boot2docker"* ]]; then
     return 0
   else
     return 1
@@ -244,7 +245,6 @@ execute_che_file() {
   info "ECLIPSE CHE FILE: LAUNCHING CONTAINER"
 
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
-#  MODIFIED_DIRECTORY=${CURRENT_DIRECTORY//////}
   docker_exec run -it --rm --name "${CHE_FILE_CONTAINER_NAME}" \
          -v /var/run/docker.sock:/var/run/docker.sock \
          -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
