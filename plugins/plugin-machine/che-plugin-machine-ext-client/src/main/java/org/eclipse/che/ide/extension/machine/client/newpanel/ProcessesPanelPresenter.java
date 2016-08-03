@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
@@ -33,7 +34,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -43,7 +44,6 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
@@ -74,12 +74,12 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
  */
 @Singleton
 public class ProcessesPanelPresenter extends BasePresenter implements ProcessesPanelView.ActionDelegate,
-                                                                      WorkspaceStartingEvent.Handler,
+                                                                      ProcessFinishedEvent.Handler,
+                                                                      OutputConsole.ConsoleOutputListener,
                                                                       WorkspaceStoppedEvent.Handler,
                                                                       MachineStateEvent.Handler,
-                                                                      OutputConsole.ConsoleOutputListener,
                                                                       WsAgentStateHandler,
-                                                                      ProcessFinishedEvent.Handler {
+                                                                      EnvironmentOutputEvent.Handler {
 
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
     public static final String SSH_PORT = "22";
@@ -107,7 +107,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     final   Map<String, OutputConsole> consoles;
     final   Map<OutputConsole, String> consoleCommands;
-    private OutputConsole              workspaceConsole;
 
     @Inject
     public ProcessesPanelPresenter(ProcessesPanelView view,
@@ -148,13 +147,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.setDelegate(this);
 
         eventBus.addHandler(ProcessFinishedEvent.TYPE, this);
-        eventBus.addHandler(WorkspaceStartingEvent.TYPE, this);
         eventBus.addHandler(WorkspaceStoppedEvent.TYPE, this);
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
-
-        workspaceConsole = commandConsoleFactory.create("");
-        updateCommandOutput("", workspaceConsole);
 
         fetchMachines();
     }
@@ -193,25 +188,16 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     @Override
     public void onMachineCreating(MachineStateEvent event) {
         workspaceAgent.setActivePart(this);
+        addMachineNode(event.getMachine());
     }
 
     @Override
     public void onMachineRunning(MachineStateEvent event) {
-        workspaceAgent.setActivePart(this);
-
-        machineServiceClient.getMachine(event.getMachineId()).then(new Operation<MachineDto>() {
-            @Override
-            public void apply(MachineDto machine) throws OperationException {
-                addMachineNode(machine);
-            }
-        });
     }
 
     @Override
     public void onMachineDestroyed(MachineStateEvent event) {
-        String destroyedMachineId = event.getMachineId();
-
-        ProcessTreeNode destroyedMachineNode = machineNodes.get(destroyedMachineId);
+        ProcessTreeNode destroyedMachineNode = machineNodes.get(event.getMachineId());
         if (destroyedMachineNode == null) {
             return;
         }
@@ -265,7 +251,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         machineServiceClient.getMachine(machineId).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto arg) throws OperationException {
-                Machine machine = entityFactory.createMachine(arg);
+                org.eclipse.che.ide.extension.machine.client.machine.Machine machine = entityFactory.createMachine(arg);
                 final ProcessTreeNode machineTreeNode = findProcessTreeNodeById(machineId);
 
                 if (machineTreeNode == null) {
@@ -488,15 +474,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return;
         }
 
-        int countWidgets = terminals.size() + consoles.size();
-        if (countWidgets <= 2) {
-            view.hideProcessOutput(processId);
-            removeChildFromMachineNode(node, parentNode);
-            return;
-        }
-
         int neighborIndex = processIndex > 0 ? processIndex - 1 : processIndex + 1;
         ProcessTreeNode neighborNode = view.getNodeByIndex(neighborIndex);
+        if (neighborNode == null) {
+            neighborNode = parentNode;
+        }
+
         String neighborNodeId = neighborNode.getId();
 
         removeChildFromMachineNode(node, parentNode);
@@ -550,7 +533,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         return null;
     }
 
-    private ProcessTreeNode addMachineNode(MachineDto machine) {
+    private ProcessTreeNode addMachineNode(final Machine machine) {
         if (machineNodes.containsKey(machine.getId())) {
             return machineNodes.get(machine.getId());
         }
@@ -565,6 +548,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         rootNodes.add(machineNode);
 
+        OutputConsole outputConsole = commandConsoleFactory.create("");
+        updateCommandOutput(machine.getId(), outputConsole);
+
         view.setProcessesData(rootNode);
 
         return machineNode;
@@ -575,16 +561,25 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         machineServiceClient.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
             @Override
             public void apply(List<MachineDto> machines) throws OperationException {
-                MachineDto devMachine = getDevMachine(machines);
-                ProcessTreeNode devMachineTreeNode = addMachineNode(devMachine);
+                if (machines.isEmpty()) {
+                    return;
+                }
 
-                machines.remove(devMachine);
+                ProcessTreeNode machineToSelect = null;
+                MachineDto devMachine = getDevMachine(machines);
+                if (devMachine != null) {
+                    machineToSelect = addMachineNode(devMachine);
+                    machines.remove(devMachine);
+                }
 
                 for (MachineDto machine : machines) {
                     addMachineNode(machine);
                 }
 
-                view.selectNode(devMachineTreeNode);
+                if (machineToSelect == null) {
+                    machineToSelect = machineNodes.entrySet().iterator().next().getValue();
+                }
+                view.selectNode(machineToSelect);
 
                 workspaceAgent.setActivePart(ProcessesPanelPresenter.this);
             }
@@ -598,15 +593,16 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             }
         }
 
-        throw new IllegalArgumentException("Dev machine can not be null");
+        throw null;
     }
 
     @Override
-    public void onWorkspaceStarting(WorkspaceStartingEvent event) {
-        workspaceConsole = commandConsoleFactory.create("");
-        updateCommandOutput("", workspaceConsole);
-
-        fetchMachines();
+    public void onEnvironmentOutputEvent(EnvironmentOutputEvent event) {
+        for (ProcessTreeNode machineNode : machineNodes.values()) {
+            if (machineNode.getName().equals(event.getMachineName())) {
+                printMachineOutput(machineNode.getId(), event.getContent());
+            }
+        }
     }
 
     @Override
@@ -649,7 +645,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         });
     }
 
-    private void restoreState(final org.eclipse.che.api.core.model.machine.Machine machine) {
+    private void restoreState(final Machine machine) {
         machineServiceClient.getProcesses(machine.getId()).then(new Operation<List<MachineProcessDto>>() {
             @Override
             public void apply(List<MachineProcessDto> arg) throws OperationException {
@@ -692,8 +688,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
     }
 
-    public void printDevMachineOutput(String text) {
-        OutputConsole console = consoles.get("");
+    public void printMachineOutput(String machineId, String text) {
+        OutputConsole console = consoles.get(machineId);
         if (console != null && console instanceof DefaultOutputConsole) {
             ((DefaultOutputConsole)console).printText(text);
         }

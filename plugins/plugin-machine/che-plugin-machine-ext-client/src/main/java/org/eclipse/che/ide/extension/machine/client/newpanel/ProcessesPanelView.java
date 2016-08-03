@@ -26,14 +26,6 @@ import javax.validation.constraints.NotNull;
 public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelegate> {
 
     /**
-     * Set view's title.
-     *
-     * @param title
-     *         new title
-     */
-    void setTitle(String title);
-
-    /**
      * Sets whether this view is visible.
      *
      * @param visible

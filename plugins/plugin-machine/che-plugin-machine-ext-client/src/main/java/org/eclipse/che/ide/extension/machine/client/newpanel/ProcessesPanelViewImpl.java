@@ -368,27 +368,29 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         }
     }
 
+    protected void focusView() {
+        getElement().focus();
+    }
+
     @Override
     public void showProcessOutput(String processId) {
         if (!processWidgets.containsKey(processId)) {
             processId = "";
         }
 
-        if (processWidgets.containsKey(processId)) {
 //            onResize();
 
-            WidgetToShow widgetToShow = processWidgets.get(processId);
-            SubPanel subPanel = widget2Panels.get(widgetToShow);
+        WidgetToShow widgetToShow = processWidgets.get(processId);
+        SubPanel subPanel = widget2Panels.get(widgetToShow);
 
-            subPanel.activateWidget(widgetToShow);
+        subPanel.activateWidget(widgetToShow);
 
-            activeProcessId = processId;
+        activeProcessId = processId;
 
-            ProcessTreeNode treeNode = processTreeNodes.get(processId);
-            if (treeNode != null) {
-                treeNode.setHasUnreadContent(false);
-                treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
-            }
+        ProcessTreeNode treeNode = processTreeNodes.get(processId);
+        if (treeNode != null) {
+            treeNode.setHasUnreadContent(false);
+            treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
         }
     }
 
