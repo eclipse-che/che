@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
@@ -59,6 +60,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -635,6 +637,57 @@ public class WorkspaceManagerTest {
         workspaceManager.startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), "account", null);
 
         verify(runtimes, timeout(2000)).start(workspace, workspace.getConfig().getDefaultEnv(), true);
+    }
+
+    @Test
+    public void shouldBeAbleToRemoveMachinesSnapshots() throws Exception {
+        // given
+        String testWsId = "testWsId";
+        String testNamespace = "testNamespace";
+        WorkspaceImpl workspaceMock = mock(WorkspaceImpl.class);
+        doReturn(workspaceMock).when(workspaceManager).getWorkspace(testWsId);
+        when(workspaceMock.getNamespace()).thenReturn(testNamespace);
+
+        // when
+        workspaceManager.removeSnapshots(testWsId);
+
+        // then
+        verify(machineManager).removeSnapshots(testNamespace, testWsId);
+    }
+
+    @Test
+    public void shouldBeAbleToStartMachineInRunningWs() throws Exception {
+        // given
+        String testWsId = "testWsId";
+        String testActiveEnv = "testActiveEnv";
+        WorkspaceImpl workspaceMock = mock(WorkspaceImpl.class);
+        doReturn(workspaceMock).when(workspaceManager).getWorkspace(testWsId);
+        WorkspaceRuntimeImpl wsRuntimeMock = mock(WorkspaceRuntimeImpl.class);
+        when(workspaceMock.getStatus()).thenReturn(RUNNING);
+        when(workspaceMock.getRuntime()).thenReturn(wsRuntimeMock);
+        when(wsRuntimeMock.getActiveEnv()).thenReturn(testActiveEnv);
+        LineConsumer lineConsumerMock = mock(LineConsumer.class);
+        MachineConfigImpl machineConfig = createConfig().getEnvironments().get(0).getMachineConfigs().get(0);
+        when(runtimes.getMachineLogger(testWsId, machineConfig.getName())).thenReturn(lineConsumerMock);
+
+        // when
+        workspaceManager.startMachine(machineConfig, testWsId);
+
+        // then
+        verify(machineManager).createMachineAsync(eq(machineConfig), eq(testWsId), eq(testActiveEnv), eq(lineConsumerMock));
+    }
+
+    @Test(expectedExceptions = ConflictException.class, expectedExceptionsMessageRegExp = "Workspace .* is not running, new machine can't be started")
+    public void shouldThrowExceptionOnStartMachineInNonRunningWs() throws Exception {
+        // given
+        String testWsId = "testWsId";
+        WorkspaceImpl workspaceMock = mock(WorkspaceImpl.class);
+        doReturn(workspaceMock).when(workspaceManager).getWorkspace(testWsId);
+        when(workspaceMock.getStatus()).thenReturn(STARTING);
+        MachineConfigImpl machineConfig = createConfig().getEnvironments().get(0).getMachineConfigs().get(0);
+
+        // when
+        workspaceManager.startMachine(machineConfig, testWsId);
     }
 
     private RuntimeDescriptor createDescriptor(WorkspaceImpl workspace, WorkspaceStatus status) {
