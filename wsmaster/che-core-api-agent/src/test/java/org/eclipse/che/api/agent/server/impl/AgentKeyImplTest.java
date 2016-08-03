@@ -8,8 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server;
+package org.eclipse.che.api.agent.server.impl;
 
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertNull;
@@ -18,11 +19,11 @@ import static org.testng.AssertJUnit.assertEquals;
 /**
  * @author Anatolii Bazko
  */
-public class AgentKeyTest {
+public class AgentKeyImplTest {
 
     @Test
     public void testAgentKeyWithFqnAndVersion() {
-        AgentKey agentKey = AgentKey.of("fqn:1");
+        AgentKeyImpl agentKey = AgentKeyImpl.of("fqn:1");
 
         assertEquals(agentKey.getFqn(), "fqn");
         assertEquals(agentKey.getVersion(), "1");
@@ -30,7 +31,7 @@ public class AgentKeyTest {
 
     @Test
     public void testParseAgentKeyWithFqn() {
-        AgentKey agentKey = AgentKey.of("fqn");
+        AgentKeyImpl agentKey = AgentKeyImpl.of("fqn");
 
         assertEquals(agentKey.getFqn(), "fqn");
         assertNull(agentKey.getVersion());
@@ -38,6 +39,6 @@ public class AgentKeyTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseAgentKeyFails() {
-        AgentKey.of("fqn:1:2");
+        AgentKeyImpl.of("fqn:1:2");
     }
 }

@@ -14,13 +14,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.server.Agent;
-import org.eclipse.che.api.agent.server.AgentException;
 import org.eclipse.che.api.agent.server.AgentFactory;
-import org.eclipse.che.api.agent.server.AgentKey;
 import org.eclipse.che.api.agent.server.AgentProvider;
 import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,7 +46,7 @@ public class AgentProviderImpl implements AgentProvider {
     }
 
     @Override
-    public Agent createAgent(AgentKey agentKey) throws AgentException {
+    public Agent createAgent(AgentKeyImpl agentKey) throws AgentException {
         AgentConfig agentConfig = agentKey.getVersion() != null
                                   ? agentRegistry.getConfig(agentKey.getFqn(), agentKey.getVersion())
                                   : agentRegistry.getConfig(agentKey.getFqn());
@@ -59,6 +64,22 @@ public class AgentProviderImpl implements AgentProvider {
     public Agent createAgent(String fqn) throws AgentException {
         AgentConfig agentConfig = agentRegistry.getConfig(fqn);
         return doCreateAgent(agentConfig);
+    }
+
+    @Override
+    public List<AgentKey> getAgents() throws AgentException {
+        List<AgentKey> agents = new ArrayList<>();
+
+        for (final String fqn : factories.keySet()) {
+            try {
+                Collection<String> versions = agentRegistry.getVersions(fqn);
+                versions.forEach(v -> agents.add(new AgentKeyImpl(fqn, v)));
+            } catch (AgentNotFoundException e) {
+                // just ignore
+            }
+        }
+
+        return agents;
     }
 
     private Agent doCreateAgent(AgentConfig agentConfig) throws AgentException {

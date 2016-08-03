@@ -10,10 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
-import org.eclipse.che.api.agent.server.AgentException;
-import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.AgentRegistryUrlProvider;
+import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
+import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
+import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.everrest.assured.EverrestJetty;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeMethod;
@@ -28,30 +34,60 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collection;
 
 import static java.lang.String.format;
 import static java.nio.file.Files.copy;
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Anatoliy Bazko
  */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
-public class AgentRegistryImplTest {
+public class RemoteAgentRegistryImplTest {
 
     @SuppressWarnings("unused")
-    private RegistryService service;
-
-    private AgentRegistry agentRegistry;
+    private RegistryService          service;
+    @Mock
+    private AgentRegistryUrlProvider urlProvider;
+    private RemoteAgentRegistryImpl  agentRegistry;
 
     @BeforeMethod
     public void setUp(ITestContext context) throws Exception {
-        Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
-        agentRegistry = new AgentRegistryImpl("http://localhost:" + port + "/rest/registry/agent/${fqn}/${version}",
-                                              "http://localhost:" + port + "/rest/registry/agent/${fqn}");
+        agentRegistry = new RemoteAgentRegistryImpl(urlProvider, new DefaultHttpJsonRequestFactory());
+
+        final Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
+        when(urlProvider.getAgentUrl(anyString())).thenAnswer(new Answer<URL>() {
+            @Override
+            public URL answer(InvocationOnMock invocation) throws Throwable {
+                String fqn = (String)invocation.getArguments()[0];
+                return new URL("http://localhost:" + port + "/rest/registry/agent/" + fqn);
+            }
+        });
+        when(urlProvider.getAgentUrl(anyString(), anyString())).thenAnswer(new Answer<URL>() {
+            @Override
+            public URL answer(InvocationOnMock invocation) throws Throwable {
+                String fqn = (String)invocation.getArguments()[0];
+                String version = (String)invocation.getArguments()[1];
+                return new URL("http://localhost:" + port + "/rest/registry/agent/" + fqn + "/" + version);
+            }
+        });
+        when(urlProvider.getAgentVersions(anyString())).thenAnswer(new Answer<URL>() {
+            @Override
+            public URL answer(InvocationOnMock invocation) throws Throwable {
+                String fqn = (String)invocation.getArguments()[0];
+                return new URL("http://localhost:" + port + "/rest/registry/updates/" + fqn);
+            }
+        });
+
         service = new RegistryService();
     }
 
@@ -77,6 +113,20 @@ public class AgentRegistryImplTest {
         agentRegistry.getConfig("terminal", "1.0");
     }
 
+    @Test
+    public void testGetAgentsVersion() throws Exception {
+        Collection<String> versions = agentRegistry.getVersions("ws-agent");
+
+        assertEquals(versions.size(), 1);
+        assertTrue(versions.contains("1.0.0"));
+    }
+
+    @Test(expectedExceptions = AgentNotFoundException.class)
+    public void testGetAgentsVersionShouldFailsIfAgentUnknown() throws Exception {
+        agentRegistry.getVersions("terminal");
+    }
+
+
     @Path("registry")
     public class RegistryService {
 
@@ -93,6 +143,16 @@ public class AgentRegistryImplTest {
         @Produces(MediaType.APPLICATION_OCTET_STREAM)
         public Response getLatestAgent(@PathParam("artifact") String artifact) throws IOException {
             return doGetAgent(artifact, "2.0");
+        }
+
+        @GET
+        @Produces(MediaType.APPLICATION_JSON)
+        @Path("/updates/{artifact}")
+        public Response getUpdates(@PathParam("artifact") final String artifact) {
+            if (!artifact.endsWith("ws-agent")) {
+                return Response.status(Response.Status.NOT_FOUND).entity("{ \"message\" : \"not found\" }").build();
+            }
+            return Response.status(Response.Status.OK).entity(new JsonArrayImpl<>(singletonList("1.0.0"))).build();
         }
 
         private Response doGetAgent(String artifact, String version) throws IOException {

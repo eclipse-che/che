@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server;
 
+import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
+
+import java.util.Collection;
 
 /**
  * @author Anatoliy Bazko
@@ -40,4 +43,6 @@ public interface AgentRegistry {
      *      if configuration can't be fetched or other unexpected error occurred
      */
     AgentConfig getConfig(String fqn) throws AgentException;
+
+    Collection<String> getVersions(String fqn) throws AgentException;
 }

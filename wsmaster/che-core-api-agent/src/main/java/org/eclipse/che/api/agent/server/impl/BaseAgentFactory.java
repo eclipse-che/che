@@ -13,7 +13,7 @@ package org.eclipse.che.api.agent.server.impl;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.server.Agent;
-import org.eclipse.che.api.agent.server.AgentException;
+import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.AgentFactory;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 
