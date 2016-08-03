@@ -75,16 +75,22 @@ public class Machine {
         return descriptor.getConfig().getType();
     }
 
-    /** @return script of machine recipe */
+    /** @return location of machine recipe */
     public String getRecipeLocation() {
         MachineSourceDto machineSource = descriptor.getConfig().getSource();
         return machineSource.getLocation();
     }
 
-    /** @return script of machine recipe */
+    /** @return content of machine recipe */
     public String getRecipeContent() {
         MachineSourceDto machineSource = descriptor.getConfig().getSource();
         return machineSource.getContent();
+    }
+
+    /** @return type of machine recipe */
+    public String getRecipeType() {
+        MachineSourceDto machineSource = descriptor.getConfig().getSource();
+        return machineSource.getType();
     }
 
     /**
