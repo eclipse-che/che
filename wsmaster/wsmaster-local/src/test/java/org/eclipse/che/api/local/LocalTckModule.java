@@ -23,7 +23,6 @@ import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
-import org.eclipse.che.api.user.server.jpa.PreferenceEntity;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
@@ -43,8 +42,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import static java.util.Collections.emptySet;
 import static org.mockito.Matchers.any;
@@ -99,7 +96,7 @@ public class LocalTckModule extends TckModule {
     private static class SnapshotTckRepository extends LocalMapTckRepository<SnapshotImpl> {
         @Inject
         public SnapshotTckRepository(LocalSnapshotDaoImpl snapshotDao) {
-            super(snapshotDao.snapshots, SnapshotImpl::getId);
+            super(snapshotDao.snapshots, SnapshotImpl::getId, snapshotDao);
         }
     }
 
@@ -107,7 +104,7 @@ public class LocalTckModule extends TckModule {
     private static class LocalUserTckRepository extends LocalMapTckRepository<UserImpl> {
         @Inject
         public LocalUserTckRepository(LocalUserDaoImpl userDao) {
-            super(userDao.users, UserImpl::getId);
+            super(userDao.users, UserImpl::getId, userDao);
         }
     }
 
@@ -115,7 +112,7 @@ public class LocalTckModule extends TckModule {
     private static class LocalProfileTckRepository extends LocalMapTckRepository<ProfileImpl> {
         @Inject
         public LocalProfileTckRepository(LocalProfileDaoImpl profileDao) {
-            super(profileDao.profiles, ProfileImpl::getUserId);
+            super(profileDao.profiles, ProfileImpl::getUserId, profileDao);
         }
     }
 
@@ -123,7 +120,7 @@ public class LocalTckModule extends TckModule {
     private static class LocalRecipeTckRepository extends LocalMapTckRepository<RecipeImpl> {
         @Inject
         public LocalRecipeTckRepository(LocalRecipeDaoImpl recipeDao) {
-            super(recipeDao.recipes, RecipeImpl::getId);
+            super(recipeDao.recipes, RecipeImpl::getId, recipeDao);
         }
     }
 
@@ -131,7 +128,7 @@ public class LocalTckModule extends TckModule {
     private static class LocalWorkspaceTckRepository extends LocalMapTckRepository<WorkspaceImpl> {
         @Inject
         public LocalWorkspaceTckRepository(LocalWorkspaceDaoImpl workspaceDao) {
-            super(workspaceDao.workspaces, WorkspaceImpl::getId);
+            super(workspaceDao.workspaces, WorkspaceImpl::getId, workspaceDao);
         }
     }
 
@@ -139,7 +136,7 @@ public class LocalTckModule extends TckModule {
     private static class LocalStackTckRepository extends LocalMapTckRepository<StackImpl> {
         @Inject
         public LocalStackTckRepository(LocalStackDaoImpl stackDao) {
-            super(stackDao.stacks, StackImpl::getId);
+            super(stackDao.stacks, StackImpl::getId, stackDao);
         }
     }
 
@@ -147,8 +144,8 @@ public class LocalTckModule extends TckModule {
     private static class LocalPreferenceTckRepository
             extends LocalTckRepository<Map<String, Map<String, String>>, Pair<String, Map<String, String>>> {
         @Inject
-        public LocalPreferenceTckRepository(LocalPreferenceDaoImpl localDao) {
-            super(localDao.preferences, (map, entity) -> map.put(entity.first, entity.second), Map::clear);
+        public LocalPreferenceTckRepository(LocalPreferenceDaoImpl prefsDao) {
+            super(prefsDao.preferences, (map, entity) -> map.put(entity.first, entity.second), Map::clear, prefsDao);
         }
     }
 
@@ -156,7 +153,7 @@ public class LocalTckModule extends TckModule {
     private static class LocalSshTckRepository extends LocalTckRepository<List<SshPairImpl>, SshPairImpl> {
         @Inject
         public LocalSshTckRepository(LocalSshDaoImpl sshDao) {
-            super(sshDao.pairs, List::add, List::clear);
+            super(sshDao.pairs, List::add, List::clear, sshDao);
         }
     }
 }

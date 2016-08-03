@@ -11,12 +11,14 @@
 package org.eclipse.che.api.user.server.model.impl;
 
 import org.eclipse.che.api.core.model.user.User;
+import org.eclipse.che.api.user.server.jpa.UserEntityListener;
 
 import javax.persistence.Basic;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
@@ -48,6 +50,7 @@ import java.util.Objects;
                             query = "SELECT u FROM \"User\" u WHERE u.email = :email")
         }
 )
+@EntityListeners(UserEntityListener.class)
 public class UserImpl implements User {
 
     @Id

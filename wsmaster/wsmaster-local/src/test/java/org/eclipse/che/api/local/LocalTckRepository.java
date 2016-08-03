@@ -10,12 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 
 import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Simplifies implementation of TckRepository for local data access objects.
@@ -31,24 +34,39 @@ public class LocalTckRepository<STORAGE_T, ENTITY_T> implements TckRepository<EN
     private final STORAGE_T                       storage;
     private final BiConsumer<STORAGE_T, ENTITY_T> adder;
     private final Consumer<STORAGE_T>             cleaner;
+    private final Object                          mutex;
 
     public LocalTckRepository(STORAGE_T storage,
                               BiConsumer<STORAGE_T, ENTITY_T> adder,
-                              Consumer<STORAGE_T> cleaner) {
-        this.storage = storage;
-        this.adder = adder;
-        this.cleaner = cleaner;
+                              Consumer<STORAGE_T> cleaner,
+                              @Nullable Object mutex) {
+        this.storage = requireNonNull(storage, "Required non-null storage");
+        this.adder = requireNonNull(adder, "Required non-null adder");
+        this.cleaner = requireNonNull(cleaner, "Required non-null cleaner");
+        this.mutex = mutex;
     }
 
     @Override
     public void createAll(Collection<? extends ENTITY_T> entities) throws TckRepositoryException {
-        for (ENTITY_T entity : entities) {
-            adder.accept(storage, entity);
-        }
+        withMutex(() -> {
+            for (ENTITY_T entity : entities) {
+                adder.accept(storage, entity);
+            }
+        });
     }
 
     @Override
     public void removeAll() throws TckRepositoryException {
-        cleaner.accept(storage);
+        withMutex(() -> cleaner.accept(storage));
+    }
+
+    private void withMutex(Runnable action) {
+        if (mutex == null) {
+            action.run();
+        } else {
+            synchronized (mutex) {
+                action.run();
+            }
+        }
     }
 }

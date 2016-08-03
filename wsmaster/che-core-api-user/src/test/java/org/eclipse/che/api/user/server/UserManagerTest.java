@@ -201,8 +201,6 @@ public class UserManagerTest {
         manager.remove("user123");
 
         verify(userDao).remove("user123");
-        verify(preferencesDao).remove("user123");
-        verify(profileDao).remove("user123");
     }
 
     @Test(expectedExceptions = ConflictException.class)

@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.factory.Ide;
 import org.eclipse.che.api.core.model.factory.Policies;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 
@@ -26,6 +27,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -60,6 +62,10 @@ public class FactoryImpl implements Factory {
 
     @Embedded
     private AuthorImpl creator;
+
+    @OneToOne
+    @JoinColumn(insertable = false, updatable = false, name = "userId")
+    private UserImpl userEntity;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private ButtonImpl button;

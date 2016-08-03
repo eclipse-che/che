@@ -17,9 +17,16 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -30,6 +37,8 @@ import static java.util.Objects.requireNonNull;
 
 @Singleton
 public class JpaProfileDao implements ProfileDao {
+
+    private static final Logger LOG = LoggerFactory.getLogger(JpaProfileDao.class);
 
     @Inject
     private Provider<EntityManager> managerProvider;
@@ -106,6 +115,33 @@ public class JpaProfileDao implements ProfileDao {
         final ProfileImpl profile = manager.find(ProfileImpl.class, userId);
         if (profile != null) {
             manager.remove(profile);
+        }
+    }
+
+    @Singleton
+    public static class RemoveProfileBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+        @Inject
+        private EventService  eventService;
+        @Inject
+        private JpaProfileDao profileDao;
+
+        @PostConstruct
+        public void subscribe() {
+            eventService.subscribe(this);
+        }
+
+        @PreDestroy
+        public void unsubscribe() {
+            eventService.unsubscribe(this);
+        }
+
+        @Override
+        public void onEvent(BeforeUserRemovedEvent event) {
+            try {
+                profileDao.remove(event.getUser().getId());
+            } catch (Exception x) {
+                LOG.error(format("Couldn't remove profile before user '%s' is removed", event.getUser().getId()), x);
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.persist.Transactional;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -40,6 +41,7 @@ public class WorkspaceTckModule extends TckModule {
     protected void configure() {
         install(new JpaPersistModule("main"));
         bind(JpaInitializer.class).asEagerSingleton();
+        bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
         bind(org.eclipse.che.api.core.h2.jdbc.jpa.eclipselink.H2ExceptionHandler.class);
 
         bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new JpaTckRepository<>(WorkspaceImpl.class));

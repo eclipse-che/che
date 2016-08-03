@@ -21,12 +21,27 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import java.util.Objects;
 
 /**
  * @author Sergii Leschenko
  */
 @Entity(name = "SshKeyPair")
+@NamedQueries(
+        {
+                @NamedQuery(name = "SshKeyPair.getByOwnerAndService",
+                            query = "SELECT pair " +
+                                    "FROM SshKeyPair pair " +
+                                    "WHERE pair.owner = :owner " +
+                                    "  AND pair.service = :service"),
+                @NamedQuery(name = "SshKeyPair.getByOwner",
+                            query = "SELECT pair " +
+                                    "FROM SshKeyPair pair " +
+                                    "WHERE pair.owner = :owner")
+        }
+)
 @IdClass(SshPairPrimaryKey.class)
 public class SshPairImpl implements SshPair {
     @Id
@@ -41,7 +56,7 @@ public class SshPairImpl implements SshPair {
     private String privateKey;
 
     @ManyToOne
-    @JoinColumn(name="owner", insertable = false, updatable = false)
+    @JoinColumn(name = "owner", insertable = false, updatable = false)
     private UserImpl user;
 
     public SshPairImpl() {
@@ -61,6 +76,10 @@ public class SshPairImpl implements SshPair {
         this.name = sshPair.getName();
         this.publicKey = sshPair.getPublicKey();
         this.privateKey = sshPair.getPrivateKey();
+    }
+
+    public SshPairImpl(SshPairImpl sshPair) {
+        this(sshPair.owner, sshPair.service, sshPair.name, sshPair.publicKey, sshPair.privateKey);
     }
 
     public String getOwner() {

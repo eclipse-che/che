@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
+import org.eclipse.che.api.workspace.server.jpa.WorkspaceEntityListener;
 import org.eclipse.che.commons.lang.NameGenerator;
 
 import javax.persistence.Basic;
@@ -22,6 +23,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -57,6 +59,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
                             query = "SELECT w FROM Workspace w")
         }
 )
+@EntityListeners(WorkspaceEntityListener.class)
 public class WorkspaceImpl implements Workspace {
 
     public static WorkspaceImplBuilder builder() {
