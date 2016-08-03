@@ -97,10 +97,7 @@ export class CheUIElementsInjectorService {
     // compile the view
     let compileAdditionalElement = this.$compile(jqAdditionalElement)(jqParentElement.scope());
 
-    let oldElement = this.$document[0].getElementById(additionalElementId);
-    if (oldElement) {
-      oldElement.remove();
-    }
+    this.deleteElementById(additionalElementId);
 
     jqParentElement.append(compileAdditionalElement);
 
@@ -139,12 +136,6 @@ export class CheUIElementsInjectorService {
    * @returns {boolean} - true if successful
    */
   deleteElementById(elementId) {
-    let removeElement = this.$document[0].getElementById(elementId);
-    if (removeElement) {
-      removeElement.remove();
-      return true;
-    }
-
-    return false;
+    return this.$document.find('#' + elementId).remove().length > 0;
   }
 }
