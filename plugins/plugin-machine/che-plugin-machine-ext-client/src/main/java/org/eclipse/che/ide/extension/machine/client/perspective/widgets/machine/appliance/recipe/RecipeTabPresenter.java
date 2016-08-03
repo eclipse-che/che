@@ -43,23 +43,40 @@ public class RecipeTabPresenter implements TabPresenter {
 
     /**
      * Calls special method on view which updates recipe of current machine.
+     * If case of 'image', it is it's location, in case of 'dockerfile'
+     * - it is content, that is fecthed by location URL
      *
      * @param machine
      *         machine for which need update information
      */
     public void updateInfo(@NotNull final Machine machine) {
-        recipeScriptClient.getRecipeScript(machine).then(new Operation<String>() {
+        if (machine.getRecipeType() == null) {
+            Log.error(RecipeTabPresenter.class, "Recipe type is null for machine '" + machine.getId() + "'");
+            view.setScript("Recipe type is null for machine '" + machine.getId() + "'");
+            return;
+        }
+        switch (machine.getRecipeType()) {
+            case "image":
+                view.setScript("Image location: " + machine.getRecipeLocation());
+                break;
+            case "dockerfile":
+                recipeScriptClient.getRecipeScript(machine).then(new Operation<String>() {
                     @Override
                     public void apply(String recipe) throws OperationException {
                         view.setScript(recipe);
                     }
                 }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                Log.error(RecipeTabPresenter.class,
-                          "Failed to get recipe script for machine " + machine.getId() + ": " + error.getMessage());
-            }
-        });
+                    @Override
+                    public void apply(PromiseError error) throws OperationException {
+                        Log.error(RecipeTabPresenter.class,
+                                  "Failed to get recipe script for machine " + machine.getId() + ": " + error.getMessage());
+                        view.setScript("Failed to get recipe script for machine '" + machine.getId() + "'");
+                    }
+                });
+                break;
+            case "default":
+                view.setScript("Recipe type: " + machine.getRecipeType());
+        }
     }
 
     /** {@inheritDoc} */
