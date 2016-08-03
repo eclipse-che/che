@@ -40,6 +40,11 @@ public class Constants {
     public static final String WSAGENT_WEBSOCKET_REFERENCE         = "wsagent.websocket";
     public static final String WSAGENT_DEBUG_REFERENCE             = "wsagent.debug";
 
+    public static final String LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL = "environment.output_channel";
+    public static final String ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE = "workspace:%s:environment_output";
+    public static final String LINK_REL_ENVIRONMENT_STATUS_CHANNEL = "environment.status_channel";
+    public static final String ENVIRONMENT_STATUS_CHANNEL_TEMPLATE = "workspace:%s:machines_statuses";
+
     public static final String TERMINAL_REFERENCE = "terminal";
 
     public static final String WS_AGENT_PORT = "4401/tcp";

@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.machine;
 
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-
 import org.eclipse.che.ide.websocket.Message;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 
@@ -32,8 +29,7 @@ public class CommandOutputMessageUnmarshaller implements Unmarshallable<String> 
 
     @Override
     public void unmarshal(Message message) {
-        final JSONString jsonString = JSONParser.parseStrict(message.getBody()).isString();
-        payload = jsonString.stringValue();
+        payload = message.getBody();
 
         if (payload.startsWith("[STDOUT]")) {
             payload = payload.substring(9);

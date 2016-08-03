@@ -8,20 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.util;
-
-import java.io.Closeable;
-import java.io.IOException;
+package org.eclipse.che.api.core.model.machine;
 
 /**
- * Consumes text line by line for analysing, writing, storing, etc.
+ * Represents log message from machine
  *
- * @author andrew00x
- * @see AbstractLineConsumer
+ * @author Alexander Garagatyi
  */
-public interface LineConsumer extends Closeable {
-    /** Consumes single line. */
-    void writeLine(String line) throws IOException;
+public interface MachineLogMessage {
+    /**
+     * Content of log message
+     */
+    String getContent();
 
-    LineConsumer DEV_NULL = new AbstractLineConsumer() {};
+    /**
+     * Machine name
+     */
+    String getMachineName();
 }

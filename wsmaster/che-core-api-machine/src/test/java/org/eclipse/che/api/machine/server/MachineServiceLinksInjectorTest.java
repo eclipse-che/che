@@ -36,6 +36,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
+import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_DESTROY_MACHINE;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_EXECUTE_COMMAND;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_GET_MACHINES;
@@ -103,7 +105,9 @@ public class MachineServiceLinksInjectorTest {
                                                                              Pair.of("GET", LINK_REL_GET_SNAPSHOTS),
                                                                              Pair.of("GET", LINK_REL_GET_PROCESSES),
                                                                              Pair.of("POST", LINK_REL_SAVE_SNAPSHOT),
-                                                                             Pair.of("GET", LINK_REL_GET_MACHINE_LOGS)));
+                                                                             Pair.of("GET", LINK_REL_GET_MACHINE_LOGS),
+                                                                             Pair.of("GET", LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL),
+                                                                             Pair.of("GET", ENVIRONMENT_STATUS_CHANNEL_TEMPLATE)));
 
         assertEquals(links, expectedLinks, "Difference " + Sets.symmetricDifference(links, expectedLinks) + "\n");
     }
