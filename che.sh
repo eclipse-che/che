@@ -18,11 +18,17 @@ init_logging() {
 
 init_global_variables() {
 
-  CHE_LAUNCHER_CONTAINER_NAME="che-launcher"
   CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
   CHE_SERVER_IMAGE_NAME="codenvy/che-server"
+  CHE_FILE_IMAGE_NAME="codenvy/che-file"
+  CHE_MOUNT_IMAGE_NAME="codenvy/che-mount"
+  CHE_TEST_IMAGE_NAME="codenvy/che-test"
 
-  CHE_MOUNT_FOLDER=${CHE_MOUNT_FOLDER:+$(get_clean_path ${CHE_MOUNT_FOLDER})}
+  CHE_LAUNCHER_CONTAINER_NAME="che-launcher"
+  CHE_SERVER_CONTAINER_NAME="che-server"
+  CHE_FILE_CONTAINER_NAME="che-file"
+  CHE_MOUNT_CONTAINER_NAME="che-mount"
+  CHE_TEST_CONTAINER_NAME="che-test"
 
   # User configurable variables
   DEFAULT_CHE_VERSION="latest"
@@ -41,6 +47,7 @@ Usage: che [COMMAND]
            mount <local-path> <ws-ssh-port>   Synchronize workspace to a local directory
            init                               Initialize directory with Che configuration
            up                                 Create workspace from source in current directory
+           test [<url>] [<user>] [<pass>]     Creates simple workspace to verify system config
 "
 }
 
@@ -97,11 +104,10 @@ get_mount_path() {
 }
 
 
-docker-exec() {
+docker_exec() {
   if is_boot2docker || is_docker_for_windows; then
     MSYS_NO_PATHCONV=1 docker.exe "$@"
   else
-    echo $(get_docker_install_type)
     "$(which docker)" "$@"
   fi
 }
@@ -118,7 +124,7 @@ parse_command_line () {
     CHE_CLI_ACTION="help"
   else
     case $1 in
-      start|stop|restart|update|info|init|up|mount|help|-h|--help)
+      start|stop|restart|update|info|init|up|mount|test|help|-h|--help)
         CHE_CLI_ACTION=$1
       ;;
       *)
@@ -130,7 +136,9 @@ parse_command_line () {
 }
 
 is_boot2docker() {
-  if uname -r | grep -q 'boot2docker'; then
+  UNAME=$(docker run --rm alpine sh -c "uname -r")
+
+  if [[ $UNAME == *"boot2docker"* ]]; then
     return 0
   else
     return 1
@@ -138,10 +146,17 @@ is_boot2docker() {
 }
 
 get_docker_host_ip() {
-  NETWORK_IF="eth0"
-  if is_boot2docker; then
-    NETWORK_IF="eth1"
-  fi
+  case $(get_docker_install_type) in
+   boot2docker)
+     NETWORK_IF="eth1"
+   ;;
+   native)
+     NETWORK_IF="docker0"
+   ;;
+   *)
+     NETWORK_IF="eth0"
+   ;;
+  esac
 
   docker run --rm --net host \
             alpine sh -c \
@@ -161,7 +176,9 @@ has_docker_for_windows_ip() {
 }
 
 is_moby_vm() {
-  if [ $(docker info | grep "Name:" | cut -d" " -f2) = "moby" ]; then
+  NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
+
+  if [ "${NAME_MAP}" = "*moby*" ]; then
     return 0
   else
     return 1
@@ -200,69 +217,49 @@ get_list_of_variables() {
   RETURN=""
   CHE_VARIABLES=$(env | grep "CHE_")
   for SINGLE_VARIABLE in $CHE_VARIABLES; do
-    VALUE='-e '${SINGLE_VARIABLE}' '
+    # Note the funky syntax - have to use the \b otherwise -e is interpreted as option to echo
+    VALUE=" --env ${SINGLE_VARIABLE}"
     RETURN="${RETURN}""${VALUE}"
   done
   echo $RETURN
 }
 
-execute_che_launcher() {
+check_current_image_and_update_if_not_found() {
 
-  CURRENT_IMAGE=$(docker images -q "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}")
+  CURRENT_IMAGE=$(docker images -q "$1":"${CHE_VERSION}")
 
   if [ "${CURRENT_IMAGE}" != "" ]; then
-    info "ECLIPSE CHE: FOUND IMAGE ${CHE_LAUNCHER_IMAGE_NAME}:${CHE_VERSION}"
+    info "ECLIPSE CHE: FOUND IMAGE $1:${CHE_VERSION}"
   else
-    update_che_image ${CHE_LAUNCHER_IMAGE_NAME}
+    update_che_image $1
   fi
-  
+
+}
+
+execute_che_launcher() {
+
+  check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
   info "ECLIPSE CHE: LAUNCHING LAUNCHER"
-  docker-exec run -t --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
+
+  docker_exec run -t --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    -e $(get_list_of_variables) \
+    $(get_list_of_variables) \
     "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" \
     # > /dev/null 2>&1
 }
 
 execute_che_file() {
 
-  update_che_file
-
+  check_current_image_and_update_if_not_found ${CHE_FILE_IMAGE_NAME}
   info "ECLIPSE CHE FILE: LAUNCHING CONTAINER"
-  CURRENT_DIRECTORY="$PWD"
-  MODIFIED_DIRECTORY=${CURRENT_DIRECTORY//////}
-  docker-exec run -it --rm --name "${CHE_FILE_CONTAINER_NAME}" \
+
+  CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
+  docker_exec run -it --rm --name "${CHE_FILE_CONTAINER_NAME}" \
          -v /var/run/docker.sock:/var/run/docker.sock \
-         -v "$PWD":"$PWD" \
+         -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
          "${CHE_FILE_IMAGE_NAME}":"${CHE_VERSION}" \
-         /bin/che-file "$PWD" "${CHE_CLI_ACTION}"
+         "${CURRENT_DIRECTORY}" "${CHE_CLI_ACTION}"
     # > /dev/null 2>&1
-}
-
-execute_command_with_progress() {
-  local progress=$1
-  local command=$2
-  shift 2
-
-  local pid=""
-  printf "\n"
-
-  case "$progress" in
-    extended)
-      $command "$@"
-      ;;
-    basic|*)
-      $command "$@" &>/dev/null &
-      pid=$!
-      while kill -0 "$pid" >/dev/null 2>&1; do
-        printf "#"
-        sleep 10
-      done
-      wait $pid # return pid's exit code
-      printf "\n"
-    ;;
-  esac
-  printf "\n"
 }
 
 update_che_image() {
@@ -271,7 +268,7 @@ update_che_image() {
   fi
 
   info "ECLIPSE CHE: PULLING IMAGE $1:${CHE_VERSION}"
-  execute_command_with_progress extended docker pull $1:${CHE_VERSION}
+  docker pull $1:${CHE_VERSION}
   info "ECLIPSE CHE: IMAGE $1:${CHE_VERSION} INSTALLED"
 }
 
@@ -293,11 +290,19 @@ mount_local_directory() {
     return
   fi
 
-  docker-exec run --rm -it --cap-add SYS_ADMIN \
+  docker_exec run --rm -it --cap-add SYS_ADMIN \
                   --device /dev/fuse \
-                  --name che-mount \
+                  --name "${CHE_MOUNT_CONTAINER_NAME}" \
                   -v "${MOUNT_PATH}":/mnthost \
-                  codenvy/che-mount $(get_docker_host_ip) $3
+                  "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" $(get_docker_host_ip) $3
+}
+
+
+execute_che_test() {
+
+  docker_exec run --rm -it --name "${CHE_TEST_CONTAINER_NAME}" \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
 }
 
 # See: https://sipb.mit.edu/doc/safe-shell/
@@ -319,12 +324,16 @@ case ${CHE_CLI_ACTION} in
   update)
     update_che_image ${CHE_LAUNCHER_IMAGE_NAME}
     update_che_image ${CHE_SERVER_IMAGE_NAME}
+    update_che_image ${CHE_MOUNT_IMAGE_NAME}
+    update_che_image ${CHE_FILE_IMAGE_NAME}
   ;;
   mount)
     mount_local_directory "$@"
   ;;
+  test)
+    execute_che_test "$@"
+  ;;
   help)
-#    get_list_of_variables
     usage
   ;;
 esac

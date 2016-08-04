@@ -101,7 +101,7 @@ public class MachineManagerTest {
     @Mock
     private InstanceProcess          instanceProcess;
     @Mock
-    private LineConsumer             processLogger;
+    private LineConsumer             logConsumer;
     @Mock
     private SnapshotDao              snapshotDao;
 
@@ -127,7 +127,7 @@ public class MachineManagerTest {
         RecipeImpl recipe = new RecipeImpl().withScript("script").withType("Dockerfile");
 //        doNothing().when(manager).createMachineLogsDir(anyString());
         doReturn(MACHINE_ID).when(manager).generateMachineId();
-        doReturn(processLogger).when(manager).getProcessLogger(MACHINE_ID, 111, "outputChannel");
+        doReturn(logConsumer).when(manager).getProcessLogger(MACHINE_ID, 111, "outputChannel");
         when(machineInstanceProviders.getProvider(anyString())).thenReturn(instanceProvider);
         HashSet<String> recipeTypes = new HashSet<>();
         recipeTypes.add("test type 1");
@@ -168,7 +168,7 @@ public class MachineManagerTest {
         String workspaceId = "wsId";
         String environmentName = "env1";
 
-        manager.createMachineSync(machineConfig, workspaceId, environmentName);
+        manager.createMachineSync(machineConfig, workspaceId, environmentName, logConsumer);
     }
 
     @Test
@@ -186,7 +186,7 @@ public class MachineManagerTest {
                                                       MachineStatus.CREATING,
                                                       null);
 
-        manager.createMachineSync(machineConfig, WS_ID, ENVIRONMENT_NAME);
+        manager.createMachineSync(machineConfig, WS_ID, ENVIRONMENT_NAME, logConsumer);
 
         verify(machineRegistry).addMachine(eq(expectedMachine));
     }
@@ -198,7 +198,7 @@ public class MachineManagerTest {
                                                                  .setDev(true)
                                                                  .build();
 
-        manager.createMachineSync(machineConfig, WS_ID, ENVIRONMENT_NAME);
+        manager.createMachineSync(machineConfig, WS_ID, ENVIRONMENT_NAME, logConsumer);
 
         verify(wsAgentLauncher).startWsAgent(WS_ID);
     }
@@ -207,7 +207,7 @@ public class MachineManagerTest {
     public void shouldNotCallWsAgentLauncherAfterNonDevMachineStart() throws Exception {
         final MachineConfigImpl machineConfig = createMachineConfig();
 
-        manager.createMachineSync(machineConfig, WS_ID, ENVIRONMENT_NAME);
+        manager.createMachineSync(machineConfig, WS_ID, ENVIRONMENT_NAME, logConsumer);
 
         verify(wsAgentLauncher, never()).startWsAgent(WS_ID);
     }
@@ -233,7 +233,7 @@ public class MachineManagerTest {
         waitForExecutorIsCompletedTask();
 
         //then
-        verify(processLogger).close();
+        verify(logConsumer).close();
     }
 
     @Test
@@ -246,7 +246,7 @@ public class MachineManagerTest {
         waitForExecutorIsCompletedTask();
 
         //then
-        verify(processLogger).close();
+        verify(logConsumer).close();
     }
 
     @Test(expectedExceptions = MachineException.class)
@@ -255,14 +255,14 @@ public class MachineManagerTest {
         MachineConfig machineConfig = mock(MachineConfig.class);
         MachineSource machineSource = mock(MachineSource.class);
         LineConsumer machineLogger = mock(LineConsumer.class);
-        doReturn(machineLogger).when(manager).getMachineLogger(MACHINE_ID, "outputChannel");
+        doReturn(machineLogger).when(manager).getMachineLogger(eq(MACHINE_ID), any(LineConsumer.class));
         when(machineConfig.getSource()).thenReturn(machineSource);
         when(machineConfig.getName()).thenReturn("Name");
         when(machineSource.getType()).thenReturn("dockerfile");
         doThrow(ConflictException.class).when(machineRegistry).addMachine(any());
 
         //when
-        manager.createMachineSync(machineConfig, "workspaceId", "environmentName");
+        manager.createMachineSync(machineConfig, "workspaceId", "environmentName", logConsumer);
 
         //then
         verify(machineLogger).close();
@@ -285,7 +285,7 @@ public class MachineManagerTest {
         when(instanceProvider.createInstance(eq(machine), any(LineConsumer.class))).thenThrow(new SourceNotFoundException(""));
         when(machineRegistry.getMachine(MACHINE_ID)).thenReturn(machine);
 
-        final MachineImpl result = manager.recoverMachine(config, WS_ID, ENVIRONMENT_NAME);
+        final MachineImpl result = manager.recoverMachine(config, WS_ID, ENVIRONMENT_NAME, logConsumer);
 
         machine.getConfig().setSource(config.getSource());
         assertEquals(result, machine);
@@ -299,7 +299,7 @@ public class MachineManagerTest {
         when(instanceProvider.createInstance(any(MachineImpl.class),
                                              any(LineConsumer.class))).thenThrow(new MachineException(""));
 
-        manager.recoverMachine(config, WS_ID, ENVIRONMENT_NAME);
+        manager.recoverMachine(config, WS_ID, ENVIRONMENT_NAME, logConsumer);
     }
 
     private void waitForExecutorIsCompletedTask() throws Exception {

@@ -154,13 +154,13 @@ public class FactoryService extends Service {
                                                                       ServerException {
         try {
             final Set<FactoryImage> images = new HashSet<>();
-            FactoryDto factoryDto = null;
+            FactoryDto factory = null;
             while (formData.hasNext()) {
                 final FileItem item = formData.next();
                 switch (item.getFieldName()) {
                     case ("factory"): {
                         try (InputStream factoryData = item.getInputStream()) {
-                            factoryDto = factoryBuilder.build(factoryData);
+                            factory = factoryBuilder.build(factoryData);
                         } catch (JsonSyntaxException ex) {
                             throw new BadRequestException("Invalid JSON value of the field 'factory' provided");
                         }
@@ -181,10 +181,10 @@ public class FactoryService extends Service {
                         //DO NOTHING
                 }
             }
-            requiredNotNull(factoryDto, "factory configuration");
-            processDefaults(factoryDto);
-            createValidator.validateOnCreate(factoryDto);
-            return injectLinks(asDto(factoryManager.saveFactory(factoryDto, images)), images);
+            requiredNotNull(factory, "factory configuration");
+            processDefaults(factory);
+            createValidator.validateOnCreate(factory);
+            return injectLinks(asDto(factoryManager.saveFactory(factory, images)), images);
         } catch (IOException ioEx) {
             throw new ServerException(ioEx.getLocalizedMessage(), ioEx);
         }
@@ -200,14 +200,15 @@ public class FactoryService extends Service {
                    @ApiResponse(code = 403, message = "User does not have rights to create factory"),
                    @ApiResponse(code = 409, message = "When factory with given name and creator already exists"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public FactoryDto saveFactory(FactoryDto factoryDto) throws BadRequestException,
+    public FactoryDto saveFactory(FactoryDto factory) throws BadRequestException,
                                                                 ServerException,
                                                                 ForbiddenException,
                                                                 ConflictException {
-        requiredNotNull(factoryDto, "Factory configuration");
-        processDefaults(factoryDto);
-        createValidator.validateOnCreate(factoryDto);
-        return injectLinks(asDto(factoryManager.saveFactory(factoryDto)), null);
+        requiredNotNull(factory, "Factory configuration");
+        factoryBuilder.checkValid(factory);
+        processDefaults(factory);
+        createValidator.validateOnCreate(factory);
+        return injectLinks(asDto(factoryManager.saveFactory(factory)), null);
     }
 
     @GET
@@ -302,6 +303,7 @@ public class FactoryService extends Service {
         final Factory existing = factoryManager.getById(factoryId);
         // check if the current user has enough access to edit the factory
         editValidator.validate(existing);
+        factoryBuilder.checkValid(update, true);
         // validate the new content
         createValidator.validateOnCreate(update);
         return injectLinks(asDto(factoryManager.updateFactory(update)),

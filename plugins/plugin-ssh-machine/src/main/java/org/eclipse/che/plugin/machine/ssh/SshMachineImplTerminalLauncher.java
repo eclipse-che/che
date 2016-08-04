@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.machine.ssh;
 
 import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
@@ -164,14 +164,11 @@ public class SshMachineImplTerminalLauncher implements MachineImplSpecificTermin
                                                                               null),
                                                               null);
 
-        startTerminal.start(new LineConsumer() {
+        startTerminal.start(new AbstractLineConsumer() {
             @Override
             public void writeLine(String line) throws IOException {
                 machine.getLogger().writeLine("[Terminal] " + line);
             }
-
-            @Override
-            public void close() throws IOException {}
         });
     }
 }

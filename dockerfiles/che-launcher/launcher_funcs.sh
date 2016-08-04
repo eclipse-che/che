@@ -110,10 +110,17 @@ get_docker_install_type() {
 }
 
 get_docker_host_ip() {
-  NETWORK_IF="eth0"
-  if is_boot2docker; then
-    NETWORK_IF="eth1"
-  fi
+  case $(get_docker_install_type) in
+   boot2docker)
+     NETWORK_IF="eth1"
+   ;;
+   native)
+     NETWORK_IF="docker0"
+   ;;
+   *)
+     NETWORK_IF="eth0"
+   ;;
+  esac
 
   docker run --rm --net host \
             alpine sh -c \

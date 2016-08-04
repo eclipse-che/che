@@ -116,7 +116,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
 
             workspaceComponent.setCurrentWorkspace(workspace);
 
-            workspaceComponent.startWorkspaceById(workspace, callback);
+            workspaceComponent.startWorkspace(workspace, callback);
 
             view.hide();
         }
@@ -135,7 +135,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
     public void onStartWorkspaceClicked() {
         DefaultWorkspaceComponent workspaceComponent = wsComponentProvider.get();
 
-        workspaceComponent.startWorkspaceById(selectedWorkspace, callback);
+        workspaceComponent.startWorkspace(selectedWorkspace, callback);
 
         view.hide();
     }

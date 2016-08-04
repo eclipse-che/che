@@ -84,6 +84,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -151,6 +152,7 @@ public class FactoryServiceTest {
     public void setUp() throws Exception {
         final FactoryBuilder factoryBuilder = spy(new FactoryBuilder(new SourceStorageParametersValidator()));
         doNothing().when(factoryBuilder).checkValid(any(FactoryDto.class));
+        doNothing().when(factoryBuilder).checkValid(any(FactoryDto.class), anyBoolean());
         when(factoryParametersResolverHolder.getFactoryParametersResolvers()).thenReturn(factoryParametersResolvers);
         user = new UserImpl(USER_ID, USER_EMAIL, ADMIN_USER_NAME);
         when(userManager.getById(anyString())).thenReturn(user);

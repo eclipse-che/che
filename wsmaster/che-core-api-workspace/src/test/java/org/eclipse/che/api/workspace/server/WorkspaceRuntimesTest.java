@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
@@ -53,6 +54,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -90,7 +92,7 @@ public class WorkspaceRuntimesTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(machineManager.createMachineSync(any(), any(), any()))
+        when(machineManager.createMachineSync(any(), any(), any(), any(LineConsumer.class)))
                 .thenAnswer(invocation -> createMachine((MachineConfig)invocation.getArguments()[0]));
         runtimes = new WorkspaceRuntimes(machineManager, eventService);
     }
@@ -117,7 +119,7 @@ public class WorkspaceRuntimesTest {
         final WorkspaceImpl workspace = createWorkspace();
 
         // check if workspace in starting status before dev machine is started
-        when(machineManagerMock.createMachineSync(anyObject(), anyString(), anyString()))
+        when(machineManagerMock.createMachineSync(anyObject(), anyString(), anyString(), any(LineConsumer.class)))
                 .thenAnswer(invocationOnMock -> {
                     final RuntimeDescriptor descriptor = runtimes.get(workspace.getId());
                     final MachineConfig cfg = (MachineConfig)invocationOnMock.getArguments()[0];
@@ -129,7 +131,7 @@ public class WorkspaceRuntimesTest {
 
         runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
 
-        verify(machineManagerMock, times(2)).createMachineSync(anyObject(), anyString(), anyString());
+        verify(machineManagerMock, times(2)).createMachineSync(anyObject(), anyString(), anyString(), any(LineConsumer.class));
     }
 
     @Test
@@ -137,7 +139,7 @@ public class WorkspaceRuntimesTest {
         final MachineManager machineManagerMock = mock(MachineManager.class);
         final WorkspaceRuntimes runtimes = new WorkspaceRuntimes(machineManagerMock, eventService);
         final WorkspaceImpl workspaceMock = createWorkspace();
-        when(machineManagerMock.createMachineSync(any(), any(), any()))
+        when(machineManagerMock.createMachineSync(any(), any(), any(), any(LineConsumer.class)))
                 .thenThrow(new MachineException("Creation error"));
 
         try {
@@ -175,7 +177,7 @@ public class WorkspaceRuntimesTest {
         final WorkspaceRuntimes registry = new WorkspaceRuntimes(machineManagerMock, eventService);
         final WorkspaceImpl workspace = createWorkspace();
 
-        when(machineManagerMock.createMachineSync(any(), any(), any())).thenAnswer(invocationOnMock -> {
+        when(machineManagerMock.createMachineSync(any(), any(), any(), any(LineConsumer.class))).thenAnswer(invocationOnMock -> {
             registry.stop(workspace.getId());
             return createMachine((MachineConfig)invocationOnMock.getArguments()[0]);
         });
@@ -193,7 +195,7 @@ public class WorkspaceRuntimesTest {
                 runtimes.stop(workspace.getId());
             }
             return createMachine((MachineConfig)invocation.getArguments()[0]);
-        }).when(machineManager).createMachineSync(any(), anyString(), anyString());
+        }).when(machineManager).createMachineSync(any(), anyString(), anyString(), any(LineConsumer.class));
 
         try {
             runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
@@ -224,7 +226,7 @@ public class WorkspaceRuntimesTest {
                 throw new MachineException("Failed to start");
             }
             return createMachine((MachineConfig)invocation.getArguments()[0]);
-        }).when(machineManager).createMachineSync(any(), anyString(), anyString());
+        }).when(machineManager).createMachineSync(any(), anyString(), anyString(), any(LineConsumer.class));
 
 
         runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
@@ -232,7 +234,7 @@ public class WorkspaceRuntimesTest {
         final RuntimeDescriptor descriptor = runtimes.get(workspace.getId());
         assertEquals(descriptor.getRuntime().getMachines().size(), 1);
         assertEquals(descriptor.getRuntimeStatus(), RUNNING);
-        verify(machineManager, times(2)).createMachineSync(any(), any(), any());
+        verify(machineManager, times(2)).createMachineSync(any(), any(), any(), any(LineConsumer.class));
     }
 
     @Test
@@ -245,7 +247,7 @@ public class WorkspaceRuntimesTest {
                 runtimes.cleanup();
             }
             return createMachine((MachineConfig)invocation.getArguments()[0]);
-        }).when(machineManager).createMachineSync(any(), anyString(), anyString());
+        }).when(machineManager).createMachineSync(any(), anyString(), anyString(), any(LineConsumer.class));
 
         try {
             runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
@@ -323,7 +325,7 @@ public class WorkspaceRuntimesTest {
         doAnswer(invocation -> {
             verify(runtimes).publishEvent(EventType.STARTING, workspace.getId(), null);
             return null;
-        }).when(machineManager).createMachineSync(any(), any(), any());
+        }).when(machineManager).createMachineSync(any(), any(), any(), any(LineConsumer.class));
 
         runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
     }
@@ -340,7 +342,7 @@ public class WorkspaceRuntimesTest {
                 verify(runtimes).publishEvent(EventType.RUNNING, workspace.getId(), null);
             }
             return createMachine(cfg);
-        }).when(machineManager).createMachineSync(any(), any(), any());
+        }).when(machineManager).createMachineSync(any(), any(), any(), any(LineConsumer.class));
 
         runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
     }
@@ -358,7 +360,7 @@ public class WorkspaceRuntimesTest {
                 throw new MachineException("Start error");
             }
             return createMachine(cfg);
-        }).when(machineManager).createMachineSync(any(), any(), any());
+        }).when(machineManager).createMachineSync(any(), any(), any(), any(LineConsumer.class));
 
         try {
             runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
@@ -652,9 +654,10 @@ public class WorkspaceRuntimesTest {
         // force machine manager to throw conflict exception
         final RuntimeDescriptor descriptorMock = mock(RuntimeDescriptor.class);
         when(descriptorMock.getRuntimeStatus()).thenReturn(WorkspaceStatus.RUNNING);
-        doThrow(new ConflictException("already exists")).when(machineManager).createMachineSync(machine.getConfig(),
-                                                                                                machine.getWorkspaceId(),
-                                                                                                workspace.getConfig().getDefaultEnv());
+        doThrow(new ConflictException("already exists")).when(machineManager).createMachineSync(eq(machine.getConfig()),
+                                                                                                eq(machine.getWorkspaceId()),
+                                                                                                eq(workspace.getConfig().getDefaultEnv()),
+                                                                                                any(LineConsumer.class));
 
         final RuntimeDescriptor descriptor = runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
 

@@ -12,6 +12,7 @@
 /// <reference path='./typings/tsd.d.ts' />
 import {PostCheck} from './post-check';
 import {CheFile} from "./che-file";
+import {Log} from "./log";
 
 /**
  * Entry point of this library providing commands.
@@ -52,12 +53,12 @@ export class EntryPoint {
                 try {
                     let errorMessage = JSON.parse(error);
                     if (errorMessage.message) {
-                        console.log('Error: ', errorMessage.message);
+                        Log.getLogger().error(errorMessage.message);
                     } else {
-                        console.log('Error: ', error.toString());
+                        Log.getLogger().error(error.toString());
                     }
                 } catch (e) {
-                    console.log('Error: ', error.toString());
+                    Log.getLogger().error(error.toString());
                 }
                 process.exit(1);
             });
@@ -69,8 +70,8 @@ export class EntryPoint {
      * Display the help.
      */
     printHelp() : void {
-        console.log('Help: ');
-        console.log('      valid options are : [che-test|che-file]');
+        Log.getLogger().info('Help: ');
+        Log.getLogger().info('      valid options are : [che-test|che-file]');
 
     }
 

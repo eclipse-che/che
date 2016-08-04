@@ -17,18 +17,11 @@ import java.io.IOException;
  * Consumes text line by line for analysing, writing, storing, etc.
  *
  * @author andrew00x
+ * @see AbstractLineConsumer
  */
 public interface LineConsumer extends Closeable {
     /** Consumes single line. */
     void writeLine(String line) throws IOException;
 
-    LineConsumer DEV_NULL = new LineConsumer() {
-        @Override
-        public void writeLine(String line) {
-        }
-
-        @Override
-        public void close() {
-        }
-    };
+    LineConsumer DEV_NULL = new AbstractLineConsumer() {};
 }

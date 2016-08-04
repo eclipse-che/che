@@ -13,6 +13,7 @@ import {MessageBusSubscriber} from './messagebus-subscriber';
 import {MessageBus} from './messagebus';
 import {AuthData} from './auth-data';
 import {WorkspaceDto} from './dto/workspacedto';
+import {Log} from "./log";
 
 /**
  * Logic on events received by the remote workspace. When workspace is going to running state, we close the websocket and display the IDE URL.
@@ -39,14 +40,14 @@ export class WorkspaceEventMessageBusSubscriber implements MessageBusSubscriber 
                     ideUrl = link.href;
                 }
             });
-            console.log('Workspace is now running. Please connect to ' + ideUrl);
+            Log.getLogger().info('Workspace is now running. Please connect to ' + ideUrl);
             this.messageBus.close();
         } else if ('ERROR' === message.eventType) {
-            console.log('Error when starting the workspace', message);
+            Log.getLogger().error('Error when starting the workspace', message);
             this.messageBus.close();
             process.exit(1);
         } else {
-            console.log('Event on workspace : ', message.eventType);
+            Log.getLogger().info('Event on workspace : ', message.eventType);
         }
 
     }
