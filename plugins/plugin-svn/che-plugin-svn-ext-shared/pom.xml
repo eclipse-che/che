@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-svn-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.6.1</version>
+        <version>4.6.2-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-svn-ext-shared</artifactId>
     <packaging>jar</packaging>
