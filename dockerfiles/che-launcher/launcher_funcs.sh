@@ -205,7 +205,8 @@ get_che_container_conf_folder() {
 }
 
 get_che_container_data_folder() {
-  get_che_container_host_bind_folder "/home/user/che/workspaces"
+  FOLDER=$(get_che_container_host_bind_folder "/home/user/che/workspaces")
+  echo "${FOLDER:=not set}"
 }
 
 get_che_container_image_name() {
