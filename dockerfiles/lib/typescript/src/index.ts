@@ -30,7 +30,7 @@ export class EntryPoint {
      * Run this entry point and analyze args to dispatch to the correct entry.
      */
     run() : void {
-        var promise : Promise<String>;
+        var promise : Promise<string>;
         // get first arg if any
         if (this.args.length > 0) {
             let commandName = this.args[0];
@@ -40,7 +40,7 @@ export class EntryPoint {
                 promise = postCheck.run();
             } else if ('che-file' === commandName) {
                 let cheFile: CheFile = new CheFile(this.args.slice(1));
-                cheFile.run();
+                promise = cheFile.run();
             } else {
                 this.printHelp();
             }

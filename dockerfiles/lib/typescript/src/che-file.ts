@@ -19,13 +19,25 @@ import {CheFileStructWorkspace} from './chefile-struct/che-file-struct';
 import {CheFileStruct} from './chefile-struct/che-file-struct';
 import {CheFileServerTypeStruct} from "./chefile-struct/che-file-struct";
 import {Log} from "./log";
+import {AuthData} from "./auth-data";
+import {CreateWorkspaceConfig} from "./workspace";
+import {resolve} from "url";
+import {MessageBus} from "./messagebus";
+import {MessageBusSubscriber} from "./messagebus-subscriber";
+import {WorkspaceEventMessageBusSubscriber} from "./workspace-event-subscriber";
+import {WorkspaceDisplayOutputMessageBusSubscriber} from "./workspace-log-output-subscriber";
+import {WorkspaceEventPromiseMessageBusSubscriber} from "./workspace-event-promise-subscriber";
 
 
-
-
+/**
+ * Entrypoint for the Chefile handling in a directory.
+ * It can either generate or reuse an existing Chefile and then boot Che.
+ * @author Florent Benoit
+ */
 export class CheFile {
 
-  times: number = 10;
+  // Try 30s to ping a che server when booting it
+  times: number = 30;
 
   // gloabl var
   waitDone = false;
@@ -54,6 +66,12 @@ export class CheFile {
   mode;
   args : Array<string>;
 
+
+  websocket: Websocket;
+  authData: AuthData;
+  workspace: Workspace;
+
+
   constructor(args) {
     this.args = args;
 
@@ -67,6 +85,10 @@ export class CheFile {
     this.chePropertiesFile = this.path.resolve(this.confFolder, 'che.properties');
 
     this.initDefault();
+
+    this.websocket = new Websocket();
+
+    this.authData = new AuthData();
   }
 
 
@@ -79,6 +101,7 @@ export class CheFile {
 
     this.chefileStructWorkspace = new CheFileStructWorkspace();
     this.chefileStructWorkspace.name = 'local';
+    this.chefileStructWorkspace.ram = 2048;
     this.chefileStructWorkspace.commands[0] = {name: 'hello'};
 
   }
@@ -89,24 +112,29 @@ export class CheFile {
     return value.substr(0, searchString.length) === searchString;
   }
 
-  run() {
+
+  parseArgument() : Promise<string> {
+    return new Promise<string>( (resolve, reject) => {
+      if (this.args.length == 0) {
+        reject('only init and up commands are supported.');
+      } else if ('init' === this.args[1] || 'up' === this.args[1]) {
+        // return method found based on arguments
+        resolve(this.args[1]);
+      } else {
+        reject('Invalid arguments ' + this.args +': Only init and up commands are supported.');
+      }
+    });
+
+  }
+
+  run() : Promise<string> {
     Log.context = 'ECLIPSE CHE FILE';
 
-    if (this.args.length == 0) {
-      Log.getLogger().error('only init and up commands are supported.');
-      return;
-    } else if ('init' === this.args[1]) {
-      this.init();
-    } else if ('up' === this.args[1]) {
-      // call init if not already done
-      if (!this.isInitialized()) {
-        this.init();
-      }
-      this.up();
-    } else {
-      Log.getLogger().error('Invalid arguments ' + this.args +': Only init and up commands are supported.');
-      return;
-    }
+    // call the method analyzed from the argument
+    return this.parseArgument().then((methodName) => {
+      return this[methodName]();
+    })
+
 
   }
 
@@ -130,19 +158,24 @@ export class CheFile {
     script.runInNewContext(sandbox);
 
     Log.getLogger().debug('Che file parsing object is ', this.chefileStruct);
+
+    this.authData.port = this.chefileStruct.server.port;
+
   }
 
   /**
    * Check if directory has been initialized or not
    * @return true if initialization has been done
    */
-  isInitialized() : boolean {
-    try {
-      this.fs.statSync(this.chePropertiesFile);
-      return true;
-    } catch (e) {
-      return false;
-    }
+  isInitialized() : Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      try {
+        this.fs.statSync(this.chePropertiesFile);
+        resolve(true);
+      } catch (e) {
+        resolve(false);
+      }
+    });
 
   }
 
@@ -172,56 +205,129 @@ export class CheFile {
 
     // write content of this.che object
     this.fs.writeFileSync(this.cheFile, content);
-    Log.getLogger().info('File', this.cheFile, 'written.')
+    Log.getLogger().info('GENERATING DEFAULT', this.cheFile);
 
   }
 
 
-  init() {
-    // Check if we have internal che.properties file. If we have, throw error
-   if (this.isInitialized()) {
-     Log.getLogger().warn('Che already initialized');
-   } else {
-      // needs to create folders
-      this.initCheFolders();
-      this.setupConfigFile();
+  init() : Promise<any> {
+    return this.isInitialized().then((isInitialized) => {
+      if (isInitialized) {
+        Log.getLogger().warn('Che already initialized');
+      } else {
+        // needs to create folders
+        this.initCheFolders();
+        this.setupConfigFile();
 
-     // write a default chefile if there is none
-     try {
-       this.fs.statSync(this.cheFile);
-       Log.getLogger().debug('Chefile is present at ', this.cheFile);
-     } catch (e) {
-       // write default
-       Log.getLogger().debug('Write a default Chefile at ', this.cheFile);
-       this.writeDefaultChefile();
-     }
+        // write a default chefile if there is none
+        try {
+          this.fs.statSync(this.cheFile);
+          Log.getLogger().debug('Chefile is present at ', this.cheFile);
+        } catch (e) {
+          // write default
+          Log.getLogger().debug('Write a default Chefile at ', this.cheFile);
+          this.writeDefaultChefile();
+        }
+        Log.getLogger().info('ADDING', this.dotCheFolder, 'DIRECTORY');
+        return true;
+      }
 
-     Log.getLogger().info('ADDING', this.dotCheFolder, 'DIRECTORY');
-    }
+    });
 
   }
 
-  up() {
-    this.parse();
+  up() : Promise<string> {
 
-    // test if conf is existing
-    try {
-      var statsPropertiesFile = this.fs.statSync(this.chePropertiesFile);
-    } catch (e) {
-      Log.getLogger().error('No che configured. che init has been done ?');
-      return;
-    }
-
-    Log.getLogger().info('STARTING ECLIPSE CHE SILENTLY');
-    // needs to invoke docker run
-    this.cheBoot();
-
-    this.dockerContent = new RecipeBuilder().getDockerContent();
-
-    // loop to check startup (during 30seconds)
-    this.waitCheBoot(this);
+    // call init if not initialized and then call up
+    return this.isInitialized().then((isInitialized) => {
+      if (!isInitialized) {
+        return this.init();
+      }
+    }).then(() => {
+      return this.performUp();
+    });
   }
 
+
+  performUp() : Promise<string> {
+
+    var callbackSubscriber:WorkspaceEventPromiseMessageBusSubscriber;
+
+    return new Promise<string>((resolve, reject) => {
+      this.parse();
+
+
+      // test if conf is existing
+      try {
+        var statsPropertiesFile = this.fs.statSync(this.chePropertiesFile);
+      } catch (e) {
+        reject('No che configured. che init has been done ?');
+      }
+
+      Log.getLogger().info('STARTING ECLIPSE CHE SILENTLY');
+      // needs to invoke docker run
+      this.cheBoot();
+      resolve();
+    }).then(() => {
+      this.dockerContent = new RecipeBuilder().getDockerContent();
+
+      // loop to check startup (during 30seconds)
+      return this.loopWaitChePing();
+    }).then((value) => {
+      Log.getLogger().info('FOUND ECLIPSE CHE', this.buildLocalCheURL());
+
+      // now create the workspace
+      let createWorkspaceConfig : CreateWorkspaceConfig = new CreateWorkspaceConfig();
+      createWorkspaceConfig.name = this.chefileStructWorkspace.name;
+      createWorkspaceConfig.ram = this.chefileStructWorkspace.ram;
+
+      this.workspace = new Workspace(this.authData);
+
+      return this.workspace.createWorkspace(createWorkspaceConfig);
+
+    }).then((workspaceDto) => {
+      Log.getLogger().info('WORKSPACE CREATED');
+
+      // get id
+      let workspaceId:string = workspaceDto.getId();
+
+      var protocol: string;
+      if (this.authData.isSecured()) {
+        protocol = 'wss';
+      } else {
+        protocol = 'ws';
+      }
+
+      // get links for WS
+      var link: string;
+      workspaceDto.getContent().links.forEach(workspaceLink => {
+        if ('get workspace events channel' === workspaceLink.rel) {
+          link = workspaceLink.href;
+        }
+      });
+
+      var messageBus:MessageBus = this.websocket.getMessageBus(link + '?token=' + this.authData.getToken() , workspaceId);
+
+      callbackSubscriber = new WorkspaceEventPromiseMessageBusSubscriber(messageBus, workspaceDto);
+      messageBus.subscribe('workspace:' + workspaceId, callbackSubscriber);
+
+      return this.workspace.startWorkspace(workspaceDto.getId());
+    }).then((workspaceDto) => {
+      Log.getLogger().info('WORKSPACE BOOTING...');
+      // wait websocket promise
+      return callbackSubscriber.promise;
+    }).then((ideUrl) => {
+      Log.getLogger().info(ideUrl);
+      Log.getLogger().info('WORKSPACE BOOTED AND READY FOR DEVELOPMENT');
+      return ideUrl;
+    });
+  }
+
+
+
+  buildLocalCheURL() : string {
+    return 'http://' + this.chefileStruct.server.ip + ':' + this.chefileStruct.server.port;
+  }
 
 
   /**
@@ -402,18 +508,18 @@ export class CheFile {
       Log.getLogger().debug(data.toString());
     });
 
+
+  }
+
+  cheHasBooted() {
+
   }
 
 
-// test if can connect on che port
-  waitCheBoot(self: CheFile) {
-
-    if(self.times < 1) {
-      return;
-    }
+  pingCheAction() : void {
     var options = {
-      hostname: self.chefileStruct.server.ip,
-      port: self.chefileStruct.server.port,
+      hostname: this.chefileStruct.server.ip,
+      port: this.chefileStruct.server.port,
       path: '/api/workspace',
       method: 'GET',
       headers: {
@@ -421,33 +527,50 @@ export class CheFile {
         'Content-Type': 'application/json;charset=UTF-8'
       }
     };
-    Log.getLogger().debug('using che ping options', options, 'and docker content', self.dockerContent);
 
-    var req = self.http.request(options, (res) => {
+    var req = this.http.request(options, (res) => {
       res.on('data', (body) => {
-
-        if (res.statusCode === 200 && !self.waitDone) {
-          self.waitDone = true;
-          Log.getLogger().debug('status code is 200, creating workspace');
-          self.createWorkspace(self.dockerContent);
+        Log.getLogger().debug('got rest status code =', res.statusCode);
+        if (res.statusCode === 200 && !this.waitDone) {
+          Log.getLogger().debug('got 200 status, stop waiting');
+          this.waitDone = true;
         }
       });
     });
     req.on('error', (e) => {
-      Log.getLogger().debug('with request: ' + e.message);
+      Log.getLogger().debug('Got error when waiting che boot: ' + e.message);
     });
-
-
     req.end();
 
-
-    self.times--;
-    if (self.times > 0 && !self.waitDone) {
-      setTimeout(self.waitCheBoot, 5000, self);
-    }
-
-
   }
+
+
+  /**
+   * Loop to send ping action each second and then try to see if we need to wait or not again
+   */
+  loopWaitChePing() : Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      var loop = () => {
+        this.pingCheAction();
+        if (this.waitDone) {
+          resolve(true);
+        } else {
+          Log.getLogger().debug('pinging che was not ready, continue ', this.times, ' times.');
+          this.times--;
+          if (this.times === 0) {
+            reject('Timeout for pinging Eclipse Che has been reached. Please check logs.');
+          } else {
+            // loop again
+            setTimeout(loop, 1000);
+          }
+        }
+      };
+      process.nextTick(loop);
+    });
+  }
+
+
+
 
 
   /**
@@ -502,5 +625,6 @@ export class CheFile {
   isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
   }
+
 
 }
