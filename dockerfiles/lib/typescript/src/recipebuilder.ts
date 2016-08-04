@@ -17,7 +17,7 @@ import {Log} from "./log";
  */
 export class RecipeBuilder {
 
-    DEFAULT_DOCKERFILE_CONTENT: string = 'FROM codenvy/ubuntu_jdk8';
+    static DEFAULT_DOCKERFILE_CONTENT: string = 'FROM codenvy/ubuntu_jdk8';
     path: any;
     fs: any;
 
@@ -40,7 +40,7 @@ export class RecipeBuilder {
             return content;
         } catch (e) {
             // file does not exist, return default
-            return this.DEFAULT_DOCKERFILE_CONTENT;
+            return RecipeBuilder.DEFAULT_DOCKERFILE_CONTENT;
         }
 
     }
