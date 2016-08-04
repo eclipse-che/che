@@ -26,10 +26,7 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
-import javax.persistence.PostUpdate;
-import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,9 +71,10 @@ public class ProjectConfigImpl implements ProjectConfig {
     @MapKey(name = "name")
     private Map<String, Attribute> dbAttributes;
 
+    // TODO consider using List<Attribute> or Map<String, Attribute> on model level instead
     // Mapping delegated to 'dbAttributes' field
     // as it is impossible to map nested list directly
-    @Transient
+    @Column(insertable = false, updatable = false)
     private Map<String, List<String>> attributes;
 
     public ProjectConfigImpl() {}
@@ -208,7 +206,7 @@ public class ProjectConfigImpl implements ProjectConfig {
                '}';
     }
 
-    @PrePersist
+    @PreUpdate
     public void syncDbAttributes() {
         dbAttributes = getAttributes().entrySet()
                                       .stream()

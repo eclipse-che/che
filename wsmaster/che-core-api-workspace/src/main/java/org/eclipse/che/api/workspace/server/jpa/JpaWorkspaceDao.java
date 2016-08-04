@@ -22,7 +22,6 @@ import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.slf4j.Logger;
@@ -73,10 +72,6 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     public WorkspaceImpl update(WorkspaceImpl update) throws NotFoundException, ConflictException, ServerException {
         requireNonNull(update, "Required non-null update");
         try {
-            // It is impossible to synchronize attributes in @PostPersist
-            // because merge won't make current object managed one, that's
-            // why synchronization is performed directly before update
-            update.getConfig().getProjects().forEach(ProjectConfigImpl::syncDbAttributes);
             return doUpdate(update);
         } catch (DuplicateKeyException dkEx) {
             throw new ConflictException(format("Workspace with name '%s' in namespace '%s' already exists",

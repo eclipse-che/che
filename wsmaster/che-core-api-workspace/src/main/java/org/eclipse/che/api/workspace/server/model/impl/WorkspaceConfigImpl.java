@@ -24,6 +24,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.PostPersist;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -210,6 +213,12 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
                ", environments=" + environments +
                ", description='" + description + '\'' +
                '}';
+    }
+
+    @PreUpdate
+    @PrePersist
+    public void syncProjects() {
+        getProjects().forEach(ProjectConfigImpl::syncDbAttributes);
     }
 
     /**
