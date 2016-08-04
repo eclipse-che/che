@@ -31,7 +31,7 @@ init_global_variables() {
   CHE_TEST_CONTAINER_NAME="che-test"
 
   # User configurable variables
-  DEFAULT_CHE_VERSION="latest"
+  DEFAULT_CHE_VERSION="nightly"
   DEFAULT_CHE_CLI_ACTION="help"
 
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
@@ -103,7 +103,6 @@ get_mount_path() {
   echo $(get_clean_path $POSIX_PATH)
 }
 
-
 docker_exec() {
   if is_boot2docker || is_docker_for_windows; then
     MSYS_NO_PATHCONV=1 docker.exe "$@"
@@ -124,7 +123,7 @@ parse_command_line () {
     CHE_CLI_ACTION="help"
   else
     case $1 in
-      start|stop|restart|update|info|init|up|mount|test|help|-h|--help)
+      start|stop|restart|update|info|init|up|mount|test|debug|help|-h|--help)
         CHE_CLI_ACTION=$1
       ;;
       *)
@@ -175,10 +174,19 @@ has_docker_for_windows_ip() {
   fi
 }
 
+has_docker_for_windows_client(){
+  ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
+  if [ "${ARCH}" = "windows" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 is_moby_vm() {
   NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
 
-  if [ "${NAME_MAP}" = "*moby*" ]; then
+  if [ "${NAME_MAP}" == "moby" ]; then
     return 0
   else
     return 1
@@ -186,7 +194,7 @@ is_moby_vm() {
 }
 
 is_docker_for_mac() {
-  if is_moby_vm && ! has_docker_for_windows_ip; then
+  if is_moby_vm && ! has_docker_for_windows_client; then
     return 0
   else
     return 1
@@ -194,7 +202,15 @@ is_docker_for_mac() {
 }
 
 is_docker_for_windows() {
-  if is_moby_vm && has_docker_for_windows_ip; then
+  if is_moby_vm && has_docker_for_windows_client; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_native() {
+  if [ $(get_docker_install_type) = "native" ]; then
     return 0
   else
     return 1
@@ -217,7 +233,6 @@ get_list_of_variables() {
   RETURN=""
   CHE_VARIABLES=$(env | grep "CHE_")
   for SINGLE_VARIABLE in $CHE_VARIABLES; do
-    # Note the funky syntax - have to use the \b otherwise -e is interpreted as option to echo
     VALUE=" --env ${SINGLE_VARIABLE}"
     RETURN="${RETURN}""${VALUE}"
   done
@@ -233,7 +248,6 @@ check_current_image_and_update_if_not_found() {
   else
     update_che_image $1
   fi
-
 }
 
 execute_che_launcher() {
@@ -297,12 +311,32 @@ mount_local_directory() {
                   "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" $(get_docker_host_ip) $3
 }
 
-
 execute_che_test() {
 
   docker_exec run --rm -it --name "${CHE_TEST_CONTAINER_NAME}" \
                   -v /var/run/docker.sock:/var/run/docker.sock \
                   "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+}
+
+print_che_cli_debug() {
+  debug "---------------------------------------"
+  debug "---------  CHE CLI DEBUG INFO  --------"
+  debug "---------------------------------------"
+  debug ""
+  debug "---------  PLATFORM INFO  -------------"
+  debug "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
+  debug "DOCKER_HOST_IP            = $(get_docker_host_ip)"
+  debug "IS_DOCKER_FOR_WINDOWS     = $(is_docker_for_windows && echo "YES" || echo "NO")"
+  debug "IS_DOCKER_FOR_MAC         = $(is_docker_for_mac && echo "YES" || echo "NO")"
+  debug "IS_BOOT2DOCKER            = $(is_boot2docker && echo "YES" || echo "NO")"
+  debug "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
+  debug "HAS_DOCKER_FOR_WINDOWS_IP = $(has_docker_for_windows_ip && echo "YES" || echo "NO")"
+  debug "IS_MOBY_VM                = $(is_moby_vm && echo "YES" || echo "NO")"
+  debug ""
+  debug ""
+  debug "---------------------------------------"
+  debug "---------------------------------------"
+  debug "---------------------------------------"
 }
 
 # See: https://sipb.mit.edu/doc/safe-shell/
@@ -332,6 +366,9 @@ case ${CHE_CLI_ACTION} in
   ;;
   test)
     execute_che_test "$@"
+  ;;
+  debug)
+    print_che_cli_debug
   ;;
   help)
     usage
