@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.model.impl;
 
+import org.eclipse.che.account.spi.AccountImpl;
+
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.jpa.UserEntityListener;
 
@@ -19,7 +21,6 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
@@ -52,17 +53,12 @@ import java.util.Objects;
         }
 )
 @EntityListeners(UserEntityListener.class)
-@Table(indexes = {@Index(columnList = "email", unique = true), @Index(columnList = "name", unique = true)})
-public class UserImpl implements User {
-
-    @Id
-    private String id;
+@Table(indexes = {@Index(columnList = "email", unique = true)})
+public class UserImpl extends AccountImpl implements User {
+    public static final String PERSONAL_ACCOUNT = "personal";
 
     @Column(nullable = false)
     private String email;
-
-    @Column(nullable = false)
-    private String name;
 
     @Basic
     private String password;
@@ -127,6 +123,11 @@ public class UserImpl implements User {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getType() {
+        return PERSONAL_ACCOUNT;
     }
 
     public void setName(String name) {

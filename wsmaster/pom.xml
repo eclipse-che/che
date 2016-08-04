@@ -33,6 +33,7 @@
         <module>che-core-api-workspace-shared</module>
         <module>che-core-api-workspace</module>
         <module>che-core-api-user-shared</module>
+        <module>che-core-api-account</module>
         <module>che-core-api-user</module>
         <module>che-core-api-factory-shared</module>
         <module>che-core-api-factory</module>
