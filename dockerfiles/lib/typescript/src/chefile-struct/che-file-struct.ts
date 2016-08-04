@@ -49,6 +49,7 @@ export class CheFileStructWorkspace {
 
     name: string;
 
+    ram: number;
     commands : Array<CheFileStructWorkspaceCommand>;
 
     constructor() {

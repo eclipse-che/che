@@ -11,7 +11,7 @@
 
 
 // imports
-import {Workspace} from './workspace';
+import {Workspace, CreateWorkspaceConfig} from './workspace';
 import {WorkspaceDto} from './dto/workspacedto';
 import {Websocket} from './websocket';
 import {MessageBus} from './messagebus';
@@ -89,7 +89,10 @@ export class PostCheck {
     createAndStart(): Promise<any> {
 
         // create the workspace
-        var promise:Promise<WorkspaceDto> = this.workspace.createWorkspace('your-first-workspace', 'FROM codenvy/ubuntu_jdk8')
+        let createWorkspaceConfig: CreateWorkspaceConfig = new CreateWorkspaceConfig();
+        createWorkspaceConfig.name = 'your-first-workspace';
+
+        var promise:Promise<WorkspaceDto> = this.workspace.createWorkspace(createWorkspaceConfig)
             .then(workspaceDto => {
 
                 // get id

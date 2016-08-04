@@ -12,6 +12,7 @@
 import {WorkspaceDto} from './dto/workspacedto';
 import {AuthData} from "./auth-data";
 import {Log} from "./log";
+import {RecipeBuilder} from "./recipebuilder";
 
 /**
  * Workspace class allowing to manage a workspace, like create/start/stop, etc operations
@@ -43,7 +44,7 @@ export class Workspace {
     /**
      * Create a workspace and return a promise with content of WorkspaceDto in case of success
      */
-    createWorkspace(workspaceName: string, dockerContent: string) : Promise<WorkspaceDto> {
+    createWorkspace(createWorkspaceConfig: CreateWorkspaceConfig) : Promise<WorkspaceDto> {
 
         var options = {
             hostname: this.authData.getHostname(),
@@ -85,14 +86,14 @@ export class Workspace {
                         "dev": true,
                         "servers": [],
                         "envVariables": {},
-                        "limits": {"ram": 2500},
-                        "source": {"type": "dockerfile", "content": dockerContent},
+                        "limits": {"ram": createWorkspaceConfig.ram},
+                        "source": createWorkspaceConfig.machineConfigSource,
                         "name": "default",
                         "type": "docker",
                         "links": []
                     }], "name": "default"
                 }],
-                "name": workspaceName,
+                "name": createWorkspaceConfig.name,
                 "links": [],
                 "description": null
             };
@@ -153,5 +154,16 @@ export class Workspace {
         return p;
     }
 
+
+}
+
+
+
+export class CreateWorkspaceConfig {
+
+    ram : number = 2048;
+    dockerContent: string;
+    machineConfigSource : any = {"type": "dockerfile", "content": RecipeBuilder.DEFAULT_DOCKERFILE_CONTENT};
+    name: string = "default";
 
 }
