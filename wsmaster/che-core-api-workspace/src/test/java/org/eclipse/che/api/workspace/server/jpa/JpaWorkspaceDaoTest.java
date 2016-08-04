@@ -12,13 +12,19 @@ package org.eclipse.che.api.workspace.server.jpa;
 
 import com.google.inject.Guice;
 
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
 
+import java.util.Collections;
+import java.util.HashMap;
+
+import static java.util.Arrays.asList;
 import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspace;
 import static org.testng.Assert.assertEquals;
 
@@ -34,6 +40,11 @@ public class JpaWorkspaceDaoTest {
     @BeforeMethod
     private void setUpManager() {
         manager = Guice.createInjector(new WorkspaceTckModule()).getInstance(EntityManager.class);
+    }
+
+    @AfterMethod
+    private void cleanup() {
+        manager.getEntityManagerFactory().close();
     }
 
     @Test
