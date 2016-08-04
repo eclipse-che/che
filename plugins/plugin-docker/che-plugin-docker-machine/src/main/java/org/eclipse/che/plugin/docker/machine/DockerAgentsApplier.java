@@ -19,8 +19,11 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.core.util.AbstractLineConsumer;
+import org.eclipse.che.api.core.util.CompositeLineConsumer;
+import org.eclipse.che.api.core.util.ErrorConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -31,7 +34,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.google.common.base.Strings.emptyToNull;
+import static java.lang.String.format;
 
 /**
  * @author Anatolii Bazko
@@ -60,6 +63,8 @@ public class DockerAgentsApplier {
         for (String agentKey : machine.getConfig().getAgents()) {
             apply(machine, AgentKeyImpl.of(agentKey), agentsCompleted, agentsInProgress);
         }
+
+        apply(machine, AgentKeyImpl.of("org.eclipse.che.ls.json"), agentsCompleted, agentsInProgress);
     }
 
     /**
@@ -102,47 +107,23 @@ public class DockerAgentsApplier {
         agentsCompleted.add(agentKey.getFqn());
     }
 
-    private void startProcess(Instance machine, CommandImpl command) throws MachineException {
-        AgentStatusDetectionLineConsumer statusDetection = new AgentStatusDetectionLineConsumer();
+    private void startProcess(Instance machine, Command command) throws MachineException {
+        ErrorConsumer statusDetector = new ErrorConsumer();
 
         InstanceProcess process = machine.createProcess(command, null);
         try {
-            process.start(statusDetection);
+            process.start(new CompositeLineConsumer(statusDetector, new AbstractLineConsumer() {
+                @Override
+                public void writeLine(String line) throws IOException {
+                    LOG.debug(line);
+                }
+            }));
         } catch (ConflictException e) {
             throw new MachineException("Can't start process with command: " + command, e);
         }
 
-        if (statusDetection.hasError()) {
-            throw new MachineException("Can't start agent: " + statusDetection.getErrorMsg());
-        }
-    }
-
-    private class AgentStatusDetectionLineConsumer implements LineConsumer {
-        private int    status;
-        private String errorMsg;
-
-        public boolean hasError() {
-            return status != 0;
-        }
-
-        public String getErrorMsg() {
-            return emptyToNull(errorMsg);
-        }
-
-        @Override
-        public void writeLine(String line) throws IOException {
-            if (line.startsWith("[STDERR]")) {
-                errorMsg = line.substring("[STDERR]".length());
-                status = 1;
-
-                LOG.error(line);
-            } else {
-                LOG.debug(line);
-            }
-        }
-
-        @Override
-        public void close() throws IOException {
+        if (statusDetector.hasError()) {
+            throw new MachineException(format("Agent %s failed: %s", command.getName(), statusDetector.getError()));
         }
     }
 }
