@@ -91,35 +91,28 @@ public class UserDaoTest {
         assertEqualsNoPassword(userDao.getByAliasAndPassword(user.getEmail(), user.getPassword()), user);
     }
 
-    @Test
-    public void shouldGetUserByAliasAndPassword() throws Exception {
-        final UserImpl user = users[0];
-
-        assertEqualsNoPassword(userDao.getByAliasAndPassword(user.getAliases().get(0), user.getPassword()), user);
-    }
-
     @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionIfUserWithSuchAliasDoesNotExist() throws Exception {
+    public void shouldThrowNotFoundExceptionIfUserWithSuchNameOrEmailDoesNotExist() throws Exception {
         final UserImpl user = users[0];
 
         userDao.getByAliasAndPassword(user.getId(), user.getPassword());
     }
 
     @Test(expectedExceptions = NotFoundException.class)
-    public void shouldThrowNotFoundExceptionWhenGettingUserByAliasAndPasswordAndPasswordIsWrong() throws Exception {
+    public void shouldThrowNotFoundExceptionWhenGettingUserByNameAndWrongPassword() throws Exception {
         final UserImpl user = users[0];
 
         userDao.getByAliasAndPassword(user.getName(), "fake" + user.getPassword());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeWhenAuthorizingUserWithNullAlias() throws Exception {
+    public void shouldThrowNpeWhenAuthorizingUserWithNullEmailOrName() throws Exception {
         userDao.getByAliasAndPassword(null, "password");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenAuthorizingUserWithNullPassword() throws Exception {
-        userDao.getByAliasAndPassword("alias", null);
+        userDao.getByAliasAndPassword(users[0].getName(), null);
     }
 
     @Test

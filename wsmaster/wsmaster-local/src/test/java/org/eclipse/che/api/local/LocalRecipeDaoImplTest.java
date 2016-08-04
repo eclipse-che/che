@@ -15,7 +15,6 @@ import com.google.gson.GsonBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
-import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -113,18 +112,6 @@ public class LocalRecipeDaoImplTest {
     }
 
     @Test
-    public void shouldBeAbleToUpdateRecipeWithoutAcl() throws Exception {
-        recipeDao.create(createRecipe().withAcl(emptyList()));
-        final RecipeImpl newRecipe = createRecipe().withDescription("new description")
-                                                   .withScript("FROM che/ubuntu_jdk")
-                                                   .withAcl(emptyList());
-
-        final RecipeImpl stored = recipeDao.update(newRecipe);
-
-        assertEquals(newRecipe, stored);
-    }
-
-    @Test
     public void shouldBeAbleToSearchRecipeByTag() throws Exception {
         final RecipeImpl toFind = createRecipe();
         recipeDao.create(toFind);
@@ -145,8 +132,6 @@ public class LocalRecipeDaoImplTest {
                               "dockerfile",
                               "FROM che/ubuntu",
                               asList("java", "ubuntu"),
-                              "Che ubuntu",
-                              singletonList(new AclEntryImpl("creator", asList("read", "update"))),
-                              singletonList("search"));
+                              "Che ubuntu");
     }
 }

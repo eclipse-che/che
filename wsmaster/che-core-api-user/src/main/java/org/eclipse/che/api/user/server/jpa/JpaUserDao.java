@@ -42,20 +42,20 @@ public class JpaUserDao implements UserDao {
 
     @Override
     @Transactional
-    public UserImpl getByAliasAndPassword(String emailOrAliasOrName, String password) throws NotFoundException, ServerException {
-        requireNonNull(emailOrAliasOrName, "Required non-null alias");
+    public UserImpl getByAliasAndPassword(String emailOrName, String password) throws NotFoundException, ServerException {
+        requireNonNull(emailOrName, "Required non-null email or name");
         requireNonNull(password, "Required non-null password");
         try {
             final UserImpl user = managerProvider.get()
                                                  .createNamedQuery("User.getByAliasAndPassword", UserImpl.class)
-                                                 .setParameter("alias", emailOrAliasOrName)
+                                                 .setParameter("alias", emailOrName)
                                                  .getSingleResult();
             if (!encryptor.test(password, user.getPassword())) {
-                throw new NotFoundException(format("User with alias '%s' and given password doesn't exist", emailOrAliasOrName));
+                throw new NotFoundException(format("User with email or name '%s' and given password doesn't exist", emailOrName));
             }
             return user;
         } catch (NoResultException x) {
-            throw new NotFoundException(format("User with alias '%s' and given password doesn't exist", emailOrAliasOrName));
+            throw new NotFoundException(format("User with email or name '%s' and given password doesn't exist", emailOrName));
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }

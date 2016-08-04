@@ -16,7 +16,6 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
-import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -60,20 +59,13 @@ public class WorkspaceTckModule extends TckModule {
         @Override
         public void createAll(Collection<? extends StackImpl> entities) throws TckRepositoryException {
             final EntityManager manager = managerProvider.get();
-            for (StackImpl entity : entities) {
-                for (AclEntryImpl ace : entity.getAcl()) {
-                    final String id = ace.getUser();
-                    manager.persist(new UserImpl(id, id + "email", id + "-name"));
-                }
-                manager.persist(entity);
-            }
+            entities.forEach(manager::persist);
         }
 
         @Override
         public void removeAll() throws TckRepositoryException {
             final EntityManager manager = managerProvider.get();
             manager.createNamedQuery("Stack.getAll", StackImpl.class).getResultList().forEach(manager::remove);
-            manager.createQuery("DELETE FROM \"User\"").executeUpdate();
         }
     }
 }

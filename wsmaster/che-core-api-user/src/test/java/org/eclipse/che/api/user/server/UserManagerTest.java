@@ -112,7 +112,19 @@ public class UserManagerTest {
     }
 
     @Test
-    public void shouldGenerateIdentifierWhenCreatingUser() throws Exception {
+    public void shouldGenerateIdentifierWhenCreatingUserWithNullId() throws Exception {
+        final User user = new UserImpl(null, "test@email.com", "testName", null, null);
+
+        manager.create(user, false);
+
+        final ArgumentCaptor<UserImpl> userCaptor = ArgumentCaptor.forClass(UserImpl.class);
+        verify(userDao).create(userCaptor.capture());
+        final String id = userCaptor.getValue().getId();
+        assertNotNull(id);
+    }
+
+    @Test
+    public void shouldNotGenerateIdentifierWhenCreatingUserWithNotNullId() throws Exception {
         final User user = new UserImpl("identifier", "test@email.com", "testName", null, null);
 
         manager.create(user, false);
@@ -121,7 +133,7 @@ public class UserManagerTest {
         verify(userDao).create(userCaptor.capture());
         final String id = userCaptor.getValue().getId();
         assertNotNull(id);
-        assertNotEquals(id, "identifier");
+        assertEquals(id, "identifier");
     }
 
     @Test(expectedExceptions = NullPointerException.class)

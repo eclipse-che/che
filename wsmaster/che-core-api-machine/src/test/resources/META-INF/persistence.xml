@@ -17,12 +17,10 @@
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>org.eclipse.che.api.machine.server.recipe.RecipeImpl</class>
         <class>org.eclipse.che.api.machine.server.model.impl.SnapshotImpl</class>
-        <class>org.eclipse.che.api.machine.server.model.impl.AclEntryImpl</class>
-        <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:;DB_CLOSE_DELAY=0;MVCC=true;TRACE_LEVEL_FILE=4;TRACE_LEVEL_SYSTEM_OUT=4"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:"/>
             <property name="javax.persistence.jdbc.user" value=""/>
             <property name="javax.persistence.jdbc.password" value=""/>
 
@@ -31,7 +29,7 @@
             <property name="eclipselink.ddl-generation" value="create-tables"/>
             <property name="eclipselink.ddl-generation.output-mode" value="database"/>
             <property name="eclipselink.logging.logger" value="DefaultLogger"/>
-            <property name="eclipselink.logging.level" value="INFO"/>
+            <property name="eclipselink.logging.level" value="SEVERE"/>
         </properties>
 
     </persistence-unit>

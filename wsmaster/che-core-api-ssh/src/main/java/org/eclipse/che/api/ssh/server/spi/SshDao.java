@@ -33,7 +33,7 @@ public interface SshDao {
      * @throws ConflictException
      *         when specified user already has ssh pair with given service and name
      * @throws NullPointerException
-     *         when {@sshPair} is null
+     *         when {@code sshPair} is null
      * @throws ServerException
      *         when any other error occurs during ssh pair creating
      */

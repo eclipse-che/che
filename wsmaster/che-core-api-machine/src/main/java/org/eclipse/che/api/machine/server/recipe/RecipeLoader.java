@@ -54,7 +54,9 @@ public class RecipeLoader {
     private final RecipeDao   recipeDao;
 
     @Inject
-    public RecipeLoader(@Nullable @Named("predefined.recipe.path") Set<String> recipesPaths, RecipeDao recipeDao) {
+    @SuppressWarnings("unused")
+    public RecipeLoader(@Nullable @Named("predefined.recipe.path") Set<String> recipesPaths,
+                        RecipeDao recipeDao) {
         this.recipesPaths = firstNonNull(recipesPaths, Collections.<String>emptySet());
         this.recipeDao = recipeDao;
     }

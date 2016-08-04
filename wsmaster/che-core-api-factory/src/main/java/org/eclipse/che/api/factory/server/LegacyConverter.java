@@ -12,7 +12,6 @@ package org.eclipse.che.api.factory.server;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.factory.Factory;
-import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 
 /**
  * Convert legacy factory parameter to new the latest format
