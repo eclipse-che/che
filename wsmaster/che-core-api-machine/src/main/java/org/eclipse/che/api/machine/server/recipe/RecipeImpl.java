@@ -11,7 +11,6 @@
 package org.eclipse.che.api.machine.server.recipe;
 
 import org.eclipse.che.api.core.model.machine.Recipe;
-import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
 
 import javax.persistence.Basic;
@@ -21,12 +20,9 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static javax.persistence.CascadeType.ALL;
 
 /**
  * Implementation of {@link ManagedRecipe}
@@ -55,16 +51,10 @@ public class RecipeImpl implements ManagedRecipe {
     @Basic
     private String description;
 
-    @OneToMany(cascade = ALL, orphanRemoval = true)
-    private List<AclEntryImpl> acl;
-
     @ElementCollection
     @Column(name = "tag")
     @CollectionTable(indexes = @Index(columnList = "tag"))
     private List<String> tags;
-
-    @ElementCollection
-    private List<String> publicActions;
 
     public RecipeImpl() {
     }
@@ -81,9 +71,7 @@ public class RecipeImpl implements ManagedRecipe {
              recipe.getType(),
              recipe.getScript(),
              recipe.getTags(),
-             recipe.getDescription(),
-             null,
-             null);
+             recipe.getDescription());
     }
 
     public RecipeImpl(RecipeImpl recipe) {
@@ -93,9 +81,7 @@ public class RecipeImpl implements ManagedRecipe {
              recipe.getType(),
              recipe.getScript(),
              recipe.getTags(),
-             recipe.getDescription(),
-             recipe.getAcl(),
-             recipe.getPublicActions());
+             recipe.getDescription());
     }
 
     public RecipeImpl(String id,
@@ -104,9 +90,7 @@ public class RecipeImpl implements ManagedRecipe {
                       String type,
                       String script,
                       List<String> tags,
-                      String description,
-                      List<AclEntryImpl> acl,
-                      List<String> publicActions) {
+                      String description) {
         this.id = id;
         this.name = name;
         this.creator = creator;
@@ -114,8 +98,6 @@ public class RecipeImpl implements ManagedRecipe {
         this.script = script;
         this.tags = tags;
         this.description = description;
-        this.acl = acl;
-        this.publicActions = publicActions;
     }
 
     @Override
@@ -219,38 +201,6 @@ public class RecipeImpl implements ManagedRecipe {
         return this;
     }
 
-    public List<AclEntryImpl> getAcl() {
-        if (acl == null) {
-            return new ArrayList<>();
-        }
-        return acl;
-    }
-
-    public void setAcl(List<AclEntryImpl> acl) {
-        this.acl = acl;
-    }
-
-    public RecipeImpl withAcl(List<AclEntryImpl> acl) {
-        this.acl = acl;
-        return this;
-    }
-
-    public List<String> getPublicActions() {
-        if (publicActions == null) {
-            return new ArrayList<>();
-        }
-        return publicActions;
-    }
-
-    public void setPublicActions(List<String> publicActions) {
-        this.publicActions = publicActions;
-    }
-
-    public RecipeImpl withActions(List<String> actions) {
-        this.publicActions = actions;
-        return this;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -266,9 +216,7 @@ public class RecipeImpl implements ManagedRecipe {
                Objects.equals(type, other.type) &&
                Objects.equals(script, other.script) &&
                Objects.equals(description, other.description) &&
-               getTags().equals(other.getTags()) &&
-               getAcl().equals(other.getAcl()) &&
-               getPublicActions().equals(other.getPublicActions());
+               getTags().equals(other.getTags());
     }
 
     @Override
@@ -281,8 +229,6 @@ public class RecipeImpl implements ManagedRecipe {
         hash = 31 * hash + Objects.hashCode(script);
         hash = 31 * hash + Objects.hashCode(description);
         hash = 31 * hash + getTags().hashCode();
-        hash = 31 * hash + getAcl().hashCode();
-        hash = 31 * hash + getPublicActions().hashCode();
         return hash;
     }
 
@@ -295,9 +241,7 @@ public class RecipeImpl implements ManagedRecipe {
                ", type='" + type + '\'' +
                ", script='" + script + '\'' +
                ", description='" + description + '\'' +
-               ", acl=" + acl +
                ", tags=" + tags +
-               ", publicActions=" + publicActions +
                '}';
     }
 }

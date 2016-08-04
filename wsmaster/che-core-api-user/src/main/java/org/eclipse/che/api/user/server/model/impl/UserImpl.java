@@ -20,9 +20,11 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,11 +39,10 @@ import java.util.Objects;
 @NamedQueries(
         {
                 @NamedQuery(name = "User.getByAliasAndPassword",
-                            query = "SELECT distinct(u) " +
+                            query = "SELECT u " +
                                     "FROM \"User\" u " +
                                     "WHERE :alias = u.name OR" +
-                                    "      :alias = u.email OR" +
-                                    "      :alias = ANY(SELECT alias FROM u.aliases alias)"),
+                                    "      :alias = u.email"),
                 @NamedQuery(name = "User.getByAlias",
                             query = "SELECT u FROM \"User\" u WHERE :alias MEMBER OF u.aliases"),
                 @NamedQuery(name = "User.getByName",
@@ -51,15 +52,16 @@ import java.util.Objects;
         }
 )
 @EntityListeners(UserEntityListener.class)
+@Table(indexes = {@Index(columnList = "email", unique = true), @Index(columnList = "name", unique = true)})
 public class UserImpl implements User {
 
     @Id
     private String id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String email;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Basic
@@ -67,7 +69,9 @@ public class UserImpl implements User {
 
     @ElementCollection
     @Column(name = "alias", nullable = false, unique = true)
-    @CollectionTable(name = "user_aliases", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(name = "user_aliases",
+                     indexes = @Index(columnList = "alias"),
+                     joinColumns = @JoinColumn(name = "user_id"))
     private List<String> aliases;
 
     public UserImpl() {}

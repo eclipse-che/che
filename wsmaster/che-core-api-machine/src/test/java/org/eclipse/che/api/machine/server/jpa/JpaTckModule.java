@@ -15,7 +15,6 @@ import com.google.inject.persist.Transactional;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
-import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -57,11 +56,6 @@ public class JpaTckModule extends TckModule {
         @Override
         public void createAll(Collection<? extends RecipeImpl> entities) throws TckRepositoryException {
             final EntityManager manager = managerProvider.get();
-            for (RecipeImpl recipe : entities) {
-                for (AclEntryImpl acl : recipe.getAcl()) {
-                    manager.persist(new UserImpl(acl.getUser(), "email_" + acl.getUser(), "name_" + acl.getUser()));
-                }
-            }
             entities.stream().forEach(manager::persist);
         }
 
@@ -71,7 +65,6 @@ public class JpaTckModule extends TckModule {
             manager.createQuery("SELECT recipe FROM Recipe recipe", RecipeImpl.class)
                    .getResultList()
                    .forEach(manager::remove);
-            manager.createQuery("DELETE FROM \"User\"").executeUpdate();
         }
     }
 }

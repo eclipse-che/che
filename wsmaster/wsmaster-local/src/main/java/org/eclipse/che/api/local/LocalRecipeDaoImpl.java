@@ -100,9 +100,6 @@ public class LocalRecipeDaoImpl implements RecipeDao {
         if (!update.getTags().isEmpty()) {
             target.setTags(update.getTags());
         }
-        if (update.getAcl() != null && !update.getAcl().isEmpty()) {
-            target.setAcl(update.getAcl());
-        }
 
         return new RecipeImpl(target);
     }

@@ -84,7 +84,8 @@ public class UserManager {
         if (reservedNames.contains(newUser.getName().toLowerCase())) {
             throw new ConflictException(String.format("Username '%s' is reserved", newUser.getName()));
         }
-        final UserImpl user = new UserImpl(generate("user", ID_LENGTH),
+        final String userId = newUser.getId() != null ? newUser.getId() : generate("user", ID_LENGTH);
+        final UserImpl user = new UserImpl(userId,
                                            newUser.getEmail(),
                                            newUser.getName(),
                                            firstNonNull(newUser.getPassword(), generate("", PASSWORD_LENGTH)),

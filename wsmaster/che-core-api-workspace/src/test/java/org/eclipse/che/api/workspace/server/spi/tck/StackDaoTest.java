@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -95,10 +94,6 @@ public class StackDaoTest {
     @Test(dependsOnMethods = "shouldGetById")
     public void shouldCreateStack() throws Exception {
         final StackImpl stack = createStack("new-stack", "new-stack-name");
-        stack.setAcl(stacks[0].getAcl()
-                              .stream()
-                              .map(ace -> new AclEntryImpl(ace.getUser(), new ArrayList<>(asList("action1", "action2"))))
-                              .collect(Collectors.toList()));
 
         stackDao.create(stack);
 
@@ -175,17 +170,6 @@ public class StackDaoTest {
         // Set a new icon
         stack.setStackIcon(new StackIcon("new-name", "new-media", "new-data".getBytes()));
 
-        // Remove an existing acl entry
-        stack.getAcl().remove(1);
-
-        // Add a new acl entry
-        stack.getAcl().add(new AclEntryImpl(stack.getAcl().get(0).getUser(), asList("action3", "action4")));
-
-        // Update an existing acl entry
-        stack.getAcl().get(0).getActions().add("new-action");
-
-        stack.getPublicActions().add("new-public-action");
-
         stackDao.update(stack);
 
         assertEquals(stackDao.getById(stack.getId()), new StackImpl(stack));
@@ -258,9 +242,6 @@ public class StackDaoTest {
                         .setStackIcon(new StackIcon(id + "-icon",
                                                     id + "-media-type",
                                                     "0x1234567890abcdef".getBytes()))
-                        .setAcl(asList(new AclEntryImpl(id + "user1", asList("action1", "action2")),
-                                       new AclEntryImpl(id + "user2", asList("action1", "action2"))))
-                        .setPublicActions(new ArrayList<>(asList("search", "read")))
                         .build();
     }
 }

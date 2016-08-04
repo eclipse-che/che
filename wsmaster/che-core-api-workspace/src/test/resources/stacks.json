@@ -64,14 +64,6 @@
                 }
             ]
         },
-        "acl": [
-            {
-                "user": "*",
-                "actions": [
-                    "search"
-                ]
-            }
-        ],
         "stackIcon" : {
             "name": "type-java.svg",
             "mediaType": "image/svg+xml"
@@ -156,14 +148,6 @@
                     "type": "mvn"
                 }
             ]
-        },
-        "acl": [
-            {
-                "user": "*",
-                "actions": [
-                    "search"
-                ]
-            }
-        ]
+        }
     }
 ]

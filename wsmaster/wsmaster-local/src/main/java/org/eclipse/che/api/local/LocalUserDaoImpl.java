@@ -81,18 +81,17 @@ public class LocalUserDaoImpl implements UserDao {
     }
 
     @Override
-    public synchronized UserImpl getByAliasAndPassword(String aliasOrNameOrEmail, String password)
-            throws ServerException, NotFoundException {
-        requireNonNull(aliasOrNameOrEmail);
+    public synchronized UserImpl getByAliasAndPassword(String emailOrName, String password) throws ServerException,
+                                                                                             NotFoundException {
+        requireNonNull(emailOrName);
         requireNonNull(password);
         final Optional<UserImpl> userOpt = users.values()
                                                 .stream()
-                                                .filter(user -> user.getName().equals(aliasOrNameOrEmail)
-                                                                || user.getEmail().equals(aliasOrNameOrEmail)
-                                                                || user.getAliases().contains(aliasOrNameOrEmail))
+                                                .filter(user -> user.getName().equals(emailOrName)
+                                                                || user.getEmail().equals(emailOrName))
                                                 .findAny();
         if (!userOpt.isPresent() || !userOpt.get().getPassword().equals(password)) {
-            throw new NotFoundException(format("User '%s' doesn't exist", aliasOrNameOrEmail));
+            throw new NotFoundException(format("User '%s' doesn't exist", emailOrName));
         }
         return new UserImpl(userOpt.get());
     }

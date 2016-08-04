@@ -15,7 +15,6 @@ import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -99,9 +98,6 @@ public class RecipeDaoTest {
     @Test
     public void shouldUpdateRecipeWithAllRelatedAttributes() throws Exception {
         final RecipeImpl update = recipes.get(0);
-        update.getAcl().add(new AclEntryImpl(recipes.get(1).getAcl().get(0).getUser(), asList("read", "write")));
-        update.getPublicActions().clear();
-        update.getPublicActions().add("create");
         update.withName("debian")
               .withCreator("userid_9")
               .withDescription("description")
@@ -155,7 +151,7 @@ public class RecipeDaoTest {
 
     @Test
     public void shouldFindRecipeByUser() throws Exception {
-        final List<RecipeImpl> result = recipeDao.search(recipes.get(0).getAcl().get(0).getUser(),
+        final List<RecipeImpl> result = recipeDao.search(null,
                                                          null,
                                                          null,
                                                          0,
@@ -181,7 +177,7 @@ public class RecipeDaoTest {
     @Test(dependsOnMethods = "shouldFindRecipeByUser")
     public void shouldFindRecipeByType() throws Exception {
         final RecipeImpl recipe = recipes.get(0);
-        final List<RecipeImpl> result = recipeDao.search(recipe.getAcl().get(0).getUser(), null, recipe.getType(), 0, recipes.size());
+        final List<RecipeImpl> result = recipeDao.search(null, null, recipe.getType(), 0, recipes.size());
 
         assertTrue(result.contains(recipe));
     }
@@ -189,7 +185,7 @@ public class RecipeDaoTest {
     @Test(dependsOnMethods = {"shouldFindRecipeByUser", "shouldFindingRecipesByTags", "shouldFindRecipeByType"})
     public void shouldFindRecipeByUserTagsAndType() throws Exception {
         final RecipeImpl recipe = recipes.get(0);
-        final List<RecipeImpl> result = recipeDao.search(recipe.getAcl().get(0).getUser(),
+        final List<RecipeImpl> result = recipeDao.search(null,
                                                          recipe.getTags(),
                                                          recipe.getType(),
                                                          0,
@@ -206,9 +202,7 @@ public class RecipeDaoTest {
                               "dockerfile" + index,
                               "script",
                               new ArrayList<>(asList("tag1" + index, "tag2" + index)),
-                              "recipe description",
-                              new ArrayList<>(singletonList(new AclEntryImpl("userId_" + index, asList("read", "search", "update")))),
-                              new ArrayList<>(asList("read", "update")));
+                              "recipe description");
     }
 
     private void updateAll() throws Exception {

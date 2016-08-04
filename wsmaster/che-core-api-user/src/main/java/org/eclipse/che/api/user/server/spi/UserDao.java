@@ -32,21 +32,21 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 public interface UserDao {
 
     /**
-     * Gets user by alias and password
+     * Gets user by email or name and password
      *
-     * @param emailOrAliasOrName
-     *         one of user aliases such as email/name/alias(but not id)
+     * @param emailOrName
+     *         one of user attribute such as email/name(but not id)
      * @param password
      *         password
      * @return user identifier
      * @throws NullPointerException
-     *         when either {@code emailOrAliasOrName} or {@code password} is null
+     *         when either {@code emailOrName} or {@code password} is null
      * @throws NotFoundException
-     *         when user with such {@code emailOrAliasOrName} and {@code password} doesn't exist
+     *         when user with such {@code emailOrName} and {@code password} doesn't exist
      * @throws ServerException
      *         when any other error occurs
      */
-    UserImpl getByAliasAndPassword(String emailOrAliasOrName, String password) throws NotFoundException, ServerException;
+    UserImpl getByAliasAndPassword(String emailOrName, String password) throws NotFoundException, ServerException;
 
     /**
      * Creates a new user.

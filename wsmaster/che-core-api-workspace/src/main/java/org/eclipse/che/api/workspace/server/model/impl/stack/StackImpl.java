@@ -10,14 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.model.impl.stack;
 
-import org.eclipse.che.api.machine.server.model.impl.AclEntryImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
 import org.eclipse.che.api.workspace.shared.stack.StackSource;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 
 import javax.persistence.Basic;
@@ -29,17 +27,14 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
-import static javax.persistence.CascadeType.ALL;
 
 /**
  * Data object for {@link Stack}.
@@ -99,13 +94,6 @@ public class StackImpl implements Stack {
     @Embedded
     private StackIcon stackIcon;
 
-    @OneToMany(cascade = ALL, orphanRemoval = true)
-    @JoinColumn
-    private List<AclEntryImpl> acl;
-
-    @ElementCollection
-    private List<String> publicActions;
-
     public StackImpl() {}
 
     public StackImpl(StackImpl stack) {
@@ -118,9 +106,7 @@ public class StackImpl implements Stack {
              stack.getWorkspaceConfig(),
              stack.getSource(),
              stack.getComponents(),
-             stack.getStackIcon(),
-             stack.getAcl(),
-             stack.getPublicActions());
+             stack.getStackIcon());
     }
 
     public StackImpl(Stack stack) {
@@ -133,8 +119,6 @@ public class StackImpl implements Stack {
              stack.getWorkspaceConfig(),
              stack.getSource(),
              stack.getComponents(),
-             null,
-             null,
              null);
     }
 
@@ -147,9 +131,7 @@ public class StackImpl implements Stack {
                      WorkspaceConfig workspaceConfig,
                      StackSource source,
                      List<? extends StackComponent> components,
-                     StackIcon stackIcon,
-                     List<AclEntryImpl> acl,
-                     List<String> publicActions) {
+                     StackIcon stackIcon) {
         this.id = id;
         this.creator = creator;
         this.name = name;
@@ -171,12 +153,6 @@ public class StackImpl implements Stack {
             this.components = components.stream()
                                         .map(StackComponentImpl::new)
                                         .collect(toList());
-        }
-        if (acl != null) {
-            this.acl = new ArrayList<>(acl);
-        }
-        if (publicActions != null) {
-            this.publicActions = new ArrayList<>(publicActions);
         }
     }
 
@@ -275,34 +251,6 @@ public class StackImpl implements Stack {
         this.stackIcon = stackIcon;
     }
 
-    @Nullable
-    public List<AclEntryImpl> getAcl() {
-        if (acl == null) {
-            acl = new ArrayList<>();
-        }
-        return acl;
-    }
-
-    public void setAcl(List<AclEntryImpl> acl) {
-        this.acl = acl;
-    }
-
-    public StackImpl withAcl(List<AclEntryImpl> acl) {
-        this.acl = acl;
-        return this;
-    }
-
-    public List<String> getPublicActions() {
-        if (publicActions == null) {
-            publicActions = new ArrayList<>();
-        }
-        return publicActions;
-    }
-
-    public void setPublicActions(List<String> publicActions) {
-        this.publicActions = publicActions;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -321,9 +269,7 @@ public class StackImpl implements Stack {
                && Objects.equals(workspaceConfig, that.workspaceConfig)
                && Objects.equals(source, that.source)
                && getComponents().equals(that.getComponents())
-               && Objects.equals(stackIcon, that.stackIcon)
-               && getAcl().equals(that.getAcl())
-               && getPublicActions().equals(that.getPublicActions());
+               && Objects.equals(stackIcon, that.stackIcon);
     }
 
     @Override
@@ -339,26 +285,22 @@ public class StackImpl implements Stack {
         hash = 31 * hash + Objects.hashCode(source);
         hash = 31 * hash + getComponents().hashCode();
         hash = 31 * hash + Objects.hashCode(stackIcon);
-        hash = 31 * hash + getAcl().hashCode();
-        hash = 31 * hash + getPublicActions().hashCode();
         return hash;
     }
 
     @Override
     public String toString() {
         return "StackImpl{" +
-               "publicActions=" + publicActions +
-               ", acl=" + acl +
-               ", stackIcon=" + stackIcon +
-               ", components=" + components +
-               ", source=" + source +
-               ", workspaceConfig=" + workspaceConfig +
-               ", tags=" + tags +
-               ", creator='" + creator + '\'' +
-               ", scope='" + scope + '\'' +
-               ", description='" + description + '\'' +
+               "id='" + id + '\'' +
                ", name='" + name + '\'' +
-               ", id='" + id + '\'' +
+               ", description='" + description + '\'' +
+               ", scope='" + scope + '\'' +
+               ", creator='" + creator + '\'' +
+               ", tags=" + tags +
+               ", workspaceConfig=" + workspaceConfig +
+               ", source=" + source +
+               ", components=" + components +
+               ", stackIcon=" + stackIcon +
                '}';
     }
 
@@ -374,8 +316,6 @@ public class StackImpl implements Stack {
         private StackSource                    source;
         private List<? extends StackComponent> components;
         private StackIcon                      stackIcon;
-        private List<AclEntryImpl>             acl;
-        private List<String>                   publicActions;
 
         public StackBuilder generateId() {
             id = NameGenerator.generate("stack", 16);
@@ -432,16 +372,6 @@ public class StackImpl implements Stack {
             return this;
         }
 
-        public StackBuilder setAcl(List<AclEntryImpl> acl) {
-            this.acl = acl;
-            return this;
-        }
-
-        public StackBuilder setPublicActions(List<String> publicActions) {
-            this.publicActions = publicActions;
-            return this;
-        }
-
         public StackImpl build() {
             return new StackImpl(id,
                                  name,
@@ -452,9 +382,7 @@ public class StackImpl implements Stack {
                                  workspaceConfig,
                                  source,
                                  components,
-                                 stackIcon,
-                                 acl,
-                                 publicActions);
+                                 stackIcon);
         }
     }
 }
