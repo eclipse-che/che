@@ -37,17 +37,27 @@ init_global_variables() {
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
 
+  GLOBAL_NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
+  GLOBAL_HOST_ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
+  GLOBAL_UNAME=$(docker run --rm alpine sh -c "uname -r")
+  GLOBAL_GET_DOCKER_HOST_IP=$(get_docker_host_ip)
+
   USAGE="
 Usage: che [COMMAND]
            start                              Starts Che server
            stop                               Stops Che server
            restart                            Restart Che server
            update                             Pull latest version of ${CHE_LAUNCHER_IMAGE_NAME}
-           info                               Print some debugging information
+           info                               Print Che server debugging information
            mount <local-path> <ws-ssh-port>   Synchronize workspace to a local directory
            init                               Initialize directory with Che configuration
            up                                 Create workspace from source in current directory
-           test [<url>] [<user>] [<pass>]     Creates simple workspace to verify system config
+           debug [--all        |              Run all debugging tests
+                  --networking |              Test connectivity between Che sub-systems
+                  --cli        |              Print CLI debugging info
+                  --chefile [<url>]           Test creating workspace and project in Che
+                            [<user>] 
+                            [<pass>]]
 "
 }
 
@@ -134,16 +144,6 @@ parse_command_line () {
   fi
 }
 
-is_boot2docker() {
-  UNAME=$(docker run --rm alpine sh -c "uname -r")
-
-  if [[ $UNAME == *"boot2docker"* ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 get_docker_host_ip() {
   case $(get_docker_install_type) in
    boot2docker)
@@ -166,8 +166,7 @@ get_docker_host_ip() {
 }
 
 has_docker_for_windows_ip() {
-  DOCKER_HOST_IP=$(get_docker_host_ip)
-  if [ "${DOCKER_HOST_IP}" = "10.0.75.2" ]; then
+  if [ "${GLOBAL_GET_DOCKER_HOST_IP}" = "10.0.75.2" ]; then
     return 0
   else
     return 1
@@ -175,8 +174,16 @@ has_docker_for_windows_ip() {
 }
 
 has_docker_for_windows_client(){
-  ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
-  if [ "${ARCH}" = "windows" ]; then
+  if [ "${GLOBAL_HOST_ARCH}" = "windows" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_boot2docker() {
+  
+  if [[ $GLOBAL_UNAME == *"boot2docker"* ]]; then
     return 0
   else
     return 1
@@ -184,9 +191,7 @@ has_docker_for_windows_client(){
 }
 
 is_moby_vm() {
-  NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
-
-  if [ "${NAME_MAP}" == "moby" ]; then
+  if [ "${GLOBAL_NAME_MAP}" == "moby" ]; then
     return 0
   else
     return 1
@@ -308,7 +313,37 @@ mount_local_directory() {
                   --device /dev/fuse \
                   --name "${CHE_MOUNT_CONTAINER_NAME}" \
                   -v "${MOUNT_PATH}":/mnthost \
-                  "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" $(get_docker_host_ip) $3
+                  "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
+}
+
+execute_che_debug() {
+
+  if [ $# -eq 1 ]; then
+    TESTS="--all"
+  else
+    TESTS=$2
+  fi
+  
+  case $TESTS in
+    --all|-all)
+      print_che_cli_debug
+      run_connectivity_tests
+      execute_che_test "$@"
+    ;;
+    --cli|-cli)
+      print_che_cli_debug
+    ;;
+    --networking|-networking)
+      run_connectivity_tests
+    ;;
+    --chefile|-chefile)
+      execute_che_test "$@"
+    ;;
+    *)
+      debug "Unknown debug flag passed: $2. Exiting."
+    ;;
+  esac
+
 }
 
 execute_che_test() {
@@ -325,7 +360,7 @@ print_che_cli_debug() {
   debug ""
   debug "---------  PLATFORM INFO  -------------"
   debug "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
-  debug "DOCKER_HOST_IP            = $(get_docker_host_ip)"
+  debug "DOCKER_HOST_IP            = ${GLOBAL_GET_DOCKER_HOST_IP}"
   debug "IS_DOCKER_FOR_WINDOWS     = $(is_docker_for_windows && echo "YES" || echo "NO")"
   debug "IS_DOCKER_FOR_MAC         = $(is_docker_for_mac && echo "YES" || echo "NO")"
   debug "IS_BOOT2DOCKER            = $(is_boot2docker && echo "YES" || echo "NO")"
@@ -333,16 +368,72 @@ print_che_cli_debug() {
   debug "HAS_DOCKER_FOR_WINDOWS_IP = $(has_docker_for_windows_ip && echo "YES" || echo "NO")"
   debug "IS_MOBY_VM                = $(is_moby_vm && echo "YES" || echo "NO")"
   debug ""
+  debug "---------------------------------------"
+  debug "---------------------------------------"
+  debug "---------------------------------------"
+  # Clenaup from any previous lingering tests
+}
+
+run_connectivity_tests() {
   debug ""
   debug "---------------------------------------"
+  debug "-------- CHE CONNECTIVITY TEST --------"
   debug "---------------------------------------"
-  debug "---------------------------------------"
+  # Start a fake workspace agent
+  docker_exec run -d -p 12345:80 --name fakeagent alpine httpd -f -p 80 -h /etc/ > /dev/null
+
+  export AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
+  export AGENT_INTERNAL_PORT=80
+  export AGENT_EXTERNAL_IP=$GLOBAL_GET_DOCKER_HOST_IP
+  #export AGENT_EXTERNAL_IP=$(docker run --rm --net host alpine ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+  export AGENT_EXTERNAL_PORT=12345
+
+
+  ### TEST 1: Simulate browser ==> workspace agent HTTP connectivity
+  export HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                          -s -o /dev/null \
+                          --write-out "%{http_code}")
+
+  if [ "${HTTP_CODE}" = "200" ]; then
+      debug "Browser    => Workspace Agent              : Connection succeeded"
+  else
+      debug "Browser    => Workspace Agent              : Connection failed"
+  fi
+
+  ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
+  export HTTP_CODE=$(docker run --rm --name fakeserver \
+                                --entrypoint=curl \
+                                codenvy/che-server:nightly \
+                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                                  -s -o /dev/null \
+                                  --write-out "%{http_code}")
+  
+  if [ "${HTTP_CODE}" = "200" ]; then
+      debug "Che Server => Workspace Agent (External IP): Connection succeeded"
+  else
+      debug "Che Server => Workspace Agent (External IP): Connection failed"
+  fi
+
+  ### TEST 2: Simulate Che server ==> workspace agent (internal IP) connectivity 
+  export HTTP_CODE=$(docker run --rm --name fakeserver \
+                                --entrypoint=curl \
+                                codenvy/che-server:nightly \
+                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                                  -s -o /dev/null \
+                                  --write-out "%{http_code}")
+
+  if [ "${HTTP_CODE}" = "200" ]; then
+      debug "Che Server => Workspace Agent (Internal IP): Connection succeeded"
+  else
+      debug "Che Server => Workspace Agent (Internal IP): Connection failed"
+  fi
+
+  docker rm -f fakeagent > /dev/null
 }
 
 # See: https://sipb.mit.edu/doc/safe-shell/
 set -e
 set -u
-
 init_logging
 check_docker
 init_global_variables
@@ -364,11 +455,8 @@ case ${CHE_CLI_ACTION} in
   mount)
     mount_local_directory "$@"
   ;;
-  test)
-    execute_che_test "$@"
-  ;;
   debug)
-    print_che_cli_debug
+    execute_che_debug "$@"
   ;;
   help)
     usage
