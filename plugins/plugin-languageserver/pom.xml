@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.6.0-SNAPSHOT</version>
+        <version>4.7.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-languageserver-parent</artifactId>
@@ -25,6 +25,7 @@
     <modules>
         <module>che-plugin-languageserver-shared</module>
         <module>che-plugin-languageserver-server</module>
+        <module>che-plugin-languageserver-agent</module>
         <module>che-plugin-languageserver-ide</module>
     </modules>
     <build>

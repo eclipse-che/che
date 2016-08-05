@@ -3,6 +3,5 @@
   "version": "1.0.0",
   "dependencies": ["org.eclipse.che.base"],
   "properties": {},
-  "script": [
-  ]
+  "script": ""
 }

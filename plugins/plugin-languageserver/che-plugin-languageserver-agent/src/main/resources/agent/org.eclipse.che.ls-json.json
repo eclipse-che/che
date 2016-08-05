@@ -1,0 +1,9 @@
+{
+  "name": "org.eclipse.che.ls.json",
+  "version": "1.0.0",
+  "dependencies": [
+    "org.eclipse.che.base"
+  ],
+  "properties": {},
+  "script": "CHE_HOME=$HOME/che-agents\nLS_HOME=$CHE_HOME/ls-json\n\n\nif [ ! -d \"$LS_HOME\" ];  then mkdir -p $LS_HOME; fi\nwget -qO - https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.json.binaries | tar -C $LS_HOME -xzf -\n\nMACHINE_TYPE=`uname -m`\nif [ ${MACHINE_TYPE} == 'x86_64' ]; then\n    NODEJS=node-v0.12.9-linux-x64\nelse\n    NODEJS=node-v0.12.9-linux-x86\nfi\nNODEJS_HOME=$CHE_HOME/$NODEJS\n\nif [ ! -f \"$NODEJS_HOME/bin/node\" ];  then \n    wget -qO - https://nodejs.org/dist/v0.12.9/$NODEJS.tar.gz | tar -C $CHE_HOME -xzf -\nfi    \n\ntouch $LS_HOME/launch.sh\necho \"$NODEJS_HOME/bin/node $LS_HOME/vscode-json-server/server.js\" > $LS_HOME/launch.sh\nchmod +x $LS_HOME/launch.sh"
+}

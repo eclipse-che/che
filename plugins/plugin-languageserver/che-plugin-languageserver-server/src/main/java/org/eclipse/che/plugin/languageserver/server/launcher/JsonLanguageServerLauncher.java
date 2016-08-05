@@ -19,7 +19,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import static java.util.Arrays.asList;
 
@@ -33,13 +32,13 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
     public static final String[] EXTENSIONS  = new String[] {"json", "bowerrc", "jshintrc", "jscsrc", "eslintrc", "babelrc"};
     public static final String[] MIME_TYPES  = new String[] {"application/json"};
 
-    public static final LanguageDescriptionImpl description;
+    private static final LanguageDescriptionImpl description;
 
     static {
         description = new LanguageDescriptionImpl();
         description.setFileExtensions(asList(EXTENSIONS));
         description.setLanguageId(LANGUAGE_ID);
-        description.setMimeTypes(Arrays.asList(MIME_TYPES));
+        description.setMimeTypes(asList(MIME_TYPES));
     }
 
     @Override

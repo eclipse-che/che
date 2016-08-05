@@ -13,8 +13,8 @@ package org.eclipse.che.plugin.languageserver.server.agent;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.server.Agent;
-import org.eclipse.che.api.agent.server.AgentException;
 import org.eclipse.che.api.agent.server.AgentFactory;
+import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.SimpleAgent;
 import org.eclipse.che.api.agent.shared.model.AgentConfig;
 
@@ -22,10 +22,10 @@ import org.eclipse.che.api.agent.shared.model.AgentConfig;
  * @author Anatolii Bazko
  */
 @Singleton
-public class CSharpLanguageServerAgentFactory implements AgentFactory {
+public class JsonLanguageServerAgentFactory implements AgentFactory {
     @Override
     public String getFqn() {
-        return "org.eclipse.che.ls.csharp";
+        return "org.eclipse.che.ls.json";
     }
 
     @Override
