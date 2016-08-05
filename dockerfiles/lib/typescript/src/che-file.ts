@@ -102,7 +102,7 @@ export class CheFile {
     this.chefileStructWorkspace = new CheFileStructWorkspace();
     this.chefileStructWorkspace.name = 'local';
     this.chefileStructWorkspace.ram = 2048;
-    this.chefileStructWorkspace.commands[0] = {name: 'hello'};
+    this.chefileStructWorkspace.commands[0] = {name: 'my command', commandLine : 'echo hello', type: 'custom'};
 
   }
 
@@ -320,6 +320,7 @@ export class CheFile {
 
       // now create the workspace
       let createWorkspaceConfig : CreateWorkspaceConfig = new CreateWorkspaceConfig();
+      createWorkspaceConfig.commands = this.chefileStructWorkspace.commands;
       createWorkspaceConfig.name = this.chefileStructWorkspace.name;
       createWorkspaceConfig.ram = this.chefileStructWorkspace.ram;
 

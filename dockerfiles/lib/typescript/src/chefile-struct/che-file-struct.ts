@@ -39,8 +39,27 @@ export class CheFileStructWorkspaceRuntime {
     recipe: string;
 }
 
-export class CheFileStructWorkspaceCommand {
+export class CheFileStructWorkspaceCommandAttributes {
+    previewUrl: string;
+}
+
+export interface CheFileStructWorkspaceCommand {
     name: string;
+    type: string;
+    commandLine: string;
+    attributes? : CheFileStructWorkspaceCommandAttributes;
+}
+
+export class CheFileStructWorkspaceCommandImpl implements CheFileStructWorkspaceCommand{
+    name: string;
+    type: string;
+    commandLine: string;
+    attributes : CheFileStructWorkspaceCommandAttributes;
+
+    constructor() {
+        this.type = 'custom';
+        this.attributes = new CheFileStructWorkspaceCommandAttributes();
+    }
 }
 
 
@@ -53,7 +72,7 @@ export class CheFileStructWorkspace {
     commands : Array<CheFileStructWorkspaceCommand>;
 
     constructor() {
-        this.commands = new Array<CheFileStructWorkspaceCommand>();
+        this.commands = new Array<CheFileStructWorkspaceCommandImpl>();
         this.runtime = new CheFileStructWorkspaceRuntime();
     }
 }

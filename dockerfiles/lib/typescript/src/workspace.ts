@@ -13,6 +13,7 @@ import {WorkspaceDto} from './dto/workspacedto';
 import {AuthData} from "./auth-data";
 import {Log} from "./log";
 import {RecipeBuilder} from "./recipebuilder";
+import {CheFileStructWorkspaceCommand} from "./chefile-struct/che-file-struct";
 
 /**
  * Workspace class allowing to manage a workspace, like create/start/stop, etc operations
@@ -79,7 +80,7 @@ export class Workspace {
 
             var workspace = {
                 "defaultEnv": "default",
-                "commands": [],
+                "commands": createWorkspaceConfig.commands,
                 "projects": [],
                 "environments": [{
                     "machineConfigs": [{
@@ -165,5 +166,6 @@ export class CreateWorkspaceConfig {
     dockerContent: string;
     machineConfigSource : any = {"type": "dockerfile", "content": RecipeBuilder.DEFAULT_DOCKERFILE_CONTENT};
     name: string = "default";
+    commands: Array<CheFileStructWorkspaceCommand> = [];
 
 }
