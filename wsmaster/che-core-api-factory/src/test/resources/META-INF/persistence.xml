@@ -25,6 +25,7 @@
         <class>org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.PoliciesImpl</class>
         <class>org.eclipse.che.api.factory.server.FactoryImage</class>
+        <class>org.eclipse.che.account.spi.AccountImpl</class>
         <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl</class>

@@ -16,6 +16,7 @@
     <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
+        <class>org.eclipse.che.account.spi.AccountImpl</class>
         <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
