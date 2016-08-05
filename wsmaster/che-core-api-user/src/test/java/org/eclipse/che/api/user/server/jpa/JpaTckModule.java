@@ -23,6 +23,7 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.tck.TckModule;
+import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.SHA512PasswordEncryptor;
@@ -41,7 +42,7 @@ public class JpaTckModule extends TckModule {
         bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
 
         bind(new TypeLiteral<TckRepository<UserImpl>>() {}).to(UserJpaTckRepository.class);
-        bind(new TypeLiteral<TckRepository<ProfileImpl>>() {}).to(ProfileJpaTckRepository.class);
+        bind(new TypeLiteral<TckRepository<ProfileImpl>>() {}).toInstance(new JpaTckRepository<>(ProfileImpl.class));
         bind(new TypeLiteral<TckRepository<Pair<String, Map<String, String>>>>() {}).to(PreferenceJpaTckRepository.class);
 
         bind(UserDao.class).to(JpaUserDao.class);
