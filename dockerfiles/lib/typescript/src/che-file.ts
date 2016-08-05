@@ -117,7 +117,7 @@ export class CheFile {
     return new Promise<string>( (resolve, reject) => {
       if (this.args.length == 0) {
         reject('only init and up commands are supported.');
-      } else if ('init' === this.args[1] || 'up' === this.args[1]) {
+      } else if ('init' === this.args[1] || 'up' === this.args[1] || 'down' === this.args[1]) {
         // return method found based on arguments
         resolve(this.args[1]);
       } else {
@@ -157,7 +157,8 @@ export class CheFile {
     var script = this.vm.createScript(script_code);
     script.runInNewContext(sandbox);
 
-    Log.getLogger().debug('Che file parsing object is ', this.chefileStruct);
+    Log.getLogger().debug('Che file parsing object is ', JSON.stringify(this.chefileStruct));
+    Log.getLogger().debug('Che workspace parsing object is ', JSON.stringify(this.chefileStructWorkspace));
 
     this.authData.port = this.chefileStruct.server.port;
 
@@ -235,6 +236,47 @@ export class CheFile {
     });
 
   }
+
+
+  /**
+   * Search a che instance and stop it it it's currently running
+   */
+  down() : Promise<void> {
+
+    // call init if not initialized and then call up
+    return this.isInitialized().then((isInitialized) => {
+      if (!isInitialized) {
+        throw new Error('Unable to stop current instance as this directory has not been initialized.')
+      }
+    }).then(() => {
+      return this.performDown();
+    });
+  }
+
+
+  performDown() : Promise<void> {
+
+    var callbackSubscriber:WorkspaceEventPromiseMessageBusSubscriber;
+
+    return new Promise<string>((resolve, reject) => {
+      this.parse();
+
+      resolve();
+    }).then(() => {
+      this.dockerContent = new RecipeBuilder().getDockerContent();
+
+      // loop to check startup (during 30seconds)
+      return this.loopWaitChePing();
+    }).then((value) => {
+      Log.getLogger().info('FOUND ECLIPSE CHE', this.buildLocalCheURL());
+
+      // call docker stop on the docker launcher
+      this.cheStop();
+      Log.getLogger().info('STOP ACTION CALLED');
+    })
+  }
+
+
 
   up() : Promise<string> {
 
@@ -511,7 +553,26 @@ export class CheFile {
 
   }
 
-  cheHasBooted() {
+  /**
+   * Command used to stop the che instance that has been launched
+   */
+  cheStop() {
+    var commandLine: string = 'docker run ' +
+        ' -v /var/run/docker.sock:/var/run/docker.sock' +
+        ' -e CHE_PORT=' + this.chefileStruct.server.port +
+        ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
+        ' -e CHE_CONF_FOLDER=' + this.confFolder +
+        ' codenvy/che-launcher:nightly stop';
+
+    Log.getLogger().debug('Executing command line', commandLine);
+    var child = this.exec(commandLine , function callback(error, stdout, stderr) {
+        }
+    );
+
+
+    child.stdout.on('data', (data) => {
+      Log.getLogger().info(data.toString());
+    });
 
   }
 
