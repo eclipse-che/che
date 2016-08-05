@@ -65,8 +65,7 @@ public class LocalStackDaoImpl implements StackDao {
         stacks.putAll(stackStorage.loadMap());
     }
 
-    @PreDestroy
-    public synchronized void stop() throws IOException {
+    public synchronized void saveStacks() throws IOException {
         stackStorage.store(stacks);
     }
 

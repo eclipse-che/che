@@ -46,6 +46,8 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class LocalPreferenceDaoImpl implements PreferenceDao {
 
+    public static final String FILENAME = "preferences.json";
+
     private static final Logger LOG = LoggerFactory.getLogger(LocalPreferenceDaoImpl.class);
 
     private final LocalStorage preferenceStorage;
@@ -71,8 +73,7 @@ public class LocalPreferenceDaoImpl implements PreferenceDao {
         }
     }
 
-    @PreDestroy
-    private synchronized void stop() throws IOException {
+    public synchronized void savePreferences() throws IOException {
         preferenceStorage.store(preferences);
     }
 

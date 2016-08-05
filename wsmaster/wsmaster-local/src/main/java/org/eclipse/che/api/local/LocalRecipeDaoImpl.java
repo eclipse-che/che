@@ -47,6 +47,8 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class LocalRecipeDaoImpl implements RecipeDao {
 
+    public static final String FILENAME = "recipes.json";
+
     @VisibleForTesting
     final Map<String, RecipeImpl> recipes;
 
@@ -54,7 +56,7 @@ public class LocalRecipeDaoImpl implements RecipeDao {
 
     @Inject
     public LocalRecipeDaoImpl(LocalStorageFactory storageFactory) throws IOException {
-        this.recipeStorage = storageFactory.create("recipes.json");
+        this.recipeStorage = storageFactory.create(FILENAME);
         this.recipes = new HashMap<>();
     }
 
@@ -63,7 +65,6 @@ public class LocalRecipeDaoImpl implements RecipeDao {
         recipes.putAll(recipeStorage.loadMap(new TypeToken<Map<String, RecipeImpl>>() {}));
     }
 
-    @PreDestroy
     public synchronized void saveRecipes() throws IOException {
         recipeStorage.store(recipes);
     }

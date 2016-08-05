@@ -43,6 +43,8 @@
         <class>org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.PoliciesImpl</class>
         <class>org.eclipse.che.api.factory.server.FactoryImage</class>
+        <class>org.eclipse.che.api.machine.server.recipe.RecipeImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>

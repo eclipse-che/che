@@ -45,6 +45,8 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class LocalProfileDaoImpl implements ProfileDao {
 
+    public static final java.lang.String FILENAME = "profiles.json";
+
     @VisibleForTesting
     final Map<String, ProfileImpl> profiles;
 
@@ -53,7 +55,7 @@ public class LocalProfileDaoImpl implements ProfileDao {
     @Inject
     public LocalProfileDaoImpl(LocalStorageFactory storageFactory) throws IOException {
         profiles = new LinkedHashMap<>();
-        profileStorage = storageFactory.create("profiles.json");
+        profileStorage = storageFactory.create(FILENAME);
     }
 
     @PostConstruct
@@ -70,8 +72,7 @@ public class LocalProfileDaoImpl implements ProfileDao {
         }
     }
 
-    @PreDestroy
-    private synchronized void stop() throws IOException {
+    public synchronized void saveProfiles() throws IOException {
         profileStorage.store(profiles);
     }
 
