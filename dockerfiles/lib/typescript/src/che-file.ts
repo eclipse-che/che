@@ -372,66 +372,6 @@ export class CheFile {
     return 'http://' + this.chefileStruct.server.ip + ':' + this.chefileStruct.server.port;
   }
 
-
-  /**
-   * Create workspace based on the remote hostname and workspacename
-   * if custom docker content is provided, use it
-   */
-  createWorkspace(dockerContent) {
-    var options = {
-      hostname: this.chefileStruct.server.ip,
-      port: this.chefileStruct.server.port,
-      path: '/api/workspace?account=',
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json, text/plain, */*',
-        'Content-Type': 'application/json;charset=UTF-8'
-      }
-    };
-    var req = this.http.request(options, (res) => {
-      res.on('data', (body) => {
-
-        if (res.statusCode == 201) {
-          // workspace created, continue
-          this.displayUrlWorkspace(JSON.parse(body));
-        } else {
-          // error
-          Log.getLogger().error('Invalid response from the server side. Aborting');
-          Log.getLogger().error('response was ' + body);
-        }
-      });
-    });
-    req.on('error', (e) => {
-      Log.getLogger().error('problem with request: ' + e.message);
-    });
-
-    var workspace = {
-      "defaultEnv": "default",
-      "commands": [],
-      "projects": [],
-      "environments": [{
-        "machineConfigs": [{
-          "dev": true,
-          "servers": [],
-          "envVariables": {},
-          "limits": {"ram": 2500},
-          "source": {"type": "dockerfile", "content": dockerContent},
-          "name": "default",
-          "type": "docker",
-          "links": []
-        }], "name": "default"
-      }],
-      "name": this.chefileStructWorkspace.name,
-      "links": [],
-      "description": null
-    };
-
-
-    req.write(JSON.stringify(workspace));
-    req.end();
-
-  }
-
   displayUrlWorkspace(workspace) {
 
     var found = false;
@@ -451,7 +391,6 @@ export class CheFile {
     if (!found) {
       Log.getLogger().warn('Workspace successfully started but unable to find workspace link');
     }
-
 
   }
 
