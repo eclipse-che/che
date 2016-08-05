@@ -39,7 +39,6 @@ public class PreferenceJpaTckRepository implements TckRepository<Pair<String, Ma
     public void createAll(Collection<? extends Pair<String, Map<String, String>>> entities) throws TckRepositoryException {
         final EntityManager manager = managerProvider.get();
         for (Pair<String, Map<String, String>> pair : entities) {
-            manager.persist(new UserImpl(pair.first, "email_" + pair.first, "name_" + pair.first));
             manager.persist(new PreferenceEntity(pair.first, pair.second));
         }
     }
@@ -50,6 +49,5 @@ public class PreferenceJpaTckRepository implements TckRepository<Pair<String, Ma
         manager.createQuery("SELECT prefs FROM Preference prefs", PreferenceEntity.class)
                .getResultList()
                .forEach(manager::remove);
-        manager.createQuery("DELETE FROM \"User\"").executeUpdate();
     }
 }

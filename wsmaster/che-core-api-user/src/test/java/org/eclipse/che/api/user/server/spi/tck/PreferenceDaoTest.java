@@ -12,6 +12,7 @@ package org.eclipse.che.api.user.server.spi.tck;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.test.tck.TckModuleFactory;
@@ -23,10 +24,12 @@ import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -47,27 +50,35 @@ public class PreferenceDaoTest {
     private List<Pair<String, Map<String, String>>> userPreferences;
 
     @Inject
-    private PreferenceDao preferenceDao;
-
+    private PreferenceDao                                    preferenceDao;
     @Inject
-    private TckRepository<Pair<String, Map<String, String>>> tckRepository;
+    private TckRepository<UserImpl>                          userTckRepository;
+    @Inject
+    private TckRepository<Pair<String, Map<String, String>>> preferenceTckRepository;
 
     @BeforeMethod
     private void setUp() throws Exception {
         userPreferences = new ArrayList<>(ENTRY_COUNT);
+        UserImpl[] users = new UserImpl[ENTRY_COUNT];
+
         for (int index = 0; index < ENTRY_COUNT; index++) {
+            String userId = "userId_" + index;
+            users[index] = new UserImpl(userId, "email_" + userId, "name_" + userId, "password", emptyList());
+
             final Map<String, String> prefs = new HashMap<>();
             prefs.put("preference1", "value");
             prefs.put("preference2", "value");
             prefs.put("preference3", "value");
-            userPreferences.add(Pair.of("userId_" + index, prefs));
+            userPreferences.add(Pair.of(userId, prefs));
         }
-        tckRepository.createAll(userPreferences);
+        userTckRepository.createAll(Arrays.asList(users));
+        preferenceTckRepository.createAll(userPreferences);
     }
 
     @AfterMethod
     private void cleanUp() throws Exception {
-        tckRepository.removeAll();
+        preferenceTckRepository.removeAll();
+        userTckRepository.removeAll();
     }
 
     @Test(dependsOnMethods = {"shouldGetPreference", "shouldRemovePreference"})

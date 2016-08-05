@@ -44,28 +44,9 @@ public class WorkspaceTckModule extends TckModule {
         bind(org.eclipse.che.api.core.h2.jdbc.jpa.eclipselink.H2ExceptionHandler.class);
 
         bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
-        bind(new TypeLiteral<TckRepository<StackImpl>>() {}).to(StackTckRepository.class);
+        bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new JpaTckRepository<>(StackImpl.class));
 
         bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
         bind(StackDao.class).to(JpaStackDao.class);
-    }
-
-    @Transactional
-    public static class StackTckRepository implements TckRepository<StackImpl> {
-
-        @Inject
-        private Provider<EntityManager> managerProvider;
-
-        @Override
-        public void createAll(Collection<? extends StackImpl> entities) throws TckRepositoryException {
-            final EntityManager manager = managerProvider.get();
-            entities.forEach(manager::persist);
-        }
-
-        @Override
-        public void removeAll() throws TckRepositoryException {
-            final EntityManager manager = managerProvider.get();
-            manager.createNamedQuery("Stack.getAll", StackImpl.class).getResultList().forEach(manager::remove);
-        }
     }
 }

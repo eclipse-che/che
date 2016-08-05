@@ -40,31 +40,10 @@ public class JpaTckModule extends TckModule {
         install(new JpaPersistModule("main"));
         bind(JpaInitializer.class).asEagerSingleton();
 
-        bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).to(RecipeJpaTckRepository.class);
+        bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).toInstance(new JpaTckRepository<>(RecipeImpl.class));
         bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).toInstance(new JpaTckRepository<>(SnapshotImpl.class));
 
         bind(RecipeDao.class).to(JpaRecipeDao.class);
         bind(SnapshotDao.class).to(JpaSnapshotDao.class);
-    }
-
-    @Transactional
-    public static class RecipeJpaTckRepository implements TckRepository<RecipeImpl> {
-
-        @Inject
-        private Provider<EntityManager> managerProvider;
-
-        @Override
-        public void createAll(Collection<? extends RecipeImpl> entities) throws TckRepositoryException {
-            final EntityManager manager = managerProvider.get();
-            entities.stream().forEach(manager::persist);
-        }
-
-        @Override
-        public void removeAll() throws TckRepositoryException {
-            final EntityManager manager = managerProvider.get();
-            manager.createQuery("SELECT recipe FROM Recipe recipe", RecipeImpl.class)
-                   .getResultList()
-                   .forEach(manager::remove);
-        }
     }
 }
