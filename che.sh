@@ -395,10 +395,26 @@ run_connectivity_tests() {
                           --write-out "%{http_code}")
 
   if [ "${HTTP_CODE}" = "200" ]; then
-      debug "Browser    => Workspace Agent              : Connection succeeded"
+      debug "Browser             => Workspace Agent              : Connection succeeded"
   else
-      debug "Browser    => Workspace Agent              : Connection failed"
+      debug "Browser             => Workspace Agent              : Connection failed"
   fi
+
+ ### TEST 1a: Simulate browser (websockets) ==> workspace agent HTTP connectivity
+  export HTTP_CODE=$(curl -I -N \
+                          -H "Connection: Upgrade" \
+                          -H "Upgrade: websocket" \
+                          -H "Host: ${AGENT_EXTERNAL_IP}" \
+                          -H "Origin: http://${AGENT_EXTERNAL_IP}" \
+                          ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                            -s -o /dev/null --write-out "%{http_code}")
+
+  if [ "${HTTP_CODE}" = "200" ]; then
+      debug "Browser (websocket) => Workspace Agent              : Connection succeeded"
+  else
+      debug "Browser (websocket) => Workspace Agent              : Connection failed"
+  fi
+
 
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
@@ -409,12 +425,12 @@ run_connectivity_tests() {
                                   --write-out "%{http_code}")
   
   if [ "${HTTP_CODE}" = "200" ]; then
-      debug "Che Server => Workspace Agent (External IP): Connection succeeded"
+      debug "Che Server          => Workspace Agent (External IP): Connection succeeded"
   else
-      debug "Che Server => Workspace Agent (External IP): Connection failed"
+      debug "Che Server          => Workspace Agent (External IP): Connection failed"
   fi
 
-  ### TEST 2: Simulate Che server ==> workspace agent (internal IP) connectivity 
+  ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
                                 codenvy/che-server:nightly \
@@ -423,9 +439,9 @@ run_connectivity_tests() {
                                   --write-out "%{http_code}")
 
   if [ "${HTTP_CODE}" = "200" ]; then
-      debug "Che Server => Workspace Agent (Internal IP): Connection succeeded"
+      debug "Che Server          => Workspace Agent (Internal IP): Connection succeeded"
   else
-      debug "Che Server => Workspace Agent (Internal IP): Connection failed"
+      debug "Che Server          => Workspace Agent (Internal IP): Connection failed"
   fi
 
   docker rm -f fakeagent > /dev/null
