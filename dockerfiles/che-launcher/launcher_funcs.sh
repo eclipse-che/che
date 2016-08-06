@@ -97,6 +97,35 @@ is_docker_for_windows() {
   fi
 }
 
+get_list_of_che_system_environment_variables() {
+  # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
+  IFS=$'\n'
+  
+  DOCKER_ENV=$(mktemp)
+
+  # First grab all known CHE_ variables
+  CHE_VARIABLES=$(env | grep CHE_)
+  for SINGLE_VARIABLE in "${CHE_VARIABLES}"; do
+    echo "${SINGLE_VARIABLE}" >> $DOCKER_ENV
+  done
+
+  # Add in known proxy variables
+  if [ ! -z ${http_proxy+x} ]; then 
+    echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
+  fi
+
+  if [ ! -z ${https_proxy+x} ]; then 
+    echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
+  fi
+
+  if [ ! -z ${no_proxy+x} ]; then 
+    echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
+  fi
+
+  echo $DOCKER_ENV
+}
+
+
 get_docker_install_type() {
   if is_boot2docker; then
     echo "boot2docker"

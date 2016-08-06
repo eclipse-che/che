@@ -27,8 +27,8 @@ error_exit() {
 
 check_docker() {
   if ! docker ps > /dev/null 2>&1; then
-    output=$(docker)
-    error_exit "Error - Docker not installed properly: ${output}"
+    output=$(docker ps)
+    error_exit "Error - Docker not installed properly: \n${output}"
   fi
 
   # Prep script by getting default image
@@ -69,17 +69,17 @@ Usage: che [COMMAND]
            start                              Starts Che server
            stop                               Stops Che server
            restart                            Restart Che server
-           update                             Pull latest version of ${CHE_LAUNCHER_IMAGE_NAME}
-           info                               Print Che server debugging information
+           update                             Pulls specific version, respecting CHE_VERSION
            mount <local-path> <ws-ssh-port>   Synchronize workspace to a local directory
            init                               Initialize directory with Che configuration
            up                                 Create workspace from source in current directory
-           debug [--all                |      Run all debugging tests
-                  --networking         |      Test connectivity between Che sub-systems
-                  --cli                |      Print CLI debugging info
-                  --chefile [<url>]           Test creating workspace and project in Che
-                            [<user>] 
-                            [<pass>]]
+           info [ --all                       Run all debugging tests
+                  --server                    Run Che launcher and server debugging tests
+                  --networking                Test connectivity between Che sub-systems
+                  --cli                       Print CLI (this program)debugging info
+                  --create [<url>]            Test creating a workspace and project in Che
+                           [<user>] 
+                           [<pass>] ]
 "
 }
 
@@ -104,7 +104,7 @@ parse_command_line () {
     CHE_CLI_ACTION="help"
   else
     case $1 in
-      start|stop|restart|update|info|init|up|mount|test|debug|help|-h|--help)
+      start|stop|restart|update|info|init|up|mount|test|help|-h|--help)
         CHE_CLI_ACTION=$1
       ;;
       *)
@@ -241,31 +241,31 @@ has_docker_for_windows_ip() {
 }
 
 
-get_list_of_variables() {
-
+get_list_of_che_system_environment_variables() {
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
-  RETURN=()
+  DOCKER_ENV=$(mktemp docker-run-env.XXX)
 
   # First grab all known CHE_ variables
   CHE_VARIABLES=($(env | grep CHE_))
   for SINGLE_VARIABLE in "${CHE_VARIABLES[@]}"; do
-    RETURN+=("--env="'"'"${SINGLE_VARIABLE}"'"') 
+    echo "${SINGLE_VARIABLE}" >> $DOCKER_ENV
   done
 
   # Add in known proxy variables
   if [ ! -z ${http_proxy+x} ]; then 
-  	RETURN+=("--env="'"'"http_proxy=${http_proxy}"'"')
+  	echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
   fi
 
   if [ ! -z ${https_proxy+x} ]; then 
-    RETURN+=("--env="'"'"https_proxy=${https_proxy}"'"')
+    echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
   fi
 
   if [ ! -z ${no_proxy+x} ]; then 
-    RETURN+=("--env="'"'"no_proxy=${no_proxy}"'"')
+    echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
   fi
-  echo "${RETURN[@]}"
+
+  echo $DOCKER_ENV
 }
 
 check_current_image_and_update_if_not_found() {
@@ -284,11 +284,15 @@ execute_che_launcher() {
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
   info "ECLIPSE CHE: LAUNCHING LAUNCHER"
 
+  ENV_FILE=$(get_list_of_che_system_environment_variables)
+
   docker_exec run -t --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    $(get_list_of_variables) \
-    "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" \
-    # > /dev/null 2>&1
+    --env-file=$ENV_FILE \
+    "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
+
+  # Remove temporary file
+  rm -rf $ENV_FILE
 }
 
 execute_che_file() {
@@ -345,7 +349,7 @@ mount_local_directory() {
 execute_che_debug() {
 
   if [ $# -eq 1 ]; then
-    TESTS="--all"
+    TESTS="--server"
   else
     TESTS=$2
   fi
@@ -353,6 +357,7 @@ execute_che_debug() {
   case $TESTS in
     --all|-all)
       print_che_cli_debug
+      execute_che_launcher
       run_connectivity_tests
       execute_che_test "$@"
     ;;
@@ -362,7 +367,12 @@ execute_che_debug() {
     --networking|-networking)
       run_connectivity_tests
     ;;
-    --chefile|-chefile)
+    --server|-server)
+      print_che_cli_debug
+      info ""
+      execute_che_launcher
+    ;;
+    --create|-create)
       execute_che_test "$@"
     ;;
     *)
@@ -481,7 +491,7 @@ init_global_variables
 parse_command_line "$@"
 
 case ${CHE_CLI_ACTION} in
-  start|stop|restart|info)
+  start|stop|restart)
     execute_che_launcher
   ;;
   init|up)
@@ -496,7 +506,7 @@ case ${CHE_CLI_ACTION} in
   mount)
     mount_local_directory "$@"
   ;;
-  debug)
+  info)
     execute_che_debug "$@"
   ;;
   help)

@@ -22,6 +22,8 @@ start_che_server() {
     update_che_server
   fi
 
+  ENV_FILE=$(get_list_of_che_system_environment_variables)
+
   info "ECLIPSE CHE: CONTAINER STARTING"
   docker run -d --name "${CHE_SERVER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
@@ -32,6 +34,7 @@ start_che_server() {
     --user="${CHE_USER}" \
     ${CHE_CONF_ARGS} \
     ${CHE_STORAGE_ARGS} \
+    --env-file=$ENV_FILE \
     "${CHE_SERVER_IMAGE_NAME}":"${CHE_VERSION}" \
                 --remote:"${CHE_HOST_IP}" \
                 -s:uid \
@@ -39,6 +42,8 @@ start_che_server() {
                 ${CHE_DEBUG_OPTION} \
                 run > /dev/null
 
+  rm $ENV_FILE
+  
   wait_until_container_is_running 10
   if ! che_container_is_running; then
     error_exit "ECLIPSE CHE: Timeout waiting Che container to start."
