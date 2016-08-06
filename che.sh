@@ -408,15 +408,14 @@ run_connectivity_tests() {
   # Start a fake workspace agent
   docker_exec run -d -p 12345:80 --name fakeagent alpine httpd -f -p 80 -h /etc/ > /dev/null
 
-  export AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
-  export AGENT_INTERNAL_PORT=80
-  export AGENT_EXTERNAL_IP=$GLOBAL_GET_DOCKER_HOST_IP
-  #export AGENT_EXTERNAL_IP=$(docker run --rm --net host alpine ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
-  export AGENT_EXTERNAL_PORT=12345
+  AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
+  AGENT_INTERNAL_PORT=80
+  AGENT_EXTERNAL_IP=$GLOBAL_GET_DOCKER_HOST_IP
+  AGENT_EXTERNAL_PORT=12345
 
 
   ### TEST 1: Simulate browser ==> workspace agent HTTP connectivity
-  export HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+  HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                           -s -o /dev/null \
                           --write-out "%{http_code}")
 
@@ -426,8 +425,8 @@ run_connectivity_tests() {
       debug "Browser             => Workspace Agent              : Connection failed"
   fi
 
- ### TEST 1a: Simulate browser (websockets) ==> workspace agent HTTP connectivity
-  export HTTP_CODE=$(curl -I -N \
+  ### TEST 1a: Simulate browser (websockets) ==> workspace agent HTTP connectivity
+  HTTP_CODE=$(curl -I -N \
                           -H "Connection: Upgrade" \
                           -H "Upgrade: websocket" \
                           -H "Host: ${AGENT_EXTERNAL_IP}" \
