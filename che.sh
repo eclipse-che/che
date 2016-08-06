@@ -16,6 +16,28 @@ init_logging() {
   NC='\033[0m'
 }
 
+error_exit() {
+  echo  "---------------------------------------"
+  error "!!!"
+  error "!!! ${1}"
+  error "!!!"
+  echo  "---------------------------------------"
+  exit 1
+}
+
+check_docker() {
+  if ! docker ps > /dev/null 2>&1; then
+    output=$(docker)
+    error_exit "Error - Docker not installed properly: ${output}"
+  fi
+
+  # Prep script by getting default image
+  if [[ "$(docker images -q alpine 2> /dev/null)" == "" ]]; then
+    info "ECLIPSE CHE: PULLING IMAGE alpine:latest"
+    docker pull alpine > /dev/null 2>&1
+  fi
+}
+
 init_global_variables() {
 
   CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
@@ -52,9 +74,9 @@ Usage: che [COMMAND]
            mount <local-path> <ws-ssh-port>   Synchronize workspace to a local directory
            init                               Initialize directory with Che configuration
            up                                 Create workspace from source in current directory
-           debug [--all        |              Run all debugging tests
-                  --networking |              Test connectivity between Che sub-systems
-                  --cli        |              Print CLI debugging info
+           debug [--all                |      Run all debugging tests
+                  --networking         |      Test connectivity between Che sub-systems
+                  --cli                |      Print CLI debugging info
                   --chefile [<url>]           Test creating workspace and project in Che
                             [<user>] 
                             [<pass>]]
@@ -77,57 +99,6 @@ error() {
   printf  "${RED}ERROR:${NC} %s\n" "${1}"
 }
 
-error_exit() {
-  echo  "---------------------------------------"
-  error "!!!"
-  error "!!! ${1}"
-  error "!!!"
-  echo  "---------------------------------------"
-  exit 1
-}
-
-get_full_path() {
-  echo $(realpath $1)
-}
-
-convert_windows_to_posix() {
-  echo "/"$(echo "$1" | sed 's/\\/\//g' | sed 's/://')
-}
-
-get_clean_path() {
-  INPUT_PATH=$1
-  # \some\path => /some/path
-  OUTPUT_PATH=$(echo ${INPUT_PATH} | tr '\\' '/')
-  # /somepath/ => /somepath
-  OUTPUT_PATH=${OUTPUT_PATH%/}
-  # /some//path => /some/path
-  OUTPUT_PATH=$(echo ${OUTPUT_PATH} | tr -s '/')
-  # "/some/path" => /some/path
-  OUTPUT_PATH=${OUTPUT_PATH//\"}
-  echo ${OUTPUT_PATH}
-}
-
-get_mount_path() {
-  FULL_PATH=$(get_full_path $1)
-  POSIX_PATH=$(convert_windows_to_posix $FULL_PATH)
-  echo $(get_clean_path $POSIX_PATH)
-}
-
-docker_exec() {
-  if is_boot2docker || is_docker_for_windows; then
-    MSYS_NO_PATHCONV=1 docker.exe "$@"
-  else
-    "$(which docker)" "$@"
-  fi
-}
-
-check_docker() {
-  if ! docker ps > /dev/null 2>&1; then
-    output=$(docker)
-    error_exit "Error - Docker not installed properly: ${output}"
-  fi
-}
-
 parse_command_line () {
   if [ $# -eq 0 ]; then 
     CHE_CLI_ACTION="help"
@@ -144,6 +115,14 @@ parse_command_line () {
   fi
 }
 
+docker_exec() {
+  if is_boot2docker || is_docker_for_windows; then
+    MSYS_NO_PATHCONV=1 docker.exe "$@"
+  else
+    "$(which docker)" "$@"
+  fi
+}
+
 get_docker_host_ip() {
   case $(get_docker_install_type) in
    boot2docker)
@@ -156,7 +135,7 @@ get_docker_host_ip() {
      NETWORK_IF="eth0"
    ;;
   esac
-
+  
   docker run --rm --net host \
             alpine sh -c \
             "ip a show ${NETWORK_IF}" | \
@@ -165,33 +144,20 @@ get_docker_host_ip() {
             awk '{ print $2}'
 }
 
-has_docker_for_windows_ip() {
-  if [ "${GLOBAL_GET_DOCKER_HOST_IP}" = "10.0.75.2" ]; then
-    return 0
+get_docker_install_type() {
+  if is_boot2docker; then
+    echo "boot2docker"
+  elif is_docker_for_windows; then
+    echo "docker4windows"
+  elif is_docker_for_mac; then
+    echo "docker4mac"
   else
-    return 1
-  fi
-}
-
-has_docker_for_windows_client(){
-  if [ "${GLOBAL_HOST_ARCH}" = "windows" ]; then
-    return 0
-  else
-    return 1
+    echo "native"
   fi
 }
 
 is_boot2docker() {
-  
   if [[ $GLOBAL_UNAME == *"boot2docker"* ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
-is_moby_vm() {
-  if [ "${GLOBAL_NAME_MAP}" == "moby" ]; then
     return 0
   else
     return 1
@@ -222,26 +188,84 @@ is_native() {
   fi
 }
 
-get_docker_install_type() {
-  if is_boot2docker; then
-    echo "boot2docker"
-  elif is_docker_for_windows; then
-    echo "docker4windows"
-  elif is_docker_for_mac; then
-    echo "docker4mac"
+is_moby_vm() {
+  if [ "${GLOBAL_NAME_MAP}" == "moby" ]; then
+    return 0
   else
-    echo "native"
+    return 1
   fi
 }
 
+has_docker_for_windows_client(){
+  if [ "${GLOBAL_HOST_ARCH}" = "windows" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+get_full_path() {
+  echo $(realpath $1)
+}
+
+convert_windows_to_posix() {
+  echo "/"$(echo "$1" | sed 's/\\/\//g' | sed 's/://')
+}
+
+get_clean_path() {
+  INPUT_PATH=$1
+  # \some\path => /some/path
+  OUTPUT_PATH=$(echo ${INPUT_PATH} | tr '\\' '/')
+  # /somepath/ => /somepath
+  OUTPUT_PATH=${OUTPUT_PATH%/}
+  # /some//path => /some/path
+  OUTPUT_PATH=$(echo ${OUTPUT_PATH} | tr -s '/')
+  # "/some/path" => /some/path
+  OUTPUT_PATH=${OUTPUT_PATH//\"}
+  echo ${OUTPUT_PATH}
+}
+
+get_mount_path() {
+  FULL_PATH=$(get_full_path $1)
+  POSIX_PATH=$(convert_windows_to_posix $FULL_PATH)
+  echo $(get_clean_path $POSIX_PATH)
+}
+
+
+has_docker_for_windows_ip() {
+  if [ "${GLOBAL_GET_DOCKER_HOST_IP}" = "10.0.75.2" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+
 get_list_of_variables() {
-  RETURN=""
-  CHE_VARIABLES=$(env | grep "CHE_")
-  for SINGLE_VARIABLE in $CHE_VARIABLES; do
-    VALUE=" --env ${SINGLE_VARIABLE}"
-    RETURN="${RETURN}""${VALUE}"
+
+  # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
+  IFS=$'\n'
+  RETURN=()
+
+  # First grab all known CHE_ variables
+  CHE_VARIABLES=($(env | grep CHE_))
+  for SINGLE_VARIABLE in "${CHE_VARIABLES[@]}"; do
+    RETURN+=("--env="'"'"${SINGLE_VARIABLE}"'"') 
   done
-  echo $RETURN
+
+  # Add in known proxy variables
+  if [ ! -z ${http_proxy+x} ]; then 
+  	RETURN+=("--env="'"'"http_proxy=${http_proxy}"'"')
+  fi
+
+  if [ ! -z ${https_proxy+x} ]; then 
+    RETURN+=("--env="'"'"https_proxy=${https_proxy}"'"')
+  fi
+
+  if [ ! -z ${no_proxy+x} ]; then 
+    RETURN+=("--env="'"'"no_proxy=${no_proxy}"'"')
+  fi
+  echo "${RETURN[@]}"
 }
 
 check_current_image_and_update_if_not_found() {
@@ -287,7 +311,9 @@ update_che_image() {
   fi
 
   info "ECLIPSE CHE: PULLING IMAGE $1:${CHE_VERSION}"
+  info ""
   docker pull $1:${CHE_VERSION}
+  info ""
   info "ECLIPSE CHE: IMAGE $1:${CHE_VERSION} INSTALLED"
 }
 
