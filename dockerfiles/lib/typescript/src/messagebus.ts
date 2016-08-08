@@ -210,7 +210,16 @@ export class MessageBus {
             var subscribers : Array<MessageBusSubscriber> = this.subscribersByChannel.get(channelHeader.value);
             if (subscribers) {
                 subscribers.forEach((subscriber : MessageBusSubscriber) => {
-                    subscriber.handleMessage(JSON.parse(jsonMessage.body));
+
+                    // Convert to JSON object if it's a JSON body
+                    var data;
+                    try {
+                        data = JSON.parse(jsonMessage.body);
+                    } catch (error) {
+                        // keep raw data
+                        data = jsonMessage.body;
+                    }
+                    subscriber.handleMessage(data);
                 });
             }
         }
