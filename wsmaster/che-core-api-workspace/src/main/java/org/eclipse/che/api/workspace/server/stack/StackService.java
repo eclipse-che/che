@@ -51,7 +51,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
@@ -75,11 +74,13 @@ import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_UPLOAD_ICO
 @Path("/stack")
 public class StackService extends Service {
 
-    private final StackDao stackDao;
+    private final StackDao       stackDao;
+    private final StackValidator stackValidator;
 
     @Inject
-    public StackService(StackDao stackDao) {
+    public StackService(StackDao stackDao, StackValidator stackValidator) {
         this.stackDao = stackDao;
+        this.stackValidator = stackValidator;
     }
 
     @POST
@@ -96,12 +97,8 @@ public class StackService extends Service {
                                                       "(e.g. The stack with such name already exists)"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response createStack(@ApiParam("The new stack") final StackDto stackDto) throws ApiException {
-        requireNonNull(stackDto, "Stack required");
-        requireNonNullAndNonEmpty(stackDto.getName(), "Stack name required");
-        if (stackDto.getSource() == null && stackDto.getWorkspaceConfig() == null) {
-            throw new BadRequestException("Stack source required. You must specify stack source: 'workspaceConfig' or 'stackSource'");
-        }
 
+        stackValidator.check(stackDto);
         String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
 
         StackImpl newStack = StackImpl.builder()
@@ -154,11 +151,7 @@ public class StackService extends Service {
                                 @ApiParam(value = "The stack id", required = true)
                                 @PathParam("id")
                                 final String id) throws ApiException {
-        requireNonNull(updateDto, "Stack required");
-        if (updateDto.getSource() == null && updateDto.getWorkspaceConfig() == null) {
-            throw new BadRequestException("Stack source required. You must specify stack source: 'workspaceConfig' or 'stackSource'");
-        }
-
+        stackValidator.check(updateDto);
         final StackImpl stack = stackDao.getById(id);
 
         StackImpl stackForUpdate = StackImpl.builder()
@@ -332,17 +325,5 @@ public class StackService extends Service {
             links.add(getIconLink);
         }
         return asDto(stack).withLinks(links);
-    }
-
-    private void requireNonNull(Object object, String message) throws BadRequestException {
-        if (object == null) {
-            throw new BadRequestException(message);
-        }
-    }
-
-    private void requireNonNullAndNonEmpty(String parameter, String message) throws BadRequestException {
-        if (isNullOrEmpty(parameter)) {
-            throw new BadRequestException(message);
-        }
     }
 }
