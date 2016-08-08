@@ -32,7 +32,7 @@ check_docker() {
   fi
 
   # Prep script by getting default image
-  if [[ "$(docker images -q alpine 2> /dev/null)" == "" ]]; then
+  if [ "$(docker images -q alpine 2> /dev/null)" = "" ]; then
     info "ECLIPSE CHE: PULLING IMAGE alpine:latest"
     docker pull alpine > /dev/null 2>&1
   fi
@@ -157,7 +157,7 @@ get_docker_install_type() {
 }
 
 is_boot2docker() {
-  if [[ $GLOBAL_UNAME == *"boot2docker"* ]]; then
+  if echo "$GLOBAL_UNAME" | grep -q "boot2docker"; then
     return 0
   else
     return 1
@@ -189,7 +189,7 @@ is_native() {
 }
 
 is_moby_vm() {
-  if [ "${GLOBAL_NAME_MAP}" == "moby" ]; then
+  if echo "$GLOBAL_NAME_MAP" | grep -q "moby"; then
     return 0
   else
     return 1
@@ -240,6 +240,14 @@ has_docker_for_windows_ip() {
   fi
 }
 
+get_che_hostname() {
+  INSTALL_TYPE=$(get_docker_install_type)
+  if [ "${INSTALL_TYPE}" = "boot2docker" ]; then
+    echo $GLOBAL_GET_DOCKER_HOST_IP
+  else
+    echo "localhost"
+  fi
+}
 
 get_list_of_che_system_environment_variables() {
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
@@ -287,7 +295,7 @@ execute_che_launcher() {
 
   ENV_FILE=$(get_list_of_che_system_environment_variables)
 
-  docker_exec run -t --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
+  docker_exec run -t --rm --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     --env-file=$ENV_FILE \
     "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
@@ -426,31 +434,26 @@ run_connectivity_tests() {
 
 
   ### TEST 1: Simulate browser ==> workspace agent HTTP connectivity
+  HTTP_CODE=$(curl -I $(get_che_hostname):${AGENT_EXTERNAL_PORT}/alpine-release \
+                          -s -o /dev/null --connect-timeout 5 \
+                          --write-out "%{http_code}") || echo "28" > /dev/null
+
+  if [ "${HTTP_CODE}" = "200" ]; then
+      debug "Browser             => Workspace Agent (Hostname)   : Connection succeeded"
+  else
+      debug "Browser             => Workspace Agent (Hostname)   : Connection failed"
+  fi
+
+  ### TEST 1a: Simulate browser ==> workspace agent HTTP connectivity
   HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                          -s -o /dev/null \
-                          --write-out "%{http_code}")
+                          -s -o /dev/null --connect-timeout 5 \
+                          --write-out "%{http_code}") || echo "28" > /dev/null
 
   if [ "${HTTP_CODE}" = "200" ]; then
-      debug "Browser             => Workspace Agent              : Connection succeeded"
+      debug "Browser             => Workspace Agent (External IP): Connection succeeded"
   else
-      debug "Browser             => Workspace Agent              : Connection failed"
+      debug "Browser             => Workspace Agent (External IP): Connection failed"
   fi
-
-  ### TEST 1a: Simulate browser (websockets) ==> workspace agent HTTP connectivity
-  HTTP_CODE=$(curl -I -N \
-                          -H "Connection: Upgrade" \
-                          -H "Upgrade: websocket" \
-                          -H "Host: ${AGENT_EXTERNAL_IP}" \
-                          -H "Origin: http://${AGENT_EXTERNAL_IP}" \
-                          ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                            -s -o /dev/null --write-out "%{http_code}")
-
-  if [ "${HTTP_CODE}" = "200" ]; then
-      debug "Browser (websocket) => Workspace Agent              : Connection succeeded"
-  else
-      debug "Browser (websocket) => Workspace Agent              : Connection failed"
-  fi
-
 
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \

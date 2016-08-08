@@ -31,7 +31,6 @@ error_exit() {
   error "!!! ${1}"
   error "!!!"
   echo  "---------------------------------------"
-  container_self_destruction
   exit 1
 }
 
@@ -169,8 +168,7 @@ get_docker_daemon_version() {
 
 get_che_hostname() {
   INSTALL_TYPE=$(get_docker_install_type)
-  if [ "${INSTALL_TYPE}" = "boot2docker" ] ||
-     [ "${INSTALL_TYPE}" = "docker4windows" ]; then
+  if [ "${INSTALL_TYPE}" = "boot2docker" ]; then
     get_docker_host_ip
   else
     echo "localhost"
@@ -310,8 +308,4 @@ execute_command_with_progress() {
     ;;
   esac
   printf "\n"
-}
-
-container_self_destruction() {
-  docker rm -f "$(get_che_launcher_container_id)" > /dev/null 2>&1
 }
