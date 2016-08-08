@@ -227,6 +227,8 @@ final class PreviewViewImpl extends Window implements PreviewView {
 
         root.setWidget(element);
 
+        element.getElement().getParentElement().getStyle().setMargin(1, PX);
+
         itemCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> event) {
