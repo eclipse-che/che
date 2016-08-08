@@ -167,7 +167,7 @@ Vagrant.configure(2) do |config|
     echo "--------------------------------------------------"
     echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE DOCKER IMAGES"
     echo "--------------------------------------------------"
-    perform $PROVISION_PROGRESS docker pull codenvy/che-launcer:${CHE_VERSION}
+    perform $PROVISION_PROGRESS docker pull codenvy/che-launcher:${CHE_VERSION}
     perform $PROVISION_PROGRESS docker pull codenvy/che-server:${CHE_VERSION}
 
     echo "--------------------------------"
