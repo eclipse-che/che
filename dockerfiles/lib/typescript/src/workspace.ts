@@ -60,18 +60,28 @@ export class Workspace {
 
         let p = new Promise<WorkspaceDto>( (resolve, reject) => {
             var req = this.http.request(options,  (res) => {
-                res.on('data', function (body) {
 
-                    if (res.statusCode == 201) {
-                        // workspace created, continue
-                        resolve(new WorkspaceDto(JSON.parse(body)));
-                    } else {
-                        // error
-                        reject(body);
-                    }
+                var data: string = '';
+
+                res.on('error',  (error) => {
+                    Log.getLogger().error('rejecting as we got error', error);
+                    reject('invalid response' + error)
                 });
 
+                res.on('data',  (body) => {
+                        data += body;
+                });
+
+                res.on('end', () => {
+                    if (res.statusCode == 201) {
+                        resolve(new WorkspaceDto(JSON.parse(data)));
+                    } else {
+                        reject('Invalid response code');
+                    }
+                });
             });
+
+
 
             req.on('error', (err) => {
                 Log.getLogger().error('rejecting as we got error', err);
@@ -127,18 +137,23 @@ export class Workspace {
         let p = new Promise<WorkspaceDto>( (resolve, reject) => {
             var req = this.http.request(options,  (res) => {
 
+                var data: string = '';
+
                 res.on('error',  (body)=> {
                     Log.getLogger().error('got the following error', body.toString());
                     reject(body);
                 });
 
-                res.on('data', (body) => {
+                res.on('data',  (body) => {
+                    data += body;
+                });
+
+                res.on('end', () => {
                     if (res.statusCode == 200) {
                         // workspace created, continue
-                        resolve(new WorkspaceDto(JSON.parse(body)));
+                        resolve(new WorkspaceDto(JSON.parse(data)));
                     } else {
-                        // error
-                        reject(body);
+                        reject('Invalid response code');
                     }
                 });
 
