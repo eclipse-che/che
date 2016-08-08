@@ -16,12 +16,12 @@ import java.util.Map;
 /**
  * @author Anatoliy Bazko
  */
-public interface AgentConfig extends AgentKey {
+public interface Agent {
 
     /**
-     * @return fqn of the agent
+     * @return the name of the agent
      */
-    String getFqn();
+    String getName();
 
     /**
      * @return the version of the agent

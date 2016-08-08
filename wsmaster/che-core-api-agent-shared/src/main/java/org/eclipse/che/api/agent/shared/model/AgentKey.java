@@ -17,9 +17,9 @@ import org.eclipse.che.commons.annotation.Nullable;
  */
 public interface AgentKey {
     /**
-     * @return fqn of the agent
+     * @return the name of the agent
      */
-    String getFqn();
+    String getName();
 
     /**
      * @return the version of the agent

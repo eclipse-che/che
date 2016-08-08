@@ -11,7 +11,9 @@
 package org.eclipse.che.api.agent.server;
 
 import org.eclipse.che.api.agent.server.exception.AgentException;
-import org.eclipse.che.api.agent.shared.model.AgentConfig;
+import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 
 import java.util.Collection;
 
@@ -21,28 +23,57 @@ import java.util.Collection;
 public interface AgentRegistry {
 
     /**
-     * Fetches {@link AgentConfig}.
+     * Creates {@link Agent} of the specific version.
      *
-     * @param fqn
-     *      the fqn of the agent
+     * @param name
+     *      the name of the agent
      * @param version
      *      the version of the agent
-     * @return {@link AgentConfig}
+     * @return {@link Agent}
+     * @throws AgentNotFoundException
+     *      if agent not found in the registry
      * @throws AgentException
-     *      if configuration can't be fetched or other unexpected error occurred
+     *      if agent can't be created or other unexpected error occurred
      */
-    AgentConfig getConfig(String fqn, String version) throws AgentException;
+    Agent createAgent(String name, String version) throws AgentException;
+
 
     /**
-     * Fetches the latest version {@link AgentConfig}.
+     * Creates {@link Agent}.
      *
-     * @param fqn
-     *      the fqn of the agent
-     * @return {@link AgentConfig}
+     * @param agentKey
+     *      the agent key
+     * @return {@link Agent}
+     * @throws AgentNotFoundException
+     *      if agent not found in the registry
      * @throws AgentException
-     *      if configuration can't be fetched or other unexpected error occurred
+     *      if agent can't be created or other unexpected error occurred
      */
-    AgentConfig getConfig(String fqn) throws AgentException;
+    Agent createAgent(AgentKey agentKey) throws AgentException;
 
-    Collection<String> getVersions(String fqn) throws AgentException;
+    /**
+     * Creates the {@link Agent} of the latest version.
+     *
+     * @param name
+     *      the name of the agent
+     * @return {@link Agent}
+     * @throws AgentNotFoundException
+     *      if agent not found in the registry
+     * @throws AgentException
+     *      if agent can't be created or other unexpected error occurred
+     */
+    Agent createAgent(String name) throws AgentException;
+
+    /**
+     * Returns a list of the available versions of the specific agent.
+     *
+     * @param name
+     *      the name of the agent
+     * @return list of versions
+     * @throws AgentNotFoundException
+     *      if agent not found in the registry
+     * @throws AgentException
+     *      if unexpected error occurred
+     */
+    Collection<String> getVersions(String name) throws AgentException;
 }

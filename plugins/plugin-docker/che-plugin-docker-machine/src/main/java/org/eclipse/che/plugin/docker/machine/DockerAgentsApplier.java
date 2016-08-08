@@ -13,11 +13,11 @@ package org.eclipse.che.plugin.docker.machine;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.agent.server.Agent;
-import org.eclipse.che.api.agent.server.AgentProvider;
+import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
-import org.eclipse.che.api.agent.shared.model.AgentConfig;
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
@@ -44,16 +44,15 @@ public class DockerAgentsApplier {
 
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DockerAgentsApplier.class);
 
-    private final AgentProvider agentProvider;
+    private final AgentRegistry agentRegistry;
 
     @Inject
-    public DockerAgentsApplier(AgentProvider agentProvider) {
-        this.agentProvider = agentProvider;
+    public DockerAgentsApplier(AgentRegistry agentRegistry) {
+        this.agentRegistry = agentRegistry;
     }
 
     /**
      * Applies agents {@link MachineConfig#getAgents()} over machine instance.
-     * It basically means run agent script {@link AgentConfig#getScript()}.
      * Respects dependencies between agents.
      */
     public void apply(Instance machine) throws MachineException {
@@ -63,8 +62,6 @@ public class DockerAgentsApplier {
         for (String agentKey : machine.getConfig().getAgents()) {
             apply(machine, AgentKeyImpl.of(agentKey), agentsCompleted, agentsInProgress);
         }
-
-        apply(machine, AgentKeyImpl.of("org.eclipse.che.ls.json"), agentsCompleted, agentsInProgress);
     }
 
     /**
@@ -78,20 +75,20 @@ public class DockerAgentsApplier {
      *      pending agents to apply, to avoid circular dependency
      */
     private void apply(Instance machine,
-                       AgentKeyImpl agentKey,
+                       AgentKey agentKey,
                        Set<String> agentsCompleted,
                        Set<String> agentsInProgress) throws MachineException {
-        if (agentsCompleted.contains(agentKey.getFqn())) {
+        if (agentsCompleted.contains(agentKey.getName())) {
             return;
         }
 
-        if (!agentsInProgress.add(agentKey.getFqn())) {
+        if (!agentsInProgress.add(agentKey.getName())) {
             throw new MachineException("Agents circular dependency found.");
         }
 
         Agent agent;
         try {
-            agent = agentProvider.createAgent(agentKey);
+            agent = agentRegistry.createAgent(agentKey);
         } catch (AgentException e) {
             throw new MachineException("Agent can't be created " + agentKey, e);
         }
@@ -103,8 +100,8 @@ public class DockerAgentsApplier {
         LOG.info("Starting {} agent", agentKey.toString());
         startProcess(machine, new CommandImpl(agentKey.toString(), agent.getScript(), "agent"));
 
-        agentsInProgress.remove(agentKey.getFqn());
-        agentsCompleted.add(agentKey.getFqn());
+        agentsInProgress.remove(agentKey.getName());
+        agentsCompleted.add(agentKey.getName());
     }
 
     private void startProcess(Instance machine, Command command) throws MachineException {

@@ -19,9 +19,9 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface AgentKeyDto extends AgentKey {
 
-    String getFqn();
+    String getName();
 
-    void setFqn(String fqn);
+    void setName(String name);
 
     String getVersion();
 

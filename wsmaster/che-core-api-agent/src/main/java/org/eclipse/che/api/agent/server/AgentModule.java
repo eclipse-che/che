@@ -11,12 +11,10 @@
 package org.eclipse.che.api.agent.server;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.Multibinder;
 
-import org.eclipse.che.api.agent.server.impl.AgentProviderImpl;
-import org.eclipse.che.api.agent.server.impl.RemoteAgentRegistryUrlProviderImpl;
-import org.eclipse.che.api.agent.server.impl.BaseAgentFactory;
+import org.eclipse.che.api.agent.server.impl.RemoteAgentRegistryUrlProvider;
 import org.eclipse.che.api.agent.server.impl.RemoteAgentRegistryImpl;
+import org.eclipse.che.api.agent.server.impl.RemoteRemoteAgentRegistryUrlProviderImpl;
 
 /**
  * @author Anatolii Bazko
@@ -24,11 +22,7 @@ import org.eclipse.che.api.agent.server.impl.RemoteAgentRegistryImpl;
 public class AgentModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(AgentRegistryUrlProvider.class).to(RemoteAgentRegistryUrlProviderImpl.class);
+        bind(RemoteAgentRegistryUrlProvider.class).to(RemoteRemoteAgentRegistryUrlProviderImpl.class);
         bind(AgentRegistry.class).to(RemoteAgentRegistryImpl.class);
-        bind(AgentProvider.class).to(AgentProviderImpl.class);
-
-        Multibinder<AgentFactory> agentFactoryMultibinder = Multibinder.newSetBinder(binder(), AgentFactory.class);
-        agentFactoryMultibinder.addBinding().to(BaseAgentFactory.class);
     }
 }

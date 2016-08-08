@@ -8,7 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server;
+package org.eclipse.che.api.agent.shared.dto;
+
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 import java.util.Map;
@@ -16,39 +19,25 @@ import java.util.Map;
 /**
  * @author Anatoliy Bazko
  */
-public interface Agent {
-    /**
-     * @return the fqn of the agent
-     */
-    String getFqn();
+@DTO
+public interface AgentgDto extends Agent {
+    String getName();
 
-    /**
-     * @return the version of the agent
-     */
+    void setName(String name);
+
     String getVersion();
 
-    /**
-     * @return environment variables to be set
-     */
-    Map<String, String> getEnvVariables();
+    void setVersion(String version);
 
-    /**
-     * @return volumes to be mounted
-     */
-    List<String> getVolumes();
-
-    /**
-     * @return ports to be exposed
-     */
-    List<String> getPorts();
-
-    /**
-     * @return depending agents to be started before
-     */
     List<String> getDependencies();
 
-    /**
-     * @return script to execute inside machine
-     */
+    void setDependencies(List<String> dependencies);
+
     String getScript();
+
+    void setScript(String script);
+
+    Map<String, String> getProperties();
+
+    void setProperties(Map<String, String> properties);
 }

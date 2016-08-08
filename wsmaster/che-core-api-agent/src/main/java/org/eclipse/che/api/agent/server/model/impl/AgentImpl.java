@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.model.impl;
 
-import org.eclipse.che.api.agent.shared.model.AgentConfig;
+import org.eclipse.che.api.agent.shared.model.Agent;
 
 import java.util.List;
 import java.util.Map;
@@ -19,36 +19,36 @@ import java.util.Objects;
 /**
  * @author Anatoliy Bazko
  */
-public class AgentConfigImpl implements AgentConfig {
-    private final String              fqn;
+public class AgentImpl implements Agent {
+    private final String              name;
     private final String              version;
     private final List<String>        dependencies;
     private final Map<String, String> properties;
     private final String              script;
 
-    public AgentConfigImpl(String fqn,
-                           String version,
-                           List<String> dependencies,
-                           Map<String, String> properties,
-                           String script) {
-        this.fqn = fqn;
+    public AgentImpl(String name,
+                     String version,
+                     List<String> dependencies,
+                     Map<String, String> properties,
+                     String script) {
+        this.name = name;
         this.version = version;
         this.dependencies = dependencies;
         this.properties = properties;
         this.script = script;
     }
 
-    public AgentConfigImpl(AgentConfig agentConfig) {
-        this(agentConfig.getFqn(),
-             agentConfig.getVersion(),
-             agentConfig.getDependencies(),
-             agentConfig.getProperties(),
-             agentConfig.getScript());
+    public AgentImpl(Agent agent) {
+        this(agent.getName(),
+             agent.getVersion(),
+             agent.getDependencies(),
+             agent.getProperties(),
+             agent.getScript());
     }
 
     @Override
-    public String getFqn() {
-        return fqn;
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -74,9 +74,9 @@ public class AgentConfigImpl implements AgentConfig {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AgentConfigImpl)) return false;
-        AgentConfigImpl that = (AgentConfigImpl)o;
-        return Objects.equals(fqn, that.fqn) &&
+        if (!(o instanceof AgentImpl)) return false;
+        AgentImpl that = (AgentImpl)o;
+        return Objects.equals(name, that.name) &&
                Objects.equals(version, that.version) &&
                Objects.equals(dependencies, that.dependencies) &&
                Objects.equals(properties, that.properties) &&
@@ -85,7 +85,7 @@ public class AgentConfigImpl implements AgentConfig {
 
     @Override
     public int hashCode() {
-        return Objects.hash(fqn, version, dependencies, properties, script);
+        return Objects.hash(name, version, dependencies, properties, script);
     }
 }
 

@@ -10,10 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
-import org.eclipse.che.api.agent.server.AgentRegistryUrlProvider;
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
-import org.eclipse.che.api.agent.shared.model.AgentConfig;
+import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.everrest.assured.EverrestJetty;
@@ -55,10 +54,10 @@ import static org.testng.Assert.assertTrue;
 public class RemoteAgentRegistryImplTest {
 
     @SuppressWarnings("unused")
-    private RegistryService          service;
+    private RegistryService                service;
     @Mock
-    private AgentRegistryUrlProvider urlProvider;
-    private RemoteAgentRegistryImpl  agentRegistry;
+    private RemoteAgentRegistryUrlProvider urlProvider;
+    private RemoteAgentRegistryImpl        agentRegistry;
 
     @BeforeMethod
     public void setUp(ITestContext context) throws Exception {
@@ -68,23 +67,23 @@ public class RemoteAgentRegistryImplTest {
         when(urlProvider.getAgentUrl(anyString())).thenAnswer(new Answer<URL>() {
             @Override
             public URL answer(InvocationOnMock invocation) throws Throwable {
-                String fqn = (String)invocation.getArguments()[0];
-                return new URL("http://localhost:" + port + "/rest/registry/agent/" + fqn);
+                String name = (String)invocation.getArguments()[0];
+                return new URL("http://localhost:" + port + "/rest/registry/agent/" + name);
             }
         });
         when(urlProvider.getAgentUrl(anyString(), anyString())).thenAnswer(new Answer<URL>() {
             @Override
             public URL answer(InvocationOnMock invocation) throws Throwable {
-                String fqn = (String)invocation.getArguments()[0];
+                String name = (String)invocation.getArguments()[0];
                 String version = (String)invocation.getArguments()[1];
-                return new URL("http://localhost:" + port + "/rest/registry/agent/" + fqn + "/" + version);
+                return new URL("http://localhost:" + port + "/rest/registry/agent/" + name + "/" + version);
             }
         });
         when(urlProvider.getAgentVersions(anyString())).thenAnswer(new Answer<URL>() {
             @Override
             public URL answer(InvocationOnMock invocation) throws Throwable {
-                String fqn = (String)invocation.getArguments()[0];
-                return new URL("http://localhost:" + port + "/rest/registry/updates/" + fqn);
+                String name = (String)invocation.getArguments()[0];
+                return new URL("http://localhost:" + port + "/rest/registry/updates/" + name);
             }
         });
 
@@ -93,24 +92,24 @@ public class RemoteAgentRegistryImplTest {
 
     @Test
     public void testGetSpecificVersionAgent() throws Exception {
-        AgentConfig config = agentRegistry.getConfig("ws-agent", "1.0");
+        Agent agent = agentRegistry.createAgent("ws-agent", "1.0");
 
-        assertEquals(config.getFqn(), "ws-agent");
-        assertEquals(config.getVersion(), "1.0");
+        assertEquals(agent.getName(), "ws-agent");
+        assertEquals(agent.getVersion(), "1.0");
     }
 
     @Test
     public void testGetLatestVersionAgent() throws Exception {
-        AgentConfig config = agentRegistry.getConfig("ws-agent");
+        Agent agent = agentRegistry.createAgent("ws-agent");
 
-        assertEquals(config.getFqn(), "ws-agent");
-        assertEquals(config.getVersion(), "2.0");
+        assertEquals(agent.getName(), "ws-agent");
+        assertEquals(agent.getVersion(), "2.0");
     }
 
 
     @Test(expectedExceptions = AgentException.class)
     public void testGetConfigShouldThrowExceptionIfAgentNotFound() throws Exception {
-        agentRegistry.getConfig("terminal", "1.0");
+        agentRegistry.createAgent("terminal", "1.0");
     }
 
     @Test
@@ -160,7 +159,7 @@ public class RemoteAgentRegistryImplTest {
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
 
-            String content = format("{ \"fqn\" : \"%s\", \"version\" : \"%s\"}", artifact, version);
+            String content = format("{ \"name\" : \"%s\", \"version\" : \"%s\"}", artifact, version);
             java.nio.file.Path file = Paths.get(System.getProperty("java.io.tmpdir"), "config.tmp");
             copy(new ByteArrayInputStream(content.getBytes()), file, StandardCopyOption.REPLACE_EXISTING);
 

@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.server.exception.AgentException;
-import org.eclipse.che.api.agent.server.AgentRegistryUrlProvider;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,16 +26,16 @@ import static java.lang.String.format;
  * @author Anatolii Bazko
  */
 @Singleton
-public class RemoteAgentRegistryUrlProviderImpl implements AgentRegistryUrlProvider {
+public class RemoteRemoteAgentRegistryUrlProviderImpl implements RemoteAgentRegistryUrlProvider {
 
     public static final String BASE_URL = "https://codenvy.com/update/repository/";
 
     @Inject
-    public RemoteAgentRegistryUrlProviderImpl() { }
+    public RemoteRemoteAgentRegistryUrlProviderImpl() { }
 
     @Override
-    public URL getAgentUrl(String fqn, String version) throws AgentException {
-        String url = format(BASE_URL + "public/download/%s/%s", fqn, version);
+    public URL getAgentUrl(String name, String version) throws AgentException {
+        String url = format(BASE_URL + "public/download/%s/%s", name, version);
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
@@ -45,8 +44,8 @@ public class RemoteAgentRegistryUrlProviderImpl implements AgentRegistryUrlProvi
     }
 
     @Override
-    public URL getAgentUrl(String fqn) throws AgentException {
-        String url = format(BASE_URL + "public/download/%s", fqn);
+    public URL getAgentUrl(String name) throws AgentException {
+        String url = format(BASE_URL + "public/download/%s", name);
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
@@ -55,8 +54,8 @@ public class RemoteAgentRegistryUrlProviderImpl implements AgentRegistryUrlProvi
     }
 
     @Override
-    public URL getAgentVersions(String fqn) throws AgentException {
-        String url = format(BASE_URL + "/updates/%s", fqn);
+    public URL getAgentVersions(String name) throws AgentException {
+        String url = format(BASE_URL + "/updates/%s", name);
         try {
             return new URL(url);
         } catch (MalformedURLException e) {

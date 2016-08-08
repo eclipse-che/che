@@ -22,23 +22,23 @@ import static org.testng.AssertJUnit.assertEquals;
 public class AgentKeyImplTest {
 
     @Test
-    public void testAgentKeyWithFqnAndVersion() {
-        AgentKeyImpl agentKey = AgentKeyImpl.of("fqn:1");
+    public void testAgentKeyWithNameAndVersion() {
+        AgentKeyImpl agentKey = AgentKeyImpl.of("name:1");
 
-        assertEquals(agentKey.getFqn(), "fqn");
+        assertEquals(agentKey.getName(), "name");
         assertEquals(agentKey.getVersion(), "1");
     }
 
     @Test
-    public void testParseAgentKeyWithFqn() {
-        AgentKeyImpl agentKey = AgentKeyImpl.of("fqn");
+    public void testParseAgentKeyWithName() {
+        AgentKeyImpl agentKey = AgentKeyImpl.of("name");
 
-        assertEquals(agentKey.getFqn(), "fqn");
+        assertEquals(agentKey.getName(), "name");
         assertNull(agentKey.getVersion());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseAgentKeyFails() {
-        AgentKeyImpl.of("fqn:1:2");
+        AgentKeyImpl.of("name:1:2");
     }
 }
