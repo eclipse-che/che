@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.model.impl;
 
+import org.eclipse.che.api.core.model.factory.Author;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.factory.server.FactoryImage;
 import org.eclipse.che.api.core.model.factory.Button;
@@ -85,33 +86,43 @@ public class FactoryImpl implements Factory {
                        String name,
                        String version,
                        WorkspaceConfig workspace,
-                       AuthorImpl creator,
-                       PoliciesImpl policies,
+                       Author creator,
+                       Policies policies,
                        Ide ide,
-                       ButtonImpl button,
+                       Button button,
                        Set<FactoryImage> images) {
         this.id = id;
         this.name = name;
         this.version = version;
-        this.workspace = new WorkspaceConfigImpl(workspace);
-        this.creator = creator;
-        this.policies = policies;
+        if (workspace != null) {
+            this.workspace = new WorkspaceConfigImpl(workspace);
+        }
+        if (creator != null) {
+            this.creator = new AuthorImpl(creator);
+        }
+        if (policies != null) {
+            this.policies = new PoliciesImpl(policies);
+        }
         if (ide != null) {
             this.ide = new IdeImpl(ide);
         }
-        this.button = button;
-        this.images = images;
+        if (button != null) {
+            this.button = new ButtonImpl(button);
+        }
+        if (images != null) {
+            this.images = new HashSet<>(images);
+        }
     }
 
     public FactoryImpl(Factory factory, Set<FactoryImage> images) {
         this(factory.getId(),
              factory.getName(),
              factory.getV(),
-             new WorkspaceConfigImpl(factory.getWorkspace()),
-             new AuthorImpl(factory.getCreator()),
-             new PoliciesImpl(factory.getPolicies()),
-             new IdeImpl(factory.getIde()),
-             new ButtonImpl(factory.getButton()),
+             factory.getWorkspace(),
+             factory.getCreator(),
+             factory.getPolicies(),
+             factory.getIde(),
+             factory.getButton(),
              images);
     }
 

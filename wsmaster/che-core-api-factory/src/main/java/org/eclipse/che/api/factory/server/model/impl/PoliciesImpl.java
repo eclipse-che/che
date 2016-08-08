@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server.model.impl;
 import org.eclipse.che.api.core.model.factory.Policies;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.util.Objects;
 
@@ -27,10 +28,10 @@ public class PoliciesImpl implements Policies {
     @Basic
     private String referer;
 
-    @Basic
+    @Column(name = "match_reopen")
     private String match;
 
-    @Basic
+    @Column(name = "creation_strategy")
     private String create;
 
     @Basic

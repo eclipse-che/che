@@ -18,6 +18,7 @@ import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.snippet.SnippetGenerator;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 
 import javax.inject.Inject;
@@ -59,7 +60,6 @@ public class FactoryManager {
      *         when any server errors occurs
      */
     public Factory saveFactory(Factory factory) throws ConflictException, ServerException {
-        requireNonNull(factory);
         return saveFactory(factory, null);
     }
 
@@ -81,7 +81,9 @@ public class FactoryManager {
     public Factory saveFactory(Factory factory, Set<FactoryImage> images) throws ConflictException,
                                                                                  ServerException {
         requireNonNull(factory);
-        return factoryDao.create(new FactoryImpl(factory, images));
+        final FactoryImpl newFactory = new FactoryImpl(factory, images);
+        newFactory.setId(NameGenerator.generate("factory", 16));
+        return factoryDao.create(newFactory);
     }
 
     /**

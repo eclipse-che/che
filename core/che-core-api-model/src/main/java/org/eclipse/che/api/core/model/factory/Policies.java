@@ -33,7 +33,7 @@ public interface Policies {
     Long getUntil();
 
     /**
-     * Re-open project on factory 2-nd click
+     * Re-open projects on factory 2-nd click
      */
     String getMatch();
 

@@ -11,6 +11,9 @@
 package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.core.model.factory.Ide;
+import org.eclipse.che.api.core.model.factory.OnAppClosed;
+import org.eclipse.che.api.core.model.factory.OnAppLoaded;
+import org.eclipse.che.api.core.model.factory.OnProjectsLoaded;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -42,18 +45,18 @@ public class IdeImpl implements Ide {
 
     public IdeImpl() {}
 
-    public IdeImpl(OnAppLoadedImpl onAppLoaded,
-                   OnProjectsLoadedImpl onProjectsLoaded,
-                   OnAppClosedImpl onAppClosed) {
-        this.onAppLoaded = onAppLoaded;
-        this.onProjectsLoaded = onProjectsLoaded;
-        this.onAppClosed = onAppClosed;
+    public IdeImpl(OnAppLoaded onAppLoaded,
+                   OnProjectsLoaded onProjectsLoaded,
+                   OnAppClosed onAppClosed) {
+        this.onAppLoaded = new OnAppLoadedImpl(onAppLoaded);
+        this.onProjectsLoaded = new OnProjectsLoadedImpl(onProjectsLoaded);
+        this.onAppClosed = new OnAppClosedImpl(onAppClosed);
     }
 
     public IdeImpl(Ide ide) {
-        this(new OnAppLoadedImpl(ide.getOnAppLoaded()),
-             new OnProjectsLoadedImpl(ide.getOnProjectsLoaded()),
-             new OnAppClosedImpl(ide.getOnAppClosed()));
+        this(ide.getOnAppLoaded(),
+             ide.getOnProjectsLoaded(),
+             ide.getOnAppClosed());
     }
 
     @Override

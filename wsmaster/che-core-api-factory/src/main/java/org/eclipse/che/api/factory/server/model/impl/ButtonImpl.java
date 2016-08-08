@@ -11,6 +11,7 @@
 package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.core.model.factory.Button;
+import org.eclipse.che.api.core.model.factory.ButtonAttributes;
 
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -38,16 +39,16 @@ public class ButtonImpl implements Button {
     @Enumerated(EnumType.STRING)
     private Type type;
 
-    public ButtonImpl(ButtonAttributesImpl attributes,
+    public ButtonImpl(ButtonAttributes attributes,
                       Type type) {
-        this.attributes = attributes;
+        this.attributes = new ButtonAttributesImpl(attributes);
         this.type = type;
     }
 
     public ButtonImpl() {}
 
     public ButtonImpl(Button button) {
-        this(new ButtonAttributesImpl(button.getAttributes()), button.getType());
+        this(button.getAttributes(), button.getType());
     }
 
     @Override
