@@ -21,12 +21,15 @@ import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerExce
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static java.util.Arrays.asList;
 
 /**
  * @author Evgen Vidolob
+ * @author Anatoliy Bazko
  */
 @Singleton
 public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate {
@@ -48,8 +51,8 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
         restoreDependencies(projectPath);
 
-        ProcessBuilder processBuilder =
-                new ProcessBuilder("node", "--debug=5858", "/projects/lscsharp/node_modules/omnisharp-client/languageserver/server.js");
+        Path launchFile = Paths.get(System.getenv("HOME"), "che-agents/ls-csharp/launch.sh");
+        ProcessBuilder processBuilder = new ProcessBuilder(launchFile.toString());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
         processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
 

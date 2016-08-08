@@ -1,7 +1,0 @@
-{
-  "fqn": "org.eclipse.che.base",
-  "version": "1.0.0",
-  "properties": {},
-  "dependencies": [],
-  "script": "PACKAGES=(\"wget\")\nunset INSTALL_COMMAND\n\ncommand -v apt-get >/dev/null 2>&1 && {\n    INSTALL_COMMAND=\"apt-get install\"\n}\n\ncommand -v yum >/dev/null 2>&1 && {\n    INSTALL_COMMAND=\"yum install\"\n}\n\ncommand -v urpmi >/dev/null 2>&1 && {\n    INSTALL_COMMAND=\"urpmi\"\n}\n\ncommand -v rpm >/dev/null 2>&1 && {\n    INSTALL_COMMAND=\"rpm -i\"\n}\n\ncommand -v dnf >/dev/null 2>&1 && {\n    INSTALL_COMMAND=\"dnf install\"\n}\n\ncommand -v apk >/dev/null 2>&1 && {\n    INSTALL_COMMAND=\"apk add\"\n}\n\nif [ -z ${INSTALL_COMMAND+1} ]; then\n  echo \"Install command is not recognized\"\n  exit 1\nfi\n\nfor resource in ${PACKAGES[@]}; do\n    sudo $INSTALL_COMMAND $resource\ndone"
-}

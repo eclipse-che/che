@@ -20,7 +20,7 @@ import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerExce
 public abstract class LanguageServerLauncherTemplate implements LanguageServerLauncher {
 
     @Override
-    public LanguageServer launch(String projectPath) throws LanguageServerException {
+    public final LanguageServer launch(String projectPath) throws LanguageServerException {
         Process languageServerProcess = startLanguageServerProcess(projectPath);
         return connectToLanguageServer(languageServerProcess);
     }

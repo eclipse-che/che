@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.shared.model;
 
-import org.eclipse.che.commons.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
 
 /**
- * @author Anatolii Bazko
+ * @author Anatoliy Bazko
  */
-public interface AgentKey {
+public interface Agent {
+
     /**
      * @return the name of the agent
      */
@@ -24,6 +26,20 @@ public interface AgentKey {
     /**
      * @return the version of the agent
      */
-    @Nullable
     String getVersion();
+
+    /**
+     * @return the depending agents, that must be applied before
+     */
+    List<String> getDependencies();
+
+    /**
+     * @return the script to be applied when machine is started
+     */
+    String getScript();
+
+    /**
+     * @return any machine specific properties
+     */
+    Map<String, String> getProperties();
 }

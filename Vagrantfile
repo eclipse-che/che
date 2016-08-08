@@ -143,6 +143,9 @@ Vagrant.configure(2) do |config|
     # We need write access to this file to enable Che container to create other containers
     sudo chmod 777 /var/run/docker.sock &>/dev/null
 
+    # Setup the overlay storage driver to eliminate errors
+    sudo sed -i '/ExecStart=\/usr\/bin\/dockerd/c\ExecStart=\/usr\/bin\/dockerd --storage-driver=overlay' /lib/systemd/system/docker.service
+
     # Configure Docker daemon with the proxy
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
         mkdir /etc/systemd/system/docker.service.d
@@ -156,26 +159,37 @@ Vagrant.configure(2) do |config|
     fi
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
         printf "[Service]\nEnvironment=\"NO_PROXY=${NO_PROXY}\"" > /etc/systemd/system/docker.service.d/no-proxy.conf
-        systemctl daemon-reload
-        systemctl restart docker
     fi
 
-    echo "-------------------------------------------------"
-    echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE DOCKER IMAGE"
-    echo "-------------------------------------------------"
-    perform $PROVISION_PROGRESS docker pull codenvy/che:${CHE_VERSION}
+    systemctl daemon-reload
+    systemctl restart docker
+
+    echo "--------------------------------------------------"
+    echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE DOCKER IMAGES"
+    echo "--------------------------------------------------"
+    perform $PROVISION_PROGRESS docker pull codenvy/che-launcer:${CHE_VERSION}
+    perform $PROVISION_PROGRESS docker pull codenvy/che-server:${CHE_VERSION}
 
     echo "--------------------------------"
     echo "ECLIPSE CHE: BOOTING ECLIPSE CHE"
     echo "--------------------------------"
-    docker run --net=host --name=che --restart=always --detach `
-              `-v /var/run/docker.sock:/var/run/docker.sock `
-              `-v /home/user/che/lib:/home/user/che/lib-copy `
-              `-v /home/user/che/workspaces:/home/user/che/workspaces `
-              `-v /home/user/che/storage:/home/user/che/storage `
-              `-v /home/user/che/conf:/container `
-              `-e CHE_LOCAL_CONF_DIR=/container `
-              `codenvy/che:${CHE_VERSION} --remote:${IP} --port:${PORT} run &>/dev/null
+    curl -sL https://raw.githubusercontent.com/eclipse/che/master/che.sh | tr -d '\15\32' > /home/vagrant/che.sh
+    chmod +x /home/vagrant/che.sh
+    export CHE_CONF_FOLDER=/home/user/che/conf/
+    export CHE_PORT=${PORT}
+    export CHE_VERSION=${CHE_VERSION}
+    export CHE_HOST_IP=172.17.0.1
+    export CHE_HOSTNAME=${CHE_IP}
+    /home/vagrant/che.sh start
+
+#    docker run --net=host --name=che --restart=always --detach `
+#              `-v /var/run/docker.sock:/var/run/docker.sock `
+#              `-v /home/user/che/lib:/home/user/che/lib-copy `
+#              `-v /home/user/che/workspaces:/home/user/che/workspaces `
+#              `-v /home/user/che/storage:/home/user/che/storage `
+#              `-v /home/user/che/conf:/container `
+#              `-e CHE_LOCAL_CONF_DIR=/container `
+#              `codenvy/che:${CHE_VERSION} --remote:${IP} --port:${PORT} run &>/dev/null
   SHELL
 
   config.vm.provision "shell" do |s|
@@ -197,22 +211,9 @@ Vagrant.configure(2) do |config|
     rm -f /home/user/che/.che_host_port
     CHE_URL="http://${IP}:${PORT}"
 
-    # Test the default dashboard page to see when it returns a non-error value.
-    # Che is active once it returns success
-    while [ true ]; do
-      printf "#"
-      http_status_code=$(curl -I ${CHE_URL}/api/ -s -o /dev/null --write-out "%{http_code}")
-      if [ "$http_status_code" == "200" ]; then
-        echo "${CHE_URL}" > /home/user/che/.che_url
-        echo "${MAPPED_PORT}" > /home/user/che/.che_host_port
-        echo "---------------------------------------"
-        echo "ECLIPSE CHE: BOOTED AND REACHABLE"
-        echo "ECLIPSE CHE: ${CHE_URL}      "
-        echo "---------------------------------------"
-        exit 0
-      fi
-      sleep 10
-    done
+    echo "${CHE_URL}" > /home/user/che/.che_url
+    echo "${MAPPED_PORT}" > /home/user/che/.che_host_port
+
   SHELL
 
   config.vm.provision "shell", run: "always" do |s|

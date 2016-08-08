@@ -14,6 +14,8 @@ import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.factory.FactoryParameter;
+import org.eclipse.che.api.core.model.machine.Limits;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.factory.server.impl.SourceStorageParametersValidator;
 import org.eclipse.che.api.factory.shared.dto.Action;
 import org.eclipse.che.api.factory.shared.dto.Author;
@@ -26,6 +28,7 @@ import org.eclipse.che.api.factory.shared.dto.OnAppLoaded;
 import org.eclipse.che.api.factory.shared.dto.OnProjectsLoaded;
 import org.eclipse.che.api.factory.shared.dto.Policies;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
+import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
@@ -45,6 +48,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -102,6 +106,12 @@ public class FactoryBuilderTest {
         factoryBuilder.checkValid(factory);
     }
 
+    @Test(dataProvider = "setByServerParamsProvider")
+    public void shouldAllowUsingParamsThatCanBeSetOnlyByServerDuringUpdate(Factory factory)
+            throws InvocationTargetException, IllegalAccessException, ApiException, NoSuchMethodException {
+        factoryBuilder.checkValid(factory, true);
+    }
+
     @DataProvider(name = "setByServerParamsProvider")
     public static Object[][] setByServerParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
         Factory factory = prepareFactory();
@@ -122,7 +132,30 @@ public class FactoryBuilderTest {
 
     @DataProvider(name = "notValidParamsProvider")
     public static Object[][] notValidParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
-        return new Object[][] {};
+        Factory factory = prepareFactory();
+        EnvironmentDto environmentDto = factory.getWorkspace().getEnvironments().get(0);
+        environmentDto.getMachineConfigs().add(dto.createDto(MachineConfigDto.class).withType(null));
+        return new Object[][] {
+                {dto.clone(factory).withWorkspace(factory.getWorkspace().withDefaultEnv(null)) },
+                {dto.clone(factory).withWorkspace(factory.getWorkspace().withEnvironments(Collections.singletonList(environmentDto))) }
+        };
+    }
+
+    @Test(dataProvider = "sameAsDefaultParamsProvider")
+    public void shouldAllowUsingParamsWIthValueLikeDefaultForType(Factory factory)
+            throws InvocationTargetException, IllegalAccessException, ApiException, NoSuchMethodException {
+        factoryBuilder.checkValid(factory);
+    }
+
+    @DataProvider(name = "sameAsDefaultParamsProvider")
+    public static Object[][] sameAsDefaultParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
+        Factory factory = prepareFactory();
+        EnvironmentDto environmentDto = factory.getWorkspace().getEnvironments().get(0);
+        environmentDto.getMachineConfigs().get(0).withDev(false)
+                                                .withLimits(dto.newDto(LimitsDto.class).withRam(0));
+        return new Object[][] {
+                {dto.clone(factory).withWorkspace(factory.getWorkspace().withEnvironments(Collections.singletonList(environmentDto))) }
+        };
     }
 
 

@@ -73,8 +73,8 @@ is_boot2docker() {
 }
 
 has_docker_for_windows_ip() {
-  DOCKER_HOST_IP=$(get_docker_host_ip)
-  if [ "${DOCKER_HOST_IP}" = "10.0.75.2" ]; then
+  ETH0_ADDRESS=$(docker run --net host alpine /bin/sh -c "ifconfig eth0" | grep "inet addr:" | cut -d: -f2 | cut -d" " -f1)
+  if [ "${ETH0_ADDRESS}" = "10.0.75.2" ]; then
     return 0
   else
     return 1
@@ -110,10 +110,17 @@ get_docker_install_type() {
 }
 
 get_docker_host_ip() {
-  NETWORK_IF="eth0"
-  if is_boot2docker; then
-    NETWORK_IF="eth1"
-  fi
+  case $(get_docker_install_type) in
+   boot2docker)
+     NETWORK_IF="eth1"
+   ;;
+   native)
+     NETWORK_IF="docker0"
+   ;;
+   *)
+     NETWORK_IF="eth0"
+   ;;
+  esac
 
   docker run --rm --net host \
             alpine sh -c \
@@ -198,7 +205,8 @@ get_che_container_conf_folder() {
 }
 
 get_che_container_data_folder() {
-  get_che_container_host_bind_folder "/home/user/che/workspaces"
+  FOLDER=$(get_che_container_host_bind_folder "/home/user/che/workspaces")
+  echo "${FOLDER:=not set}"
 }
 
 get_che_container_image_name() {

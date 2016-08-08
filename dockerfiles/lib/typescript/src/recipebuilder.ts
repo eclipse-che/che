@@ -10,6 +10,7 @@
  */
 
 
+import {Log} from "./log";
 /**
  * Build a default recipe.
  * @author Florent Benoit
@@ -34,7 +35,7 @@ export class RecipeBuilder {
         // use synchronous API
         try {
             var stats = this.fs.statSync(dockerFilePath);
-            console.log('Using a custom project Dockerfile \'' + dockerFilePath + '\' for the setup of the workspace.');
+            Log.getLogger().info('Using a custom project Dockerfile \'' + dockerFilePath + '\' for the setup of the workspace.');
             var content = this.fs.readFileSync(dockerFilePath, 'utf8');
             return content;
         } catch (e) {

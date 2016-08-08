@@ -19,11 +19,14 @@ import com.google.inject.Singleton;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static java.util.Arrays.asList;
 
 /**
  * @author Evgen Vidolob
+ * @author Anatolii Bazko
  */
 @Singleton
 public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
@@ -53,7 +56,9 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
     }
 
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-        ProcessBuilder processBuilder = new ProcessBuilder("$HOME/che/ls-json/launch.sh");
+        Path launchFile = Paths.get(System.getenv("HOME"), "che-agents/ls-json/launch.sh");
+
+        ProcessBuilder processBuilder = new ProcessBuilder(launchFile.toString());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
         processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);
         try {

@@ -402,6 +402,7 @@ public final class ResourceManager {
             public Promise<Project> apply(Optional<Resource> resource) throws FunctionException {
 
                 final ProjectConfigDto dto = dtoFactory.createDto(ProjectConfigDto.class)
+                                                       .withName(createRequest.getBody().getName())
                                                        .withPath(path.toString())
                                                        .withDescription(createRequest.getBody().getDescription())
                                                        .withType(createRequest.getBody().getType())

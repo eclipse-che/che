@@ -102,13 +102,13 @@ public class ServerInitializerImpl implements ServerInitializer {
         return Collections.unmodifiableMap(serversToInitResult);
     }
 
-    protected LanguageServer doInitialize(LanguageServerLauncher factory, String projectPath) throws LanguageServerException {
-        String languageId = factory.getLanguageDescription().getLanguageId();
+    protected LanguageServer doInitialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
+        String languageId = launcher.getLanguageDescription().getLanguageId();
         InitializeParamsImpl initializeParams = prepareInitializeParams(projectPath);
 
         LanguageServer server;
         try {
-            server = factory.launch(projectPath);
+            server = launcher.launch(projectPath);
         } catch (LanguageServerException e) {
             throw new LanguageServerException(
                     "Can't initialize Language Server " + languageId + " on " + projectPath + ". " + e.getMessage(), e);

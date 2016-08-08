@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
-import org.eclipse.che.api.agent.server.Agent;
+import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
-import org.eclipse.che.api.agent.server.AgentProvider;
+import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -52,7 +52,7 @@ public class DockerAgentsApplierTest {
     @Mock
     private Instance            machine;
     @Mock
-    private AgentProvider       agentProvider;
+    private AgentRegistry       agentRegistry;
     @Mock
     private Agent               agent1;
     @Mock
@@ -71,9 +71,9 @@ public class DockerAgentsApplierTest {
 
         when(machineConfig.getAgents()).thenReturn(asList("fqn1:1.0.0", "fqn2"));
 
-        when(agentProvider.createAgent(eq(AgentKeyImpl.of("fqn1:1.0.0")))).thenReturn(agent1);
-        when(agentProvider.createAgent(eq(AgentKeyImpl.of("fqn2")))).thenReturn(agent2);
-        when(agentProvider.createAgent(eq(AgentKeyImpl.of("fqn3")))).thenReturn(agent3);
+        when(agentRegistry.createAgent(eq(AgentKeyImpl.of("fqn1:1.0.0")))).thenReturn(agent1);
+        when(agentRegistry.createAgent(eq(AgentKeyImpl.of("fqn2")))).thenReturn(agent2);
+        when(agentRegistry.createAgent(eq(AgentKeyImpl.of("fqn3")))).thenReturn(agent3);
 
         when(agent1.getScript()).thenReturn("script1");
         when(agent1.getDependencies()).thenReturn(singletonList("fqn3"));

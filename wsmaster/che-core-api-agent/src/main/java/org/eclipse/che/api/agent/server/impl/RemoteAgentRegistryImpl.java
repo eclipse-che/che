@@ -15,11 +15,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.server.AgentRegistry;
-import org.eclipse.che.api.agent.server.AgentRegistryUrlProvider;
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
-import org.eclipse.che.api.agent.shared.dto.AgentConfigDto;
-import org.eclipse.che.api.agent.shared.model.AgentConfig;
+import org.eclipse.che.api.agent.shared.dto.AgentgDto;
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -46,30 +46,37 @@ import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
  */
 @Singleton
 public class RemoteAgentRegistryImpl implements AgentRegistry {
-    private final AgentRegistryUrlProvider urlProvider;
-    private final HttpJsonRequestFactory   requestFactory;
+    private final RemoteAgentRegistryUrlProvider urlProvider;
+    private final HttpJsonRequestFactory         requestFactory;
 
     @Inject
-    public RemoteAgentRegistryImpl(AgentRegistryUrlProvider urlProvider, HttpJsonRequestFactory requestFactory) {
+    public RemoteAgentRegistryImpl(RemoteAgentRegistryUrlProvider urlProvider, HttpJsonRequestFactory requestFactory) {
         this.urlProvider = urlProvider;
         this.requestFactory = requestFactory;
     }
 
     @Override
-    public AgentConfig getConfig(String fqn, String version) throws AgentException {
-        URL url = urlProvider.getAgentUrl(fqn, version);
-        return getConfig(url);
+    public Agent createAgent(String name, String version) throws AgentException {
+        URL url = urlProvider.getAgentUrl(name, version);
+        return createAgent(url);
     }
 
     @Override
-    public AgentConfig getConfig(String fqn) throws AgentException {
-        URL url = urlProvider.getAgentUrl(fqn);
-        return getConfig(url);
+    public Agent createAgent(AgentKey agentKey) throws AgentException {
+        URL url = agentKey.getVersion() != null ? urlProvider.getAgentUrl(agentKey.getName(), agentKey.getVersion())
+                                                : urlProvider.getAgentUrl(agentKey.getName());
+        return createAgent(url);
     }
 
     @Override
-    public Collection<String> getVersions(String fqn) throws AgentException {
-        URL url = urlProvider.getAgentVersions(fqn);
+    public Agent createAgent(String name) throws AgentException {
+        URL url = urlProvider.getAgentUrl(name);
+        return createAgent(url);
+    }
+
+    @Override
+    public Collection<String> getVersions(String name) throws AgentException {
+        URL url = urlProvider.getAgentVersions(name);
         try {
             HttpJsonResponse response = requestFactory.fromUrl(url.toString()).useGetMethod().request();
 
@@ -78,17 +85,17 @@ public class RemoteAgentRegistryImpl implements AgentRegistry {
 
             return versions;
         } catch (IOException | ServerException | UnauthorizedException | ConflictException | BadRequestException | ForbiddenException e) {
-            throw new AgentException(format("Can't fetch available %s version.", fqn), e);
+            throw new AgentException(format("Can't fetch available %s version.", name), e);
         } catch (NotFoundException e) {
-            throw new AgentNotFoundException(format("Agent %s not found", fqn), e);
+            throw new AgentNotFoundException(format("Agent %s not found", name), e);
         }
     }
 
-    private AgentConfig getConfig(URL url) throws AgentException {
+    private Agent createAgent(URL url) throws AgentException {
         try {
-            File agentConf = downloadFile(new File(System.getProperty("java.io.tmpdir")), "agent", ".tmp", url);
-            String json = readAndCloseQuietly(new FileInputStream(agentConf));
-            return DtoFactory.getInstance().createDtoFromJson(json, AgentConfigDto.class);
+            File agent = downloadFile(new File(System.getProperty("java.io.tmpdir")), "agent", ".tmp", url);
+            String json = readAndCloseQuietly(new FileInputStream(agent));
+            return DtoFactory.getInstance().createDtoFromJson(json, AgentgDto.class);
         } catch (IOException | IllegalArgumentException e) {
             throw new AgentException("Can't fetch agent configuration", e);
         }

@@ -8,21 +8,25 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server;
+package org.eclipse.che.ide.ext.git.server.github;
 
+import org.eclipse.che.api.git.CredentialsProvider;
+import org.eclipse.che.inject.DynaModule;
 import com.google.inject.AbstractModule;
-
-import org.eclipse.che.api.agent.server.impl.RemoteAgentRegistryUrlProvider;
-import org.eclipse.che.api.agent.server.impl.RemoteAgentRegistryImpl;
-import org.eclipse.che.api.agent.server.impl.RemoteRemoteAgentRegistryUrlProviderImpl;
+import com.google.inject.multibindings.Multibinder;
 
 /**
- * @author Anatolii Bazko
+ * The module that contains configuration of the server side part of the Git extension.
+ *
+ * @author Alexander Garagatyi
  */
-public class AgentModule extends AbstractModule {
+@DynaModule
+public class GithubGitModule extends AbstractModule {
+
+    /** {@inheritDoc} */
     @Override
     protected void configure() {
-        bind(RemoteAgentRegistryUrlProvider.class).to(RemoteRemoteAgentRegistryUrlProviderImpl.class);
-        bind(AgentRegistry.class).to(RemoteAgentRegistryImpl.class);
+        Multibinder.newSetBinder(binder(), CredentialsProvider.class).addBinding().to(GitHubOAuthCredentialProvider.class);
     }
 }
+

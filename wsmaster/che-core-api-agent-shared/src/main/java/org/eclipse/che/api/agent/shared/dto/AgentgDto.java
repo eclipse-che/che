@@ -8,22 +8,36 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.shared.model;
+package org.eclipse.che.api.agent.shared.dto;
 
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.dto.shared.DTO;
+
+import java.util.List;
+import java.util.Map;
 
 /**
- * @author Anatolii Bazko
+ * @author Anatoliy Bazko
  */
-public interface AgentKey {
-    /**
-     * @return the name of the agent
-     */
+@DTO
+public interface AgentgDto extends Agent {
     String getName();
 
-    /**
-     * @return the version of the agent
-     */
-    @Nullable
+    void setName(String name);
+
     String getVersion();
+
+    void setVersion(String version);
+
+    List<String> getDependencies();
+
+    void setDependencies(List<String> dependencies);
+
+    String getScript();
+
+    void setScript(String script);
+
+    Map<String, String> getProperties();
+
+    void setProperties(Map<String, String> properties);
 }

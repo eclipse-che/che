@@ -59,7 +59,7 @@ public interface MachineConfig {
     Map<String, String> getEnvVariables();
 
     /**
-     * List of injected agents respecting format {@code fqn:version}.
+     * List of injected agents respecting format {@code name:version}.
      * The version part can be omitted.
      */
     List<String> getAgents();
