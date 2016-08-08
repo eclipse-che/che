@@ -30,6 +30,9 @@ import org.eclipse.che.ide.extension.machine.client.command.valueproviders.Comma
 import java.util.List;
 import java.util.Set;
 
+import static org.eclipse.che.ide.ext.java.client.command.ClasspathContainer.JRE_CONTAINER;
+import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
+
 /**
  * Provides project's classpath.
  *
@@ -88,6 +91,12 @@ public class ClasspathProvider implements CommandPropertyValueProvider {
                     classpath.append(lib).append(':');
                 }
 
+                for (ClasspathEntryDto container : classpathResolver.getContainers()) {
+                    if (!JRE_CONTAINER.equals(container.getPath())) {
+                        addLibsFromContainer(container, classpath);
+                    }
+                }
+
                 if (classpath.toString().isEmpty()) {
                     classpath.append(appContext.getProjectsRoot().toString()).append(projectPath).append(':');
                 }
@@ -95,6 +104,14 @@ public class ClasspathProvider implements CommandPropertyValueProvider {
                 return classpath.toString();
             }
         });
+    }
+
+    private void addLibsFromContainer(ClasspathEntryDto container, StringBuilder classpath) {
+        for (ClasspathEntryDto entry : container.getExpandedEntries()) {
+            if (LIBRARY == entry.getEntryKind()) {
+                classpath.append(entry.getPath()).append(':');
+            }
+        }
     }
 
 }

@@ -39,9 +39,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -115,6 +118,43 @@ public class ClasspathProviderTest {
 
         verify(classpathResolver).resolveClasspathEntries(entries);
         assertEquals("lib2.jar:lib1.jar:", classpath);
+    }
+
+    @Test
+    public void classpathShouldBeBuiltWith2ExternalLibrariesAnd2LibrariesFromContainer() throws Exception {
+        String lib1 = "lib1.jar";
+        String lib2 = "lib2.jar";
+
+        List<ClasspathEntryDto> entries = new ArrayList<>();
+
+        Set<String> libs = new HashSet<>();
+        libs.add(lib1);
+        libs.add(lib2);
+
+        ClasspathEntryDto container = mock(ClasspathEntryDto.class);
+        ClasspathEntryDto cLib1 = mock(ClasspathEntryDto.class);
+        ClasspathEntryDto cLib2 = mock(ClasspathEntryDto.class);
+        when(container.getPath()).thenReturn("containerPath");
+        when(container.getExpandedEntries()).thenReturn(asList(cLib1, cLib2));
+        when(cLib1.getPath()).thenReturn("cLib1.jar");
+        when(cLib1.getEntryKind()).thenReturn(LIBRARY);
+        when(cLib2.getPath()).thenReturn("cLib2.jar");
+        when(cLib2.getEntryKind()).thenReturn(LIBRARY);
+
+        Set<ClasspathEntryDto> containers = new HashSet<>();
+        containers.add(container);
+
+        when(classpathContainer.getClasspathEntries(anyString())).thenReturn(classpathEntriesPromise);
+        when(classpathResolver.getLibs()).thenReturn(libs);
+        when(classpathResolver.getContainers()).thenReturn(containers);
+
+        classpathProvider.getValue();
+
+        verify(classpathEntriesPromise).then(classpathEntriesCapture.capture());
+        String classpath = classpathEntriesCapture.getValue().apply(entries);
+
+        verify(classpathResolver).resolveClasspathEntries(entries);
+        assertEquals("lib2.jar:lib1.jar:cLib1.jar:cLib2.jar:", classpath);
     }
 
     @Test

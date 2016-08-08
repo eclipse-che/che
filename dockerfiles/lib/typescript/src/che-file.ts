@@ -15,19 +15,23 @@ import {RecipeBuilder} from './recipebuilder';
 import {Workspace} from './workspace';
 import {WorkspaceDto} from './dto/workspacedto';
 import {Websocket} from './websocket';
+import {CheFileStructWorkspace} from './chefile-struct/che-file-struct';
+import {CheFileStruct} from './chefile-struct/che-file-struct';
+import {CheFileServerTypeStruct} from "./chefile-struct/che-file-struct";
+import {Log} from "./log";
+
+
 
 
 export class CheFile {
 
-  // grab default hostname from the remote ip component
-  DEFAULT_HOSTNAME: string;
-
-  debug: boolean = false;
   times: number = 10;
 
   // gloabl var
   waitDone = false;
-  che: { hostname: string, server: any };
+
+  chefileStruct: CheFileStruct;
+  chefileStructWorkspace: CheFileStructWorkspace;
   dockerContent;
 
   // requirements
@@ -53,40 +57,54 @@ export class CheFile {
   constructor(args) {
     this.args = args;
 
-    this.DEFAULT_HOSTNAME = new RemoteIp().getIp();
-    this.che =  {hostname: this.DEFAULT_HOSTNAME, server: 'tmp'};
-
 
     this.currentFolder = this.path.resolve(args[0]);
     this.folderName = this.path.basename(this.currentFolder);
-    this.cheFile = this.path.resolve(this.currentFolder, 'chefile');
+    this.cheFile = this.path.resolve(this.currentFolder, 'Chefile');
     this.dotCheFolder = this.path.resolve(this.currentFolder, '.che');
     this.confFolder = this.path.resolve(this.dotCheFolder, 'conf');
     this.workspacesFolder = this.path.resolve(this.dotCheFolder, 'workspaces');
     this.chePropertiesFile = this.path.resolve(this.confFolder, 'che.properties');
 
+    this.initDefault();
   }
+
+
+
+  initDefault() {
+    this.chefileStruct = new CheFileStruct();
+    this.chefileStruct.server.ip = new RemoteIp().getIp();
+    this.chefileStruct.server.port = 8080;
+    this.chefileStruct.server.type =  'local';
+
+    this.chefileStructWorkspace = new CheFileStructWorkspace();
+    this.chefileStructWorkspace.name = 'local';
+    this.chefileStructWorkspace.commands[0] = {name: 'hello'};
+
+  }
+
 
 
   startsWith(value:string, searchString: string) : boolean {
     return value.substr(0, searchString.length) === searchString;
   }
 
-
-
-
-
   run() {
+    Log.context = 'ECLIPSE CHE FILE';
+
     if (this.args.length == 0) {
-      console.log('only init and up commands are supported.');
+      Log.getLogger().error('only init and up commands are supported.');
       return;
     } else if ('init' === this.args[1]) {
       this.init();
     } else if ('up' === this.args[1]) {
-      this.init();
+      // call init if not already done
+      if (!this.isInitialized()) {
+        this.init();
+      }
       this.up();
     } else {
-      console.log('Invalid arguments ' + this.args +': Only init and up commands are supported.');
+      Log.getLogger().error('Invalid arguments ' + this.args +': Only init and up commands are supported.');
       return;
     }
 
@@ -98,35 +116,89 @@ export class CheFile {
       this.fs.statSync(this.cheFile);
       // we have a file
     } catch (e) {
-      console.log('No chefile defined, use default settings');
+      Log.getLogger().debug('No chefile defined, use default settings');
       return;
     }
 
     // load the chefile script if defined
     var script_code = this.fs.readFileSync(this.cheFile);
 
-    // setup the bindings for the script
-    this.che.server =  {};
-    this.che.server.ip = this.che.hostname;
-
     // create sandboxed object
-    var sandbox = { "che": this.che, "console": console};
+    var sandbox = { "che": this.chefileStruct,  "workspace": this.chefileStructWorkspace, "console": console};
 
     var script = this.vm.createScript(script_code);
     script.runInNewContext(sandbox);
 
-    if (this.debug) {
-      console.log('Che file parsing object is ', this.che);
+    Log.getLogger().debug('Che file parsing object is ', this.chefileStruct);
+  }
+
+  /**
+   * Check if directory has been initialized or not
+   * @return true if initialization has been done
+   */
+  isInitialized() : boolean {
+    try {
+      this.fs.statSync(this.chePropertiesFile);
+      return true;
+    } catch (e) {
+      return false;
     }
+
+  }
+
+
+  /**
+   * Write a default chefile
+   */
+  writeDefaultChefile() {
+
+    // get json string from object
+    let stringified = JSON.stringify(this.chefileStruct, null, 4);
+
+
+    let content = '';
+    let flatChe = this.flatJson('che', this.chefileStruct);
+    flatChe.forEach((value, key) => {
+      Log.getLogger().debug( 'the value is ' + value.toString() + ' for key' + key);
+      content += key + '=' + value.toString() + '\n';
+    });
+
+    let flatWorkspace = this.flatJson('workspace', this.chefileStructWorkspace);
+    flatWorkspace.forEach((value, key) => {
+      Log.getLogger().debug( 'the flatWorkspace value is ' + value.toString() + ' for key' + key);
+      content += key + '=' + value.toString() + '\n';
+    });
+
+
+    // write content of this.che object
+    this.fs.writeFileSync(this.cheFile, content);
+    Log.getLogger().info('File', this.cheFile, 'written.')
+
   }
 
 
   init() {
-    // needs to create folders
-    this.initCheFolders();
-    this.setupConfigFile();
+    // Check if we have internal che.properties file. If we have, throw error
+   if (this.isInitialized()) {
+     Log.getLogger().warn('Che already initialized');
+   } else {
+      // needs to create folders
+      this.initCheFolders();
+      this.setupConfigFile();
 
-    console.log('Che configuration initialized in ' + this.dotCheFolder );
+     // write a default chefile if there is none
+     try {
+       this.fs.statSync(this.cheFile);
+       Log.getLogger().debug('Chefile is present at ', this.cheFile);
+     } catch (e) {
+       // write default
+       Log.getLogger().debug('Write a default Chefile at ', this.cheFile);
+       this.writeDefaultChefile();
+     }
+
+     Log.getLogger().info('ADDING', this.dotCheFolder, 'DIRECTORY');
+    }
+
   }
 
   up() {
@@ -136,11 +208,11 @@ export class CheFile {
     try {
       var statsPropertiesFile = this.fs.statSync(this.chePropertiesFile);
     } catch (e) {
-      console.log('No che configured. che init has been done ?');
+      Log.getLogger().error('No che configured. che init has been done ?');
       return;
     }
 
-    console.log('Starting che');
+    Log.getLogger().info('STARTING ECLIPSE CHE SILENTLY');
     // needs to invoke docker run
     this.cheBoot();
 
@@ -152,12 +224,14 @@ export class CheFile {
 
 
 
-// Create workspace based on the remote hostname and workspacename
-// if custom docker content is provided, use it
-  createWorkspace(remoteHostname, workspaceName, dockerContent) {
+  /**
+   * Create workspace based on the remote hostname and workspacename
+   * if custom docker content is provided, use it
+   */
+  createWorkspace(dockerContent) {
     var options = {
-      hostname: remoteHostname,
-      port: 8080,
+      hostname: this.chefileStruct.server.ip,
+      port: this.chefileStruct.server.port,
       path: '/api/workspace?account=',
       method: 'POST',
       headers: {
@@ -173,13 +247,13 @@ export class CheFile {
           this.displayUrlWorkspace(JSON.parse(body));
         } else {
           // error
-          console.log('Invalid response from the server side. Aborting');
-          console.log('response was ' + body);
+          Log.getLogger().error('Invalid response from the server side. Aborting');
+          Log.getLogger().error('response was ' + body);
         }
       });
     });
     req.on('error', (e) => {
-      console.log('problem with request: ' + e.message);
+      Log.getLogger().error('problem with request: ' + e.message);
     });
 
     var workspace = {
@@ -198,7 +272,7 @@ export class CheFile {
           "links": []
         }], "name": "default"
       }],
-      "name": workspaceName,
+      "name": this.chefileStructWorkspace.name,
       "links": [],
       "description": null
     };
@@ -219,14 +293,14 @@ export class CheFile {
       var link = links[i];
       if (link.rel === 'ide url') {
         found = true;
-        console.log('Open browser to ' + link.href);
+        Log.getLogger().info('WORKSPACE AT ' + link.href);
       }
       i++;
 
     }
 
     if (!found) {
-      console.log('Workspace successfully started but unable to find workspace link');
+      Log.getLogger().warn('Workspace successfully started but unable to find workspace link');
     }
 
 
@@ -313,37 +387,33 @@ export class CheFile {
 
     var commandLine: string = 'docker run ' +
         ' -v /var/run/docker.sock:/var/run/docker.sock' +
+        ' -e CHE_PORT=' + this.chefileStruct.server.port +
         ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
         ' -e CHE_CONF_FOLDER=' + this.confFolder +
         ' codenvy/che-launcher:nightly start';
 
-    if (this.debug) {
-      console.log('Executing command line', commandLine);
-    }
+    Log.getLogger().debug('Executing command line', commandLine);
     var child = this.exec(commandLine , function callback(error, stdout, stderr) {
-          //console.log('error is ' + error, stdout, stderr);
         }
     );
 
-    //if (debug) {
+
     child.stdout.on('data', (data) => {
-      console.log(data.toString());
+      Log.getLogger().debug(data.toString());
     });
-    //}
 
   }
 
 
-// test if can connect on port 8080
+// test if can connect on che port
   waitCheBoot(self: CheFile) {
 
     if(self.times < 1) {
       return;
     }
-    //console.log('wait che on boot', times);
     var options = {
-      hostname: self.che.hostname,
-      port: 8080,
+      hostname: self.chefileStruct.server.ip,
+      port: self.chefileStruct.server.port,
       path: '/api/workspace',
       method: 'GET',
       headers: {
@@ -351,26 +421,20 @@ export class CheFile {
         'Content-Type': 'application/json;charset=UTF-8'
       }
     };
-    if (self.debug) {
-      console.log('using che ping options', options, 'and docker content', self.dockerContent);
-    }
+    Log.getLogger().debug('using che ping options', options, 'and docker content', self.dockerContent);
 
     var req = self.http.request(options, (res) => {
       res.on('data', (body) => {
 
         if (res.statusCode === 200 && !self.waitDone) {
           self.waitDone = true;
-          if (self.debug) {
-            console.log('status code is 200, creating workspace');
-          }
-          self.createWorkspace(self.che.hostname, 'local', self.dockerContent);
+          Log.getLogger().debug('status code is 200, creating workspace');
+          self.createWorkspace(self.dockerContent);
         }
       });
     });
     req.on('error', (e) => {
-      if (self.debug) {
-        console.log('with request: ' + e.message);
-      }
+      Log.getLogger().debug('with request: ' + e.message);
     });
 
 
@@ -384,4 +448,59 @@ export class CheFile {
 
 
   }
+
+
+  /**
+   * Flatten a JSON object and return a map of string with key and value
+   * @param prefix the prefix to use in order to flatten given object instance
+   * @param data the JSON object
+   * @returns {Map<any, any><string, string>} the flatten map
+   */
+  flatJson(prefix, data) : Map<string, string> {
+    var map = new Map<string, string>();
+
+    this.recurseFlatten(map, data, prefix);
+    return map;
+  }
+
+
+  /**
+   * Recursive method to iterate on elements of a JSON object.
+   * @param map the map containing the key being the property name and the value the JSON element value
+   * @param jsonData the data to parse
+   * @param prop the nme of the property being analyzed
+     */
+  recurseFlatten(map : Map<string, string>, jsonData: any, prop: string) : void {
+
+    if (Object(jsonData) !== jsonData) {
+      if (this.isNumber(jsonData)) {
+        map.set(prop, jsonData);
+      } else {
+        map.set(prop, "'" + jsonData + "'");
+      }
+    } else if (Array.isArray(jsonData)) {
+      let arr : Array<any> = jsonData;
+      let l: number = arr.length;
+      if (l == 0) {
+        map.set(prop, '[]');
+      } else {
+        for(var i : number =0 ; i<l; i++) {
+          this.recurseFlatten(map, arr[i], prop + "[" + i + "]");
+        }
+      }
+    } else {
+      var isEmpty = true;
+      for (var p in jsonData) {
+        isEmpty = false;
+        this.recurseFlatten(map, jsonData[p], prop ? prop + "." + p : p);
+      }
+      if (isEmpty && prop)
+        map.set(prop, '{}');
+    }
+  }
+
+  isNumber(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+  }
+
 }

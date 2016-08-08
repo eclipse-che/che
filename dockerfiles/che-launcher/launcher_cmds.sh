@@ -46,7 +46,7 @@ start_che_server() {
 
   info "ECLIPSE CHE: SERVER LOGS AT \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
   info "ECLIPSE CHE: SERVER BOOTING..."
-  wait_until_server_is_booted 20
+  wait_until_server_is_booted 60
 
   if server_is_booted; then
     info "ECLIPSE CHE: BOOTED AND REACHABLE"

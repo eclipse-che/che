@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.git.server.nativegit;
+package org.eclipse.che.ide.ext.git.server.github;
 
 import org.eclipse.che.api.git.CredentialsProvider;
 import org.eclipse.che.inject.DynaModule;
@@ -21,12 +21,12 @@ import com.google.inject.multibindings.Multibinder;
  * @author Alexander Garagatyi
  */
 @DynaModule
-public class CheGitModule extends AbstractModule {
+public class GithubGitModule extends AbstractModule {
 
     /** {@inheritDoc} */
     @Override
     protected void configure() {
-        Multibinder.newSetBinder(binder(), CredentialsProvider.class).addBinding().to(CheAccessTokenCredentialProvider.class);
+        Multibinder.newSetBinder(binder(), CredentialsProvider.class).addBinding().to(GitHubOAuthCredentialProvider.class);
     }
 }
 
