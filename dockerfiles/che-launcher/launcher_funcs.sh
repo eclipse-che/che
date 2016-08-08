@@ -31,7 +31,6 @@ error_exit() {
   error "!!! ${1}"
   error "!!!"
   echo  "---------------------------------------"
-  container_self_destruction
   exit 1
 }
 
@@ -97,6 +96,35 @@ is_docker_for_windows() {
   fi
 }
 
+get_list_of_che_system_environment_variables() {
+  # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
+  IFS=$'\n'
+  
+  DOCKER_ENV=$(mktemp)
+
+  # First grab all known CHE_ variables
+  CHE_VARIABLES=$(env | grep CHE_)
+  for SINGLE_VARIABLE in "${CHE_VARIABLES}"; do
+    echo "${SINGLE_VARIABLE}" >> $DOCKER_ENV
+  done
+
+  # Add in known proxy variables
+  if [ ! -z ${http_proxy+x} ]; then 
+    echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
+  fi
+
+  if [ ! -z ${https_proxy+x} ]; then 
+    echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
+  fi
+
+  if [ ! -z ${no_proxy+x} ]; then 
+    echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
+  fi
+
+  echo $DOCKER_ENV
+}
+
+
 get_docker_install_type() {
   if is_boot2docker; then
     echo "boot2docker"
@@ -140,8 +168,7 @@ get_docker_daemon_version() {
 
 get_che_hostname() {
   INSTALL_TYPE=$(get_docker_install_type)
-  if [ "${INSTALL_TYPE}" = "boot2docker" ] ||
-     [ "${INSTALL_TYPE}" = "docker4windows" ]; then
+  if [ "${INSTALL_TYPE}" = "boot2docker" ]; then
     get_docker_host_ip
   else
     echo "localhost"
@@ -281,8 +308,4 @@ execute_command_with_progress() {
     ;;
   esac
   printf "\n"
-}
-
-container_self_destruction() {
-  docker rm -f "$(get_che_launcher_container_id)" > /dev/null 2>&1
 }
