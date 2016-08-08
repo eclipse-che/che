@@ -282,6 +282,7 @@ check_current_image_and_update_if_not_found() {
 execute_che_launcher() {
 
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
+
   info "ECLIPSE CHE: LAUNCHING LAUNCHER"
 
   ENV_FILE=$(get_list_of_che_system_environment_variables)
@@ -489,6 +490,13 @@ init_logging
 check_docker
 init_global_variables
 parse_command_line "$@"
+
+if is_boot2docker; then
+  debug "Boot2docker detected - limited mounting"
+  debug "Host OS -> Che folder mapping disabled"
+  debug "Consider Docker for Mac or Windows to activate mounting"
+  debug ""
+fi
 
 case ${CHE_CLI_ACTION} in
   start|stop|restart)
