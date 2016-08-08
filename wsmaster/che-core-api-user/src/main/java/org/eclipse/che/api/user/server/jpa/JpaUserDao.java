@@ -36,7 +36,7 @@ import static java.util.Objects.requireNonNull;
 public class JpaUserDao implements UserDao {
 
     @Inject
-    private Provider<EntityManager> managerProvider;
+    protected Provider<EntityManager> managerProvider;
     @Inject
     private PasswordEncryptor       encryptor;
 

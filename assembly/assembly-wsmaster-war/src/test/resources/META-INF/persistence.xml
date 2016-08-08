@@ -30,8 +30,6 @@
         <class>org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl</class>
         <class>org.eclipse.che.api.machine.server.model.impl.CommandImpl</class>
         <class>org.eclipse.che.api.machine.server.model.impl.SnapshotImpl</class>
-        <class>org.eclipse.che.account.spi.AccountImpl</class>
-        <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.ActionImpl</class>
         <class>org.eclipse.che.api.factory.server.model.impl.AuthorImpl</class>
