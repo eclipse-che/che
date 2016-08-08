@@ -11,6 +11,7 @@
 
 import {MessageBuilder} from './messagebuilder';
 import {MessageBusSubscriber} from './messagebus-subscriber';
+import {Log} from "./log";
 
 
 /**
@@ -36,11 +37,11 @@ export class MessageBus {
         this.delaySend = [];
 
         var client = websocketClient.on('connectFailed', function(error) {
-                console.log('Connect Error: ' + error.toString());
+            Log.getLogger().error('Connect Error: ' + error.toString());
             });
 
 
-        client.on('error', error => console.log('websocketclient error', error.toString()));
+        client.on('error', error => Log.getLogger().error('websocketclient error', error.toString()));
 
         client.on('connect', (connection) => {
             this.websocketConnection = connection;
@@ -55,12 +56,12 @@ export class MessageBus {
 
             connection.on('error', (error) => {
                 if (!this.closed) {
-                    console.log("Connection Error: " + error.toString());
+                    Log.getLogger().error("Connection Error: " + error.toString());
                 }
             });
             connection.on('close', () => {
                 if (!this.closed) {
-                    console.log('Websocket connection closed');
+                    Log.getLogger().error('Websocket connection closed');
                 }
             });
             connection.on('message', (message) => {

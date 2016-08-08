@@ -95,7 +95,7 @@ public class LoaderPresenter implements OperationInfo.StatusListener, LoaderView
         switch (operation.getStatus()) {
             case IN_PROGRESS:
                 view.setInProgressStatus(operationIndex, operationName);
-                view.setCurrentOperation(operationName);
+                updateState();
                 break;
             case SUCCESS:
                 view.setSuccessStatus(operationIndex, operationName);

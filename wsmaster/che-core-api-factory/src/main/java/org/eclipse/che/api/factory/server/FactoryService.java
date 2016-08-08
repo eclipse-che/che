@@ -245,6 +245,7 @@ public class FactoryService extends Service {
         if (factory == null) {
             throw new BadRequestException("Not null factory required");
         }
+        factoryBuilder.checkValid(factory);
         processDefaults(factory);
         createValidator.validateOnCreate(factory);
         final Factory storedFactory = factoryStore.getFactory(factoryStore.saveFactory(factory, null));
@@ -345,6 +346,7 @@ public class FactoryService extends Service {
         newFactory.setId(existingFactory.getId());
 
         // validate the new content
+        factoryBuilder.checkValid(newFactory, true);
         createValidator.validateOnCreate(newFactory);
 
         // access granted, user can update the factory

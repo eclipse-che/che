@@ -26,6 +26,7 @@ Run script
 ```
 docker run -v /var/run/docker.sock:/var/run/docker.sock \
            -v "$PWD":"$PWD" --rm codenvy/che-file \
-           /bin/che $PWD <init|up>
+           $PWD <init|up>
+```
 
 note: if Eclipse Che is already started, it does not handle yet this state

@@ -13,6 +13,8 @@ package org.eclipse.che.api.factory.server;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * @author Sergii Kabashniuk
  */
@@ -22,19 +24,13 @@ public class ValueHelper {
      *
      * @param value
      *         - value to check
-     * @return - true if value is useless for factory (0 for primitives or empty collection or map), false otherwise
+     * @return - true if value is useless for factory (empty string, collection or map), false otherwise
      */
     public static boolean isEmpty(Object value) {
         return (null == value) ||
-               (value.getClass().equals(Boolean.class) && !((Boolean)value)) ||
-               (value.getClass().equals(Integer.class) && (Integer)value == 0) ||
-               (value.getClass().equals(Long.class) && (Long)value == 0) ||
+               (value.getClass().equals(String.class) && isNullOrEmpty((String)value) ||
                (Collection.class.isAssignableFrom(value.getClass()) && ((Collection)value).isEmpty()) ||
-               (Map.class.isAssignableFrom(value.getClass()) && ((Map)value).isEmpty()) ||
-               (value.getClass().equals(Byte.class) && (Byte)value == 0) ||
-               (value.getClass().equals(Short.class) && (Short)value == 0) ||
-               (value.getClass().equals(Double.class) && (Double)value == 0) ||
-               (value.getClass().equals(Float.class) && (Float)value == 0);
+               (Map.class.isAssignableFrom(value.getClass()) && ((Map)value).isEmpty()));
     }
 
 }

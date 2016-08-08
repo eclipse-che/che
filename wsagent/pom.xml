@@ -29,7 +29,6 @@
         <module>che-core-api-project</module>
         <module>che-core-api-git</module>
         <module>che-core-api-git-shared</module>
-        <module>che-core-git-impl-native</module>
         <module>che-core-git-impl-jgit</module>
         <module>che-core-api-debug</module>
         <module>che-core-api-debug-shared</module>

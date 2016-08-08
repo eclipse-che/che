@@ -1,10 +1,17 @@
 <div class="admin-navbar-menu recent-workspaces"
      ng-show="navbarRecentWorkspacesController.getRecentWorkspaces().length">
-  <section class="left-sidebar-menu" layout="column" layout-align="start start">
+  <section class="left-sidebar-menu" layout="column" layout-align="start stretch">
 
-    <div class="navbar-section"
-         flex layout="row" layout-align="start start">
-      <span flex class="navbar-section-title">Recent workspaces</span>
+    <div class="navbar-section navbar-section-title"
+         flex layout="row">
+      <div flex>
+        <span>Recent workspaces</span>
+      </div>
+      <div>
+        <md-button class="navbar-section-title-button" ng-href="#/create-workspace">
+          <i class="fa fa-plus" aria-hidden="true"></i>
+        </md-button>
+      </div>
     </div>
 
     <md-list layout="column">

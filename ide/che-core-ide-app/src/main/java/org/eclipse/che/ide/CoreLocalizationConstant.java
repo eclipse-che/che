@@ -408,6 +408,12 @@ public interface CoreLocalizationConstant extends Messages {
     String startingMachine(String machineName);
 
     /* Buttons */
+    @DefaultMessage("Yes")
+    String yesButtonTitle();
+
+    @DefaultMessage("No")
+    String noButtonTitle();
+
     @Key("ok")
     String ok();
 
@@ -546,6 +552,15 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("ext.server.stopped")
     String extServerStopped();
+
+    @Key("workspace.recovering.dialog.title")
+    String workspaceRecoveringDialogTitle();
+
+    @Key("workspace.recovering.dialog.text")
+    String workspaceRecoveringDialogText();
+
+    @Key("workspace.subscribe.on.events.failed")
+    String workspaceSubscribeOnEventsFailed();
 
     @Key("workspace.start.failed")
     String workspaceStartFailed();

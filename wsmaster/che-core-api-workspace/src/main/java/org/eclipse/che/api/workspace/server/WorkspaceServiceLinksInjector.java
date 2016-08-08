@@ -14,11 +14,9 @@ import org.eclipse.che.api.core.rest.ServiceContext;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 
@@ -31,12 +29,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_HTML;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
+import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
+import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
@@ -116,7 +119,7 @@ public class WorkspaceServiceLinksInjector {
                                      .build();
         links.add(createLink("GET", ideUri.toString(), TEXT_HTML, LINK_REL_IDE_URL));
 
-        // add workspace channel link
+        // add workspace channel links
         final Link workspaceChannelLink = createLink("GET",
                                                      serviceContext.getBaseUriBuilder()
                                                                    .path("ws")
@@ -132,14 +135,16 @@ public class WorkspaceServiceLinksInjector {
                                                 .withParameters(singletonList(
                                                         cloneDto(channelParameter).withDefaultValue("workspace:" + workspace.getId()))));
 
-        // add machine channels links to machines configs
-        workspace.getConfig()
-                 .getEnvironments()
-                 .stream()
-                 .forEach(environmentDto -> injectMachineChannelsLinks(environmentDto,
-                                                                       workspace.getId(),
-                                                                       workspaceChannelLink,
-                                                                       channelParameter));
+        links.add(cloneDto(workspaceChannelLink).withRel(LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL)
+                                                .withParameters(singletonList(cloneDto(channelParameter)
+                                                                                      .withDefaultValue(format(ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE,
+                                                                                                               workspace.getId())))));
+
+        links.add(cloneDto(workspaceChannelLink).withRel(LINK_REL_ENVIRONMENT_STATUS_CHANNEL)
+                                                .withParameters(singletonList(cloneDto(channelParameter)
+                                                                                      .withDefaultValue(format(ENVIRONMENT_STATUS_CHANNEL_TEMPLATE,
+                                                                                                               workspace.getId())))));
+
         // add links for running workspace
         injectRuntimeLinks(workspace, ideUri, uriBuilder);
         return workspace.withLinks(links);
@@ -232,18 +237,5 @@ public class WorkspaceServiceLinksInjector {
 
     public MachineDto injectMachineLinks(MachineDto machine, ServiceContext serviceContext) {
         return machineLinksInjector.injectLinks(machine, serviceContext);
-    }
-    
-    private void injectMachineChannelsLinks(EnvironmentDto environmentDto,
-                                            String workspaceId,
-                                            Link machineChannelLink,
-                                            LinkParameter channelParameter) {
-        for (MachineConfigDto machineConfigDto : environmentDto.getMachineConfigs()) {
-            machineLinksInjector.injectMachineChannelsLinks(machineConfigDto,
-                                                            workspaceId,
-                                                            environmentDto.getName(),
-                                                            machineChannelLink,
-                                                            channelParameter);
-        }
     }
 }

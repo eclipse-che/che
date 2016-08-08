@@ -99,8 +99,6 @@
 /projects/che-plugins/plugin-github/che-plugin-github-ext-github/src/main/java:\
 /projects/che-plugins/plugin-github/che-plugin-github-ext-github/src/main/resources:\
 /projects/che-plugins/plugin-github/che-plugin-github-ext-github/target/generated-sources/dto:\
-/projects/che-core/che-core-git-impl-native/src/main/java:\
-/projects/che-core/che-core-git-impl-native/src/main/resources:\
 /projects/che-plugins/plugin-git/che-plugin-git-ssh-client/src/main/java:\
 /projects/che-plugins/plugin-git/che-plugin-git-ssh-client/src/main/resources:\
 /projects/che-plugins/plugin-github/che-plugin-github-oauth2/src/main/java:\
@@ -234,7 +232,6 @@
 /projects/che-plugins/plugin-dashboard/che-plugin-ext-dashboard/target/classes:\
 /projects/che-plugins/plugin-git/che-plugin-git-ext-git/target/classes:\
 /projects/che-plugins/plugin-github/che-plugin-github-ext-github/target/classes:\
-/projects/che-core/che-core-git-impl-native/target/classes:\
 /projects/che-plugins/plugin-git/che-plugin-git-ssh-client/target/classes:\
 /home/user/.m2/repository/org/kohsuke/github-api/1.67/github-api-1.67.jar:\
 /home/user/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar:\

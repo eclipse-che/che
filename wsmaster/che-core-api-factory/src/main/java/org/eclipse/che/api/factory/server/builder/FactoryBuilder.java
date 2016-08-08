@@ -116,13 +116,27 @@ public class FactoryBuilder {
     }
 
     /**
-     * Validate factory compatibility.
+     * Validate factory compatibility at creation time.
      *
      * @param factory
      *         - factory object to validate
      * @throws ConflictException
      */
     public void checkValid(Factory factory) throws ConflictException {
+       checkValid(factory,  false);
+    }
+
+    /**
+     * Validate factory compatibility.
+     *
+     * @param factory
+     *         - factory object to validate
+     * @param isUpdate
+     *         - indicates is validation performed on update time.
+     *           Set-by-server variables are allowed during update.
+     * @throws ConflictException
+     */
+    public void checkValid(Factory factory, boolean isUpdate) throws ConflictException {
         if (null == factory) {
             throw new ConflictException(FactoryConstants.UNPARSABLE_FACTORY_MESSAGE);
         }
@@ -145,7 +159,7 @@ public class FactoryBuilder {
             default:
                 throw new ConflictException(FactoryConstants.INVALID_VERSION_MESSAGE);
         }
-        validateCompatibility(factory, null, Factory.class, usedFactoryVersionMethodProvider, v, "");
+        validateCompatibility(factory, null, Factory.class, usedFactoryVersionMethodProvider, v, "", isUpdate);
     }
 
     /**
@@ -170,7 +184,7 @@ public class FactoryBuilder {
      *
      * @param object
      *         - object to validate factory parameters
-     * @param object
+     * @param parent
      *         - parent object
      * @param methodsProvider
      *         - class that provides methods with {@link org.eclipse.che.api.core.factory.FactoryParameter}
@@ -188,7 +202,8 @@ public class FactoryBuilder {
                                Class methodsProvider,
                                Class allowedMethodsProvider,
                                Version version,
-                               String parentName) throws ConflictException {
+                               String parentName,
+                               boolean isUpdate) throws ConflictException {
         // validate source
         if (SourceStorageDto.class.equals(methodsProvider) && !hasSubprojectInPath(parent)) {
             sourceStorageParametersValidator.validate((SourceStorage)object, version);
@@ -203,9 +218,12 @@ public class FactoryBuilder {
                 continue;
             }
             String fullName = (parentName.isEmpty() ? "" : (parentName + ".")) + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL,
-                                                                                                           method.getName()
-                                                                                                                 .substring(3)
-                                                                                                                 .toLowerCase());
+                                                                                                           method.getName().startsWith("is")
+                                                                                                           ? method.getName()
+                                                                                                                   .substring(2)
+                                                                                                           : method.getName()
+                                                                                                                   .substring(3)
+                                                                                                                   .toLowerCase());
             // check that field is set
             Object parameterValue;
             try {
@@ -235,7 +253,7 @@ public class FactoryBuilder {
                 throw new ConflictException(String.format(FactoryConstants.PARAMETRIZED_INVALID_PARAMETER_MESSAGE, fullName, version));
             } else {
                 // is parameter deprecated
-                if (factoryParameter.deprecatedSince().compareTo(version) <= 0 || factoryParameter.setByServer()) {
+                if (factoryParameter.deprecatedSince().compareTo(version) <= 0 || (!isUpdate && factoryParameter.setByServer())) {
                     throw new ConflictException(
                             String.format(FactoryConstants.PARAMETRIZED_INVALID_PARAMETER_MESSAGE, fullName, version));
                 }
@@ -243,7 +261,7 @@ public class FactoryBuilder {
                 // use recursion if parameter is DTO object
                 if (method.getReturnType().isAnnotationPresent(DTO.class)) {
                     // validate inner objects such Git ot ProjectAttributes
-                    validateCompatibility(parameterValue, object, method.getReturnType(), method.getReturnType(), version, fullName);
+                    validateCompatibility(parameterValue, object, method.getReturnType(), method.getReturnType(), version, fullName, isUpdate);
                 } else if (Map.class.isAssignableFrom(method.getReturnType())) {
                     Type tp = ((ParameterizedType)method.getGenericReturnType()).getActualTypeArguments()[1];
 
@@ -253,7 +271,7 @@ public class FactoryBuilder {
                             Map<Object, Object> map = (Map)parameterValue;
                             for (Map.Entry<Object, Object> entry : map.entrySet()) {
                                 validateCompatibility(entry.getValue(), object, secMapParamClass, secMapParamClass, version,
-                                                      fullName + "." + entry.getKey());
+                                                      fullName + "." + entry.getKey(), isUpdate);
                             }
                         } else {
                             throw new RuntimeException("This type of fields is not supported by factory.");
@@ -267,7 +285,7 @@ public class FactoryBuilder {
                         if (secListParamClass.isAnnotationPresent(DTO.class)) {
                             List<Object> list = (List)parameterValue;
                             for (Object entry : list) {
-                                validateCompatibility(entry, object, secListParamClass, secListParamClass, version, fullName);
+                                validateCompatibility(entry, object, secListParamClass, secListParamClass, version, fullName, isUpdate);
                             }
                         } else {
                             throw new RuntimeException("This type of fields is not supported by factory.");

@@ -19,6 +19,7 @@ import {WorkspaceEventMessageBusSubscriber} from './workspace-event-subscriber';
 import {MessageBusSubscriber} from './messagebus-subscriber';
 import {WorkspaceDisplayOutputMessageBusSubscriber} from './workspace-log-output-subscriber';
 import {AuthData} from "./auth-data";
+import {Log} from "./log";
 
 
 /**
@@ -53,6 +54,7 @@ export class PostCheck {
 
 
     run() : Promise<string> {
+        Log.context = 'ECLIPSE CHE TEST/post-check';
         let p = new Promise<any>( (resolve, reject) => {
 
             var securedOrNot:string;
@@ -61,7 +63,7 @@ export class PostCheck {
             } else {
                 securedOrNot = '.';
             }
-            console.log('PostCheck:: using hostname \"' + this.authData.getHostname() + '\" and port \"' + this.authData.getPort() + '\"' + securedOrNot);
+            Log.getLogger().info('using hostname \"' + this.authData.getHostname() + '\" and port \"' + this.authData.getPort() + '\"' + securedOrNot);
 
             // we have a promise for auth, wait it
             if (this.promiseAuth) {
@@ -126,7 +128,7 @@ export class PostCheck {
                 var startWorkspacePromise:Promise<WorkspaceDto> = this.workspace.startWorkspace(workspaceDto.getId());
                 startWorkspacePromise.then(workspaceDto => {
                     return new Promise<WorkspaceDto>( (resolve, reject) => {
-                        console.log('Workspace is now starting...');
+                        Log.getLogger().info('Workspace is now starting...');
                         resolve(workspaceDto);
                     });
                 }, error => {

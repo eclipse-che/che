@@ -10,6 +10,7 @@
  */
 
 import {MessageBusSubscriber} from './messagebus-subscriber';
+import {Log} from "./log";
 
 /**
  * Class that will display to console all workspace output messages.
@@ -19,7 +20,7 @@ export class WorkspaceDisplayOutputMessageBusSubscriber implements MessageBusSub
 
     handleMessage(message: string) {
         // maybe parse data to add colors
-        console.log(message);
+        Log.getLogger().info(message);
     }
 
 }
