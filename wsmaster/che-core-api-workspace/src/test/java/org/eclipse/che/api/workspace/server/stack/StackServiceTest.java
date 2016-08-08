@@ -45,14 +45,12 @@ import org.everrest.core.impl.uri.UriBuilderImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.core.UriInfo;
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -145,6 +143,9 @@ public class StackServiceTest {
     @Mock
     StackComponentImpl stackComponent;
 
+    @Mock
+    StackValidator validator;
+
     @InjectMocks
     StackService service;
 
@@ -230,55 +231,7 @@ public class StackServiceTest {
     /** Create stack */
 
     @Test
-    public void shouldThrowBadRequestExceptionWhenUserTryCreateNullStack() {
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType(APPLICATION_JSON)
-                                         .when()
-                                         .post(SECURE_PATH + "/stack");
-
-        assertEquals(response.getStatusCode(), 400);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Stack required");
-    }
-
-    @Test
-    public void shouldThrowBadRequestExceptionWhenUserTryCreateStackWithNonRequiredStackName() {
-        stackDto.setName(null);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType(APPLICATION_JSON)
-                                         .body(stackDto)
-                                         .when()
-                                         .post(SECURE_PATH + "/stack");
-
-        assertEquals(response.getStatusCode(), 400);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Stack name required");
-    }
-
-    @Test
-    public void shouldThrowBadRequestExceptionWhenUserTryCreateStackWithNonRequiredSource() {
-        stackDto.setSource(null);
-        stackDto.setWorkspaceConfig(null);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType(APPLICATION_JSON)
-                                         .body(stackDto)
-                                         .when()
-                                         .post(SECURE_PATH + "/stack");
-
-        assertEquals(response.getStatusCode(), 400);
-        String expectedErrorMessage = "Stack source required. You must specify stack source: 'workspaceConfig' or 'stackSource'";
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedErrorMessage);
-    }
-
-    @Test
     public void newStackShouldBeCreatedForUser() throws ConflictException, ServerException {
-        stackShouldBeCreated();
-    }
-
-    private void stackShouldBeCreated() throws ConflictException, ServerException {
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType(APPLICATION_JSON)
@@ -308,41 +261,6 @@ public class StackServiceTest {
         assertEquals(stackDtoDescriptor.getLinks().get(1).getRel(), LINK_REL_GET_STACK_BY_ID);
     }
 
-    @Test
-    public void shouldThrowBadRequestExceptionOnCreateStackWithEmptyBody() {
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .contentType(APPLICATION_JSON)
-                                         .when()
-                                         .post(SECURE_PATH + "/stack");
-
-        assertEquals(response.getStatusCode(), 400);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Stack required");
-    }
-
-    @Test
-    public void shouldThrowBadRequestExceptionOnCreateStackWithEmptyName() {
-        StackComponentDto stackComponentDto = newDto(StackComponentDto.class).withName("Java").withVersion("1.8.45");
-        StackSourceDto stackSourceDto = newDto(StackSourceDto.class).withType("image").withOrigin("codenvy/ubuntu_jdk8");
-        StackDto stackDto = newDto(StackDto.class).withId(USER_ID)
-                                                  .withDescription("")
-                                                  .withScope("Simple java stack for generation java projects")
-                                                  .withTags(asList("java", "maven"))
-                                                  .withCreator("che")
-                                                  .withComponents(Collections.singletonList(stackComponentDto))
-                                                  .withSource(stackSourceDto);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .contentType(APPLICATION_JSON)
-                                   .body(stackDto)
-                                   .when()
-                                   .post(SECURE_PATH + "/stack");
-
-        assertEquals(response.getStatusCode(), 400);
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), "Stack name required");
-    }
-
     /** Get stack by id */
 
     @Test
@@ -367,24 +285,6 @@ public class StackServiceTest {
         assertEquals(result.getSource().getType(), stackImpl.getSource().getType());
         assertEquals(result.getSource().getOrigin(), stackImpl.getSource().getOrigin());
         assertEquals(result.getCreator(), stackImpl.getCreator());
-    }
-
-    /** Update stack */
-
-    @Test
-    public void shouldThrowBadRequestExceptionWhenUserTryUpdateStackWithNonRequiredSource() {
-        StackDto updatedStackDto = stackDto.withSource(null).withWorkspaceConfig(null);
-
-        Response response = given().auth()
-                                   .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                   .contentType(APPLICATION_JSON)
-                                   .content(updatedStackDto)
-                                   .when()
-                                   .put(SECURE_PATH + "/stack/" + STACK_ID);
-
-        assertEquals(response.getStatusCode(), 400);
-        String expectedMessage = "Stack source required. You must specify stack source: 'workspaceConfig' or 'stackSource'";
-        assertEquals(unwrapDto(response, ServiceError.class).getMessage(), expectedMessage);
     }
 
     @Test
