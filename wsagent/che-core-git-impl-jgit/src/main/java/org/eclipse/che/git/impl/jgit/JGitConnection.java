@@ -76,8 +76,10 @@ import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.TagDeleteRequest;
 import org.eclipse.che.api.git.shared.TagListRequest;
+import org.eclipse.che.api.git.shared.DiffCommitFile;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CloneCommand;
@@ -102,6 +104,8 @@ import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.BatchingProgressMonitor;
@@ -136,10 +140,17 @@ import org.eclipse.jgit.transport.TrackingRefUpdate;
 import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.treewalk.EmptyTreeIterator;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.AndTreeFilter;
+import org.eclipse.jgit.treewalk.filter.PathFilterGroup;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
+import org.eclipse.jgit.util.io.NullOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,6 +175,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
@@ -710,48 +722,178 @@ class JGitConnection implements GitConnection {
         }
     }
 
+    /** @see org.exoplatform.ide.git.server.GitConnection#log(org.exoplatform.ide.git.shared.LogRequest) */
     @Override
-    public LogPage log(LogRequest request) throws GitException {
+    public LogPage log(LogRequest logRequest) throws GitException {
         LogCommand logCommand = getGit().log();
+        String sFilePath = null;
         try {
-            setRevisionRange(logCommand, request);
-
-            request.getFileFilter().forEach(logCommand::addPath);
-
+            setRevisionRange(logCommand, logRequest);
+            setPaging(logCommand, logRequest);
+            if (logRequest != null) {
+                sFilePath = logRequest.getFilePath();
+                if (sFilePath != null && !sFilePath.isEmpty()) {
+                    logCommand.addPath(sFilePath);
+                }
+            }
             Iterator<RevCommit> revIterator = logCommand.call().iterator();
-            List<Revision> commits = new ArrayList<>();
-
+            List<Revision> commits = new ArrayList<Revision>();
             while (revIterator.hasNext()) {
                 RevCommit commit = revIterator.next();
-                PersonIdent committerIdentity = commit.getCommitterIdent();
-
-                GitUser gitUser = newDto(GitUser.class).withName(committerIdentity.getName())
-                                                       .withEmail(committerIdentity.getEmailAddress());
-
-                Revision revision = newDto(Revision.class).withId(commit.getId().getName())
-                                                          .withMessage(commit.getFullMessage())
-                                                          .withCommitTime(MILLISECONDS.convert(commit.getCommitTime(), SECONDS))
-                                                          .withCommitter(gitUser);
+                Revision revision = getRevision(commit, sFilePath);
                 commits.add(revision);
             }
             return new LogPage(commits);
         } catch (GitAPIException | IOException exception) {
-            String errorMessage = exception.getMessage();
-            if (ERROR_LOG_NO_HEAD_EXISTS.equals(errorMessage)) {
-                throw new GitException(errorMessage, ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
-            }
-            throw new GitException(errorMessage, exception);
+			String errorMessage = exception.getMessage();
+            LOG.error("Failed to retrieve log. ", errorMessage);
+			if (ERROR_LOG_NO_HEAD_EXISTS.equals(errorMessage)) {
+				throw new GitException(errorMessage, ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED);
+			}else{
+				throw new GitException(exception);
+			}
         }
     }
 
-    private void setRevisionRange(LogCommand logCommand, LogRequest request) throws IOException {
-        if (request != null) {
-            String revisionRangeSince = request.getRevisionRangeSince();
-            String revisionRangeUntil = request.getRevisionRangeUntil();
+    private Revision getRevision(RevCommit commit, String sFilePath) throws GitAPIException, IOException {
+        List<String> commitParentsList = Stream.of(commit.getParents())
+                                               .map(RevCommit::getName)
+                                               .collect(Collectors.toList());
+        List<Branch> commitBranchesList = getCommitBranches(commit, ListMode.ALL);
+        List<DiffCommitFile> diffCommitFilesList = getCommitDiffFiles(commit,sFilePath);
+
+        GitUser author = getCommitAuthor(commit);
+        GitUser committer = getCommitCommitter(commit);
+
+        Revision revision = createDto(Revision.class).withId(commit.getId()
+                                                     .getName())
+                                                     .withMessage(commit.getFullMessage())
+                                                     .withCommitTime((long) commit.getCommitTime() * 1000)
+                                                     .withCommitter(committer)
+                                                     .withAuthor(author)
+                                                     .withBranches(commitBranchesList)
+                                                     .withCommitParent(commitParentsList)
+                                                     .withDiffCommitFile(diffCommitFilesList);
+        return revision;
+    }
+
+    private GitUser getCommitCommitter(RevCommit commit) {
+        PersonIdent committerIdentity = commit.getCommitterIdent();
+        GitUser committer = createDto(GitUser.class).withName(committerIdentity.getName())
+                                                     .withEmail(committerIdentity.getEmailAddress());
+        return committer;
+    }
+
+    private GitUser getCommitAuthor(RevCommit commit) {
+        PersonIdent authorIdentity = commit.getAuthorIdent();
+        GitUser author = createDto(GitUser.class).withName(authorIdentity.getName())
+                                                  .withEmail(authorIdentity.getEmailAddress());
+        return author;
+    }
+
+    private List<Branch>  getCommitBranches(RevCommit commit, ListMode mode) throws GitAPIException {
+        List<Branch> branchList = new ArrayList<Branch>();
+        List<Ref> branches = getGit().branchList()
+                                     .setListMode(mode)
+                                     .setContains(commit.getName())
+                                     .call();
+        branches.forEach(ref->branchList.add(createDto(Branch.class).withName(ref.getName())));
+        return branchList;
+    }
+
+    private List<DiffCommitFile> getCommitDiffFiles(RevCommit revCommit, String pattern) throws IOException {
+        TreeWalk tw = null;
+        List<DiffEntry> diffs = null;
+        TreeFilter filter = null;
+        if (pattern != null && !pattern.isEmpty()) {
+            filter = AndTreeFilter.create(PathFilterGroup.createFromStrings(Collections.singleton(pattern)), TreeFilter.ANY_DIFF);
+        }
+        List<DiffCommitFile> commitFilesList = new ArrayList<DiffCommitFile>();
+        try {
+            tw = new TreeWalk(repository);
+            tw.setRecursive(true);
+            // get the current commit parent in order to compare it with the current commit
+            // and to get the list of DiffEntry.
+            if (revCommit.getParentCount() > 0) {
+                RevCommit parent = parseCommit(revCommit.getParent(0));
+                tw.reset(parent.getTree(), revCommit.getTree());
+                if (filter != null) {
+                    tw.setFilter(filter);
+                } else {
+                    tw.setFilter(TreeFilter.ANY_DIFF);
+                }
+                diffs = DiffEntry.scan(tw);
+            } else {
+                // If the current commit has no parents (which means it is the initial commit),
+                // then create an empty tree and compare it to the current commit to get the
+                // list of DiffEntry.
+                RevWalk rw = null;
+                DiffFormatter diffFormat = null;
+                try {
+                    rw = new RevWalk(repository);
+                    diffFormat = new DiffFormatter(NullOutputStream.INSTANCE);
+                    diffFormat.setRepository(repository);
+                    if (filter != null) {
+                        diffFormat.setPathFilter(filter);
+                    }
+                    diffs = diffFormat.scan(new EmptyTreeIterator(), new CanonicalTreeParser(null, rw.getObjectReader(), revCommit.getTree()));
+                } finally {
+                    if (diffFormat != null) {
+                        diffFormat.close();
+                    }
+                    if (rw != null) {
+                        rw.close();
+                    }
+                }
+            }
+        } finally {
+            if (tw != null) {
+                tw.close();
+            }
+        }
+        if (diffs != null) {
+            commitFilesList.addAll(diffs.stream().map(diff -> createDto(DiffCommitFile.class).withOldPath(diff.getOldPath())
+                                                                                             .withNewPath(diff.getNewPath())
+                                                                                             .withChangeType(diff.getChangeType().name()))
+                                                 .collect(Collectors.toList()));
+        }
+        return commitFilesList;
+    }
+
+    private RevCommit parseCommit(RevCommit revCommit) {
+        RevWalk rw = null;
+        try {
+            rw = new RevWalk(repository);
+            return rw.parseCommit(revCommit);
+        } catch (IOException e) {
+            return revCommit;
+        } finally {
+            if (rw != null) {
+                rw.close();
+            }
+        }
+    }
+
+
+    private void setRevisionRange(LogCommand logCommand, LogRequest logRequest) throws IOException {
+        if (logRequest != null && logCommand != null) {
+            String revisionRangeSince = logRequest.getRevisionRangeSince();
+            String revisionRangeUntil = logRequest.getRevisionRangeUntil();
             if (revisionRangeSince != null && revisionRangeUntil != null) {
                 ObjectId since = repository.resolve(revisionRangeSince);
                 ObjectId until = repository.resolve(revisionRangeUntil);
                 logCommand.addRange(since, until);
+            }
+        }
+    }
+
+    private void setPaging(LogCommand logCommand, LogRequest logRequest) {
+        if (logCommand != null && logRequest != null) {
+            int skip = logRequest.getSkip();
+            int maxCount = logRequest.getMaxCount();
+            if (skip > 0 && maxCount > 0) {
+                logCommand.setSkip((skip - 1) * maxCount);
+                logCommand.setMaxCount(maxCount);
             }
         }
     }
@@ -772,7 +914,6 @@ class JGitConnection implements GitConnection {
         } catch (GitAPIException exception) {
             throw new GitException(exception.getMessage(), exception);
         }
-
         return gitUsers;
     }
 
@@ -1505,6 +1646,10 @@ class JGitConnection implements GitConnection {
             return git;
         }
         return git = new Git(repository);
+    }
+	
+	private static <T> T createDto(Class<T> clazz) {
+        return DtoFactory.getInstance().createDto(clazz);
     }
 
     @Override
