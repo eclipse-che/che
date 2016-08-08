@@ -25,7 +25,6 @@
     <modules>
         <module>che-plugin-languageserver-shared</module>
         <module>che-plugin-languageserver-server</module>
-        <module>che-plugin-languageserver-agent</module>
         <module>che-plugin-languageserver-ide</module>
     </modules>
     <build>
