@@ -17,6 +17,7 @@
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <non-jta-data-source>java:/comp/env/jdbc/che</non-jta-data-source>
 
+        <class>org.eclipse.che.account.spi.AccountImpl</class>
         <class>org.eclipse.che.api.user.server.model.impl.UserImpl</class>
         <class>org.eclipse.che.api.user.server.model.impl.ProfileImpl</class>
         <class>org.eclipse.che.api.user.server.jpa.PreferenceEntity</class>
