@@ -49,6 +49,8 @@ public class LocalDockerModule extends AbstractModule {
         bind(org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider.class)
                 .to(org.eclipse.che.plugin.docker.machine.local.node.provider.LocalWorkspaceFolderPathProvider.class);
 
+        bind(org.eclipse.che.plugin.docker.client.DockerRegistryDynamicAuthResolver.class)
+                .to(org.eclipse.che.plugin.docker.client.NoOpDockerRegistryDynamicAuthResolverImpl.class);
         bind(org.eclipse.che.plugin.docker.client.DockerRegistryChecker.class).asEagerSingleton();
 
         Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
