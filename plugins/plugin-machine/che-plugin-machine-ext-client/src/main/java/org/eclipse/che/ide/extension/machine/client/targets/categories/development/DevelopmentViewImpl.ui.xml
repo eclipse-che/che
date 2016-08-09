@@ -24,26 +24,40 @@
             margin-top: 10px;
         }
 
-        input.withCopyButton {
+        input.withCopyButton,
+        textarea.withCopyButton {
             width: literal("calc(100% - 28px)");
             float: left;
         }
 
-        input.withCopyButton + div {
-            margin-top: 0;
+        textarea.withCopyButton {
+            min-height: 14px;
+            max-height: 70px;
+            padding: 4px 5px 4px 5px;
+            font-size: inherit;
         }
 
-        input.withCopyButton + div > span {
+        textarea.withCopyButton + div {
+            margin-top: 28px;
+        }
+
+        input.withCopyButton + div > span,
+        textarea.withCopyButton + div > span {
             margin-top: 1px;
             left: inherit;
-            top: 28px;
             right: -15px;
+            top: 28px;
         }
 
-        input.withCopyButton + div > span:after {
+        input.withCopyButton + div > span:after,
+        textarea.withCopyButton + div > span:after {
             top: -15px;
             right: 14px;
             left: inherit;
+        }
+
+        input.withCopyButton + div {
+            margin-top: 0;
         }
 
     </ui:style>
@@ -61,8 +75,15 @@
         <g:Label width="100%" text="Source type" addStyleNames="{style.label} {style.delimiter}"/>
         <g:TextBox readOnly="true" height="14px" ui:field="sourceType" tabIndex="0"/>
 
-        <g:Label width="100%" text="Source URL" addStyleNames="{style.label} {style.delimiter}"/>
-        <g:TextBox addStyleNames=" {style.withCopyButton}" readOnly="true" height="14px" ui:field="sourceUrl" tabIndex="0"/>
+        <g:FlowPanel width="100%" visible="false">
+            <g:Label width="100%" text="Source URL" addStyleNames="{style.label} {style.delimiter}"/>
+            <g:TextBox addStyleNames=" {style.withCopyButton}" readOnly="true" height="14px" ui:field="sourceUrl" tabIndex="0"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel width="100%" visible="false">
+            <g:Label width="100%" text="Source content" addStyleNames="{style.label} {style.delimiter}"/>
+            <g:TextArea addStyleNames=" {style.withCopyButton}" readOnly="true" height="70px" ui:field="sourceContent" tabIndex="0"/>
+        </g:FlowPanel>
 
     </g:FlowPanel>
 </ui:UiBinder>
