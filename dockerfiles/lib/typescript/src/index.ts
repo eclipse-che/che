@@ -11,7 +11,7 @@
 
 /// <reference path='./typings/tsd.d.ts' />
 import {PostCheck} from './post-check';
-import {CheFile} from "./che-file";
+import {CheDir} from "./che-dir";
 import {Log} from "./log";
 
 /**
@@ -38,9 +38,9 @@ export class EntryPoint {
                 // remove post-check arg for now as it's the only test
                 let postCheck: PostCheck = new PostCheck(this.args.slice(2));
                 promise = postCheck.run();
-            } else if ('che-file' === commandName) {
-                let cheFile: CheFile = new CheFile(this.args.slice(1));
-                promise = cheFile.run();
+            } else if ('che-dir' === commandName) {
+                let cheDir: CheDir = new CheDir(this.args.slice(1));
+                promise = cheDir.run();
             } else {
                 this.printHelp();
             }

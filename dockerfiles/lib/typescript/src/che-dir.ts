@@ -27,6 +27,7 @@ import {MessageBusSubscriber} from "./messagebus-subscriber";
 import {WorkspaceEventMessageBusSubscriber} from "./workspace-event-subscriber";
 import {WorkspaceDisplayOutputMessageBusSubscriber} from "./workspace-log-output-subscriber";
 import {WorkspaceEventPromiseMessageBusSubscriber} from "./workspace-event-promise-subscriber";
+import {Project} from "./project";
 
 
 /**
@@ -34,7 +35,7 @@ import {WorkspaceEventPromiseMessageBusSubscriber} from "./workspace-event-promi
  * It can either generate or reuse an existing Chefile and then boot Che.
  * @author Florent Benoit
  */
-export class CheFile {
+export class CheDir {
 
   // Try 30s to ping a che server when booting it
   times: number = 30;
@@ -294,10 +295,11 @@ export class CheFile {
   performUp() : Promise<string> {
 
     var callbackSubscriber:WorkspaceEventPromiseMessageBusSubscriber;
+    var workspaceId : string;
+    var ideUrl: string;
 
     return new Promise<string>((resolve, reject) => {
       this.parse();
-
 
       // test if conf is existing
       try {
@@ -357,9 +359,24 @@ export class CheFile {
       return this.workspace.startWorkspace(workspaceDto.getId());
     }).then((workspaceDto) => {
       Log.getLogger().info('WORKSPACE BOOTING...');
+
+      // keep id
+      workspaceId = workspaceDto.getId();
+
       // wait websocket promise
       return callbackSubscriber.promise;
-    }).then((ideUrl) => {
+    }).then((url) => {
+      ideUrl = url;
+      // then get workspace details to get workspace agent
+      return this.workspace.getWorkspace(workspaceId);
+    }).then((workspaceDto) => {
+      Log.getLogger().info('UPDATING PROJECT...');
+      var project : Project = new Project(workspaceDto);
+      // update created project to blank
+      return project.updateType(this.folderName, 'blank');
+
+
+    }).then(() => {
       Log.getLogger().info(ideUrl);
       Log.getLogger().info('WORKSPACE BOOTED AND READY FOR DEVELOPMENT');
       return ideUrl;

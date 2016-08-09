@@ -171,6 +171,58 @@ export class Workspace {
     }
 
 
+    /**
+     * Get a workspace data by returning a Promise with WorkspaceDto.
+     */
+    getWorkspace(workspaceId: string) : Promise<WorkspaceDto> {
+
+        var options = {
+            hostname: this.authData.getHostname(),
+            port: this.authData.getPort(),
+            path: '/api/workspace/' + workspaceId + '?token=' + this.authData.getToken(),
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Content-Type': 'application/json;charset=UTF-8'
+            }
+        };
+
+        let p = new Promise<WorkspaceDto>( (resolve, reject) => {
+            var req = this.http.request(options,  (res) => {
+
+                var data: string = '';
+
+                res.on('error',  (body)=> {
+                    Log.getLogger().error('got the following error', body.toString());
+                    reject(body);
+                });
+
+                res.on('data',  (body) => {
+                    data += body;
+                });
+
+                res.on('end', () => {
+                    if (res.statusCode == 200) {
+                        // workspace created, continue
+                        resolve(new WorkspaceDto(JSON.parse(data)));
+                    } else {
+                        reject('Invalid response code');
+                    }
+                });
+
+            });
+
+            req.on('error', (err) => {
+                reject('HTTP error: ' + err);
+            });
+
+            req.write('{}');
+            req.end();
+
+        });
+        return p;
+    }
+
 }
 
 

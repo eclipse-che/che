@@ -136,6 +136,8 @@ export class AuthData {
                 isSecured = true;
                 port = 443;
             }
+        } else {
+            port = urlObject.port;
         }
 
         let authData: AuthData = new AuthData(urlObject.hostname, port);

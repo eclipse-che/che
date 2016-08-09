@@ -15,8 +15,10 @@
 #              $PWD <init|up>`
 # 
 #  where [COMMAND]:
-#    init -- Initialize configuration files for this directory
-#    up   -- Launch workspace, starting Che server, if necessary 
+#    init    -- Initialize configuration files for this directory
+#    up      -- Launch workspace, starting Che server, if necessary
+#    down    -- Stop the Che server
+#    status  -- Provide status of what is in the current directory
 #
 FROM mhart/alpine-node
 
@@ -36,4 +38,4 @@ COPY lib/typescript/dependencies/runtime/node_modules /lib/node_modules
 COPY lib/typescript/bin /bin
 ADD  che-file/src/che.properties /lib/che.properties
 
-ENTRYPOINT ["/bin/che", "che-file"]
+ENTRYPOINT ["/bin/che", "che-dir"]
