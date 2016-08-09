@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--                                                                                                                                                             
+                                                                                                                                                                 
+    Copyright (c) 2015 Serli SAS.                                                                                                                                
+    All rights reserved. This program and the accompanying materials                                                                                             
+    are made available under the terms of the Eclipse Public License v1.0                                                                                        
+    which accompanies this distribution, and is available at                                                                                                     
+    http://www.eclipse.org/legal/epl-v10.html                                                                                                                    
+                                                                                                                                                                 
+    Contributors:                                                                                                                                                
+      Sun Seng David TAN <sunix@sunix.org> - initial API and implementation                                                                                      
+                                                                                                                                                                 
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-plugin-pair-programming-parent</artifactId>
+        <groupId>org.eclipse.che.plugin</groupId>
+        <version>4.7.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <groupId>org.eclipse.che.plugin</groupId>
+    <artifactId>che-plugin-flux-live-edit</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>Che :: Flux live edit plugin</name>
+    <dependencies>
+        <!--<dependency>-->
+            <!--<groupId>com.google.gwt.inject</groupId>-->
+            <!--<artifactId>gin</artifactId>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-machine-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-gwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-machine-ext-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <repositories>
+        <repository>
+            <id>codenvy-public-repo</id>
+            <name>codenvy public</name>
+            <url>https://maven.codenvycorp.com/content/groups/public/</url>
+        </repository>
+    </repositories>
+    <build>
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <outputDirectory>target/classes</outputDirectory>
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/org/eclipse/che/ide/**</exclude>
+                        <exclude>pom.xml</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.sortpom</groupId>
+                <artifactId>maven-sortpom-plugin</artifactId>
+                <configuration>
+                    <verifyFail>Warn</verifyFail>
+                </configuration>
+            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-dependency-plugin</artifactId>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<configuration>-->
+                            <!--<skip>true</skip>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
+        </plugins>
+    </build>
+</project>

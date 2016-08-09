@@ -47,5 +47,6 @@
         <module>plugin-nodejs</module>
         <module>plugin-ssh-machine</module>
         <module>plugin-ssh-key</module>
+        <module>plugin-pair-programming</module>
     </modules>
 </project>
