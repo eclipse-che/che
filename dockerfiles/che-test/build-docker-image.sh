@@ -5,6 +5,13 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
+if [ "latest" = "$1" ]
+then
+  TAG="latest"
+else
+  TAG="nightly"
+fi
+
 DIR=$(cd "$(dirname "$0")"; cd ..; pwd)
-echo "Building Docker Image from $DIR directory"
-cd $DIR && docker build -t codenvy/che-test -f che-test/Dockerfile .
+echo "Building Docker Image from $DIR directory with tag $TAG"
+cd $DIR && docker build -t codenvy/che-test:$TAG -f che-test/Dockerfile .

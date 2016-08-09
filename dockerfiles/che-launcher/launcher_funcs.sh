@@ -31,7 +31,6 @@ error_exit() {
   error "!!! ${1}"
   error "!!!"
   echo  "---------------------------------------"
-  container_self_destruction
   exit 1
 }
 
@@ -73,8 +72,8 @@ is_boot2docker() {
 }
 
 has_docker_for_windows_ip() {
-  DOCKER_HOST_IP=$(get_docker_host_ip)
-  if [ "${DOCKER_HOST_IP}" = "10.0.75.2" ]; then
+  ETH0_ADDRESS=$(docker run --net host alpine /bin/sh -c "ifconfig eth0" | grep "inet addr:" | cut -d: -f2 | cut -d" " -f1)
+  if [ "${ETH0_ADDRESS}" = "10.0.75.2" ]; then
     return 0
   else
     return 1
@@ -97,6 +96,35 @@ is_docker_for_windows() {
   fi
 }
 
+get_list_of_che_system_environment_variables() {
+  # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
+  IFS=$'\n'
+  
+  DOCKER_ENV=$(mktemp)
+
+  # First grab all known CHE_ variables
+  CHE_VARIABLES=$(env | grep CHE_)
+  for SINGLE_VARIABLE in "${CHE_VARIABLES}"; do
+    echo "${SINGLE_VARIABLE}" >> $DOCKER_ENV
+  done
+
+  # Add in known proxy variables
+  if [ ! -z ${http_proxy+x} ]; then 
+    echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
+  fi
+
+  if [ ! -z ${https_proxy+x} ]; then 
+    echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
+  fi
+
+  if [ ! -z ${no_proxy+x} ]; then 
+    echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
+  fi
+
+  echo $DOCKER_ENV
+}
+
+
 get_docker_install_type() {
   if is_boot2docker; then
     echo "boot2docker"
@@ -110,10 +138,17 @@ get_docker_install_type() {
 }
 
 get_docker_host_ip() {
-  NETWORK_IF="eth0"
-  if is_boot2docker; then
-    NETWORK_IF="eth1"
-  fi
+  case $(get_docker_install_type) in
+   boot2docker)
+     NETWORK_IF="eth1"
+   ;;
+   native)
+     NETWORK_IF="docker0"
+   ;;
+   *)
+     NETWORK_IF="eth0"
+   ;;
+  esac
 
   docker run --rm --net host \
             alpine sh -c \
@@ -133,8 +168,7 @@ get_docker_daemon_version() {
 
 get_che_hostname() {
   INSTALL_TYPE=$(get_docker_install_type)
-  if [ "${INSTALL_TYPE}" = "boot2docker" ] ||
-     [ "${INSTALL_TYPE}" = "docker4windows" ]; then
+  if [ "${INSTALL_TYPE}" = "boot2docker" ]; then
     get_docker_host_ip
   else
     echo "localhost"
@@ -198,7 +232,8 @@ get_che_container_conf_folder() {
 }
 
 get_che_container_data_folder() {
-  get_che_container_host_bind_folder "/home/user/che/workspaces"
+  FOLDER=$(get_che_container_host_bind_folder "/home/user/che/workspaces")
+  echo "${FOLDER:=not set}"
 }
 
 get_che_container_image_name() {
@@ -273,8 +308,4 @@ execute_command_with_progress() {
     ;;
   esac
   printf "\n"
-}
-
-container_self_destruction() {
-  docker rm -f "$(get_che_launcher_container_id)" > /dev/null 2>&1
 }
