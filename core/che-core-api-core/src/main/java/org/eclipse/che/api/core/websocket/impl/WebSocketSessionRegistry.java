@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.stream.Collectors.toSet;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -31,7 +32,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class WebSocketSessionRegistry {
     private static final Logger LOG = getLogger(WebSocketSessionRegistry.class);
 
-    private final Map<Integer, Session> sessionsMap = new HashMap<>();
+    private final Map<Integer, Session> sessionsMap = new ConcurrentHashMap<>();
 
     public void add(Integer endpointId, Session session) {
         LOG.debug("Registering session with endpoint {}", session.getId(), endpointId);

@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Binds request identifiers with request methods. Registry is used by response receivers
@@ -34,7 +34,7 @@ public class JsonRpcRequestRegistry {
 
     @Inject
     public JsonRpcRequestRegistry() {
-        this.requests = new HashMap<>();
+        this.requests = new ConcurrentHashMap<>();
     }
 
     /**

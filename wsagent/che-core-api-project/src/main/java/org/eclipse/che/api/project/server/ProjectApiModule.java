@@ -99,10 +99,10 @@ public class ProjectApiModule extends AbstractModule {
         highLevelVfsEventDetectorMultibinder.addBinding().to(GitCheckoutHiEventDetector.class);
         highLevelVfsEventDetectorMultibinder.addBinding().to(OpenedFileContentUpdateEventDetector.class);
 
-        MapBinder<String, JsonRpcRequestReceiver> notificationReceivers =
+        MapBinder<String, JsonRpcRequestReceiver> requestReceivers =
                 MapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
 
-        notificationReceivers.addBinding("event:file-opened").to(OpenedFileContentUpdateEventDetector.class);
-        notificationReceivers.addBinding("event:file-closed").to(OpenedFileContentUpdateEventDetector.class);
+        requestReceivers.addBinding("event:file-opened").to(OpenedFileContentUpdateEventDetector.class);
+        requestReceivers.addBinding("event:file-closed").to(OpenedFileContentUpdateEventDetector.class);
     }
 }
