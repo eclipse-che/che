@@ -36,20 +36,20 @@ import java.util.Objects;
  *
  * @author Yevhenii Voevodin
  */
-@Entity(name = "\"User\"")
+@Entity(name = "Usr")
 @NamedQueries(
         {
                 @NamedQuery(name = "User.getByAliasAndPassword",
                             query = "SELECT u " +
-                                    "FROM \"User\" u " +
+                                    "FROM Usr u " +
                                     "WHERE :alias = u.name OR" +
                                     "      :alias = u.email"),
                 @NamedQuery(name = "User.getByAlias",
-                            query = "SELECT u FROM \"User\" u WHERE :alias MEMBER OF u.aliases"),
+                            query = "SELECT u FROM Usr u WHERE :alias MEMBER OF u.aliases"),
                 @NamedQuery(name = "User.getByName",
-                            query = "SELECT u FROM \"User\" u WHERE u.name = :name"),
+                            query = "SELECT u FROM Usr u WHERE u.name = :name"),
                 @NamedQuery(name = "User.getByEmail",
-                            query = "SELECT u FROM \"User\" u WHERE u.email = :email")
+                            query = "SELECT u FROM Usr u WHERE u.email = :email")
         }
 )
 @EntityListeners(UserEntityListener.class)
