@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.wsagent;
+package org.eclipse.che.api.agent.server.wsagent;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -18,15 +18,16 @@ import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
-import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.commons.test.SelfReturningAnswer;
+import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -42,31 +43,30 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @Listeners(MockitoTestNGListener.class)
 public class WsAgentLauncherImplTest {
-    private static final String     WS_ID                         = "wsId";
-    private static final String     MACHINE_ID                    = "machineId";
-    private static final String     WS_AGENT_START_CMD_LINE       = "cmdLine";
-    private static final String     WS_AGENT_PORT                 = Constants.WS_AGENT_PORT;
-    private static final long       WS_AGENT_MAX_START_TIME_MS    = 1000;
-    private static final long       WS_AGENT_PING_DELAY_MS        = 1;
-    private static final int        WS_AGENT_PING_CONN_TIMEOUT_MS = 1;
-    private static final String     WS_AGENT_SERVER_LOCATION      = "ws-agent.com:456789/";
-    private static final String     WS_AGENT_SERVER_URL           = "http://" + WS_AGENT_SERVER_LOCATION;
+    private static final String MACHINE_ID                    = "machineId";
+    private static final String WORKSPACE_ID                  = "testWorkspaceId";
+    private static final String WS_AGENT_START_CMD_LINE       = "cmdLine";
+    private static final String WS_AGENT_PORT                 = Constants.WS_AGENT_PORT;
+    private static final long   WS_AGENT_MAX_START_TIME_MS    = 1000;
+    private static final long   WS_AGENT_PING_DELAY_MS        = 1;
+    private static final int    WS_AGENT_PING_CONN_TIMEOUT_MS = 1;
+    private static final String WS_AGENT_SERVER_LOCATION      = "ws-agent.com:456789/";
+    private static final String WS_AGENT_SERVER_URL           = "http://" + WS_AGENT_SERVER_LOCATION;
     private static final ServerImpl SERVER                        = new ServerImpl("ref",
                                                                                    "http",
                                                                                    WS_AGENT_SERVER_LOCATION,
                                                                                    null,
                                                                                    WS_AGENT_SERVER_URL);
-    private static final String     WS_AGENT_TIMED_OUT_MESSAGE    = "timeout error message";
+    private static final String WS_AGENT_TIMED_OUT_MESSAGE    = "timeout error message";
 
     @Mock
-    private MachineManager         machineManager;
+    private MachineProcessManager  machineProcessManager;
     @Mock
     private HttpJsonRequestFactory requestFactory;
     @Mock
@@ -81,16 +81,16 @@ public class WsAgentLauncherImplTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        wsAgentLauncher = new WsAgentLauncherImpl(() -> machineManager,
+        wsAgentLauncher = new WsAgentLauncherImpl(() -> machineProcessManager,
                                                   requestFactory,
                                                   WS_AGENT_START_CMD_LINE,
                                                   WS_AGENT_MAX_START_TIME_MS,
                                                   WS_AGENT_PING_DELAY_MS,
                                                   WS_AGENT_PING_CONN_TIMEOUT_MS,
                                                   WS_AGENT_TIMED_OUT_MESSAGE);
-        pingRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
-        when(machineManager.getDevMachine(WS_ID)).thenReturn(machine);
+        pingRequest = Mockito.mock(HttpJsonRequest.class, new SelfReturningAnswer());
         when(machine.getId()).thenReturn(MACHINE_ID);
+        when(machine.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(machine.getRuntime()).thenReturn(machineRuntime);
         doReturn(Collections.<String, Server>singletonMap(WS_AGENT_PORT, SERVER)).when(machineRuntime).getServers();
         when(requestFactory.fromUrl(anyString())).thenReturn(pingRequest);
@@ -100,19 +100,20 @@ public class WsAgentLauncherImplTest {
 
     @Test
     public void shouldStartWsAgentUsingMachineExec() throws Exception {
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
 
-        verify(machineManager).exec(eq(MACHINE_ID),
-                                    eq(new CommandImpl(WsAgentLauncherImpl.WS_AGENT_PROCESS_NAME,
+        verify(machineProcessManager).exec(eq(WORKSPACE_ID),
+                                           eq(MACHINE_ID),
+                                           eq(new CommandImpl(WsAgentLauncherImpl.WS_AGENT_PROCESS_NAME,
                                                        WS_AGENT_START_CMD_LINE,
                                                        "Arbitrary")),
-                                    eq(WsAgentLauncherImpl.getWsAgentProcessOutputChannel(WS_ID)));
+                                           eq(WsAgentLauncherImpl.getWsAgentProcessOutputChannel(WORKSPACE_ID)));
 
     }
 
     @Test
     public void shouldPingWsAgentAfterStart() throws Exception {
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
 
         verify(requestFactory).fromUrl(UriBuilder.fromUri(WS_AGENT_SERVER_URL)
                                                  .build()
@@ -130,7 +131,7 @@ public class WsAgentLauncherImplTest {
                                               new IOException())
                                    .thenReturn(pingResponse);
 
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
 
         verify(requestFactory).fromUrl(WS_AGENT_SERVER_URL);
         verify(pingRequest).setMethod(HttpMethod.GET);
@@ -145,7 +146,7 @@ public class WsAgentLauncherImplTest {
                                                         HttpURLConnection.HTTP_NO_CONTENT,
                                                         HttpURLConnection.HTTP_OK);
 
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
 
         verify(requestFactory).fromUrl(WS_AGENT_SERVER_URL);
         verify(pingRequest).setMethod(HttpMethod.GET);
@@ -159,57 +160,58 @@ public class WsAgentLauncherImplTest {
         when(pingRequest.request()).thenThrow(new ServerException(""))
                                    .thenReturn(pingResponse);
 
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
 
         verify(pingRequest, times(2)).request();
         verify(pingResponse).getResponseCode();
     }
 
     @Test(expectedExceptions = NotFoundException.class, expectedExceptionsMessageRegExp = "Test exception")
-    public void shouldThrowNotFoundExceptionIfMachineManagerGetDevMachineForWsThrowsNotFoundException() throws Exception {
-        final String notExistingWsId = "notExistingWsId";
-        when(machineManager.getDevMachine(notExistingWsId)).thenThrow(new NotFoundException("Test exception"));
-
-        wsAgentLauncher.startWsAgent(notExistingWsId);
-
-        verify(machineManager).getDevMachine(eq(notExistingWsId));
-    }
-
-    @Test(expectedExceptions = MachineException.class, expectedExceptionsMessageRegExp = "Test exception")
-    public void shouldThrowMachineExceptionIfMachineManagerGetDevMachineForWsThrowsMachineException() throws Exception {
-        final String notExistingWsId = "notExistingWsId";
-        when(machineManager.getDevMachine(notExistingWsId)).thenThrow(new MachineException("Test exception"));
-
-        wsAgentLauncher.startWsAgent(notExistingWsId);
-
-        verify(machineManager).getDevMachine(eq(notExistingWsId));
-    }
-
-    @Test(expectedExceptions = NotFoundException.class, expectedExceptionsMessageRegExp = "Test exception")
     public void shouldThrowNotFoundExceptionIfMachineManagerExecInDevMachineThrowsNotFoundException() throws Exception {
-        when(machineManager.exec(anyString(), any(Command.class), anyString())).thenThrow(new NotFoundException("Test exception"));
+        when(machineProcessManager.exec(anyString(),
+                                        anyString(),
+                                        any(Command.class),
+                                        anyString()))
+                .thenThrow(new NotFoundException("Test exception"));
 
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
 
-        verify(machineManager).exec(anyString(), any(Command.class), anyString());
+        verify(machineProcessManager).exec(anyString(),
+                                           anyString(),
+                                           any(Command.class),
+                                           anyString());
     }
 
     @Test(expectedExceptions = MachineException.class, expectedExceptionsMessageRegExp = "Test exception")
     public void shouldThrowMachineExceptionIfMachineManagerExecInDevMachineThrowsMachineException() throws Exception {
-        when(machineManager.exec(anyString(), any(Command.class), anyString())).thenThrow(new MachineException("Test exception"));
+        when(machineProcessManager.exec(anyString(),
+                                        anyString(),
+                                        any(Command.class),
+                                        anyString()))
+                .thenThrow(new MachineException("Test exception"));
 
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
 
-        verify(machineManager).exec(anyString(), any(Command.class), anyString());
+        verify(machineProcessManager).exec(anyString(),
+                                           anyString(),
+                                           any(Command.class),
+                                           anyString());
     }
 
-    @Test(expectedExceptions = MachineException.class, expectedExceptionsMessageRegExp = "Test exception")
-    public void shouldThrowMachineExceptionIfMachineManagerExecInDevMachineThrowsBadRequestException() throws Exception {
-        when(machineManager.exec(anyString(), any(Command.class), anyString())).thenThrow(new BadRequestException("Test exception"));
+    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "Test exception")
+    public void shouldThrowExceptionIfMachineManagerExecInDevMachineThrowsBadRequestException() throws Exception {
+        when(machineProcessManager.exec(anyString(),
+                                        anyString(),
+                                        any(Command.class),
+                                        anyString()))
+                .thenThrow(new BadRequestException("Test exception"));
 
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
 
-        verify(machineManager).exec(anyString(), any(Command.class), anyString());
+        verify(machineProcessManager).exec(anyString(),
+                                           anyString(),
+                                           any(Command.class),
+                                           anyString());
     }
 
     @Test(expectedExceptions = ServerException.class,
@@ -217,14 +219,14 @@ public class WsAgentLauncherImplTest {
     public void shouldThrowMachineExceptionIfPingsWereUnsuccessfulTooLong() throws Exception {
         when(pingRequest.request()).thenThrow(new ServerException(""));
 
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
     }
 
-    @Test(expectedExceptions = MachineException.class,
+    @Test(expectedExceptions = ServerException.class,
           expectedExceptionsMessageRegExp = "Workspace agent server not found in dev machine.")
-    public void shouldThrowMachineExceptionIfwsAgentNotFound() throws Exception {
+    public void shouldThrowExceptionIfWsAgentNotFound() throws Exception {
         doReturn(Collections.emptyMap()).when(machineRuntime).getServers();
 
-        wsAgentLauncher.startWsAgent(WS_ID);
+        wsAgentLauncher.startWsAgent(machine);
     }
 }

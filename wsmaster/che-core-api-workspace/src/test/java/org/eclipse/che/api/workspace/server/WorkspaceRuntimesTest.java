@@ -10,22 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.MachineManager;
-import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
+import org.eclipse.che.api.environment.server.NoOpMachineInstance;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -33,32 +36,25 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.EnumSet;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -68,93 +64,138 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yevhenii Voevodin
+ * @author Alexander Garagatyi
  */
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceRuntimesTest {
 
-    private static final String WORKSPACE_ID = "workspace123";
-    private static final String ENV_NAME     = "default-env";
-
-    @Mock
-    private MachineManager machineManager;
+    private static String WORKSPACE_ID = "workspace123";
+    private static String ENV_NAME     = "default-env";
 
     @Mock
     private EventService eventService;
 
     @Mock
-    private RuntimeDescriptor descriptor;
+    private CheEnvironmentEngine environmentEngine;
+
+    @Mock
+    private WsAgentLauncher wsAgentLauncher;
 
     private WorkspaceRuntimes runtimes;
 
     @BeforeMethod
-    public void setUp() throws Exception {
-        when(machineManager.createMachineSync(any(), any(), any(), any(LineConsumer.class)))
-                .thenAnswer(invocation -> createMachine((MachineConfig)invocation.getArguments()[0]));
-        runtimes = new WorkspaceRuntimes(machineManager, eventService);
+    public void setUp(Method method) throws Exception {
+        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, wsAgentLauncher));
+
+        List<Instance> machines = asList(createMachine(true), createMachine(false));
+        when(environmentEngine.start(anyString(),
+                                     any(Environment.class),
+                                     anyBoolean(),
+                                     any()))
+                .thenReturn(machines);
+        when(environmentEngine.getMachines(WORKSPACE_ID)).thenReturn(machines);
     }
 
     @Test(expectedExceptions = NotFoundException.class,
           expectedExceptionsMessageRegExp = "Workspace with id '.*' is not running.")
     public void shouldThrowNotFoundExceptionIfWorkspaceRuntimeDoesNotExist() throws Exception {
-        runtimes.get("workspace123");
+        runtimes.get(WORKSPACE_ID);
+    }
+
+    @Test(expectedExceptions = ServerException.class,
+          expectedExceptionsMessageRegExp = "Dev machine is not found in active environment of workspace 'workspace123'")
+    public void shouldThrowExceptionOnGetRuntimesIfDevMachineIsMissingInTheEnvironment() throws Exception {
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+        when(environmentEngine.getMachines(workspace.getId()))
+                .thenReturn(asList(createMachine(false), createMachine(false)));
+
+        // when
+        runtimes.get(workspace.getId());
+    }
+
+    @Test
+    public void shouldFetchMachinesFromEnvEngineOnGetRuntime() throws Exception {
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        Instance devMachine = createMachine(true);
+        List<Instance> machines = asList(devMachine, createMachine(false));
+        when(environmentEngine.start(anyString(),
+                                     any(Environment.class),
+                                     anyBoolean(),
+                                     any()))
+                .thenReturn(machines);
+        when(environmentEngine.getMachines(WORKSPACE_ID)).thenReturn(machines);
+
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+
+        // when
+        RuntimeDescriptor runtimeDescriptor = runtimes.get(workspace.getId());
+
+        // then
+        RuntimeDescriptor expected = new RuntimeDescriptor(WorkspaceStatus.RUNNING,
+                                                           new WorkspaceRuntimeImpl(workspace.getConfig()
+                                                                                             .getDefaultEnv(),
+                                                                                    devMachine.getRuntime()
+                                                                                              .projectsRoot(),
+                                                                                    machines,
+                                                                                    devMachine));
+        verify(environmentEngine, times(2)).getMachines(workspace.getId());
+        assertEquals(runtimeDescriptor, expected);
     }
 
     @Test(expectedExceptions = ServerException.class,
           expectedExceptionsMessageRegExp = "Could not perform operation because application server is stopping")
     public void shouldNotStartTheWorkspaceIfPostConstructWasIsInvoked() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
+        // given
+        WorkspaceImpl workspace = createWorkspace();
         runtimes.cleanup();
 
+        // when
         runtimes.start(createWorkspace(), workspace.getConfig().getDefaultEnv(), false);
     }
 
     @Test
-    public void workspaceShouldBeInStartingStatusUntilDevMachineIsNotStarted() throws Exception {
-        final MachineManager machineManagerMock = mock(MachineManager.class);
-        final WorkspaceRuntimes runtimes = new WorkspaceRuntimes(machineManagerMock, eventService);
-        final WorkspaceImpl workspace = createWorkspace();
-
-        // check if workspace in starting status before dev machine is started
-        when(machineManagerMock.createMachineSync(anyObject(), anyString(), anyString(), any(LineConsumer.class)))
-                .thenAnswer(invocationOnMock -> {
-                    final RuntimeDescriptor descriptor = runtimes.get(workspace.getId());
-                    final MachineConfig cfg = (MachineConfig)invocationOnMock.getArguments()[0];
-                    if (cfg.isDev()) {
-                        assertEquals(descriptor.getRuntimeStatus(), STARTING, "Workspace status is not 'STARTING'");
-                    }
-                    return createMachine((MachineConfig)invocationOnMock.getArguments()[0]);
-                });
-
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
-
-        verify(machineManagerMock, times(2)).createMachineSync(anyObject(), anyString(), anyString(), any(LineConsumer.class));
-    }
-
-    @Test
-    public void workspaceShouldNotHaveRuntimeIfDevMachineCreationFailed() throws Exception {
-        final MachineManager machineManagerMock = mock(MachineManager.class);
-        final WorkspaceRuntimes runtimes = new WorkspaceRuntimes(machineManagerMock, eventService);
-        final WorkspaceImpl workspaceMock = createWorkspace();
-        when(machineManagerMock.createMachineSync(any(), any(), any(), any(LineConsumer.class)))
-                .thenThrow(new MachineException("Creation error"));
+    public void workspaceShouldNotHaveRuntimeIfEnvStartFails() throws Exception {
+        // given
+        when(environmentEngine.start(anyString(),
+                                     any(Environment.class),
+                                     anyBoolean(),
+                                     any()))
+                .thenThrow(new ServerException("Test env start error"));
+        WorkspaceImpl workspaceMock = createWorkspace();
 
         try {
-            runtimes.start(workspaceMock, workspaceMock.getConfig().getDefaultEnv());
-        } catch (MachineException ex) {
+            // when
+            runtimes.start(workspaceMock,
+                           workspaceMock.getConfig().getDefaultEnv(),
+                           false);
+        } catch (Exception ex) {
+            // then
             assertFalse(runtimes.hasRuntime(workspaceMock.getId()));
         }
     }
 
     @Test
     public void workspaceShouldContainAllMachinesAndBeInRunningStatusAfterSuccessfulStart() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
+        // given
+        WorkspaceImpl workspace = createWorkspace();
 
-        final RuntimeDescriptor runningWorkspace = runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+        // when
+        RuntimeDescriptor runningWorkspace = runtimes.start(workspace,
+                                                            workspace.getConfig().getDefaultEnv(),
+                                                            false);
 
+        // then
         assertEquals(runningWorkspace.getRuntimeStatus(), RUNNING);
         assertNotNull(runningWorkspace.getRuntime().getDevMachine());
         assertEquals(runningWorkspace.getRuntime().getMachines().size(), 2);
@@ -163,558 +204,345 @@ public class WorkspaceRuntimesTest {
     @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "Could not start workspace '.*' because its status is 'RUNNING'")
     public void shouldNotStartWorkspaceIfItIsAlreadyRunning() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
+        // given
+        WorkspaceImpl workspace = createWorkspace();
 
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-    }
-
-    @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Couldn't stop '.*' workspace because its status is 'STARTING'. " +
-                                            "Workspace can be stopped only if it is 'RUNNING'")
-    public void shouldNotStopWorkspaceIfItIsStarting() throws Exception {
-        final MachineManager machineManagerMock = mock(MachineManager.class);
-        final WorkspaceRuntimes registry = new WorkspaceRuntimes(machineManagerMock, eventService);
-        final WorkspaceImpl workspace = createWorkspace();
-
-        when(machineManagerMock.createMachineSync(any(), any(), any(), any(LineConsumer.class))).thenAnswer(invocationOnMock -> {
-            registry.stop(workspace.getId());
-            return createMachine((MachineConfig)invocationOnMock.getArguments()[0]);
-        });
-
-        registry.start(workspace, workspace.getConfig().getDefaultEnv());
-    }
-
-    @Test
-    public void shouldDestroyNonDevMachineIfWorkspaceWasStoppedWhileNonDevMachineWasStarting() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-
-        doAnswer(invocation -> {
-            final MachineConfig machineCfg = (MachineConfig)invocation.getArguments()[0];
-            if (!machineCfg.isDev()) {
-                runtimes.stop(workspace.getId());
-            }
-            return createMachine((MachineConfig)invocation.getArguments()[0]);
-        }).when(machineManager).createMachineSync(any(), anyString(), anyString(), any(LineConsumer.class));
-
-        try {
-            runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-        } catch (ConflictException ex) {
-            assertEquals(ex.getMessage(), "Workspace '" + workspace.getId() + "' start interrupted. " +
-                                          "Workspace stopped before all its machines started");
-        }
-        verify(machineManager, times(2)).destroy(any(), anyBoolean());
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+        // when
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
     }
 
     @Test
     public void testCleanup() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
 
         runtimes.cleanup();
 
+        // when, then
         assertFalse(runtimes.hasRuntime(workspace.getId()));
-    }
-
-    @Test
-    public void startShouldIgnoreFailedToStartNonDevMachine() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-
-        doAnswer(invocation -> {
-            final MachineConfig machineCfg = (MachineConfig)invocation.getArguments()[0];
-            if (!machineCfg.isDev()) {
-                throw new MachineException("Failed to start");
-            }
-            return createMachine((MachineConfig)invocation.getArguments()[0]);
-        }).when(machineManager).createMachineSync(any(), anyString(), anyString(), any(LineConsumer.class));
-
-
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-
-        final RuntimeDescriptor descriptor = runtimes.get(workspace.getId());
-        assertEquals(descriptor.getRuntime().getMachines().size(), 1);
-        assertEquals(descriptor.getRuntimeStatus(), RUNNING);
-        verify(machineManager, times(2)).createMachineSync(any(), any(), any(), any(LineConsumer.class));
-    }
-
-    @Test
-    public void shouldNotDestroyNonDevMachineIfRegistryWasStoppedWhileDevMachineWasStarting() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-
-        doAnswer(invocation -> {
-            final MachineConfig machineCfg = (MachineConfig)invocation.getArguments()[0];
-            if (!machineCfg.isDev()) {
-                runtimes.cleanup();
-            }
-            return createMachine((MachineConfig)invocation.getArguments()[0]);
-        }).when(machineManager).createMachineSync(any(), anyString(), anyString(), any(LineConsumer.class));
-
-        try {
-            runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-        } catch (ServerException ex) {
-            assertEquals(ex.getMessage(), "Could not perform operation because application server is stopping");
-        }
-        verify(machineManager, never()).destroy(any(), anyBoolean());
-    }
-
-    @Test
-    public void runtimeShouldBeInStoppingStatusIfWorkspacesDevMachineIsNotStopped() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-
-        doAnswer(invocation -> {
-            assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(), STOPPING);
-            return null;
-        }).when(machineManager).destroy(any(), anyBoolean());
-
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-        runtimes.stop(workspace.getId());
-    }
-
-    @Test
-    public void runtimeStopShouldIgnoreNonDevMachineFail() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-
-        doAnswer(invocation -> {
-            if (!runtimes.get(workspace.getId())
-                         .getRuntime()
-                         .getDevMachine()
-                         .getId()
-                         .equals(invocation.getArguments()[0])) {
-                throw new MachineException("Destroy failed");
-            }
-            return null;
-        }).when(machineManager).destroy(any(), anyBoolean());
-
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-        runtimes.stop(workspace.getId());
-
-        assertFalse(runtimes.hasRuntime(workspace.getId()));
-        verify(machineManager, times(2)).destroy(anyString(), anyBoolean());
     }
 
     @Test
     public void shouldStopRunningWorkspace() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
+        // given
+        WorkspaceImpl workspace = createWorkspace();
 
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+        // when
         runtimes.stop(workspace.getId());
 
+        // then
         assertFalse(runtimes.hasRuntime(workspace.getId()));
     }
 
     @Test(expectedExceptions = NotFoundException.class,
           expectedExceptionsMessageRegExp = "Workspace with id 'workspace123' is not running.")
     public void shouldThrowNotFoundExceptionWhenStoppingWorkspaceWhichDoesNotHaveRuntime() throws Exception {
-        runtimes.stop("workspace123");
+        runtimes.stop(WORKSPACE_ID);
     }
 
     @Test
     public void startedRuntimeShouldBeTheSameToRuntimeTakenFromGetMethod() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-        final RuntimeDescriptor descriptor = runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+        // given
+        WorkspaceImpl workspace = createWorkspace();
 
-        assertEquals(runtimes.get(workspace.getId()).getRuntime(), descriptor.getRuntime());
+        // when
+        RuntimeDescriptor descriptorFromStartMethod = runtimes.start(workspace,
+                                                                     workspace.getConfig().getDefaultEnv(),
+                                                                     false);
+        RuntimeDescriptor descriptorFromGetMethod = runtimes.get(workspace.getId());
+
+        // then
+        assertEquals(descriptorFromStartMethod,
+                     descriptorFromGetMethod);
     }
 
     @Test
     public void startingEventShouldBePublishedBeforeStart() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doNothing().when(runtimes).publishEvent(any(), any(), any());
+        // given
+        WorkspaceImpl workspace = createWorkspace();
 
-        doAnswer(invocation -> {
-            verify(runtimes).publishEvent(EventType.STARTING, workspace.getId(), null);
-            return null;
-        }).when(machineManager).createMachineSync(any(), any(), any(), any(LineConsumer.class));
+        // when
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
 
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+        // then
+        verify(runtimes).publishWorkspaceEvent(EventType.STARTING,
+                                               workspace.getId(),
+                                               null);
     }
 
     @Test
-    public void runningEventShouldBePublishedAfterDevMachineStarted() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doNothing().when(runtimes).publishEvent(any(), any(), any());
+    public void runningEventShouldBePublishedAfterEnvStart() throws Exception {
+        // given
+        WorkspaceImpl workspace = createWorkspace();
 
-        doAnswer(invocation -> {
-            final MachineConfig cfg = (MachineConfig)invocation.getArguments()[0];
-            if (!cfg.isDev()) {
-                verify(runtimes).publishEvent(EventType.RUNNING, workspace.getId(), null);
-            }
-            return createMachine(cfg);
-        }).when(machineManager).createMachineSync(any(), any(), any(), any(LineConsumer.class));
+        // when
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
 
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+        // then
+        verify(runtimes).publishWorkspaceEvent(EventType.RUNNING,
+                                               workspace.getId(),
+                                               null);
     }
 
     @Test
     public void errorEventShouldBePublishedIfDevMachineFailedToStart() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doNothing().when(runtimes).publishEvent(any(), any(), any());
-        doNothing().when(runtimes).cleanupStartResources(any());
-
-        doAnswer(invocation -> {
-            final MachineConfig cfg = (MachineConfig)invocation.getArguments()[0];
-            if (cfg.isDev()) {
-                throw new MachineException("Start error");
-            }
-            return createMachine(cfg);
-        }).when(machineManager).createMachineSync(any(), any(), any(), any(LineConsumer.class));
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        when(environmentEngine.start(anyString(),
+                                     any(Environment.class),
+                                     anyBoolean(),
+                                     any()))
+                .thenReturn(singletonList(createMachine(false)));
 
         try {
-            runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-        } catch (MachineException ex) {
-            verify(runtimes).publishEvent(EventType.ERROR, workspace.getId(), ex.getLocalizedMessage());
+            // when
+            runtimes.start(workspace,
+                           workspace.getConfig().getDefaultEnv(),
+                           false);
+
+        } catch (Exception e) {
+            // then
+            verify(runtimes).publishWorkspaceEvent(EventType.ERROR,
+                                                   workspace.getId(),
+                                                   e.getLocalizedMessage());
         }
     }
 
     @Test
     public void stoppingEventShouldBePublishedBeforeStop() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doNothing().when(runtimes).publishEvent(any(), any(), any());
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
 
-        doAnswer(invocation -> {
-            if ((!runtimes.get(workspace.getId())
-                          .getRuntime()
-                          .getDevMachine()
-                          .getId()
-                          .equals(invocation.getArguments()[0]))) {
-                verify(runtimes).publishEvent(EventType.STOPPING, workspace.getId(), null);
-            }
-            return null;
-        }).when(machineManager).destroy(anyString(), anyBoolean());
-
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+        // when
         runtimes.stop(workspace.getId());
+
+        // then
+        verify(runtimes).publishWorkspaceEvent(EventType.STOPPING,
+                                               workspace.getId(),
+                                               null);
     }
 
     @Test
-    public void stoppedEventShouldBePublishedAfterDevMachineStopped() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doNothing().when(runtimes).publishEvent(any(), any(), any());
+    public void stoppedEventShouldBePublishedAfterEnvStop() throws Exception {
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
 
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+        // when
         runtimes.stop(workspace.getId());
 
-        verify(runtimes).publishEvent(EventType.STOPPED, workspace.getId(), null);
+        // then
+        verify(runtimes).publishWorkspaceEvent(EventType.STOPPED,
+                                               workspace.getId(),
+                                               null);
     }
 
     @Test
-    public void errorEventShouldBePublishedIfDevMachineFailedToStop() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace();
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doNothing().when(runtimes).publishEvent(any(), any(), any());
-
-        doAnswer(invocation -> {
-            if ((runtimes.get(workspace.getId())
-                         .getRuntime()
-                         .getDevMachine()
-                         .getId()
-                         .equals(invocation.getArguments()[0]))) {
-                throw new MachineException("Stop error");
-            }
-            return null;
-        }).when(machineManager).destroy(anyString(), anyBoolean());
-
-        runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
+    public void errorEventShouldBePublishedIfEnvFailedToStop() throws Exception {
+        // given
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
 
         try {
+            // when
             runtimes.stop(workspace.getId());
-        } catch (MachineException ex) {
-            verify(runtimes).publishEvent(EventType.ERROR, workspace.getId(), ex.getLocalizedMessage());
+        } catch (Exception e) {
+            // then
+            verify(runtimes).publishWorkspaceEvent(EventType.ERROR,
+                                                   workspace.getId(),
+                                                   "Test error");
         }
     }
 
     @Test
-    public void shouldNotAddMachineIfWorkspaceDescriptorDoesNotExist() throws Exception {
-        assertFalse(runtimes.addMachine(createMachine(true)), "should not be added");
+    public void shouldBeAbleToStartMachine() throws Exception {
+        // when
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+        MachineConfigImpl config = createConfig(false);
+        Instance instance = mock(Instance.class);
+        when(environmentEngine.startMachine(anyString(), any(MachineConfig.class))).thenReturn(instance);
+        when(instance.getConfig()).thenReturn(config);
+
+        // when
+        Instance actual = runtimes.startMachine(workspace.getId(), config);
+
+        // then
+        assertEquals(actual, instance);
+        verify(environmentEngine).startMachine(workspace.getId(), config);
+    }
+
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Environment of workspace '.*' is not running")
+    public void shouldNotStartMachineIfEnvironmentIsNotRunning() throws Exception {
+        // when
+        MachineConfigImpl config = createConfig(false);
+
+        // when
+        runtimes.startMachine("someWsID", config);
+
+        // then
+        verify(environmentEngine, never()).startMachine(anyString(), any(MachineConfig.class));
     }
 
     @Test
-    public void shouldPromiseToAddMachineIfStatusIsStartingAndCreatedMachineIsDev() throws Exception {
-        when(descriptor.getRuntimeStatus()).thenReturn(STARTING);
-        runtimes.descriptors.put(WORKSPACE_ID, descriptor);
+    public void shouldBeAbleToStopMachine() throws Exception {
+        // when
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
 
-        assertTrue(runtimes.addMachine(createMachine(true)), "should be added later");
+        // when
+        runtimes.stopMachine(workspace.getId(), "testMachineId");
+
+        // then
+        verify(environmentEngine).stopMachine(workspace.getId(), "testMachineId");
     }
 
-    @Test(dataProvider = "inconsistentMachines")
-    public void machineShouldNotBeAdded(boolean isDev, WorkspaceStatus status) throws Exception {
-        when(descriptor.getRuntimeStatus()).thenReturn(status);
-        runtimes.descriptors.put(WORKSPACE_ID, descriptor);
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Environment of workspace '.*' is not running")
+    public void shouldNotStopMachineIfEnvironmentIsNotRunning() throws Exception {
+        // when
+        runtimes.stopMachine("someWsID", "someMachineId");
 
-        assertFalse(runtimes.addMachine(createMachine(isDev)), "should not be added");
-    }
-
-    @Test
-    public void machineShouldBeAddedIfStartQueueDoesNotExist() throws Exception {
-        // prepare runtime
-        final WorkspaceRuntimeImpl runtime = mock(WorkspaceRuntimeImpl.class);
-        final ArrayList<MachineImpl> machines = new ArrayList<>();
-        when(runtime.getMachines()).thenReturn(machines);
-        // prepare descriptor
-        when(descriptor.getRuntime()).thenReturn(runtime);
-        when(descriptor.getRuntimeStatus()).thenReturn(RUNNING);
-        // register mocks
-        runtimes.descriptors.put(WORKSPACE_ID, descriptor);
-
-        final MachineImpl machine = createMachine(false);
-        assertTrue(runtimes.addMachine(machine), "should be added");
-        assertFalse(machines.isEmpty());
-        assertEquals(machines.get(0), machine);
+        // then
+        verify(environmentEngine, never()).stopMachine(anyString(), anyString());
     }
 
     @Test
-    public void machineShouldBeAddedIfStartQueueDoesNotContainIt() throws Exception {
-        // prepare runtime
-        final WorkspaceRuntimeImpl runtime = mock(WorkspaceRuntimeImpl.class);
-        final ArrayList<MachineImpl> machines = new ArrayList<>();
-        when(runtime.getMachines()).thenReturn(machines);
-        // prepare descriptor
-        when(descriptor.getRuntime()).thenReturn(runtime);
-        when(descriptor.getRuntimeStatus()).thenReturn(RUNNING);
-        // register mocks
-        runtimes.descriptors.put(WORKSPACE_ID, descriptor);
-        runtimes.startQueues.put(WORKSPACE_ID, new ArrayDeque<>());
+    public void shouldBeAbleToSaveMachine() throws Exception {
+        // when
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+        SnapshotImpl snapshot = mock(SnapshotImpl.class);
+        when(runtimes.saveMachine(workspace.getNamespace(), workspace.getId(), "machineId")).thenReturn(snapshot);
 
-        final MachineImpl machine = createMachine(false);
-        assertTrue(runtimes.addMachine(machine), "should be added");
-        assertFalse(machines.isEmpty());
-        assertEquals(machines.get(0), machine);
+        // when
+        SnapshotImpl actualSnapshot = runtimes.saveMachine(workspace.getNamespace(), workspace.getId(), "machineId");
+
+        // then
+        assertEquals(actualSnapshot, snapshot);
+        verify(environmentEngine).saveSnapshot(workspace.getNamespace(), workspace.getId(), "machineId");
+    }
+
+    @Test(expectedExceptions = ConflictException.class,
+          expectedExceptionsMessageRegExp = "Environment of workspace '.*' is not running")
+    public void shouldNotSaveMachineIfEnvironmentIsNotRunning() throws Exception {
+        // when
+        runtimes.saveMachine("namespace", "workspaceId", "machineId");
+
+        // then
+        verify(environmentEngine, never()).saveSnapshot(anyString(), anyString(), anyString());
     }
 
     @Test
-    public void shouldPromiseThatMachineWillBeAddedIfStartQueueContainsMachine() throws Exception {
-        // prepare runtime
-        final WorkspaceRuntimeImpl runtime = mock(WorkspaceRuntimeImpl.class);
-        final ArrayList<MachineImpl> machines = new ArrayList<>();
-        when(runtime.getMachines()).thenReturn(machines);
-        // prepare descriptor
-        when(descriptor.getRuntime()).thenReturn(runtime);
-        when(descriptor.getRuntimeStatus()).thenReturn(RUNNING);
-        // prepare queue
-        final ArrayDeque<MachineConfigImpl> queue = new ArrayDeque<>();
-        queue.add(createConfig(false));
-        // register mocks
-        runtimes.descriptors.put(WORKSPACE_ID, descriptor);
-        runtimes.startQueues.put(WORKSPACE_ID, queue);
+    public void shouldBeAbleToRemoveSnapshot() throws Exception {
+        // given
+        SnapshotImpl snapshot = mock(SnapshotImpl.class);
 
-        final MachineImpl machine = createMachine(false);
-        assertTrue(runtimes.addMachine(machine), "should be added");
-        assertTrue(machines.isEmpty());
+        // when
+        runtimes.removeSnapshot(snapshot);
+
+        // then
+        verify(environmentEngine).removeSnapshot(snapshot);
     }
 
     @Test
-    public void shouldDestroyMachineIfItIsNotAddedWhenEventReceived() throws Exception {
-        // prepare runtimes
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doReturn(false).when(runtimes).addMachine(any());
-        // prepare machine
-        final MachineImpl machine = createMachine(true);
-        when(machineManager.getMachine(machine.getId())).thenReturn(machine);
-        // prepare event
-        final MachineStatusEvent event = DtoFactory.newDto(MachineStatusEvent.class)
-                                                   .withDev(true)
-                                                   .withEventType(MachineStatusEvent.EventType.RUNNING)
-                                                   .withMachineId(machine.getId());
+    public void shouldBeAbleToGetMachine() throws Exception {
+        // given
+        Instance expected = createMachine(false);
+        when(environmentEngine.getMachine(WORKSPACE_ID, expected.getId())).thenReturn(expected);
 
+        // when
+        Instance actualMachine = runtimes.getMachine(WORKSPACE_ID, expected.getId());
 
-        runtimes.new AddMachineEventSubscriber().onEvent(event);
-
-        verify(machineManager).destroy(machine.getId(), true);
+        // then
+        assertEquals(actualMachine, expected);
+        verify(environmentEngine).getMachine(WORKSPACE_ID, expected.getId());
     }
 
-    @Test(dataProvider = "machineEventTypesExceptOfRunning")
-    public void eventTypesExceptOfRunningShouldBeIgnoredByAddMachineSubscriber(MachineStatusEvent.EventType type)
-            throws Exception {
-        // prepare runtimes
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doReturn(false).when(runtimes).addMachine(any());
-        // prepare machine
-        final MachineImpl machine = createMachine(true);
-        when(machineManager.getMachine(machine.getId())).thenReturn(machine);
-        // prepare event
-        final MachineStatusEvent event = DtoFactory.newDto(MachineStatusEvent.class)
-                                                   .withDev(true)
-                                                   .withEventType(type)
-                                                   .withMachineId(machine.getId());
+    @Test(expectedExceptions = NotFoundException.class,
+          expectedExceptionsMessageRegExp = "test exception")
+    public void shouldThrowExceptionIfGetMachineFromEnvEngineThrowsException() throws Exception {
+        // given
+        Instance expected = createMachine(false);
+        when(environmentEngine.getMachine(WORKSPACE_ID, expected.getId()))
+                .thenThrow(new NotFoundException("test exception"));
 
+        // when
+        runtimes.getMachine(WORKSPACE_ID, expected.getId());
 
-        runtimes.new AddMachineEventSubscriber().onEvent(event);
-
-        verify(machineManager, never()).destroy(machine.getId(), true);
-    }
-
-    @Test(dataProvider = "workspaceStatusesExceptOfRunning")
-    public void shouldNotRemoveMachineWhenDescriptorStatusIsNotRunning(WorkspaceStatus status) throws Exception {
-        // prepare runtime
-        final WorkspaceRuntimeImpl runtime = mock(WorkspaceRuntimeImpl.class);
-        final MachineImpl machine = createMachine(false);
-        final ArrayList<MachineImpl> machines = new ArrayList<>();
-        machines.add(machine);
-        when(runtime.getMachines()).thenReturn(machines);
-        // prepare descriptor
-        when(descriptor.getRuntime()).thenReturn(runtime);
-        when(descriptor.getRuntimeStatus()).thenReturn(status);
-        // register mocks
-        runtimes.descriptors.put(WORKSPACE_ID, descriptor);
-
-        runtimes.removeMachine(machine.getId(), machine.getConfig().getName(), machine.getWorkspaceId());
-
-        assertFalse(machines.isEmpty(), "should not remove machine");
+        // then
+        verify(environmentEngine).getMachine(WORKSPACE_ID, expected.getId());
     }
 
     @Test
-    public void shouldNotRemoveMachineWhenMachineNameIsDifferent() throws Exception {
-        // prepare runtime
-        final WorkspaceRuntimeImpl runtime = mock(WorkspaceRuntimeImpl.class);
-        final MachineImpl machine = createMachine(false);
-        final ArrayList<MachineImpl> machines = new ArrayList<>();
-        machines.add(machine);
-        when(runtime.getMachines()).thenReturn(machines);
-        // prepare descriptor
-        when(descriptor.getRuntime()).thenReturn(runtime);
-        when(descriptor.getRuntimeStatus()).thenReturn(RUNNING);
-        // register mocks
-        runtimes.descriptors.put(WORKSPACE_ID, descriptor);
+    public void shouldBeAbleToGetAllWorkspacesWithExistingRuntime() throws Exception {
+        // then
+        Map<String, WorkspaceRuntimes.WorkspaceState> expectedWorkspaces = new HashMap<>();
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+        expectedWorkspaces.put(workspace.getId(),
+                               new WorkspaceRuntimes.WorkspaceState(RUNNING,
+                                                                    workspace.getConfig().getDefaultEnv()));
+        WorkspaceImpl workspace2 = spy(createWorkspace());
+        when(workspace2.getId()).thenReturn("testWsId");
+        when(environmentEngine.getMachines(workspace2.getId()))
+                .thenReturn(Collections.singletonList(createMachine(true)));
+        runtimes.start(workspace2,
+                       workspace2.getConfig().getDefaultEnv(),
+                       false);
+        expectedWorkspaces.put(workspace2.getId(),
+                               new WorkspaceRuntimes.WorkspaceState(RUNNING,
+                                                                    workspace2.getConfig().getDefaultEnv()));
 
-        runtimes.removeMachine(machine.getId(), machine.getConfig().getName() + "2", machine.getWorkspaceId());
+        // when
+        Map<String, WorkspaceRuntimes.WorkspaceState> actualWorkspaces = runtimes.getWorkspaces();
 
-        assertFalse(machines.isEmpty(), "should not remove machine");
+        // then
+        assertEquals(actualWorkspaces, expectedWorkspaces);
     }
 
-    @Test
-    public void shouldRemoveMachineIfStatusIsRunning() throws Exception {
-        // prepare runtime
-        final WorkspaceRuntimeImpl runtime = mock(WorkspaceRuntimeImpl.class);
-        final MachineImpl machine = createMachine(false);
-        final ArrayList<MachineImpl> machines = new ArrayList<>();
-        machines.add(machine);
-        when(runtime.getMachines()).thenReturn(machines);
-        // prepare descriptor
-        when(descriptor.getRuntime()).thenReturn(runtime);
-        when(descriptor.getRuntimeStatus()).thenReturn(RUNNING);
-        // register mocks
-        runtimes.descriptors.put(WORKSPACE_ID, descriptor);
-
-        runtimes.removeMachine(machine.getId(), machine.getConfig().getName(), machine.getWorkspaceId());
-
-        assertTrue(machines.isEmpty(), "should remove machine");
-    }
-
-    @Test(dataProvider = "machineEventTypesExceptOfDestroyed")
-    public void eventTypesExceptOfDestroyedShouldBeIgnoredByRemoveMachineSubscriber(MachineStatusEvent.EventType type)
-            throws Exception {
-        // prepare runtimes
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doNothing().when(runtimes).removeMachine(anyString(), anyString(), anyString());
-        // prepare event
-        final MachineImpl machine = createMachine(true);
-        final MachineStatusEvent event = DtoFactory.newDto(MachineStatusEvent.class)
-                                                   .withDev(false)
-                                                   .withEventType(type)
-                                                   .withMachineId(machine.getId());
-
-
-        runtimes.new RemoveMachineEventSubscriber().onEvent(event);
-
-        verify(runtimes, never()).removeMachine(anyString(), anyString(), anyString());
-    }
-
-    @Test
-    public void removeMachineSubscriberShouldRemoveMachineIfItIsDevAndEventIsDestroyed() throws Exception {
-        // prepare runtimes
-        runtimes = spy(new WorkspaceRuntimes(machineManager, eventService));
-        doNothing().when(runtimes).removeMachine(anyString(), anyString(), anyString());
-        // prepare event
-        final MachineImpl machine = createMachine(true);
-        final MachineStatusEvent event = DtoFactory.newDto(MachineStatusEvent.class)
-                                                   .withDev(false)
-                                                   .withEventType(MachineStatusEvent.EventType.DESTROYED)
-                                                   .withMachineId(machine.getId())
-                                                   .withMachineName(machine.getConfig().getName())
-                                                   .withWorkspaceId(machine.getWorkspaceId());
-
-        runtimes.new RemoveMachineEventSubscriber().onEvent(event);
-
-        verify(runtimes).removeMachine(machine.getId(), machine.getConfig().getName(), machine.getWorkspaceId());
-    }
-
-    @Test
-    public void shouldReuseRunningMachineIfFailedToStart() throws Exception {
-        // prepare workspace
-        final WorkspaceImpl workspace = createWorkspace();
-        // prepare machine
-        final MachineImpl machine = createMachine(true);
-        machine.setStatus(MachineStatus.RUNNING);
-        when(machineManager.getMachines()).thenReturn(singletonList(machine));
-        // force machine manager to throw conflict exception
-        final RuntimeDescriptor descriptorMock = mock(RuntimeDescriptor.class);
-        when(descriptorMock.getRuntimeStatus()).thenReturn(WorkspaceStatus.RUNNING);
-        doThrow(new ConflictException("already exists")).when(machineManager).createMachineSync(eq(machine.getConfig()),
-                                                                                                eq(machine.getWorkspaceId()),
-                                                                                                eq(workspace.getConfig().getDefaultEnv()),
-                                                                                                any(LineConsumer.class));
-
-        final RuntimeDescriptor descriptor = runtimes.start(workspace, workspace.getConfig().getDefaultEnv());
-
-        assertEquals(descriptor.getRuntime().getDevMachine(), machine);
-        verify(machineManager).getMachines();
-    }
-
-    @DataProvider(name = "workspaceStatusesExceptOfRunning")
-    private Object[][] workspaceStatusesExceptOfRunning() {
-        final EnumSet<WorkspaceStatus> events = EnumSet.allOf(WorkspaceStatus.class);
-        events.remove(WorkspaceStatus.RUNNING);
-        return rotate(events.toArray(new Object[events.size()]));
-    }
-
-    @DataProvider(name = "machineEventTypesExceptOfRunning")
-    private Object[][] machineEventTypesExceptOfRunning() {
-        final EnumSet<MachineStatusEvent.EventType> events = EnumSet.allOf(MachineStatusEvent.EventType.class);
-        events.remove(MachineStatusEvent.EventType.RUNNING);
-        return rotate(events.toArray(new Object[events.size()]));
-    }
-
-    @DataProvider(name = "machineEventTypesExceptOfDestroyed")
-    private Object[][] machineEventTypesExceptOfDestroyed() {
-        final EnumSet<MachineStatusEvent.EventType> events = EnumSet.allOf(MachineStatusEvent.EventType.class);
-        events.remove(MachineStatusEvent.EventType.DESTROYED);
-        return rotate(events.toArray(new Object[events.size()]));
-    }
-
-    @DataProvider(name = "inconsistentMachines")
-    private Object[][] inconsistentMachinesProvider() {
-        return new Object[][] {
-                {true, WorkspaceStatus.RUNNING},
-                {true, WorkspaceStatus.STOPPING},
-                {false, WorkspaceStatus.STARTING},
-                {false, WorkspaceStatus.STOPPING}
-        };
-    }
-
-    private static Object[][] rotate(Object[] array) {
-        final Object[][] result = new Object[array.length][1];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = new Object[] {array[i]};
-        }
-        return result;
-    }
-
-    private static MachineImpl createMachine(boolean isDev) {
+    private static Instance createMachine(boolean isDev) {
         return createMachine(createConfig(isDev));
     }
 
-    private static MachineImpl createMachine(MachineConfig cfg) {
-        return MachineImpl.builder()
-                          .setId(NameGenerator.generate("machine", 10))
-                          .setWorkspaceId(WORKSPACE_ID)
-                          .setEnvName(ENV_NAME)
-                          .setConfig(new MachineConfigImpl(cfg))
-                          .build();
+    private static Instance createMachine(MachineConfig cfg) {
+        return new TestMachineInstance(MachineImpl.builder()
+                                                  .setId(NameGenerator.generate("machine", 10))
+                                                  .setWorkspaceId(WORKSPACE_ID)
+                                                  .setEnvName(ENV_NAME)
+                                                  .setConfig(new MachineConfigImpl(cfg))
+                                                  .build());
     }
 
     private static MachineConfigImpl createConfig(boolean isDev) {
@@ -723,25 +551,40 @@ public class WorkspaceRuntimesTest {
                                 .setType("docker")
                                 .setLimits(new LimitsImpl(1024))
                                 .setSource(new MachineSourceImpl("git").setLocation("location"))
-                                .setName("dev-machine")
+                                .setName(UUID.randomUUID().toString())
                                 .build();
     }
 
     private static WorkspaceImpl createWorkspace() {
-        final MachineConfigImpl devCfg = createConfig(true);
-        final MachineConfigImpl nonDevCfg = MachineConfigImpl.builder()
+        MachineConfigImpl devCfg = createConfig(true);
+        MachineConfigImpl nonDevCfg = MachineConfigImpl.builder()
                                                              .fromConfig(devCfg)
                                                              .setName("non-dev")
                                                              .setDev(false)
                                                              .build();
-        final EnvironmentImpl environment = new EnvironmentImpl(ENV_NAME,
-                                                                new RecipeImpl(),
-                                                                asList(nonDevCfg, devCfg));
-        final WorkspaceConfigImpl wsConfig = WorkspaceConfigImpl.builder()
-                                                                .setName("test workspace")
-                                                                .setEnvironments(singletonList(environment))
-                                                                .setDefaultEnv(environment.getName())
-                                                                .build();
+        EnvironmentImpl environment = new EnvironmentImpl(ENV_NAME,
+                                                          new RecipeImpl(),
+                                                          asList(nonDevCfg, devCfg));
+        WorkspaceConfigImpl wsConfig = WorkspaceConfigImpl.builder()
+                                                          .setName("test workspace")
+                                                          .setEnvironments(singletonList(environment))
+                                                          .setDefaultEnv(environment.getName())
+                                                          .build();
         return new WorkspaceImpl(WORKSPACE_ID, "user123", wsConfig);
+    }
+
+    private static class TestMachineInstance extends NoOpMachineInstance {
+
+        MachineRuntimeInfoImpl runtime;
+
+        public TestMachineInstance(Machine machine) {
+            super(machine);
+            runtime = mock(MachineRuntimeInfoImpl.class);
+        }
+
+        @Override
+        public MachineRuntimeInfoImpl getRuntime() {
+            return runtime;
+        }
     }
 }

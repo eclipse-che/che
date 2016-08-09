@@ -119,7 +119,11 @@ public class CommandManager {
                                                      .withCommandLine(arg)
                                                      .withType(configuration.getType().getId());
 
-                final Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machine.getId(), command, outputChannel);
+                final Promise<MachineProcessDto> processPromise =
+                        machineServiceClient.executeCommand(machine.getWorkspaceId(),
+                                                            machine.getId(),
+                                                            command,
+                                                            outputChannel);
                 processPromise.then(new Operation<MachineProcessDto>() {
                     @Override
                     public void apply(MachineProcessDto process) throws OperationException {

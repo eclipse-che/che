@@ -15,7 +15,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.machine.server.terminal.MachineImplSpecificTerminalLauncher;
+import org.eclipse.che.api.agent.server.terminal.MachineImplSpecificTerminalLauncher;
 
 /**
  * Provides bindings needed for ssh machine implementation usage.

@@ -126,7 +126,7 @@ public class SnapshotImpl implements Snapshot {
         return this.isDev;
     }
 
-    public void setMachineSourceImpl(MachineSource machineSource) {
+    public void setMachineSource(MachineSource machineSource) {
         this.machineSource = machineSource != null ? new MachineSourceImpl(machineSource) : null;
     }
 
@@ -192,16 +192,16 @@ public class SnapshotImpl implements Snapshot {
      */
     public static class SnapshotBuilder {
 
-        private String      workspaceId;
-        private String      machineName;
-        private String      envName;
-        private String      id;
-        private String      type;
-        private String      namespace;
-        private String      description;
+        private String        workspaceId;
+        private String        machineName;
+        private String        envName;
+        private String        id;
+        private String        type;
+        private String        namespace;
+        private String        description;
         private MachineSource machineSource;
-        private boolean     isDev;
-        private long        creationDate;
+        private boolean       isDev;
+        private long          creationDate;
 
         public SnapshotBuilder fromConfig(MachineConfig machineConfig) {
             machineName = machineConfig.getName();

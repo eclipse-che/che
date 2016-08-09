@@ -20,7 +20,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
-import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
@@ -50,12 +49,14 @@ public class MachineServiceClientImpl implements MachineServiceClient {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
-        this.baseHttpUrl = restContext + "/machine";
+        this.baseHttpUrl = restContext + "/workspace/";
     }
 
     @Override
-    public Promise<MachineDto> getMachine(@NotNull final String machineId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + machineId)
+    public Promise<MachineDto> getMachine(@NotNull final String workspaceId,
+                                          @NotNull final String machineId) {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId +
+                                                    "/machine/" + machineId)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting info about machine..."))
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(MachineDto.class));
@@ -63,50 +64,57 @@ public class MachineServiceClientImpl implements MachineServiceClient {
 
     @Override
     public Promise<List<MachineDto>> getMachines(@NotNull String workspaceId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + "?workspace=" + workspaceId)
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId + "/machine")
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting info about bound machines..."))
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(MachineDto.class));
     }
 
     @Override
-    public Promise<Void> destroyMachine(@NotNull final String machineId) {
-        return asyncRequestFactory.createRequest(DELETE, baseHttpUrl + '/' + machineId, null, false)
+    public Promise<Void> destroyMachine(@NotNull final String workspaceId,
+                                        @NotNull final String machineId) {
+        return asyncRequestFactory.createRequest(DELETE,
+                                                 baseHttpUrl + workspaceId +
+                                                 "/machine/" + machineId,
+                                                 null,
+                                                 false)
                                   .loader(loaderFactory.newLoader("Destroying machine..."))
                                   .send();
     }
 
     @Override
-    public Promise<MachineProcessDto> executeCommand(@NotNull final String machineId,
+    public Promise<MachineProcessDto> executeCommand(@NotNull final String workspaceId,
+                                                     @NotNull final String machineId,
                                                      @NotNull final Command command,
                                                      @Nullable final String outputChannel) {
-        return asyncRequestFactory.createPostRequest(baseHttpUrl + '/' + machineId + "/command?outputChannel=" + outputChannel, command)
+        return asyncRequestFactory.createPostRequest(baseHttpUrl + workspaceId +
+                                                     "/machine/" + machineId +
+                                                     "/command?outputChannel=" + outputChannel,
+                                                     command)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Executing command..."))
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(MachineProcessDto.class));
     }
 
     @Override
-    public Promise<List<MachineProcessDto>> getProcesses(@NotNull final String machineId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + "/" + machineId + "/process")
+    public Promise<List<MachineProcessDto>> getProcesses(@NotNull final String workspaceId,
+                                                         @NotNull final String machineId) {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId +
+                                                    "/machine/" + machineId +
+                                                    "/process")
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting machine processes..."))
                                   .send(dtoUnmarshallerFactory.newListUnmarshaller(MachineProcessDto.class));
     }
 
     @Override
-    public Promise<Void> stopProcess(@NotNull final String machineId, final int processId) {
-        return asyncRequestFactory.createDeleteRequest(baseHttpUrl + '/' + machineId + "/process/" + processId)
+    public Promise<Void> stopProcess(@NotNull final String workspaceId,
+                                     @NotNull final String machineId,
+                                     final int processId) {
+        return asyncRequestFactory.createDeleteRequest(baseHttpUrl + workspaceId +
+                                                       "/machine/" + machineId +
+                                                       "/process/" + processId)
                                   .loader(loaderFactory.newLoader("Stopping process..."))
                                   .send();
-    }
-
-    @Override
-    public Promise<String> getFileContent(@NotNull final String machineId, final @NotNull String path, final int startFrom,
-                                          final int limit) {
-        String url = baseHttpUrl + "/" + machineId + "/filepath/" + path + "?startFrom=" + startFrom + "&limit=" + limit;
-        return asyncRequestFactory.createGetRequest(url)
-                                  .loader(loaderFactory.newLoader("Loading file content..."))
-                                  .send(new StringUnmarshaller());
     }
 }

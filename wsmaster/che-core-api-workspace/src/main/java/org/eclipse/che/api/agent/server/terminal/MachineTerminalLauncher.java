@@ -8,14 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.terminal;
+package org.eclipse.che.api.agent.server.terminal;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
@@ -43,19 +43,20 @@ public class MachineTerminalLauncher {
     private static final Logger LOG = LoggerFactory.getLogger(MachineTerminalLauncher.class);
 
     private final EventService                                     eventService;
-    private final MachineManager                                   machineManager;
+    // TODO replace with WorkspaceManager
+    private final CheEnvironmentEngine                             cheEnvironmentEngine;
     private final Map<String, MachineImplSpecificTerminalLauncher> terminalLaunchers;
     private final ExecutorService                                  executor;
 
     @Inject
     public MachineTerminalLauncher(EventService eventService,
-                                   MachineManager machineManager,
-                                   Set<MachineImplSpecificTerminalLauncher> machineImplLaunchers) {
+                                   Set<MachineImplSpecificTerminalLauncher> machineImplLaunchers,
+                                   CheEnvironmentEngine cheEnvironmentEngine) {
         this.eventService = eventService;
-        this.machineManager = machineManager;
         this.terminalLaunchers = machineImplLaunchers.stream()
                                                      .collect(toMap(MachineImplSpecificTerminalLauncher::getMachineType,
                                                                     Function.identity()));
+        this.cheEnvironmentEngine = cheEnvironmentEngine;
         this.executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineTerminalLauncher-%d")
                                                                                 .setDaemon(true)
                                                                                 .build());
@@ -70,10 +71,11 @@ public class MachineTerminalLauncher {
                 if (event.getEventType() == MachineStatusEvent.EventType.RUNNING) {
                     executor.execute(() -> {
                         try {
-                            final Instance machine = machineManager.getInstance(event.getMachineId());
+                            final Instance machine = cheEnvironmentEngine.getMachine(event.getWorkspaceId(),
+                                                                                     event.getMachineId());
 
-                            MachineImplSpecificTerminalLauncher terminalLauncher = terminalLaunchers.get(machine.getConfig()
-                                                                                                                .getType());
+                            MachineImplSpecificTerminalLauncher terminalLauncher =
+                                    terminalLaunchers.get(machine.getConfig().getType());
                             if (terminalLauncher == null) {
                                 LOG.warn("Terminal launcher implementation was not found for machine {} with type {}.",
                                          machine.getId(),

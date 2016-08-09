@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server;
+package org.eclipse.che.api.environment.server;
 
 import com.google.common.collect.Lists;
 
@@ -19,7 +19,6 @@ import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
-import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 
 import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
@@ -35,8 +34,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
-import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.TERMINAL_REFERENCE;
 import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -56,67 +55,41 @@ public class MachineServiceLinksInjector {
         links.add(createLink(HttpMethod.GET,
                              uriBuilder.clone()
                                        .path(MachineService.class, "getMachineById")
-                                       .build(machine.getId())
+                                       .build(machine.getWorkspaceId(), machine.getId())
                                        .toString(),
                              APPLICATION_JSON,
                              "self link"));
         links.add(createLink(HttpMethod.GET,
                              uriBuilder.clone()
                                        .path(MachineService.class, "getMachines")
-                                       .build()
+                                       .build(machine.getWorkspaceId())
                                        .toString(),
                              null,
                              APPLICATION_JSON,
-                             Constants.LINK_REL_GET_MACHINES,
-                             newDto(LinkParameter.class).withName("workspace")
-                                                        .withRequired(true)
-                                                        .withDefaultValue(machine.getWorkspaceId())));
+                             Constants.LINK_REL_GET_MACHINES));
         links.add(createLink(HttpMethod.DELETE,
                              uriBuilder.clone()
-                                       .path(MachineService.class, "destroyMachine")
-                                       .build(machine.getId())
+                                       .path(MachineService.class, "stopMachine")
+                                       .build(machine.getWorkspaceId(), machine.getId())
                                        .toString(),
                              Constants.LINK_REL_DESTROY_MACHINE));
-        links.add(createLink(HttpMethod.GET,
-                             uriBuilder.clone()
-                                       .path(MachineService.class, "getSnapshots")
-                                       .build()
-                                       .toString(),
-                             null,
-                             APPLICATION_JSON,
-                             Constants.LINK_REL_GET_SNAPSHOTS,
-                             newDto(LinkParameter.class).withName("workspace")
-                                                        .withRequired(true)
-                                                        .withDefaultValue(machine.getWorkspaceId())));
-        links.add(createLink(HttpMethod.POST,
-                             uriBuilder.clone()
-                                       .path(MachineService.class, "saveSnapshot")
-                                       .build(machine.getId())
-                                       .toString(),
-                             APPLICATION_JSON,
-                             APPLICATION_JSON,
-                             Constants.LINK_REL_SAVE_SNAPSHOT));
         links.add(createLink(HttpMethod.POST,
                              uriBuilder.clone()
                                        .path(MachineService.class, "executeCommandInMachine")
-                                       .build(machine.getId())
+                                       .build(machine.getWorkspaceId(), machine.getId())
                                        .toString(),
                              APPLICATION_JSON,
                              APPLICATION_JSON,
                              Constants.LINK_REL_EXECUTE_COMMAND,
                              newDto(LinkParameter.class).withName("outputChannel")
                                                         .withRequired(false)));
+        URI getProcessesUri = uriBuilder.clone()
+                                     .path(MachineService.class, "getProcesses")
+                                     .build(machine.getWorkspaceId(), machine.getId());
         links.add(createLink(HttpMethod.GET,
-                             uriBuilder.clone()
-                                       .path(MachineService.class, "getProcesses")
-                                       .build(machine.getId())
-                                       .toString(),
+                             getProcessesUri.toString(),
                              APPLICATION_JSON,
                              Constants.LINK_REL_GET_PROCESSES));
-        final URI getLogsUri = uriBuilder.clone()
-                                         .path(MachineService.class, "getMachineLogs")
-                                         .build(machine.getId());
-        links.add(createLink(HttpMethod.GET, getLogsUri.toString(), TEXT_PLAIN, Constants.LINK_REL_GET_MACHINE_LOGS));
 
         injectTerminalLink(machine, serviceContext, links);
 
@@ -125,7 +98,7 @@ public class MachineServiceLinksInjector {
                                                      serviceContext.getBaseUriBuilder()
                                                                    .path("ws")
                                                                    .path(machine.getWorkspaceId())
-                                                                   .scheme("https".equals(getLogsUri.getScheme()) ? "wss" : "ws")
+                                                                   .scheme("https".equals(getProcessesUri.getScheme()) ? "wss" : "ws")
                                                                    .build()
                                                                    .toString(),
                                                      null);
@@ -163,41 +136,39 @@ public class MachineServiceLinksInjector {
         }
     }
 
-    public MachineProcessDto injectLinks(MachineProcessDto process, String machineId, ServiceContext serviceContext) {
+    public MachineProcessDto injectLinks(MachineProcessDto process,
+                                         String workspaceId,
+                                         String machineId,
+                                         ServiceContext serviceContext) {
         final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
         final List<Link> links = Lists.newArrayListWithExpectedSize(3);
 
         links.add(createLink(HttpMethod.DELETE,
                              uriBuilder.clone()
                                        .path(MachineService.class, "stopProcess")
-                                       .build(machineId, process.getPid())
+                                       .build(workspaceId,
+                                              machineId,
+                                              process.getPid())
                                        .toString(),
                              Constants.LINK_REL_STOP_PROCESS));
         links.add(createLink(HttpMethod.GET,
                              uriBuilder.clone()
                                        .path(MachineService.class, "getProcessLogs")
-                                       .build(machineId, process.getPid())
+                                       .build(workspaceId,
+                                              machineId,
+                                              process.getPid())
                                        .toString(),
                              TEXT_PLAIN,
                              Constants.LINK_REL_GET_PROCESS_LOGS));
         links.add(createLink(HttpMethod.GET,
                              uriBuilder.clone()
                                        .path(MachineService.class, "getProcesses")
-                                       .build(machineId)
+                                       .build(workspaceId,
+                                              machineId)
                                        .toString(),
                              APPLICATION_JSON,
                              Constants.LINK_REL_GET_PROCESSES));
 
         return process.withLinks(links);
-    }
-
-    public SnapshotDto injectLinks(SnapshotDto snapshot, ServiceContext serviceContext) {
-        final UriBuilder uriBuilder = serviceContext.getServiceUriBuilder();
-        return snapshot.withLinks(singletonList(createLink(HttpMethod.DELETE,
-                                                           uriBuilder.clone()
-                                                                     .path(MachineService.class, "removeSnapshot")
-                                                                     .build(snapshot.getId())
-                                                                     .toString(),
-                                                           Constants.LINK_REL_REMOVE_SNAPSHOT)));
     }
 }

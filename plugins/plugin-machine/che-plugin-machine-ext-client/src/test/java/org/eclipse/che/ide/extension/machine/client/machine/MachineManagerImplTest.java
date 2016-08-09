@@ -108,6 +108,7 @@ public class MachineManagerImplTest {
     @Test
     public void checkUseValidSource() throws OperationException {
         final String ID = "id";
+        final String WORKSPACE_ID = "testWorkspaceId";
         final String DISPLAY_NAME = "my-display-name";
         final boolean IS_DEV = true;
 
@@ -117,9 +118,10 @@ public class MachineManagerImplTest {
 
         org.eclipse.che.api.core.model.machine.Machine machineState = mock(org.eclipse.che.api.core.model.machine.Machine.class);
         when(machineState.getId()).thenReturn(ID);
+        when(machineState.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         Promise<Void> promise = mock(Promise.class);
         Promise<Void> promiseThen = mock(Promise.class);
-        when(machineServiceClient.destroyMachine(eq(ID))).thenReturn(promise);
+        when(machineServiceClient.destroyMachine(eq(WORKSPACE_ID), eq(ID))).thenReturn(promise);
         when(promise.then(Matchers.<Operation<Void>>anyObject())).thenReturn(promiseThen);
 
         MachineSource machineSource = mock(MachineSource.class);

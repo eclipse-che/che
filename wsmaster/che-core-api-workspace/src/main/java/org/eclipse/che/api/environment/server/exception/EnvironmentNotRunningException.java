@@ -8,16 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.wsagent;
+package org.eclipse.che.api.environment.server.exception;
 
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 
 /**
- * Starts ws agent in the machine and wait until ws agent sends notification about its start
+ * Exception thrown in case environment stop is called but no matching environment is running.
  *
  * @author Alexander Garagatyi
  */
-public interface WsAgentLauncher {
-    void startWsAgent(String workspaceId) throws NotFoundException, MachineException, InterruptedException;
+public class EnvironmentNotRunningException extends NotFoundException {
+    public EnvironmentNotRunningException(String message) {
+        super(message);
+    }
+
+    public EnvironmentNotRunningException(ServiceError serviceError) {
+        super(serviceError);
+    }
 }

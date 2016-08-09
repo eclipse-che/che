@@ -66,13 +66,14 @@ public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler 
     public void onMachineStatusChanged(final MachineStatusChangedEvent event) {
         final String machineName = event.getMachineName();
         final String machineId = event.getMachineId();
+        final String workspaceId = event.getWorkspaceId();
 
         switch (event.getEventType()) {
             case CREATING:
-                getMachine(machineId).then(notifyMachineCreating());
+                getMachine(workspaceId, machineId).then(notifyMachineCreating());
                 break;
             case RUNNING:
-                getMachine(machineId).then(notifyMachineRunning());
+                getMachine(workspaceId, machineId).then(notifyMachineRunning());
                 break;
             case DESTROYED:
                 notificationManager.notify(locale.notificationMachineDestroyed(machineName), SUCCESS, EMERGE_MODE);
@@ -83,8 +84,8 @@ public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler 
         }
     }
 
-    private Promise<MachineDto> getMachine(final String machineId) {
-        return machineServiceClient.getMachine(machineId).catchError(new Operation<PromiseError>() {
+    private Promise<MachineDto> getMachine(final String workspaceId, final String machineId) {
+        return machineServiceClient.getMachine(workspaceId, machineId).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 notificationManager.notify(locale.failedToFindMachine(machineId));

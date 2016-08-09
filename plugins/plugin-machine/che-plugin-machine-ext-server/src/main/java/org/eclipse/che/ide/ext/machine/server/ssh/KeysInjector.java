@@ -14,7 +14,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
-import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.ssh.server.SshManager;
@@ -43,20 +43,21 @@ import java.util.stream.Collectors;
 public class KeysInjector {
     private static final Logger LOG = LoggerFactory.getLogger(KeysInjector.class);
 
-    private final EventService    eventService;
-    private final DockerConnector docker;
-    private final MachineManager  machineManager;
-    private final SshManager      sshManager;
+    private final EventService         eventService;
+    private final DockerConnector      docker;
+    private final SshManager           sshManager;
+    // TODO replace with WorkspaceManager
+    private final CheEnvironmentEngine environmentEngine;
 
     @Inject
     public KeysInjector(EventService eventService,
                         DockerConnector docker,
-                        MachineManager machineManager,
-                        SshManager sshManager) {
+                        SshManager sshManager,
+                        CheEnvironmentEngine environmentEngine) {
         this.eventService = eventService;
         this.docker = docker;
-        this.machineManager = machineManager;
         this.sshManager = sshManager;
+        this.environmentEngine = environmentEngine;
     }
 
     @PostConstruct
@@ -66,7 +67,8 @@ public class KeysInjector {
             public void onEvent(MachineStatusEvent event) {
                 if (event.getEventType() == MachineStatusEvent.EventType.RUNNING) {
                     try {
-                        final Instance machine = machineManager.getInstance(event.getMachineId());
+                        final Instance machine = environmentEngine.getMachine(event.getWorkspaceId(),
+                                                                              event.getMachineId());
                         List<SshPairImpl> sshPairs = sshManager.getPairs(machine.getOwner(), "machine");
                         final List<String> publicKeys = sshPairs.stream()
                                                              .filter(sshPair -> sshPair.getPublicKey() != null)
