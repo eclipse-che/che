@@ -25,8 +25,12 @@
     <packaging>pom</packaging>
     <name>Che Sample :: Parent</name>
     <modules>
+        <module>sample-plugin-embedjs</module>
         <module>sample-plugin-json</module>
         <module>sample-plugin-filetype</module>
         <module>sample-plugin-wizard</module>
+        <module>sample-plugin-nativeaccess</module>
+        <module>sample-plugin-parts</module>
+        <module>sample-plugin-serverservice</module>
     </modules>
 </project>
