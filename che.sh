@@ -252,19 +252,23 @@ get_che_hostname() {
 get_list_of_che_system_environment_variables() {
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
-  DOCKER_ENV=$(mktemp docker-run-env.XXX)
+  if [ is_native ]; then
+       DOCKER_ENV=$(mktemp)
+  else
+       DOCKER_ENV=$(mktemp docker-run-env.XXX)
+  fi
   env | grep CHE_ >> $DOCKER_ENV
 
   # Add in known proxy variables
-  if [ ! -z ${http_proxy+x} ]; then 
-  	echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
+  if [ ! -z ${http_proxy+x} ]; then
+    echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
   fi
 
-  if [ ! -z ${https_proxy+x} ]; then 
+  if [ ! -z ${https_proxy+x} ]; then
     echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
   fi
 
-  if [ ! -z ${no_proxy+x} ]; then 
+  if [ ! -z ${no_proxy+x} ]; then
     echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
   fi
 
