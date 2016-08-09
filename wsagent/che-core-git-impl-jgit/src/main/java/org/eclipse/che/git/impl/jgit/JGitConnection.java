@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.jgit;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import com.jcraft.jsch.JSch;
@@ -229,6 +230,8 @@ class JGitConnection implements GitConnection {
 
     private static final String MESSAGE_COMMIT_NOT_POSSIBLE       = "Commit is not possible because repository state is '%s'";
     private static final String MESSAGE_COMMIT_AMEND_NOT_POSSIBLE = "Amend is not possible because repository state is '%s'";
+
+    private static final Pattern GIT_URL_WITH_CREDENTIALS_PATTERN = Pattern.compile("https?://[^:]+:.+@.*");
 
     private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
 
@@ -1566,7 +1569,8 @@ class JGitConnection implements GitConnection {
      * @throws GitAPIException
      * @throws UnauthorizedException
      */
-    private Object executeRemoteCommand(String remoteUrl, TransportCommand command)
+    @VisibleForTesting
+    Object executeRemoteCommand(String remoteUrl, TransportCommand command)
             throws GitException, GitAPIException, UnauthorizedException {
         File keyDirectory = null;
         UserCredential credentials = null;
@@ -1589,18 +1593,19 @@ class JGitConnection implements GitConnection {
                         return jsch;
                     }
                 };
-                command.setTransportConfigCallback(new TransportConfigCallback() {
-                    @Override
-                    public void configure(Transport transport) {
-                        SshTransport sshTransport = (SshTransport)transport;
-                        sshTransport.setSshSessionFactory(sshSessionFactory);
-                    }
+                command.setTransportConfigCallback(transport -> {
+                    SshTransport sshTransport = (SshTransport)transport;
+                    sshTransport.setSshSessionFactory(sshSessionFactory);
                 });
             } else {
                 credentials = credentialsLoader.getUserCredential(remoteUrl);
                 if (credentials != null) {
                     command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(credentials.getUserName(),
                                                                                            credentials.getPassword()));
+                } else if (remoteUrl != null && GIT_URL_WITH_CREDENTIALS_PATTERN.matcher(remoteUrl).matches()) {
+                    String username = remoteUrl.substring(remoteUrl.indexOf("://") + 3, remoteUrl.lastIndexOf(":"));
+                    String password = remoteUrl.substring(remoteUrl.lastIndexOf(":") + 1, remoteUrl.indexOf("@"));
+                    command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
                 }
             }
 
