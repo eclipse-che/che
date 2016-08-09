@@ -253,12 +253,7 @@ get_list_of_che_system_environment_variables() {
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
   DOCKER_ENV=$(mktemp docker-run-env.XXX)
-
-  # First grab all known CHE_ variables
-  CHE_VARIABLES=($(env | grep CHE_))
-  for SINGLE_VARIABLE in "${CHE_VARIABLES[@]}"; do
-    echo "${SINGLE_VARIABLE}" >> $DOCKER_ENV
-  done
+  env | grep CHE_ >> $DOCKER_ENV
 
   # Add in known proxy variables
   if [ ! -z ${http_proxy+x} ]; then 
