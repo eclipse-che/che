@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sample-plugin-json-parent</artifactId>
         <groupId>org.eclipse.che.sample</groupId>
-        <version>4.6.2-SNAPSHOT</version>
+        <version>4.6.2</version>
     </parent>
     <artifactId>che-sample-plugin-json-shared</artifactId>
     <name>Che Sample :: Plugin JSON :: Shared</name>
