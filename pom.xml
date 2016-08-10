@@ -365,7 +365,7 @@
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>org-eclipse-jdt-core-repack</artifactId>
-                <version>${che.version}</version>
+                <version>${che.lib.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>

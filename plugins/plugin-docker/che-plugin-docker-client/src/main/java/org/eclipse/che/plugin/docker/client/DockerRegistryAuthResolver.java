@@ -42,11 +42,14 @@ public class DockerRegistryAuthResolver {
 
     public static final String DEFAULT_REGISTRY = "https://index.docker.io/v1/";
 
-    private final InitialAuthConfig initialAuthConfig;
+    private final InitialAuthConfig                 initialAuthConfig;
+    private final DockerRegistryDynamicAuthResolver dynamicAuthResolver;
 
     @Inject
-    public DockerRegistryAuthResolver(InitialAuthConfig initialAuthConfig) {
+    public DockerRegistryAuthResolver(InitialAuthConfig initialAuthConfig,
+                                      DockerRegistryDynamicAuthResolver dynamicAuthResolver) {
         this.initialAuthConfig = initialAuthConfig;
+        this.dynamicAuthResolver = dynamicAuthResolver;
     }
 
     /**
@@ -69,6 +72,9 @@ public class DockerRegistryAuthResolver {
         }
         if (authConfig == null) {
             authConfig = normalizeDockerHubRegistryUrl(initialAuthConfig.getAuthConfigs().getConfigs()).get(normalizedRegistry);
+        }
+        if (authConfig == null) {
+            authConfig = dynamicAuthResolver.getXRegistryAuth(registry);
         }
 
         String authConfigJson;
@@ -97,8 +103,9 @@ public class DockerRegistryAuthResolver {
         if (paramAuthConfigs != null && paramAuthConfigs.getConfigs() != null) {
             authConfigs.putAll(paramAuthConfigs.getConfigs());
         }
+        authConfigs.putAll(dynamicAuthResolver.getXRegistryConfig());
 
-       authConfigs = normalizeDockerHubRegistryUrl(authConfigs);
+        authConfigs = normalizeDockerHubRegistryUrl(authConfigs);
 
         return Base64.getEncoder().encodeToString(JsonHelper.toJson(authConfigs).getBytes());
     }

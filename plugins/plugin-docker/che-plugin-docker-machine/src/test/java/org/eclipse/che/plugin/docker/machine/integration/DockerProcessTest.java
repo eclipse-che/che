@@ -54,7 +54,7 @@ public class DockerProcessTest {
                                                                         new DefaultNetworkFinder());
         docker = new DockerConnector(dockerConnectorConfiguration,
                                      new DockerConnectionFactory(dockerConnectorConfiguration),
-                                     new DockerRegistryAuthResolver(null),
+                                     new DockerRegistryAuthResolver(null, null),
                                      new DockerApiVersionPathPrefixProvider("1.18"));
 
         final ContainerCreated containerCreated = docker.createContainer(
@@ -93,7 +93,7 @@ public class DockerProcessTest {
                                                                             new DefaultNetworkFinder());
             docker = new DockerConnector(dockerConnectorConfiguration,
                                          new DockerConnectionFactory(dockerConnectorConfiguration),
-                                         new DockerRegistryAuthResolver(null),
+                                         new DockerRegistryAuthResolver(null, null),
                                          new DockerApiVersionPathPrefixProvider(""));
         }
         Command command = new CommandImpl("tailf", "tail -f /dev/null", "mvn");

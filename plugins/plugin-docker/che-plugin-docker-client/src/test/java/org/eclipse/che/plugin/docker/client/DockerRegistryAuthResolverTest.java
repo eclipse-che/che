@@ -25,6 +25,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -46,7 +47,8 @@ public class DockerRegistryAuthResolverTest {
 
     private static final String INITIAL_REGISTRY1_X_REGISTRY_AUTH_HEADER_VALUE = "{\"username\":\"user1\",\"password\":\"1234\"}";
     private static final String INITIAL_REGISTRY2_X_REGISTRY_AUTH_HEADER_VALUE = "{\"username\":\"login2\",\"password\":\"abcd\"}";
-    private static final String INITIAL_REGISTRY3_X_REGISTRY_AUTH_HEADER_VALUE = "{\"username\":\"username1234\",\"password\":\"a1b2c3d4\"}";
+    private static final String INITIAL_REGISTRY3_X_REGISTRY_AUTH_HEADER_VALUE =
+            "{\"username\":\"username1234\",\"password\":\"a1b2c3d4\"}";
 
     private static final String REGISTRY1_URL      = "user.registry.com:5000";
     private static final String REGISTRY2_URL      = "local.registry:1234";
@@ -62,27 +64,35 @@ public class DockerRegistryAuthResolverTest {
     private static final String REGISTRY2_X_REGISTRY_AUTH_HEADER_VALUE = "{\"username\":\"mylocallogin\",\"password\":\"localreg\"}";
     private static final String REGISTRY3_X_REGISTRY_AUTH_HEADER_VALUE = "{\"username\":\"usrname\",\"password\":\"pass1234\"}";
 
-    private static final String INITIAL_X_AUTH_CONFIG_VALUE =
+    private static final String REGISTRY_WITH_DYNAMIC_PASSWORD_URL      = "some.registry.com:1234";
+    private static final String REGISTRY_WITH_DYNAMIC_PASSWORD_USERNAME = "USR";
+    private static final String REGISTRY_WITH_DYNAMIC_PASSWORD_PASSWORD = "<current time>";
+
+    private static final String REGISTRY_WITH_DYNAMIC_PASSWORD_AUTH_HEADER_VALUE = "{\"username\":\"USR\",\"password\":\"<current time>\"}";
+
+    private static final String INITIAL_X_AUTH_CONFIG_VALUE                        =
             "{\"test.registry.com:5050\":{\"password\":\"1234\",\"username\":\"user1\"}," +
             "\"somehost:4567\":{\"password\":\"a1b2c3d4\",\"username\":\"username1234\"}," +
             "\"some.reg:1234\":{\"password\":\"abcd\",\"username\":\"login2\"}}";
-    private static final String CUSTOM_X_AUTH_CONFIG_VALUE  =
+    private static final String CUSTOM_X_AUTH_CONFIG_VALUE                         =
             "{\"local.registry:1234\":{\"password\":\"localreg\",\"username\":\"mylocallogin\"}," +
             "\"test.registry.com:5050\":{\"password\":\"pass1234\",\"username\":\"usrname\"}," +
             "\"user.registry.com:5000\":{\"password\":\"pass\",\"username\":\"user\"}}";
-    private static final String X_AUTH_CONFIG_VALUE         =
+    private static final String REGISTRY_WITH_DYNAMIC_PASSWORD_X_AUTH_CONFIG_VALUE =
+            "{\"some.registry.com:1234\":{\"password\":\"<current time>\",\"username\":\"USR\"}}";
+    private static final String X_AUTH_CONFIG_VALUE                                =
             "{\"local.registry:1234\":{\"password\":\"localreg\",\"username\":\"mylocallogin\"}," +
             "\"test.registry.com:5050\":{\"password\":\"pass1234\",\"username\":\"usrname\"}," +
             "\"somehost:4567\":{\"password\":\"a1b2c3d4\",\"username\":\"username1234\"}," +
             "\"some.reg:1234\":{\"password\":\"abcd\",\"username\":\"login2\"}," +
             "\"user.registry.com:5000\":{\"password\":\"pass\",\"username\":\"user\"}}";
 
-    private static final String DEFAULT_REGISTRY_URL_ALIAS1  = null;
-    private static final String DEFAULT_REGISTRY_URL_ALIAS2  = "";
-    private static final String DEFAULT_REGISTRY_URL_ALIAS3  = "docker.io";
-    private static final String DEFAULT_REGISTRY_URL         = "https://index.docker.io/v1/";
-    private static final String DEFAULT_REGISTRY_USERNAME    = "dockerHubUser";
-    private static final String DEFAULT_REGISTRY_PASSWORD    = "passwordFromDockerHubAccount";
+    private static final String DEFAULT_REGISTRY_URL_ALIAS1 = null;
+    private static final String DEFAULT_REGISTRY_URL_ALIAS2 = "";
+    private static final String DEFAULT_REGISTRY_URL_ALIAS3 = "docker.io";
+    private static final String DEFAULT_REGISTRY_URL        = "https://index.docker.io/v1/";
+    private static final String DEFAULT_REGISTRY_USERNAME   = "dockerHubUser";
+    private static final String DEFAULT_REGISTRY_PASSWORD   = "passwordFromDockerHubAccount";
 
     private static final String DEFAULT_REGISTRY_X_REGISTRY_AUTH_VALUE =
             "{\"username\":\"dockerHubUser\",\"password\":\"passwordFromDockerHubAccount\"}";
@@ -93,10 +103,13 @@ public class DockerRegistryAuthResolverTest {
     private static final String EMPTY_JSON       = "{}";
 
     @Mock
-    private InitialAuthConfig initialAuthConfig;
+    private InitialAuthConfig                 initialAuthConfig;
+    @Mock
+    private DockerRegistryDynamicAuthResolver dynamicAuthResolver;
 
     private AuthConfigs initialAuthConfigs;
     private AuthConfigs customAuthConfigs;
+    private AuthConfigs dynamicAuthConfigs;
     private AuthConfigs emptyAuthConfigs;
     private AuthConfigs dockerHubAuthConfigs;
 
@@ -122,7 +135,13 @@ public class DockerRegistryAuthResolverTest {
                                                                                    .withPassword(REGISTRY2_PASSWORD));
         customAuthConfigsMap.put(REGISTRY3_URL, DtoFactory.newDto(AuthConfig.class).withUsername(REGISTRY3_USERNAME)
                                                                                    .withPassword(REGISTRY3_PASSWORD));
-        customAuthConfigs =  DtoFactory.newDto(AuthConfigs.class).withConfigs(customAuthConfigsMap);
+        customAuthConfigs = DtoFactory.newDto(AuthConfigs.class).withConfigs(customAuthConfigsMap);
+
+        Map<String, AuthConfig> dynamicAuthConfigsMap = new HashMap<>();
+        dynamicAuthConfigsMap.put(REGISTRY_WITH_DYNAMIC_PASSWORD_URL, DtoFactory.newDto(AuthConfig.class)
+                                                                                .withUsername(REGISTRY_WITH_DYNAMIC_PASSWORD_USERNAME)
+                                                                                .withPassword(REGISTRY_WITH_DYNAMIC_PASSWORD_PASSWORD));
+        dynamicAuthConfigs = DtoFactory.newDto(AuthConfigs.class).withConfigs(dynamicAuthConfigsMap);
 
         emptyAuthConfigs = DtoFactory.newDto(AuthConfigs.class).withConfigs(new HashMap<>());
 
@@ -135,6 +154,7 @@ public class DockerRegistryAuthResolverTest {
     @BeforeMethod
     private void setup() {
         when(initialAuthConfig.getAuthConfigs()).thenReturn(initialAuthConfigs);
+
     }
 
     @Test
@@ -382,13 +402,46 @@ public class DockerRegistryAuthResolverTest {
                                           jsonToAuthConfigs(EMPTY_JSON));
     }
 
+    @Test
+    public void shouldGetXRegistryAuthHeaderValueFromDynamicConfigOnly() {
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(emptyAuthConfigs);
+        when(dynamicAuthResolver.getXRegistryAuth(REGISTRY_WITH_DYNAMIC_PASSWORD_URL))
+                .thenReturn(dynamicAuthConfigs.getConfigs().get(REGISTRY_WITH_DYNAMIC_PASSWORD_URL));
+
+        String base64HeaderValue = authResolver.getXRegistryAuthHeaderValue(REGISTRY_WITH_DYNAMIC_PASSWORD_URL, emptyAuthConfigs);
+
+        assertEqualsXRegistryAuthHeader(base64ToAuthConfig(base64HeaderValue),
+                                        jsonToAuthConfig(REGISTRY_WITH_DYNAMIC_PASSWORD_AUTH_HEADER_VALUE));
+    }
+
+    @Test
+    public void shouldGetXRegistryAuthHeaderValueFromDynamicConfig() {
+        when(dynamicAuthResolver.getXRegistryAuth(REGISTRY_WITH_DYNAMIC_PASSWORD_URL))
+                .thenReturn(dynamicAuthConfigs.getConfigs().get(REGISTRY_WITH_DYNAMIC_PASSWORD_URL));
+
+        String base64HeaderValue = authResolver.getXRegistryAuthHeaderValue(REGISTRY_WITH_DYNAMIC_PASSWORD_URL, customAuthConfigs);
+
+        assertEqualsXRegistryAuthHeader(base64ToAuthConfig(base64HeaderValue),
+                                        jsonToAuthConfig(REGISTRY_WITH_DYNAMIC_PASSWORD_AUTH_HEADER_VALUE));
+    }
+
+    @Test
+    public void shouldGetXRegistryConfigValueFromDynamicAuthConfigOnly() {
+        when(initialAuthConfig.getAuthConfigs()).thenReturn(emptyAuthConfigs);
+        when(dynamicAuthResolver.getXRegistryConfig()).thenReturn(dynamicAuthConfigs.getConfigs());
+
+        String base64HeaderValue = authResolver.getXRegistryConfigHeaderValue(emptyAuthConfigs);
+
+        assertEqualsXRegistryConfigHeader(base64ToAuthConfigs(base64HeaderValue),
+                                          jsonToAuthConfigs(REGISTRY_WITH_DYNAMIC_PASSWORD_X_AUTH_CONFIG_VALUE));
+    }
 
     private AuthConfig base64ToAuthConfig(String base64decodedJson) {
         return jsonToAuthConfig(new String(Base64.getDecoder().decode(base64decodedJson.getBytes())));
     }
 
     private AuthConfig jsonToAuthConfig(String json) {
-       return DtoFactory.getInstance().createDtoFromJson(json, AuthConfig.class);
+        return DtoFactory.getInstance().createDtoFromJson(json, AuthConfig.class);
     }
 
     private void assertEqualsXRegistryAuthHeader(AuthConfig actual, AuthConfig expected) {

@@ -29,7 +29,11 @@ import org.eclipse.che.api.git.Config;
 import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.DiffPage;
 import org.eclipse.che.api.git.GitConnection;
-import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.exception.GitException;
+import org.eclipse.che.api.git.exception.GitConflictException;
+import org.eclipse.che.api.git.exception.GitRefAlreadyExistsException;
+import org.eclipse.che.api.git.exception.GitRefNotFoundException;
+import org.eclipse.che.api.git.exception.GitInvalidRefNameException;
 import org.eclipse.che.api.git.GitUrlUtils;
 import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
@@ -100,6 +104,9 @@ import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -144,6 +151,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.net.ssl.SSLHandshakeException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -229,6 +237,8 @@ class JGitConnection implements GitConnection {
 
     private static final String MESSAGE_COMMIT_NOT_POSSIBLE       = "Commit is not possible because repository state is '%s'";
     private static final String MESSAGE_COMMIT_AMEND_NOT_POSSIBLE = "Amend is not possible because repository state is '%s'";
+
+    private static final String FILE_NAME_TOO_LONG_ERROR_PREFIX = "File name too long";
 
     private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
 
@@ -339,6 +349,14 @@ class JGitConnection implements GitConnection {
         }
         try {
             checkoutCommand.call();
+        } catch(CheckoutConflictException exception){
+            throw new GitConflictException(exception.getMessage(), exception.getConflictingPaths());
+        } catch(RefAlreadyExistsException exception){
+            throw new GitRefAlreadyExistsException(exception.getMessage());
+        } catch(RefNotFoundException exception){
+            throw new GitRefNotFoundException(exception.getMessage());
+        } catch(InvalidRefNameException exception){
+            throw new GitInvalidRefNameException(exception.getMessage());
         } catch (GitAPIException exception) {
             if (exception.getMessage().endsWith("already exists")) {
                 throw new GitException(format(ERROR_CHECKOUT_BRANCH_NAME_EXISTS, name != null ? name : cleanRemoteName(trackBranch)));
@@ -521,7 +539,8 @@ class JGitConnection implements GitConnection {
                 }
                 return;
             }
-            throw new GitException(exception.getMessage(), exception);
+            String message = generateExceptionMessage(exception);
+            throw new GitException(message, exception);
         }
     }
 
@@ -684,7 +703,7 @@ class JGitConnection implements GitConnection {
             } else if ("Nothing to fetch.".equals(exception.getMessage())) {
                 return;
             } else {
-                errorMessage = exception.getMessage();
+                errorMessage = generateExceptionMessage(exception);
             }
             throw new GitException(errorMessage, exception);
         }
@@ -1030,7 +1049,7 @@ class JGitConnection implements GitConnection {
             if (exception.getMessage().equals("Invalid remote: " + remoteName)) {
                 errorMessage = ERROR_NO_REMOTE_REPOSITORY;
             } else {
-                errorMessage = exception.getMessage();
+                errorMessage = generateExceptionMessage(exception);
             }
             throw new GitException(errorMessage, exception);
         }
@@ -1111,7 +1130,8 @@ class JGitConnection implements GitConnection {
             if ("origin: not found.".equals(exception.getMessage())) {
                 throw new GitException(ERROR_NO_REMOTE_REPOSITORY, exception);
             } else {
-                throw new GitException(exception.getMessage(), exception);
+                String message = generateExceptionMessage(exception);
+                throw new GitException(message, exception);
             }
         }
     }
@@ -1550,7 +1570,8 @@ class JGitConnection implements GitConnection {
                 }
             }
         } catch (IOException exception) {
-            throw new GitException(exception.getMessage(), exception);
+            String message = generateExceptionMessage(exception);
+            throw new GitException(message, exception);
         }
     }
 
@@ -1707,5 +1728,43 @@ class JGitConnection implements GitConnection {
             }
         }
         return returnName;
+    }
+
+    /**
+     * Method for generate exception message. The default logic return message from the error.
+     * It also check if the type of the message is for SSL or in case that the error
+     * start with "file name to long" then it raise the relevant message
+     *
+     * @param error
+     *        throwable error
+     * @return exception message
+     */
+    private String generateExceptionMessage(Throwable error) {
+        String message = error.getMessage();
+        while (error.getCause() != null) {
+            //if e caused by an SSLHandshakeException - replace thrown message with a hardcoded message
+            if (error.getCause() instanceof SSLHandshakeException) {
+                message = "The system is not configured to trust the security certificate provided by the Git server";
+                break;
+            } else if (error.getCause() instanceof IOException) {
+                // Security fix - error message should not include complete local file path on the target system
+                // Error message for example - File name too long (path /xx/xx/xx/xx/xx/xx/xx/xx /, working dir /xx/xx/xx)
+                if (message != null && message.startsWith(FILE_NAME_TOO_LONG_ERROR_PREFIX)) {
+                    try {
+                        String repoPath = repository.getWorkTree().getCanonicalPath();
+                        int startIndex = message.indexOf(repoPath);
+                        int endIndex = message.indexOf(",");
+                        if (startIndex > -1 && endIndex > -1) {
+                            message = FILE_NAME_TOO_LONG_ERROR_PREFIX + " " + message.substring(startIndex + repoPath.length(), endIndex);
+                        }
+                        break;
+                    } catch (IOException e) {
+                        //Hide exception as it is only needed for this message generation
+                    }
+                }
+            }
+            error = error.getCause();
+        }
+        return message;
     }
 }

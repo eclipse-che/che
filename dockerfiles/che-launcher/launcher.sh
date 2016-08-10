@@ -90,7 +90,6 @@ Docs: http://eclipse.org/che/getting-started.
 parse_command_line () {
   if [ $# -eq 0 ]; then
     usage
-    container_self_destruction
     exit
   fi
 
@@ -101,7 +100,6 @@ parse_command_line () {
       ;;
       -h|--help)
         usage
-        container_self_destruction
         exit
       ;;
       *)
@@ -138,6 +136,3 @@ case ${CHE_SERVER_ACTION} in
     print_debug_info
   ;;
 esac
-
-# This container will self destruct after execution
-container_self_destruction
