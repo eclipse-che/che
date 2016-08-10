@@ -29,7 +29,6 @@ import static java.util.Arrays.asList;
 
 /**
  * @author Evgen Vidolob
- * @author Anatoliy Bazko
  */
 @Singleton
 public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate {
@@ -50,8 +49,8 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     @Override
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
         restoreDependencies(projectPath);
-
         Path launchFile = Paths.get(System.getenv("HOME"), "che-agents/ls-csharp/launch.sh");
+
         ProcessBuilder processBuilder = new ProcessBuilder(launchFile.toString());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
         processBuilder.redirectOutput(ProcessBuilder.Redirect.PIPE);

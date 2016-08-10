@@ -34,8 +34,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import static java.lang.String.format;
-
 /**
  * @author Anatolii Bazko
  */
@@ -62,6 +60,9 @@ public class DockerAgentsApplier {
         for (String agentKey : machine.getConfig().getAgents()) {
             apply(machine, AgentKeyImpl.of(agentKey), agentsCompleted, agentsInProgress);
         }
+
+        apply(machine, AgentKeyImpl.of("org.eclipse.che.ls.json"), agentsCompleted, agentsInProgress);
+        apply(machine, AgentKeyImpl.of("org.eclipse.che.ls.csharp"), agentsCompleted, agentsInProgress);
     }
 
     /**
@@ -119,8 +120,8 @@ public class DockerAgentsApplier {
             throw new MachineException("Can't start process with command: " + command, e);
         }
 
-        if (statusDetector.hasError()) {
-            throw new MachineException(format("Agent %s failed: %s", command.getName(), statusDetector.getError()));
-        }
+//        if (statusDetector.hasError()) {
+//            throw new MachineException(format("Agent %s failed: %s", command.getName(), statusDetector.getError()));
+//        }
     }
 }
