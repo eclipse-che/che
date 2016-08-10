@@ -9,22 +9,27 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 
+import {ContainerVersion} from "./container-version";
+
 /**
  * Defines a way to grab remote ip
  * @author Florent Benoit
  */
 export class RemoteIp {
 
-    ip: string;
+    static ip: string;
 
     constructor() {
-        var execSync = require('child_process').execSync;
-        this.ip = execSync('docker run --net host --rm codenvy/che-ip').toString().replace(/[\n\r]/g, '');
+        if (!RemoteIp.ip) {
+            var execSync = require('child_process').execSync;
+            let containerVersion : string = new ContainerVersion().getVersion();
+            RemoteIp.ip = execSync('docker run --net host --rm codenvy/che-ip:' + containerVersion).toString().replace(/[\n\r]/g, '');
+        }
     }
 
 
    getIp() : string {
-       return this.ip;
+       return RemoteIp.ip;
    }
 
 }

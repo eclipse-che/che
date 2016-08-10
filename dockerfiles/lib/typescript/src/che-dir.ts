@@ -28,6 +28,7 @@ import {WorkspaceEventMessageBusSubscriber} from "./workspace-event-subscriber";
 import {WorkspaceDisplayOutputMessageBusSubscriber} from "./workspace-log-output-subscriber";
 import {WorkspaceEventPromiseMessageBusSubscriber} from "./workspace-event-promise-subscriber";
 import {Project} from "./project";
+import {ContainerVersion} from "./container-version";
 
 
 /**
@@ -489,13 +490,14 @@ export class CheDir {
   }
 
   cheBoot() {
+    let containerVersion : string = new ContainerVersion().getVersion();
 
     var commandLine: string = 'docker run ' +
         ' -v /var/run/docker.sock:/var/run/docker.sock' +
         ' -e CHE_PORT=' + this.chefileStruct.server.port +
         ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
         ' -e CHE_CONF_FOLDER=' + this.confFolder +
-        ' codenvy/che-launcher:nightly start';
+        ' codenvy/che-launcher:' + containerVersion + ' start';
 
     Log.getLogger().debug('Executing command line', commandLine);
     var child = this.exec(commandLine , function callback(error, stdout, stderr) {
@@ -514,12 +516,14 @@ export class CheDir {
    * Command used to stop the che instance that has been launched
    */
   cheStop() {
+    let containerVersion : string = new ContainerVersion().getVersion();
+
     var commandLine: string = 'docker run ' +
         ' -v /var/run/docker.sock:/var/run/docker.sock' +
         ' -e CHE_PORT=' + this.chefileStruct.server.port +
         ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
         ' -e CHE_CONF_FOLDER=' + this.confFolder +
-        ' codenvy/che-launcher:nightly stop';
+        ' codenvy/che-launcher:' + containerVersion + ' stop';
 
     Log.getLogger().debug('Executing command line', commandLine);
     var child = this.exec(commandLine , function callback(error, stdout, stderr) {
