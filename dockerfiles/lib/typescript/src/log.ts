@@ -72,11 +72,20 @@ export class Log {
             prefix += ' ' + Log.context + ':';
         }
 
-        if (optional) {
-            console.log(prefix, message, optional.join(' '));
+        var consoleMethod : any;
+        if ('error' === type) {
+            consoleMethod = console.error;
         } else {
-            console.log(prefix, message);
+            consoleMethod = console.log;
         }
+
+
+        if (optional) {
+            consoleMethod(prefix, message, optional.join(' '));
+        } else {
+            consoleMethod(prefix, message);
+        }
+
     }
 
 }
