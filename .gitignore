@@ -23,7 +23,7 @@ test-output/
 *.exe
 *.o
 *.so
-*.sh
+
 
 # Packages #
 ############
