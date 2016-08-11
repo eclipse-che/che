@@ -26,17 +26,14 @@ import org.eclipse.che.api.user.server.spi.UserDao;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static java.lang.String.format;
@@ -54,7 +51,8 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class LocalUserDaoImpl implements UserDao {
 
-    @VisibleForTesting
+    public static final String FILENAME = "users.json";
+
     final Map<String, UserImpl> users;
 
     private final LocalStorage userStorage;
@@ -62,27 +60,22 @@ public class LocalUserDaoImpl implements UserDao {
     @Inject
     public LocalUserDaoImpl(LocalStorageFactory storageFactory) throws IOException {
         this.users = new HashMap<>();
-        userStorage = storageFactory.create("users.json");
+        userStorage = storageFactory.create(FILENAME);
     }
 
     @Inject
     @PostConstruct
-    public synchronized void start(@Named("codenvy.local.infrastructure.users") Set<UserImpl> defaultUsers) {
-        final Map<String, UserImpl> storedUsers = userStorage.loadMap(new TypeToken<Map<String, UserImpl>>() {});
-        final Collection<UserImpl> preloadedUsers = storedUsers.isEmpty() ? defaultUsers : storedUsers.values();
-        for (UserImpl defaultUser : preloadedUsers) {
-            users.put(defaultUser.getId(), new UserImpl(defaultUser));
-        }
+    public synchronized void start() {
+        users.putAll(userStorage.loadMap(new TypeToken<Map<String, UserImpl>>() {}));
     }
 
-    @PreDestroy
-    public synchronized void stop() throws IOException {
+    public synchronized void saveUsers() throws IOException {
         userStorage.store(new HashMap<>(users));
     }
 
     @Override
     public synchronized UserImpl getByAliasAndPassword(String emailOrName, String password) throws ServerException,
-                                                                                             NotFoundException {
+                                                                                                   NotFoundException {
         requireNonNull(emailOrName);
         requireNonNull(password);
         final Optional<UserImpl> userOpt = users.values()

@@ -46,6 +46,8 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class LocalSshDaoImpl implements SshDao {
 
+    public static final String FILENAME = "ssh.json";
+
     private final LocalStorage sshStorage;
 
     @VisibleForTesting
@@ -54,7 +56,7 @@ public class LocalSshDaoImpl implements SshDao {
     @Inject
     public LocalSshDaoImpl(LocalStorageFactory storageFactory) throws IOException {
         pairs = new ArrayList<>();
-        sshStorage = storageFactory.create("ssh.json");
+        sshStorage = storageFactory.create(FILENAME);
     }
 
     @Override
@@ -119,8 +121,6 @@ public class LocalSshDaoImpl implements SshDao {
         pairs.addAll(sshStorage.loadList(new TypeToken<List<SshPairImpl>>() {}));
     }
 
-    @PreDestroy
-    @VisibleForTesting
     synchronized void saveSshPairs() throws IOException {
         sshStorage.store(pairs);
     }

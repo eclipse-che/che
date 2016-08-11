@@ -48,6 +48,8 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class LocalSnapshotDaoImpl implements SnapshotDao {
 
+    public static final String FILENAME = "snapshots.json";
+
     @VisibleForTesting
     final Map<String, SnapshotImpl> snapshots;
 
@@ -122,7 +124,6 @@ public class LocalSnapshotDaoImpl implements SnapshotDao {
         snapshots.putAll(snapshotStorage.loadMap(new TypeToken<Map<String, SnapshotImpl>>() {}));
     }
 
-    @PreDestroy
     public synchronized void saveSnapshots() throws IOException {
         snapshotStorage.store(snapshots);
     }

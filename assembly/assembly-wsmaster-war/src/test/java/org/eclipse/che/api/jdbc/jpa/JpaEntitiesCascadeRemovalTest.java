@@ -10,19 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.jdbc.jpa;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
-import com.google.inject.TypeLiteral;
-import com.google.inject.matcher.Matchers;
-import com.google.inject.name.Named;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -31,15 +24,12 @@ import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
-import org.eclipse.che.api.factory.server.jpa.JpaFactoryDao;
 import org.eclipse.che.api.factory.server.jpa.JpaFactoryDao.RemoveFactoriesBeforeUserRemovedEventSubscriber;
-import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.ssh.server.jpa.JpaSshDao;
 import org.eclipse.che.api.ssh.server.jpa.JpaSshDao.RemoveSshKeysBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
@@ -52,10 +42,8 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.lang.Pair;
@@ -74,6 +62,13 @@ import java.util.concurrent.Callable;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.TestObjectsFactory.createFactory;
+import static org.eclipse.che.api.TestObjectsFactory.createPreferences;
+import static org.eclipse.che.api.TestObjectsFactory.createProfile;
+import static org.eclipse.che.api.TestObjectsFactory.createSnapshot;
+import static org.eclipse.che.api.TestObjectsFactory.createSshPair;
+import static org.eclipse.che.api.TestObjectsFactory.createUser;
+import static org.eclipse.che.api.TestObjectsFactory.createWorkspace;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -254,65 +249,6 @@ public class JpaEntitiesCascadeRemovalTest {
         profileDao.remove(user.getId());
 
         userDao.remove(user.getId());
-    }
-
-    public static UserImpl createUser(String id) {
-        return new UserImpl(id,
-                            id + "@eclipse.org",
-                            id + "_name",
-                            "password",
-                            asList(id + "_alias1", id + "_alias2"));
-    }
-
-    public static ProfileImpl createProfile(String userId) {
-        return new ProfileImpl(userId, new HashMap<>(ImmutableMap.of("attribute1", "value1",
-                                                                     "attribute2", "value2",
-                                                                     "attribute3", "value3")));
-    }
-
-    public static Map<String, String> createPreferences() {
-        return new HashMap<>(ImmutableMap.of("preference1", "value1",
-                                             "preference2", "value2",
-                                             "preference3", "value3"));
-    }
-
-    public static WorkspaceImpl createWorkspace(String id, String namespace) {
-        return new WorkspaceImpl(id,
-                                 namespace,
-                                 new WorkspaceConfigImpl(id + "_name",
-                                                         id + "description",
-                                                         "default-env",
-                                                         null,
-                                                         null,
-                                                         null));
-    }
-
-    public static SshPairImpl createSshPair(String owner, String service, String name) {
-        return new SshPairImpl(owner, service, name, "public-key", "private-key");
-    }
-
-    public static FactoryImpl createFactory(String id, String creator) {
-        return new FactoryImpl(id,
-                               id + "-name",
-                               "4.0",
-                               createWorkspace(id, creator).getConfig(),
-                               new AuthorImpl(creator, System.currentTimeMillis()),
-                               null,
-                               null,
-                               null,
-                               null);
-    }
-
-    public static SnapshotImpl createSnapshot(String snapshotId, String workspaceId) {
-        return new SnapshotImpl(snapshotId,
-                                "type",
-                                null,
-                                System.currentTimeMillis(),
-                                workspaceId,
-                                snapshotId + "_description",
-                                true,
-                                "dev-machine",
-                                snapshotId + "env-name");
     }
 
     private static <T> T notFoundToNull(Callable<T> action) throws Exception {

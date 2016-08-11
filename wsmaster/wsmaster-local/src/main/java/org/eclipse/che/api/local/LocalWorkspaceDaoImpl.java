@@ -56,6 +56,8 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class LocalWorkspaceDaoImpl implements WorkspaceDao {
 
+    public static final String FILENAME = "workspaces.json";
+
     @VisibleForTesting
     final         Map<String, WorkspaceImpl> workspaces;
     private final LocalStorage               localStorage;
@@ -64,7 +66,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     public LocalWorkspaceDaoImpl(LocalStorageFactory factory) throws IOException {
         final Map<Class<?>, Object> adapters = ImmutableMap.of(Recipe.class, new RecipeTypeAdapter(),
                                                                ProjectConfig.class, new ProjectConfigAdapter());
-        this.localStorage = factory.create("workspaces.json", adapters);
+        this.localStorage = factory.create(FILENAME, adapters);
         this.workspaces = new HashMap<>();
     }
 
@@ -76,7 +78,6 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         }
     }
 
-    @PreDestroy
     public synchronized void saveWorkspaces() throws IOException {
         localStorage.store(workspaces);
     }

@@ -11,7 +11,6 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
@@ -20,23 +19,14 @@ import org.eclipse.che.account.api.AccountModule;
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
-import org.eclipse.che.api.machine.server.spi.RecipeDao;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
-import org.eclipse.che.api.ssh.server.spi.SshDao;
 import org.eclipse.che.api.user.server.CheUserCreator;
 import org.eclipse.che.api.user.server.TokenValidator;
 
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
-import org.eclipse.che.api.user.server.spi.PreferenceDao;
-import org.eclipse.che.api.user.server.spi.ProfileDao;
-import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
-import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.security.PasswordEncryptor;
 
 /** @author andrew00x */
 @DynaModule
@@ -54,6 +44,7 @@ public class WsMasterModule extends AbstractModule {
         install(new AccountModule());
         install(new MachineJpaModule());
         bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
+        bind(org.eclipse.che.api.local.LocalDataMigrator.class).asEagerSingleton();
 
         bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
         bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class).asEagerSingleton();
