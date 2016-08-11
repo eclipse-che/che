@@ -457,7 +457,7 @@ run_connectivity_tests() {
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                codenvy/che-server:nightly \
+                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
@@ -471,7 +471,7 @@ run_connectivity_tests() {
   ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                codenvy/che-server:nightly \
+                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
