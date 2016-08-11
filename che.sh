@@ -53,7 +53,7 @@ init_global_variables() {
   CHE_TEST_CONTAINER_NAME="che-test"
 
   # User configurable variables
-  DEFAULT_CHE_VERSION="nightly"
+  DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
 
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
