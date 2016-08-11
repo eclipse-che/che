@@ -24,7 +24,7 @@ import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
-import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
 
 import java.net.URI;
@@ -41,12 +41,12 @@ import static org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey.c
 
 @Singleton
 public class LanguageServerRegistryImpl implements LanguageServerRegistry, ServerInitializerObserver {
-    private final static String PROJECT_FOLDER_PATH = "/projects";
+    public final static String PROJECT_FOLDER_PATH = "/projects";
 
     /**
-     * Available {@link LanguageServerFactory} by extension.
+     * Available {@link LanguageServerLauncher} by extension.
      */
-    private final ConcurrentHashMap<String, List<LanguageServerFactory>> extensionToFactory;
+    private final ConcurrentHashMap<String, List<LanguageServerLauncher>> extensionToLauncher;
 
     /**
      * Started {@link LanguageServer} by project.
@@ -57,27 +57,25 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     private final ServerInitializer      initializer;
 
     @Inject
-    public LanguageServerRegistryImpl(Set<LanguageServerFactory> languageServerFactories,
+    public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers,
                                       ProjectManager projectManager,
                                       ServerInitializer initializer) {
         this.projectManager = projectManager;
         this.initializer = initializer;
-        this.extensionToFactory = new ConcurrentHashMap<>();
+        this.extensionToLauncher = new ConcurrentHashMap<>();
         this.projectToServer = new ConcurrentHashMap<>();
         this.initializer.addObserver(this);
 
-        for (LanguageServerFactory factory : languageServerFactories) {
-            for (String extension : factory.getLanguageDescription().getFileExtensions()) {
-                extensionToFactory.putIfAbsent(extension, new ArrayList<>());
-                extensionToFactory.get(extension).add(factory);
+        for (LanguageServerLauncher launcher : languageServerLaunchers) {
+            for (String extension : launcher.getLanguageDescription().getFileExtensions()) {
+                extensionToLauncher.putIfAbsent(extension, new ArrayList<>());
+                extensionToLauncher.get(extension).add(launcher);
             }
         }
     }
 
     @Override
     public LanguageServer findServer(String fileUri) throws LanguageServerException {
-        new LanguageServerRegistryConfigurationBasedImpl(initializer, projectManager);
-
         String path = URI.create(fileUri).getPath();
 
         String extension = getFileExtension(path);
@@ -90,11 +88,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     protected LanguageServer findServer(String extension, String projectPath) throws LanguageServerException {
         ProjectExtensionKey projectKey = createProjectKey(projectPath, extension);
 
-        for (LanguageServerFactory factory : extensionToFactory.get(extension)) {
+        for (LanguageServerLauncher launcher : extensionToLauncher.get(extension)) {
             if (!projectToServer.containsKey(projectKey)) {
-                synchronized (factory) {
+                synchronized (launcher) {
                     if (!projectToServer.containsKey(projectKey)) {
-                        LanguageServer server = initializer.initialize(factory, projectPath);
+                        LanguageServer server = initializer.initialize(launcher, projectPath);
                         projectToServer.put(projectKey, server);
                     }
                 }
@@ -108,11 +106,11 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
 
     @Override
     public List<LanguageDescription> getSupportedLanguages() {
-        return extensionToFactory.values()
-                                 .stream()
-                                 .flatMap(Collection::stream)
-                                 .map(LanguageServerFactory::getLanguageDescription)
-                                 .collect(Collectors.toList());
+        return extensionToLauncher.values()
+                                  .stream()
+                                  .flatMap(Collection::stream)
+                                  .map(LanguageServerLauncher::getLanguageDescription)
+                                  .collect(Collectors.toList());
     }
 
     @Override

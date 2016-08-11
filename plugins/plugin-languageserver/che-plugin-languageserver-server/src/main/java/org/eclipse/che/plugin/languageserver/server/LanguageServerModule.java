@@ -14,9 +14,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.languageserver.server.factory.CSharpLanguageServerFactory;
-import org.eclipse.che.plugin.languageserver.server.factory.JsonLanguageServerFactory;
-import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.launcher.CSharpLanguageServerLauncher;
+import org.eclipse.che.plugin.languageserver.server.launcher.JsonLanguageServerLauncher;
+import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.server.messager.InitializeEventMessenger;
 import org.eclipse.che.plugin.languageserver.server.messager.PublishDiagnosticsParamsMessenger;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
@@ -32,12 +32,10 @@ public class LanguageServerModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        Multibinder.newSetBinder(binder(), LanguageServerFactory.class).addBinding().to(JsonLanguageServerFactory.class);
-        Multibinder.newSetBinder(binder(), LanguageServerFactory.class).addBinding().to(CSharpLanguageServerFactory.class);
-//        Multibinder.newSetBinder(binder(), LanguageServerFactory.class).addBinding().to(FatJarBasedLanguageServerFactory.class);
+        Multibinder.newSetBinder(binder(), LanguageServerLauncher.class).addBinding().to(JsonLanguageServerLauncher.class);
+        Multibinder.newSetBinder(binder(), LanguageServerLauncher.class).addBinding().to(CSharpLanguageServerLauncher.class);
 
         bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);
-//        bind(LanguageServerRegistry.class).to(LanguageServerRegistryConfigurationBasedImpl.class);
         bind(ServerInitializer.class).to(ServerInitializerImpl.class);
 
         bind(LanguageRegistryService.class);

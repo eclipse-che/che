@@ -18,7 +18,7 @@ import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
 
-import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.server.messager.PublishDiagnosticsParamsMessenger;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -51,7 +51,7 @@ public class ServerInitializerImplTest {
     @Mock
     private LanguageDescription                 languageDescription;
     @Mock
-    private LanguageServerFactory               factory;
+    private LanguageServerLauncher              launcher;
     @Mock
     private LanguageServer                      server;
     @Mock
@@ -70,12 +70,12 @@ public class ServerInitializerImplTest {
         when(server.initialize(any(InitializeParams.class))).thenReturn(completableFuture);
         when(completableFuture.get()).thenReturn(mock(InitializeResult.class));
 
-        when(factory.getLanguageDescription()).thenReturn(languageDescription);
-        when(factory.create(anyString())).thenReturn(server);
+        when(launcher.getLanguageDescription()).thenReturn(languageDescription);
+        when(launcher.launch(anyString())).thenReturn(server);
         doNothing().when(initializer).registerCallbacks(server);
 
         initializer.addObserver(observer);
-        LanguageServer languageServer = initializer.initialize(factory, "/path");
+        LanguageServer languageServer = initializer.initialize(launcher, "/path");
 
         assertEquals(server, languageServer);
         verify(observer).onServerInitialized(eq(server), any(ServerCapabilities.class), eq(languageDescription), eq("/path"));

@@ -16,12 +16,12 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>4.6.0-SNAPSHOT</version>
+        <version>4.7.0-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-agent-parent</artifactId>
-    <version>4.6.0-SNAPSHOT</version>
+    <version>4.7.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Agent Parent</name>
     <modules>
@@ -29,7 +29,6 @@
         <module>che-core-api-project</module>
         <module>che-core-api-git</module>
         <module>che-core-api-git-shared</module>
-        <module>che-core-git-impl-native</module>
         <module>che-core-git-impl-jgit</module>
         <module>che-core-api-debug</module>
         <module>che-core-api-debug-shared</module>

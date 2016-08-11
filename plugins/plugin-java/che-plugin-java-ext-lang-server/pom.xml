@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.6.0-SNAPSHOT</version>
+        <version>4.7.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-ext-lang-server</artifactId>
     <name>Che Plugin :: Java :: Extension Java Server</name>
@@ -98,19 +98,19 @@
             <artifactId>che-core-commons-schedule</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-shared</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-jdt-core-repack</artifactId>
+            <groupId>org.eclipse.che.lib</groupId>
+            <artifactId>org-eclipse-jdt-core-repack</artifactId>
             <exclusions>
                 <exclusion>
                     <artifactId>org.eclipse.jdt.core</artifactId>
                     <groupId>org.eclipse.tycho</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-ext-lang-shared</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

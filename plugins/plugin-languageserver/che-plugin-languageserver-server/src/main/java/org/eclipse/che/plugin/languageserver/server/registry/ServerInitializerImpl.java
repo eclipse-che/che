@@ -24,7 +24,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
-import org.eclipse.che.plugin.languageserver.server.factory.LanguageServerFactory;
+import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.server.messager.PublishDiagnosticsParamsMessenger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,25 +74,25 @@ public class ServerInitializerImpl implements ServerInitializer {
     }
 
     @Override
-    public LanguageServer initialize(LanguageServerFactory factory, String projectPath) throws LanguageServerException {
-        String languageId = factory.getLanguageDescription().getLanguageId();
+    public LanguageServer initialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
+        String languageId = launcher.getLanguageDescription().getLanguageId();
 
-        synchronized (factory) {
+        synchronized (launcher) {
             LanguageServer server = languageIdToServers.get(languageId);
             if (server != null) {
                 InitializeResult initializeResult = serversToInitResult.get(server);
 //                if (!initializeResult.getCapabilities().isMultiplyProjectsProvider()) {
-                    server = doInitialize(factory, projectPath);
+                    server = doInitialize(launcher, projectPath);
 //                }
             } else {
-                server = doInitialize(factory, projectPath);
+                server = doInitialize(launcher, projectPath);
                 languageIdToServers.put(languageId, server);
             }
             InitializeResult initializeResult = serversToInitResult.get(server);
             if(initializeResult instanceof InitializeResultImpl){
-                ((InitializeResultImpl)initializeResult).setSupportedLanguages(Collections.singletonList((LanguageDescriptionImpl)factory.getLanguageDescription()));
+                ((InitializeResultImpl)initializeResult).setSupportedLanguages(Collections.singletonList((LanguageDescriptionImpl)launcher.getLanguageDescription()));
             }
-            onServerInitialized(server, serversToInitResult.get(server).getCapabilities(), factory.getLanguageDescription(), projectPath);
+            onServerInitialized(server, serversToInitResult.get(server).getCapabilities(), launcher.getLanguageDescription(), projectPath);
             return server;
         }
     }
@@ -102,13 +102,13 @@ public class ServerInitializerImpl implements ServerInitializer {
         return Collections.unmodifiableMap(serversToInitResult);
     }
 
-    protected LanguageServer doInitialize(LanguageServerFactory factory, String projectPath) throws LanguageServerException {
-        String languageId = factory.getLanguageDescription().getLanguageId();
+    protected LanguageServer doInitialize(LanguageServerLauncher launcher, String projectPath) throws LanguageServerException {
+        String languageId = launcher.getLanguageDescription().getLanguageId();
         InitializeParamsImpl initializeParams = prepareInitializeParams(projectPath);
 
         LanguageServer server;
         try {
-            server = factory.create(projectPath);
+            server = launcher.launch(projectPath);
         } catch (LanguageServerException e) {
             throw new LanguageServerException(
                     "Can't initialize Language Server " + languageId + " on " + projectPath + ". " + e.getMessage(), e);

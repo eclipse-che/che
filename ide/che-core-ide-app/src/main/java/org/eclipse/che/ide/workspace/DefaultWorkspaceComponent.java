@@ -10,41 +10,32 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace;
 
-import com.google.common.base.Strings;
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.actions.WorkspaceSnapshotCreator;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.statepersistance.dto.AppState;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
-
-import java.util.List;
-
-import static org.eclipse.che.ide.statepersistance.AppStateManager.PREFERENCE_PROPERTY_NAME;
 
 /**
  * Performs default start of IDE - creates new or starts latest workspace.
@@ -73,8 +64,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
                                      InitialLoadingInfo initialLoadingInfo,
-                                     WorkspaceSnapshotCreator snapshotCreator,
-                                     LoaderFactory loaderFactory) {
+                                     WorkspaceEventsNotifier workspaceEventsNotifier) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -91,27 +81,23 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
               preferencesManager,
               dtoFactory,
               initialLoadingInfo,
-              snapshotCreator,
-              loaderFactory);
+              workspaceEventsNotifier);
     }
 
     /** {@inheritDoc} */
     @Override
     public void start(final Callback<Component, Exception> callback) {
         this.callback = callback;
-
         workspaceServiceClient.getWorkspace(browserQueryFieldRenderer.getNamespace(), browserQueryFieldRenderer.getWorkspaceName()).then(
                 new Operation<WorkspaceDto>() {
                     @Override
-                    public void apply(WorkspaceDto workspace) throws OperationException {
-                        startWorkspaceById(workspace, callback);
-                        return;
+                    public void apply(WorkspaceDto workspaceDto) throws OperationException {
+                        handleWorkspaceEvents(workspaceDto, callback);
                     }
                 }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 needToReloadComponents = true;
-
                 dialogFactory.createMessageDialog(locale.getWsErrorDialogTitle(),
                                                   locale.getWsErrorDialogContent(error.getMessage()),
                                                   null).show();
@@ -119,37 +105,6 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
         });
     }
 
-
-    private void tryStartRecentWorkspaceIfExist(List<WorkspaceDto> workspaces) {
-        final String recentWorkspaceId = getRecentWorkspaceId();
-        if (Strings.isNullOrEmpty(recentWorkspaceId)) {
-            startWorkspacePresenter.show(workspaces, callback);
-        } else {
-            for(WorkspaceDto workspace : workspaces) {
-                if (workspace.getId().equals(recentWorkspaceId)) {
-                    startWorkspaceById(workspace, callback);
-                    return;
-                }
-            }
-        }
-    }
-
-    private String getRecentWorkspaceId() {
-        String json = preferencesManager.getValue(PREFERENCE_PROPERTY_NAME);
-
-        AppState appState = null;
-
-        try {
-            appState = dtoFactory.createDtoFromJson(json, AppState.class);
-        } catch (Exception exception) {
-            Log.error(getClass(), "Can't create object using json: " + exception);
-        }
-
-        if (appState != null) {
-            return appState.getRecentWorkspaceId();
-        }
-        return null;
-    }
 
     @Override
     public void tryStartWorkspace() {

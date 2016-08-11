@@ -275,7 +275,7 @@ public class ConsolesPanelViewImpl extends Composite implements ConsolesPanelVie
 
         processTree.asWidget().setVisible(true);
         processTree.getModel().setRoot(root);
-        processTree.renderTree(-1);
+        processTree.renderTree();
 
         for (ProcessTreeNode processTreeNode : processTreeNodes.values()) {
             if (!processTreeNode.getId().equals(activeProcessId) && processTreeNode.hasUnreadContent()) {
@@ -310,20 +310,18 @@ public class ConsolesPanelViewImpl extends Composite implements ConsolesPanelVie
     @Override
     public void showProcessOutput(String processId) {
         if (!processWidgets.containsKey(processId)) {
-            processId = "";
+            return;
         }
 
-        if (processWidgets.containsKey(processId)) {
-            onResize();
-            outputPanel.showWidget(processWidgets.get(processId).asWidget());
+        onResize();
+        outputPanel.showWidget(processWidgets.get(processId).asWidget());
 
-            activeProcessId = processId;
+        activeProcessId = processId;
 
-            ProcessTreeNode treeNode = processTreeNodes.get(processId);
-            if (treeNode != null) {
-                treeNode.setHasUnreadContent(false);
-                treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
-            }
+        ProcessTreeNode treeNode = processTreeNodes.get(processId);
+        if (treeNode != null) {
+            treeNode.setHasUnreadContent(false);
+            treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
         }
     }
 

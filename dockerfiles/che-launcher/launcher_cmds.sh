@@ -46,7 +46,7 @@ start_che_server() {
 
   info "ECLIPSE CHE: SERVER LOGS AT \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
   info "ECLIPSE CHE: SERVER BOOTING..."
-  wait_until_server_is_booted 20
+  wait_until_server_is_booted 60
 
   if server_is_booted; then
     info "ECLIPSE CHE: BOOTED AND REACHABLE"
@@ -63,10 +63,14 @@ stop_che_server() {
     info "-------------------------------------------------------"
   else
     info "ECLIPSE CHE: STOPPING SERVER..."
-    docker exec ${CHE_SERVER_CONTAINER_NAME} /home/user/che/bin/che.sh -c stop > /dev/null 2>&1
-    sleep 5
+    docker exec ${CHE_SERVER_CONTAINER_NAME} /home/user/che/bin/che.sh -c -s:uid stop > /dev/null
+    wait_until_container_is_stopped 60
+    if che_container_is_running; then
+      error_exit "ECLIPSE CHE: Timeout waiting Che container to stop."
+    fi
+
     info "ECLIPSE CHE: REMOVING CONTAINER"
-    docker rm -f ${CHE_SERVER_CONTAINER_NAME} > /dev/null 2>&1
+    docker rm ${CHE_SERVER_CONTAINER_NAME} > /dev/null
     info "ECLIPSE CHE: STOPPED"
   fi
 }
@@ -90,23 +94,32 @@ update_che_server() {
 
 print_debug_info() {
   debug "---------------------------------------"
-  debug "---------  CHE DEBUG INFO   -----------"
+  debug "---------  CHE DEBUG INFO  ------------"
   debug "---------------------------------------"
   debug ""
+  debug "---------  PLATFORM INFO  -------------"
   debug "DOCKER_INSTALL_TYPE       = ${DOCKER_INSTALL_TYPE}"
+  debug "DOCKER_HOST_OS            = $(get_docker_host_os)"
+  debug "DOCKER_HOST_IP            = $(get_docker_host_ip)"
+  debug "DOCKER_DAEMON_VERSION     = $(get_docker_daemon_version)"
   debug ""
-  debug "CHE_SERVER_CONTAINER_NAME = ${CHE_SERVER_CONTAINER_NAME}"
-  debug "CHE_SERVER_IMAGE_NAME     = ${CHE_SERVER_IMAGE_NAME}"
   debug ""
-  VAL=$(if che_container_exist;then echo "YES"; else echo "NO"; fi)
-  debug "CHE CONTAINER EXISTS?     ${VAL}"
-  VAL=$(if che_container_is_running;then echo "YES"; else echo "NO"; fi)
-  debug "CHE CONTAINER IS RUNNING? ${VAL}"
-  VAL=$(if che_container_is_stopped;then echo "YES"; else echo "NO"; fi)
-  debug "CHE CONTAINER IS STOPPED? ${VAL}"
-  VAL=$(if server_is_booted;then echo "YES"; else echo "NO"; fi)
-  debug "CHE SERVER IS BOOTED?     ${VAL}"
+  debug "--------- CHE INSTANCE INFO  ----------" 
+  debug "CHE CONTAINER EXISTS      = $(che_container_exist && echo "YES" || echo "NO")"
+  debug "CHE CONTAINER STATUS      = $(che_container_is_running && echo "running" || echo "stopped")"
+  if che_container_is_running; then
+    debug "CHE SERVER STATUS         = $(server_is_booted && echo "running" || echo "stopped")"
+    debug "CHE IMAGE                 = $(get_che_container_image_name)"
+    debug "CHE SERVER CONTAINER ID   = $(get_che_server_container_id)"
+    debug "CHE CONF FOLDER           = $(get_che_container_conf_folder)"
+    debug "CHE DATA FOLDER           = $(get_che_container_data_folder)"
+    debug "CHE DASHBOARD URL         = http://${CHE_HOSTNAME}:${CHE_PORT}"
+    debug "CHE API URL               = http://${CHE_HOSTNAME}:${CHE_PORT}/api"
+    debug 'CHE LOGS                  = run `docker logs -f '${CHE_SERVER_CONTAINER_NAME}'`'
+  fi
   debug ""
+  debug ""
+  debug "----  CURRENT COMMAND LINE OPTIONS  ---" 
   debug "CHE_PORT                  = ${CHE_PORT}"
   debug "CHE_VERSION               = ${CHE_VERSION}"
   debug "CHE_RESTART_POLICY        = ${CHE_RESTART_POLICY}"
@@ -117,6 +130,8 @@ print_debug_info() {
   debug "CHE_DATA_FOLDER           = ${CHE_DATA_FOLDER}"
   debug "CHE_CONF_FOLDER           = ${CHE_CONF_FOLDER:-not set}"
   debug "CHE_LOCAL_BINARY          = ${CHE_LOCAL_BINARY:-not set}"
+  debug "CHE_SERVER_CONTAINER_NAME = ${CHE_SERVER_CONTAINER_NAME}"
+  debug "CHE_SERVER_IMAGE_NAME     = ${CHE_SERVER_IMAGE_NAME}"
   debug ""
   debug "---------------------------------------"
   debug "---------------------------------------"

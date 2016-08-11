@@ -26,6 +26,7 @@ import java.util.List;
  * GWT Client for Workspace Service.
  *
  * @author Yevhenii Voevodin
+ * @author Igor Vinokur
  */
 public interface WorkspaceServiceClient {
 
@@ -116,10 +117,14 @@ public interface WorkspaceServiceClient {
      *         workspace ID
      * @param envName
      *         the name of the workspace environment that should be used for start
+     * @param restore
+     *         if <code>true</code> workspace will be restored from snapshot if snapshot exists,
+     *         if <code>false</code> workspace will not be restored from snapshot
+     *         even if auto-restore is enabled and snapshot exists
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#startById(String, String, Boolean, String)
      */
-    Promise<WorkspaceDto> startById(String id, String envName);
+    Promise<WorkspaceDto> startById(String id, String envName, boolean restore);
 
     /**
      * Stops running workspace.
@@ -276,17 +281,4 @@ public interface WorkspaceServiceClient {
      */
     Promise<Void> createSnapshot(String workspaceId);
 
-    /**
-     * Recovers workspace from snapshot.
-     *
-     * @param workspaceId
-     *         workspace ID
-     * @param envName
-     *         the name of the workspace environment to recover from
-     * @param accountId
-     *         the account id related to this operation
-     * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
-     * @see WorkspaceService#recoverWorkspace(String, String, String)
-     */
-    Promise<WorkspaceDto> recoverWorkspace(String workspaceId, String envName, String accountId);
 }
