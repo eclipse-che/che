@@ -17,8 +17,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -64,33 +62,35 @@ public class OpenFileInEditorHelper {
             return;
         }
 
-        appContext.getWorkspaceRoot().getFile(filePath).then(new Operation<Optional<File>>() {
-            @Override
-            public void apply(Optional<File> file) throws OperationException {
-                if (file.isPresent()) {
-                    selectNode();
-                }
-            }
-        }).then(new Operation<Optional<File>>() {
-            @Override
-            public void apply(Optional<File> file) throws OperationException {
-                if (file.isPresent()) {
-                    openNode(selectionRange);
-                }
-            }
-        });
+        appContext.getWorkspaceRoot().getFile(filePath).then(openNode(selectionRange));
+
+//                  .then(new Operation<Optional<File>>() {
+//            @Override
+//            public void apply(Optional<File> file) throws OperationException {
+//                if (file.isPresent()) {
+//                    selectNode();
+//                }
+//            }
+//        }).then(new Operation<Optional<File>>() {
+//            @Override
+//            public void apply(Optional<File> file) throws OperationException {
+//                if (file.isPresent()) {
+//                    openNode(selectionRange);
+//                }
+//            }
+//        });
     }
 
     public void openFile(String filePath) {
         openFile(filePath, null);
     }
 
-    private Function<Node, Node> openNode(final TextRange selectionRange) {
-        return new Function<Node, Node>() {
+    private Function<Optional<File>, Optional<File>> openNode(final TextRange selectionRange) {
+        return new Function<Optional<File>, Optional<File>>() {
             @Override
-            public Node apply(Node node) {
-                if (node instanceof VirtualFile) {
-                    openFile((VirtualFile)node, selectionRange);
+            public Optional<File> apply(Optional<File> node) {
+                if(node.isPresent()){
+                    openFile(node.get(), selectionRange);
                 }
                 return node;
             }

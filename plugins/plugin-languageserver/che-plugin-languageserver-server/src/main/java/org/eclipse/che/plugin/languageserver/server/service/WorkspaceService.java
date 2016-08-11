@@ -56,7 +56,7 @@ public class WorkspaceService {
     public List<? extends SymbolInformation> documentSymbol(WorkspaceSymbolParamsDTO workspaceSymbolParams) throws ExecutionException,
                                                                                                                    InterruptedException,
                                                                                                                    LanguageServerException {
-        LanguageServer server = getServer(workspaceSymbolParams.getFileUri());
+        LanguageServer server = getServer(TextDocumentService.prefixURI(workspaceSymbolParams.getFileUri()));
         if (server == null) {
             return emptyList();
         }
