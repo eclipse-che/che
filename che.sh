@@ -253,22 +253,32 @@ get_list_of_che_system_environment_variables() {
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
   DOCKER_ENV="tmp"
-  env | grep CHE_ >> $DOCKER_ENV
+  RETURN=""
+
+  CHE_VARIABLES=$(env | grep CHE_)
+
+  if [ ! -z ${CHE_VARIABLES+x} ]; then
+    env | grep CHE_ >> $DOCKER_ENV
+    RETURN="--env-file=$DOCKER_ENV"
+  fi
 
   # Add in known proxy variables
   if [ ! -z ${http_proxy+x} ]; then
     echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
+    RETURN="--env-file=$DOCKER_ENV"
   fi
 
   if [ ! -z ${https_proxy+x} ]; then
     echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
+    RETURN="--env-file=$DOCKER_ENV"
   fi
 
   if [ ! -z ${no_proxy+x} ]; then
     echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
+    RETURN="--env-file=$DOCKER_ENV"
   fi
 
-  echo $DOCKER_ENV
+  echo $RETURN
 }
 
 check_current_image_and_update_if_not_found() {
@@ -287,16 +297,13 @@ execute_che_launcher() {
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
 
   info "ECLIPSE CHE: LAUNCHING LAUNCHER"
-
-  ENV_FILE=$(get_list_of_che_system_environment_variables)
-
   docker_exec run -t --rm --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    --env-file="${ENV_FILE}" \
+    $(get_list_of_che_system_environment_variables) \
     "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
 
   # Remove temporary file
-  rm -rf $ENV_FILE
+  rm -rf "tmp" > /dev/null 2>&1
 }
 
 execute_che_file() {
