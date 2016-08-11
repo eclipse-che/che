@@ -252,11 +252,7 @@ get_che_hostname() {
 get_list_of_che_system_environment_variables() {
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
-  if [ is_native ]; then
-       DOCKER_ENV=$(mktemp)
-  else
-       DOCKER_ENV=$(mktemp docker-run-env.XXX)
-  fi
+  DOCKER_ENV="tmp"
   env | grep CHE_ >> $DOCKER_ENV
 
   # Add in known proxy variables
@@ -296,7 +292,7 @@ execute_che_launcher() {
 
   docker_exec run -t --rm --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    --env-file=$ENV_FILE \
+    --env-file="${ENV_FILE}" \
     "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
 
   # Remove temporary file
