@@ -53,7 +53,7 @@ init_global_variables() {
   CHE_TEST_CONTAINER_NAME="che-test"
 
   # User configurable variables
-  DEFAULT_CHE_VERSION="nightly"
+  DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
 
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
@@ -457,7 +457,7 @@ run_connectivity_tests() {
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                codenvy/che-server:nightly \
+                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
@@ -471,7 +471,7 @@ run_connectivity_tests() {
   ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                codenvy/che-server:nightly \
+                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
