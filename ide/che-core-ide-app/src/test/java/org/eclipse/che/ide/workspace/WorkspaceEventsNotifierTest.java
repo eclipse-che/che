@@ -37,7 +37,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
-import org.eclipse.che.ide.api.workspace.event.EnvironmentStatusChangedEvent;
+import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
@@ -333,7 +333,7 @@ public class WorkspaceEventsNotifierTest {
         workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
         workspaceEventsNotifier.environmentStatusSubscriptionHandler.onMessageReceived(machineStatusEvent);
 
-        verify(eventBus).fireEvent(Matchers.<EnvironmentStatusChangedEvent>anyObject());
+        verify(eventBus).fireEvent(Matchers.<MachineStatusChangedEvent>anyObject());
     }
 
     @Test
