@@ -52,10 +52,6 @@ get_che_launcher_container_id() {
 }
 
 get_che_launcher_version() {
-  LAUNCHER_CONTAINER_ID=$(get_che_launcher_container_id)
-  LAUNCHER_IMAGE_NAME=$(docker inspect --format='{{.Config.Image}}' "${LAUNCHER_CONTAINER_ID}")
-  LAUNCHER_IMAGE_VERSION=$(echo "${LAUNCHER_IMAGE_NAME}" | cut -d : -f2 -s)
-
   if [ -n "${LAUNCHER_IMAGE_VERSION}" ]; then
     echo "${LAUNCHER_IMAGE_VERSION}"
   else
@@ -72,7 +68,6 @@ is_boot2docker() {
 }
 
 has_docker_for_windows_ip() {
-  ETH0_ADDRESS=$(docker run --net host alpine /bin/sh -c "ifconfig eth0" | grep "inet addr:" | cut -d: -f2 | cut -d" " -f1)
   if [ "${ETH0_ADDRESS}" = "10.0.75.2" ]; then
     return 0
   else
@@ -140,22 +135,15 @@ get_docker_install_type() {
 get_docker_host_ip() {
   case $(get_docker_install_type) in
    boot2docker)
-     NETWORK_IF="eth1"
+     echo $ETH1_ADDRESS
    ;;
    native)
-     NETWORK_IF="docker0"
+     echo $DOCKER0_ADDRESS
    ;;
    *)
-     NETWORK_IF="eth0"
+     echo $ETH0_ADDRESS
    ;;
   esac
-
-  docker run --rm --net host \
-            alpine sh -c \
-            "ip a show ${NETWORK_IF}" | \
-            grep 'inet ' | \
-            cut -d/ -f1 | \
-            awk '{ print $2}'
 }
 
 get_docker_host_os() {
@@ -169,7 +157,7 @@ get_docker_daemon_version() {
 get_che_hostname() {
   INSTALL_TYPE=$(get_docker_install_type)
   if [ "${INSTALL_TYPE}" = "boot2docker" ]; then
-    get_docker_host_ip
+    echo $DEFAULT_DOCKER_HOST_IP
   else
     echo "localhost"
   fi
