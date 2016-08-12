@@ -50,9 +50,6 @@ public interface ChangedListView extends View<ChangedListView.ActionDelegate> {
          */
         void onNodeSelected(@NotNull Node node);
 
-        /** Performs any action in response to the user do not have any selected node. */
-        void onNodeNotSelected();
-
         /** Performs any actions appropriate in response to the user double clicked on the file node. */
         void onFileNodeDoubleClicked();
     }
