@@ -118,8 +118,9 @@ print_debug_info() {
     debug "CHE SERVER CONTAINER ID   = $(get_che_server_container_id)"
     debug "CHE CONF FOLDER           = $(get_che_container_conf_folder)"
     debug "CHE DATA FOLDER           = $(get_che_container_data_folder)"
-    debug "CHE DASHBOARD URL         = http://${CHE_HOSTNAME}:${CHE_PORT}"
-    debug "CHE API URL               = http://${CHE_HOSTNAME}:${CHE_PORT}/api"
+    CURRENT_CHE_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "8080/tcp") 0).HostPort }}' ${CHE_SERVER_CONTAINER_NAME})
+    debug "CHE DASHBOARD URL         = http://${DEFAULT_CHE_HOSTNAME}:${CURRENT_CHE_PORT}"  
+    debug "CHE API URL               = http://${DEFAULT_CHE_HOSTNAME}:${CURRENT_CHE_PORT}/api"
     debug 'CHE LOGS                  = run `docker logs -f '${CHE_SERVER_CONTAINER_NAME}'`'
   fi
   debug ""
