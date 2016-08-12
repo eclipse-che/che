@@ -31,6 +31,17 @@ init_global_variables() {
                                                             grep "inet addr:" | \
                                                             cut -d: -f2 | \
                                                             cut -d" " -f1)
+
+  ETH1_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig eth1" | \
+                                                            grep "inet addr:" | \
+                                                            cut -d: -f2 | \
+                                                            cut -d" " -f1)
+
+  DOCKER0_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig docker0" | \
+                                                              grep "inet addr:" | \
+                                                              cut -d: -f2 | \
+                                                              cut -d" " -f1)
+
   # Used to self-determine container version
   LAUNCHER_CONTAINER_ID=$(get_che_launcher_container_id)
   LAUNCHER_IMAGE_NAME=$(docker inspect --format='{{.Config.Image}}' "${LAUNCHER_CONTAINER_ID}")

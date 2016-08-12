@@ -135,22 +135,15 @@ get_docker_install_type() {
 get_docker_host_ip() {
   case $(get_docker_install_type) in
    boot2docker)
-     NETWORK_IF="eth1"
+     echo $ETH1_ADDRESS
    ;;
    native)
-     NETWORK_IF="docker0"
+     echo $DOCKER0_ADDRESS
    ;;
    *)
-     NETWORK_IF="eth0"
+     echo $ETH0_ADDRESS
    ;;
   esac
-
-  docker run --rm --net host \
-            alpine sh -c \
-            "ip a show ${NETWORK_IF}" | \
-            grep 'inet ' | \
-            cut -d/ -f1 | \
-            awk '{ print $2}'
 }
 
 get_docker_host_os() {
