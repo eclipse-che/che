@@ -2,7 +2,8 @@
 
 ## Build Docker container
 ```
-$ build-docker-image.sh
+$ build.sh  (on Unix)
+> build.bat (on Windows)
 ```
 
 ## Run container

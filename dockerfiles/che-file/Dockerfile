@@ -4,22 +4,14 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 #
+# Contributors:
+#   Codenvy, S.A. - Initial implementation
+#
 # Prerequisite : typescript library compiled
 # see ../lib/typescript/README.md folder
 #
-# To build, see README.md
-#
-# To use:
-#  `docker run -v /var/run/docker.sock:/var/run/docker.sock \
-#              -v "$PWD":"$PWD" --rm codenvy/che-file \
-#              $PWD <init|up>`
-# 
-#  where [COMMAND]:
-#    init    -- Initialize configuration files for this directory
-#    up      -- Launch workspace, starting Che server, if necessary
-#    down    -- Stop the Che server
-#    status  -- Provide status of what is in the current directory
-#
+# To build and run, see README.md
+
 FROM mhart/alpine-node
 
 ENV DOCKER_BUCKET get.docker.com

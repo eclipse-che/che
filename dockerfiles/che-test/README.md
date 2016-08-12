@@ -2,10 +2,22 @@
 
 ## Build container
 ```
-$ build-docker-image.sh
+$ build.sh  (on Unix)
+> build.bat (on Windows)
 ```
 
-## Run container
+## Run a test
 ```
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock codenvy/che-test <post-check> [URL of Che/Codenvy] [login] [password]
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock codenvy/che-test <name-of-test>
 ```
+
+## Get available tests
+```
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock codenvy/che-test
+```
+
+## Get help on a test
+```
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock codenvy/che-test <name-of-test> --help
+```
+
