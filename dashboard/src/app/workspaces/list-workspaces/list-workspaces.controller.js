@@ -176,10 +176,11 @@ export class ListWorkspacesCtrl {
     if (this.isBulkChecked) {
       this.deselectAllWorkspaces();
       this.isBulkChecked = false;
-      return;
+    } else {
+      this.selectAllWorkspaces();
+      this.isBulkChecked = true;
     }
-    this.selectAllWorkspaces();
-    this.isBulkChecked = true;
+    this.updateSelectedStatus();
   }
 
   /**
@@ -295,5 +296,4 @@ export class ListWorkspacesCtrl {
     return this.$mdDialog.show(confirm);
   }
 
-;
 }
