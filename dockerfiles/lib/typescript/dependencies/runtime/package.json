@@ -6,6 +6,7 @@
   "author": "Florent Benoit",
   "license": "EPL-1.0",
   "devDependencies": {
+    "reflect-metadata": "^0.1.8",
     "websocket": "1.0.23"
   }
 }
