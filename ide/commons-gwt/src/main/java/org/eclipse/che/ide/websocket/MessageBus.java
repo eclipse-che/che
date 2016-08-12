@@ -174,6 +174,18 @@ public interface MessageBus extends MessageReceivedHandler {
     void unsubscribe(String channel, MessageHandler handler) throws WebSocketException;
 
     /**
+     * Unsubscribes a previously subscribed handler listening on the specified channel ignoring errors.
+     * If it's the last unsubscribe to a channel, a message is sent to the server to
+     * unsubscribe the client for that channel.
+     *
+     * @param channel
+     *         channel identifier
+     * @param handler
+     *         {@link MessageHandler} to unsubscribe
+     */
+    void unsubscribeSilently(String channel, MessageHandler handler);
+
+    /**
      * Check if a provided handler is subscribed to a provided channel or not.
      *
      * @param handler

@@ -59,8 +59,6 @@ public class SshCategoryPresenterTest {
     @Mock
     private DtoFactory                  dtoFactory;
     @Mock
-    private DtoUnmarshallerFactory      dtoUnmarshallerFactory;
-    @Mock
     private DialogFactory               dialogFactory;
     @Mock
     private NotificationManager         notificationManager;
@@ -74,8 +72,6 @@ public class SshCategoryPresenterTest {
     private MachineServiceClient        machineService;
     @Mock
     private EventBus                    eventBus;
-    @Mock
-    private MessageBusProvider          messageBusProvider;
 
     //additional mocks
     @Mock
@@ -111,15 +107,13 @@ public class SshCategoryPresenterTest {
         arbitraryCategoryPresenter = new SshCategoryPresenter(sshView,
                                                               recipeServiceClient,
                                                               dtoFactory,
-                                                              dtoUnmarshallerFactory,
                                                               dialogFactory,
                                                               notificationManager,
                                                               machineLocale,
                                                               workspaceServiceClient,
                                                               appContext,
                                                               machineService,
-                                                              eventBus,
-                                                              messageBusProvider);
+                                                              eventBus);
         arbitraryCategoryPresenter.setTargetsTreeManager(targetsTreeManager);
         arbitraryCategoryPresenter.setCurrentSelection(target);
     }
@@ -173,7 +167,7 @@ public class SshCategoryPresenterTest {
         final String disconnectButtonTitle = "Disconnect";
         when(target.isConnected()).thenReturn(true);
 
-        arbitraryCategoryPresenter.updateButtons();
+        arbitraryCategoryPresenter.updateButtons(true);
 
         verify(sshView).setConnectButtonText(disconnectButtonTitle);
     }
@@ -183,7 +177,7 @@ public class SshCategoryPresenterTest {
         final String connectButtonTitle = "Connect";
         when(target.isConnected()).thenReturn(false);
 
-        arbitraryCategoryPresenter.updateButtons();
+        arbitraryCategoryPresenter.updateButtons(true);
 
         verify(sshView, times(2)).setConnectButtonText(connectButtonTitle);
     }
