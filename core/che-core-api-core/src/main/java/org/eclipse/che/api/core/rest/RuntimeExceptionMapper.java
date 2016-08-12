@@ -36,7 +36,7 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
 
     @Override
     public Response toResponse(RuntimeException exception) {
-        String errorMessage = exception.getLocalizedMessage();
+        final String errorMessage = exception.getLocalizedMessage();
         if (!isNullOrEmpty(errorMessage)) {
             LOG.error(errorMessage, exception);
             ServiceError serviceError = DtoFactory.newDto(ServiceError.class).withMessage(errorMessage);
