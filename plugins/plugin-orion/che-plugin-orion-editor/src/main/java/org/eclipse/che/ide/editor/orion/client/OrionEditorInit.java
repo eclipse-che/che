@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.editor.events.CompletionRequestHandler;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.events.TextChangeEvent;
 import org.eclipse.che.ide.api.editor.events.TextChangeHandler;
+import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
 import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
 import org.eclipse.che.ide.api.editor.keymap.KeyBindingAction;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
@@ -90,6 +91,7 @@ public class OrionEditorInit {
         configureAnnotationModel(documentHandle);
         configureCodeAssist(documentHandle);
         configureChangeInterceptors(documentHandle);
+        configureFormatter(textEditor);
         addQuickAssistKeyBinding();
     }
 
@@ -98,6 +100,14 @@ public class OrionEditorInit {
         if (reconciler != null) {
             reconciler.uninstall();
         }
+    }
+
+    private void configureFormatter(OrionEditorPresenter textEditor) {
+        ContentFormatter formatter = configuration.getContentFormatter();
+        if (formatter != null) {
+            formatter.install(textEditor);
+        }
+
     }
 
     /**
