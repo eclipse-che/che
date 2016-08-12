@@ -76,7 +76,7 @@ export class Workspace {
                     if (res.statusCode == 201) {
                         resolve(new WorkspaceDto(JSON.parse(data)));
                     } else {
-                        reject('Invalid response code');
+                        reject('create workspace: Invalid response code' + res.statusCode + ':' + data.toString());
                     }
                 });
             });
@@ -153,7 +153,7 @@ export class Workspace {
                         // workspace created, continue
                         resolve(new WorkspaceDto(JSON.parse(data)));
                     } else {
-                        reject('Invalid response code');
+                        reject('startWorkspace: Invalid response code' + res.statusCode + ':' + data.toString());
                     }
                 });
 
@@ -206,7 +206,7 @@ export class Workspace {
                         // workspace created, continue
                         resolve(new WorkspaceDto(JSON.parse(data)));
                     } else {
-                        reject('Invalid response code');
+                        reject('get workspace: Invalid response code' + res.statusCode + ':' + data.toString());
                     }
                 });
 

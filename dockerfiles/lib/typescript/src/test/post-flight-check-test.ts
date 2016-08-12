@@ -11,23 +11,32 @@
 
 
 // imports
-import {Workspace, CreateWorkspaceConfig} from './workspace';
-import {WorkspaceDto} from './dto/workspacedto';
-import {Websocket} from './websocket';
-import {MessageBus} from './messagebus';
-import {WorkspaceEventMessageBusSubscriber} from './workspace-event-subscriber';
-import {MessageBusSubscriber} from './messagebus-subscriber';
-import {WorkspaceDisplayOutputMessageBusSubscriber} from './workspace-log-output-subscriber';
-import {AuthData} from "./auth-data";
-import {Log} from "./log";
-
+import {Workspace, CreateWorkspaceConfig} from '../workspace';
+import {WorkspaceDto} from '../dto/workspacedto';
+import {Websocket} from '../websocket';
+import {MessageBus} from '../messagebus';
+import {WorkspaceEventMessageBusSubscriber} from '../workspace-event-subscriber';
+import {MessageBusSubscriber} from '../messagebus-subscriber';
+import {WorkspaceDisplayOutputMessageBusSubscriber} from '../workspace-log-output-subscriber';
+import {AuthData} from "../auth-data";
+import {Log} from "../log";
+import {Parameter, ParameterType} from "../parameter/parameter";
+import {ArgumentProcessor} from "../parameter/argument-processor";
 
 /**
  * This class is managing a post-check operation by creating a workspace, starting it and displaying the log data.
  * @author Florent Benoit
  */
-export class PostCheck {
+export class PostFlightCheckTest {
 
+    @Parameter({names: ["-q", "--quiet"], description: "Run in quiet mode for this test."})
+    isQuiet : boolean = false;
+
+    @Parameter({names: ["-u", "--user"], description: "Defines the user to be used"})
+    username : string;
+
+    @Parameter({names: ["-w", "--password"], description: "Defines the password to be used"})
+    password : string;
 
     websocket: Websocket;
     authData: AuthData;
@@ -35,25 +44,28 @@ export class PostCheck {
     promiseAuth: Promise<any>;
 
     constructor(args:Array<string>) {
+        let updatedArgs = ArgumentProcessor.inject(this, args);
+
         this.websocket = new Websocket();
 
-        if (args.length > 0) {
-            this.authData = AuthData.parse(args[0]);
+        // get options from arguments
+        if (updatedArgs.length > 0) {
+            this.authData = AuthData.parse(updatedArgs[0]);
         } else {
             this.authData = new AuthData();
         }
 
         // if login and password, get a token
-        if (args.length >=3) {
+        if (this.username && this.password) {
             // get token from login/password
-            this.promiseAuth = this.authData.initToken(args[1], args[2]);
+            this.promiseAuth = this.authData.initToken(this.username, this.password);
         }
 
         this.workspace = new Workspace(this.authData);
     }
 
-
     run() : Promise<string> {
+
         Log.context = 'ECLIPSE CHE TEST/post-check';
         let p = new Promise<any>( (resolve, reject) => {
 

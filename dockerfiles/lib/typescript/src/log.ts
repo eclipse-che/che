@@ -17,7 +17,7 @@
 export class Log {
 
     static debugEnabled : boolean = false;
-    static context : string = 'ECLIPSE CHE';
+    static context : string = 'che';
     static logger : Log;
 
     BLUE: string = '\u001b[34m';
@@ -86,6 +86,11 @@ export class Log {
             consoleMethod(prefix, message);
         }
 
+    }
+
+
+    static enableDebug() : void {
+        Log.debugEnabled = true;
     }
 
 }

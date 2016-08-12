@@ -9,23 +9,15 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 
-export class WorkspaceDto {
+export class UserDto {
 
-    id: string;
     content: any;
 
 
-    constructor(workspaceObject: any) {
-        this.content = workspaceObject;
+    constructor(userObject: any) {
+        this.content = userObject;
     }
 
-    getId() : string {
-        return this.content.id;
-    }
-
-    getName() : string {
-        return this.content.config.name;
-    }
     getContent() : any {
         return this.content;
     }
