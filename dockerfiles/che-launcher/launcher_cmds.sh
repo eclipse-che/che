@@ -105,7 +105,7 @@ print_debug_info() {
   debug "---------  PLATFORM INFO  -------------"
   debug "DOCKER_INSTALL_TYPE       = ${DOCKER_INSTALL_TYPE}"
   debug "DOCKER_HOST_OS            = $(get_docker_host_os)"
-  debug "DOCKER_HOST_IP            = $(get_docker_host_ip)"
+  debug "DOCKER_HOST_IP            = ${DEFAULT_DOCKER_HOST_IP}"
   debug "DOCKER_DAEMON_VERSION     = $(get_docker_daemon_version)"
   debug ""
   debug ""
