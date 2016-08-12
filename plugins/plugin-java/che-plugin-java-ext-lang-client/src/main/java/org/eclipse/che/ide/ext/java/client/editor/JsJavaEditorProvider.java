@@ -16,7 +16,7 @@ import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
 
 import javax.inject.Inject;
 import java.util.logging.Logger;
@@ -53,8 +53,8 @@ public class JsJavaEditorProvider extends AbstractTextEditorProvider {
 
         final TextEditor textEditor = super.getEditor();
 
-        if (textEditor instanceof TextEditorPresenter) {
-            final TextEditorPresenter<?> editor = (TextEditorPresenter<?>)textEditor;
+        if (textEditor instanceof OrionEditorPresenter) {
+            final OrionEditorPresenter editor = (OrionEditorPresenter)textEditor;
             final TextEditorConfiguration configuration = configurationFactory.create(editor);
             editor.initialize(configuration);
             editor.addEditorUpdateAction(new EditorUpdateAction() {

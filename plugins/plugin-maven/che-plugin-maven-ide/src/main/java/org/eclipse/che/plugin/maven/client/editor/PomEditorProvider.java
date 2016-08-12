@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.editor.defaulteditor.AbstractTextEditorProvider;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
 
 /**
  * Creates editor for pom.xml file
@@ -46,8 +46,8 @@ public class PomEditorProvider extends AbstractTextEditorProvider {
     @Override
     public TextEditor getEditor() {
         TextEditor editor = super.getEditor();
-        if (editor instanceof TextEditorPresenter) {
-            PomEditorConfiguration configuration = configurationFactory.create((TextEditorPresenter<?>)editor);
+        if (editor instanceof OrionEditorPresenter) {
+            PomEditorConfiguration configuration = configurationFactory.create((OrionEditorPresenter)editor);
             editor.initialize(configuration);
         }
 

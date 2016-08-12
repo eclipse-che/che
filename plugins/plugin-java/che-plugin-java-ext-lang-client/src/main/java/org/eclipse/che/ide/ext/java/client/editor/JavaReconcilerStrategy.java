@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
 import org.eclipse.che.ide.api.editor.text.Region;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -43,17 +43,19 @@ import static org.eclipse.che.ide.project.ResolvingProjectStateHolder.ResolvingP
 
 public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingProjectStateListener {
 
-    private final TextEditorPresenter<?>              editor;
+    private final TextEditor                          editor;
     private final JavaCodeAssistProcessor             codeAssistProcessor;
     private final AnnotationModel                     annotationModel;
     private final SemanticHighlightRenderer           highlighter;
     private final ResolvingProjectStateHolderRegistry resolvingProjectStateHolderRegistry;
     private final JavaLocalizationConstant            localizationConstant;
     private final JavaReconcileClient                 client;
-    private       ResolvingProjectStateHolder         resolvingProjectStateHolder;
+
+    private EditorWithErrors            editorWithErrors;
+    private ResolvingProjectStateHolder resolvingProjectStateHolder;
 
     @AssistedInject
-    public JavaReconcilerStrategy(@Assisted @NotNull final TextEditorPresenter<?> editor,
+    public JavaReconcilerStrategy(@Assisted @NotNull final TextEditor editor,
                                   @Assisted final JavaCodeAssistProcessor codeAssistProcessor,
                                   @Assisted final AnnotationModel annotationModel,
                                   final JavaReconcileClient client,
@@ -67,11 +69,14 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
         this.highlighter = highlighter;
         this.resolvingProjectStateHolderRegistry = resolvingProjectStateHolderRegistry;
         this.localizationConstant = localizationConstant;
+        if (editor instanceof EditorWithErrors) {
+            this.editorWithErrors = ((EditorWithErrors)editor);
+        }
     }
 
     @Override
     public void setDocument(final Document document) {
-        highlighter.init(editor.getHasTextMarkers(), document);
+        highlighter.init(editor.getEditorWidget(), document);
 
         if (getFile() instanceof Resource) {
             final Optional<Project> project = ((Resource)getFile()).getRelatedProject();
@@ -152,7 +157,9 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
             problemRequester = (ProblemRequester)this.annotationModel;
             problemRequester.beginReporting();
         } else {
-            editor.setErrorState(EditorWithErrors.EditorState.NONE);
+            if (editorWithErrors != null) {
+                editorWithErrors.setErrorState(EditorWithErrors.EditorState.NONE);
+            }
             return;
         }
         try {
@@ -168,12 +175,14 @@ public class JavaReconcilerStrategy implements ReconcilingStrategy, ResolvingPro
                 }
                 problemRequester.acceptProblem(problem);
             }
-            if (error) {
-                editor.setErrorState(EditorWithErrors.EditorState.ERROR);
-            } else if (warning) {
-                editor.setErrorState(EditorWithErrors.EditorState.WARNING);
-            } else {
-                editor.setErrorState(EditorWithErrors.EditorState.NONE);
+            if(editorWithErrors != null) {
+                if (error) {
+                    editorWithErrors.setErrorState(EditorWithErrors.EditorState.ERROR);
+                } else if (warning) {
+                    editorWithErrors.setErrorState(EditorWithErrors.EditorState.WARNING);
+                } else {
+                    editorWithErrors.setErrorState(EditorWithErrors.EditorState.NONE);
+                }
             }
         } catch (final Exception e) {
             Log.error(getClass(), e);

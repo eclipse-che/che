@@ -17,14 +17,13 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorWithErrors;
-import org.eclipse.che.ide.api.editor.text.Region;
-import org.eclipse.che.ide.ext.java.client.editor.ProblemRequester;
-import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.reconciler.DirtyRegion;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilingStrategy;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.text.Region;
+import org.eclipse.che.ide.ext.java.client.editor.ProblemRequester;
+import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
 
@@ -39,13 +38,13 @@ import java.util.List;
 public class PomReconcilingStrategy implements ReconcilingStrategy {
 
     private final AnnotationModel          annotationModel;
-    private final TextEditorPresenter<?>   editor;
+    private final EditorWithErrors   editor;
     private final MavenServerServiceClient client;
     private       String                   pomPath;
 
     @Inject
     public PomReconcilingStrategy(@Assisted AnnotationModel annotationModel,
-                                  @Assisted @NotNull final TextEditorPresenter<?> editor,
+                                  @Assisted @NotNull final EditorWithErrors editor,
                                   MavenServerServiceClient client) {
         this.annotationModel = annotationModel;
         this.editor = editor;

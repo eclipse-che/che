@@ -27,15 +27,15 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.HasNotificationPanel;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.editor.texteditor.HasNotificationPanel;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
+import org.eclipse.che.ide.util.dom.Elements;
 import org.eclipse.che.plugin.maven.client.MavenLocalizationConstant;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 import org.eclipse.che.plugin.maven.client.service.MavenServerServiceClient;
@@ -78,8 +78,8 @@ public class ClassFileSourcesDownloader implements EditorOpenedEventHandler {
         if (file instanceof JarFileNode) {
             final JarFileNode jarFileNode = (JarFileNode)file;
             if (jarFileNode.isContentGenerated()) {
-                if (editor instanceof TextEditorPresenter) {
-                    final TextEditorPresenter presenter = (TextEditorPresenter)editor;
+                if (editor instanceof TextEditor) {
+                    final TextEditor presenter = (TextEditor)editor;
                     TextEditorPartView view = presenter.getView();
                     final DivElement divElement = Elements.createDivElement();
                     divElement.setClassName(resources.css().editorInfoPanel());

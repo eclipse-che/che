@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.editor.document;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.ImplementedBy;
 
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -35,6 +36,15 @@ public interface DocumentStorage {
      */
     void getDocument(@NotNull VirtualFile file,
                      @NotNull final DocumentCallback callback);
+
+    /**
+     * Retrieves the file content.
+     * @param file
+     *          the file
+     * @return the promise which should return content
+     */
+    @NotNull
+    Promise<String> getDocument(@NotNull VirtualFile file);
 
     /**
      * Saves the file content.
