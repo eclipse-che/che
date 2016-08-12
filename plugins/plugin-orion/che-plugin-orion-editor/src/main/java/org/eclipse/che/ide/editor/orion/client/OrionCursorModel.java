@@ -8,14 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.editor.texteditor;
+package org.eclipse.che.ide.editor.orion.client;
 
-import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.CursorActivityEvent;
 import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
+import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
-
+import org.eclipse.che.ide.api.editor.texteditor.CursorModelWithHandler;
 import org.eclipse.che.ide.util.ListenerManager;
 import org.eclipse.che.ide.util.ListenerManager.Dispatcher;
 import org.eclipse.che.ide.util.ListenerRegistrar.Remover;
@@ -25,13 +25,12 @@ import org.eclipse.che.ide.util.ListenerRegistrar.Remover;
  *
  * @author "Mickaël Leduque"
  */
-@Deprecated
-class TextEditorCursorModel implements CursorModelWithHandler, CursorActivityHandler {
+class OrionCursorModel implements CursorModelWithHandler, CursorActivityHandler {
 
     private final Document document;
     private final ListenerManager<CursorHandler> cursorHandlerManager = ListenerManager.create();
 
-    public TextEditorCursorModel(final Document document) {
+    public OrionCursorModel(final Document document) {
         this.document = document;
         this.document.addCursorHandler(this);
     }
@@ -58,7 +57,7 @@ class TextEditorCursorModel implements CursorModelWithHandler, CursorActivityHan
         final TextPosition position = this.document.getCursorPosition();
 
 
-        cursorHandlerManager.dispatch(new Dispatcher<CursorModelWithHandler.CursorHandler>() {
+        cursorHandlerManager.dispatch(new Dispatcher<CursorHandler>() {
             @Override
             public void dispatch(CursorHandler listener) {
                 listener.onCursorChange(position.getLine(), position.getCharacter(), isExplicitChange);

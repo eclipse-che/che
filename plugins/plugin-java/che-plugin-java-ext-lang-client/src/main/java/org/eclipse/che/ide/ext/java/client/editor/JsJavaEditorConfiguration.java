@@ -24,7 +24,7 @@ import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerFactory;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +47,7 @@ public class JsJavaEditorConfiguration extends DefaultTextEditorConfiguration {
     private final ContentFormatter                 contentFormatter;
 
     @AssistedInject
-    public JsJavaEditorConfiguration(@Assisted final TextEditorPresenter<?> editor,
+    public JsJavaEditorConfiguration(@Assisted final TextEditor editor,
                                      final JavaCodeAssistProcessorFactory codeAssistProcessorFactory,
                                      final JavaQuickAssistProcessorFactory quickAssistProcessorFactory,
                                      final ReconcilerFactory reconcilerFactory,

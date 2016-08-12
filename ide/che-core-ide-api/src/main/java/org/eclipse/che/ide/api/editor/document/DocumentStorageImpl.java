@@ -10,16 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.document;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.util.loging.Log;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import javax.validation.constraints.NotNull;
 
@@ -58,6 +60,11 @@ public class DocumentStorageImpl implements DocumentStorage {
                 Log.error(DocumentStorageImpl.class, "Could not retrieve document (" + file.getLocation() + ").", arg.getCause());
             }
         });
+    }
+
+    @Override
+    public Promise<String> getDocument(@NotNull VirtualFile file) {
+        return file.getContent();
     }
 
     @Override

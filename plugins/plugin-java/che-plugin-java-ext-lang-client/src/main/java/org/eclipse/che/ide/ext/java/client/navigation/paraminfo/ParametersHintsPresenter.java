@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -25,7 +26,6 @@ import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.model.MethodParameters;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class ParametersHintsPresenter {
      * @param activeEditor
      *         active editor which contains method or constructor for which parameters will be displayed
      */
-    public void show(final TextEditorPresenter activeEditor) {
+    public void show(final TextEditor activeEditor) {
         final int offset = activeEditor.getCursorOffset();
 
         if (!isCursorInRightPlace(activeEditor, offset)) {
@@ -92,7 +92,7 @@ public class ParametersHintsPresenter {
 
     }
 
-    private boolean isCursorInRightPlace(TextEditorPresenter activeEditor, int offset) {
+    private boolean isCursorInRightPlace(TextEditor activeEditor, int offset) {
         Document document = activeEditor.getDocument();
 
         int lineIndex = document.getLineAtOffset(offset);
@@ -104,7 +104,7 @@ public class ParametersHintsPresenter {
         return contentRange.contains(")");
     }
 
-    private int getLineStartOffset(TextEditorPresenter activeEditor, int offset) {
+    private int getLineStartOffset(TextEditor activeEditor, int offset) {
         Document document = activeEditor.getDocument();
         int lineIndex = document.getLineAtOffset(offset);
         return document.getLineStart(lineIndex);
