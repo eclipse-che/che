@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.editor.texteditor;
 
 import com.google.common.base.Optional;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -27,6 +28,8 @@ import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
@@ -104,7 +107,10 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 /**
  * Presenter part for the editor implementations.
+ *
+ * @deprecated use {@link TextEditor} instead
  */
+@Deprecated
 public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorPresenter implements TextEditor,
                                                                                                     FileEventHandler,
                                                                                                     UndoableEditor,
@@ -127,7 +133,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     private final DocumentStorage             documentStorage;
     private final EditorLocalizationConstants constant;
     private final EditorWidgetFactory<T>      editorWidgetFactory;
-    private final EditorModule<T>             editorModule;
+    private final EditorModule             editorModule;
     private final TextEditorPartView          editorView;
     private final EventBus                    generalEventBus;
     private final FileTypeIdentifier          fileTypeIdentifier;
@@ -155,6 +161,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     private List<String>             fileTypes;
     private TextPosition             cursorPosition;
     private HandlerRegistration      resourceChangeHandler;
+    private TextEditorInit<T> editorInit;
 
     @AssistedInject
     public TextEditorPresenter(final CodeAssistantFactory codeAssistantFactory,
@@ -164,7 +171,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
                                final DocumentStorage documentStorage,
                                final EditorLocalizationConstants constant,
                                @Assisted final EditorWidgetFactory<T> editorWidgetFactory,
-                               final EditorModule<T> editorModule,
+                               final EditorModule editorModule,
                                final TextEditorPartView editorView,
                                final EventBus eventBus,
                                final FileTypeIdentifier fileTypeIdentifier,
@@ -204,11 +211,20 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
             quickAssistant = quickAssistantFactory.createQuickAssistant(this);
             quickAssistant.setQuickAssistProcessor(processor);
         }
-        new TextEditorInit<T>(configuration,
-                              generalEventBus,
-                              this.codeAssistantFactory,
-                              this.quickAssistant,
-                              this).init();
+
+
+        Promise<Document> documentPromice = CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<Document, Throwable>() {
+            @Override
+            public void makeCall(Callback<Document, Throwable> callback) {
+
+            }
+        });
+        editorInit = new TextEditorInit<>(configuration,
+                                          generalEventBus,
+                                          this.codeAssistantFactory,
+                                          this.quickAssistant,
+                                          this);
+        editorInit.init();
 
         if (editorModule.isError()) {
             displayErrorPanel(constant.editorInitErrorMessage());
@@ -436,11 +452,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     @Override
     public void close(final boolean save) {
         this.documentStorage.documentClosed(this.document);
-        final Reconciler reconciler = configuration.getReconciler();
-        if (reconciler != null) {
-            reconciler.uninstall();
-        }
-
+        editorInit.uninstall();
         workspaceAgent.removePart(this);
     }
 
@@ -844,7 +856,8 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         this.editorWidget.setReadOnly(readOnly);
     }
 
-    protected EditorWidget getEditorWidget() {
+    @Override
+    public EditorWidget getEditorWidget() {
         return this.editorWidget;
     }
 

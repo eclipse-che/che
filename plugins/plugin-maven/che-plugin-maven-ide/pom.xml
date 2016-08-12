@@ -105,6 +105,10 @@
             <artifactId>che-plugin-maven-shared</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-orion-editor</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.vectomatic</groupId>
             <artifactId>lib-gwt-svg</artifactId>
         </dependency>

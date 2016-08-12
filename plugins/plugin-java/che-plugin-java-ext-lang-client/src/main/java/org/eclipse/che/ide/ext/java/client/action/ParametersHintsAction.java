@@ -16,10 +16,10 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.navigation.paraminfo.ParametersHintsPresenter;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
  * @author Dmitry Shnurenko
@@ -42,10 +42,10 @@ public class ParametersHintsAction extends JavaEditorAction {
     @Override
     public void actionPerformed(ActionEvent event) {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if (!(activeEditor instanceof TextEditorPresenter)) {
+        if (!(activeEditor instanceof TextEditor)) {
             return;
         }
 
-        parametersHintsPresenter.show((TextEditorPresenter)activeEditor);
+        parametersHintsPresenter.show((TextEditor)activeEditor);
     }
 }

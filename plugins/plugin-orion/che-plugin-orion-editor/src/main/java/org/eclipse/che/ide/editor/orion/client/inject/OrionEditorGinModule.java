@@ -16,15 +16,10 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 
 import org.eclipse.che.ide.api.editor.defaulteditor.EditorBuilder;
-import org.eclipse.che.ide.api.editor.texteditor.EditorModule;
 import org.eclipse.che.ide.api.editor.texteditor.EditorWidgetFactory;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenterFactory;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.editor.orion.client.ContentAssistWidgetFactory;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorBuilder;
-import org.eclipse.che.ide.editor.orion.client.OrionEditorModule;
-import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
 import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
 import org.eclipse.che.ide.requirejs.ModuleHolder;
@@ -39,16 +34,10 @@ public class OrionEditorGinModule extends AbstractGinModule {
         bind(EditorBuilder.class).to(OrionEditorBuilder.class);
 
         install(new GinFactoryModuleBuilder().build(new TypeLiteral<EditorWidgetFactory<OrionEditorWidget>>() {}));
-        bind(new TypeLiteral<EditorModule<OrionEditorWidget>>() {}).to(OrionEditorModule.class);
 
         bind(OrionCodeEditWidgetOverlay.class).toProvider(OrionCodeEditWidgetProvider.class);
 
         install(new GinFactoryModuleBuilder().build(ContentAssistWidgetFactory.class));
 
-        install(new GinFactoryModuleBuilder()
-                        .implement(new TypeLiteral<TextEditorPresenter<OrionEditorWidget>>() {
-                        }, OrionEditorPresenter.class)
-                        .build(new TypeLiteral<TextEditorPresenterFactory<OrionEditorWidget>>() {
-                        }));
     }
 }

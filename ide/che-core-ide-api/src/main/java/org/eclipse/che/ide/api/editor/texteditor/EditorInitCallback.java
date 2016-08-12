@@ -19,6 +19,7 @@ import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
  * Composite callback that waits for both the editor module initialization and the document content.
  * @param <T> the type of the editor widget
  */
+@Deprecated
 abstract class EditorInitCallback<T extends EditorWidget> implements DocumentCallback, EditorModule.EditorModuleReadyCallback {
 
     /** Loader used to wait for editor impl initialization. */

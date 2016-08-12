@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.events;
 
+import com.google.gwt.event.shared.GwtEvent;
+
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.EditorHandle;
 
-import com.google.gwt.event.shared.GwtEvent;
-
+@Deprecated
 public class DocumentReadyEvent extends GwtEvent<DocumentReadyHandler> {
 
     /** The type instance for this event. */
