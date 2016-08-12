@@ -38,7 +38,6 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import static org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper.createFromCallback;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -91,7 +90,7 @@ public class OpenFileAction extends Action implements PromisableAction {
                         actionCompletedCallback.onSuccess(null);
                     }
 
-                    eventBus.fireEvent(new FileEvent(optionalFile.get(), OPEN));
+                    eventBus.fireEvent(FileEvent.createOpenFileEvent(optionalFile.get()));
                 } else {
                     if (actionCompletedCallback != null) {
                         actionCompletedCallback.onFailure(null);

@@ -8,19 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.event;
+package org.eclipse.che.ide.part.editor;
 
-import com.google.gwt.event.shared.EventHandler;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 
 /**
- * Handles OpenFileEvent.
+ * The factory which creates instances of {@link EditorPartStack}.
  *
- * @author Nikolay Zamosenchuk
+ * @author Roman Nikitenko
  */
-public interface FileEventHandler extends EventHandler {
+public interface EditorPartStackFactory {
+
     /**
-     * @param event
-     *         OpenFileEvent
+     * Creates implementation of {@link EditorPartStack}.
+     *
+     * @return an instance of {@link EditorPartStack}
      */
-    void onFileOperation(FileEvent event);
+    EditorPartStack create();
 }

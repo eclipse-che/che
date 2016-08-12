@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.resources.File;
 import javax.validation.constraints.NotNull;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.getShortPath;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -53,7 +52,7 @@ public class RecentFileAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventBus.fireEvent(new FileEvent(file, OPEN));
+        eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
     }
 
     /**
