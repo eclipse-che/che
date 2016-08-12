@@ -10,12 +10,25 @@
  ******************************************************************************/
 package org.eclipse.che.ide.api.multisplitpanel;
 
+import com.google.gwt.event.dom.client.ClickHandler;
+
+import org.eclipse.che.ide.api.mvp.View;
+import org.vectomatic.dom.svg.ui.SVGResource;
+
 /**
  * //
  *
  * @author Artem Zatsarynnyi
  */
-public interface TabItem {
+public interface TabItem extends View<TabItem.ActionDelegate>, ClickHandler {
 
-    String getTitle();
+    SVGResource getIcon();
+
+    interface ActionDelegate {
+
+        void onTabClicked(TabItem tab);
+
+        /** Called just before the {@code tab} closes. */
+        void onTabClosing(TabItem tab);
+    }
 }

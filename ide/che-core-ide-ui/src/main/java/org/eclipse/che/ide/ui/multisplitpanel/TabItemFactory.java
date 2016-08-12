@@ -8,17 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  ******************************************************************************/
-package org.eclipse.che.ide.api.multisplitpanel;
+package org.eclipse.che.ide.ui.multisplitpanel;
 
-import com.google.gwt.user.client.ui.IsWidget;
+import org.eclipse.che.ide.api.multisplitpanel.TabItem;
 
 /**
- * Listener to be notified when some widget on some {@link SubPanel} is focused.
+ * //
  *
  * @author Artem Zatsarynnyi
  */
-public interface FocusListener {
+public interface TabItemFactory {
 
-    /** Invoked when a {@code widget} on a {@code panel} gains the focus. */
-    void focusGained(SubPanel panel, IsWidget widget);
+    TabItem createTabItem(String title);
 }

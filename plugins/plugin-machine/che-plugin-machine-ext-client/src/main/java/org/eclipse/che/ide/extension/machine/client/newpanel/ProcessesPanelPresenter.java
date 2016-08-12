@@ -54,7 +54,6 @@ import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
 import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -100,7 +99,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     private final Map<String, ProcessTreeNode>   machineNodes;
     private final Map<String, TerminalPresenter> terminals;
-    // Currently focused sub-panel.
     private       List<ProcessTreeNode>          rootNodes;
     private       ProcessTreeNode                rootNode;
     private       ProcessTreeNode                selectedTreeNode;
@@ -211,7 +209,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
-    public void onCloseTerminal(@NotNull ProcessTreeNode node) {
+    public void onCloseTerminal(ProcessTreeNode node) {
         String terminalId = node.getId();
         if (terminals.containsKey(terminalId)) {
             onStopProcess(node);
@@ -393,7 +391,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         return consoles.containsKey(commandId) && consoles.get(commandId).isFinished();
     }
 
-    protected void updateCommandOutput(@NotNull final String command, @NotNull OutputConsole outputConsole) {
+    protected void updateCommandOutput(final String command, OutputConsole outputConsole) {
         consoles.put(command, outputConsole);
         consoleCommands.put(outputConsole, command);
 
@@ -525,7 +523,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.setProcessesData(rootNode);
     }
 
-    private ProcessTreeNode findProcessTreeNodeById(@NotNull String id) {
+    private ProcessTreeNode findProcessTreeNodeById(String id) {
         for (ProcessTreeNode processTreeNode : rootNode.getChildren()) {
             if (id.equals(processTreeNode.getId())) {
                 return processTreeNode;

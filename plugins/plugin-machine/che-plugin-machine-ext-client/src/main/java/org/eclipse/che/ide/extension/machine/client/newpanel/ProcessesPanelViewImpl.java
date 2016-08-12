@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.multisplitpanel.CloseListener;
 import org.eclipse.che.ide.api.multisplitpanel.FocusListener;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanelFactory;
@@ -73,8 +74,9 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     private LinkedHashMap<String, ProcessTreeNode> processTreeNodes;
 
-    private Map<WidgetToShow, SubPanel> widget2Panels;
-    private Map<String, WidgetToShow> processWidgets;
+    private Map<WidgetToShow, SubPanel>    widget2Panels;
+    private Map<String, WidgetToShow>      processWidgets;
+    private Map<IsWidget, ProcessTreeNode> widget2TreeNodes;
 
     private SubPanel focusedSubPanel;
 
@@ -94,6 +96,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         processTreeNodes = new LinkedHashMap<>();
         widget2Panels = new HashMap<>();
         processWidgets = new HashMap<>();
+        widget2TreeNodes = new HashMap<>();
 
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
             @Override
@@ -117,8 +120,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public void onCloseProcessOutputClick(ProcessTreeNode node) {
-                ProcessTreeNode.ProcessNodeType type = node.getType();
-                switch (type) {
+                switch (node.getType()) {
                     case COMMAND_NODE:
                         delegate.onCloseCommandOutputClick(node);
                         break;
@@ -134,12 +136,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         processTree.setTreeEventHandler(new Tree.Listener<ProcessTreeNode>() {
             @Override
             public void onNodeAction(TreeNodeElement<ProcessTreeNode> node) {
-
             }
 
             @Override
             public void onNodeClosed(TreeNodeElement<ProcessTreeNode> node) {
-
             }
 
             @Override
@@ -149,17 +149,14 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public void onNodeDragStart(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {
-
             }
 
             @Override
             public void onNodeDragDrop(TreeNodeElement<ProcessTreeNode> node, MouseEvent event) {
-
             }
 
             @Override
             public void onNodeExpanded(TreeNodeElement<ProcessTreeNode> node) {
-
             }
 
             @Override
@@ -173,12 +170,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public void onRootDragDrop(MouseEvent event) {
-
             }
 
             @Override
             public void onKeyboard(KeyboardEvent event) {
-
             }
         });
 
@@ -187,7 +182,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         setContentWidget(uiBinder.createAndBindUi(this));
         navigationPanel.getElement().setTabIndex(0);
 
-        SubPanel subPanel = subPanelFactory.newPanel(this, null);
+        SubPanel subPanel = subPanelFactory.newPanel(null);
+        subPanel.setFocusListener(this);
         splitLayoutPanel.add(subPanel.getView());
         focusedSubPanel = subPanel;
 
@@ -253,8 +249,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
-    public void addProcessWidget(String processId, final IsWidget widget) {
-        WidgetToShow widgetToShow = new WidgetToShow() {
+    public void addProcessWidget(final String processId, final IsWidget widget) {
+        final WidgetToShow widgetToShow = new WidgetToShow() {
             @Override
             public IsWidget getWidget() {
                 return widget;
@@ -262,7 +258,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public String getTitle() {
-                return null;
+                return processId;
             }
 
             @Override
@@ -273,9 +269,25 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         widget2Panels.put(widgetToShow, focusedSubPanel);
 
-        focusedSubPanel.addWidget(widgetToShow);
+        focusedSubPanel.addWidget(widgetToShow, new CloseListener() {
+            @Override
+            public void tabClosed() {
+                ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
+
+                switch (treeNode.getType()) {
+                    case COMMAND_NODE:
+                        delegate.onCloseCommandOutputClick(treeNode);
+                        break;
+                    case TERMINAL_NODE:
+                        delegate.onCloseTerminal(treeNode);
+                        break;
+                }
+            }
+        });
 
         processWidgets.put(processId, widgetToShow);
+
+        widget2TreeNodes.put(widgetToShow.getWidget(), processTreeNodes.get(processId));
 
         showProcessOutput(processId);
     }
@@ -382,8 +394,9 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         WidgetToShow widgetToShow = processWidgets.get(processId);
         SubPanel subPanel = widget2Panels.get(widgetToShow);
-
-        subPanel.activateWidget(widgetToShow);
+        if (subPanel != null) {
+            subPanel.activateWidget(widgetToShow);
+        }
 
         activeProcessId = processId;
 
@@ -426,8 +439,11 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
-    public void focusGained(SubPanel subPanel) {
+    public void focusGained(SubPanel subPanel, IsWidget widget) {
         focusedSubPanel = subPanel;
+
+        ProcessTreeNode processTreeNode = widget2TreeNodes.get(widget);
+        selectNode(processTreeNode);
     }
 
     interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {

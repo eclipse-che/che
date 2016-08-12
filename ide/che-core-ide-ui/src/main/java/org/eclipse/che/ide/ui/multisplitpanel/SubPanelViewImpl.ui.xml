@@ -40,7 +40,7 @@
                     </g:FlowPanel>
                 </g:north>
                 <g:center>
-                    <g:DeckLayoutPanel ui:field="outputPanel"/>
+                    <g:DeckLayoutPanel ui:field="widgetsPanel"/>
                 </g:center>
             </g:DockLayoutPanel>
         </g:center>

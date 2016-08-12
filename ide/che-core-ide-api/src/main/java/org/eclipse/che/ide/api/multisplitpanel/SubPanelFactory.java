@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.che.ide.api.multisplitpanel;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /**
  * Factory for {@link SubPanel}.
  *
@@ -20,10 +22,8 @@ public interface SubPanelFactory {
     /**
      * Create new instance of {@link SubPanel}.
      *
-     * @param focusListener
-     *         listener that should be called on focusing {@link SubPanel}
      * @param parentPanel
      * @return new split panel that contains {@code widget}
      */
-    SubPanel newPanel(FocusListener focusListener, SubPanel parentPanel);
+    SubPanel newPanel(@Nullable SubPanel parentPanel);
 }

@@ -24,12 +24,23 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.api.multisplitpanel.TabItem;
+import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * //
  *
  * @author Artem Zatsarynnyi
  */
-public class SubPanelViewImpl extends Composite implements SubPanelView {
+public class SubPanelViewImpl extends Composite implements SubPanelView, TabItem.ActionDelegate {
+
+    private final TabItemFactory tabItemFactory;
+
+    private final Map<TabItem, WidgetToShow> tabs2Widgets;
+    private final Map<WidgetToShow, TabItem> widgets2Tabs;
 
     @UiField(provided = true)
     SplitLayoutPanel splitLayoutPanel;
@@ -50,15 +61,21 @@ public class SubPanelViewImpl extends Composite implements SubPanelView {
     Button closePaneButton;
 
     @UiField
-    DeckLayoutPanel outputPanel;
+    DeckLayoutPanel widgetsPanel;
 
     private ActionDelegate delegate;
 
-    private SubPanelView parent;
+    private SubPanelView parentPanel;
 
     @Inject
-    public SubPanelViewImpl(SubPanelViewImplUiBinder uiBinder) {
+    public SubPanelViewImpl(SubPanelViewImplUiBinder uiBinder, TabItemFactory tabItemFactory) {
+        this.tabItemFactory = tabItemFactory;
+
+        tabs2Widgets = new HashMap<>();
+        widgets2Tabs = new HashMap<>();
+
         splitLayoutPanel = new SplitLayoutPanel(5);
+
 
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -83,10 +100,10 @@ public class SubPanelViewImpl extends Composite implements SubPanelView {
             }
         });
 
-        outputPanel.addDomHandler(new ClickHandler() {
+        widgetsPanel.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                delegate.onFocused();
+                delegate.onWidgetFocused(widgetsPanel.getVisibleWidget());
             }
         }, ClickEvent.getType());
     }
@@ -115,19 +132,37 @@ public class SubPanelViewImpl extends Composite implements SubPanelView {
     }
 
     @Override
-    public void addWidget(IsWidget widget) {
-        outputPanel.setWidget(widget);
+    public void addWidget(WidgetToShow widget) {
+        TabItem tabItem = tabItemFactory.createTabItem(widget.getTitle());
+        tabItem.setDelegate(this);
+
+        tabs2Widgets.put(tabItem, widget);
+        widgets2Tabs.put(widget, tabItem);
+
+        tabsPanel.add(tabItem);
+        widgetsPanel.setWidget(widget.getWidget());
     }
 
     @Override
-    public void activateWidget(IsWidget widget) {
-        outputPanel.showWidget(widget.asWidget());
+    public void activateWidget(WidgetToShow widget) {
+        widgetsPanel.showWidget(widget.getWidget().asWidget());
+    }
+
+    @Override
+    public void removeWidget(WidgetToShow widget) {
+        TabItem tabItem = widgets2Tabs.remove(widget);
+        if (tabItem != null) {
+            tabsPanel.remove(tabItem);
+            widgetsPanel.remove(widget.getWidget());
+
+            tabs2Widgets.remove(tabItem);
+        }
     }
 
     @Override
     public void removeCentralPanel() {
         if (splitLayoutPanel.getWidgetCount() == 1) {
-            parent.removeChildSubPanel(this);
+            parentPanel.removeChildSubPanel(this);
             return;
         }
 
@@ -152,13 +187,25 @@ public class SubPanelViewImpl extends Composite implements SubPanelView {
     }
 
     @Override
-    public void setParent(SubPanelView w) {
-        parent = w;
+    public void setParentPanel(SubPanelView parentPanel) {
+        this.parentPanel = parentPanel;
     }
 
     @Override
-    public void removeWidget(IsWidget widget) {
-        outputPanel.remove(widget);
+    public void onTabClicked(TabItem tab) {
+        WidgetToShow widget = tabs2Widgets.get(tab);
+        if (widget != null) {
+            activateWidget(widget);
+            delegate.onWidgetFocused(widget.getWidget());
+        }
+    }
+
+    @Override
+    public void onTabClosing(TabItem tab) {
+        WidgetToShow widget = tabs2Widgets.get(tab);
+        if (widget != null) {
+            delegate.onWidgetRemoved(widget.getWidget());
+        }
     }
 
     interface SubPanelViewImplUiBinder extends UiBinder<Widget, SubPanelViewImpl> {

@@ -10,15 +10,13 @@
  ******************************************************************************/
 package org.eclipse.che.ide.api.multisplitpanel;
 
-import com.google.gwt.user.client.ui.IsWidget;
-
 /**
- * Listener to be notified when some widget on some {@link SubPanel} is focused.
+ * //
  *
  * @author Artem Zatsarynnyi
  */
-public interface FocusListener {
+public interface CloseListener {
 
-    /** Invoked when a {@code widget} on a {@code panel} gains the focus. */
-    void focusGained(SubPanel panel, IsWidget widget);
+    /** Invoked when a tab that contains widget is closed. */
+    void tabClosed();
 }

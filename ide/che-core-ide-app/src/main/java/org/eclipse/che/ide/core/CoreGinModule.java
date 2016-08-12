@@ -58,6 +58,8 @@ import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
+import org.eclipse.che.ide.api.multisplitpanel.SubPanelFactory;
+import org.eclipse.che.ide.api.multisplitpanel.TabItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
@@ -205,9 +207,10 @@ import org.eclipse.che.ide.ui.loaders.initialization.LoaderView;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderViewImpl;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelPresenter;
-import org.eclipse.che.ide.api.multisplitpanel.SubPanelFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelView;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelViewImpl;
+import org.eclipse.che.ide.ui.multisplitpanel.TabItemFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.TabItemWidget;
 import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.ui.toolbar.ToolbarView;
@@ -420,6 +423,8 @@ public class CoreGinModule extends AbstractGinModule {
         bind(SubPanelView.class).to(SubPanelViewImpl.class);
         install(new GinFactoryModuleBuilder().implement(SubPanel.class, SubPanelPresenter.class)
                                              .build(SubPanelFactory.class));
+        install(new GinFactoryModuleBuilder().implement(TabItem.class, TabItemWidget.class)
+                                             .build(TabItemFactory.class));
 
         install(new GinFactoryModuleBuilder().implement(ConsoleButton.class, ConsoleButtonImpl.class)
                                              .build(ConsoleButtonFactory.class));

@@ -14,34 +14,42 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.multisplitpanel.CloseListener;
 import org.eclipse.che.ide.api.multisplitpanel.FocusListener;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanelFactory;
 import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * //
  *
  * @author Artem Zatsarynnyi
  */
-public class SubPanelPresenter implements SubPanelView.ActionDelegate, SubPanel {
+public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate {
 
-    private final SubPanelView    view;
-    private final SubPanelFactory subPanelFactory;
-    private final FocusListener   focusListener;
+    private final SubPanelView                 view;
+    private final SubPanelFactory              subPanelFactory;
+    private final Map<IsWidget, CloseListener> closeListeners;
+
+    private FocusListener focusListener;
 
     @Inject
     public SubPanelPresenter(SubPanelView view,
                              SubPanelFactory subPanelFactory,
-                             @Assisted FocusListener focusListener,
-                             @Assisted SubPanel parentPanel) {
+                             @Assisted @Nullable SubPanel parentPanel) {
         this.view = view;
         this.subPanelFactory = subPanelFactory;
-        this.focusListener = focusListener;
+
+        closeListeners = new HashMap<>();
 
         view.setDelegate(this);
+
         if (parentPanel != null) {
-            view.setParent((SubPanelView)parentPanel.getView());
+            view.setParentPanel((SubPanelView)parentPanel.getView());
         }
     }
 
@@ -51,19 +59,34 @@ public class SubPanelPresenter implements SubPanelView.ActionDelegate, SubPanel 
     }
 
     @Override
-    public void onFocused() {
-        focusListener.focusGained(this);
+    public void setFocusListener(FocusListener listener) {
+        focusListener = listener;
+    }
+
+    @Override
+    public void onWidgetFocused(IsWidget widget) {
+        focusListener.focusGained(this, widget);
+    }
+
+    @Override
+    public void onWidgetRemoved(IsWidget widget) {
+        CloseListener listener = closeListeners.get(widget);
+        if (listener != null) {
+            listener.tabClosed();
+        }
     }
 
     @Override
     public void onSplitHorizontallyClicked() {
-        SubPanel subPanel = subPanelFactory.newPanel(focusListener, this);
+        SubPanel subPanel = subPanelFactory.newPanel(this);
+        subPanel.setFocusListener(focusListener);
         view.splitHorizontally(subPanel.getView());
     }
 
     @Override
     public void onSplitVerticallyClicked() {
-        SubPanel subPanel = subPanelFactory.newPanel(focusListener, this);
+        SubPanel subPanel = subPanelFactory.newPanel(this);
+        subPanel.setFocusListener(focusListener);
         view.splitVertically(subPanel.getView());
     }
 
@@ -73,17 +96,21 @@ public class SubPanelPresenter implements SubPanelView.ActionDelegate, SubPanel 
     }
 
     @Override
-    public void addWidget(WidgetToShow widget) {
-        view.addWidget(widget.getWidget());
+    public void addWidget(WidgetToShow widget, CloseListener closeListener) {
+        // TODO: just activate the widget if it's already exists on the panel
+
+        closeListeners.put(widget.getWidget(), closeListener);
+
+        view.addWidget(widget);
     }
 
     @Override
     public void activateWidget(WidgetToShow widget) {
-        view.activateWidget(widget.getWidget());
+        view.activateWidget(widget);
     }
 
     @Override
     public void removeWidget(WidgetToShow widget) {
-        view.removeWidget(widget.getWidget());
+        view.removeWidget(widget);
     }
 }
