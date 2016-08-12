@@ -5,25 +5,23 @@
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
 
-
-# return true if system is using boot2docker
-is_boot2docker() {
-  if uname -r | grep -q 'boot2docker'; then
-    return 0
-  else
-    return 1
+# define network interface variable
+NETWORK_IF=
+for i in $( ls /sys/class/net ); do
+  if [ ${i:0:3} = eth ]
+  then
+    NETWORK_IF=${i}
   fi
-}
+done
 
-# network interface to use to grab local ip
-NETWORK_IF="eth0"
-if is_boot2docker; then
-  NETWORK_IF="eth1"
+# if not found, throw error
+if test -z ${NETWORK_IF}
+  then
+    echo unable to find a eth* interface
+    exit 1
 fi
 
-# grab ip from the following command
 ip a show "${NETWORK_IF}" | \
             grep 'inet ' | \
             cut -d/ -f1 | \
             awk '{print $2}'
-
