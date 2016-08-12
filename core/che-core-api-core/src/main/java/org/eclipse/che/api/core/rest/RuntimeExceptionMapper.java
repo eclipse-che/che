@@ -24,7 +24,10 @@ import javax.ws.rs.ext.Provider;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
+ * Exception mapper that wrap RuntimeException message if it exists in to json.
+ *
  * @author Roman Nikitenko
+ * @author Sergii Kabashniuk
  */
 @Provider
 @Singleton
@@ -35,13 +38,16 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
     public Response toResponse(RuntimeException exception) {
         String errorMessage = exception.getLocalizedMessage();
         if (!isNullOrEmpty(errorMessage)) {
-            LOG.error(errorMessage);
+            LOG.error(errorMessage, exception);
             ServiceError serviceError = DtoFactory.newDto(ServiceError.class).withMessage(errorMessage);
             return Response.serverError()
                            .entity(DtoFactory.getInstance().toJson(serviceError))
                            .type(MediaType.APPLICATION_JSON)
                            .build();
+        } else {
+            LOG.error("RuntimeException occurred", exception);
         }
+
         return Response.serverError().build();
     }
 }
