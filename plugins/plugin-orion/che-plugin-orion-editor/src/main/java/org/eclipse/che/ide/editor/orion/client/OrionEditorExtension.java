@@ -15,19 +15,22 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.LinkElement;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.editor.texteditor.AbstractEditorModule.EditorInitializer;
-import org.eclipse.che.ide.api.editor.texteditor.AbstractEditorModule.InitializerCallback;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
+import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextThemeOverlay;
 import org.eclipse.che.ide.requirejs.RequireJsLoader;
 import org.eclipse.che.ide.requirejs.RequirejsErrorHandler.RequireError;
+import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
@@ -43,43 +46,40 @@ public class OrionEditorExtension {
     /** The logger. */
     private static final Logger LOG = Logger.getLogger(OrionEditorExtension.class.getSimpleName());
 
-    private final NotificationManager    notificationManager;
-    private final RequireJsLoader        requireJsLoader;
-    private final OrionResource          orionResource;
+    private final NotificationManager notificationManager;
+    private final RequireJsLoader     requireJsLoader;
+    private final OrionResource       orionResource;
+    private final MessageLoader       loader;
+    private final String              waitEditorMessage;
 
     private boolean initFailedWarnedOnce = false;
 
     @Inject
     public OrionEditorExtension(final NotificationManager notificationManager,
                                 final RequireJsLoader requireJsLoader,
-                                final OrionEditorModule editorModule,
-                                final OrionResource orionResource) {
+                                final EditorInitializePromiseHolder editorModule,
+                                final OrionResource orionResource,
+                                final LoaderFactory loaderFactory,
+                                final EditorLocalizationConstants constants) {
         this.notificationManager = notificationManager;
         this.requireJsLoader = requireJsLoader;
         this.orionResource = orionResource;
+        this.loader = loaderFactory.newLoader();
+        this.waitEditorMessage = constants.waitEditorInitMessage();
 
-        editorModule.setEditorInitializer(new EditorInitializer() {
+        Promise<Void> promise = AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<Void>() {
             @Override
-            public void initialize(final InitializerCallback callback) {
-                // add code-splitting of the whole orion editor
-                GWT.runAsync(new RunAsyncCallback() {
-                    @Override
-                    public void onSuccess() {
-                        injectOrion(callback);
-                    }
-
-                    @Override
-                    public void onFailure(final Throwable reason) {
-                        callback.onFailure(reason);
-                    }
-                });
+            public void makeCall(AsyncCallback<Void> callback) {
+                injectOrion(callback);
             }
         });
+        editorModule.setInitializerPromise(promise);
 
         KeyMode.init();
     }
 
-    private void injectOrion(final InitializerCallback callback) {
+    private void injectOrion(final AsyncCallback<Void> callback) {
+        loader.setMessage(waitEditorMessage);
         final String[] scripts = new String[]{
                 "built-codeEdit-11.0/code_edit/built-codeEdit-amd",
                 "orion/CheContentAssistMode"
@@ -121,7 +121,7 @@ public class OrionEditorExtension {
         Document.get().getHead().appendChild(link);
     }
 
-    private void requireOrion(final InitializerCallback callback) {
+    private void requireOrion(final AsyncCallback<Void> callback) {
         requireJsLoader.require(new Callback<JavaScriptObject[], Throwable>() {
 
             @Override
@@ -151,9 +151,10 @@ public class OrionEditorExtension {
                       "UiUtils"});
     }
 
-    private void endConfiguration(final InitializerCallback callback) {
+    private void endConfiguration(final AsyncCallback<Void> callback) {
         defineDefaultTheme();
-        callback.onSuccess();
+        loader.hide();
+        callback.onSuccess(null);
     }
 
     private void defineDefaultTheme() {
@@ -162,10 +163,11 @@ public class OrionEditorExtension {
         OrionTextThemeOverlay.setDefaultTheme("orionCodenvy", "orion-codenvy-theme.css");
     }
 
-    private void initializationFailed(final InitializerCallback callback, final String errorMessage, Throwable e) {
+    private void initializationFailed(final AsyncCallback<Void> callback, final String errorMessage, Throwable e) {
         if (initFailedWarnedOnce) {
             return;
         }
+        loader.hide();
         initFailedWarnedOnce = true;
         notificationManager.notify(errorMessage, StatusNotification.Status.FAIL, FLOAT_MODE);
         LOG.log(Level.SEVERE, errorMessage + " - ", e);

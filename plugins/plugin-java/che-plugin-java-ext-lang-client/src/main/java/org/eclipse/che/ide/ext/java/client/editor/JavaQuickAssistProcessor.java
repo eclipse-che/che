@@ -13,8 +13,17 @@ package org.eclipse.che.ide.ext.java.client.editor;
 import com.google.common.base.Optional;
 
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.annotation.QueryAnnotationsEvent;
+import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
+import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
+import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
+import org.eclipse.che.ide.api.editor.quickfix.QuickAssistInvocationContext;
+import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -25,16 +34,6 @@ import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
 import org.eclipse.che.ide.ext.java.shared.dto.ProposalPresentation;
 import org.eclipse.che.ide.ext.java.shared.dto.Proposals;
-import org.eclipse.che.ide.api.editor.annotation.QueryAnnotationsEvent;
-import org.eclipse.che.ide.api.editor.codeassist.CodeAssistCallback;
-import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
-import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.link.HasLinkedMode;
-import org.eclipse.che.ide.api.editor.quickfix.QuickAssistInvocationContext;
-import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
@@ -111,7 +110,7 @@ public class JavaQuickAssistProcessor implements QuickAssistProcessor {
                 /*final Map<Annotation, Position> problems =*/
                 int offset = collectQuickFixableAnnotations(range, document, annotations, goToClosest, problems);
                 if (offset != range.getStartOffset()) {
-                    TextEditorPresenter presenter = ((TextEditorPresenter)textEditor);
+                    TextEditor presenter = ((TextEditor)textEditor);
                     presenter.getCursorModel().setCursorPosition(offset);
                 }
 

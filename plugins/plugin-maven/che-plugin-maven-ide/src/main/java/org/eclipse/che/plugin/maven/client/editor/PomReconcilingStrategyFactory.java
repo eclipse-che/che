@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client.editor;
 
+import org.eclipse.che.ide.api.editor.EditorWithErrors;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
  * Factory class for creating PomReconcilingStrategy
@@ -20,5 +20,5 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
  */
 public interface PomReconcilingStrategyFactory {
 
-    PomReconcilingStrategy create(AnnotationModel annotationModel, TextEditorPresenter<?> editor);
+    PomReconcilingStrategy create(AnnotationModel annotationModel, EditorWithErrors editor);
 }

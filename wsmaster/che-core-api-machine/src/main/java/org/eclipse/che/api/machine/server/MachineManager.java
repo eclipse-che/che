@@ -19,7 +19,6 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
@@ -277,7 +276,7 @@ public class MachineManager {
                                              createInstance(instanceProvider,
                                                             machine,
                                                             machineLogger);
-                                         } catch (MachineException | NotFoundException e) {
+                                         } catch (MachineException e) {
                                              if (!(e.getCause() instanceof InvalidRecipeException)) {
                                                  LOG.error(e.getLocalizedMessage(), e);
                                              }
@@ -363,6 +362,7 @@ public class MachineManager {
                     try {
                         machineRegistry.remove(machineId);
                     } catch (NotFoundException ignored) {
+                        // todo looks like not needed anymore, test and remove
                         // machine is already removed, should never happen
                     }
                     machineRegistry.addMachine(machine);
@@ -379,6 +379,7 @@ public class MachineManager {
             try {
                 machineRegistry.remove(machineId);
             } catch (NotFoundException ignored) {
+                // todo looks like not needed anymore, test and remove
                 // machine is already removed
             }
 
@@ -388,7 +389,7 @@ public class MachineManager {
 
     private void createInstance(InstanceProvider instanceProvider,
                                 Machine machine,
-                                LineConsumer machineLogger) throws MachineException, NotFoundException {
+                                LineConsumer machineLogger) throws MachineException {
         Instance instance = null;
         try {
             eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
@@ -415,7 +416,11 @@ public class MachineManager {
                                            .withWorkspaceId(machine.getWorkspaceId())
                                            .withMachineName(machine.getConfig().getName()));
 
-        } catch (ServerException | InterruptedException creationEx) {
+        } catch (Exception creationEx) {
+            try {
+                machineRegistry.remove(machine.getId());
+            } catch (NotFoundException ignore) {
+            }
             eventService.publish(DtoFactory.newDto(MachineStatusEvent.class)
                                            .withEventType(MachineStatusEvent.EventType.ERROR)
                                            .withMachineId(machine.getId())
@@ -443,7 +448,7 @@ public class MachineManager {
     private interface MachineInstanceCreator {
         void createInstance(InstanceProvider instanceProvider,
                             Machine machineState,
-                            LineConsumer machineLogger) throws MachineException, NotFoundException;
+                            LineConsumer machineLogger) throws MachineException;
     }
 
     /**

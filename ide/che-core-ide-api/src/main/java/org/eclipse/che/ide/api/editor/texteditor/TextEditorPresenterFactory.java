@@ -16,6 +16,7 @@ package org.eclipse.che.ide.api.editor.texteditor;
  * @param <T>
  *         the type of the editor
  */
+@Deprecated
 public interface TextEditorPresenterFactory<T extends EditorWidget> {
 
     /**

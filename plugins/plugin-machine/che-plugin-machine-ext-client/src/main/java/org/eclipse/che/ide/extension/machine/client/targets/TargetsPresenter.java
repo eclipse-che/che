@@ -47,7 +47,7 @@ public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionD
     private final MachineServiceClient        machineService;
     private final CategoryPageRegistry        categoryPageRegistry;
 
-    private final List<Target> targets = new ArrayList<>();
+    private final Map<String, Target>     targets  = new HashMap<>();
     private final Map<String, MachineDto> machines = new HashMap<>();
 
     private Target selectedTarget;
@@ -89,24 +89,21 @@ public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionD
      */
     @Override
     public void updateTargets(final String preselectTargetName) {
-        final Map<String, Target> targetByName = new HashMap<>();
         targets.clear();
         machines.clear();
 
-        machineService.getMachines(appContext.getDevMachine().getId()).then(new Operation<List<MachineDto>>() {
+        machineService.getMachines(appContext.getWorkspaceId()).then(new Operation<List<MachineDto>>() {
             @Override
             public void apply(List<MachineDto> machineList) throws OperationException {
-
-                //create Target objects from all machines except machines with ssh type
+                //create Target objects from all machines
                 for (MachineDto machine : machineList) {
                     final MachineConfigDto machineConfig = machine.getConfig();
                     machines.put(machineConfig.getName(), machine);
                     final String targetCategory = machineConfig.isDev() ? machineLocale.devMachineCategory() : machineConfig.getType();
                     final Target target = createTarget(machineConfig.getName(), targetCategory);
                     target.setConnected(isMachineRunning(machine));
-                    targetByName.put(target.getName(), target);
+                    targets.put(target.getName(), target);
                 }
-
                 //create Target objects from recipe with ssh type
                 recipeServiceClient.getAllRecipes().then(new Operation<List<RecipeDescriptor>>() {
                     @Override
@@ -116,18 +113,16 @@ public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionD
                             if (!machineLocale.targetsViewCategorySsh().equalsIgnoreCase(recipe.getType())) {
                                 continue;
                             }
-                            Target target = targetByName.get(recipe.getName());
+                            Target target = targets.get(recipe.getName());
                             if (target == null) {
                                 target = createTarget(recipe.getName(), recipe.getType());
                             }
                             target.setRecipe(recipe);
                             categoryPageRegistry.getCategoryPage(target.getCategory()).getTargetManager().restoreTarget(target);
-                            targetByName.put(target.getName(), target);
+                            targets.put(target.getName(), target);
                         }
-                        targets.addAll(targetByName.values());
-                        view.showTargets(targets);
-
-                        selectTarget(preselectTargetName == null ? selectedTarget : targetByName.get(preselectTargetName));
+                        view.showTargets(new ArrayList<>(targets.values()));
+                        selectTarget(preselectTargetName == null ? selectedTarget : targets.get(preselectTargetName));
                     }
                 });
 
@@ -197,28 +192,31 @@ public class TargetsPresenter implements TargetsTreeManager, TargetsView.ActionD
     @Override
     public void onAddTarget(String type) {
         final CategoryPage page = categoryPageRegistry.getCategoryPage(type);
-        if (page != null) {
-            page.setTargetsTreeManager(this);
-            Target defaultTarget = page.getTargetManager().createDefaultTarget();
-            if (targets.add(defaultTarget)){
-                view.showTargets(targets);
-            }
-            selectTarget(defaultTarget);
+        if (page == null) {
+            return;
         }
+
+        page.setTargetsTreeManager(this);
+        Target defaultTarget = page.getTargetManager().createDefaultTarget();
+        targets.put(defaultTarget.getName(), defaultTarget);
+        view.showTargets(new ArrayList<>(targets.values()));
+        selectTarget(defaultTarget);
     }
 
     @Override
     public void onDeleteTarget(Target target) {
         final String type = target.getCategory();
         final CategoryPage page = categoryPageRegistry.getCategoryPage(type);
-        if (page != null) {
-            page.getTargetManager().onDeleteClicked(target);
+        if (page == null) {
+            return;
         }
+
+        page.getTargetManager().onDeleteClicked(target);
     }
 
     @Override
     public boolean isTargetNameExist(String targetName) {
-        for (Target target : targets) {
+        for (Target target : targets.values()) {
             if (!target.equals(selectedTarget) && target.getName().equals(targetName)) {
                 return true;
             }

@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.maven.client.editor;
 
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
 
 /**
  * @author Evgen Vidolob
  */
 public interface PomEditorConfigurationFactory {
 
-    PomEditorConfiguration create(TextEditorPresenter<?> editor);
+    PomEditorConfiguration create(OrionEditorPresenter editor);
 }
