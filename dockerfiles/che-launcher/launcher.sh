@@ -27,17 +27,17 @@ init_global_variables() {
   CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
 
   # Set variables that use docker as utilities to avoid over container execution
-  ETH0_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig eth0" | \
+  ETH0_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig eth0 2> /dev/null" | \
                                                             grep "inet addr:" | \
                                                             cut -d: -f2 | \
                                                             cut -d" " -f1)
 
-  ETH1_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig eth1" | \
+  ETH1_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig eth1 2> /dev/null" | \
                                                             grep "inet addr:" | \
                                                             cut -d: -f2 | \
-                                                            cut -d" " -f1)
+                                                            cut -d" " -f1) 
 
-  DOCKER0_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig docker0" | \
+  DOCKER0_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig docker0 2> /dev/null" | \
                                                               grep "inet addr:" | \
                                                               cut -d: -f2 | \
                                                               cut -d" " -f1)
