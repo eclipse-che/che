@@ -79,7 +79,7 @@ public class RunAllTestAction extends JavaEditorAction {
         testResultPromise.then(new Operation<TestResult>() {
             @Override
             public void apply(TestResult result) throws OperationException {
-                Log.info(TestResultPresenter.class, result);
+                Log.info(RunAllTestAction.class, result);
                 notification.setStatus(SUCCESS);
                 if (result.isSuccess()) {
                     notification.setTitle("Test runner executed successfully");

@@ -80,7 +80,7 @@ public class RunTestXMLAction extends JavaEditorAction {
         testResultPromise.then(new Operation<TestResult>() {
             @Override
             public void apply(TestResult result) throws OperationException {
-                Log.info(TestResultPresenter.class, result);
+                Log.info(RunTestXMLAction.class, result);
                 notification.setStatus(SUCCESS);
                 if (result.isSuccess()) {
                     notification.setTitle("Test runner executed successfully");
