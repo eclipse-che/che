@@ -22,6 +22,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -34,8 +36,6 @@ import org.eclipse.che.ide.ext.java.client.tree.library.JarFileNode;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.ext.java.shared.OpenDeclarationDescriptor;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
@@ -69,11 +69,11 @@ public class OpenDeclarationFinder {
             return;
         }
 
-        if (!(activeEditor instanceof TextEditorPresenter)) {
-            Log.error(getClass(), "Open Declaration support only TextEditorPresenter as editor");
+        if (!(activeEditor instanceof TextEditor)) {
+            Log.error(getClass(), "Open Declaration support only TextEditor as editor");
             return;
         }
-        TextEditorPresenter editor = ((TextEditorPresenter)activeEditor);
+        TextEditor editor = ((TextEditor)activeEditor);
         int offset = editor.getCursorOffset();
         final VirtualFile file = editor.getEditorInput().getFile();
 
@@ -122,8 +122,8 @@ public class OpenDeclarationFinder {
         new DelayedTask(){
             @Override
             public void onExecute() {
-                if (editor instanceof TextEditorPresenter) {
-                    ((TextEditorPresenter)editor).getDocument().setSelectedRange(LinearRange.createWithStart(offset).andLength(0), true);
+                if (editor instanceof TextEditor) {
+                    ((TextEditor)editor).getDocument().setSelectedRange(LinearRange.createWithStart(offset).andLength(0), true);
                     editor.activate(); //force set focus to the editor
                 }
             }
@@ -165,8 +165,8 @@ public class OpenDeclarationFinder {
                                                              Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                                                                  @Override
                                                                  public void execute() {
-                                                                     if (editor instanceof TextEditorPresenter) {
-                                                                         ((TextEditorPresenter)editor).getDocument().setSelectedRange(
+                                                                     if (editor instanceof TextEditor) {
+                                                                         ((TextEditor)editor).getDocument().setSelectedRange(
                                                                                  LinearRange.createWithStart(descriptor.getOffset())
                                                                                             .andLength(0), true);
                                                                          editor.activate();
@@ -190,8 +190,8 @@ public class OpenDeclarationFinder {
                                 Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                                     @Override
                                     public void execute() {
-                                        if (editor instanceof TextEditorPresenter) {
-                                            ((TextEditorPresenter)editor).getDocument().setSelectedRange(
+                                        if (editor instanceof TextEditor) {
+                                            ((TextEditor)editor).getDocument().setSelectedRange(
                                                     LinearRange.createWithStart(descriptor.getOffset()).andLength(0), true);
                                             editor.activate();
                                         }

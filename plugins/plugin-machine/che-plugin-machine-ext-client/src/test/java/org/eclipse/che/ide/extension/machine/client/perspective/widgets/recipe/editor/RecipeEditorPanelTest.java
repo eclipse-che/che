@@ -11,15 +11,14 @@
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.editor;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.inject.Provider;
 
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
+import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
-import org.eclipse.che.ide.editor.orion.client.OrionTextEditorFactory;
-import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,22 +43,22 @@ public class RecipeEditorPanelTest {
 
     //constructor mocks
     @Mock
-    private RecipeEditorView       view;
+    private RecipeEditorView               view;
     @Mock
-    private RecipeFileFactory      recipeFileFactory;
+    private RecipeFileFactory              recipeFileFactory;
     @Mock
-    private FileTypeRegistry       fileTypeRegistry;
+    private FileTypeRegistry               fileTypeRegistry;
     @Mock
-    private RecipeDescriptor       recipeDescriptor;
+    private RecipeDescriptor               recipeDescriptor;
     @Mock
-    private OrionTextEditorFactory orionTextEditorFactory;
+    private Provider<OrionEditorPresenter> orionTextEditorFactory;
 
     @Mock
     private VirtualFile                            recipeFile;
     @Mock
     private RecipeEditorPanel.ActionDelegate       delegate;
     @Mock
-    private TextEditorPresenter<OrionEditorWidget> editor;
+    private OrionEditorPresenter editor;
 
     private RecipeEditorPanel presenter;
 
@@ -67,7 +66,7 @@ public class RecipeEditorPanelTest {
     public void setUp() throws Exception {
         when(recipeDescriptor.getScript()).thenReturn(SOME_TEXT);
         when(recipeFileFactory.newInstance(anyString())).thenReturn(recipeFile);
-        when(orionTextEditorFactory.createTextEditor()).thenReturn(editor);
+        when(orionTextEditorFactory.get()).thenReturn(editor);
 
         presenter = new RecipeEditorPanel(recipeFileFactory,
                                           fileTypeRegistry,
@@ -130,7 +129,7 @@ public class RecipeEditorPanelTest {
         verify(recipeDescriptor).getScript();
         verify(recipeFileFactory).newInstance(SOME_TEXT);
 
-        verify(orionTextEditorFactory).createTextEditor();
+        verify(orionTextEditorFactory).get();
         verify(editor).activate();
         verify(editor).onOpen();
         verify(view).showEditor(editor);
@@ -147,7 +146,7 @@ public class RecipeEditorPanelTest {
         verify(recipeDescriptor).getScript();
         verify(recipeFileFactory).newInstance(SOME_TEXT);
 
-        verify(orionTextEditorFactory).createTextEditor();
+        verify(orionTextEditorFactory).get();
         verify(editor).activate();
         verify(editor).onOpen();
         verify(view).showEditor(editor);

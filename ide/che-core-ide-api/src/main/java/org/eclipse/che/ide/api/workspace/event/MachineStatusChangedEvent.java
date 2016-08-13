@@ -17,18 +17,11 @@ import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType;
 
 /**
- * Event informing about changing of environments status.
+ * Event informing about changing the machine status.
  *
  * @author Vitalii Parfonov
  */
-public class EnvironmentStatusChangedEvent extends GwtEvent<EnvironmentStatusChangedEvent.Handler> {
-
-    private final boolean                      dev;
-    private final String                       error;
-    private final EventType                    eventType;
-    private final String                       machineId;
-    private final String                       machineName;
-    private final String                       workspaceId;
+public class MachineStatusChangedEvent extends GwtEvent<MachineStatusChangedEvent.Handler> {
 
     /**
      * Implement this handler to handle the event.
@@ -40,18 +33,25 @@ public class EnvironmentStatusChangedEvent extends GwtEvent<EnvironmentStatusCha
          * @param event
          *         contains information about environments status
          */
-        void onEnvironmentStatusChanged(EnvironmentStatusChangedEvent event);
+        void onMachineStatusChanged(MachineStatusChangedEvent event);
     }
 
-    public static final Type<EnvironmentStatusChangedEvent.Handler> TYPE = new Type<>();
+    public static final Type<MachineStatusChangedEvent.Handler> TYPE = new Type<>();
 
-    public EnvironmentStatusChangedEvent(MachineStatusEvent machineStatusEvent) {
-        dev = machineStatusEvent.isDev();
-        error = machineStatusEvent.getError();
-        eventType = machineStatusEvent.getEventType();
+    private final String                       workspaceId;
+    private final String                       machineId;
+    private final String                       machineName;
+    private final boolean                      dev;
+    private final EventType                    eventType;
+    private final String                       errorMessage;
+
+    public MachineStatusChangedEvent(MachineStatusEvent machineStatusEvent) {
+        workspaceId = machineStatusEvent.getWorkspaceId();
         machineId = machineStatusEvent.getMachineId();
         machineName = machineStatusEvent.getMachineName();
-        workspaceId = machineStatusEvent.getWorkspaceId();
+        dev = machineStatusEvent.isDev();
+        eventType = machineStatusEvent.getEventType();
+        errorMessage = machineStatusEvent.getError();
     }
 
     @Override
@@ -61,15 +61,15 @@ public class EnvironmentStatusChangedEvent extends GwtEvent<EnvironmentStatusCha
 
     @Override
     protected void dispatch(Handler handler) {
-        handler.onEnvironmentStatusChanged(this);
+        handler.onMachineStatusChanged(this);
     }
 
     public boolean isDev() {
         return dev;
     }
 
-    public String getError() {
-        return error;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
     public EventType getEventType() {

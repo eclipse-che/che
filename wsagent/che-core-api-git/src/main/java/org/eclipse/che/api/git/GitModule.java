@@ -38,6 +38,7 @@ public class GitModule extends AbstractModule {
         multiBinder.addBinding().to(GitValueProviderFactory.class);
 
         bind(GitService.class);
+        bind(GitExceptionMapper.class);
         bind(BranchListWriter.class);
         bind(CommitMessageWriter.class);
         bind(MergeResultWriter.class);

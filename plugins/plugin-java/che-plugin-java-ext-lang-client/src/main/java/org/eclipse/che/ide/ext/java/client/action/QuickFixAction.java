@@ -16,9 +16,10 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.HandlesTextOperations;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
  * Action to show Quick fix in editor.
@@ -42,11 +43,15 @@ public class QuickFixAction extends JavaEditorAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        if(activeEditor == null){
+        if (activeEditor == null) {
             return;
         }
-        if(activeEditor instanceof TextEditorPresenter) {
-            ((TextEditorPresenter)activeEditor).showQuickAssist();
+        if (activeEditor instanceof HandlesTextOperations) {
+
+            HandlesTextOperations textEditor = (HandlesTextOperations)activeEditor;
+            if (textEditor.canDoOperation(TextEditorOperations.QUICK_ASSIST)) {
+                textEditor.doOperation(TextEditorOperations.QUICK_ASSIST);
+            }
         }
     }
 }

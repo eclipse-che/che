@@ -199,7 +199,7 @@ public class ConsolesPanelPresenterTest {
 
         MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
         when(machineStateEvent.getMachine()).thenReturn(machineDto);
-        verify(eventBus, times(5)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
+        verify(eventBus, times(6)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
         MachineStateEvent.Handler machineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
         machineStateHandler.onMachineCreating(machineStateEvent);
 

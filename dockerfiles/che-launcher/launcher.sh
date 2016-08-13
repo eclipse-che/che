@@ -26,6 +26,27 @@ init_global_variables() {
   CHE_SERVER_IMAGE_NAME="codenvy/che-server"
   CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
 
+  # Set variables that use docker as utilities to avoid over container execution
+  ETH0_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig eth0 2> /dev/null" | \
+                                                            grep "inet addr:" | \
+                                                            cut -d: -f2 | \
+                                                            cut -d" " -f1)
+
+  ETH1_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig eth1 2> /dev/null" | \
+                                                            grep "inet addr:" | \
+                                                            cut -d: -f2 | \
+                                                            cut -d" " -f1) 
+
+  DOCKER0_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig docker0 2> /dev/null" | \
+                                                              grep "inet addr:" | \
+                                                              cut -d: -f2 | \
+                                                              cut -d" " -f1)
+
+  # Used to self-determine container version
+  LAUNCHER_CONTAINER_ID=$(get_che_launcher_container_id)
+  LAUNCHER_IMAGE_NAME=$(docker inspect --format='{{.Config.Image}}' "${LAUNCHER_CONTAINER_ID}")
+  LAUNCHER_IMAGE_VERSION=$(echo "${LAUNCHER_IMAGE_NAME}" | cut -d : -f2 -s)
+
   # Possible Docker install types are:
   #     native, boot2docker or moby
   DOCKER_INSTALL_TYPE=$(get_docker_install_type)
