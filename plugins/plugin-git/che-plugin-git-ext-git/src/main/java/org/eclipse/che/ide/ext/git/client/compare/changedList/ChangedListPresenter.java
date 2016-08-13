@@ -67,11 +67,13 @@ public class ChangedListPresenter implements ChangedListView.ActionDelegate {
     public void show(Map<String, Status> changedFiles, String revision, Project project) {
         this.changedFiles = changedFiles;
         this.project = project;
+        this.revision = revision;
+
+        view.setEnableCompareButton(false);
+        view.setEnableExpandCollapseButtons(treeViewEnabled);
+
         view.showDialog();
         viewChangedFiles();
-        view.setEnableExpandCollapseButtons(treeViewEnabled);
-        view.setEnableCompareButton(false);
-        this.revision = revision;
     }
 
     /** {@inheritDoc} */
@@ -119,12 +121,6 @@ public class ChangedListPresenter implements ChangedListView.ActionDelegate {
         view.setEnableCompareButton(true);
         this.file = node.getName();
         this.status = ((ChangedFileNode)node).getStatus();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void onNodeNotSelected() {
-        view.setEnableCompareButton(false);
     }
 
     private void viewChangedFiles() {

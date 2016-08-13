@@ -16,12 +16,12 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocumentation;
 import org.eclipse.che.ide.api.editor.codeassist.HasCompletionInformation;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 /**
  * @author Evgen Vidolob
@@ -51,8 +51,8 @@ public class QuickDocumentationAction extends JavaEditorAction {
         if(activeEditor == null){
             return;
         }
-        if(activeEditor instanceof TextEditorPresenter && activeEditor instanceof HasCompletionInformation) {
-            if (((TextEditorPresenter)activeEditor).isCompletionProposalsShowing() ) {
+        if(activeEditor instanceof TextEditor && activeEditor instanceof HasCompletionInformation) {
+            if (((TextEditor)activeEditor).getEditorWidget().isCompletionProposalsShowing() ) {
                 ((HasCompletionInformation)activeEditor).showCompletionInformation();
                 return;
             }

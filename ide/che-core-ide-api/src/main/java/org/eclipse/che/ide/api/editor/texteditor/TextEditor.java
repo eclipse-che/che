@@ -48,6 +48,11 @@ public interface TextEditor extends EditorPartPresenter {
     TextEditorPartView getView();
 
     /**
+     * @return the text editor widget
+     */
+    EditorWidget getEditorWidget();
+
+    /**
      * Add an editor-specific key binding.
      *
      * @param keyBinding

@@ -274,18 +274,26 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     }
 
     @Override
-    public void print(String text, boolean cr) {
-        if (carriageReturn) {
+    public void print(String text, boolean carriageReturn) {
+        print(text, carriageReturn, null);
+    }
+
+    @Override
+    public void print(String text, boolean carriageReturn, String color) {
+        if (this.carriageReturn) {
             Node lastChild = consoleLines.getElement().getLastChild();
             if (lastChild != null) {
                 lastChild.removeFromParent();
             }
         }
 
-        carriageReturn = cr;
+        this.carriageReturn = carriageReturn;
 
         PreElement pre = DOM.createElement("pre").cast();
         pre.setInnerText(text.isEmpty() ? " " : text);
+        if (color != null) {
+            pre.getStyle().setColor(color);
+        }
         consoleLines.getElement().appendChild(pre);
 
         followOutput();

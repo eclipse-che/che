@@ -17,10 +17,9 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -57,12 +56,12 @@ public class QuickDocPresenter implements QuickDocumentation, QuickDocView.Actio
             return;
         }
 
-        if (!(activeEditor instanceof TextEditorPresenter)) {
-            Log.error(getClass(), "Quick Document support only TextEditorPresenter as editor");
+        if (!(activeEditor instanceof TextEditor)) {
+            Log.error(getClass(), "Quick Document support only TextEditor as editor");
             return;
         }
 
-        TextEditorPresenter editor = ((TextEditorPresenter)activeEditor);
+        TextEditor editor = ((TextEditor)activeEditor);
         int offset = editor.getCursorOffset();
         final PositionConverter.PixelCoordinates coordinates = editor.getPositionConverter().offsetToPixel(offset);
 

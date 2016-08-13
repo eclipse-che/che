@@ -22,6 +22,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -36,8 +38,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.ext.java.shared.dto.Region;
 import org.eclipse.che.ide.ext.java.shared.dto.model.CompilationUnit;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Member;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
@@ -57,9 +57,9 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
     private final EditorAgent           editorAgent;
     private final MessageLoader         loader;
 
-    private TextEditorPresenter activeEditor;
-    private boolean             showInheritedMembers;
-    private int                 cursorOffset;
+    private TextEditor activeEditor;
+    private boolean    showInheritedMembers;
+    private int        cursorOffset;
 
     @Inject
     public FileStructurePresenter(FileStructure view,
@@ -85,11 +85,11 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
         loader.show();
         view.setTitle(editorPartPresenter.getEditorInput().getFile().getName());
 
-        if (!(editorPartPresenter instanceof TextEditorPresenter)) {
-            Log.error(getClass(), "Open Declaration support only TextEditorPresenter as editor");
+        if (!(editorPartPresenter instanceof TextEditor)) {
+            Log.error(getClass(), "Open Declaration support only TextEditor as editor");
             return;
         }
-        activeEditor = ((TextEditorPresenter)editorPartPresenter);
+        activeEditor = ((TextEditor)editorPartPresenter);
         cursorOffset = activeEditor.getCursorOffset();
         VirtualFile file = activeEditor.getEditorInput().getFile();
 
@@ -196,8 +196,8 @@ public class FileStructurePresenter implements FileStructure.ActionDelegate {
     }
 
     private void setCursor(EditorPartPresenter editor, int offset) {
-        if (editor instanceof TextEditorPresenter) {
-            ((TextEditorPresenter)editor).getDocument().setSelectedRange(LinearRange.createWithStart(offset).andLength(0), true);
+        if (editor instanceof TextEditor) {
+            ((TextEditor)editor).getDocument().setSelectedRange(LinearRange.createWithStart(offset).andLength(0), true);
         }
     }
 }
