@@ -686,6 +686,11 @@
                 <version>${che.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-flux-live-edit</artifactId>
+                <version>${che.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <repositories>

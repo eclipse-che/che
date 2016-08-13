@@ -21,14 +21,9 @@
     </parent>
     <groupId>org.eclipse.che.plugin</groupId>
     <artifactId>che-plugin-flux-live-edit</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Che :: Flux live edit plugin</name>
     <dependencies>
-        <!--<dependency>-->
-            <!--<groupId>com.google.gwt.inject</groupId>-->
-            <!--<artifactId>gin</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
@@ -101,17 +96,6 @@
                     <verifyFail>Warn</verifyFail>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-dependency-plugin</artifactId>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<configuration>-->
-                            <!--<skip>true</skip>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
         </plugins>
     </build>
 </project>
