@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Folder;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.wizard.AbstractWizard;
 import org.eclipse.che.ide.resource.Path;
@@ -36,6 +37,7 @@ import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.IMPO
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.PROJECT_NAME_KEY;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.WIZARD_MODE_KEY;
+import static org.eclipse.che.ide.api.resources.Resource.FOLDER;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 
 /**
@@ -44,6 +46,7 @@ import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
  * @author Artem Zatsarynnyi
  * @author Dmitry Shnurenko
  * @author Vlad Zhukovskyi
+ * @author Valeriy Svydenko
  */
 public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
 
@@ -85,6 +88,12 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
                                             .send()
                                             .then(onComplete(callback))
                                             .catchError(onFailure(callback));
+                    } else if (container.getResourceType() == FOLDER) {
+                        ((Folder)container).toProject()
+                                           .withBody(dataObject)
+                                           .send()
+                                           .then(onComplete(callback))
+                                           .catchError(onFailure(callback));
                     }
                 }
             });

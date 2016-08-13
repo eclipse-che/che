@@ -111,6 +111,9 @@ public class ProjectClasspathViewImpl extends Window implements ProjectClasspath
     @Override
     public void show() {
         super.show();
+        super.setHideOnEscapeEnabled(true);
+
+        doneButton.setFocus(true);
     }
 
     @Override

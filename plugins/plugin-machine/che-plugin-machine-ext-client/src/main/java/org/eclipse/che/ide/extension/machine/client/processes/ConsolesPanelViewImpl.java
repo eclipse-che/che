@@ -21,6 +21,7 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -28,11 +29,8 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
-import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.ui.tree.SelectionModel;
@@ -51,8 +49,8 @@ import java.util.Map;
  * @author Anna Shumilova
  * @author Roman Nikitenko
  */
-@Singleton
-public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDelegate> implements ConsolesPanelView, RequiresResize {
+
+public class ConsolesPanelViewImpl extends Composite implements ConsolesPanelView, RequiresResize {
 
     interface ProcessesViewImplUiBinder extends UiBinder<Widget, ConsolesPanelViewImpl> {
     }
@@ -72,6 +70,8 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     @UiField
     FlowPanel navigationPanel;
 
+    ActionDelegate delegate;
+
     private Map<String, IsWidget> processWidgets;
 
     private LinkedHashMap<String, ProcessTreeNode> processTreeNodes;
@@ -81,12 +81,9 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     @Inject
     public ConsolesPanelViewImpl(org.eclipse.che.ide.Resources resources,
                                  MachineResources machineResources,
-                                 PartStackUIResources partStackUIResources,
                                  ProcessesViewImplUiBinder uiBinder,
                                  ProcessTreeRenderer renderer,
                                  ProcessDataAdapter adapter) {
-        super(partStackUIResources);
-
         this.machineResources = machineResources;
         this.processWidgets = new HashMap<>();
         processTreeNodes = new LinkedHashMap<>();
@@ -180,13 +177,17 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
             }
         });
 
-        setContentWidget(uiBinder.createAndBindUi(this));
+        initWidget(uiBinder.createAndBindUi(this));
         navigationPanel.getElement().setTabIndex(0);
-        minimizeButton.ensureDebugId("consoles-minimizeButton");
 
         tuneSplitter();
 
         splitLayoutPanel.setWidgetHidden(navigationPanel, true);
+    }
+
+    @Override
+    public void setDelegate(ActionDelegate delegate) {
+        this.delegate = delegate;
     }
 
     /**
@@ -246,7 +247,6 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
         el.appendChild(largeBorder);
     }
 
-    @Override
     protected void focusView() {
         getElement().focus();
     }
@@ -275,7 +275,7 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
 
         processTree.asWidget().setVisible(true);
         processTree.getModel().setRoot(root);
-        processTree.renderTree(-1);
+        processTree.renderTree();
 
         for (ProcessTreeNode processTreeNode : processTreeNodes.values()) {
             if (!processTreeNode.getId().equals(activeProcessId) && processTreeNode.hasUnreadContent()) {
@@ -310,20 +310,18 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
     @Override
     public void showProcessOutput(String processId) {
         if (!processWidgets.containsKey(processId)) {
-            processId = "";
+            return;
         }
 
-        if (processWidgets.containsKey(processId)) {
-            onResize();
-            outputPanel.showWidget(processWidgets.get(processId).asWidget());
+        onResize();
+        outputPanel.showWidget(processWidgets.get(processId).asWidget());
 
-            activeProcessId = processId;
+        activeProcessId = processId;
 
-            ProcessTreeNode treeNode = processTreeNodes.get(processId);
-            if (treeNode != null) {
-                treeNode.setHasUnreadContent(false);
-                treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
-            }
+        ProcessTreeNode treeNode = processTreeNodes.get(processId);
+        if (treeNode != null) {
+            treeNode.setHasUnreadContent(false);
+            treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
         }
     }
 
@@ -405,5 +403,4 @@ public class ConsolesPanelViewImpl extends BaseView<ConsolesPanelView.ActionDele
             }
         }
     }
-
 }

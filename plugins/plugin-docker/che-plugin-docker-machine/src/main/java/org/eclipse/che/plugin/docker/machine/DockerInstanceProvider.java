@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ObjectArrays;
@@ -50,11 +51,11 @@ import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
-import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
-import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
+import org.eclipse.che.plugin.docker.client.params.GetContainerLogsParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
@@ -76,12 +77,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -94,6 +96,7 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
  * @author andrew00x
  * @author Alexander Garagatyi
  * @author Roman Iuvshyn
+ * @author Mykola Morhun
  */
 @Singleton
 public class DockerInstanceProvider implements InstanceProvider {
@@ -109,11 +112,19 @@ public class DockerInstanceProvider implements InstanceProvider {
      */
     public static final String DOCKER_IMAGE_TYPE = "image";
 
+    /**
+     * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
+     */
+    public static final String MACHINE_SNAPSHOT_PREFIX = "machine_snapshot_";
+
+    public static final Pattern SNAPSHOT_LOCATION_PATTERN = Pattern.compile("(.+/)?" + MACHINE_SNAPSHOT_PREFIX + ".+");
+
     private final DockerConnector                               docker;
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
     private final DockerContainerNameGenerator                  containerNameGenerator;
+    private final RecipeRetriever                               recipeRetriever;
     private final WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegeMode;
@@ -128,7 +139,6 @@ public class DockerInstanceProvider implements InstanceProvider {
     private final String[]                                      allMachinesExtraHosts;
     private final String                                        projectFolderPath;
     private final boolean                                       snapshotUseRegistry;
-    private final RecipeRetriever                               recipeRetriever;
     private final double                                        memorySwapMultiplier;
 
     @Inject
@@ -257,7 +267,6 @@ public class DockerInstanceProvider implements InstanceProvider {
         return esc;
     }
 
-
     @Override
     public String getType() {
         return "docker";
@@ -267,8 +276,6 @@ public class DockerInstanceProvider implements InstanceProvider {
     public Set<String> getRecipeTypes() {
         return supportedRecipeTypes;
     }
-
-
 
     /**
      * Creates instance from scratch or by reusing a previously one by using specified {@link MachineSource}
@@ -295,116 +302,95 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                                            SourceNotFoundException,
                                                                            NotFoundException,
                                                                            MachineException {
+        MachineConfig config = machine.getConfig();
+        String sourceType = config.getSource().getType();
 
-        // based on machine source, do the right steps
-        MachineConfig machineConfig = machine.getConfig();
-        MachineSource machineSource = machineConfig.getSource();
-        String type = machineSource.getType();
-
-        // create container machine name
         final String userName = EnvironmentContext.getCurrent().getSubject().getUserName();
-        final String machineContainerName = containerNameGenerator.generateContainerName(machine.getWorkspaceId(),
-                                                                                         machine.getId(),
-                                                                                         userName,
-                                                                                         machine.getConfig().getName());
-        // get recipe
-        // - it's a dockerfile type:
-        //    - location defined : download this location and get script as recipe
-        //    - content defined  : use this content as recipe script
-        // - it's an image:
-        //    - use location of image ([registry:port]/<repository-image>[:tag][@digest])
-        final Recipe recipe;
-        if (DOCKER_FILE_TYPE.equals(type)) {
-            recipe = this.recipeRetriever.getRecipe(machineConfig);
-        } else if (DOCKER_IMAGE_TYPE.equals(type)) {
-            if (isNullOrEmpty(machineSource.getLocation())) {
-                throw new InvalidRecipeException(String.format("The type '%s' needs to be used with a location, not with any other parameter. Found '%s'.", type, machineSource));
+        final String containerName = containerNameGenerator.generateContainerName(machine.getWorkspaceId(),
+                                                                                  machine.getId(),
+                                                                                  userName,
+                                                                                  config.getName());
+        final String imageName = "eclipse-che/" + containerName;
+        final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
+        ProgressMonitor progressMonitor = currentProgressStatus -> {
+            try {
+                creationLogsOutput.writeLine(progressLineFormatter.format(currentProgressStatus));
+            } catch (IOException e) {
+                LOG.error(e.getLocalizedMessage(), e);
             }
-            return createInstanceFromImage(machine, machineContainerName, creationLogsOutput);
+        };
+
+        if (DOCKER_FILE_TYPE.equals(sourceType)) {
+            buildImage(config, imageName, doForcePullOnBuild, progressMonitor);
+        } else if (DOCKER_IMAGE_TYPE.equals(sourceType)) {
+            pullImage(config, imageName, progressMonitor);
         } else {
             // not supported
-            throw new UnsupportedRecipeException("The type '" + type + "' is not supported");
+            throw new UnsupportedRecipeException("The type '" + sourceType + "' is not supported");
         }
-        final Dockerfile dockerfile = parseRecipe(recipe);
 
-        final String machineImageName = "eclipse-che/" + machineContainerName;
-        final long memoryLimit = (long)machine.getConfig().getLimits().getRam() * 1024 * 1024;
-
-        buildImage(dockerfile, creationLogsOutput, machineImageName, doForcePullOnBuild, memoryLimit, -1);
-
-        return createInstance(machineContainerName,
+        return createInstance(containerName,
                               machine,
-                              machineImageName,
+                              imageName,
                               creationLogsOutput);
     }
 
-    protected Instance createInstanceFromImage(Machine machine,
-                                               String machineContainerName,
-                                               LineConsumer creationLogsOutput) throws NotFoundException,
-                                                                                       MachineException,
-                                                                                       SourceNotFoundException {
-        final DockerMachineSource dockerMachineSource = new DockerMachineSource(machine.getConfig().getSource());
-
-        if (snapshotUseRegistry) {
-            pullImage(dockerMachineSource, creationLogsOutput);
+    protected void pullImage(MachineConfig machineConfig,
+                             String machineImageName,
+                             ProgressMonitor progressMonitor) throws NotFoundException,
+                                                                     MachineException,
+                                                                     SourceNotFoundException {
+        MachineSource source = machineConfig.getSource();
+        if (isNullOrEmpty(source.getLocation())) {
+            throw new InvalidRecipeException(
+                    format("The type '%s' needs to be used with a location, not with any other parameter. Found '%s'.",
+                           source.getType(),
+                           source));
+        }
+        final DockerMachineSource dockerMachineSource = new DockerMachineSource(source);
+        if (dockerMachineSource.getRepository() == null) {
+            throw new MachineException(
+                    format("Machine creation failed. Machine source is invalid. No repository is defined. Found %s.",
+                           dockerMachineSource));
         }
 
-        final String machineImageName = "eclipse-che/" + machineContainerName;
-        final String fullNameOfPulledImage = dockerMachineSource.getLocation(false);
         try {
-            // tag image with generated name to allow sysadmin recognize it
-            docker.tag(TagParams.create(fullNameOfPulledImage, machineImageName));
-        } catch (ImageNotFoundException nfEx) {
-            throw new SourceNotFoundException(nfEx.getLocalizedMessage(), nfEx);
-        } catch (IOException ioEx) {
-            LOG.error(ioEx.getLocalizedMessage(), ioEx);
-            throw new MachineException("Can't create machine from snapshot.");
-        }
-        try {
-            // remove unneeded tag
-            docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
+            boolean isSnapshot = SNAPSHOT_LOCATION_PATTERN.matcher(dockerMachineSource.getLocation()).matches();
+            if (!isSnapshot || snapshotUseRegistry) {
+                PullParams pullParams = PullParams.create(dockerMachineSource.getRepository())
+                                                  .withTag(MoreObjects.firstNonNull(dockerMachineSource.getTag(), LATEST_TAG))
+                                                  .withRegistry(dockerMachineSource.getRegistry())
+                                                  .withAuthConfigs(dockerCredentials.getCredentials());
+                docker.pull(pullParams, progressMonitor);
+            }
+
+            final String fullNameOfPulledImage = dockerMachineSource.getLocation(false);
+            try {
+                // tag image with generated name to allow sysadmin recognize it
+                docker.tag(TagParams.create(fullNameOfPulledImage, machineImageName));
+            } catch (ImageNotFoundException nfEx) {
+                throw new SourceNotFoundException(nfEx.getLocalizedMessage(), nfEx);
+            }
+
+            // remove unneeded tag if restoring snapshot from registry
+            if (isSnapshot && snapshotUseRegistry){
+                docker.removeImage(RemoveImageParams.create(fullNameOfPulledImage).withForce(false));
+            }
         } catch (IOException e) {
             LOG.error(e.getLocalizedMessage(), e);
-        }
-
-        return createInstance(machineContainerName,
-                              machine,
-                              machineImageName,
-                              creationLogsOutput);
-    }
-
-    private Dockerfile parseRecipe(final Recipe recipe) throws InvalidRecipeException {
-        final Dockerfile dockerfile = getDockerFile(recipe);
-        if (dockerfile.getImages().isEmpty()) {
-            throw new InvalidRecipeException("Unable build docker based machine, Dockerfile found but it doesn't contain base image.");
-        }
-        if (dockerfile.getImages().size() > 1) {
-            throw new InvalidRecipeException(
-                    "Unable build docker based machine, Dockerfile found but it contains more than one instruction 'FROM'.");
-        }
-        return dockerfile;
-    }
-
-    private Dockerfile getDockerFile(final Recipe recipe) throws InvalidRecipeException {
-        if (recipe.getScript() == null) {
-            throw new InvalidRecipeException("Unable build docker based machine, recipe isn't set or doesn't provide Dockerfile and " +
-                                             "no Dockerfile found in the list of files attached to this builder.");
-        }
-        try {
-            return DockerfileParser.parse(recipe.getScript());
-        } catch (DockerFileException e) {
-            LOG.debug(e.getLocalizedMessage(), e);
-            throw new InvalidRecipeException("Unable build docker based machine. " + e.getMessage());
+            throw new MachineException("Can't create machine from image. Cause: " + e.getLocalizedMessage());
         }
     }
 
-    protected void buildImage(final Dockerfile dockerfile,
-                              final LineConsumer creationLogsOutput,
-                              final String imageName,
-                              final boolean doForcePullOnBuild,
-                              final long memoryLimit,
-                              final long memorySwapLimit)
+    protected void buildImage(MachineConfig machineConfig,
+                              String machineImageName,
+                              boolean doForcePullOnBuild,
+                              ProgressMonitor progressMonitor)
             throws MachineException {
+
+        Recipe recipe = recipeRetriever.getRecipe(machineConfig);
+        Dockerfile dockerfile = parseRecipe(recipe);
+        long memoryLimit = (long)machineConfig.getLimits().getRam() * 1024 * 1024;
 
         File workDir = null;
         try {
@@ -412,26 +398,17 @@ public class DockerInstanceProvider implements InstanceProvider {
             workDir = Files.createTempDirectory(null).toFile();
             final File dockerfileFile = new File(workDir, "Dockerfile");
             dockerfile.writeDockerfile(dockerfileFile);
-            final List<File> files = new LinkedList<>();
-            //noinspection ConstantConditions
-            Collections.addAll(files, workDir.listFiles());
-            final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
-            final ProgressMonitor progressMonitor = currentProgressStatus -> {
-                try {
-                    creationLogsOutput.writeLine(progressLineFormatter.format(currentProgressStatus));
-                } catch (IOException e) {
-                    LOG.error(e.getLocalizedMessage(), e);
-                }
-            };
-            docker.buildImage(BuildImageParams.create(files.toArray(new File[files.size()]))
-                                              .withRepository(imageName)
+
+            docker.buildImage(BuildImageParams.create(dockerfileFile)
+                                              .withForceRemoveIntermediateContainers(true)
+                                              .withRepository(machineImageName)
                                               .withAuthConfigs(dockerCredentials.getCredentials())
                                               .withDoForcePull(doForcePullOnBuild)
                                               .withMemoryLimit(memoryLimit)
-                                              .withMemorySwapLimit(memorySwapLimit),
+                                              .withMemorySwapLimit(-1),
                               progressMonitor);
-        } catch (IOException | InterruptedException e) {
-            throw new MachineException(e.getMessage(), e);
+        } catch (IOException e) {
+            throw new MachineException(e.getLocalizedMessage(), e);
         } finally {
             if (workDir != null) {
                 FileCleaner.addFile(workDir);
@@ -439,33 +416,24 @@ public class DockerInstanceProvider implements InstanceProvider {
         }
     }
 
-    private void pullImage(final DockerMachineSource dockerMachineSource, final LineConsumer creationLogsOutput) throws MachineException {
-        if (dockerMachineSource.getRepository() == null) {
-            throw new MachineException(String.format("Machine creation failed. Machine source is invalid. No repository is defined. Found %s.", dockerMachineSource));
+    public static Dockerfile parseRecipe(final Recipe recipe) throws InvalidRecipeException {
+        if (recipe.getScript() == null) {
+            throw new InvalidRecipeException("Unable build docker based machine, recipe isn't set or doesn't provide Dockerfile and " +
+                                             "no Dockerfile found in the list of files attached to this builder.");
         }
-
-        final String tag;
-        if (isNullOrEmpty(dockerMachineSource.getTag())) {
-            tag = LATEST_TAG;
-        } else {
-            tag = dockerMachineSource.getTag();
-        }
-        PullParams pullParams = PullParams.create(dockerMachineSource.getRepository())
-                                          .withTag(tag)
-                                          .withRegistry(dockerMachineSource.getRegistry())
-                                          .withAuthConfigs(dockerCredentials.getCredentials());
         try {
-            final ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
-            docker.pull(pullParams,
-                        currentProgressStatus -> {
-                            try {
-                                creationLogsOutput.writeLine(progressLineFormatter.format(currentProgressStatus));
-                            } catch (IOException e) {
-                                LOG.error(e.getLocalizedMessage(), e);
-                            }
-                        });
-        } catch (IOException | InterruptedException e) {
-            throw new MachineException(e.getLocalizedMessage(), e);
+            Dockerfile dockerfile = DockerfileParser.parse(recipe.getScript());
+            if (dockerfile.getImages().isEmpty()) {
+                throw new InvalidRecipeException("Unable build docker based machine, Dockerfile found but it doesn't contain base image.");
+            }
+            if (dockerfile.getImages().size() > 1) {
+                throw new InvalidRecipeException(
+                        "Unable build docker based machine, Dockerfile found but it contains more than one instruction 'FROM'.");
+            }
+            return dockerfile;
+        } catch (DockerFileException e) {
+            LOG.debug(e.getLocalizedMessage(), e);
+            throw new InvalidRecipeException("Unable build docker based machine. " + e.getMessage());
         }
     }
 
@@ -538,6 +506,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                     final String imageName,
                                     final LineConsumer outputConsumer)
             throws MachineException {
+        Optional<String> containerIdOptional = null;
         try {
             final Map<String, Map<String, String>> portsToExpose;
             final String[] volumes;
@@ -588,14 +557,15 @@ public class DockerInstanceProvider implements InstanceProvider {
 
             final String containerId = docker.createContainer(CreateContainerParams.create(config)
                                                                                    .withContainerName(containerName))
-                                             .getId();
+                                                                                   .getId();
+            containerIdOptional = Optional.ofNullable(containerId);
 
             docker.startContainer(StartContainerParams.create(containerId));
 
             executor.execute(() -> {
                 long lastProcessedLogDate = 0;
                 boolean isContainerRunning = true;
-                while(isContainerRunning) {
+                while (isContainerRunning) {
                     try {
                         docker.getContainerLogs(GetContainerLogsParams.create(containerId)
                                                                       .withFollow(true)
@@ -631,7 +601,22 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                        node,
                                                        outputConsumer);
         } catch (IOException e) {
+            cleanUpContainer(containerIdOptional);
             throw new MachineException(e.getLocalizedMessage(), e);
+        } catch (MachineException e) {
+            cleanUpContainer(containerIdOptional);
+            throw e;
+        }
+    }
+
+    private void cleanUpContainer(Optional<String> containerIdOptional) {
+        try {
+            if (containerIdOptional.isPresent()) {
+                String containerId = containerIdOptional.get();
+                docker.removeContainer(RemoveContainerParams.create(containerId).withRemoveVolumes(true).withForce(true));
+            }
+        } catch (Exception ex) {
+            LOG.error("Failed to remove docker container.", ex);
         }
     }
 

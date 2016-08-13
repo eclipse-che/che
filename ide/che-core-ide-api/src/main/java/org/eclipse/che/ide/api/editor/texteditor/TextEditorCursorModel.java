@@ -25,6 +25,7 @@ import org.eclipse.che.ide.util.ListenerRegistrar.Remover;
  *
  * @author "Mickaël Leduque"
  */
+@Deprecated
 class TextEditorCursorModel implements CursorModelWithHandler, CursorActivityHandler {
 
     private final Document document;

@@ -431,4 +431,10 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("command.line.description")
     String commandLineDescription();
+
+    @Key("code.assist.errorMessage.default")
+    String codeAssistDefaultErrorMessage();
+
+    @Key("code.assist.errorMessage.resolvingProject")
+    String codeAssistErrorMessageResolvingProject();
 }

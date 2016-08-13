@@ -25,6 +25,7 @@ import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
 import org.eclipse.che.ide.api.reference.FqnProvider;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
+import org.eclipse.che.ide.api.resources.RenamingSupport;
 import org.eclipse.che.ide.ext.java.client.CurrentClassFQNProvider;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction;
@@ -44,6 +45,7 @@ import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServ
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileView;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileViewImpl;
 import org.eclipse.che.ide.ext.java.client.resource.ClassInterceptor;
+import org.eclipse.che.ide.ext.java.client.resource.JavaSourceRenameValidator;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderInterceptor;
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
@@ -122,6 +124,7 @@ public class JavaGinModule extends AbstractGinModule {
         GinMultibinder.newSetBinder(binder(), CommandPropertyValueProvider.class).addBinding().to(CurrentClassFQNProvider.class);
         GinMultibinder.newSetBinder(binder(), ClasspathPagePresenter.class).addBinding().to(LibEntryPresenter.class);
         GinMultibinder.newSetBinder(binder(), ClasspathPagePresenter.class).addBinding().to(SourceEntryPresenter.class);
+        GinMultibinder.newSetBinder(binder(), RenamingSupport.class).addBinding().to(JavaSourceRenameValidator.class);
     }
 
     @Provides

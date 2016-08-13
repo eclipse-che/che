@@ -24,6 +24,9 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static java.lang.String.format;
+import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_STATUS_CHANNEL_TEMPLATE;
+
 /**
  * Send machine state events using websocket channel to the clients
  *
@@ -44,7 +47,7 @@ public class MachineStateMessenger implements EventSubscriber<MachineStatusEvent
     public void onEvent(MachineStatusEvent event) {
         try {
             final ChannelBroadcastMessage bm = new ChannelBroadcastMessage();
-            bm.setChannel("machine:status:" + event.getWorkspaceId() + ':' + event.getMachineName());
+            bm.setChannel(format(ENVIRONMENT_STATUS_CHANNEL_TEMPLATE, event.getWorkspaceId()));
             bm.setBody(DtoFactory.getInstance().toJson(event));
             WSConnectionContext.sendMessage(bm);
         } catch (Exception e) {

@@ -195,6 +195,46 @@
     ]
   },
   {
+    "name": "hadoop-wordcount-simple",
+    "displayName": "hadoop-wordcount-simple",
+    "path": "/hadoop-wordcount-simple",
+    "description": "Simple Hadoop Wordcount Sample.",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/hadoop-wordcount-simple.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} && mvn exec:java -Dexec.mainClass='org.eclipse.che.wordcount.WordCount'"
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Hadoop"
+    ]
+  },
+  {
     "name": "console-python3-simple",
     "displayName": "console-python3.5-simple",
     "path": "/console-python3-simple",

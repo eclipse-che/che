@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.debugger.ide.debug;
 
+import com.google.common.base.Optional;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -43,11 +44,14 @@ import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.debug.DebuggerDescriptor;
 import org.eclipse.che.ide.debug.DebuggerManager;
 import org.eclipse.che.ide.debug.DebuggerObserver;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.storage.LocalStorage;
 import org.eclipse.che.ide.util.storage.LocalStorageProvider;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
@@ -59,7 +63,9 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.MockSettings;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.creation.MockSettingsImpl;
 
 import java.util.Collections;
 import java.util.List;
@@ -72,11 +78,13 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Testing {@link AbstractDebugger} functionality.
@@ -128,6 +136,8 @@ public class DebuggerTest extends BaseTest {
     private LocationDto        locationDto;
     @Mock
     private BreakpointDto      breakpointDto;
+    @Mock
+    private Optional<Project>  optional;
 
     @Captor
     private ArgumentCaptor<WsAgentStateHandler>             extServerStateHandlerCaptor;
@@ -362,16 +372,39 @@ public class DebuggerTest extends BaseTest {
 
     @Test
     public void testAddBreakpoint() throws Exception {
+        MockSettings mockSettings = new MockSettingsImpl<>().defaultAnswer(RETURNS_SMART_NULLS)
+                                                            .extraInterfaces(Resource.class);
+        Project project = mock(Project.class);
+        when(optional.isPresent()).thenReturn(true);
+        when(optional.get()).thenReturn(project);
+        when(project.getPath()).thenReturn(PATH);
+
+        VirtualFile virtualFile = mock(VirtualFile.class, mockSettings);
+        Path path = mock(Path.class);
+        when(path.toString()).thenReturn(PATH);
+        when(virtualFile.getLocation()).thenReturn(path);
+        when(virtualFile.toString()).thenReturn(PATH);
+
+        Resource resource = (Resource)virtualFile;
+        when(resource.getRelatedProject()).thenReturn(optional);
         doReturn(promiseVoid).when(service).addBreakpoint(SESSION_ID, breakpointDto);
         doReturn(promiseVoid).when(promiseVoid).then((Operation<Void>)any());
+        when(locationDto.withLineNumber(LINE_NUMBER + 1)).thenReturn(locationDto);
+        when(locationDto.withResourcePath(PATH)).thenReturn(locationDto);
+        when(locationDto.withResourceProjectPath(PATH)).thenReturn(locationDto);
+        when(locationDto.withTarget(anyString())).thenReturn(locationDto);
+        when(breakpointDto.withLocation(locationDto)).thenReturn(breakpointDto);
+        when(breakpointDto.withEnabled(true)).thenReturn(breakpointDto);
 
-        debugger.addBreakpoint(file, LINE_NUMBER);
+        debugger.addBreakpoint(virtualFile, LINE_NUMBER);
 
-        verify(locationDto).setLineNumber(LINE_NUMBER + 1);
-        verify(locationDto).setTarget(FQN);
+        verify(locationDto).withLineNumber(LINE_NUMBER + 1);
+        verify(locationDto).withTarget(FQN);
+        verify(locationDto).withResourcePath(PATH);
+        verify(locationDto).withResourceProjectPath(PATH);
 
-        verify(breakpointDto).setLocation(locationDto);
-        verify(breakpointDto).setEnabled(true);
+        verify(breakpointDto).withLocation(locationDto);
+        verify(breakpointDto).withEnabled(true);
 
         verify(promiseVoid).then(operationVoidCaptor.capture());
         operationVoidCaptor.getValue().apply(null);

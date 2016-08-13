@@ -40,6 +40,8 @@ import org.eclipse.che.ide.workspace.create.CreateWorkspaceView.HidePopupCallBac
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
+
 /**
  * The class contains business logic which allow to create user workspace if it doesn't exist.
  *
@@ -212,7 +214,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
                 DefaultWorkspaceComponent component = wsComponentProvider.get();
-                component.startWorkspaceById(workspace, callback);
+                component.startWorkspace(workspace, callback);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -227,7 +229,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
 
         List<MachineConfigDto> machineConfigs = new ArrayList<>();
         machineConfigs.add(dtoFactory.createDto(MachineConfigDto.class)
-                                     .withName("ws-machine")
+                                     .withName(WS_MACHINE_NAME)
                                      .withType("docker")
                                      .withSource(dtoFactory.createDto(MachineSourceDto.class)
                                                            .withType("dockerfile")

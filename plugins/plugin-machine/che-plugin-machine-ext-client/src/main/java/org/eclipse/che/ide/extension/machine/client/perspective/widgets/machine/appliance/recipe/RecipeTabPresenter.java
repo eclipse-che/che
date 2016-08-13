@@ -10,22 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.recipe;
 
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
-
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * The class contains business logic which allows update a recipe for current machine. The class is a tab presenter and
@@ -35,40 +32,50 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  */
 public class RecipeTabPresenter implements TabPresenter {
 
-    private final RecipeView view;
+    private final RecipeView                        view;
+    private final RecipeScriptDownloadServiceClient recipeScriptClient;
 
     @Inject
-    public RecipeTabPresenter(RecipeView view) {
+    public RecipeTabPresenter(RecipeView view, RecipeScriptDownloadServiceClient recipeScriptClient) {
         this.view = view;
+        this.recipeScriptClient = recipeScriptClient;
     }
 
     /**
      * Calls special method on view which updates recipe of current machine.
+     * If case of 'image', it is it's location, in case of 'dockerfile'
+     * - it is content, that is fecthed by location URL
      *
      * @param machine
      *         machine for which need update information
      */
-    public void updateInfo(@NotNull Machine machine) {
-        String scriptLocation = machine.getRecipeLocation();
-        if (!isNullOrEmpty(scriptLocation)) { //TODO : need to add test this block
-            RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, scriptLocation);
-            try {
-                requestBuilder.sendRequest(null, new RequestCallback() {
+    public void updateInfo(@NotNull final Machine machine) {
+        if (machine.getRecipeType() == null) {
+            Log.error(RecipeTabPresenter.class, "Recipe type is null for machine '" + machine.getId() + "'");
+            view.setScript("Recipe type is null for machine '" + machine.getId() + "'");
+            return;
+        }
+        switch (machine.getRecipeType()) {
+            case "image":
+                view.setScript("Image location: " + machine.getRecipeLocation());
+                break;
+            case "dockerfile":
+                recipeScriptClient.getRecipeScript(machine).then(new Operation<String>() {
                     @Override
-                    public void onResponseReceived(Request request, Response response) {
-                        view.setScript(response.getText());
+                    public void apply(String recipe) throws OperationException {
+                        view.setScript(recipe);
                     }
-
+                }).catchError(new Operation<PromiseError>() {
                     @Override
-                    public void onError(Request request, Throwable exception) {
-
+                    public void apply(PromiseError error) throws OperationException {
+                        Log.error(RecipeTabPresenter.class,
+                                  "Failed to get recipe script for machine " + machine.getId() + ": " + error.getMessage());
+                        view.setScript("Failed to get recipe script for machine '" + machine.getId() + "'");
                     }
                 });
-            } catch (RequestException exception) {
-                Log.error(getClass(), exception);
-            }
-        } else if (!isNullOrEmpty(machine.getRecipeContent())) {
-            view.setScript(machine.getRecipeContent());
+                break;
+            case "default":
+                view.setScript("Recipe type: " + machine.getRecipeType());
         }
     }
 

@@ -166,9 +166,9 @@ public class FactoryService extends Service {
     @ApiOperation(value = "Create a Factory and return data",
                   notes = "Save factory to storage and return stored data. Field 'factory' should contains factory information.")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 403, message = "The user does not have appropriate rights for perform factory save"),
-                   @ApiResponse(code = 409, message = "Conflict error. Some parameter is missing"),
+                   @ApiResponse(code = 400, message = "Parameters are not valid: missing required parameter(s)"),
+                   @ApiResponse(code = 403, message = "You do not have the permissions to perform a Factory save operation"),
+                   @ApiResponse(code = 409, message = "Parameters are not valid: missing parameters causing conflict"),
                    @ApiResponse(code = 500, message = "Unable to identify user from context")})
     public Factory saveFactory(Iterator<FileItem> formData, @Context UriInfo uriInfo)
             throws ForbiddenException, ConflictException, BadRequestException, ServerException, NotFoundException {
@@ -182,8 +182,7 @@ public class FactoryService extends Service {
                         try (InputStream factoryData = item.getInputStream()) {
                             factory = factoryBuilder.build(factoryData);
                         } catch (JsonSyntaxException e) {
-                            throw new BadRequestException("You have provided an invalid JSON.  For more information, please visit: " +
-                                                          "http://docs.codenvy.com/user/creating-factories/factory-parameter-reference/");
+                            throw new BadRequestException("You have provided an invalid JSON.");
                         }
                         break;
                     }
@@ -237,15 +236,16 @@ public class FactoryService extends Service {
     @ApiOperation(value = "Stores the factory from the configuration",
                   notes = "Stores the factory without pictures and returns instance of the stored factory with links")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 403, message = "The user does not have appropriate rights for perform factory save"),
-                   @ApiResponse(code = 409, message = "Conflict error. Some parameter is missing"),
+                   @ApiResponse(code = 400, message = "Parameters are not valid: missing required parameter(s)"),
+                   @ApiResponse(code = 403, message = "You do not have the permissions to perform a Factory save operation"),
+                   @ApiResponse(code = 409, message = "Parameters are not valid: missing parameters causing conflict"),
                    @ApiResponse(code = 500, message = "Internal Server Error")})
     public Factory saveFactory(Factory factory)
             throws BadRequestException, ServerException, ForbiddenException, ConflictException, NotFoundException {
         if (factory == null) {
             throw new BadRequestException("Not null factory required");
         }
+        factoryBuilder.checkValid(factory);
         processDefaults(factory);
         createValidator.validateOnCreate(factory);
         final Factory storedFactory = factoryStore.getFactory(factoryStore.saveFactory(factory, null));
@@ -322,9 +322,9 @@ public class FactoryService extends Service {
                   notes = "Updates factory based on the factory id which is passed in a path parameter. " +
                           "For perform this operation user needs respective rights")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 403, message = "User not authorized to call this operation"),
-                   @ApiResponse(code = 409, message = "Not rewritable factory information is present in the new factory"),
+                   @ApiResponse(code = 400, message = "Parameters are not valid: missing required parameter(s)"),
+                   @ApiResponse(code = 403, message = "You do not have the permissions to perform a Factory save operation"),
+                   @ApiResponse(code = 409, message = "The factory information is not updateable"),
                    @ApiResponse(code = 404, message = "Factory to update not found"),
                    @ApiResponse(code = 500, message = "Internal server error")})
     public Factory updateFactory(@ApiParam(value = "Factory id")
@@ -334,7 +334,7 @@ public class FactoryService extends Service {
             throws BadRequestException, NotFoundException, ServerException, ForbiddenException, ConflictException {
         // forbid null update
         if (newFactory == null) {
-            throw new BadRequestException("The updating factory shouldn't be null");
+            throw new BadRequestException("The factory information is not updateable");
         }
         final Factory existingFactory = factoryStore.getFactory(id);
 
@@ -346,6 +346,7 @@ public class FactoryService extends Service {
         newFactory.setId(existingFactory.getId());
 
         // validate the new content
+        factoryBuilder.checkValid(newFactory, true);
         createValidator.validateOnCreate(newFactory);
 
         // access granted, user can update the factory
@@ -374,7 +375,7 @@ public class FactoryService extends Service {
                   notes = "Removes factory based on the factory id which is passed in a path parameter. " +
                           "For perform this operation user needs respective rights")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
-                   @ApiResponse(code = 403, message = "User not authorized to call this operation"),
+                   @ApiResponse(code = 403, message = "You do not have the permissions to perform a Factory remove operation"),
                    @ApiResponse(code = 404, message = "Factory not found"),
                    @ApiResponse(code = 500, message = "Internal server error")})
     public void removeFactory(@ApiParam(value = "Factory id")
@@ -410,7 +411,7 @@ public class FactoryService extends Service {
     @ApiOperation(value = "Get Factory by attribute",
                   notes = "If specify more than one value for a single query parameter then will be taken first one")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
-                   @ApiResponse(code = 400, message = "Failed to validate factory e.g. if it expired"),
+                   @ApiResponse(code = 400, message = "No search parameters provided"),
                    @ApiResponse(code = 500, message = "Internal server error")})
     public List<Factory> getFactoryByAttribute(@DefaultValue("0")
                                                @QueryParam("skipCount")
@@ -505,7 +506,7 @@ public class FactoryService extends Service {
     @ApiOperation(value = "Get factory snippet by id",
                   notes = "If snippet type not set then default 'url' will be used")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
+                   @ApiResponse(code = 400, message = "Parameters are not valid: missing required parameter(s)"),
                    @ApiResponse(code = 404, message = "Factory or factory images not found"),
                    @ApiResponse(code = 500, message = "Internal server error")})
     public String getFactorySnippet(@ApiParam(value = "Factory ID")
@@ -566,7 +567,7 @@ public class FactoryService extends Service {
     @ApiOperation(value = "Construct factory from workspace",
                   notes = "This call returns a Factory.json that is used to create a factory.")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
+                   @ApiResponse(code = 400, message = "Parameters are not valid: missing required parameter(s)"),
                    @ApiResponse(code = 403, message = "Access to workspace denied"),
                    @ApiResponse(code = 404, message = "Workspace not found"),
                    @ApiResponse(code = 500, message = "Internal server error")})

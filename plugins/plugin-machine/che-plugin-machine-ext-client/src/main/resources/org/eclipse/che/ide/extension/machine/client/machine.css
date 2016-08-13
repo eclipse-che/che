@@ -20,6 +20,8 @@
 @eval outputBoxShadow org.eclipse.che.ide.api.theme.Style.theme.outputBoxShadow();
 @eval processTreeDevLabel org.eclipse.che.ide.api.theme.Style.theme.processTreeDevLabel();
 @eval processBadgeBorderColor org.eclipse.che.ide.api.theme.Style.theme.processBadgeBorderColor();
+@eval getTooltipBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.getTooltipBackgroundColor();
+@eval getPrimaryHighlightColor org.eclipse.che.ide.api.theme.Style.theme.getPrimaryHighlightColor();
 
 @external .terminal, .terminal-cursor;
 
@@ -192,7 +194,7 @@
 .selectCommandBox .selectCommandBoxIconPanel + div {
     float: left;
     text-align: left;
-    min-width: 138px;
+    width: 150px;
     padding: 0 5px 0 5px;
     display: inline-block;
 }
@@ -357,7 +359,7 @@
     border: 1px solid processBadgeBorderColor;
     box-sizing: border-box;
     display: none;
- }
+}
 
 .processTree .badgeVisible .processBadge {
     display: block;
@@ -435,4 +437,13 @@
 
 .hideStopButton .processesPanelStopButtonForProcess {
     display: none;
+}
+
+.consolesActiveToolButton[turnOn] {
+    opacity: 1;
+    background-color: getTooltipBackgroundColor;
+}
+
+.consolesActiveToolButton[turnOn] :first-child {
+    color: getPrimaryHighlightColor;
 }

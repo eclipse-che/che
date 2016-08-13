@@ -19,9 +19,6 @@ import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  *
@@ -40,15 +37,7 @@ public class LocalDockerNode implements DockerNode {
                            WorkspaceFolderPathProvider workspaceFolderNodePathProvider,
                            DockerConnectorConfiguration dockerConnectorConfiguration) throws IOException {
 
-        Path workspaceFolderPath = Paths.get(workspaceFolderNodePathProvider.getPath(workspaceId));
-        if (Files.notExists(workspaceFolderPath)) {
-            Files.createDirectories(workspaceFolderPath);
-        }
-        if (!Files.isDirectory(workspaceFolderPath)) {
-            throw new IOException("Workspace folder location " + workspaceFolderPath.toAbsolutePath() + " is invalid.");
-        }
-        workspaceFolder = workspaceFolderPath.toAbsolutePath().toString();
-
+        workspaceFolder = workspaceFolderNodePathProvider.getPath(workspaceId);
         host = dockerConnectorConfiguration.getDockerHost();
     }
 

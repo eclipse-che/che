@@ -12,26 +12,24 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.recipe.
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
+import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
+import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
-import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
-import org.eclipse.che.ide.api.editor.texteditor.HasReadOnlyProperty;
-import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.editor.orion.client.OrionEditorWidget;
-import org.eclipse.che.ide.editor.orion.client.OrionTextEditorFactory;
+import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
-import org.eclipse.che.ide.api.editor.editorconfig.DefaultTextEditorConfiguration;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -45,11 +43,11 @@ import static org.eclipse.che.ide.api.editor.EditorPartPresenter.PROP_INPUT;
  * @author Valeriy Svydenko
  */
 public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionDelegate {
-    private final RecipeEditorView       view;
-    private final RecipeFileFactory      recipeFileFactory;
-    private final FileTypeRegistry       fileTypeRegistry;
-    private final RecipeDescriptor       recipeDescriptor;
-    private final OrionTextEditorFactory orionTextEditorFactory;
+    private final RecipeEditorView               view;
+    private final RecipeFileFactory              recipeFileFactory;
+    private final FileTypeRegistry               fileTypeRegistry;
+    private final RecipeDescriptor               recipeDescriptor;
+    private final Provider<OrionEditorPresenter> orionTextEditorFactory;
 
     private EditorPartPresenter editor;
     private ActionDelegate      delegate;
@@ -60,7 +58,7 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
     @AssistedInject
     public RecipeEditorPanel(RecipeFileFactory recipeFileFactory,
                              FileTypeRegistry fileTypeRegistry,
-                             OrionTextEditorFactory orionTextEditorFactory,
+                             Provider<OrionEditorPresenter> orionTextEditorFactory,
                              RecipeEditorView view,
                              @Assisted @NotNull RecipeDescriptor recipeDescriptor) {
         this.view = view;
@@ -151,7 +149,6 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
             public void propertyChanged(PartPresenter source, int propId) {
                 switch (propId) {
                     case PROP_INPUT:
-                        setReadOnlyProperty(file);
                         view.showEditor(editor);
                         break;
                     case PROP_DIRTY:
@@ -168,16 +165,10 @@ public class RecipeEditorPanel implements TabPresenter, RecipeEditorView.ActionD
     }
 
     private TextEditor getEditor() {
-        TextEditorPresenter<OrionEditorWidget> editor = orionTextEditorFactory.createTextEditor();
+        OrionEditorPresenter editor = orionTextEditorFactory.get();
         editor.initialize(new DefaultTextEditorConfiguration());
 
         return editor;
-    }
-
-    private void setReadOnlyProperty(VirtualFile file) {
-        if (editor instanceof HasReadOnlyProperty) {
-            ((HasReadOnlyProperty)editor).setReadOnly(file.isReadOnly());
-        }
     }
 
     private boolean validateUndoOperation() {

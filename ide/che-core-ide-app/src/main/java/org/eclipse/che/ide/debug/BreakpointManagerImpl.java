@@ -17,7 +17,10 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -35,7 +38,7 @@ import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEventHandler;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.project.DeleteProjectEvent;
 import org.eclipse.che.ide.api.event.project.DeleteProjectHandler;
 import org.eclipse.che.ide.api.resources.File;
@@ -44,9 +47,11 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.debug.dto.BreakpointDto;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +63,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
+
+import static org.eclipse.che.ide.api.debug.Breakpoint.Type.BREAKPOINT;
 
 /**
  * Implementation of {@link BreakpointManager} for editor.
@@ -101,7 +108,6 @@ public class BreakpointManagerImpl implements BreakpointManager,
 
         this.debuggerManager.addObserver(this);
         registerEventHandlers(eventBus);
-        restoreBreakpoints();
     }
 
     @Override
@@ -125,7 +131,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
         }
 
         if (isLineNotEmpty(activeFile, lineNumber)) {
-            Breakpoint breakpoint = new Breakpoint(Type.BREAKPOINT,
+            Breakpoint breakpoint = new Breakpoint(BREAKPOINT,
                                                    lineNumber,
                                                    activeFile.getPath(),
                                                    activeFile,
@@ -229,8 +235,8 @@ public class BreakpointManagerImpl implements BreakpointManager,
      */
     private boolean isLineNotEmpty(final VirtualFile activeFile, int lineNumber) {
         EditorPartPresenter editor = getEditorForFile(activeFile.getPath());
-        if (editor instanceof TextEditorPresenter) {
-            Document document = ((TextEditorPresenter)editor).getDocument();
+        if (editor instanceof TextEditor) {
+            Document document = ((TextEditor)editor).getDocument();
             return !document.getLineContent(lineNumber).trim().isEmpty();
         }
 
@@ -385,6 +391,13 @@ public class BreakpointManagerImpl implements BreakpointManager,
      * Registers events handlers.
      */
     private void registerEventHandlers(EventBus eventBus) {
+        eventBus.addHandler(WorkspaceReadyEvent.getType(), new WorkspaceReadyEvent.WorkspaceReadyHandler() {
+            @Override
+            public void onWorkspaceReady(WorkspaceReadyEvent event) {
+                restoreBreakpoints();
+            }
+        });
+
         eventBus.addHandler(EditorOpenedEvent.TYPE, new EditorOpenedEventHandler() {
             @Override
             public void onEditorOpened(EditorOpenedEvent event) {
@@ -427,7 +440,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
                 }
             }
         });
-     }
+    }
 
     /**
      * @param pathToFind
@@ -503,7 +516,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
                     final Optional<Project> project = ((Resource)breakpoint.getFile()).getRelatedProject();
                     if (project.isPresent()) {
                         final ProjectConfigDto projectDto = dtoFactory.createDto(ProjectConfigDto.class)
-                                                                      .withPath(project.get().getName())
+                                                                      .withName(project.get().getName())
                                                                       .withPath(project.get().getPath())
                                                                       .withType(project.get().getType())
                                                                       .withDescription(project.get().getDescription())
@@ -545,6 +558,9 @@ public class BreakpointManagerImpl implements BreakpointManager,
                     return appContext.getWorkspaceRoot().getFile(dto.getPath()).then(new Function<Optional<File>, Void>() {
                         @Override
                         public Void apply(Optional<File> file) throws FunctionException {
+                            if (!file.isPresent()) {
+                                return null;
+                            }
                             if (dto.getType() == Type.CURRENT) {
                                 doSetCurrentBreakpoint(file.get(), dto.getLineNumber());
                             } else {
@@ -556,6 +572,11 @@ public class BreakpointManagerImpl implements BreakpointManager,
                             }
 
                             return null;
+                        }
+                    }).catchError(new Operation<PromiseError>() {
+                        @Override
+                        public void apply(PromiseError arg) throws OperationException {
+                            Log.error(getClass(), "Failed to restore breakpoint. ", arg.getCause());
                         }
                     });
                 }

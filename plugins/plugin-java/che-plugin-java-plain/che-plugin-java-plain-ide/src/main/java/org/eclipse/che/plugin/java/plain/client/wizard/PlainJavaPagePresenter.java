@@ -18,6 +18,7 @@ import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.tree.ResourceNode;
 import org.eclipse.che.plugin.java.plain.client.wizard.selector.SelectNodePresenter;
 import org.eclipse.che.plugin.java.plain.client.wizard.selector.SelectionDelegate;
@@ -31,6 +32,7 @@ import java.util.Map;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.WIZARD_MODE_KEY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
+import static org.eclipse.che.ide.resource.Path.valueOf;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
 
@@ -111,12 +113,13 @@ class PlainJavaPagePresenter extends AbstractWizardPage<MutableProjectConfig> im
 
     @Override
     public void onNodeSelected(List<Node> nodes) {
-        int projectNameLength = dataObject.getName().length();
+        String projectName = dataObject.getName();
 
         List<String> nodeRelativePath = new LinkedList<>();
 
         for (Node node : nodes) {
-            nodeRelativePath.add(((ResourceNode)node).getData().getLocation().toString().substring(projectNameLength + 1));
+            Path nodeLocation = ((ResourceNode)node).getData().getLocation();
+            nodeRelativePath.add(nodeLocation.makeRelativeTo(valueOf(projectName)).toString());
         }
 
         if (isSourceSelected) {

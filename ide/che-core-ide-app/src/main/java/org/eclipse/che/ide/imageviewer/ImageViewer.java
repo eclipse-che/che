@@ -31,6 +31,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -47,6 +48,7 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
     private CoreLocalizationConstant constant;
     private DialogFactory            dialogFactory;
     private WorkspaceAgent           workspaceAgent;
+    private WsAgentURLModifier       urlModifier;
     private ScrollPanel              editorView;
 
     @Inject
@@ -54,11 +56,13 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
                        CoreLocalizationConstant constant,
                        DialogFactory dialogFactory,
                        EventBus eventBus,
-                       WorkspaceAgent workspaceAgent) {
+                       WorkspaceAgent workspaceAgent,
+                       WsAgentURLModifier urlModifier) {
         this.resources = resources;
         this.constant = constant;
         this.dialogFactory = dialogFactory;
         this.workspaceAgent = workspaceAgent;
+        this.urlModifier = urlModifier;
 
         resources.imageViewerCss().ensureInjected();
 
@@ -150,7 +154,7 @@ public class ImageViewer extends AbstractEditorPresenter implements FileEventHan
      * @return {@link Image}
      */
     private Image getImage() {
-        String contentLink = input.getFile().getContentUrl();
+        String contentLink = urlModifier.modify(input.getFile().getContentUrl());
         Image image = (contentLink != null) ? new Image(contentLink) : new Image();
         image.setStyleName(resources.imageViewerCss().imageViewer());
         return image;

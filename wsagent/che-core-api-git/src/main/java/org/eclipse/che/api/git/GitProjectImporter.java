@@ -13,6 +13,7 @@ package org.eclipse.che.api.git;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.WorkspaceIdProvider;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
@@ -20,6 +21,7 @@ import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.BranchListRequest;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
@@ -265,7 +267,7 @@ public class GitProjectImporter implements ProjectImporter {
                                        .stream()
                                        .anyMatch(branch -> branch.getName().equals(branchName));
         final GitCheckoutEvent checkout = dtoFactory.createDto(GitCheckoutEvent.class)
-                                                    .withWorkspaceId(System.getenv("CHE_WORKSPACE_ID"))
+                                                    .withWorkspaceId(WorkspaceIdProvider.getWorkspaceId())
                                                     .withProjectName(projectName);
         if (startPoint != null) {
             if (branchExist) {

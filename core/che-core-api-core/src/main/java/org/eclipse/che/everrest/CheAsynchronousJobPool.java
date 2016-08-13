@@ -36,15 +36,6 @@ public class CheAsynchronousJobPool extends AsynchronousJobPool implements Conte
     }
 
     @Override
-    protected UriBuilder getAsynchronousJobUriBuilder(AsynchronousJob job) {
-        final String wsId = EnvironmentContext.getCurrent().getWorkspaceId();
-        if (wsId == null) {
-            return super.getAsynchronousJobUriBuilder(job);
-        }
-        return UriBuilder.fromPath(asynchronousServicePath).path(wsId).path(Long.toString(job.getJobId()));
-    }
-
-    @Override
     protected Callable<Object> newCallable(Object resource, Method method, Object[] params) {
         return ThreadLocalPropagateContext.wrap((super.newCallable(resource, method, params)));
     }

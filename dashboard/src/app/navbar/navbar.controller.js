@@ -38,7 +38,6 @@ export class CheNavBarCtrl {
 
     this.menuItemUrl = {
       dashboard: '#/',
-      projects: '#/projects',
       workspaces: '#/workspaces',
       administration: '#/administration',
       // subsections
@@ -72,10 +71,6 @@ export class CheNavBarCtrl {
 
   getWorkspacesNumber() {
     return this.cheAPI.cheWorkspace.getWorkspaces().length;
-  }
-
-  getProjectsNumber() {
-    return this.cheAPI.cheWorkspace.getAllProjects().length;
   }
 
   openLinkInNewTab(url) {

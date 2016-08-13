@@ -17,6 +17,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
@@ -90,6 +91,11 @@ public class NewFolderAction extends AbstractNewResourceAction {
             @Override
             public void apply(Folder folder) throws OperationException {
                 eventBus.fireEvent(new RevealResourceEvent(folder));
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                dialogFactory.createMessageDialog("Error", error.getMessage(), null).show();
             }
         });
     }

@@ -14,30 +14,24 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MessageBus;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
-import org.eclipse.che.ide.websocket.WebSocketException;
-import org.eclipse.che.ide.websocket.events.MessageHandler;
-import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
-import org.eclipse.che.ide.websocket.rest.Unmarshallable;
+import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
+import org.eclipse.che.ide.ui.loaders.initialization.OperationInfo;
 
-import javax.validation.constraints.NotNull;
-
-import static org.eclipse.che.ide.api.machine.MachineManager.MachineOperationType;
-import static org.eclipse.che.ide.api.machine.MachineManager.MachineOperationType.RESTART;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.MACHINE_BOOTING;
+import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
 
 /**
  * Notifies about changing machine state.
@@ -45,142 +39,84 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  * @author Artem Zatsarynnyi
  */
 @Singleton
-class MachineStatusNotifier {
-
-    /** WebSocket channel to receive messages about changing machine state. */
-    public static final String MACHINE_STATUS_WS_CHANNEL = "machine:status:";
+public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler {
 
     private final EventBus                    eventBus;
-    private final DtoUnmarshallerFactory      dtoUnmarshallerFactory;
-    private final AppContext                  appContext;
     private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant locale;
-
-    private MessageBus messageBus;
+    private final MachineServiceClient        machineServiceClient;
+    private final InitialLoadingInfo          initialLoadingInfo;
 
     @Inject
-    MachineStatusNotifier(EventBus eventBus,
-                          DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                          AppContext appContext,
-                          final MessageBusProvider messageBusProvider,
-                          NotificationManager notificationManager,
-                          MachineLocalizationConstant locale) {
+    MachineStatusNotifier(final EventBus eventBus,
+                          final InitialLoadingInfo initialLoadingInfo,
+                          final MachineServiceClient machineServiceClient,
+                          final NotificationManager notificationManager,
+                          final MachineLocalizationConstant locale) {
         this.eventBus = eventBus;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.appContext = appContext;
+        this.initialLoadingInfo = initialLoadingInfo;
+        this.machineServiceClient = machineServiceClient;
         this.notificationManager = notificationManager;
         this.locale = locale;
 
-        this.messageBus = messageBusProvider.getMessageBus();
+        eventBus.addHandler(MachineStatusChangedEvent.TYPE, this);
+    }
 
-        eventBus.addHandler(WorkspaceStartedEvent.TYPE, new WorkspaceStartedEvent.Handler() {
+    @Override
+    public void onMachineStatusChanged(final MachineStatusChangedEvent event) {
+        final String machineName = event.getMachineName();
+        final String machineId = event.getMachineId();
+
+        switch (event.getEventType()) {
+            case CREATING:
+                getMachine(machineId).then(notifyMachineCreating());
+                break;
+            case RUNNING:
+                getMachine(machineId).then(notifyMachineRunning());
+                break;
+            case DESTROYED:
+                notificationManager.notify(locale.notificationMachineDestroyed(machineName), SUCCESS, EMERGE_MODE);
+                break;
+            case ERROR:
+                notificationManager.notify(event.getErrorMessage(), FAIL, EMERGE_MODE);
+                break;
+        }
+    }
+
+    private Promise<MachineDto> getMachine(final String machineId) {
+        return machineServiceClient.getMachine(machineId).catchError(new Operation<PromiseError>() {
             @Override
-            public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-                messageBus = messageBusProvider.getMessageBus();
+            public void apply(PromiseError arg) throws OperationException {
+                notificationManager.notify(locale.failedToFindMachine(machineId));
             }
         });
     }
 
-    /**
-     * Start tracking machine state and notify about state changing.
-     *
-     * @param machine
-     *         machine to track
-     */
-    void trackMachine(Machine machine, MachineOperationType operationType) {
-        trackMachine(machine, null, operationType);
-    }
-
-    /**
-     * Start tracking machine state and notify about state changing.
-     *
-     * @param machine
-     *         machine to track
-     * @param runningListener
-     *         listener that will be notified when machine is running
-     */
-    void trackMachine(final Machine machine, final RunningListener runningListener, final MachineOperationType operationType) {
-        final String machineName = machine.getConfig().getName();
-        final String workspaceId = appContext.getWorkspace().getId();
-        final String wsChannel = MACHINE_STATUS_WS_CHANNEL + workspaceId + ":" + machineName;
-
-        final StatusNotification notification = notificationManager.notify("", PROGRESS, NOT_EMERGE_MODE);
-
-        final Unmarshallable<MachineStatusEvent> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(MachineStatusEvent.class);
-        final MessageHandler messageHandler = new SubscriptionHandler<MachineStatusEvent>(unmarshaller) {
+    private Operation<MachineDto> notifyMachineCreating() {
+        return new Operation<MachineDto>() {
             @Override
-            protected void onMessageReceived(MachineStatusEvent result) {
-                switch (result.getEventType()) {
-                    case RUNNING:
-                        unsubscribe(wsChannel, this);
-
-                        if (runningListener != null) {
-                            runningListener.onRunning();
-                        }
-
-                        final String message = RESTART.equals(operationType) ? locale.machineRestarted(machineName)
-                                                                             : locale.notificationMachineIsRunning(machineName);
-                        notification.setTitle(message);
-                        notification.setStatus(SUCCESS);
-                        eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.RUNNING));
-                        break;
-                    case DESTROYED:
-                        unsubscribe(wsChannel, this);
-                        notification.setStatus(SUCCESS);
-                        notification.setTitle(locale.notificationMachineDestroyed(machineName));
-                        eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
-                        break;
-                    case ERROR:
-                        unsubscribe(wsChannel, this);
-                        notification.setStatus(FAIL);
-                        notification.setTitle(result.getError());
-                        break;
+            public void apply(MachineDto machine) throws OperationException {
+                if (machine.getConfig().isDev()) {
+                    initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), IN_PROGRESS);
                 }
-            }
-
-            @Override
-            protected void onErrorReceived(Throwable exception) {
-                unsubscribe(wsChannel, this);
-                notification.setStatus(FAIL);
+                eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.CREATING));
             }
         };
-
-        switch (operationType) {
-            case START:
-                notification.setTitle(locale.notificationCreatingMachine(machineName));
-                break;
-            case RESTART:
-                notification.setTitle(locale.notificationMachineRestarting(machineName));
-                break;
-            case DESTROY:
-                notification.setTitle(locale.notificationDestroyingMachine(machineName));
-                break;
-        }
-
-        notification.setStatus(PROGRESS);
-
-        subscribe(wsChannel, messageHandler);
     }
 
-    private void subscribe(@NotNull String wsChannel, @NotNull MessageHandler handler) {
-        try {
-            messageBus.subscribe(wsChannel, handler);
-        } catch (WebSocketException e) {
-            Log.error(getClass(), e);
-        }
-    }
+    private Operation<MachineDto> notifyMachineRunning() {
+        return new Operation<MachineDto>() {
+            @Override
+            public void apply(MachineDto machine) throws OperationException {
+                final MachineConfigDto machineConfig = machine.getConfig();
+                if (machineConfig.isDev()) {
+                    initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), OperationInfo.Status.SUCCESS);
+                }
 
-    private void unsubscribe(@NotNull String wsChannel, @NotNull MessageHandler handler) {
-        try {
-            messageBus.unsubscribe(wsChannel, handler);
-        } catch (WebSocketException e) {
-            Log.error(getClass(), e);
-        }
+                final String message = locale.notificationMachineIsRunning(machineConfig.getName());
+                notificationManager.notify(message, SUCCESS, EMERGE_MODE);
+                eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.RUNNING));
+            }
+        };
     }
-
-    /** Listener's method will be invoked when machine is running. */
-    interface RunningListener {
-        void onRunning();
-    }
-
 }

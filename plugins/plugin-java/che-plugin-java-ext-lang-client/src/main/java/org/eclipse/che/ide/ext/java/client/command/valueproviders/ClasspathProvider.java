@@ -30,6 +30,9 @@ import org.eclipse.che.ide.extension.machine.client.command.valueproviders.Comma
 import java.util.List;
 import java.util.Set;
 
+import static org.eclipse.che.ide.ext.java.client.command.ClasspathContainer.JRE_CONTAINER;
+import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
+
 /**
  * Provides project's classpath.
  *
@@ -65,38 +68,50 @@ public class ClasspathProvider implements CommandPropertyValueProvider {
 
         final Resource[] resources = appContext.getResources();
 
-        if (resources != null && resources.length == 1) {
-
-            final Resource resource = resources[0];
-            final Optional<Project> project = resource.getRelatedProject();
-
-            if (JavaUtil.isJavaProject(project.get())) {
-                return classpathContainer.getClasspathEntries(project.get().getLocation().toString()).then(
-                        new Function<List<ClasspathEntryDto>, String>() {
-                            @Override
-                            public String apply(List<ClasspathEntryDto> arg) throws FunctionException {
-                                classpathResolver.resolveClasspathEntries(arg);
-                                Set<String> sources = classpathResolver.getSources();
-                                StringBuilder classpath = new StringBuilder("");
-                                for (String source : sources) {
-                                    classpath.append(source);
-                                }
-
-                                if (classpath.toString().isEmpty()) {
-                                    classpath.append(appContext.getProjectsRoot().toString()).append(project.get().getLocation().toString());
-                                }
-
-                                classpath.append(':');
-
-                                return classpath.toString();
-                            }
-                        });
-            } else {
-                return promises.resolve("");
-            }
+        if (resources == null || resources.length != 1) {
+            return promises.resolve("");
         }
 
-        return promises.resolve("");
+        final Resource resource = resources[0];
+        final Optional<Project> project = resource.getRelatedProject();
+
+        if (!JavaUtil.isJavaProject(project.get())) {
+            return promises.resolve("");
+        }
+
+        final String projectPath = project.get().getLocation().toString();
+
+        return classpathContainer.getClasspathEntries(projectPath).then(new Function<List<ClasspathEntryDto>, String>() {
+            @Override
+            public String apply(List<ClasspathEntryDto> arg) throws FunctionException {
+                classpathResolver.resolveClasspathEntries(arg);
+                Set<String> libs = classpathResolver.getLibs();
+                StringBuilder classpath = new StringBuilder();
+                for (String lib : libs) {
+                    classpath.append(lib).append(':');
+                }
+
+                for (ClasspathEntryDto container : classpathResolver.getContainers()) {
+                    if (!JRE_CONTAINER.equals(container.getPath())) {
+                        addLibsFromContainer(container, classpath);
+                    }
+                }
+
+                if (classpath.toString().isEmpty()) {
+                    classpath.append(appContext.getProjectsRoot().toString()).append(projectPath).append(':');
+                }
+
+                return classpath.toString();
+            }
+        });
+    }
+
+    private void addLibsFromContainer(ClasspathEntryDto container, StringBuilder classpath) {
+        for (ClasspathEntryDto entry : container.getExpandedEntries()) {
+            if (LIBRARY == entry.getEntryKind()) {
+                classpath.append(entry.getPath()).append(':');
+            }
+        }
     }
 
 }

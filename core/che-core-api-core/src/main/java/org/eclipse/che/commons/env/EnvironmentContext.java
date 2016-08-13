@@ -50,21 +50,11 @@ public class EnvironmentContext {
 
     private Subject subject;
 
-    private String workspaceName;
-
-    private String workspaceId;
-
-    private boolean workspaceTemporary;
-
-
     public EnvironmentContext() {
     }
 
     public EnvironmentContext(EnvironmentContext other) {
         setSubject(other.getSubject());
-        setWorkspaceName(other.getWorkspaceName());
-        setWorkspaceId(other.getWorkspaceId());
-        setWorkspaceTemporary(other.isWorkspaceTemporary());
     }
 
     public Subject getSubject() {
@@ -73,29 +63,5 @@ public class EnvironmentContext {
 
     public void setSubject(Subject subject) {
         this.subject = subject;
-    }
-
-    public String getWorkspaceName() {
-        return workspaceName;
-    }
-
-    public void setWorkspaceName(String workspaceName) {
-        this.workspaceName = workspaceName;
-    }
-
-    public String getWorkspaceId() {
-        return workspaceId;
-    }
-
-    public void setWorkspaceId(String workspaceId) {
-        this.workspaceId = workspaceId;
-    }
-
-    public boolean isWorkspaceTemporary() {
-        return workspaceTemporary;
-    }
-
-    public void setWorkspaceTemporary(boolean workspaceTemporary) {
-        this.workspaceTemporary = workspaceTemporary;
     }
 }

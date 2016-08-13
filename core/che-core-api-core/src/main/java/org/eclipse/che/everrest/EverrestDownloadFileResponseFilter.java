@@ -15,7 +15,6 @@ import org.everrest.core.ApplicationContext;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerResponse;
 import org.everrest.core.ResponseFilter;
-import org.everrest.core.impl.ApplicationContextImpl;
 
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
@@ -33,13 +32,13 @@ public class EverrestDownloadFileResponseFilter extends DownloadFileResponseFilt
      * Filter the given container response.
      *
      * @param containerResponse
-     *         the reponse to use
+     *         the response to use
      */
     public void doFilter(GenericContainerResponse containerResponse) {
         containerResponse.getResponse();
 
         // Get the request
-        ApplicationContext applicationContext = ApplicationContextImpl.getCurrent();
+        ApplicationContext applicationContext = ApplicationContext.getCurrent();
         Request request = applicationContext.getRequest();
 
         // Apply header if all if correct

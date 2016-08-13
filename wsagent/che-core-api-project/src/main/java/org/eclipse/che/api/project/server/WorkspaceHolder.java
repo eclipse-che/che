@@ -108,7 +108,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class)
                                       .path(WorkspaceService.class, "updateProject")
-                                      .build(workspaceId, project.getPath()).toString();
+                                      .build(new String[] {workspaceId, project.getPath()}, false).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).usePutMethod().setBody(asDto(project)).request();
         } catch (IOException | ApiException e) {
@@ -123,7 +123,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
          final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class)
                                       .path(WorkspaceService.class, "deleteProject")
-                                      .build(workspaceId, project.getPath()).toString();
+                                      .build(new String[] {workspaceId, project.getPath()}, false).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).useDeleteMethod().request();
         } catch (IOException | ApiException e) {

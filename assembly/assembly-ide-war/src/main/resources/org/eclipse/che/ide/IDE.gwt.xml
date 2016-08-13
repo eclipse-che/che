@@ -67,6 +67,7 @@
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
 
     <inherits name='org.eclipse.che.api.core.Core'/>
+    <inherits name='org.eclipse.che.api.core.model.Model'/>
     <inherits name='org.eclipse.che.api.machine.Machine'/>
     <inherits name='org.eclipse.che.api.git.Git'/>
     <inherits name='org.eclipse.che.api.project.Project'/>

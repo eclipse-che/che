@@ -31,6 +31,8 @@ import java.util.Map;
  */
 @Singleton
 public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChangedHandler {
+    public static String JRE_CONTAINER = "org.eclipse.jdt.launching.JRE_CONTAINER";
+
     private final ClasspathServiceClient classpathServiceClient;
 
     private Map<String, Promise<List<ClasspathEntryDto>>> classpathes;

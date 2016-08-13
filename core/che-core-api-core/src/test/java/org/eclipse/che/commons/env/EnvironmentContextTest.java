@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 public class EnvironmentContextTest {
 
@@ -24,13 +23,9 @@ public class EnvironmentContextTest {
     public void shouldBeAbleToSetEnvContextInSameThread() {
         //given
         EnvironmentContext expected = EnvironmentContext.getCurrent();
-        expected.setWorkspaceId("ws1");
-        expected.setWorkspaceTemporary(true);
         expected.setSubject(new SubjectImpl("user", "id", "token", false));
 
         EnvironmentContext actual = EnvironmentContext.getCurrent();
-        assertEquals(actual.getWorkspaceId(), "ws1");
-        assertTrue(actual.isWorkspaceTemporary());
         Subject actualSubject = actual.getSubject();
         assertEquals(actualSubject.getUserName(), "user");
         assertEquals(actualSubject.getUserId(), "id");
@@ -42,8 +37,6 @@ public class EnvironmentContextTest {
     public void shouldNotBeAbleToSeeContextInOtherThread() {
         //given
         final EnvironmentContext expected = EnvironmentContext.getCurrent();
-        expected.setWorkspaceId("ws1");
-        expected.setWorkspaceTemporary(true);
         expected.setSubject(new SubjectImpl("user", "id", "token", false));
 
 

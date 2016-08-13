@@ -54,6 +54,12 @@ public interface DockerView extends View<DockerView.ActionDelegate> {
      */
     void setSourceUrl(String sourceUrl);
 
+    /**
+     * Sets machine sourceContent value.
+     *
+     * @param sourceContent
+     */
+    void setSourceContent(String sourceContent);
 
     /**
      * Update target fields on DockerView.

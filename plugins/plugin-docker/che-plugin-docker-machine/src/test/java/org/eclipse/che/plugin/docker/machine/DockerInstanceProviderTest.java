@@ -40,6 +40,7 @@ import org.eclipse.che.plugin.docker.client.params.CreateContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
+import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
@@ -54,6 +55,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,10 +69,12 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_FILE_TYPE;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_IMAGE_TYPE;
+import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -155,7 +159,6 @@ public class DockerInstanceProviderTest {
 
         EnvironmentContext envCont = new EnvironmentContext();
         envCont.setSubject(new SubjectImpl(USER_NAME, "userId", USER_TOKEN, false));
-        envCont.setWorkspaceId(WORKSPACE_ID);
         EnvironmentContext.setCurrent(envCont);
 
 
@@ -208,11 +211,10 @@ public class DockerInstanceProviderTest {
     }
 
     @Test
-    public void shouldPullDockerImageOnInstanceCreationFromSnapshot() throws Exception {
-        String repo = "repo";
+    public void shouldPullDockerImageOnInstanceCreationFromSnapshotFromRegistry() throws Exception {
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
         String tag = "latest";
         String registry = "localhost:1234";
-
 
         createInstanceFromSnapshot(repo, tag, registry);
 
@@ -222,8 +224,20 @@ public class DockerInstanceProviderTest {
     }
 
     @Test
+    public void shouldNotPullDockerImageOnInstanceCreationFromLocalSnapshot() throws Exception {
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
+        String tag = "latest";
+        String registry = "localhost:1234";
+        dockerInstanceProvider = getDockerInstanceProvider(false);
+
+        createInstanceFromSnapshot(repo, tag, registry);
+
+        verify(dockerConnector, never()).pull(eq(PullParams.create(repo).withTag(tag)), any(ProgressMonitor.class));
+    }
+
+    @Test
     public void shouldUseLocalImageOnInstanceCreationFromSnapshot() throws Exception {
-        final String repo = "repo";
+        final String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
         final String tag = "latest";
         dockerInstanceProvider = getDockerInstanceProvider(false);
 
@@ -239,7 +253,7 @@ public class DockerInstanceProviderTest {
 
     @Test
     public void shouldRemoveLocalImageDuringRemovalOfSnapshot() throws Exception {
-        final String repo = "repo";
+        final String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
         final String tag = "latest";
         final DockerMachineSource dockerMachineSource = new DockerMachineSource(repo).withTag(tag);
         dockerInstanceProvider = getDockerInstanceProvider(false);
@@ -250,13 +264,47 @@ public class DockerInstanceProviderTest {
     }
 
     @Test
+    public void shouldRemoveImageAfterRestoreFromSnapshotFromRegistry() throws Exception {
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
+        String tag = "latest";
+
+        createInstanceFromSnapshot(repo, tag, null);
+
+        verify(dockerConnector).removeImage(any(RemoveImageParams.class));
+    }
+
+    @Test
+    public void shouldNotRemoveImageAfterRestoreFromLocalSnapshot() throws Exception {
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo";
+        String tag = "latest";
+        dockerInstanceProvider = getDockerInstanceProvider(false);
+
+        createInstanceFromSnapshot(repo, tag, null);
+
+        verify(dockerConnector, never()).removeImage(any(RemoveImageParams.class));
+    }
+
+    @Test
+    public void shouldNotRemoveImageWhenCreatingInstanceFromLocalImage() throws Exception {
+        String repo = "repo1";
+        String tag = "latest";
+        DockerInstanceProvider dockerInstanceProvider = getDockerInstanceProvider(false);
+        MachineImpl machine = getMachineBuilder().build();
+        machine.getConfig().setSource(new DockerMachineSource(repo).withTag(tag).withDigest("digest"));
+
+        dockerInstanceProvider.createInstance(machine, LineConsumer.DEV_NULL);
+
+        verify(dockerConnector, never()).removeImage(any(RemoveImageParams.class));
+    }
+
+    @Test
     public void shouldReTagBuiltImageWithPredictableOnInstanceCreationFromRecipe() throws Exception {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(containerNameGenerator).generateContainerName(eq(WORKSPACE_ID),
                                                                                           eq(MACHINE_ID),
                                                                                           eq(USER_NAME),
                                                                                           eq(MACHINE_NAME));
-        String repo = "repo1";
+        String repo = MACHINE_SNAPSHOT_PREFIX + "repo1";
         String tag = "tag1";
         String registry = "registry1";
         TagParams tagParams = TagParams.create(registry + "/" + repo + ":" + tag, "eclipse-che/" + generatedContainerId);
@@ -340,6 +388,45 @@ public class DockerInstanceProviderTest {
         ArgumentCaptor<CreateContainerParams> argumentCaptor = ArgumentCaptor.forClass(CreateContainerParams.class);
         verify(dockerConnector).createContainer(argumentCaptor.capture());
         assertTrue(argumentCaptor.getValue().getContainerConfig().getHostConfig().isPrivileged());
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldRemoveContainerInCaseFailedBindWorkspaceOnCreateInstance() throws Exception {
+        doThrow(MachineException.class).when(dockerNode).bindWorkspace();
+        final boolean isDev = true;
+        final String hostProjectsFolder = "/tmp/projects";
+        when(dockerNode.getProjectsFolder()).thenReturn(hostProjectsFolder);
+
+        createInstanceFromRecipe(isDev, WORKSPACE_ID);
+
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldRemoveContainerInCaseFailedStartContainer() throws Exception {
+        doThrow(IOException.class).when(dockerConnector).startContainer(StartContainerParams.create(CONTAINER_ID));
+
+        createInstanceFromRecipe(false, WORKSPACE_ID);
+
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldRemoveContainerInCaseFailedGetCreateNode() throws Exception {
+        doThrow(IOException.class).when(dockerMachineFactory).createNode(any(), any());
+
+        createInstanceFromRecipe(false, WORKSPACE_ID);
+
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
+    }
+
+    @Test(expectedExceptions = MachineException.class)
+    public void shouldRemoveContainerInCaseFailedCreateInstanceOnTheDockerMachineFactory() throws Exception {
+        doThrow(IOException.class).when(dockerMachineFactory).createInstance(any(), any(), any(), any(), any());
+
+        createInstanceFromRecipe(false, WORKSPACE_ID);
+
+        verify(dockerConnector).removeContainer(RemoveContainerParams.create(CONTAINER_ID).withRemoveVolumes(true).withForce(true));
     }
 
     @Test

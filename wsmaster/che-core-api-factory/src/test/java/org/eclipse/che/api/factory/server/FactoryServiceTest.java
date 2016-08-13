@@ -89,6 +89,7 @@ import static org.eclipse.che.api.factory.server.FactoryService.VALIDATE_QUERY_P
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anySetOf;
@@ -160,6 +161,7 @@ public class FactoryServiceTest {
         dto = DtoFactory.getInstance();
         factoryBuilder = spy(new FactoryBuilder(new SourceStorageParametersValidator()));
         doNothing().when(factoryBuilder).checkValid(any(Factory.class));
+        doNothing().when(factoryBuilder).checkValid(any(Factory.class), anyBoolean());
         when(factoryParametersResolverHolder.getFactoryParametersResolvers()).thenReturn(factoryParametersResolvers);
         when(userDao.getById(anyString())).thenReturn(new UserImpl(null,
                                                                    null,
@@ -922,7 +924,7 @@ public class FactoryServiceTest {
 
         assertEquals(response.getStatusCode(), BAD_REQUEST.getStatusCode());
         assertEquals(dto.createDtoFromJson(response.getBody().asString(), ServiceError.class).getMessage(),
-                     "The updating factory shouldn't be null");
+                     "The factory information is not updateable");
 
     }
 

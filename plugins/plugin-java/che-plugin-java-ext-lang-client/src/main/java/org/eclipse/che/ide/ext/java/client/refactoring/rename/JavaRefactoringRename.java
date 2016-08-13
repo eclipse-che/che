@@ -31,7 +31,7 @@ import org.eclipse.che.ide.api.editor.link.LinkedModelData;
 import org.eclipse.che.ide.api.editor.link.LinkedModelGroup;
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -302,8 +302,8 @@ public class JavaRefactoringRename implements FileEventHandler {
     }
 
     private void undoChanges() {
-        if (linkedEditor instanceof TextEditorPresenter) {
-            ((TextEditorPresenter)linkedEditor).getUndoRedo().undo();
+        if (linkedEditor instanceof UndoableEditor) {
+            ((UndoableEditor)linkedEditor).getUndoRedo().undo();
         }
     }
 

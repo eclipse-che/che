@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.MAX_COUNT;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.RECIPE_TYPE;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.SKIP_COUNT;
@@ -316,7 +317,7 @@ public class CreateWorkspacePresenterTest {
 
         verify(view, times(2)).getWorkspaceName();
         verify(dtoFactory).createDto(MachineConfigDto.class);
-        verify(machineConfigDto).withName("ws-machine");
+        verify(machineConfigDto).withName(WS_MACHINE_NAME);
         verify(machineConfigDto).withType("docker");
         verify(machineConfigDto).withSource(machineSourceDto);
         verify(machineConfigDto).withDev(true);
@@ -337,7 +338,7 @@ public class CreateWorkspacePresenterTest {
         callApplyCreateWorkspaceMethod();
 
         verify(wsComponentProvider).get();
-        verify(workspaceComponent).startWorkspaceById(usersWorkspaceDto, componentCallback);
+        verify(workspaceComponent).startWorkspace(usersWorkspaceDto, componentCallback);
     }
 
     private void callApplyCreateWorkspaceMethod() throws Exception {
@@ -361,7 +362,7 @@ public class CreateWorkspacePresenterTest {
 
         callApplyCreateWorkspaceMethod();
 
-        verify(workspaceComponent).startWorkspaceById(usersWorkspaceDto, componentCallback);
+        verify(workspaceComponent).startWorkspace(usersWorkspaceDto, componentCallback);
     }
 
     @Test

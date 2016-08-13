@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
-import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.shared.AddRequest;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.git.shared.BranchListRequest;
@@ -115,15 +115,12 @@ public class PullTest {
         connection.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
         connection.commit(newDto(CommitRequest.class).withMessage("remote test"));
 
-        GitConnection connection2 = connectToInitializedGitRepository(connectionFactory, remoteRepo);
-        addFile(connection2, "EMPTY", "");
-        connection2.add(newDto(AddRequest.class).withFilepattern(Arrays.asList(".")));
-        connection2.commit(newDto(CommitRequest.class).withMessage("init"));
+        GitConnection connection2 = connectToGitRepositoryWithContent(connectionFactory, remoteRepo);
 
         //when
         PullRequest request = newDto(PullRequest.class);
         request.setRemote(connection.getWorkingDir().getAbsolutePath());
-        request.setRefSpec(branchName);
+        request.setRefSpec("refs/heads/remoteBranch:refs/heads/remoteBranch");
         connection2.pull(request);
         //then
         assertTrue(new File(remoteRepo.getAbsolutePath(), "remoteFile").exists());
@@ -139,5 +136,30 @@ public class PullTest {
         //when
         PullRequest request = newDto(PullRequest.class);
         connection.pull(request);
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class,
+        expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "No remote repository specified.  " +
+                                                                                   "Please, specify either a URL or a remote name from which new revisions should be fetched in request.")
+    public void testWhenThereAreNoAnyRemotesBehindTheProxy(GitConnectionFactory connectionFactory) throws Exception {
+        //given
+        System.setProperty("http.proxyUser", "user1");
+        System.setProperty("http.proxyPassword", "paswd1");
+        System.setProperty("https.proxyUser", "user2");
+        System.setProperty("https.proxyPassword", "paswd2");
+
+        GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
+
+        //when
+        PullRequest request = newDto(PullRequest.class);
+        connection.pull(request);
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        System.clearProperty("http.proxyUser");
+        System.clearProperty("http.proxyPassword");
+        System.clearProperty("https.proxyUser");
+        System.clearProperty("https.proxyPassword");
     }
 }

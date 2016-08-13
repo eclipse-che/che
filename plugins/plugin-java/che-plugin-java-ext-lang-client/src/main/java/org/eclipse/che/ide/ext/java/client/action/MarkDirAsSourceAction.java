@@ -47,10 +47,10 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  */
 @Singleton
 public class MarkDirAsSourceAction extends AbstractPerspectiveAction {
-    private final AppContext               appContext;
-    private final ClasspathServiceClient   classpathService;
-    private final ClasspathResolver        classpathResolver;
-    private final NotificationManager      notificationManager;
+    private final AppContext             appContext;
+    private final ClasspathServiceClient classpathService;
+    private final ClasspathResolver      classpathResolver;
+    private final NotificationManager    notificationManager;
 
     @Inject
     public MarkDirAsSourceAction(JavaResources javaResources,
@@ -99,8 +99,17 @@ public class MarkDirAsSourceAction extends AbstractPerspectiveAction {
     @Override
     public void updateInPerspective(ActionEvent e) {
         final Resource[] resources = appContext.getResources();
-        final boolean inJavaProject = resources != null && resources.length == 1 && isJavaProject(resources[0].getRelatedProject().get());
 
-        e.getPresentation().setEnabledAndVisible(inJavaProject && !resources[0].getMarker(SourceFolderMarker.ID).isPresent());
+        if (resources == null || resources.length != 1) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        Resource resource = resources[0];
+        final boolean inJavaProject = isJavaProject(resource.getRelatedProject().get());
+
+        e.getPresentation().setEnabledAndVisible(inJavaProject &&
+                                                 resource.isFolder() &&
+                                                 !resource.getMarker(SourceFolderMarker.ID).isPresent());
     }
 }

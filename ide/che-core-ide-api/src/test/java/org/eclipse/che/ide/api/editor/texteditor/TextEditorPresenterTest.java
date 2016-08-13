@@ -62,7 +62,7 @@ public class TextEditorPresenterTest {
     @Mock
     private EditorWidgetFactory<EditorWidget> editorWidgetFactory;
     @Mock
-    private EditorModule<EditorWidget>        editorModule;
+    private EditorModule        editorModule;
     @Mock
     private TextEditorPartView                editorView;
     @Mock

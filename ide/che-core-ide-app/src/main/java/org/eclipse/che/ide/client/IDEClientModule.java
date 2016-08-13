@@ -20,6 +20,8 @@ import org.eclipse.che.ide.part.widgets.editortab.EditorTab;
 import org.eclipse.che.ide.part.widgets.editortab.EditorTabWidget;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButtonWidget;
+import org.eclipse.che.ide.project.ResolvingProjectStateHolderRegistry;
+import org.eclipse.che.ide.project.ResolvingProjectStateHolderRegistryImpl;
 
 /**
  * GIN Client module for ide-client subproject. Used to maintain relations of
@@ -38,5 +40,7 @@ public class IDEClientModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(PartButton.class, PartButtonWidget.class)
                                              .implement(EditorTab.class, EditorTabWidget.class)
                                              .build(TabItemFactory.class));
+
+        bind(ResolvingProjectStateHolderRegistry.class).to(ResolvingProjectStateHolderRegistryImpl.class);
     }
 }
