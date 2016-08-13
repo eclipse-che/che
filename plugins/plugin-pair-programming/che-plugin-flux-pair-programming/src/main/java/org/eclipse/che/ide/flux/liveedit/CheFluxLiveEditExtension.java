@@ -15,8 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.user.client.Window;
-import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.api.promises.client.Operation;
@@ -28,16 +26,13 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.events.*;
-import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
-import org.eclipse.che.ide.api.editor.texteditor.CursorModelWithHandler;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProviderRegistry;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
@@ -47,8 +42,6 @@ import org.eclipse.che.ide.socketio.Message;
 import org.eclipse.che.ide.socketio.SocketIOOverlay;
 import org.eclipse.che.ide.socketio.SocketIOResources;
 import org.eclipse.che.ide.socketio.SocketOverlay;
-import org.eclipse.che.ide.util.ListenerManager;
-import org.eclipse.che.ide.util.ListenerRegistrar;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
@@ -66,11 +59,9 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.resource.Path;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.ide.api.notification.ReadState.READ;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsPresenter.PREVIEW_URL_ATTR;
 
 
 @Extension(title = "Che Flux extension", version = "1.0.0")
