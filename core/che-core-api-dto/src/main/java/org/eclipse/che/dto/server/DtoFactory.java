@@ -180,6 +180,21 @@ public final class DtoFactory {
     }
 
     /**
+     * Creates new instance of class which implements specified DTO interface, uses the specific JSON data for
+     * initializing fields of DTO object.
+     *
+     * @param json
+     *            JSON data
+     * @param dtoInterface
+     *            DTO interface
+     * @throws IllegalArgumentException
+     *             if can't provide any implementation for specified interface
+     */
+    public <T> T createDtoFromJson(JsonElement json, Class<T> dtoInterface) {
+        return getDtoProvider(dtoInterface).fromJson(json);
+    }
+
+    /**
      * Creates new instance of class which implements specified DTO interface, parses specified JSON data and uses parsed data for
      * initializing fields of DTO object.
      *
