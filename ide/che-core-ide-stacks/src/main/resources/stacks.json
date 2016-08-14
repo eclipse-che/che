@@ -1,5 +1,88 @@
 [
   {
+    "id": "che-in-che",
+    "creator": "ide",
+    "name": "Eclipse Che",
+    "description": "Utilities to build Che with Che. Alpine, JDK 8, maven, git, docker.",
+    "scope": "general",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Tomcat",
+      "Subversion",
+      "Ubuntu",
+      "Git",
+      "Docker"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_92"
+      },
+      {
+        "name": "Maven",
+        "version": "3.3.9"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.29"
+      }
+      {
+        "name": "Docker",
+        "version": "1.12.0"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/alpine-jdk:nightly"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "Che in Che",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "build",
+          "type": "mvn"
+        }
+      ]
+    },
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "search"
+        ]
+      }
+    ],
+    "stackIcon": {
+      "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "java-default",
     "creator": "ide",
     "name": "Java",
