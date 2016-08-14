@@ -22,10 +22,6 @@ init_logging() {
 
 init_global_variables() {
 
-  CHE_SERVER_CONTAINER_NAME="che-server"
-  CHE_SERVER_IMAGE_NAME="codenvy/che-server"
-  CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
-
   # Set variables that use docker as utilities to avoid over container execution
   ETH0_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig eth0 2> /dev/null" | \
                                                             grep "inet addr:" | \
@@ -52,6 +48,8 @@ init_global_variables() {
   DOCKER_INSTALL_TYPE=$(get_docker_install_type)
 
   # User configurable variables
+  DEFAULT_CHE_SERVER_CONTAINER_NAME="che-server"
+  DEFAULT_CHE_SERVER_IMAGE_NAME="codenvy/che-server"
   DEFAULT_DOCKER_HOST_IP=$(get_docker_host_ip)
   DEFAULT_CHE_HOSTNAME=$(get_che_hostname)
   DEFAULT_CHE_PORT="8080"
@@ -65,6 +63,8 @@ init_global_variables() {
   CHE_CONF_FOLDER=${CHE_CONF_FOLDER:+$(get_clean_path ${CHE_CONF_FOLDER})}
   CHE_DATA_FOLDER=${CHE_DATA_FOLDER:+$(get_clean_path ${CHE_DATA_FOLDER})}
 
+  CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}
+  CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME:-${DEFAULT_CHE_SERVER_IMAGE_NAME}}
   CHE_HOSTNAME=${CHE_HOSTNAME:-${DEFAULT_CHE_HOSTNAME}}
   CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
@@ -97,7 +97,7 @@ init_global_variables() {
 
   USAGE="
 Usage:
-  docker run -v /var/run/docker.sock:/var/run/docker.sock ${CHE_LAUNCHER_IMAGE_NAME} [COMMAND]
+  docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che [COMMAND]
      start                              Starts Che server
      stop                               Stops Che server
      restart                            Restart Che server

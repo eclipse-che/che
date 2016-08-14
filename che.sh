@@ -41,13 +41,11 @@ check_docker() {
 init_global_variables() {
 
   CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
-  CHE_SERVER_IMAGE_NAME="codenvy/che-server"
   CHE_FILE_IMAGE_NAME="codenvy/che-file"
   CHE_MOUNT_IMAGE_NAME="codenvy/che-mount"
   CHE_TEST_IMAGE_NAME="codenvy/che-test"
 
   CHE_LAUNCHER_CONTAINER_NAME="che-launcher"
-  CHE_SERVER_CONTAINER_NAME="che-server"
   CHE_FILE_CONTAINER_NAME="che-file"
   CHE_MOUNT_CONTAINER_NAME="che-mount"
   CHE_TEST_CONTAINER_NAME="che-test"
@@ -297,6 +295,7 @@ execute_che_launcher() {
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
 
   info "ECLIPSE CHE: LAUNCHING LAUNCHER"
+
   docker_exec run -t --rm --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     $(get_list_of_che_system_environment_variables) \
@@ -512,7 +511,9 @@ case ${CHE_CLI_ACTION} in
   ;;
   update)
     update_che_image ${CHE_LAUNCHER_IMAGE_NAME}
-    update_che_image ${CHE_SERVER_IMAGE_NAME}
+# TODO: Call the che-launcher to update the che-server instead
+# TODO: Do a hard prune - where we wipe previous images and re-download
+#    update_che_image ${CHE_SERVER_IMAGE_NAME}
     update_che_image ${CHE_MOUNT_IMAGE_NAME}
     update_che_image ${CHE_FILE_IMAGE_NAME}
   ;;

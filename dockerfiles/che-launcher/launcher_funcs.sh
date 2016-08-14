@@ -229,7 +229,7 @@ get_che_container_image_name() {
 }
 
 get_che_server_container_id() {
-  docker ps -qa -f "name=${CHE_SERVER_CONTAINER_NAME}"
+  docker ps -q -a -f "name=${CHE_SERVER_CONTAINER_NAME}"
 }
 
 wait_until_container_is_running() {
