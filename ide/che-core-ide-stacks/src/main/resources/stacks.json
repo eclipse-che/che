@@ -1457,6 +1457,85 @@
     }
   },
   {
+    "id": "flux-default",
+    "creator": "rnavagamuwa",
+    "name": "Flux",
+    "description": "Default Java Stack with JDK 8, Maven and Eclipse flux. Can be used for pair programming",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "Java",
+      "JDK",
+      "Maven",
+      "Flux",
+      "Rabbitmq",
+      "Node"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "rnavagamuwa/fluxworkspace"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 2000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "build",
+          "type": "mvn"
+        },
+        {
+          "commandLine": "sudo service rabbitmq-server start && cd /home/user/flux-master/node.server && npm start",
+          "name": "flux",
+          "type": "custom"
+        }
+      ]
+    },
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "search"
+        ]
+      }
+    ],
+    "stackIcon": {
+      "name": "type-flux.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "ubuntu",
     "creator": "ide",
     "name": "Ubuntu",
