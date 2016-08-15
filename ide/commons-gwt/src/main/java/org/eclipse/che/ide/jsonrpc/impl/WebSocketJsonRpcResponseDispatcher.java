@@ -21,6 +21,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 
 /**
  * Dispatches JSON RPC responses among all registered implementations of {@link JsonRpcResponseReceiver}
@@ -30,7 +32,7 @@ import java.util.Map;
  */
 @Singleton
 public class WebSocketJsonRpcResponseDispatcher implements JsonRpcDispatcher {
-    private final Map<RegExp, JsonRpcResponseReceiver> receivers = new HashMap<>();
+    private final Map<String, JsonRpcResponseReceiver> receivers;
 
     private final JsonRpcRequestRegistry registry;
     private final DtoFactory             dtoFactory;
@@ -39,13 +41,7 @@ public class WebSocketJsonRpcResponseDispatcher implements JsonRpcDispatcher {
     public WebSocketJsonRpcResponseDispatcher(Map<String, JsonRpcResponseReceiver> receivers,
                                               JsonRpcRequestRegistry registry,
                                               DtoFactory dtoFactory) {
-
-        for (Map.Entry<String, JsonRpcResponseReceiver> entry : receivers.entrySet()) {
-            final RegExp regExp = RegExp.compile(entry.getKey());
-            final JsonRpcResponseReceiver receiver = entry.getValue();
-            this.receivers.put(regExp, receiver);
-        }
-
+        this.receivers = receivers;
         this.registry = registry;
         this.dtoFactory = dtoFactory;
     }
@@ -55,9 +51,9 @@ public class WebSocketJsonRpcResponseDispatcher implements JsonRpcDispatcher {
         final JsonRpcResponse response = dtoFactory.createDtoFromJson(message, JsonRpcResponse.class);
         final String method = registry.extractFor(response.getId());
 
-        for (Map.Entry<RegExp, JsonRpcResponseReceiver> entry : receivers.entrySet()) {
-            final RegExp regExp = entry.getKey();
-            if (regExp.test(method)) {
+        for (Entry<String, JsonRpcResponseReceiver> entry : receivers.entrySet()) {
+            final String candidate = entry.getKey();
+            if (Objects.equals(candidate, method)) {
                 final JsonRpcResponseReceiver receiver = entry.getValue();
                 Log.debug(getClass(), "Matching response receiver: ", receiver.getClass());
                 receiver.receive(response);

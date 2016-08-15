@@ -21,6 +21,7 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,11 +35,11 @@ import java.util.regex.Pattern;
 public class WebSocketJsonRpcRequestDispatcher implements JsonRpcDispatcher {
     private static final Logger LOG = LoggerFactory.getLogger(WebSocketJsonRpcRequestDispatcher.class);
 
-    private final Map<Pattern, JsonRpcRequestReceiver> receivers = new HashMap<>();
+    private final Map<String, JsonRpcRequestReceiver> receivers;
 
     @Inject
     public WebSocketJsonRpcRequestDispatcher(Map<String, JsonRpcRequestReceiver> receivers) {
-        receivers.forEach((k, v) -> this.receivers.put(Pattern.compile(k), v));
+        this.receivers = receivers;
     }
 
     @Override
@@ -46,10 +47,9 @@ public class WebSocketJsonRpcRequestDispatcher implements JsonRpcDispatcher {
         final JsonRpcRequest request = DtoFactory.getInstance().createDtoFromJson(message, JsonRpcRequest.class);
         final String method = request.getMethod();
 
-        for (Entry<Pattern, JsonRpcRequestReceiver> entry : receivers.entrySet()) {
-            final Pattern pattern = entry.getKey();
-            final Matcher matcher = pattern.matcher(method);
-            if (matcher.matches()) {
+        for (Entry<String, JsonRpcRequestReceiver> entry : receivers.entrySet()) {
+            final String candidate = entry.getKey();
+            if (Objects.equals(candidate, method)) {
                 final JsonRpcRequestReceiver receiver = entry.getValue();
                 LOG.debug("Matching json rpc request receiver: {}", receiver.getClass());
                 receiver.receive(request, endpointId);

@@ -22,6 +22,7 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import static com.google.gwt.regexp.shared.RegExp.compile;
 
@@ -33,18 +34,13 @@ import static com.google.gwt.regexp.shared.RegExp.compile;
  */
 @Singleton
 public class WebSocketJsonRpcRequestDispatcher implements JsonRpcDispatcher {
-    private final Map<RegExp, JsonRpcRequestReceiver> receivers = new HashMap<>();
+    private final Map<String, JsonRpcRequestReceiver> receivers;
 
     private final DtoFactory dtoFactory;
 
     @Inject
     public WebSocketJsonRpcRequestDispatcher(Map<String, JsonRpcRequestReceiver> receivers, DtoFactory dtoFactory) {
-        for (Entry<String, JsonRpcRequestReceiver> entry : receivers.entrySet()) {
-            final RegExp regExp = compile(entry.getKey());
-            final JsonRpcRequestReceiver receiver = entry.getValue();
-            this.receivers.put(regExp, receiver);
-        }
-
+        this.receivers = receivers;
         this.dtoFactory = dtoFactory;
     }
 
@@ -53,9 +49,9 @@ public class WebSocketJsonRpcRequestDispatcher implements JsonRpcDispatcher {
         final JsonRpcRequest request = dtoFactory.createDtoFromJson(message, JsonRpcRequest.class);
         final String method = request.getMethod();
 
-        for (Entry<RegExp, JsonRpcRequestReceiver> entry : receivers.entrySet()) {
-            final RegExp regExp = entry.getKey();
-            if (regExp.test(method)) {
+        for (Entry<String, JsonRpcRequestReceiver> entry : receivers.entrySet()) {
+            final String candidate = entry.getKey();
+            if (Objects.equals(candidate, method)) {
                 final JsonRpcRequestReceiver receiver = entry.getValue();
                 Log.debug(getClass(), "Matching request receiver: ", receiver.getClass());
                 receiver.receive(request);

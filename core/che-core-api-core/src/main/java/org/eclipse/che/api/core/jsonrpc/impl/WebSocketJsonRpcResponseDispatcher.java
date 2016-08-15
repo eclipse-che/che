@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,15 +34,13 @@ import java.util.regex.Pattern;
 public class WebSocketJsonRpcResponseDispatcher implements JsonRpcDispatcher {
     private static final Logger LOG = LoggerFactory.getLogger(WebSocketJsonRpcResponseDispatcher.class);
 
-    private final JsonRpcRequestRegistry requestRegistry;
-
-    private final Map<Pattern, JsonRpcResponseReceiver> receivers = new HashMap<>();
+    private final JsonRpcRequestRegistry               requestRegistry;
+    private final Map<String, JsonRpcResponseReceiver> receivers;
 
     @Inject
     public WebSocketJsonRpcResponseDispatcher(JsonRpcRequestRegistry requestRegistry, Map<String, JsonRpcResponseReceiver> receivers) {
         this.requestRegistry = requestRegistry;
-
-        receivers.forEach((k, v) -> this.receivers.put(Pattern.compile(k), v));
+        this.receivers = receivers;
     }
 
     @Override
@@ -50,10 +48,9 @@ public class WebSocketJsonRpcResponseDispatcher implements JsonRpcDispatcher {
         final JsonRpcResponse response = DtoFactory.getInstance().createDtoFromJson(message, JsonRpcResponse.class);
         final String method = requestRegistry.extractFor(response.getId());
 
-        for (Entry<Pattern, JsonRpcResponseReceiver> entry : receivers.entrySet()) {
-            final Pattern pattern = entry.getKey();
-            final Matcher matcher = pattern.matcher(method);
-            if (matcher.matches()) {
+        for (Entry<String, JsonRpcResponseReceiver> entry : receivers.entrySet()) {
+            final String candidate = entry.getKey();
+            if (Objects.equals(candidate, method)) {
                 final JsonRpcResponseReceiver receiver = entry.getValue();
                 LOG.debug("Matching json rpc response receiver: {}", receiver.getClass());
                 receiver.receive(response, endpointId);

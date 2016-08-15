@@ -16,6 +16,7 @@ import org.eclipse.che.ide.jsonrpc.JsonRpcRequestReceiver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -44,7 +45,7 @@ public class WebSocketJsonRpcRequestDispatcherTest {
     private Map<String, JsonRpcRequestReceiver> receivers;
     @Mock
     private DtoFactory                          dtoFactory;
-
+    @InjectMocks
     private WebSocketJsonRpcRequestDispatcher dispatcher;
 
     @Mock
@@ -57,8 +58,6 @@ public class WebSocketJsonRpcRequestDispatcherTest {
         when(request.getMethod()).thenReturn("");
         when(dtoFactory.createDtoFromJson(anyString(), any())).thenReturn(request);
         when(receivers.entrySet()).thenReturn(emptySet());
-
-        dispatcher = new WebSocketJsonRpcRequestDispatcher(receivers, dtoFactory);
     }
 
     @Test
@@ -75,39 +74,5 @@ public class WebSocketJsonRpcRequestDispatcherTest {
         dispatcher.dispatch(MESSAGE);
 
         verify(receiver).receive(request);
-    }
-
-    @Test
-    public void shouldRunMatchingReceiverWithRegExpedName() {
-        final Map<String, JsonRpcRequestReceiver> map = Collections.singletonMap("test-met*", receiver);
-        when(receivers.entrySet()).thenReturn(map.entrySet());
-        dispatcher = new WebSocketJsonRpcRequestDispatcher(receivers, dtoFactory);
-
-
-        when(request.getMethod()).thenReturn("test-method");
-        dispatcher.dispatch(MESSAGE);
-        when(request.getMethod()).thenReturn("test-metho");
-        dispatcher.dispatch(MESSAGE);
-        when(request.getMethod()).thenReturn("test-meth");
-        dispatcher.dispatch(MESSAGE);
-
-        verify(receiver, times(3)).receive(request);
-    }
-
-    @Test
-    public void shouldRunMatchingSeveralReceiverWithRegExpedName() {
-        Map<String, JsonRpcRequestReceiver> map = new HashMap<>();
-        map.put("test-met*", receiver);
-        map.put("test-me*", receiver);
-        map.put("test-m*", receiver);
-
-        when(receivers.entrySet()).thenReturn(map.entrySet());
-        dispatcher = new WebSocketJsonRpcRequestDispatcher(receivers, dtoFactory);
-
-
-        when(request.getMethod()).thenReturn("test-method");
-        dispatcher.dispatch(MESSAGE);
-
-        verify(receiver, times(3)).receive(request);
     }
 }
