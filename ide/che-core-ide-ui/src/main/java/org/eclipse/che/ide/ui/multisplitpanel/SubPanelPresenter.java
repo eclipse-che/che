@@ -20,8 +20,12 @@ import org.eclipse.che.ide.api.multisplitpanel.FocusListener;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanelFactory;
 import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
+import org.eclipse.che.ide.api.parts.PartStackUIResources;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,16 +37,24 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
 
     private final SubPanelView                 view;
     private final SubPanelFactory              subPanelFactory;
+    private final List<WidgetToShow>           widgets;
     private final Map<IsWidget, CloseListener> closeListeners;
 
     private FocusListener focusListener;
 
     @Inject
-    public SubPanelPresenter(SubPanelView view,
-                             SubPanelFactory subPanelFactory,
+    public SubPanelPresenter(SubPanelFactory subPanelFactory,
+                             SubPanelViewFactory subPanelViewFactory,
+                             PartStackUIResources resources,
                              @Assisted @Nullable SubPanel parentPanel) {
-        this.view = view;
         this.subPanelFactory = subPanelFactory;
+
+        widgets = new ArrayList<>();
+
+        this.view = subPanelViewFactory.createView(new ClosePaneAction(resources, this),
+                                                   new CloseAllTabsInPaneAction(resources, this),
+                                                   new SplitHorizontallyAction(resources, this),
+                                                   new SplitVerticallyAction(resources, this));
 
         closeListeners = new HashMap<>();
 
@@ -56,6 +68,54 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     @Override
     public IsWidget getView() {
         return view;
+    }
+
+    @Override
+    public void splitHorizontally() {
+        final SubPanel subPanel = subPanelFactory.newPanel(this);
+        subPanel.setFocusListener(focusListener);
+        view.splitHorizontally(subPanel.getView());
+    }
+
+    @Override
+    public void splitVertically() {
+        final SubPanel subPanel = subPanelFactory.newPanel(this);
+        subPanel.setFocusListener(focusListener);
+        view.splitVertically(subPanel.getView());
+    }
+
+    @Override
+    public void addWidget(WidgetToShow widget, @Nullable CloseListener closeListener) {
+        // TODO: just activate the widget if it's already exists on the panel
+
+        widgets.add(widget);
+
+        if (closeListener != null) {
+            closeListeners.put(widget.getWidget(), closeListener);
+        }
+
+        view.addWidget(widget);
+    }
+
+    @Override
+    public void activateWidget(WidgetToShow widget) {
+        view.activateWidget(widget);
+    }
+
+    @Override
+    public List<WidgetToShow> getAllWidgets() {
+        return new ArrayList<>(widgets);
+    }
+
+    @Override
+    public void removeWidget(WidgetToShow widget) {
+        view.removeWidget(widget);
+        widgets.remove(widget);
+    }
+
+    @Override
+    public void closePane() {
+        view.removeCentralPanel();
     }
 
     @Override
@@ -74,43 +134,5 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
         if (listener != null) {
             listener.tabClosed();
         }
-    }
-
-    @Override
-    public void onSplitHorizontallyClicked() {
-        SubPanel subPanel = subPanelFactory.newPanel(this);
-        subPanel.setFocusListener(focusListener);
-        view.splitHorizontally(subPanel.getView());
-    }
-
-    @Override
-    public void onSplitVerticallyClicked() {
-        SubPanel subPanel = subPanelFactory.newPanel(this);
-        subPanel.setFocusListener(focusListener);
-        view.splitVertically(subPanel.getView());
-    }
-
-    @Override
-    public void onClosePaneClicked() {
-        view.removeCentralPanel();
-    }
-
-    @Override
-    public void addWidget(WidgetToShow widget, CloseListener closeListener) {
-        // TODO: just activate the widget if it's already exists on the panel
-
-        closeListeners.put(widget.getWidget(), closeListener);
-
-        view.addWidget(widget);
-    }
-
-    @Override
-    public void activateWidget(WidgetToShow widget) {
-        view.activateWidget(widget);
-    }
-
-    @Override
-    public void removeWidget(WidgetToShow widget) {
-        view.removeWidget(widget);
     }
 }

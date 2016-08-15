@@ -14,7 +14,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
@@ -23,7 +22,9 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.multisplitpanel.TabItem;
 import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
 
@@ -35,9 +36,10 @@ import java.util.Map;
  *
  * @author Artem Zatsarynnyi
  */
-public class SubPanelViewImpl extends Composite implements SubPanelView, TabItem.ActionDelegate {
+public class SubPanelViewImpl extends Composite implements SubPanelView, ListButton.ActionDelegate, TabItem.ActionDelegate {
 
     private final TabItemFactory tabItemFactory;
+    private final ListButton listButton;
 
     private final Map<TabItem, WidgetToShow> tabs2Widgets;
     private final Map<WidgetToShow, TabItem> widgets2Tabs;
@@ -52,15 +54,6 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, TabItem
     FlowPanel tabsPanel;
 
     @UiField
-    Button splitHorizontallyButton;
-
-    @UiField
-    Button splitVerticallyButton;
-
-    @UiField
-    Button closePaneButton;
-
-    @UiField
     DeckLayoutPanel widgetsPanel;
 
     private ActionDelegate delegate;
@@ -68,37 +61,31 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, TabItem
     private SubPanelView parentPanel;
 
     @Inject
-    public SubPanelViewImpl(SubPanelViewImplUiBinder uiBinder, TabItemFactory tabItemFactory) {
+    public SubPanelViewImpl(SubPanelViewImplUiBinder uiBinder,
+                            TabItemFactory tabItemFactory,
+                            ListButton listButton,
+                            @Assisted ClosePaneAction closePaneAction,
+                            @Assisted CloseAllTabsInPaneAction closeAllTabsInPaneAction,
+                            @Assisted SplitHorizontallyAction splitHorizontallyAction,
+                            @Assisted SplitVerticallyAction splitVerticallyAction) {
         this.tabItemFactory = tabItemFactory;
+        this.listButton = listButton;
+
+        listButton.addListItem(new ListItemActionWidget(closePaneAction));
+        listButton.addListItem(new ListItemActionWidget(closeAllTabsInPaneAction));
+        listButton.addListItem(new ListItemActionWidget(splitHorizontallyAction));
+        listButton.addListItem(new ListItemActionWidget(splitVerticallyAction));
+
+        listButton.setDelegate(this);
 
         tabs2Widgets = new HashMap<>();
         widgets2Tabs = new HashMap<>();
 
         splitLayoutPanel = new SplitLayoutPanel(5);
 
-
         initWidget(uiBinder.createAndBindUi(this));
 
-        splitHorizontallyButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onSplitHorizontallyClicked();
-            }
-        });
-
-        splitVerticallyButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onSplitVerticallyClicked();
-            }
-        });
-
-        closePaneButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onClosePaneClicked();
-            }
-        });
+        tabsPanel.add(listButton);
 
         widgetsPanel.addDomHandler(new ClickHandler() {
             @Override
@@ -133,7 +120,7 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, TabItem
 
     @Override
     public void addWidget(WidgetToShow widget) {
-        TabItem tabItem = tabItemFactory.createTabItem(widget.getTitle());
+        TabItem tabItem = tabItemFactory.createTabItem(widget.getTitle(), widget.getIcon());
         tabItem.setDelegate(this);
 
         tabs2Widgets.put(tabItem, widget);
@@ -141,6 +128,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, TabItem
 
         tabsPanel.add(tabItem);
         widgetsPanel.setWidget(widget.getWidget());
+
+        listButton.addListItem(new ListItemWidget(tabItem));
     }
 
     @Override
@@ -192,7 +181,33 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, TabItem
     }
 
     @Override
+    public void onListButtonClicked(ListItem tab) {
+        final Object data = tab.getTabItem();
+        if (data instanceof TabItem) {
+            WidgetToShow widget = tabs2Widgets.get(data);
+            if (widget != null) {
+                activateWidget(widget);
+                delegate.onWidgetFocused(widget.getWidget());
+            }
+        } else if (data instanceof Action) {
+            ((Action)data).actionPerformed(null);
+        }
+    }
+
+    @Override
+    public void onListButtonClosing(ListItem tab) {
+        final Object data = tab.getTabItem();
+        if (data instanceof TabItem) {
+            WidgetToShow widget = tabs2Widgets.get(data);
+            if (widget != null) {
+                delegate.onWidgetRemoved(widget.getWidget());
+            }
+        }
+    }
+
+    @Override
     public void onTabClicked(TabItem tab) {
+        // TODO: extract code to the separate method
         WidgetToShow widget = tabs2Widgets.get(tab);
         if (widget != null) {
             activateWidget(widget);
@@ -202,6 +217,7 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, TabItem
 
     @Override
     public void onTabClosing(TabItem tab) {
+        // TODO: extract code to the separate method
         WidgetToShow widget = tabs2Widgets.get(tab);
         if (widget != null) {
             delegate.onWidgetRemoved(widget.getWidget());

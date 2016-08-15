@@ -34,9 +34,6 @@
             <g:DockLayoutPanel ui:field="mainPanel" width="100%" height="100%">
                 <g:north size="23">
                     <g:FlowPanel ui:field="tabsPanel" addStyleNames="{style.tabsPanel}" debugId="multiSplitPanel-tabsPanel">
-                        <g:Button ui:field="splitHorizontallyButton" text="H"/>
-                        <g:Button ui:field="splitVerticallyButton" text="V"/>
-                        <g:Button ui:field="closePaneButton" text="X"/>
                     </g:FlowPanel>
                 </g:north>
                 <g:center>

@@ -10,15 +10,15 @@
  ******************************************************************************/
 package org.eclipse.che.ide.ui.multisplitpanel;
 
-import org.eclipse.che.ide.api.multisplitpanel.TabItem;
-import org.vectomatic.dom.svg.ui.SVGResource;
-
 /**
  * //
  *
  * @author Artem Zatsarynnyi
  */
-public interface TabItemFactory {
+public interface SubPanelViewFactory {
 
-    TabItem createTabItem(String title, SVGResource icon);
+    SubPanelView createView(ClosePaneAction closePaneAction,
+                            CloseAllTabsInPaneAction closeAllTabsInPaneAction,
+                            SplitHorizontallyAction splitHorizontallyAction,
+                            SplitVerticallyAction splitVerticallyAction);
 }

@@ -39,6 +39,9 @@ public class TabItemWidget extends Composite implements TabItem {
 
     private static final TabItemWidgetUiBinder UI_BINDER = GWT.create(TabItemWidgetUiBinder.class);
 
+    private final String title;
+    private final SVGResource icon;
+
     @UiField
     SimplePanel iconPanel;
 
@@ -54,8 +57,10 @@ public class TabItemWidget extends Composite implements TabItem {
     private ActionDelegate delegate;
 
     @Inject
-    public TabItemWidget(PartStackUIResources resources, @Assisted String title) {
+    public TabItemWidget(PartStackUIResources resources, @Assisted String title, @Assisted SVGResource icon) {
         this.resources = resources;
+        this.title = title;
+        this.icon = icon;
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
@@ -73,7 +78,12 @@ public class TabItemWidget extends Composite implements TabItem {
 
     @Override
     public SVGResource getIcon() {
-        return null;
+        return icon;
+    }
+
+    @Override
+    public String getTitleText() {
+        return title;
     }
 
     @Override

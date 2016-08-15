@@ -208,6 +208,7 @@ import org.eclipse.che.ide.ui.loaders.initialization.LoaderViewImpl;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelPresenter;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelView;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanelViewFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelViewImpl;
 import org.eclipse.che.ide.ui.multisplitpanel.TabItemFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.TabItemWidget;
@@ -420,7 +421,8 @@ public class CoreGinModule extends AbstractGinModule {
                                              .implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
                                              .build(DialogFactory.class));
 
-        bind(SubPanelView.class).to(SubPanelViewImpl.class);
+        install(new GinFactoryModuleBuilder().implement(SubPanelView.class, SubPanelViewImpl.class)
+                                             .build(SubPanelViewFactory.class));
         install(new GinFactoryModuleBuilder().implement(SubPanel.class, SubPanelPresenter.class)
                                              .build(SubPanelFactory.class));
         install(new GinFactoryModuleBuilder().implement(TabItem.class, TabItemWidget.class)

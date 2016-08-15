@@ -263,7 +263,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public SVGResource getIcon() {
-                return null;
+                return machineResources.cmdIcon();
             }
         };
 

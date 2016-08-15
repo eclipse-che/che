@@ -46,11 +46,5 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
 
         /** Called when the {@code widget} has been removed from the panel. */
         void onWidgetRemoved(IsWidget widget);
-
-        void onSplitHorizontallyClicked();
-
-        void onSplitVerticallyClicked();
-
-        void onClosePaneClicked();
     }
 }
