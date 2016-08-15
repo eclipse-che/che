@@ -199,7 +199,7 @@ public class SubversionExtension {
 
         contextGroup.getTemplatePresentation().setSVGResource(resources.svn());
 
-        DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction("resourceOperation");
-        mainContextMenuGroup.add(contextGroup);
+        DefaultActionGroup resourceOperationPartOfMainContextMenuGroup = (DefaultActionGroup)actionManager.getAction("resourceOperation");
+        resourceOperationPartOfMainContextMenuGroup.add(contextGroup);
     }
 }
