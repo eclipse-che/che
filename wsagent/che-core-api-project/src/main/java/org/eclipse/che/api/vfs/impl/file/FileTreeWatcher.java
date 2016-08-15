@@ -225,6 +225,10 @@ public class FileTreeWatcher {
                 for (Path entry : entries) {
                     watchedDirectory
                             .addItem(new DirectoryItem(entry.getFileName(), Files.isDirectory(entry), getLastModifiedInMillis(entry)));
+
+                    if (Files.isDirectory(entry)) {
+                        setupDirectoryWatcher(entry);
+                    }
                 }
             }
             watchedDirectories.put(directory, watchedDirectory);
