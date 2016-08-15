@@ -224,9 +224,13 @@ get_clean_path() {
 }
 
 get_mount_path() {
-  FULL_PATH=$(get_full_path $1)
-  POSIX_PATH=$(convert_windows_to_posix $FULL_PATH)
-  echo $(get_clean_path $POSIX_PATH)
+
+  FULL_PATH=$(get_full_path "${1}")
+
+  POSIX_PATH=$(convert_windows_to_posix "${FULL_PATH}")
+
+  CLEAN_PATH=$(get_clean_path "${POSIX_PATH}")
+  echo $CLEAN_PATH
 }
 
 
@@ -257,23 +261,23 @@ get_list_of_che_system_environment_variables() {
 
   if [ ! -z ${CHE_VARIABLES+x} ]; then
     env | grep CHE_ >> $DOCKER_ENV
-    RETURN="--env-file=$DOCKER_ENV"
+    RETURN=$DOCKER_ENV
   fi
 
   # Add in known proxy variables
   if [ ! -z ${http_proxy+x} ]; then
     echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
-    RETURN="--env-file=$DOCKER_ENV"
+    RETURN=$DOCKER_ENV
   fi
 
   if [ ! -z ${https_proxy+x} ]; then
     echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
-    RETURN="--env-file=$DOCKER_ENV"
+    RETURN=$DOCKER_ENV
   fi
 
   if [ ! -z ${no_proxy+x} ]; then
     echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
-    RETURN="--env-file=$DOCKER_ENV"
+    RETURN=$DOCKER_ENV
   fi
 
   echo $RETURN
@@ -298,7 +302,7 @@ execute_che_launcher() {
 
   docker_exec run -t --rm --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    $(get_list_of_che_system_environment_variables) \
+    --env-file=$(get_list_of_che_system_environment_variables) \
     "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
 
   # Remove temporary file
@@ -311,12 +315,12 @@ execute_che_file() {
   info "ECLIPSE CHE FILE: LAUNCHING CONTAINER"
 
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
+
   docker_exec run -it --rm --name "${CHE_FILE_CONTAINER_NAME}" \
          -v /var/run/docker.sock:/var/run/docker.sock \
          -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
          "${CHE_FILE_IMAGE_NAME}":"${CHE_VERSION}" \
          "${CURRENT_DIRECTORY}" "${CHE_CLI_ACTION}"
-    # > /dev/null 2>&1
 }
 
 update_che_image() {
@@ -337,7 +341,7 @@ mount_local_directory() {
     return
   fi
 
-  MOUNT_PATH=$(get_mount_path $2)
+  MOUNT_PATH=$(get_mount_path "${2}")
 
   if [ ! -e "${MOUNT_PATH}" ]; then
     error "che mount: Path provided does not exist."
