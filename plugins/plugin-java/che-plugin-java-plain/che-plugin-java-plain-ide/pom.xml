@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-java-plain</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.7.0-artik-SNAPSHOT</version>
+        <version>4.7.0-artik</version>
     </parent>
     <artifactId>che-plugin-java-plain-ide</artifactId>
     <packaging>jar</packaging>
