@@ -59,6 +59,7 @@ import org.eclipse.che.ide.api.editor.document.DocumentStorage;
 import org.eclipse.che.ide.api.editor.editorconfig.EditorUpdateAction;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.events.CompletionRequestEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentReadyEvent;
 import org.eclipse.che.ide.api.editor.events.GutterClickEvent;
 import org.eclipse.che.ide.api.editor.events.GutterClickHandler;
 import org.eclipse.che.ide.api.editor.filetype.FileTypeIdentifier;
@@ -1018,6 +1019,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                         return;
                     }
                     editorInit.init(document);
+                    generalEventBus.fireEvent(new DocumentReadyEvent(document));
                     firePropertyChange(PROP_INPUT);
                     setupEventHandlers();
                     setupFileContentUpdateHandler();

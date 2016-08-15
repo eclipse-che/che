@@ -15,7 +15,9 @@ import com.google.gwt.event.shared.GwtEvent;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.texteditor.EditorHandle;
 
-@Deprecated
+/**
+ * Event will be fired then document fully initialized in editor
+ */
 public class DocumentReadyEvent extends GwtEvent<DocumentReadyHandler> {
 
     /** The type instance for this event. */
@@ -26,8 +28,21 @@ public class DocumentReadyEvent extends GwtEvent<DocumentReadyHandler> {
     /** The document. */
     private final Document     document;
 
+    /**
+     * Use {@link DocumentReadyEvent(Document)}
+     *
+     */
+    @Deprecated
     public DocumentReadyEvent(final EditorHandle editorHandle, final Document document) {
         this.editorHandle = editorHandle;
+        this.document = document;
+    }
+
+    /**
+     * @param document the related initialized document
+     */
+    public DocumentReadyEvent(final Document document) {
+        this.editorHandle = null;
         this.document = document;
     }
 
@@ -45,6 +60,11 @@ public class DocumentReadyEvent extends GwtEvent<DocumentReadyHandler> {
         return document;
     }
 
+    /**
+     * Don't use this method because {@link EditorHandle} will be removed in next version.
+     * It useless interface dont have any implementation and donr need in future
+     */
+    @Deprecated
     public EditorHandle getEditorHandle() {
         return editorHandle;
     }

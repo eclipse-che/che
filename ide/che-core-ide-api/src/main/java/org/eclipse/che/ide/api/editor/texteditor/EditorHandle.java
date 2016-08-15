@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.editor.texteditor;
 
 /**
  * Handle on an editor view instance.
+ * Don't use it for now don't have any implementation and will be remove in next version
  */
 @Deprecated
 public interface EditorHandle {
