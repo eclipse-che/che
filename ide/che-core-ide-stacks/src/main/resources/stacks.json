@@ -1269,6 +1269,76 @@
     }
   },
   {
+    "id": "flux",
+    "creator": "rnavagamuwa",
+    "name": "Flux",
+    "description": "Eclipse flux stack with java and maven",
+    "scope": "advanced",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "rnavagamuwa/fluxworkspace"
+    },
+    "workspaceConfig": {
+      "environments": [
+        {
+          "name": "default",
+          "recipe": null,
+          "machineConfigs": [
+            {
+              "name": "default",
+              "limits": {
+                "ram": 1000
+              },
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "type": "docker",
+              "dev": true
+            }
+          ]
+        }
+      ],
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "name": "flux",
+          "type": "custom",
+          "commandLine": "sudo service rabbitmq-server start && cd /home/user/flux-master/node.server && npm start"
+        }
+      ]
+    },
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "search"
+        ]
+      }
+    ],
+    "stackIcon": {
+      "name": "type-flux.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "selenium",
     "creator": "ide",
     "name": "Selenium",
