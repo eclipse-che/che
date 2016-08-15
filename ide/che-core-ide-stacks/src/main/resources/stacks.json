@@ -1272,21 +1272,18 @@
     "id": "flux",
     "creator": "rnavagamuwa",
     "name": "Flux",
-    "description": "Eclipse flux stack with java and maven",
+    "description": "Eclipse flux stack with java, node and rabbitmq",
     "scope": "advanced",
     "tags": [
       "Java",
       "JDK",
-      "Maven"
+      "Node",
+      "Rabbitmq"
     ],
     "components": [
       {
         "name": "JDK",
         "version": "1.8.0_45"
-      },
-      {
-        "name": "Maven",
-        "version": "3.2.2"
       }
     ],
     "source": {
