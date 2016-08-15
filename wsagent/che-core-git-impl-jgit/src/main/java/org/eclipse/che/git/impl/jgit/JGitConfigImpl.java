@@ -12,7 +12,7 @@
 package org.eclipse.che.git.impl.jgit;
 
 import org.eclipse.che.api.git.Config;
-import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 

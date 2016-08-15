@@ -58,7 +58,7 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
 
     private Revision selectedRevision;
     private Project  project;
-    private Path     selectedPath;
+    private Path     selectedFilePath;
 
     @Inject
     public RevisionListPresenter(RevisionListView view,
@@ -80,13 +80,14 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
     }
 
     /** Open dialog and shows revisions to compare. */
-    public void showRevisions(Project project, File file) {
+    public void showRevisions(Project project, File selectedFile) {
         this.project = project;
 
-        checkState(project.getLocation().isPrefixOf(file.getLocation()), "Given file is not descendant of given project");
+        checkState(project.getLocation().isPrefixOf(selectedFile.getLocation()), "Given selected file is not descendant of given project");
 
-        selectedPath = file.getLocation().removeFirstSegments(project.getLocation().segmentCount());
-
+        selectedFilePath = selectedFile.getLocation()
+                                       .removeFirstSegments(project.getLocation().segmentCount())
+                                       .removeTrailingSeparator();
         getRevisions();
     }
 
@@ -126,13 +127,14 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
 
     /** Get list of revisions. */
     private void getRevisions() {
-        service.log(appContext.getDevMachine(), project.getLocation(), new Path[]{selectedPath}, false).then(new Operation<LogResponse>() {
-            @Override
-            public void apply(LogResponse log) throws OperationException {
-                view.setRevisions(log.getCommits());
-                view.showDialog();
-            }
-        }).catchError(new Operation<PromiseError>() {
+        service.log(appContext.getDevMachine(), project.getLocation(), new Path[]{selectedFilePath}, false)
+               .then(new Operation<LogResponse>() {
+                   @Override
+                   public void apply(LogResponse log) throws OperationException {
+                       view.setRevisions(log.getCommits());
+                       view.showDialog();
+                   }
+               }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 if (getErrorCode(error.getCause()) == ErrorCodes.INIT_COMMIT_WAS_NOT_PERFORMED) {
@@ -149,36 +151,36 @@ public class RevisionListPresenter implements RevisionListView.ActionDelegate {
     private void compare() {
         service.diff(appContext.getDevMachine(),
                      project.getLocation(),
-                     singletonList(selectedPath.toString()),
+                     singletonList(selectedFilePath.toString()),
                      NAME_STATUS,
                      false,
                      0,
                      selectedRevision.getId(),
                      false)
-                .then(new Operation<String>() {
-                    @Override
-                    public void apply(final String diff) throws OperationException {
-                        if (diff.isEmpty()) {
-                            dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
-                                                              locale.compareMessageIdenticalContentText(), null).show();
-                        } else {
-                            project.getFile(diff.substring(2)).then(new Operation<Optional<File>>() {
-                                @Override
-                                public void apply(Optional<File> file) throws OperationException {
-                                    if (file.isPresent()) {
-                                        comparePresenter.show(file.get(), defineStatus(diff.substring(0, 1)), selectedRevision.getId());
-                                    }
-                                }
-                            });
+               .then(new Operation<String>() {
+                   @Override
+                   public void apply(final String diff) throws OperationException {
+                       if (diff.isEmpty()) {
+                           dialogFactory.createMessageDialog(locale.compareMessageIdenticalContentTitle(),
+                                                             locale.compareMessageIdenticalContentText(), null).show();
+                       } else {
+                           project.getFile(diff.substring(2)).then(new Operation<Optional<File>>() {
+                               @Override
+                               public void apply(Optional<File> file) throws OperationException {
+                                   if (file.isPresent()) {
+                                       comparePresenter.show(file.get(), defineStatus(diff.substring(0, 1)), selectedRevision.getId());
+                                   }
+                               }
+                           });
 
-                        }
-                    }
-                })
-                .catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError arg) throws OperationException {
-                        notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-                    }
-                });
+                       }
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError arg) throws OperationException {
+                       notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
+                   }
+               });
     }
 }

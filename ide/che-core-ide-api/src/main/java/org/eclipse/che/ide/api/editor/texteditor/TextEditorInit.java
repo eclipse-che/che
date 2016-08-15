@@ -55,6 +55,7 @@ import java.util.logging.Logger;
  * Initialization controller for the text editor.
  * Sets-up (when available) the different components that depend on the document being ready.
  */
+@Deprecated
 public class TextEditorInit<T extends EditorWidget> {
 
     /** The logger. */
@@ -105,6 +106,13 @@ public class TextEditorInit<T extends EditorWidget> {
         new DocReadyWrapper<TextEditorInit<T>>(generalEventBus, this.textEditor.getEditorHandle(), init, this);
     }
 
+    public void uninstall() {
+        Reconciler reconciler = configuration.getReconciler();
+        if (reconciler != null) {
+            reconciler.uninstall();
+        }
+    }
+
     /**
      * Configures the editor's DocumentPartitioner.
      * @param documentHandle the handle to the document
@@ -149,36 +157,6 @@ public class TextEditorInit<T extends EditorWidget> {
 
         // the model listens to QueryAnnotation events
         documentHandle.getDocEventBus().addHandler(QueryAnnotationsEvent.TYPE, annotationModel);
-//        // gutter renderer
-//        if (textEditor instanceof HasGutter && ((HasGutter)this.textEditor).getGutter() != null) {
-////            final GutterAnnotationRenderer annotationRenderer = new GutterAnnotationRenderer();
-////            annotationRenderer.setDocument(documentHandle.getDocument());
-////            annotationRenderer.setHasGutter(((HasGutter)this.textEditor).getGutter());
-////            documentHandle.getDocEventBus().addHandler(AnnotationModelEvent.TYPE, annotationRenderer);
-////            documentHandle.getDocEventBus().addHandler(ClearAnnotationModelEvent.TYPE, annotationRenderer);
-//        }
-//
-//        // inline renderer
-//        final InlineAnnotationRenderer inlineAnnotationRenderer = new InlineAnnotationRenderer();
-//        inlineAnnotationRenderer.setDocument(documentHandle.getDocument());
-//        inlineAnnotationRenderer.setHasTextMarkers(this.textEditor.getHasTextMarkers());
-//        documentHandle.getDocEventBus().addHandler(AnnotationModelEvent.TYPE, inlineAnnotationRenderer);
-//        documentHandle.getDocEventBus().addHandler(ClearAnnotationModelEvent.TYPE, inlineAnnotationRenderer);
-//
-//        // minimap renderer
-//        if (this.textEditor instanceof HasMinimap && ((HasMinimap)this.textEditor).getMinimap() != null) {
-//            final MinimapAnnotationRenderer minimapAnnotationRenderer = new MinimapAnnotationRenderer();
-//            minimapAnnotationRenderer.setDocument(documentHandle.getDocument());
-//            minimapAnnotationRenderer.setMinimap(((HasMinimap)this.textEditor).getMinimap());
-//            documentHandle.getDocEventBus().addHandler(AnnotationModelEvent.TYPE, minimapAnnotationRenderer);
-//            documentHandle.getDocEventBus().addHandler(ClearAnnotationModelEvent.TYPE, minimapAnnotationRenderer);
-//        }
-//
-//        annotationModel.setDocumentHandle(documentHandle);
-//        documentHandle.getDocEventBus().addHandler(DocumentChangeEvent.TYPE, annotationModel);
-//
-//        // the model listens to QueryAnnotation events
-//        documentHandle.getDocEventBus().addHandler(QueryAnnotationsEvent.TYPE, annotationModel);
     }
 
     /**

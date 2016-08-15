@@ -14,9 +14,11 @@ import com.google.gwt.event.shared.EventHandler;
 
 /**
  * Special handler which is called when selected other project.
+ * @deprecated since 4.6.0 replaced by {@link org.eclipse.che.ide.api.event.SelectionChangedHandler}
  *
  * @author Dmitry Shnurenko
  */
+@Deprecated
 public interface CurrentProjectChangedHandler extends EventHandler {
 
     /**

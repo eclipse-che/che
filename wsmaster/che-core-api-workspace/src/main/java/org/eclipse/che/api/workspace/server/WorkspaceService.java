@@ -27,7 +27,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
-import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -73,6 +72,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSP
  * Defines Workspace REST API.
  *
  * @author Yevhenii Voevodin
+ * @author Igor Vinokur
  */
 @Api(value = "/workspace", description = "Workspace REST API")
 @Path("/workspace")
@@ -80,7 +80,6 @@ public class WorkspaceService extends Service {
 
     private final WorkspaceManager   workspaceManager;
     private final WorkspaceValidator validator;
-    private final MachineManager     machineManager;
     private final WorkspaceServiceLinksInjector linksInjector;
 
     @Context
@@ -88,11 +87,9 @@ public class WorkspaceService extends Service {
 
     @Inject
     public WorkspaceService(WorkspaceManager workspaceManager,
-                            MachineManager machineManager,
                             WorkspaceValidator validator,
                             WorkspaceServiceLinksInjector workspaceServiceLinksInjector) {
         this.workspaceManager = workspaceManager;
-        this.machineManager = machineManager;
         this.validator = validator;
         this.linksInjector = workspaceServiceLinksInjector;
     }
@@ -140,7 +137,7 @@ public class WorkspaceService extends Service {
                                                                          attributes,
                                                                          accountId);
         if (startAfterCreate) {
-            workspaceManager.startWorkspace(workspace.getId(), null, accountId);
+            workspaceManager.startWorkspace(workspace.getId(), null, accountId, false);
         }
         return Response.status(201)
                        .entity(linksInjector.injectLinks(asDto(workspace), getServiceContext()))
@@ -239,7 +236,7 @@ public class WorkspaceService extends Service {
                                                                                         ConflictException,
                                                                                         ForbiddenException {
         if (!workspaceManager.getSnapshot(id).isEmpty()) {
-            machineManager.removeSnapshots(workspaceManager.getWorkspace(id).getNamespace(), id);
+            workspaceManager.removeSnapshots(id);
         }
         workspaceManager.removeWorkspace(id);
     }
@@ -264,16 +261,17 @@ public class WorkspaceService extends Service {
                                   String envName,
                                   @ApiParam("The account id related to this operation")
                                   @QueryParam("accountId")
-                                  String accountId) throws ServerException,
-                                                           BadRequestException,
-                                                           NotFoundException,
-                                                           ForbiddenException,
-                                                           ConflictException {
-        final Map<String, String> params = Maps.newHashMapWithExpectedSize(2);
-        params.put("accountId", accountId);
-        params.put("workspaceId", workspaceId);
+                                  String accountId,
+                                  @ApiParam("Restore workspace from snapshot")
+                                  @QueryParam("restore")
+                                  Boolean restore) throws ServerException,
+                                                          BadRequestException,
+                                                          NotFoundException,
+                                                          ForbiddenException,
+                                                          ConflictException {
 
-        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, accountId)), getServiceContext());
+        return linksInjector.injectLinks(asDto(workspaceManager.startWorkspace(workspaceId, envName, accountId, restore)),
+                                         getServiceContext());
     }
 
     @POST
@@ -309,39 +307,6 @@ public class WorkspaceService extends Service {
                                                                                EnvironmentContext.getCurrent().getSubject().getUserName(),
                                                                                firstNonNull(isTemporary, false),
                                                                                accountId)), getServiceContext());
-    }
-
-    @POST
-    @Path("/{id}/runtime/snapshot")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Recover the workspace by the id from the snapshot",
-                  notes = "This operation can be performed only by the workspace owner." +
-                          "The workspace recovers asynchronously")
-    @ApiResponses({@ApiResponse(code = 200, message = "The workspace is starting"),
-                   @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist." +
-                                                      "The snapshot from this workspace doesn't exist"),
-                   @ApiResponse(code = 403, message = "The user is not workspace owner. " +
-                                                      "The operation is not allowed for the user"),
-                   @ApiResponse(code = 409, message = "Any conflict occurs during the workspace start"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public WorkspaceDto recoverWorkspace(@ApiParam("The workspace id")
-                                         @PathParam("id")
-                                         String workspaceId,
-                                         @ApiParam("The name of the workspace environment to recover from")
-                                         @QueryParam("environment")
-                                         String envName,
-                                         @ApiParam("The account id related to this operation")
-                                         @QueryParam("accountId")
-                                         String accountId) throws BadRequestException,
-                                                                  ForbiddenException,
-                                                                  NotFoundException,
-                                                                  ServerException,
-                                                                  ConflictException {
-        final Map<String, String> params = Maps.newHashMapWithExpectedSize(2);
-        params.put("accountId", accountId);
-        params.put("workspaceId", workspaceId);
-
-        return linksInjector.injectLinks(asDto(workspaceManager.recoverWorkspace(workspaceId, envName, accountId)), getServiceContext());
     }
 
     @DELETE
@@ -545,7 +510,7 @@ public class WorkspaceService extends Service {
         requiredNotNull(update, "Environment description");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         final List<EnvironmentImpl> environments = workspace.getConfig().getEnvironments();
-        if (!environments.stream().anyMatch(env -> env.getName().equals(envName))) {
+        if (!environments.removeIf(env -> env.getName().equals(envName))) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain environment '%s'", id, envName));
         }
         workspace.getConfig().getEnvironments().add(new EnvironmentImpl(update));
@@ -677,7 +642,8 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
                    @ApiResponse(code = 403, message = "The user does not have access to create the new machine"),
                    @ApiResponse(code = 409, message = "Conflict error occurred during the machine creation" +
-                                                      "(e.g. The machine with such name already exists)"),
+                                                      "(e.g. The machine with such name already exists)." +
+                                                      "Workspace is not in RUNNING state"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response createMachine(@ApiParam("The workspace id")
                                   @PathParam("id")
@@ -694,16 +660,9 @@ public class WorkspaceService extends Service {
         requiredNotNull(machineConfig.getSource().getType(), "Machine source type");
         // definition of source should come either with a content or with location
         requiredOnlyOneNotNull(machineConfig.getSource().getLocation(), machineConfig.getSource().getContent(),
-                        "Machine source should provide either location or content");
+                               "Machine source should provide either location or content");
 
-        final WorkspaceImpl workspace = workspaceManager.getWorkspace(workspaceId);
-        if (workspace.getRuntime() == null) {
-            throw new NotFoundException(format("Workspace '%s' is not running, new machine can't be started", workspaceId));
-        }
-
-        final MachineImpl machine = machineManager.createMachineAsync(machineConfig,
-                                                                      workspaceId,
-                                                                      workspace.getRuntime().getActiveEnv());
+        final MachineImpl machine = workspaceManager.startMachine(machineConfig, workspaceId);
 
         return Response.status(201)
                        .entity(linksInjector.injectMachineLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),

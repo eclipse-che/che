@@ -10,7 +10,6 @@
     "angular": "1.4.8",
     "angular-animate": "1.4.8",
     "angular-bootstrap": "0.13.0",
-    "angular-card": "0.1.0",
     "angular-charts": "0.2.6",
     "angular-cookies": "1.4.8",
     "angular-dropdowns": "1.0.0",
@@ -33,7 +32,8 @@
     "ng-lodash": "0.2.3",
     "zeroclipboard": "2.2.0",
     "angular-uuid4": "0.3.0",
-    "angular-file-upload": "2.0.0"
+    "angular-file-upload": "2.0.0",
+    "jquery": "2.1.3"
   },
   "devDependencies": {
   },
@@ -41,9 +41,6 @@
     "angular": "~1.4.8"
   },
   "overrides": {
-    "card": {
-      "main": "lib/js/jquery.card.js"
-    },
     "font-awesome": {
       "main": [
         "./css/font-awesome.css",

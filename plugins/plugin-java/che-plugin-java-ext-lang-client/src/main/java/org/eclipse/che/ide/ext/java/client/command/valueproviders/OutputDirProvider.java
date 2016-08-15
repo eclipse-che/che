@@ -19,9 +19,9 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
 
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 
 /**
@@ -56,10 +56,22 @@ public class OutputDirProvider implements CommandPropertyValueProvider {
             final Resource resource = resources[0];
             final Optional<Project> project = resource.getRelatedProject();
 
-            if (JavaUtil.isJavaProject(project.get()) && project.get().getAttributes().containsKey(OUTPUT_FOLDER)) {
-                return promises.resolve(appContext.getProjectsRoot().append(project.get().getAttributes().get(OUTPUT_FOLDER).get(0)).toString());
+            if (!project.isPresent()) {
+                return promises.resolve("");
+            }
+
+            Project relatedProject = project.get();
+
+            if (!isJavaProject(relatedProject)) {
+                return promises.resolve("");
+            }
+
+            if (relatedProject.getAttributes().containsKey(OUTPUT_FOLDER)) {
+                return promises.resolve(appContext.getProjectsRoot()
+                                                  .append(relatedProject.getLocation())
+                                                  .append(relatedProject.getAttributes().get(OUTPUT_FOLDER).get(0)).toString());
             } else {
-                return promises.resolve(appContext.getProjectsRoot().append(project.get().getLocation()).toString());
+                return promises.resolve(appContext.getProjectsRoot().append(relatedProject.getLocation()).toString());
             }
         }
 

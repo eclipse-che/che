@@ -34,18 +34,16 @@ import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
-import org.eclipse.che.api.project.shared.dto.event.VfsWatchEvent;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
-import org.eclipse.che.api.vfs.VirtualFileFilter;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationListener;
+import org.eclipse.che.api.vfs.impl.file.event.LoEvent;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
-import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,16 +107,22 @@ public final class ProjectManager {
 
     @PostConstruct
     void initWatcher() throws IOException {
-        FileWatcherNotificationListener defaultListener = new FileWatcherNotificationListener(VirtualFileFilter.ACCEPT_ALL) {
-            @Override
-            public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
-                LOG.debug("FS event detected: " + eventType + " " + virtualFile.getPath().toString() + " " + virtualFile.isFile());
-                eventService.publish(DtoFactory.newDto(VfsWatchEvent.class)
-                                               .withPath(virtualFile.getPath().toString())
-                                               .withFile(virtualFile.isFile())
-                                               .withType(eventType));
-            }
-        };
+        FileWatcherNotificationListener defaultListener =
+                new FileWatcherNotificationListener(file -> !(file.getPath().toString().contains(".codenvy")
+                                                              || file.getPath().toString().contains(".#"))) {
+                    @Override
+                    public void onFileWatcherEvent(VirtualFile virtualFile, FileWatcherEventType eventType) {
+                        LOG.debug("FS event detected: " + eventType + " " + virtualFile.getPath().toString() + " " + virtualFile.isFile());
+                        eventService.publish(LoEvent.newInstance()
+                                                    .withPath(virtualFile.getPath().toString())
+                                                    .withName(virtualFile.getName())
+                                                    .withItemType(virtualFile.isFile()
+                                                                           ? LoEvent.ItemType.FILE
+                                                                           : LoEvent.ItemType.DIR)
+                                                    .withTime(System.currentTimeMillis())
+                                                    .withEventType(eventType));
+                    }
+                };
         fileWatchNotifier.addNotificationListener(defaultListener);
         try {
             fileWatcher.startup();

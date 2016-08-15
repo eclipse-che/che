@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.editor.texteditor;
 
+import com.google.common.base.Optional;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -24,6 +26,11 @@ import com.google.inject.assistedinject.AssistedInject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.callback.CallbackPromiseHelper;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.BreakpointRenderer;
 import org.eclipse.che.ide.api.debug.BreakpointRendererFactory;
@@ -100,7 +107,10 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 /**
  * Presenter part for the editor implementations.
+ *
+ * @deprecated use {@link TextEditor} instead
  */
+@Deprecated
 public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorPresenter implements TextEditor,
                                                                                                     FileEventHandler,
                                                                                                     UndoableEditor,
@@ -123,13 +133,14 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     private final DocumentStorage             documentStorage;
     private final EditorLocalizationConstants constant;
     private final EditorWidgetFactory<T>      editorWidgetFactory;
-    private final EditorModule<T>             editorModule;
+    private final EditorModule             editorModule;
     private final TextEditorPartView          editorView;
     private final EventBus                    generalEventBus;
     private final FileTypeIdentifier          fileTypeIdentifier;
     private final QuickAssistantFactory       quickAssistantFactory;
     private final WorkspaceAgent              workspaceAgent;
     private final NotificationManager         notificationManager;
+    private final AppContext                  appContext;
 
     /** The editor handle for this editor. */
     private final EditorHandle handle;
@@ -150,6 +161,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     private List<String>             fileTypes;
     private TextPosition             cursorPosition;
     private HandlerRegistration      resourceChangeHandler;
+    private TextEditorInit<T> editorInit;
 
     @AssistedInject
     public TextEditorPresenter(final CodeAssistantFactory codeAssistantFactory,
@@ -159,13 +171,15 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
                                final DocumentStorage documentStorage,
                                final EditorLocalizationConstants constant,
                                @Assisted final EditorWidgetFactory<T> editorWidgetFactory,
-                               final EditorModule<T> editorModule,
+                               final EditorModule editorModule,
                                final TextEditorPartView editorView,
                                final EventBus eventBus,
                                final FileTypeIdentifier fileTypeIdentifier,
                                final QuickAssistantFactory quickAssistantFactory,
                                final WorkspaceAgent workspaceAgent,
-                               final NotificationManager notificationManager) {
+                               final NotificationManager notificationManager,
+                               final AppContext appContext
+                              ) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.breakpointManager = breakpointManager;
         this.breakpointRendererFactory = breakpointRendererFactory;
@@ -180,6 +194,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         this.quickAssistantFactory = quickAssistantFactory;
         this.workspaceAgent = workspaceAgent;
         this.notificationManager = notificationManager;
+        this.appContext = appContext;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
         handle = new EditorHandle() {
@@ -196,11 +211,20 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
             quickAssistant = quickAssistantFactory.createQuickAssistant(this);
             quickAssistant.setQuickAssistProcessor(processor);
         }
-        new TextEditorInit<T>(configuration,
-                              generalEventBus,
-                              this.codeAssistantFactory,
-                              this.quickAssistant,
-                              this).init();
+
+
+        Promise<Document> documentPromice = CallbackPromiseHelper.createFromCallback(new CallbackPromiseHelper.Call<Document, Throwable>() {
+            @Override
+            public void makeCall(Callback<Document, Throwable> callback) {
+
+            }
+        });
+        editorInit = new TextEditorInit<>(configuration,
+                                          generalEventBus,
+                                          this.codeAssistantFactory,
+                                          this.quickAssistant,
+                                          this);
+        editorInit.init();
 
         if (editorModule.isError()) {
             displayErrorPanel(constant.editorInitErrorMessage());
@@ -280,23 +304,24 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
 
     private void setupFileContentUpdateHandler() {
 
-        resourceChangeHandler = generalEventBus.addHandler(ResourceChangedEvent.getType(), new ResourceChangedEvent.ResourceChangedHandler() {
-            @Override
-            public void onResourceChanged(ResourceChangedEvent event) {
-                final ResourceDelta delta = event.getDelta();
+        resourceChangeHandler =
+                generalEventBus.addHandler(ResourceChangedEvent.getType(), new ResourceChangedEvent.ResourceChangedHandler() {
+                    @Override
+                    public void onResourceChanged(ResourceChangedEvent event) {
+                        final ResourceDelta delta = event.getDelta();
 
-                switch (delta.getKind()) {
-                    case ADDED:
-                        onResourceCreated(delta);
-                        break;
-                    case REMOVED:
-                        onResourceRemoved(delta);
-                        break;
-                    case UPDATED:
-                        onResourceUpdated(delta);
-                }
-            }
-        });
+                        switch (delta.getKind()) {
+                            case ADDED:
+                                onResourceCreated(delta);
+                                break;
+                            case REMOVED:
+                                onResourceRemoved(delta);
+                                break;
+                            case UPDATED:
+                                onResourceUpdated(delta);
+                        }
+                    }
+                });
 
         this.generalEventBus.addHandler(FileContentUpdateEvent.TYPE, new FileContentUpdateHandler() {
             @Override
@@ -309,19 +334,39 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     }
 
     private void onResourceCreated(ResourceDelta delta) {
-        if (!delta.getResource().isFile() || (delta.getFlags() & (MOVED_FROM | MOVED_TO)) == 0) {
+        if ((delta.getFlags() & (MOVED_FROM | MOVED_TO)) == 0) {
             return;
         }
 
-        final Resource resource = delta.getResource();
-        final Path movedFrom = delta.getFromPath();
+        //file moved directly
+        if (delta.getFromPath().equals(document.getFile().getLocation())) {
+            final Resource resource = delta.getResource();
+            final Path movedFrom = delta.getFromPath();
 
-        if (document.getFile().getLocation().equals(movedFrom)) {
-            document.setFile((File)resource);
-            input.setFile((File)resource);
+            if (document.getFile().getLocation().equals(movedFrom)) {
+                document.setFile((File)resource);
+                input.setFile((File)resource);
+            }
+
+            updateContent();
+        } else if (delta.getFromPath().isPrefixOf(document.getFile().getLocation())) { //directory where file moved
+            final Path relPath = document.getFile().getLocation().removeFirstSegments(delta.getFromPath().segmentCount());
+            final Path newPath = delta.getToPath().append(relPath);
+
+            appContext.getWorkspaceRoot().getFile(newPath).then(new Operation<Optional<File>>() {
+                @Override
+                public void apply(Optional<File> file) throws OperationException {
+                    if (file.isPresent()) {
+                        document.setFile(file.get());
+                        input.setFile(file.get());
+
+                        updateContent();
+                    }
+                }
+            });
         }
 
-        updateContent();
+
     }
 
     private void onResourceRemoved(ResourceDelta delta) {
@@ -407,11 +452,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     @Override
     public void close(final boolean save) {
         this.documentStorage.documentClosed(this.document);
-        final Reconciler reconciler = configuration.getReconciler();
-        if (reconciler != null) {
-            reconciler.uninstall();
-        }
-
+        editorInit.uninstall();
         workspaceAgent.removePart(this);
     }
 
@@ -815,7 +856,8 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
         this.editorWidget.setReadOnly(readOnly);
     }
 
-    protected EditorWidget getEditorWidget() {
+    @Override
+    public EditorWidget getEditorWidget() {
         return this.editorWidget;
     }
 

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.WorkspaceIdProvider;
 import org.eclipse.che.jdt.javadoc.JavaDocLocations;
 import org.eclipse.che.jdt.javadoc.JavadocContentAccess2;
 import org.eclipse.che.jdt.rest.UrlContextProvider;
@@ -89,14 +89,17 @@ public class ProposalInfo {
 	 */
 	private String extractJavadoc(IJavaElement element) throws CoreException {
 		if (element instanceof IMember) {
-			return JavadocContentAccess2.getHTMLContent((IMember) element, true, UrlContextProvider.get(EnvironmentContext.getCurrent().getWorkspaceId(), element.getJavaProject().getPath().toString()));
-		} else if (element instanceof IPackageDeclaration) {
-			return JavadocContentAccess2.getHTMLContent((IPackageDeclaration)element,UrlContextProvider.get(EnvironmentContext.getCurrent().getWorkspaceId(),
-                    element.getJavaProject().getPath().toString()));
-		} else if (element instanceof IPackageFragment) {
-			return JavadocContentAccess2.getHTMLContent((IPackageFragment) element,UrlContextProvider.get(EnvironmentContext.getCurrent().getWorkspaceId(),
-                    element.getJavaProject().getPath().toString()));
-		}
+            return JavadocContentAccess2.getHTMLContent((IMember)element, true, UrlContextProvider
+                    .get(WorkspaceIdProvider.getWorkspaceId(), element.getJavaProject().getPath().toString()));
+        } else if (element instanceof IPackageDeclaration) {
+            return JavadocContentAccess2
+                    .getHTMLContent((IPackageDeclaration)element, UrlContextProvider.get(WorkspaceIdProvider.getWorkspaceId(),
+                                                                                         element.getJavaProject().getPath().toString()));
+        } else if (element instanceof IPackageFragment) {
+            return JavadocContentAccess2
+                    .getHTMLContent((IPackageFragment)element, UrlContextProvider.get(WorkspaceIdProvider.getWorkspaceId(),
+                                                                                      element.getJavaProject().getPath().toString()));
+        }
         return null;
 	}
 

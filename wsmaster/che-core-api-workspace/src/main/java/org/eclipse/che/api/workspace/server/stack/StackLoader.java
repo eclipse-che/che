@@ -61,8 +61,7 @@ public class StackLoader {
         this.stackIconFolderPath = Paths.get(stackIconFolder);
         this.stackDao = stackDao;
 
-        //TODO remove this strategy after fix https://jira.codenvycorp.com/browse/CODENVY-651
-        GSON = new GsonBuilder().setFieldNamingStrategy(field -> field.getName().equals("isDev") ? "dev" : field.getName()).create();
+        GSON = new GsonBuilder().create();
     }
 
     /**

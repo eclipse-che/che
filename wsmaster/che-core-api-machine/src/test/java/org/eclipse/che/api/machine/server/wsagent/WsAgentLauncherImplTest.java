@@ -219,4 +219,12 @@ public class WsAgentLauncherImplTest {
 
         wsAgentLauncher.startWsAgent(WS_ID);
     }
+
+    @Test(expectedExceptions = MachineException.class,
+          expectedExceptionsMessageRegExp = "Workspace agent server not found in dev machine.")
+    public void shouldThrowMachineExceptionIfwsAgentNotFound() throws Exception {
+        doReturn(Collections.emptyMap()).when(machineRuntime).getServers();
+
+        wsAgentLauncher.startWsAgent(WS_ID);
+    }
 }

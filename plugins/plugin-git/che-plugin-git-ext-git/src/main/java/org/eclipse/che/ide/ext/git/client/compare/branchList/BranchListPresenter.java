@@ -23,6 +23,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
@@ -38,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.BranchListMode.LIST_ALL;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
@@ -64,8 +67,9 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
     private final AppContext               appContext;
     private final NotificationManager      notificationManager;
 
-    private Branch  selectedBranch;
-    private Project project;
+    private Branch   selectedBranch;
+    private Project  project;
+    private Resource selectedItem;
 
     @Inject
     public BranchListPresenter(BranchListView view,
@@ -93,8 +97,11 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
     }
 
     /** Open dialog and shows branches to compare. */
-    public void showBranches(Project project) {
+    public void showBranches(Project project, Resource selectedItem) {
+        checkState(project.getLocation().isPrefixOf(selectedItem.getLocation()), "Given selected item is not descendant of given project");
+
         this.project = project;
+        this.selectedItem = selectedItem;
 
         getBranches();
     }
@@ -108,9 +115,15 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void onCompareClicked() {
+
+        final String selectedItemPath = selectedItem.getLocation()
+                                                    .removeFirstSegments(project.getLocation().segmentCount())
+                                                    .removeTrailingSeparator()
+                                                    .toString();
+
         service.diff(appContext.getDevMachine(),
                      project.getLocation(),
-                     Collections.<String>emptyList(),
+                     selectedItemPath.isEmpty() ? null : singletonList(selectedItemPath),
                      NAME_STATUS,
                      false,
                      0,

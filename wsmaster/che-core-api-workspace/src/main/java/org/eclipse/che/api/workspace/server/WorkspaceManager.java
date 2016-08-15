@@ -15,10 +15,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -72,6 +74,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author gazarenkov
  * @author Alexander Garagatyi
  * @author Yevhenii Voevodin
+ * @author Igor Vinokur
  */
 @Singleton
 public class WorkspaceManager {
@@ -352,6 +355,18 @@ public class WorkspaceManager {
      * @param accountId
      *         account which should be used for this runtime workspace or null when
      *         it should be automatically detected
+     * @param restore
+     *         if <code>true</code> workspace will be restored from snapshot if snapshot exists,
+     *         otherwise (if snapshot does not exist) workspace will be started from default source.
+     *         If <code>false</code> workspace will be started from default source,
+     *         even if auto-restore is enabled and snapshot exists.
+     *         If <code>null</code> workspace will be restored from snapshot
+     *         only if workspace has `auto-restore` attribute set to <code>true</code>,
+     *         or system wide parameter `auto-restore` is enabled and snapshot exists.
+     *         <p>
+     *         This parameter has the highest priority to define if it is needed to restore from snapshot or not.
+     *         If it is not defined workspace `auto-restore` attribute will be checked, then if last is not defined
+     *         system wide `auto-restore` parameter will be checked.
      * @return starting workspace
      * @throws NullPointerException
      *         when {@code workspaceId} is null
@@ -363,15 +378,16 @@ public class WorkspaceManager {
      */
     public WorkspaceImpl startWorkspace(String workspaceId,
                                         @Nullable String envName,
-                                        @Nullable String accountId) throws NotFoundException,
-                                                                           ServerException,
-                                                                           ConflictException {
+                                        @Nullable String accountId,
+                                        @Nullable Boolean restore) throws NotFoundException,
+                                                                          ServerException,
+                                                                          ConflictException {
         requireNonNull(workspaceId, "Required non-null workspace id");
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         final String restoreAttr = workspace.getAttributes().get(AUTO_RESTORE_FROM_SNAPSHOT);
         final boolean autoRestore = restoreAttr == null ? defaultAutoRestore : parseBoolean(restoreAttr);
         final boolean snapshotExists = !getSnapshot(workspaceId).isEmpty();
-        return performAsyncStart(workspace, envName, snapshotExists && autoRestore, accountId);
+        return performAsyncStart(workspace, envName, firstNonNull(restore, autoRestore) && snapshotExists, accountId);
     }
 
     /**
@@ -411,35 +427,39 @@ public class WorkspaceManager {
     }
 
     /**
-     * Asynchronously recovers the workspace from the snapshot.
+     * Starts machine in running workspace
      *
-     * @param workspaceId
-     *         workspace id
-     * @param envName
-     *         environment name or null if default one should be used
-     * @param accountId
-     *         account which should be used for this runtime workspace or null when
-     *         it should be automatically detected
-     * @return starting workspace instance
-     * @throws NullPointerException
-     *         when {@code workspaceId} is null
+     * @param machineConfig configuration of machine to start
+     * @param workspaceId id of workspace in which machine should be started
+     * @return starting machine instance
      * @throws NotFoundException
-     *         when workspace with such id doesn't exist
-     * @throws ServerException
-     *         when any server error occurs
+     *         if machine type from recipe is unsupported
+     * @throws NotFoundException
+     *         if no instance provider implementation found for provided machine type
      * @throws ConflictException
-     *         when workspace with such id is not stopped
-     * @throws ForbiddenException
-     *         when user doesn't have access to start the new workspace
+     *         if machine with given name already exists
+     * @throws ConflictException
+     *         if workspace is not in RUNNING state
+     * @throws BadRequestException
+     *         if machine name is invalid
+     * @throws ServerException
+     *         if any other exception occurs during starting
      */
-    public WorkspaceImpl recoverWorkspace(String workspaceId,
-                                          @Nullable String envName,
-                                          @Nullable String accountId) throws NotFoundException,
-                                                                             ServerException,
-                                                                             ConflictException,
-                                                                             ForbiddenException {
-        requireNonNull(workspaceId, "Required non-null workspace id");
-        return performAsyncStart(workspaceDao.get(workspaceId), envName, true, accountId);
+    public MachineImpl startMachine(MachineConfig machineConfig, String workspaceId)
+            throws ServerException,
+                   ConflictException,
+                   BadRequestException,
+                   NotFoundException {
+
+        final WorkspaceImpl workspace = getWorkspace(workspaceId);
+        if (RUNNING != workspace.getStatus()) {
+            throw new ConflictException(format("Workspace '%s' is not running, new machine can't be started", workspaceId));
+        }
+
+        return machineManager.createMachineAsync(machineConfig,
+                                                 workspaceId,
+                                                 workspace.getRuntime().getActiveEnv(),
+                                                 runtimes.getMachineLogger(workspaceId, machineConfig.getName()));
     }
 
     /**
@@ -511,6 +531,19 @@ public class WorkspaceManager {
         // check if workspace exists
         final WorkspaceImpl workspace = workspaceDao.get(workspaceId);
         return machineManager.getSnapshots(workspace.getNamespace(), workspaceId);
+    }
+
+    /**
+     * Removes all snapshots of workspace machines
+     *
+     * @param workspaceId workspace id to remove machine snapshots
+     * @throws NotFoundException
+     *         when workspace with given id doesn't exists
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public void removeSnapshots(String workspaceId) throws NotFoundException, ServerException {
+        machineManager.removeSnapshots(getWorkspace(workspaceId).getNamespace(), workspaceId);
     }
 
     /** Asynchronously starts given workspace. */

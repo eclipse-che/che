@@ -73,6 +73,8 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
+import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
@@ -127,7 +129,6 @@ public class WorkspaceServiceTest {
     @BeforeMethod
     public void setup() {
         service = new WorkspaceService(wsManager,
-                                       machineManager,
                                        validator,
                                        new WorkspaceServiceLinksInjector(new MachineServiceLinksInjector()));
     }
@@ -177,7 +178,7 @@ public class WorkspaceServiceTest {
                      "&attribute=custom:custom:value" +
                      "&start-after-create=true");
 
-        verify(wsManager).startWorkspace(workspace.getId(), null, null);
+        verify(wsManager).startWorkspace(workspace.getId(), null, null, false);
         verify(wsManager).createWorkspace(anyObject(),
                                           anyString(),
                                           eq(ImmutableMap.of("stackId", "stack123",
@@ -295,14 +296,14 @@ public class WorkspaceServiceTest {
                                          .delete(SECURE_PATH + "/workspace/" + workspace.getId());
 
         assertEquals(response.getStatusCode(), 204);
-        verify(machineManager).removeSnapshots(NAMESPACE, workspace.getId());
+        verify(wsManager).removeSnapshots(workspace.getId());
         verify(wsManager).removeWorkspace(workspace.getId());
     }
 
     @Test
     public void shouldStartWorkspace() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        when(wsManager.startWorkspace(any(), any(), any())).thenReturn(workspace);
+        when(wsManager.startWorkspace(any(), any(), any(), any())).thenReturn(workspace);
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
 
         final Response response = given().auth()
@@ -313,8 +314,41 @@ public class WorkspaceServiceTest {
 
         assertEquals(response.getStatusCode(), 200);
         assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
-        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
-        verify(wsManager, never()).recoverWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
+        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null, null);
+    }
+
+    @Test
+    public void shouldRestoreWorkspace() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.startWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime" +
+                                               "?environment=" + workspace.getConfig().getDefaultEnv() + "&restore=true");
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
+        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null, true);
+    }
+
+    @Test
+    public void shouldNotRestoreWorkspace() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.startWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime" +
+                                               "?environment=" + workspace.getConfig().getDefaultEnv() + "&restore=false");
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
+        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null, false);
     }
 
     @Test
@@ -336,23 +370,6 @@ public class WorkspaceServiceTest {
 
         assertEquals(response.getStatusCode(), 200);
         verify(validator).validateConfig(any());
-    }
-
-    @Test
-    public void shouldRecoverWorkspace() throws Exception {
-        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        when(wsManager.recoverWorkspace(any(), any(), any())).thenReturn(workspace);
-        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
-
-        final Response response = given().auth()
-                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-                                         .when()
-                                         .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime/snapshot" +
-                                               "?environment=" + workspace.getConfig().getDefaultEnv());
-
-        assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
-        verify(wsManager).recoverWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
     }
 
     @Test
@@ -501,6 +518,7 @@ public class WorkspaceServiceTest {
                                               + "/environment/" + envDto.getName());
 
         assertEquals(response.getStatusCode(), 200);
+        assertEquals(workspace.getConfig().getEnvironments().size(), 1);
         verify(validator).validateConfig(workspace.getConfig());
         verify(wsManager).updateWorkspace(any(), any());
     }
@@ -664,7 +682,9 @@ public class WorkspaceServiceTest {
                                                               LINK_REL_GET_SNAPSHOT,
                                                               LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL,
                                                               LINK_REL_IDE_URL,
-                                                              LINK_REL_SELF));
+                                                              LINK_REL_SELF,
+                                                              LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL,
+                                                              LINK_REL_ENVIRONMENT_STATUS_CHANNEL));
         assertTrue(actualRels.equals(expectedRels), format("Links difference: '%s'. \n" +
                                                            "Returned links: '%s', \n" +
                                                            "Expected links: '%s'.",

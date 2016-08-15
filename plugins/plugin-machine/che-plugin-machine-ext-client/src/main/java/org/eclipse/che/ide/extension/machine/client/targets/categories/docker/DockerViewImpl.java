@@ -15,6 +15,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -51,6 +52,8 @@ public class DockerViewImpl implements DockerView {
     @UiField
     TextBox sourceUrl;
 
+    @UiField
+    TextArea sourceContent;
 
     @Inject
     public DockerViewImpl(ClipboardButtonBuilder buttonBuilder) {
@@ -58,6 +61,7 @@ public class DockerViewImpl implements DockerView {
         this.rootElement.setVisible(true);
 
         buttonBuilder.withResourceWidget(sourceUrl).build();
+        buttonBuilder.withResourceWidget(sourceContent).build();
     }
 
 
@@ -87,7 +91,7 @@ public class DockerViewImpl implements DockerView {
     }
 
     @Override
-    public void setSourceType(String sourceType){
+    public void setSourceType(String sourceType) {
         this.sourceType.setValue(sourceType);
     }
 
@@ -96,12 +100,26 @@ public class DockerViewImpl implements DockerView {
         this.sourceUrl.setValue(sourceUrl);
     }
 
+    @Override
+    public void setSourceContent(String sourceContent) {
+        this.sourceContent.setValue(sourceContent);
+    }
+
     public void updateTargetFields(DockerMachineTarget target) {
         this.setTargetName(target.getName());
         this.setOwner(target.getOwner());
         this.setType(target.getType());
         this.setSourceType(target.getSourceType());
-        this.setSourceUrl(target.getSourceUrl());
+
+        final String sourceUrl = target.getSourceUrl();
+
+        if (sourceUrl != null && sourceUrl.length() > 0) {
+            this.setSourceUrl(target.getSourceUrl());
+            this.sourceUrl.getParent().setVisible(true);
+        } else {
+            this.setSourceContent(target.getSourceContent());
+            this.sourceContent.getParent().setVisible(true);
+        }
     }
 
     @Override

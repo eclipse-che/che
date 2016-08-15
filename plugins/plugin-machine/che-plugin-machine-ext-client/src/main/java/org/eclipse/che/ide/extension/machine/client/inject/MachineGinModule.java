@@ -22,6 +22,8 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.Perspective;
+import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
+import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClientImpl;
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsView;
@@ -128,6 +130,8 @@ public class MachineGinModule extends AbstractGinModule {
         bind(DevelopmentView.class).to(DevelopmentViewImpl.class);
 
         bind(Target.class).to(BaseTarget.class);
+
+        bind(RecipeScriptDownloadServiceClient.class).to(RecipeScriptDownloadServiceClientImpl.class).in(Singleton.class);
 
         final GinMultibinder<CategoryPage> categoryPageBinder = GinMultibinder.newSetBinder(binder(), CategoryPage.class);
         categoryPageBinder.addBinding().to(SshCategoryPresenter.class);

@@ -36,6 +36,7 @@ import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.modification.ClipboardManager;
 import org.eclipse.che.ide.api.resources.modification.CutResourceMarker;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
 import static java.util.Arrays.copyOf;
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
@@ -59,6 +60,7 @@ class CopyPasteManager implements ResourceChangedHandler {
     private final PromiseProvider     promises;
     private final DialogFactory       dialogFactory;
     private final NotificationManager notificationManager;
+    private final EventBus            eventBus;
     private       Resource[]          resources;
     private       boolean             move;
 
@@ -70,6 +72,7 @@ class CopyPasteManager implements ResourceChangedHandler {
         this.promises = promises;
         this.dialogFactory = dialogFactory;
         this.notificationManager = notificationManager;
+        this.eventBus = eventBus;
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
     }
@@ -137,7 +140,8 @@ class CopyPasteManager implements ResourceChangedHandler {
         //simple move without overwriting
         return resource.move(destination).thenPromise(new Function<Resource, Promise<Void>>() {
             @Override
-            public Promise<Void> apply(Resource ignored) throws FunctionException {
+            public Promise<Void> apply(Resource resource) throws FunctionException {
+                eventBus.fireEvent(new RevealResourceEvent(resource));
                 return promises.resolve(null);
             }
         }).catchErrorPromise(new Function<PromiseError, Promise<Void>>() {
@@ -240,7 +244,8 @@ class CopyPasteManager implements ResourceChangedHandler {
         //simple copy without overwriting
         return resource.copy(destination).thenPromise(new Function<Resource, Promise<Void>>() {
             @Override
-            public Promise<Void> apply(Resource ignored) throws FunctionException {
+            public Promise<Void> apply(Resource resource) throws FunctionException {
+                eventBus.fireEvent(new RevealResourceEvent(resource));
                 return promises.resolve(null);
             }
         }).catchErrorPromise(new Function<PromiseError, Promise<Void>>() {

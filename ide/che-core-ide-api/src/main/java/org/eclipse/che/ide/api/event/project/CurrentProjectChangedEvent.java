@@ -13,15 +13,14 @@ package org.eclipse.che.ide.api.event.project;
 import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.api.core.model.project.Project;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * This event should be fired when we select different projects.
+ * @deprecated since 4.6.0 replaced by {@link org.eclipse.che.ide.api.event.SelectionChangedEvent}
  *
  * @author Dmitry Shnurenko
  */
+@Deprecated
 public class CurrentProjectChangedEvent extends GwtEvent<CurrentProjectChangedHandler> {
 
     /** Type class used to register this event. */

@@ -11,7 +11,7 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl.jgit;
 
-import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.InfoPage;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusFormat;

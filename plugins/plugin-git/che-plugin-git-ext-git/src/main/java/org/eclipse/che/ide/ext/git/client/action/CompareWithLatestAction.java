@@ -23,17 +23,17 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.compare.ComparePresenter;
 import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
-
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.git.shared.DiffType.NAME_STATUS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -78,10 +78,20 @@ public class CompareWithLatestAction extends GitAction {
     public void actionPerformed(ActionEvent e) {
 
         final Project project = appContext.getRootProject();
+        final Resource resource = appContext.getResource();
 
         checkState(project != null, "Null project occurred");
+        checkState(project.getLocation().isPrefixOf(resource.getLocation()), "Given selected item is not descendant of given project");
 
-        service.diff(appContext.getDevMachine(), project.getLocation(), Collections.<String>emptyList(), NAME_STATUS, false, 0, REVISION, false)
+        final String selectedItemPath = resource.getLocation()
+                                                .removeFirstSegments(project.getLocation().segmentCount())
+                                                .removeTrailingSeparator()
+                                                .toString();
+
+        service.diff(appContext.getDevMachine(),
+                     project.getLocation(),
+                     selectedItemPath.isEmpty() ? null : singletonList(selectedItemPath),
+                     NAME_STATUS, false, 0, REVISION, false)
                .then(new Operation<String>() {
                    @Override
                    public void apply(String diff) throws OperationException {
@@ -109,11 +119,11 @@ public class CompareWithLatestAction extends GitAction {
                        }
                    }
                })
-        .catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
-            }
-        });
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError arg) throws OperationException {
+                       notificationManager.notify(locale.diffFailed(), FAIL, NOT_EMERGE_MODE);
+                   }
+               });
     }
 }

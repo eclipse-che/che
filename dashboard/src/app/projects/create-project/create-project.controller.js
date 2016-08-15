@@ -21,7 +21,7 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory, $window) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -36,16 +36,9 @@ export class CreateProjectCtrl {
     this.cheNotification = cheNotification;
     this.$q = $q;
     this.$document = $document;
+    this.$window = $window;
 
-    if ($routeParams.resetProgress) {
-      this.resetCreateProgress();
-
-      routeHistory.popCurrentPath();
-
-      // remove param
-      $location.search({});
-      $location.replace();
-    }
+    this.resetCreateProgress();
 
     // JSON used for import data
     this.importProjectData = this.getDefaultProjectJson();
@@ -311,6 +304,7 @@ export class CreateProjectCtrl {
       this.importProjectData.source.type = 'git';
     } else if ('zip' === tab) {
       this.importProjectData.project.type = '';
+      this.importProjectData.source.type = 'zip';
     } else if ('config' === tab) {
       this.importProjectData.project.type = 'blank';
       this.importProjectData.source.type = 'git';
@@ -334,28 +328,20 @@ export class CreateProjectCtrl {
   startWorkspace(bus, workspace) {
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
-    // get channels
-    let environments = workspace.config.environments;
-    let envName = workspace.config.defaultEnv;
-    let defaultEnvironment = this.lodash.find(environments, (environment) => {
-      return environment.name === envName;
+
+    let statusLink = this.lodash.find(workspace.links, (link) => {
+      return link.rel === 'environment.status_channel';
     });
 
-    let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
-
-    let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-      return machineConfigsLink.rel === 'get machine status channel';
-    });
-
-    let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-      return machineConfigsLink.rel === 'get machine logs channel';
+    let outputLink = this.lodash.find(workspace.links, (link) => {
+      return link.rel === 'environment.output_channel';
     });
 
     let workspaceId = workspace.id;
 
     let agentChannel = 'workspace:' + workspace.id + ':ext-server:output';
-    let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
-    let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
+    let statusChannel = statusLink ? statusLink.parameters[0].defaultValue : null;
+    let outputChannel = outputLink ? outputLink.parameters[0].defaultValue : null;
 
     this.listeningChannels.push(agentChannel);
     bus.subscribe(agentChannel, (message) => {
@@ -374,6 +360,7 @@ export class CreateProjectCtrl {
       // for now, display log of status channel in case of errors
       this.listeningChannels.push(statusChannel);
       bus.subscribe(statusChannel, (message) => {
+        message = this.getDisplayMachineLog(message);
         if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
           this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
 
@@ -404,6 +391,7 @@ export class CreateProjectCtrl {
     if (outputChannel) {
       this.listeningChannels.push(outputChannel);
       bus.subscribe(outputChannel, (message) => {
+        message = this.getDisplayMachineLog(message);
         if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
           this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
         } else {
@@ -441,6 +429,21 @@ export class CreateProjectCtrl {
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
     });
     return  startWorkspacePromise;
+  }
+
+  /**
+   * Gets the log to be displayed per machine.
+   *
+   * @param log origin log content
+   * @returns {*} parsed log
+   */
+  getDisplayMachineLog(log) {
+    log = angular.fromJson(log);
+    if (angular.isObject(log)) {
+      return '[' + log.machineName + '] ' + log.content;
+    } else {
+      return log;
+    }
   }
 
   createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
@@ -506,6 +509,16 @@ export class CreateProjectCtrl {
 
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.createProjectSvc.setCurrentProgressStep(4);
+
+      // redirect to IDE from crane loader page
+      let currentPath = this.$location.path();
+      if (/create-project/.test(currentPath)) {
+        let link = this.getIDELink();
+        if (link.indexOf('#') === 0) {
+          link = link.substring(1, link.length);
+        }
+        this.$location.path(link);
+      }
     }, (error) => {
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
@@ -552,10 +565,6 @@ export class CreateProjectCtrl {
       let fetchTypePromise = projectTypeService.fetchTypes();
       fetchTypePromise.then(() => {
         let projectTypesByCategory = projectTypeService.getProjectTypesIDs();
-        // now try the estimate for each source
-        let deferredEstimate = this.$q.defer();
-        let deferredEstimatePromise = deferredResolve.promise;
-
 
         let estimatePromises = [];
         let estimateTypes = [];
@@ -812,8 +821,6 @@ export class CreateProjectCtrl {
     this.resetCreateProgress();
     this.setCreateProjectInProgress();
 
-    this.createProjectSvc.createPopup();
-
     // logic to decide if we create workspace based on a stack or reuse existing workspace
     let option;
 
@@ -856,13 +863,6 @@ export class CreateProjectCtrl {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
       this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
-    }
-    // do we have projects ?
-    let projects = this.cheAPI.getWorkspace().getAllProjects();
-    if (projects.length > 1) {
-      // we have projects, show notification first and redirect to the list of projects
-      this.createProjectSvc.showPopup();
-      this.$location.path('/projects');
     }
   }
 
@@ -918,7 +918,7 @@ export class CreateProjectCtrl {
    * @param workspace workspace for listening status
    */
   subscribeStatusChannel(workspace) {
-    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then(() => {
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then((message) => {
       this.createProjectSvc.setCurrentProgressStep(2);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
       // need to show the error
@@ -1064,10 +1064,6 @@ export class CreateProjectCtrl {
 
   setCreateProjectInProgress() {
     this.createProjectSvc.setCreateProjectInProgress(true);
-  }
-
-  hideCreateProjectPanel() {
-    this.createProjectSvc.showPopup();
   }
 
   getWorkspaceOfProject() {
@@ -1222,7 +1218,7 @@ export class CreateProjectCtrl {
     this.getCreationSteps().forEach((step) => {
       logs += step.logs + '\n';
     });
-    window.open('data:text/csv,' + encodeURIComponent(logs));
+    this.$window.open('data:text/csv,' + encodeURIComponent(logs));
   }
 
   getCreateButtonTitle() {

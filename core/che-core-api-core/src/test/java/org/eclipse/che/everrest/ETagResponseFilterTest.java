@@ -11,12 +11,14 @@
 package org.eclipse.che.everrest;
 
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.everrest.core.impl.ApplicationContextImpl;
+import org.everrest.core.ApplicationContext;
 import org.everrest.core.impl.ApplicationProviderBinder;
 import org.everrest.core.impl.ContainerRequest;
 import org.everrest.core.impl.ContainerResponse;
 import org.everrest.core.impl.EverrestConfiguration;
 import org.everrest.core.impl.EverrestProcessor;
+import org.everrest.core.impl.RequestDispatcher;
+import org.everrest.core.impl.RequestHandlerImpl;
 import org.everrest.core.impl.ResourceBinderImpl;
 import org.everrest.core.tools.DependencySupplierImpl;
 import org.everrest.core.tools.ResourceLauncher;
@@ -31,7 +33,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,6 +43,7 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.everrest.core.ApplicationContext.anApplicationContext;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -109,18 +111,17 @@ public class ETagResponseFilterTest {
         final ResourceBinderImpl resources = new ResourceBinderImpl();
         resources.addResource(MyJaxRSService.class, null);
         final DependencySupplierImpl dependencies = new DependencySupplierImpl();
-        final ApplicationProviderBinder binder = new ApplicationProviderBinder();
-        binder.addExceptionMapper(ApiExceptionMapper.class);
-        binder.addResponseFilter(ETagResponseFilter.class);
+        final ApplicationProviderBinder providers = new ApplicationProviderBinder();
+        providers.addExceptionMapper(ApiExceptionMapper.class);
+        providers.addResponseFilter(ETagResponseFilter.class);
         final URI uri = new URI(BASE_URI);
         final ContainerRequest req = new ContainerRequest(null, uri, uri, null, null, null);
-        final ApplicationContextImpl contextImpl = new ApplicationContextImpl(req, null, binder);
+        final ApplicationContext contextImpl = anApplicationContext().withRequest(req).withProviders(providers).build();
         contextImpl.setDependencySupplier(dependencies);
-        ApplicationContextImpl.setCurrent(contextImpl);
-        final EverrestProcessor processor = new EverrestProcessor(resources,
-                                                                  binder,
+        ApplicationContext.setCurrent(contextImpl);
+        final EverrestProcessor processor = new EverrestProcessor(new EverrestConfiguration(),
                                                                   dependencies,
-                                                                  new EverrestConfiguration(),
+                                                                  new RequestHandlerImpl(new RequestDispatcher(resources), providers),
                                                                   null);
         resourceLauncher = new ResourceLauncher(processor);
     }

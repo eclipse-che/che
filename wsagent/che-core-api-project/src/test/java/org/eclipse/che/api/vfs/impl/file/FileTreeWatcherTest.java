@@ -109,6 +109,34 @@ public class FileTreeWatcherTest {
     }
 
     @Test
+    public void watchesCreatedSubDirectoriesRecursively() throws Exception {
+        FileWatcherNotificationHandler notificationHandler = aNotificationHandler();
+        fileWatcher = new FileTreeWatcher(testDirectory, newHashSet(), notificationHandler);
+        fileWatcher.startup();
+
+        Thread.sleep(500);
+
+        final String first = fileWatcherTestTree.createDirectory("", "first");
+        final String second = fileWatcherTestTree.createDirectory(first, "second");
+        final String file = fileWatcherTestTree.createFile(second);
+
+        Thread.sleep(5000);
+
+        fileWatcherTestTree.updateFile(file);
+
+        Thread.sleep(5000);
+
+        verify(notificationHandler, never()).errorOccurred(eq(testDirectory), any(Throwable.class));
+        verify(notificationHandler, never()).handleFileWatcherEvent(eq(DELETED), eq(testDirectory), anyString(), anyBoolean());
+
+        verify(notificationHandler, times(3)).handleFileWatcherEvent(eq(CREATED), eq(testDirectory), anyString(), anyBoolean());
+
+        ArgumentCaptor<String> modifiedEvents = ArgumentCaptor.forClass(String.class);
+        verify(notificationHandler).handleFileWatcherEvent(eq(MODIFIED), eq(testDirectory), modifiedEvents.capture(), anyBoolean());
+        assertEquals(newHashSet(file), newHashSet(modifiedEvents.getAllValues()));
+    }
+
+    @Test
     public void watchesCreateDirectoryAndStartsWatchingNewlyCreatedDirectory() throws Exception {
         FileWatcherNotificationHandler notificationHandler = aNotificationHandler();
         fileWatcher = new FileTreeWatcher(testDirectory, newHashSet(), notificationHandler);

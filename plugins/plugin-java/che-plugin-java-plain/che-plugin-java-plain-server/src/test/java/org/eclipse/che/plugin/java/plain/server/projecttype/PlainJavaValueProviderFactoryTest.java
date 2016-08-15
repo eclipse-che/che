@@ -103,8 +103,8 @@ public class PlainJavaValueProviderFactoryTest extends BaseTest {
 
     @Test
     public void outputFolderShouldBeReturned() throws Exception {
-        when(rootProjectFolder.getPath()).thenReturn(Path.of("project"));
+        when(rootProjectFolder.getPath()).thenReturn(Path.of("/project"));
 
-        assertThat(plainJavaValueProviderFactory.newInstance(rootProjectFolder).getValues(OUTPUT_FOLDER)).contains("/project/bin");
+        assertThat(plainJavaValueProviderFactory.newInstance(rootProjectFolder).getValues(OUTPUT_FOLDER)).contains("bin");
     }
 }

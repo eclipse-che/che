@@ -12,6 +12,7 @@ package org.eclipse.che.ide.api.editor.events;
 
 import com.google.gwt.event.shared.EventHandler;
 
+@Deprecated
 public interface DocumentReadyHandler extends EventHandler {
 
     void onDocumentReady(DocumentReadyEvent event);

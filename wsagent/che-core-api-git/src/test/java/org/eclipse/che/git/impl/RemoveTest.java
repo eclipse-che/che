@@ -13,7 +13,7 @@ package org.eclipse.che.git.impl;
 import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
-import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.RmParams;
 import org.eclipse.che.api.git.shared.StatusFormat;
 import org.testng.annotations.AfterMethod;

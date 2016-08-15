@@ -16,9 +16,11 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
+import org.eclipse.che.plugin.ssh.key.client.manage.ShowSshKeyViewImpl;
 import org.eclipse.che.plugin.ssh.key.client.manage.SshKeyManagerPresenter;
 import org.eclipse.che.plugin.ssh.key.client.manage.SshKeyManagerView;
 import org.eclipse.che.plugin.ssh.key.client.manage.SshKeyManagerViewImpl;
+import org.eclipse.che.plugin.ssh.key.client.manage.ShowSshKeyView;
 import org.eclipse.che.plugin.ssh.key.client.upload.UploadSshKeyView;
 import org.eclipse.che.plugin.ssh.key.client.upload.UploadSshKeyViewImpl;
 
@@ -29,6 +31,7 @@ public class SshKeyGinModule extends AbstractGinModule {
     protected void configure() {
         bind(SshKeyManagerView.class).to(SshKeyManagerViewImpl.class).in(Singleton.class);
         bind(UploadSshKeyView.class).to(UploadSshKeyViewImpl.class).in(Singleton.class);
+        bind(ShowSshKeyView.class).to(ShowSshKeyViewImpl.class).in(Singleton.class);
         GinMultibinder<PreferencePagePresenter> prefBinder = GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class);
         prefBinder.addBinding().to(SshKeyManagerPresenter.class);
     }

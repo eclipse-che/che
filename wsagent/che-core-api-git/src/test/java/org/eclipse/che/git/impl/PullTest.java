@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
-import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
 import org.eclipse.che.api.git.params.CloneParams;
@@ -130,5 +130,29 @@ public class PullTest {
 
         //when
         connection.pull(PullParams.create(null));
+    }
+
+    @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class,
+        expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "No remote repository specified.  " +
+                                                                                   "Please, specify either a URL or a remote name from which new revisions should be fetched in request.")
+    public void testWhenThereAreNoAnyRemotesBehindTheProxy(GitConnectionFactory connectionFactory) throws Exception {
+        //given
+        System.setProperty("http.proxyUser", "user1");
+        System.setProperty("http.proxyPassword", "paswd1");
+        System.setProperty("https.proxyUser", "user2");
+        System.setProperty("https.proxyPassword", "paswd2");
+
+        GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
+
+        //when
+        connection.pull(PullParams.create(null));
+    }
+
+    @AfterMethod
+    public void tearDown() throws Exception {
+        System.clearProperty("http.proxyUser");
+        System.clearProperty("http.proxyPassword");
+        System.clearProperty("https.proxyUser");
+        System.clearProperty("https.proxyPassword");
     }
 }

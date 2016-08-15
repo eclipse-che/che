@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.maven.server.core;
 
 import org.eclipse.che.plugin.maven.server.core.project.MavenProject;
+import org.eclipse.core.resources.IProject;
 
 /**
  * @author Evgen Vidolob
@@ -29,7 +30,11 @@ public class MavenProjectResolveTask implements MavenProjectTask {
 
     @Override
     public void perform() {
-        projectManager.resolveMavenProject(mavenProject.getProject(), mavenProject);
+        IProject project = mavenProject.getProject();
+        if (!project.exists()) {
+            return;
+        }
+        projectManager.resolveMavenProject(project, mavenProject);
         if (afterTask != null) {
             afterTask.run();
         }

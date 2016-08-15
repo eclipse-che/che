@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -31,6 +32,7 @@ import javax.inject.Singleton;
 import javax.ws.rs.HttpMethod;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.Map;
 
 /**
  * Starts ws agent in the machine and waits until ws agent sends notification about its start
@@ -45,6 +47,7 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     protected static final Logger LOG = LoggerFactory.getLogger(WsAgentLauncherImpl.class);
 
     private static final String WS_AGENT_PROCESS_OUTPUT_CHANNEL = "workspace:%s:ext-server:output";
+    private static final String WS_AGENT_SERVER_NOT_FOUND_ERROR = "Workspace agent server not found in dev machine.";
 
     private final Provider<MachineManager> machineManagerProvider;
     private final HttpJsonRequestFactory   httpJsonRequestFactory;
@@ -105,11 +108,15 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
     }
 
     // forms the ping request based on information about the machine.
-    protected HttpJsonRequest createPingRequest(Machine machine) {
-        String wsAgentPingUrl = machine.getRuntime()
-                                       .getServers()
-                                       .get(Constants.WS_AGENT_PORT)
-                                       .getUrl();
+    protected HttpJsonRequest createPingRequest(Machine machine) throws MachineException {
+        Map<String, ? extends Server> servers = machine.getRuntime().getServers();
+        Server wsAgentServer = servers.get(Constants.WS_AGENT_PORT);
+        if (wsAgentServer == null) {
+            LOG.error("{} WorkspaceId: {}, DevMachine Id: {}, found servers: {}",
+                      WS_AGENT_SERVER_NOT_FOUND_ERROR, machine.getWorkspaceId(), machine.getId(), servers);
+            throw new MachineException(WS_AGENT_SERVER_NOT_FOUND_ERROR);
+        }
+        String wsAgentPingUrl = wsAgentServer.getUrl();
         // since everrest mapped on the slash in case of it absence
         // we will always obtain not found response
         if (!wsAgentPingUrl.endsWith("/")) {

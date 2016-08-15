@@ -13,6 +13,7 @@ package org.eclipse.che.api.git;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
+import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.LsFilesParams;
 import org.eclipse.che.api.git.shared.BranchListMode;

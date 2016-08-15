@@ -16,7 +16,9 @@ import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
@@ -30,16 +32,20 @@ import static org.eclipse.che.plugin.docker.client.params.ParamsUtils.requireNon
  * @author Alexander Garagatyi
  */
 public class BuildImageParams {
-    // todo add next parameters q, nocache, rm, forcerm
-    private String      repository;
-    private String      tag;
-    private AuthConfigs authConfigs;
-    private Boolean     doForcePull;
-    private Long        memoryLimit;
-    private Long        memorySwapLimit;
-    private List<File>  files;
-    private String      dockerfile;
-    private String      remote;
+    private String              repository;
+    private String              tag;
+    private AuthConfigs         authConfigs;
+    private Boolean             doForcePull;
+    private Long                memoryLimit;
+    private Long                memorySwapLimit;
+    private List<File>          files;
+    private String              dockerfile;
+    private String              remote;
+    private Boolean             quiet;
+    private Boolean             noCache;
+    private Boolean             removeIntermediateContainer;
+    private Boolean             forceRemoveIntermediateContainers;
+    private Map<String, String> buildArgs;
 
     /**
      * Creates arguments holder with required parameters.
@@ -182,6 +188,9 @@ public class BuildImageParams {
      *         if {@code files} is null
      */
     public BuildImageParams addFiles(@NotNull File... files) {
+        if (remote != null) {
+            throw new IllegalStateException("Remote parameter is already set. Remote and files parameters are mutually exclusive.");
+        }
         requireNonNull(files);
         for (File file : files) {
             requireNonNull(file);
@@ -210,6 +219,87 @@ public class BuildImageParams {
         }
 
         this.remote = remote;
+        return this;
+    }
+
+    /**
+     * Suppress verbose build output.
+     *
+     * @param quiet
+     *         quiet flag
+     * @return this params instance
+     */
+    public BuildImageParams withQuiet(boolean quiet) {
+        this.quiet = quiet;
+        return this;
+    }
+
+    /**
+     * Do not use the cache when building the image.
+     *
+     * @param noCache
+     *         no cache flag
+     * @return this params instance
+     */
+    public BuildImageParams withNoCache(boolean noCache) {
+        this.noCache = noCache;
+        return this;
+    }
+
+    /**
+     * Remove intermediate containers after a successful build.
+     *
+     * @param removeIntermediateContainer
+     *         remove intermediate container flag
+     * @return this params instance
+     */
+    public BuildImageParams withRemoveIntermediateContainers(boolean removeIntermediateContainer) {
+        this.removeIntermediateContainer = removeIntermediateContainer;
+        return this;
+    }
+
+    /**
+     * Always remove intermediate containers (includes removeIntermediateContainer).
+     *
+     * @param forceRemoveIntermediateContainers
+     *         remove intermediate containers with force flag
+     * @return this params instance
+     */
+    public BuildImageParams withForceRemoveIntermediateContainers(boolean forceRemoveIntermediateContainers) {
+        this.forceRemoveIntermediateContainers = forceRemoveIntermediateContainers;
+        return this;
+    }
+
+    /**
+     * Map of string pairs for build-time variables.
+     * Users pass these values at build-time.
+     * Docker uses the buildargs as the environment context for command(s) run via the Dockerfile’s RUN instruction
+     * or for variable expansion in other Dockerfile instructions.
+     *
+     * @param buildArgs
+     *         map of build arguments
+     * @return this params instance
+     */
+    public BuildImageParams withBuildArgs(Map<String, String> buildArgs) {
+        this.buildArgs = buildArgs;
+        return this;
+    }
+
+    /**
+     * Adds build variable to build args.
+     * See {@link #withBuildArgs(Map)}
+     *
+     * @param key
+     *         variable name
+     * @param value
+     *         variable value
+     * @return this params instance
+     */
+    public BuildImageParams addBuildArg(String key, String value) {
+        if (buildArgs == null) {
+            buildArgs = new HashMap<>();
+        }
+        buildArgs.put(key, value);
         return this;
     }
 
@@ -261,39 +351,63 @@ public class BuildImageParams {
         return remote;
     }
 
+    public Boolean isQuiet() {
+        return quiet;
+    }
+
+    public Boolean isNoCache() {
+        return noCache;
+    }
+
+    public Boolean isRemoveIntermediateContainer() {
+        return removeIntermediateContainer;
+    }
+
+    public Boolean isForceRemoveIntermediateContainers() {
+        return forceRemoveIntermediateContainers;
+    }
+
+    public Map<String, String> getBuildArgs() {
+        return buildArgs;
+    }
+
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof BuildImageParams)) {
-            return false;
-        }
-        final BuildImageParams that = (BuildImageParams)obj;
-        return Objects.equals(repository, that.repository)
-               && Objects.equals(tag, that.tag)
-               && Objects.equals(authConfigs, that.authConfigs)
-               && Objects.equals(doForcePull, that.doForcePull)
-               && Objects.equals(memoryLimit, that.memoryLimit)
-               && Objects.equals(memorySwapLimit, that.memorySwapLimit)
-               && getFiles().equals(that.getFiles())
-               && Objects.equals(dockerfile, that.dockerfile)
-               && Objects.equals(remote, that.remote);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BuildImageParams that = (BuildImageParams)o;
+        return Objects.equals(repository, that.repository) &&
+               Objects.equals(tag, that.tag) &&
+               Objects.equals(authConfigs, that.authConfigs) &&
+               Objects.equals(doForcePull, that.doForcePull) &&
+               Objects.equals(memoryLimit, that.memoryLimit) &&
+               Objects.equals(memorySwapLimit, that.memorySwapLimit) &&
+               Objects.equals(files, that.files) &&
+               Objects.equals(dockerfile, that.dockerfile) &&
+               Objects.equals(remote, that.remote) &&
+               Objects.equals(quiet, that.quiet) &&
+               Objects.equals(noCache, that.noCache) &&
+               Objects.equals(removeIntermediateContainer, that.removeIntermediateContainer) &&
+               Objects.equals(forceRemoveIntermediateContainers, that.forceRemoveIntermediateContainers) &&
+               Objects.equals(buildArgs, that.buildArgs);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + Objects.hashCode(repository);
-        hash = 31 * hash + Objects.hashCode(tag);
-        hash = 31 * hash + Objects.hashCode(authConfigs);
-        hash = 31 * hash + Objects.hashCode(doForcePull);
-        hash = 31 * hash + Objects.hashCode(memoryLimit);
-        hash = 31 * hash + Objects.hashCode(memorySwapLimit);
-        hash = 31 * hash + getFiles().hashCode();
-        hash = 31 * hash + Objects.hashCode(dockerfile);
-        hash = 31 * hash + Objects.hashCode(remote);
-        return hash;
+        return Objects.hash(repository,
+                            tag,
+                            authConfigs,
+                            doForcePull,
+                            memoryLimit,
+                            memorySwapLimit,
+                            files,
+                            dockerfile,
+                            remote,
+                            quiet,
+                            noCache,
+                            removeIntermediateContainer,
+                            forceRemoveIntermediateContainers,
+                            buildArgs);
     }
 
     @Override
@@ -308,6 +422,12 @@ public class BuildImageParams {
                ", files=" + files +
                ", dockerfile='" + dockerfile + '\'' +
                ", remote='" + remote + '\'' +
+               ", quiet=" + quiet +
+               ", noCache=" + noCache +
+               ", removeIntermediateContainer=" + removeIntermediateContainer +
+               ", forceRemoveIntermediateContainers=" + forceRemoveIntermediateContainers +
+               ", buildArgs=" + buildArgs +
                '}';
     }
+
 }

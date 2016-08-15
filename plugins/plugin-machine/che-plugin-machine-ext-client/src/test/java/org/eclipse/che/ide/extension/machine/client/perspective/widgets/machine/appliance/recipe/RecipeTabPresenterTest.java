@@ -11,9 +11,11 @@
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.recipe;
 
 import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.JsPromiseError;
+import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
 import org.eclipse.che.ide.extension.machine.client.machine.Machine;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -23,7 +25,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,12 +35,22 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class RecipeTabPresenterTest {
     @Mock
-    private RecipeView view;
+    private RecipeView                        view;
     @Mock
-    private Machine    machine;
+    private Machine                           machine;
+    @Mock
+    private RecipeScriptDownloadServiceClient recipeScriptClient;
+
+    @Mock
+    private Promise<String> recipePromise;
+
+    @Mock
+    private PromiseError promiseError;
 
     @Captor
-    private ArgumentCaptor<RequestCallback> argumentCaptor;
+    private ArgumentCaptor<Operation<String>>       argumentCaptor;
+    @Captor
+    private ArgumentCaptor<Operation<PromiseError>> errorArgumentCaptor;
 
     @InjectMocks
     private RecipeTabPresenter presenter;
@@ -63,11 +75,49 @@ public class RecipeTabPresenterTest {
     }
 
     @Test
-    public void tabGetScriptAsContent() throws Exception {
-        when(machine.getRecipeContent()).thenReturn("test content");
+    public void tabSetDockerfileScriptContent() throws Exception {
+        when(machine.getRecipeType()).thenReturn("dockerfile");
+        when(recipeScriptClient.getRecipeScript(any(Machine.class))).thenReturn(recipePromise);
+        when(recipePromise.then(any(Operation.class))).thenReturn(recipePromise);
+
         presenter.updateInfo(machine);
+
+        verify(recipePromise).then(argumentCaptor.capture());
+        argumentCaptor.getValue().apply("test content");
         verify(view).setScript("test content");
     }
 
+    @Test
+    public void tabSetImageLocation() throws Exception {
+        when(machine.getRecipeType()).thenReturn("image");
+        when(machine.getRecipeLocation()).thenReturn("localhost:5000/image:latest");
 
+        presenter.updateInfo(machine);
+
+        verify(view).setScript("Image location: localhost:5000/image:latest");
+    }
+
+    @Test
+    public void tabSetErrorMessageWhenRecipeTypeIsNull() throws Exception {
+        when(machine.getRecipeType()).thenReturn(null);
+        when(machine.getId()).thenReturn("machine123");
+
+        presenter.updateInfo(machine);
+
+        verify(view).setScript("Recipe type is null for machine 'machine123'");
+    }
+
+    @Test
+    public void tabSetErrorMessageWhenFailedToFetchScript() throws Exception {
+        when(machine.getRecipeType()).thenReturn("dockerfile");
+        when(recipeScriptClient.getRecipeScript(any(Machine.class))).thenReturn(recipePromise);
+        when(recipePromise.then(any(Operation.class))).thenReturn(recipePromise);
+        when(machine.getId()).thenReturn("machine123");
+
+        presenter.updateInfo(machine);
+
+        verify(recipePromise).catchError(errorArgumentCaptor.capture());
+        errorArgumentCaptor.getValue().apply(promiseError);
+        verify(view).setScript("Failed to get recipe script for machine 'machine123'");
+    }
 }

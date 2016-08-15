@@ -43,6 +43,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBo
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier;
 import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
 import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
@@ -51,6 +52,7 @@ import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProce
 import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
+import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
@@ -80,17 +82,20 @@ public class MachineExtension {
     public static final String GROUP_MACHINES_LIST           = "MachinesListGroup";
 
     @Inject
-    public MachineExtension(MachineResources machineResources,
+    public MachineExtension(final MachineResources machineResources,
                             final EventBus eventBus,
                             final WorkspaceAgent workspaceAgent,
-                            final AppContext   appContext,
+                            final AppContext appContext,
                             final ConsolesContainerPresenter consolesContainerPresenter,
                             final ConsolesPanelPresenter consolesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
-                            IconRegistry iconRegistry,
-                            CustomCommandType arbitraryCommandType) {
+                            final IconRegistry iconRegistry,
+                            final CustomCommandType arbitraryCommandType,
+                            final Provider<MachineStatusNotifier> machineStatusNotifierProvider,
+                            final ProjectExplorerPresenter projectExplorerPresenter) {
         machineResources.getCss().ensureInjected();
+        machineStatusNotifierProvider.get();
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
@@ -99,8 +104,10 @@ public class MachineExtension {
                 /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
                     consolesPanelPresenter.newTerminal();
-                    workspaceAgent.setActivePart(consolesContainerPresenter);
+                    workspaceAgent.openPart(consolesContainerPresenter, PartStackType.INFORMATION);
                 }
+
+                workspaceAgent.setActivePart(projectExplorerPresenter);
             }
 
             @Override

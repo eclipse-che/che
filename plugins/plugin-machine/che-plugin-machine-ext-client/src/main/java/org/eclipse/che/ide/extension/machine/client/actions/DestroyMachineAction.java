@@ -36,9 +36,9 @@ public class DestroyMachineAction extends AbstractPerspectiveAction {
     private final MachineManager              machineManager;
 
     @Inject
-    public DestroyMachineAction(MachineLocalizationConstant locale,
-                                MachinePanelPresenter panelPresenter,
-                                MachineManager machineManager) {
+    public DestroyMachineAction(final MachineLocalizationConstant locale,
+                                final MachinePanelPresenter panelPresenter,
+                                final MachineManager machineManager) {
         super(Collections.singletonList(OPERATIONS_PERSPECTIVE_ID),
               locale.machineDestroyTitle(),
               locale.machineDestroyDescription(),

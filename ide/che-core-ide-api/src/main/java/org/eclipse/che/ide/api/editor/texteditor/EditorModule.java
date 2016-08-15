@@ -12,9 +12,9 @@ package org.eclipse.che.ide.api.editor.texteditor;
 
 /**
  * Front for an editor module, that allows to be warned when it's initialized.
- * @param <T> the type of the editor widget.
  */
-public interface EditorModule<T extends EditorWidget> {
+@Deprecated
+public interface EditorModule {
 
     /**
      * Tells if the editor module is initialized.
@@ -35,6 +35,7 @@ public interface EditorModule<T extends EditorWidget> {
     void waitReady(EditorModuleReadyCallback callback);
 
     /** Callback to call when the module is ready of failed. */
+    @Deprecated
     interface EditorModuleReadyCallback {
         /** Used when the initialization is done. */
         void onEditorModuleReady();

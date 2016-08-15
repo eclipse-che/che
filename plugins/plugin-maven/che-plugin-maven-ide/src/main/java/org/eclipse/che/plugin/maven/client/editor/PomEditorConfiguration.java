@@ -14,12 +14,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.ide.ext.java.client.editor.JavaAnnotationModelFactory;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.editorconfig.AutoSaveTextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.editor.orion.client.OrionEditorPresenter;
+import org.eclipse.che.ide.ext.java.client.editor.JavaAnnotationModelFactory;
 
 import javax.validation.constraints.NotNull;
 
@@ -36,7 +36,7 @@ public class PomEditorConfiguration extends AutoSaveTextEditorConfiguration {
     public PomEditorConfiguration(Provider<DocumentPositionMap> docPositionMapProvider,
                                   JavaAnnotationModelFactory javaAnnotationModelFactory,
                                   PomReconcilingStrategyFactory reconcilingStrategyFactory,
-                                  @Assisted @NotNull final TextEditorPresenter<?> editor) {
+                                  @Assisted @NotNull final OrionEditorPresenter editor) {
         annotationModel = javaAnnotationModelFactory.create(docPositionMapProvider.get());
         PomReconcilingStrategy reconsilingStrategy = reconcilingStrategyFactory.create(annotationModel, editor);
         Reconciler reconciler = getReconciler();

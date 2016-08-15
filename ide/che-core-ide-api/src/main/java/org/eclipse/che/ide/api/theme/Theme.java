@@ -1511,4 +1511,12 @@ public interface Theme {
     String vcsConsoleChangesLineNumbersColor();
 
     String editorPreferenceCategoryBackgroundColor();
+
+    /********************************************************************************************
+     *
+     * Resource monitors
+     *
+     ********************************************************************************************/
+    String resourceMonitorBarBackground();
+
 }

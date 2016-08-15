@@ -1,2 +1,0 @@
-echo $username;
-echo echo\ $password>$self

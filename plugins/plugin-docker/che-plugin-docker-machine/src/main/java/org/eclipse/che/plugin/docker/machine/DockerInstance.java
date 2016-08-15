@@ -55,6 +55,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
+import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX;
 
 /**
  * Docker implementation of {@link Instance}
@@ -260,9 +261,9 @@ public class DockerInstance extends AbstractInstance {
 
     private String generateRepository() {
         if (registryNamespace != null) {
-            return registryNamespace + '/' + NameGenerator.generate(null, 16);
+            return registryNamespace + '/' + MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
         }
-        return NameGenerator.generate(null, 16);
+        return MACHINE_SNAPSHOT_PREFIX + NameGenerator.generate(null, 16);
     }
 
     @Override

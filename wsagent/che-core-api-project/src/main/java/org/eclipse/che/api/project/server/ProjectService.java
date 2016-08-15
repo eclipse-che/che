@@ -348,7 +348,7 @@ public class ProjectService extends Service {
 
         final URI location = getServiceContext().getServiceUriBuilder().clone()
                                                 .path(getClass(), "getFile")
-                                                .build(newFile.getPath().toString().substring(1));
+                                                .build(new String[]{newFile.getPath().toString().substring(1)}, false);
         return Response.created(location)
                        .entity(injectFileLinks(asDto(newFile)))
                        .build();
@@ -372,7 +372,7 @@ public class ProjectService extends Service {
         final FolderEntry newFolder = projectManager.getProjectsRoot().createFolder(path);
         final URI location = getServiceContext().getServiceUriBuilder().clone()
                                                 .path(getClass(), "getChildren")
-                                                .build(newFolder.getPath().toString().substring(1));
+                                                .build(new String[]{newFolder.getPath().toString().substring(1)}, false);
 
         eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.CREATED,
                                                           workspace,
@@ -520,7 +520,7 @@ public class ProjectService extends Service {
 
         final URI location = getServiceContext().getServiceUriBuilder()
                                                 .path(getClass(), copy.isFile() ? "getFile" : "getChildren")
-                                                .build(copy.getPath().toString().substring(1));
+                                                .build(new String[]{copy.getPath().toString().substring(1)}, false);
 
         if (copy.isFolder()) {
             try {
@@ -567,7 +567,7 @@ public class ProjectService extends Service {
 
         final URI location = getServiceContext().getServiceUriBuilder()
                                                 .path(getClass(), move.isFile() ? "getFile" : "getChildren")
-                                                .build(move.getPath().toString().substring(1));
+                                                .build(new String[]{move.getPath().toString().substring(1)}, false);
 
         eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.MOVED,
                                                           workspace,
@@ -678,7 +678,7 @@ public class ProjectService extends Service {
 
         return Response.created(getServiceContext().getServiceUriBuilder()
                                                    .path(getClass(), "getChildren")
-                                                   .build(parent.getPath().toString().substring(1))).build();
+                                                   .build(new String[]{parent.getPath().toString().substring(1)}, false)).build();
     }
 
     @GET
@@ -872,7 +872,7 @@ public class ProjectService extends Service {
         LOG.info("EVENT#project-created# PROJECT#{}# TYPE#{}# WS#{}# USER#{}# PAAS#default#",
                  projectName,
                  projectType,
-                 EnvironmentContext.getCurrent().getWorkspaceId(),
+                 workspace,
                  EnvironmentContext.getCurrent().getSubject().getUserId());
     }
 
@@ -1032,14 +1032,14 @@ public class ProjectService extends Service {
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getFile")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_GET_CONTENT));
         links.add(createLink(PUT,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "updateFile")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              MediaType.WILDCARD,
                              null,
@@ -1047,7 +1047,7 @@ public class ProjectService extends Service {
         links.add(createLink(DELETE,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "delete")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              LINK_REL_DELETE));
 
@@ -1062,21 +1062,21 @@ public class ProjectService extends Service {
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getChildren")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_CHILDREN));
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getTree")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_TREE));
         links.add(createLink(DELETE,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "delete")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              LINK_REL_DELETE));
 
@@ -1091,7 +1091,7 @@ public class ProjectService extends Service {
         links.add(createLink(PUT,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "updateProject")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              APPLICATION_JSON,
                              APPLICATION_JSON,
@@ -1099,21 +1099,21 @@ public class ProjectService extends Service {
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getChildren")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_CHILDREN));
         links.add(createLink(GET,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "getTree")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              APPLICATION_JSON,
                              LINK_REL_TREE));
         links.add(createLink(DELETE,
                              uriBuilder.clone()
                                        .path(ProjectService.class, "delete")
-                                       .build(relPath)
+                                       .build(new String[]{relPath}, false)
                                        .toString(),
                              LINK_REL_DELETE));
 

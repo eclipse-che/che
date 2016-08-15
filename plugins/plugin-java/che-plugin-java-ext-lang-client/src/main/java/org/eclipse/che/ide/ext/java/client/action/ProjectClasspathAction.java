@@ -25,7 +25,6 @@ import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathPre
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
-import static org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker.ID;
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
@@ -72,6 +71,6 @@ public class ProjectClasspathAction extends AbstractPerspectiveAction {
             return;
         }
 
-        event.getPresentation().setEnabledAndVisible(isJavaProject(project.get()) && resource.getParentWithMarker(ID).isPresent());
+        event.getPresentation().setEnabledAndVisible(isJavaProject(project.get()));
     }
 }

@@ -22,8 +22,11 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.part.widgets.editortab.EditorTabWidget;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -50,14 +53,17 @@ public class ListButtonWidget extends Composite implements ListButton {
 
     @UiField(provided = true)
     final Resources resources;
+    private EventBus eventBus;
 
     private ActionDelegate delegate;
 
     private long closeTime;
 
     @Inject
-    public ListButtonWidget(Resources resources) {
+    public ListButtonWidget(Resources resources,
+                            EventBus eventBus) {
         this.resources = resources;
+        this.eventBus = eventBus;
         initWidget(UI_BINDER.createAndBindUi(this));
 
         closeTime = System.currentTimeMillis();
@@ -112,8 +118,8 @@ public class ListButtonWidget extends Composite implements ListButton {
         @Override
         public void onCloseButtonClicked(@NotNull ListItem listItem) {
             popupPanel.hide();
-            if (delegate != null) {
-                delegate.onTabClose(listItem.getTabItem());
+            if (delegate != null && listItem.getTabItem() instanceof EditorTabWidget) {
+                eventBus.fireEvent(new FileEvent(((EditorTabWidget)listItem.getTabItem()).getFile(), FileEvent.FileOperation.CLOSE));
             }
         }
     };

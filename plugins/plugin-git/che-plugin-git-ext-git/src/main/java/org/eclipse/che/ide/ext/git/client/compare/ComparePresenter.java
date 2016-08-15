@@ -13,7 +13,9 @@ package org.eclipse.che.ide.ext.git.client.compare;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -46,6 +48,7 @@ import static org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status.DELET
 public class ComparePresenter implements CompareView.ActionDelegate {
 
     private final AppContext              appContext;
+    private final EventBus                eventBus;
     private final DialogFactory           dialogFactory;
     private final CompareView             view;
     private final GitServiceClient        service;
@@ -58,12 +61,14 @@ public class ComparePresenter implements CompareView.ActionDelegate {
 
     @Inject
     public ComparePresenter(AppContext appContext,
+                            EventBus eventBus,
                             DialogFactory dialogFactory,
                             CompareView view,
                             GitServiceClient service,
                             GitLocalizationConstant locale,
                             NotificationManager notificationManager) {
         this.appContext = appContext;
+        this.eventBus = eventBus;
         this.dialogFactory = dialogFactory;
         this.view = view;
         this.service = service;
@@ -152,6 +157,7 @@ public class ComparePresenter implements CompareView.ActionDelegate {
                             parent.get().synchronize();
                         }
 
+                        eventBus.fireEvent(new FileContentUpdateEvent(comparedFile.getPath()));
                         view.hide();
                     }
                 });

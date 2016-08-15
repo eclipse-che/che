@@ -31,6 +31,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.parts.PartPresenter;
@@ -48,6 +49,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 
+import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_TO;
@@ -62,7 +64,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
  * @author Vitaliy Guliy
  * @author Vlad Zhukovskyi
  */
-public class EditorTabWidget extends Composite implements EditorTab, ContextMenuHandler, ResourceChangedHandler {
+public class EditorTabWidget extends Composite implements EditorTab, ContextMenuHandler, ResourceChangedHandler, FileEventHandler {
 
     interface EditorTabWidgetUiBinder extends UiBinder<Widget, EditorTabWidget> {
     }
@@ -96,7 +98,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
                            @Assisted String title,
                            PartStackUIResources resources,
                            EditorTabContextMenuFactory editorTabContextMenu,
-                           EventBus eventBus,
+                           final EventBus eventBus,
                            FileTypeRegistry fileTypeRegistry) {
         this.resources = resources;
         this.eventBus = eventBus;
@@ -116,11 +118,12 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         addDomHandler(this, ContextMenuEvent.getType());
 
         eventBus.addHandler(ResourceChangedEvent.getType(), this);
+        eventBus.addHandler(FileEvent.TYPE, this);
 
         closeButton.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                delegate.onTabClose(EditorTabWidget.this);
+                eventBus.fireEvent(new FileEvent(EditorTabWidget.this.file, CLOSE));
             }
         }, ClickEvent.getType());
     }
@@ -151,8 +154,8 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         title.setText(part.getTitle());
 
         if (part instanceof EditorPartPresenter) {
-            VirtualFile changedFile = ((EditorPartPresenter)part).getEditorInput().getFile();
-            FileType fileType = fileTypeRegistry.getFileTypeByFile(changedFile);
+            file = ((EditorPartPresenter)part).getEditorInput().getFile();
+            FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
             icon = fileType.getImage();
             iconPanel.setWidget(getIcon());
         }
@@ -205,7 +208,6 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
             delegate.onTabClicked(this);
         } else if (NativeEvent.BUTTON_MIDDLE == event.getNativeButton()) {
             eventBus.fireEvent(new FileEvent(file, FileEvent.FileOperation.CLOSE));
-            delegate.onTabClose(this);
         }
     }
 
@@ -301,6 +303,13 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
 
                 title.setText(file.getDisplayName());
             }
+        }
+    }
+
+    @Override
+    public void onFileOperation(FileEvent event) {
+        if (event.getOperationType() == CLOSE && event.getFile().equals(file)) {
+            delegate.onTabClose(this);
         }
     }
 }
