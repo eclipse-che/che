@@ -33,8 +33,8 @@ import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
 import org.eclipse.che.api.vfs.impl.file.event.HiEventService;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventListener;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventService;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.EditorFileStatusDetector;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.GitCheckoutHiEventDetector;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.OpenedFileContentUpdateEventDetector;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.PomModifiedHiEventDetector;
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
@@ -47,6 +47,7 @@ import java.nio.file.PathMatcher;
  *
  * @author gazarenkov
  * @author Artem Zatsarynnyi
+ * @author Dmitry Kuleshov
  */
 public class ProjectApiModule extends AbstractModule {
 
@@ -97,12 +98,11 @@ public class ProjectApiModule extends AbstractModule {
 
         highLevelVfsEventDetectorMultibinder.addBinding().to(PomModifiedHiEventDetector.class);
         highLevelVfsEventDetectorMultibinder.addBinding().to(GitCheckoutHiEventDetector.class);
-        highLevelVfsEventDetectorMultibinder.addBinding().to(OpenedFileContentUpdateEventDetector.class);
+        highLevelVfsEventDetectorMultibinder.addBinding().to(EditorFileStatusDetector.class);
 
         MapBinder<String, JsonRpcRequestReceiver> requestReceivers =
                 MapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
 
-        requestReceivers.addBinding("event:file-opened").to(OpenedFileContentUpdateEventDetector.class);
-        requestReceivers.addBinding("event:file-closed").to(OpenedFileContentUpdateEventDetector.class);
+        requestReceivers.addBinding("event:file-in-editor-status-changed").to(EditorFileStatusDetector.class);
     }
 }

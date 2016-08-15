@@ -13,8 +13,17 @@ package org.eclipse.che.api.project.shared.dto.event;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface FileOpenedDto {
+public interface FileInEditorStatusDto {
+    Status getStatus();
+
+    FileInEditorStatusDto withStatus(Status status);
+
     String getPath();
 
-    FileOpenedDto withPath(String path);
+    FileInEditorStatusDto withPath(String path);
+
+    enum Status {
+        OPENED,
+        CLOSED,
+    }
 }

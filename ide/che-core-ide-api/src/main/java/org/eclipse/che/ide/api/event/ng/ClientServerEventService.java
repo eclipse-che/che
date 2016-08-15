@@ -13,8 +13,8 @@ package org.eclipse.che.ide.api.event.ng;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
-import org.eclipse.che.api.project.shared.dto.event.FileClosedDto;
-import org.eclipse.che.api.project.shared.dto.event.FileOpenedDto;
+import org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto;
+import org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto.Status;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestTransmitter;
@@ -22,6 +22,9 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto.Status.CLOSED;
+import static org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto.Status.OPENED;
 
 /**
  * @author Dmitry Kuleshov
@@ -46,12 +49,12 @@ public class ClientServerEventService {
 
                 switch (event.getOperationType()) {
                     case OPEN: {
-                        transmitOpenFileNotification(path);
+                        transmitInternal(path, OPENED);
 
                         break;
                     }
                     case CLOSE: {
-                        transmitCloseFileNotification(path);
+                        transmitInternal(path, CLOSED);
 
                         break;
                     }
@@ -62,29 +65,18 @@ public class ClientServerEventService {
 
     }
 
-    private void transmitCloseFileNotification(String path) {
-        Log.info(ClientServerEventService.class, "Sending file closed event: " + path);
+    private void transmitInternal(String path, Status status) {
+        Log.info(getClass(), "Sending file status changed event: " + path);
 
-        final FileClosedDto dto = dtoFactory.createDto(FileClosedDto.class).withPath(path);
+        final FileInEditorStatusDto fileInEditorStatusDto = dtoFactory.createDto(FileInEditorStatusDto.class)
+                                                                      .withPath(path)
+                                                                      .withStatus(status);
 
         final JsonRpcRequest request = dtoFactory.createDto(JsonRpcRequest.class)
                                                  .withJsonrpc("2.0")
-                                                 .withMethod("event:file-closed")
-                                                 .withParams(dto.toString());
+                                                 .withMethod("event:file-in-editor-status-changed")
+                                                 .withParams(fileInEditorStatusDto.toString());
 
         transmitter.transmit(request);
-    }
-
-    private void transmitOpenFileNotification(String path) {
-        Log.info(ClientServerEventService.class, "Sending file opened event: " + path);
-
-        final FileOpenedDto dto = dtoFactory.createDto(FileOpenedDto.class).withPath(path);
-
-        final JsonRpcRequest notification = dtoFactory.createDto(JsonRpcRequest.class)
-                                                      .withJsonrpc("2.0")
-                                                      .withMethod("event:file-opened")
-                                                      .withParams(dto.toString());
-
-        transmitter.transmit(notification);
     }
 }

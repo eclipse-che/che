@@ -44,7 +44,7 @@ import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.FileUpdateEventRequestReceiver;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.extension.ExtensionRegistry;
@@ -345,7 +345,7 @@ public class CoreGinModule extends AbstractGinModule {
         GinMapBinder<String, JsonRpcRequestReceiver> requestReceivers =
                 GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
 
-        requestReceivers.addBinding("event:file-updated").to(FileUpdateEventRequestReceiver.class);
+        requestReceivers.addBinding("event:file-in-vfs-status-changed").to(EditorFileStatusNotificationReceiver.class);
     }
 
     private void configureJsonRpc() {

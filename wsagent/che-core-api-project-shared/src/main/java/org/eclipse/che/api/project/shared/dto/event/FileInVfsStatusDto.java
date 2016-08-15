@@ -13,8 +13,17 @@ package org.eclipse.che.api.project.shared.dto.event;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface FileClosedDto {
+public interface FileInVfsStatusDto {
+    Status getStatus();
+
+    FileInVfsStatusDto withStatus(Status status);
+
     String getPath();
 
-    FileClosedDto withPath(String path);
+    FileInVfsStatusDto withPath(String path);
+
+    enum Status {
+        UPDATED,
+        REMOVED,
+    }
 }
