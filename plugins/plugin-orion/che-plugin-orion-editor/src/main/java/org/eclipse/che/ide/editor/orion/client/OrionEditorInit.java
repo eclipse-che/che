@@ -8,14 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.editor.texteditor;
+package org.eclipse.che.ide.editor.orion.client;
 
 import elemental.events.KeyboardEvent.KeyCode;
 
-import com.google.web.bindery.event.shared.EventBus;
-
-import org.eclipse.che.ide.api.editor.events.DocumentReadyEvent;
-import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.api.editor.annotation.AnnotationModel;
 import org.eclipse.che.ide.api.editor.annotation.HasAnnotationRendering;
 import org.eclipse.che.ide.api.editor.annotation.QueryAnnotationsEvent;
@@ -29,6 +25,7 @@ import org.eclipse.che.ide.api.editor.codeassist.CodeAssistantFactory;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionProposal;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionReadyCallback;
 import org.eclipse.che.ide.api.editor.codeassist.CompletionsSource;
+import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.events.CompletionRequestEvent;
@@ -36,15 +33,15 @@ import org.eclipse.che.ide.api.editor.events.CompletionRequestHandler;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.events.TextChangeEvent;
 import org.eclipse.che.ide.api.editor.events.TextChangeHandler;
-import org.eclipse.che.ide.api.editor.events.doc.DocReadyWrapper;
-import org.eclipse.che.ide.api.editor.events.doc.DocReadyWrapper.DocReadyInit;
-import org.eclipse.che.ide.api.editor.keymap.KeyBindingAction;
 import org.eclipse.che.ide.api.editor.keymap.KeyBinding;
+import org.eclipse.che.ide.api.editor.keymap.KeyBindingAction;
 import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistAssistant;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
+import org.eclipse.che.ide.api.editor.text.TypedRegion;
+import org.eclipse.che.ide.api.editor.texteditor.HasKeyBindings;
 import org.eclipse.che.ide.util.browser.UserAgent;
 
 import java.util.List;
@@ -55,31 +52,27 @@ import java.util.logging.Logger;
  * Initialization controller for the text editor.
  * Sets-up (when available) the different components that depend on the document being ready.
  */
-@Deprecated
-public class TextEditorInit<T extends EditorWidget> {
+public class OrionEditorInit {
 
     /** The logger. */
-    private static final Logger LOG = Logger.getLogger(TextEditorInit.class.getName());
+    private static final Logger LOG = Logger.getLogger(OrionEditorInit.class.getName());
 
     private static final String CONTENT_ASSIST = "Content assist";
     private static final String QUICK_FIX      = "Quick fix";
 
     private final TextEditorConfiguration configuration;
-    private final EventBus                generalEventBus;
     private final CodeAssistantFactory    codeAssistantFactory;
-    private final TextEditorPresenter<T>  textEditor;
+    private final OrionEditorPresenter    textEditor;
     private final QuickAssistAssistant    quickAssist;
 
     /**
      * The quick assist assistant.
      */
-    public TextEditorInit(final TextEditorConfiguration configuration,
-                          final EventBus generalEventBus,
-                          final CodeAssistantFactory codeAssistantFactory,
-                          final QuickAssistAssistant quickAssist,
-                          final TextEditorPresenter<T> textEditor) {
+    public OrionEditorInit(final TextEditorConfiguration configuration,
+                           final CodeAssistantFactory codeAssistantFactory,
+                           final QuickAssistAssistant quickAssist,
+                           final OrionEditorPresenter textEditor) {
         this.configuration = configuration;
-        this.generalEventBus = generalEventBus;
         this.codeAssistantFactory = codeAssistantFactory;
         this.quickAssist = quickAssist;
         this.textEditor = textEditor;
@@ -87,23 +80,17 @@ public class TextEditorInit<T extends EditorWidget> {
 
     /**
      * Initialize the text editor.
-     * Sets itself as {@link DocumentReadyEvent} handler.
+     *
+     * @param document to initialise with
      */
-    public void init() {
-
-        final DocReadyInit<TextEditorInit<T>> init = new DocReadyInit<TextEditorInit<T>>() {
-
-            @Override
-            public void initialize(final DocumentHandle documentHandle, final TextEditorInit<T> wrapped) {
-                configurePartitioner(documentHandle);
-                configureReconciler(documentHandle);
-                configureAnnotationModel(documentHandle);
-                configureCodeAssist(documentHandle);
-                configureChangeInterceptors(documentHandle);
-                addQuickAssistKeyBinding();
-            }
-        };
-        new DocReadyWrapper<TextEditorInit<T>>(generalEventBus, this.textEditor.getEditorHandle(), init, this);
+    public void init(Document document) {
+        DocumentHandle documentHandle = document.getDocumentHandle();
+        configurePartitioner(documentHandle);
+        configureReconciler(documentHandle);
+        configureAnnotationModel(documentHandle);
+        configureCodeAssist(documentHandle);
+        configureChangeInterceptors(documentHandle);
+        addQuickAssistKeyBinding();
     }
 
     public void uninstall() {
@@ -149,7 +136,7 @@ public class TextEditorInit<T extends EditorWidget> {
             return;
         }
         // add the renderers (event handler) before the model (event source)
-        if(textEditor instanceof HasAnnotationRendering){
+        if (textEditor instanceof HasAnnotationRendering) {
             ((HasAnnotationRendering)textEditor).configure(annotationModel, documentHandle);
         }
         annotationModel.setDocumentHandle(documentHandle);
@@ -174,7 +161,7 @@ public class TextEditorInit<T extends EditorWidget> {
 
             final CodeAssistant codeAssistant = this.codeAssistantFactory.create(this.textEditor,
                                                                                  this.configuration.getPartitioner());
-            for (String key: processors.keySet()) {
+            for (String key : processors.keySet()) {
                 codeAssistant.setCodeAssistantProcessor(key, processors.get(key));
             }
 
@@ -202,7 +189,7 @@ public class TextEditorInit<T extends EditorWidget> {
                 }
             };
             final HasKeyBindings hasKeyBindings = this.textEditor.getHasKeybindings();
-            if(UserAgent.isMac()){
+            if (UserAgent.isMac()) {
                 hasKeyBindings.addKeyBinding(new KeyBinding(false, false, false, true, KeyCode.SPACE, action), CONTENT_ASSIST);
                 hasKeyBindings.addKeyBinding(new KeyBinding(false, false, true, true, KeyCode.SPACE, action), CONTENT_ASSIST);
             } else {
@@ -298,14 +285,14 @@ public class TextEditorInit<T extends EditorWidget> {
                     }
                     // don't apply the interceptors if the range end doesn't belong to the same partition
                     final TextPosition to = change.getTo();
-                    if (to != null && ! from.equals(to)) {
+                    if (to != null && !from.equals(to)) {
                         final int endOffset = documentHandle.getDocument().getIndexFromPosition(to);
                         if (endOffset < region.getOffset() || endOffset > region.getOffset() + region.getLength()) {
                             return;
                         }
                     }
                     // stop as soon as one interceptors has modified the content
-                    for (final TextChangeInterceptor interceptor: filteredInterceptors) {
+                    for (final TextChangeInterceptor interceptor : filteredInterceptors) {
                         final TextChange result = interceptor.processChange(change,
                                                                             documentHandle.getDocument().getReadOnlyDocument());
                         if (result != null) {

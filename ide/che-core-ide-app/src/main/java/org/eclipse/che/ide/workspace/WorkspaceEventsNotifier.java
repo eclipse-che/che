@@ -38,7 +38,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
-import org.eclipse.che.ide.api.workspace.event.EnvironmentStatusChangedEvent;
+import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
@@ -72,7 +72,7 @@ import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status
  * <ul> Notifies about the events which occur in the workspace:
  * <li> changing of the workspace status ({@link WorkspaceStartingEvent}, {@link WorkspaceStartedEvent}, {@link
  * WorkspaceStoppedEvent});</li>
- * <li> changing of environments status ({@link EnvironmentStatusChangedEvent});</li>
+ * <li> changing of environments status ({@link MachineStatusChangedEvent});</li>
  * <li> receiving Environment Output message from server ({@link EnvironmentOutputEvent});</li>
  *
  * @author Vitalii Parfonov
@@ -389,9 +389,8 @@ public class WorkspaceEventsNotifier {
         }
 
         @Override
-        protected void onMessageReceived(MachineStatusEvent machineStatusEvent) {
-            EnvironmentStatusChangedEvent environmentStatusChangedEvent = new EnvironmentStatusChangedEvent(machineStatusEvent);
-            eventBus.fireEvent(environmentStatusChangedEvent);
+        protected void onMessageReceived(MachineStatusEvent event) {
+            eventBus.fireEvent(new MachineStatusChangedEvent(event));
         }
 
         @Override

@@ -73,13 +73,17 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
     private List<Pair<String, ?>> queryParams;
     private String                authorizationHeaderValue;
 
-    DefaultHttpJsonRequest(String url) {
+    protected DefaultHttpJsonRequest(String url, String method) {
         this.url = requireNonNull(url, "Required non-null url");
+        this.method = method;
     }
 
-    DefaultHttpJsonRequest(Link link) {
-        this(requireNonNull(link, "Required non-null link").getHref());
-        this.method = link.getMethod();
+    protected DefaultHttpJsonRequest(String url) {
+        this(url, HttpMethod.GET);
+    }
+
+    protected DefaultHttpJsonRequest(Link link) {
+        this(requireNonNull(link, "Required non-null link").getHref(), link.getMethod());
     }
 
     @Override
@@ -190,7 +194,7 @@ public class DefaultHttpJsonRequest implements HttpJsonRequest {
      * @throws BadRequestException
      *         when response code is 400
      */
-    DefaultHttpJsonResponse doRequest(int timeout,
+    protected DefaultHttpJsonResponse doRequest(int timeout,
                                       String url,
                                       String method,
                                       Object body,

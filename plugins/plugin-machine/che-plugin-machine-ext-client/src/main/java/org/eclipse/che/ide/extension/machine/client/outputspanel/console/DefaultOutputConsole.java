@@ -57,10 +57,10 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     }
 
     /**
-     * Print message in the console.
+     * Print text in the console.
      *
      * @param text
-     *         message which should be printed
+     *         text to be printed
      */
     public void printText(String text) {
         view.print(text, text.endsWith("\r"));
@@ -71,21 +71,15 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
     }
 
     /**
-     * Print message in console. If next string repeat previous, the previous string will be removed and the next string will be shown.
+     * Print colored text in the console.
      *
      * @param text
-     *         message which will be printed
-     * @param isRepeat
-     *         flag which define string repeats or not {@code true} string repeats, {@code false} string doesn't repeat
+     *         text to be printed
+     * @param color
+     *         color of the text or NULL
      */
-    public void printText(String text, boolean isRepeat) {
-        text = text.trim();
-
-        if (text.isEmpty()) {
-            return;
-        }
-
-        view.print(text, isRepeat);
+    public void printText(String text, String color) {
+        view.print(text, text.endsWith("\r"), color);
 
         for (ConsoleOutputListener outputListener : outputListeners) {
             outputListener.onConsoleOutput(this);

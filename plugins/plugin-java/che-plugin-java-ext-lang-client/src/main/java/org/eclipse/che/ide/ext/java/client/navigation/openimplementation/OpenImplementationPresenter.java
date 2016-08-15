@@ -21,6 +21,9 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
+import org.eclipse.che.ide.api.editor.position.PositionConverter;
+import org.eclipse.che.ide.api.editor.text.LinearRange;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -41,9 +44,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.model.Member;
 import org.eclipse.che.ide.ext.java.shared.dto.model.Type;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.popup.PopupResources;
-import org.eclipse.che.ide.api.editor.position.PositionConverter;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -63,7 +63,7 @@ public class OpenImplementationPresenter {
     private final PopupResources           popupResources;
     private final JavaLocalizationConstant locale;
 
-    private TextEditorPresenter activeEditor;
+    private TextEditor activeEditor;
 
     @Inject
     public OpenImplementationPresenter(JavaNavigationService javaNavigationService,
@@ -89,11 +89,11 @@ public class OpenImplementationPresenter {
      *         the active editor
      */
     public void show(final EditorPartPresenter editorPartPresenter) {
-        if (!(editorPartPresenter instanceof TextEditorPresenter)) {
-            Log.error(getClass(), "Open Declaration support only TextEditorPresenter as editor");
+        if (!(editorPartPresenter instanceof TextEditor)) {
+            Log.error(getClass(), "Open Declaration support only TextEditor as editor");
             return;
         }
-        activeEditor = ((TextEditorPresenter)editorPartPresenter);
+        activeEditor = ((TextEditor)editorPartPresenter);
         final VirtualFile file = activeEditor.getEditorInput().getFile();
 
         if (file instanceof Resource) {
@@ -124,9 +124,9 @@ public class OpenImplementationPresenter {
                             } else if (overridingSize > 1) {
                                 openOneImplementation(impls,
                                                       noImplementationWidget,
-                                                      (TextEditorPresenter)editorPartPresenter);
+                                                      (TextEditor)editorPartPresenter);
                             } else if (!isNullOrEmpty(impls.getMemberName()) && overridingSize == 0) {
-                                showNoImplementations(noImplementationWidget, (TextEditorPresenter)editorPartPresenter);
+                                showNoImplementations(noImplementationWidget, (TextEditor)editorPartPresenter);
                             }
                         }
                     });
@@ -188,7 +188,7 @@ public class OpenImplementationPresenter {
         });
     }
 
-    private void showNoImplementations(NoImplementationWidget noImplementationWidget, TextEditorPresenter editorPartPresenter) {
+    private void showNoImplementations(NoImplementationWidget noImplementationWidget, TextEditor editorPartPresenter) {
         int offset = editorPartPresenter.getCursorOffset();
         PositionConverter.PixelCoordinates coordinates = editorPartPresenter.getPositionConverter().offsetToPixel(offset);
         Type type = dtoFactory.createDto(Type.class);
@@ -199,7 +199,7 @@ public class OpenImplementationPresenter {
 
     private void openOneImplementation(ImplementationsDescriptorDTO implementationsDescriptor,
                                        NoImplementationWidget implementationWidget,
-                                       TextEditorPresenter editorPartPresenter) {
+                                       TextEditor editorPartPresenter) {
         int offset = editorPartPresenter.getCursorOffset();
         PositionConverter.PixelCoordinates coordinates = editorPartPresenter.getPositionConverter().offsetToPixel(offset);
         for (Type type : implementationsDescriptor.getImplementations()) {
@@ -210,13 +210,13 @@ public class OpenImplementationPresenter {
     }
 
     private void setCursor(final Region region) {
-        if (!(editorAgent.getActiveEditor() instanceof TextEditorPresenter)) {
+        if (!(editorAgent.getActiveEditor() instanceof TextEditor)) {
             return;
         }
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                TextEditorPresenter editor = (TextEditorPresenter)editorAgent.getActiveEditor();
+                TextEditor editor = (TextEditor)editorAgent.getActiveEditor();
                 editor.setFocus();
                 editor.getDocument().setSelectedRange(LinearRange.createWithStart(region.getOffset()).andLength(0), true);
             }

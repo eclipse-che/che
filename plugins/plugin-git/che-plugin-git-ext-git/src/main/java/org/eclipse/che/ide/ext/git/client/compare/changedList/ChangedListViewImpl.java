@@ -99,9 +99,7 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
             public void onSelectionChanged(SelectionChangedEvent event) {
                 List<Node> selection = event.getSelection();
                 if (!selection.isEmpty()) {
-                    delegate.onNodeSelected(event.getSelection().get(0));
-                } else {
-                    delegate.onNodeNotSelected();
+                    delegate.onNodeSelected(selection.get(0));
                 }
             }
         });
@@ -138,9 +136,6 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
         for (String file : items.keySet()) {
             tree.getNodeStorage().add(new ChangedFileNode(file, items.get(file), nodesResources, delegate, false));
         }
-        if (tree.getSelectionModel().getSelectedNodes() == null) {
-            delegate.onNodeNotSelected();
-        }
     }
 
     @Override
@@ -154,9 +149,6 @@ public class ChangedListViewImpl extends Window implements ChangedListView {
             for (Node node : nodes) {
                 tree.getNodeStorage().add(node);
             }
-        }
-        if (tree.getSelectionModel().getSelectedNodes() == null) {
-            delegate.onNodeNotSelected();
         }
     }
 

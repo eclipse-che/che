@@ -35,7 +35,7 @@ public class DefaultHttpJsonResponse implements HttpJsonResponse {
     private final String responseBody;
     private final int responseCode;
 
-    DefaultHttpJsonResponse(String response, int responseCode) {
+    protected DefaultHttpJsonResponse(String response, int responseCode) {
         this.responseBody = response;
         this.responseCode = responseCode;
     }

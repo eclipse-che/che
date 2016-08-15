@@ -53,7 +53,7 @@ init_global_variables() {
   CHE_TEST_CONTAINER_NAME="che-test"
 
   # User configurable variables
-  DEFAULT_CHE_VERSION="nightly"
+  DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
 
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
@@ -205,7 +205,7 @@ has_docker_for_windows_client(){
 }
 
 get_full_path() {
-  echo $(realpath $1)
+  echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
 }
 
 convert_windows_to_posix() {
@@ -252,27 +252,33 @@ get_che_hostname() {
 get_list_of_che_system_environment_variables() {
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
-  if [ is_native ]; then
-       DOCKER_ENV=$(mktemp)
-  else
-       DOCKER_ENV=$(mktemp docker-run-env.XXX)
+  DOCKER_ENV="tmp"
+  RETURN=""
+
+  CHE_VARIABLES=$(env | grep CHE_)
+
+  if [ ! -z ${CHE_VARIABLES+x} ]; then
+    env | grep CHE_ >> $DOCKER_ENV
+    RETURN="--env-file=$DOCKER_ENV"
   fi
-  env | grep CHE_ >> $DOCKER_ENV
 
   # Add in known proxy variables
   if [ ! -z ${http_proxy+x} ]; then
     echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
+    RETURN="--env-file=$DOCKER_ENV"
   fi
 
   if [ ! -z ${https_proxy+x} ]; then
     echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
+    RETURN="--env-file=$DOCKER_ENV"
   fi
 
   if [ ! -z ${no_proxy+x} ]; then
     echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
+    RETURN="--env-file=$DOCKER_ENV"
   fi
 
-  echo $DOCKER_ENV
+  echo $RETURN
 }
 
 check_current_image_and_update_if_not_found() {
@@ -291,16 +297,13 @@ execute_che_launcher() {
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
 
   info "ECLIPSE CHE: LAUNCHING LAUNCHER"
-
-  ENV_FILE=$(get_list_of_che_system_environment_variables)
-
   docker_exec run -t --rm --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    --env-file=$ENV_FILE \
+    $(get_list_of_che_system_environment_variables) \
     "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
 
   # Remove temporary file
-  rm -rf $ENV_FILE
+  rm -rf "tmp" > /dev/null 2>&1
 }
 
 execute_che_file() {
@@ -457,7 +460,7 @@ run_connectivity_tests() {
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                codenvy/che-server:nightly \
+                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
@@ -471,7 +474,7 @@ run_connectivity_tests() {
   ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                codenvy/che-server:nightly \
+                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")

@@ -40,11 +40,24 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
      *
      * @param text
      *         text to print
-     * @param cr
+     * @param carriageReturn
      *         if {@code true} - next message should replace the current one,
      *         if {@code false} - next message will be printed in a new line
      */
-    void print(String text, boolean cr);
+    void print(String text, boolean carriageReturn);
+
+    /**
+     * Prints colored text.
+     *
+     * @param text
+     *         text to print
+     * @param carriageReturn
+     *         if {@code true} - next message should replace the current one,
+     *         if {@code false} - next message will be printed in a new line
+     * @param color
+     *         color of the text or NULL
+     */
+    void print(String text, boolean carriageReturn, String color);
 
     /**
      * Hides command title and command label.
