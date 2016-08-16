@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 
@@ -35,7 +36,7 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
     void setVisible(boolean visible);
 
     /** Add process widget */
-    void addProcessWidget(String processId, IsWidget widget);
+    void addProcessWidget(String processId, String title, SVGResource icon, IsWidget widget);
 
     /** Select given process node */
     void selectNode(ProcessTreeNode node);

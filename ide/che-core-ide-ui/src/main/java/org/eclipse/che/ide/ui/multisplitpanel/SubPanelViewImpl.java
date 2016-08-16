@@ -39,10 +39,11 @@ import java.util.Map;
 public class SubPanelViewImpl extends Composite implements SubPanelView, ListButton.ActionDelegate, TabItem.ActionDelegate {
 
     private final TabItemFactory tabItemFactory;
-    private final ListButton listButton;
+    private final ListButton     listButton;
 
-    private final Map<TabItem, WidgetToShow> tabs2Widgets;
-    private final Map<WidgetToShow, TabItem> widgets2Tabs;
+    private final Map<TabItem, WidgetToShow>        tabs2Widgets;
+    private final Map<WidgetToShow, TabItem>        widgets2Tabs;
+    private final Map<WidgetToShow, ListItemWidget> widgets2ListItems;
 
     @UiField(provided = true)
     SplitLayoutPanel splitLayoutPanel;
@@ -80,6 +81,7 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, ListBut
 
         tabs2Widgets = new HashMap<>();
         widgets2Tabs = new HashMap<>();
+        widgets2ListItems = new HashMap<>();
 
         splitLayoutPanel = new SplitLayoutPanel(5);
 
@@ -129,7 +131,10 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, ListBut
         tabsPanel.add(tabItem);
         widgetsPanel.setWidget(widget.getWidget());
 
-        listButton.addListItem(new ListItemWidget(tabItem));
+        // add item to drop-down menu
+        final ListItemWidget listItemWidget = new ListItemWidget(tabItem);
+        listButton.addListItem(listItemWidget);
+        widgets2ListItems.put(widget, listItemWidget);
     }
 
     @Override
@@ -145,6 +150,12 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, ListBut
             widgetsPanel.remove(widget.getWidget());
 
             tabs2Widgets.remove(tabItem);
+
+            // remove item from drop-down menu
+            final ListItemWidget listItemWidget = widgets2ListItems.remove(widget);
+            if (listItemWidget != null) {
+                listButton.removeListItem(listItemWidget);
+            }
         }
     }
 

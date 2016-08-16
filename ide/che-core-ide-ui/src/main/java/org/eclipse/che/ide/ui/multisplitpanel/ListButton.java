@@ -24,8 +24,6 @@ public interface ListButton extends View<ListButton.ActionDelegate> {
 
     void removeListItem(ListItem listItem);
 
-    void setVisible(boolean visible);
-
     interface ActionDelegate {
 
         /**

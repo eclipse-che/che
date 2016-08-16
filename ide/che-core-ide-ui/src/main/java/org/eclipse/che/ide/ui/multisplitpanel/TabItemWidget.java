@@ -26,6 +26,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.multisplitpanel.TabItem;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
+import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -65,6 +66,8 @@ public class TabItemWidget extends Composite implements TabItem {
         initWidget(UI_BINDER.createAndBindUi(this));
 
         titleLabel.setText(title);
+
+        iconPanel.add(new SVGImage(getIcon()));
 
         addDomHandler(this, ClickEvent.getType());
 

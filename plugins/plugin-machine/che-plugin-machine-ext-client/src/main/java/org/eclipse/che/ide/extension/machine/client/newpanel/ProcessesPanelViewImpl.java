@@ -13,7 +13,6 @@ package org.eclipse.che.ide.extension.machine.client.newpanel;
 import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;
 
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -249,7 +248,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
-    public void addProcessWidget(final String processId, final IsWidget widget) {
+    public void addProcessWidget(final String processId, final String title, final SVGResource icon, final IsWidget widget) {
         final WidgetToShow widgetToShow = new WidgetToShow() {
             @Override
             public IsWidget getWidget() {
@@ -258,12 +257,12 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public String getTitle() {
-                return processId;
+                return title;
             }
 
             @Override
             public SVGResource getIcon() {
-                return machineResources.cmdIcon();
+                return icon;
             }
         };
 
@@ -293,7 +292,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
-    public void selectNode(final ProcessTreeNode node) {
+    public void selectNode(ProcessTreeNode node) {
         SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
 
         if (node == null) {
@@ -307,12 +306,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
             node.getTreeNodeElement().scrollIntoView();
         }
 
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                delegate.onTreeNodeSelected(node);
-            }
-        });
+        delegate.onTreeNodeSelected(node);
     }
 
     @Override
@@ -392,15 +386,15 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
 //            onResize();
 
-        WidgetToShow widgetToShow = processWidgets.get(processId);
-        SubPanel subPanel = widget2Panels.get(widgetToShow);
+        final WidgetToShow widgetToShow = processWidgets.get(processId);
+        final SubPanel subPanel = widget2Panels.get(widgetToShow);
         if (subPanel != null) {
             subPanel.activateWidget(widgetToShow);
         }
 
         activeProcessId = processId;
 
-        ProcessTreeNode treeNode = processTreeNodes.get(processId);
+        final ProcessTreeNode treeNode = processTreeNodes.get(processId);
         if (treeNode != null) {
             treeNode.setHasUnreadContent(false);
             treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
@@ -409,8 +403,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     @Override
     public void hideProcessOutput(String processId) {
-        WidgetToShow widgetToShow = processWidgets.get(processId);
-        SubPanel subPanel = widget2Panels.get(widgetToShow);
+        final WidgetToShow widgetToShow = processWidgets.get(processId);
+        final SubPanel subPanel = widget2Panels.get(widgetToShow);
         subPanel.removeWidget(widgetToShow);
         processWidgets.remove(processId);
     }
@@ -421,7 +415,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
             return;
         }
 
-        ProcessTreeNode treeNode = processTreeNodes.get(processId);
+        final ProcessTreeNode treeNode = processTreeNodes.get(processId);
         if (treeNode != null) {
             treeNode.setHasUnreadContent(true);
             treeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().badgeVisible());
