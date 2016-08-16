@@ -42,4 +42,12 @@ public interface TestLocalizationConstant extends Messages {
 
     @Key("action.runAll.description")
     String actionRunAllDescription();
+
+    /* Titles */
+
+    @Key("title.testResultPresenter")
+    String titleTestResultPresenter();
+
+    @Key("title.testResultPresenter.toolTip")
+    String titleTestResultPresenterToolTip();
 }

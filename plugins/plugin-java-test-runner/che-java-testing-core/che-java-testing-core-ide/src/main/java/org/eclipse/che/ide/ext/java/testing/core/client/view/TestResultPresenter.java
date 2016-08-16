@@ -21,6 +21,7 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.ide.ext.java.testing.core.client.TestLocalizationConstant;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestResources;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -28,20 +29,20 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import java.util.List;
 
 /**
- * Presenter for the searching some text in the workspace.
+ * Presenter for the displaying the test results on the workspace.
  *
- * @author Valeriy Svydenko
+ * @author Mirage Abeysekara
  */
 @Singleton
 public class TestResultPresenter extends BasePresenter implements TestResultView.ActionDelegate {
     private final WorkspaceAgent           workspaceAgent;
-    private final CoreLocalizationConstant localizationConstant;
+    private final TestLocalizationConstant localizationConstant;
     private final TestResources                resources;
     private final TestResultView           view;
 
     @Inject
     public TestResultPresenter(WorkspaceAgent workspaceAgent,
-                               CoreLocalizationConstant localizationConstant,
+                               TestLocalizationConstant localizationConstant,
                                TestResources resources,
                                TestResultView view) {
         this.workspaceAgent = workspaceAgent;
@@ -53,7 +54,7 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
 
     @Override
     public String getTitle() {
-        return "Test Results";
+        return localizationConstant.titleTestResultPresenter();
     }
 
     @Override
@@ -68,7 +69,7 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
 
     @Override
     public String getTitleToolTip() {
-        return "Test Runner Results";
+        return localizationConstant.titleTestResultPresenterToolTip();
     }
 
     @Override
@@ -82,10 +83,9 @@ public class TestResultPresenter extends BasePresenter implements TestResultView
     }
 
     /**
-     * Activate Find results part and showing all occurrences.
+     * Activate Test results part and showing the test results.
      *
-     * @param response
-     *         list of files which contains requested text
+     * @param response result of the test runner
      */
     public void handleResponse(TestResult response) {
         workspaceAgent.openPart(this, PartStackType.INFORMATION);
