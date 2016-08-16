@@ -97,7 +97,7 @@ abstract class AbstractMessageBus implements MessageBus {
                     if (getReadyState() == ReadyState.CLOSED) {
                         wsListener.onClose(new WebSocketClosedEvent());
                     } else {
-                        Log.error(MessageBus.class, e);
+                        Log.error(AbstractMessageBus.class, e);
                     }
                 }
             }
@@ -479,6 +479,15 @@ abstract class AbstractMessageBus implements MessageBus {
         }
     }
 
+    @Override
+    public void unsubscribeSilently(String channel, MessageHandler handler) {
+        try {
+            unsubscribe(channel, handler);
+        } catch (WebSocketException e) {
+            Log.error(AbstractMessageBus.class, e);
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean isHandlerSubscribed(MessageHandler handler, String channel) {
@@ -564,7 +573,7 @@ abstract class AbstractMessageBus implements MessageBus {
                 }
                 messages2send.clear();
             } catch (WebSocketException e) {
-                Log.error(MessageBusImpl.class, e);
+                Log.error(AbstractMessageBus.class, e);
             }
         }
     }

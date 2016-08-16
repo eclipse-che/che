@@ -941,7 +941,7 @@ public class ProjectServiceTest {
 
     @Test
     public void testDeleteProjectsConcurrently() throws Exception {
-        int threadNumber = 100;
+        int threadNumber = 5 * (Runtime.getRuntime().availableProcessors() + 1);
         ExecutorService executor = Executors.newFixedThreadPool(threadNumber);
         CountDownLatch countDownLatch = new CountDownLatch(threadNumber);
         List<Future<ContainerResponse>> futures = new LinkedList<>();
@@ -981,6 +981,8 @@ public class ProjectServiceTest {
         for (Future<ContainerResponse> future : futures) {
             assertEquals(future.get().getStatus(), 204, "Error: " + future.get().getEntity());
         }
+
+        executor.shutdown();
     }
 
     @Test

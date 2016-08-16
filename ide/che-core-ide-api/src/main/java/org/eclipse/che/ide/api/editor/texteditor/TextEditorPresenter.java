@@ -947,7 +947,7 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
                     if (isInitialized) {
                         return;
                     }
-                    generalEventBus.fireEvent(new DocumentReadyEvent(getEditorHandle(), document));
+                    generalEventBus.fireEvent(new DocumentReadyEvent(document));
                     firePropertyChange(PROP_INPUT);
                     setupEventHandlers();
                     setupFileContentUpdateHandler();
