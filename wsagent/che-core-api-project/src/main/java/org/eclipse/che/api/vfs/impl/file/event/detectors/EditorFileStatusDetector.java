@@ -63,7 +63,7 @@ public class EditorFileStatusDetector implements HiEventDetector<FileInVfsStatus
 
     private static final Logger LOG = LoggerFactory.getLogger(EditorFileStatusDetector.class);
 
-    private final Map<String, List<Integer>> endpointRegistry = new HashMap<>();
+    private final Map<String, Set<Integer>> endpointRegistry = new HashMap<>();
     private final Set<String>                skipping         = new HashSet<>();
 
     private final ProjectItemModifiedEventSubscriber subscriber = new ProjectItemModifiedEventSubscriber();
@@ -160,7 +160,7 @@ public class EditorFileStatusDetector implements HiEventDetector<FileInVfsStatus
         private void track(int endpoint, String path) {
             Optional.ofNullable(endpointRegistry.get(path))
                     .orElseGet(() -> {
-                        final List<Integer> endpoints = new LinkedList<>();
+                        final Set<Integer> endpoints = new HashSet<>();
                         endpointRegistry.put(path, endpoints);
                         return endpoints;
                     })

@@ -49,23 +49,21 @@ public class ClientServerEventService {
 
                 switch (event.getOperationType()) {
                     case OPEN: {
-                        transmitInternal(path, OPENED);
+                        transmit(path, OPENED);
 
                         break;
                     }
                     case CLOSE: {
-                        transmitInternal(path, CLOSED);
+                        transmit(path, CLOSED);
 
                         break;
                     }
                 }
             }
         });
-
-
     }
 
-    private void transmitInternal(String path, Status status) {
+    private void transmit(String path, Status status) {
         Log.info(getClass(), "Sending file status changed event: " + path);
 
         final FileInEditorStatusDto fileInEditorStatusDto = dtoFactory.createDto(FileInEditorStatusDto.class)

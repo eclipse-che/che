@@ -72,7 +72,7 @@ public class EditorFileStatusNotificationReceiver implements JsonRpcRequestRecei
 
                 eventBus.fireEvent(new FileContentUpdateEvent(path));
                 if (notificationManager != null) {
-                    notificationManager.notify("File '" + name + "' is updated externally", SUCCESS, EMERGE_MODE);
+                    notificationManager.notify("External operation", "File '" + name + "' is updated", SUCCESS, EMERGE_MODE);
                 }
 
                 break;
@@ -81,9 +81,9 @@ public class EditorFileStatusNotificationReceiver implements JsonRpcRequestRecei
 
                 Log.info(getClass(), "Received removed file event status: " + path);
 
-                appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(Path.valueOf(path), REMOVED));
+                appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(Path.valueOf(path), Path.valueOf(path), REMOVED));
                 if (notificationManager != null) {
-                    notificationManager.notify("File '" + name + "' is removed externally", SUCCESS, EMERGE_MODE);
+                    notificationManager.notify("External operation", "File '" + name + "' is removed", SUCCESS, EMERGE_MODE);
                 }
 
 

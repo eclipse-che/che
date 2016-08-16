@@ -18,13 +18,21 @@ import org.eclipse.che.dto.shared.DTO;
  * To transfer branch name after git checkout operation
  *
  * @author Dmitry Kuleshov
- *
  * @since 4.5
  */
 @Beta
 @DTO
-public interface GitBranchCheckoutEventDto {
-    String getBranchName();
+public interface GitCheckoutEventDto {
+    Type getType();
 
-    GitBranchCheckoutEventDto withBranchName(String branchName);
+    String getName();
+
+    GitCheckoutEventDto withType(Type type);
+
+    GitCheckoutEventDto withName(String name);
+
+    enum Type {
+        BRANCH,
+        REVISION,
+    }
 }

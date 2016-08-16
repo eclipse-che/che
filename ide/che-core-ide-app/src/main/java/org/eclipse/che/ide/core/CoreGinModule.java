@@ -45,6 +45,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.GitCheckoutStatusNotificationReceiver;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.extension.ExtensionRegistry;
@@ -238,9 +239,9 @@ import org.eclipse.che.ide.upload.folder.UploadFolderFromZipViewImpl;
 import org.eclipse.che.ide.util.executor.UserActivityManager;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageReceiver;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
+import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketMessageTransmitter;
 import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketTransmissionValidator;
-import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.ide.websocket.ng.impl.DelayableWebSocket;
 import org.eclipse.che.ide.websocket.ng.impl.SessionWebSocketInitializer;
 import org.eclipse.che.ide.websocket.ng.impl.WebSocket;
@@ -346,6 +347,7 @@ public class CoreGinModule extends AbstractGinModule {
                 GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
 
         requestReceivers.addBinding("event:file-in-vfs-status-changed").to(EditorFileStatusNotificationReceiver.class);
+        requestReceivers.addBinding("event:git-checkout").to(GitCheckoutStatusNotificationReceiver.class);
     }
 
     private void configureJsonRpc() {
