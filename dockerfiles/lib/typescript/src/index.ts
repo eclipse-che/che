@@ -16,6 +16,7 @@ import {Argument} from "./parameter/parameter";
 import {ArgumentProcessor} from "./parameter/argument-processor";
 import {Parameter} from "./parameter/parameter";
 import {CheTest} from "./che-test";
+import {CheAction} from "./che-action";
 
 /**
  * Entry point of this library providing commands.
@@ -50,9 +51,12 @@ export class EntryPoint {
 
         switch(this.commandName) {
             case 'che-test':
-                // remove post-check arg for now as it's the only test
                 let cheTest: CheTest = new CheTest(this.args);
                 promise = cheTest.run();
+                break;
+            case 'che-action':
+                let cheAction: CheAction = new CheAction(this.args);
+                promise = cheAction.run();
                 break;
             case 'che-dir':
                 let cheDir: CheDir = new CheDir(this.args);

@@ -80,7 +80,7 @@ export class Workspace {
             "description": null
         };
 
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace?account=&token=' + this.authData.getToken(), 201).setMethod('POST').setBody(workspace);
+        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace?account=', 201).setMethod('POST').setBody(workspace);
         return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
             return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
         });
@@ -92,7 +92,7 @@ export class Workspace {
      * Start a workspace and provide a Promise with WorkspaceDto.
      */
     startWorkspace(workspaceId: string, displayLog? : boolean) : Promise<WorkspaceDto> {
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime?environment=default&token=' + this.authData.getToken(), 200).setMethod('POST');
+        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime?environment=default', 200).setMethod('POST');
         return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
             return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
         }).then((workspaceDto) => {
@@ -115,7 +115,7 @@ export class Workspace {
      * Get a workspace data by returning a Promise with WorkspaceDto.
      */
     getWorkspace(workspaceId: string) : Promise<WorkspaceDto> {
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '?token=' + this.authData.getToken(), 200);
+        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId, 200);
         return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
             return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
         });
@@ -150,7 +150,7 @@ export class Workspace {
      * Delete a workspace and returns a Promise with WorkspaceDto.
      */
     deleteWorkspace(workspaceId: string) : Promise<WorkspaceDto> {
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '?token=' + this.authData.getToken(), 204).setMethod('DELETE');
+        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId, 204).setMethod('DELETE');
         return this.getWorkspace(workspaceId).then((workspaceDto : WorkspaceDto) => {
             return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
                 return workspaceDto;
@@ -164,7 +164,7 @@ export class Workspace {
      */
     stopWorkspace(workspaceId: string) : Promise<WorkspaceDto> {
 
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime?token=' + this.authData.getToken(), 204).setMethod('DELETE');
+        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime', 204).setMethod('DELETE');
         var callbackSubscriber:WorkspaceStopEventPromiseMessageBusSubscriber;
 
         // get workspace DTO

@@ -40,7 +40,8 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
             method: 'GET',
             headers: {
                 'Accept': 'application/json, text/plain, */*',
-                'Content-Type': 'application/json;charset=UTF-8'
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Cookie': 'session-access-key=' + this.authData.getToken()
             }
         };
 
@@ -80,7 +81,17 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
                         // workspace created, continue
                         resolve(new DefaultHttpJsonResponse(res.statusCode, data));
                     } else {
-                        reject('Call on rest url ' + this.options.path + 'returned invalid response code' + res.statusCode + ' with invalid data:' + data.toString());
+                        try {
+                            var parsed = JSON.parse(data);
+                            if (parsed.message) {
+                                reject('Call on rest url ' + this.options.path + ' returned invalid response code (' + res.statusCode + ') with error:' + parsed.message);
+                            } else {
+                                reject('Call on rest url ' + this.options.path + ' returned invalid response code (' + res.statusCode + ') with error:' + data);
+                            }
+                        } catch (error) {
+                            reject('Call on rest url ' + this.options.path + ' returned invalid response code (' + res.statusCode + ') with error:' + data.toString());
+                        }
+
                     }
                 });
 

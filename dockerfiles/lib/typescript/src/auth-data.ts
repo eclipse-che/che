@@ -10,6 +10,8 @@
  */
 
 import {RemoteIp} from './remoteip';
+import {Log} from "./log";
+import {HttpJsonRequest} from "./default-http-json-request";
 
 /**
  * Defines a way to store the auth data in order to deal with remote REST or Websocket API
@@ -27,6 +29,9 @@ export class AuthData {
     port : number;
     token : string;
     secured : boolean;
+
+    username: string;
+    password: string;
 
     constructor(hostname?: string, port? : number, token? : string) {
         this.secured = false;
@@ -69,13 +74,30 @@ export class AuthData {
     }
 
 
-    initToken(login: string, password: string) {
-        var http: any;
+    login() : Promise<boolean> {
+
+        // no auth, return a dummy promise
+        if (!this.username && !this.password) {
+            return new Promise<any>((resolve, reject) => {
+                resolve(true);
+            });
+        }
+
+
+        var http:any;
         if (this.isSecured()) {
             http = require('https');
         } else {
             http = require('http');
         }
+
+        var securedOrNot:string;
+        if (this.isSecured()) {
+            securedOrNot = ' using SSL.';
+        } else {
+            securedOrNot = '.';
+        }
+        Log.getLogger().info('using hostname \"' + this.getHostname() + '\" and port \"' + this.getPort() + '\"' + securedOrNot);
 
         var options = {
             hostname: this.hostname,
@@ -88,8 +110,8 @@ export class AuthData {
             }
         };
 
-        let p = new Promise<any>( (resolve, reject) => {
-            var req = http.request(options,  (res) => {
+        return new Promise<any>((resolve, reject) => {
+            var req = http.request(options, (res) => {
                 res.on('data', (body) => {
                     if (res.statusCode == 200) {
                         // token get, continue
@@ -108,21 +130,17 @@ export class AuthData {
             });
 
             const auth = {
-                "username": login,
-                "password": password
+                "username": this.username,
+                "password": this.password
             };
 
             req.write(JSON.stringify(auth));
             req.end();
 
         });
-        return p;
-
-
     }
 
-
-    static parse(remoteUrl : string) : AuthData {
+    static parse(remoteUrl : string, username?: string, password?: string) : AuthData {
         // extract hostname and port
         const url = require('url');
         var urlObject : any = url.parse(remoteUrl);
@@ -144,6 +162,11 @@ export class AuthData {
         if (isSecured) {
             authData.secured = true;
         }
+
+        authData.username = username;
+        authData.password = password;
+
+
         return authData;
     }
 

@@ -55,6 +55,9 @@ export class CheTest {
     run() : Promise<any> {
        let classOfTest: any = this.mapOfTests.get(this.testName);
        if (classOfTest) {
+           // update logger
+           Log.context = 'ECLIPSE CHE TEST/' + this.testName;
+
            var instance = Object.create(classOfTest.prototype);
            // here we use an array of array as constructor instance is an array and apply method is also using array to give parameter
            // so it results in having only the first argument of the array without this hack
