@@ -54,6 +54,7 @@ import static org.mockito.Mockito.when;
 public class MachineStateNotifierTest {
     private static final String MACHINE_NAME = "machineName";
     private static final String MACHINE_ID   = "machineId";
+    private static final String WORKSPACE_ID = "workspaceId";
 
     //constructor mocks
     @Mock
@@ -90,8 +91,9 @@ public class MachineStateNotifierTest {
         when(machine.getConfig()).thenReturn(machineConfig);
         when(machineConfig.getName()).thenReturn(MACHINE_NAME);
         when(machineStatusChangedEvent.getMachineId()).thenReturn(MACHINE_ID);
+        when(machineStatusChangedEvent.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(machineStatusChangedEvent.getMachineName()).thenReturn(MACHINE_NAME);
-        when(machineServiceClient.getMachine(MACHINE_ID)).thenReturn(machinePromise);
+        when(machineServiceClient.getMachine(WORKSPACE_ID, MACHINE_ID)).thenReturn(machinePromise);
         when(machinePromise.then(Matchers.<Operation<MachineDto>>anyObject())).thenReturn(machinePromise);
         when(machinePromise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(machinePromise);
     }

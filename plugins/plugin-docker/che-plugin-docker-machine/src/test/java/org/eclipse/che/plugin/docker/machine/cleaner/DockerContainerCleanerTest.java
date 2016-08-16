@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine.cleaner;
 
-import org.eclipse.che.api.machine.server.MachineRegistry;
-import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
@@ -28,8 +29,8 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.Optional;
 
-import static java.util.Optional.of;
 import static java.util.Arrays.asList;
+import static java.util.Optional.of;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
@@ -64,12 +65,14 @@ public class DockerContainerCleanerTest {
     private static final String RUNNING_STATUS = "Up 6 hour ago";
 
     @Mock
-    private MachineRegistry              machineRegistry;
+    private CheEnvironmentEngine         environmentEngine;
     @Mock
     private DockerConnector              dockerConnector;
     @Mock
     private DockerContainerNameGenerator nameGenerator;
 
+    @Mock
+    private Instance instance;
     @Mock
     private MachineImpl machineImpl1;
     @Mock
@@ -93,8 +96,9 @@ public class DockerContainerCleanerTest {
     private DockerContainerCleaner cleaner;
 
     @BeforeMethod
-    public void setUp() throws MachineException, IOException {
-        when(machineRegistry.isExist(machineId1)).thenReturn(true);
+    public void setUp() throws Exception {
+        when(environmentEngine.getMachine(workspaceId1, machineId1)).thenReturn(instance);
+        when(environmentEngine.getMachine(workspaceId2, machineId2)).thenThrow(new NotFoundException("test"));
         when(machineImpl1.getId()).thenReturn(machineId1);
         when(machineImpl1.getWorkspaceId()).thenReturn(workspaceId1);
 
@@ -121,27 +125,30 @@ public class DockerContainerCleanerTest {
 
         when(containerNameInfo2.getMachineId()).thenReturn(machineId2);
         when(containerNameInfo2.getWorkspaceId()).thenReturn(workspaceId2);
+
+        when(containerNameInfo3.getMachineId()).thenReturn(machineId2);
+        when(containerNameInfo3.getWorkspaceId()).thenReturn(workspaceId2);
     }
 
     @Test
     public void cleanerShouldKillAndRemoveContainerIfThisContainerIsRunningAndContainerNameInfoIsNotEmptyAndContainerIsNotExistInTheAPI()
-            throws MachineException, IOException {
+            throws Exception {
         cleaner.run();
 
         verify(dockerConnector).listContainers();
 
         verify(nameGenerator, times(3)).parse(anyString());
-        verify(machineRegistry, times(3)).isExist(anyString());
+        verify(environmentEngine, times(3)).getMachine(anyString(), anyString());
 
         verify(dockerConnector, times(2)).killContainer(anyString());
-        verify(dockerConnector, times(2)).removeContainer(Matchers.<RemoveContainerParams>anyObject());
+        verify(dockerConnector, times(2)).removeContainer(Matchers.anyObject());
 
         verify(dockerConnector, never()).killContainer(containerId1);
         verify(dockerConnector, never()).removeContainer(RemoveContainerParams.create(containerId1).withForce(true).withRemoveVolumes(true));
     }
 
     @Test
-    public void cleanerShouldRemoveButShouldNotKillContainerWithStatusNotRunning() throws IOException, MachineException {
+    public void cleanerShouldRemoveButShouldNotKillContainerWithStatusNotRunning() throws Exception {
         when(container2.getStatus()).thenReturn(EXITED_STATUS);
         cleaner.run();
 
@@ -150,14 +157,14 @@ public class DockerContainerCleanerTest {
     }
 
     @Test
-    public void cleanerShouldNotKillAndRemoveContainerIfMachineManagerDetectedExistingThisContainerInTheAPI() throws IOException {
-        when(machineRegistry.isExist(anyString())).thenReturn(true);
+    public void cleanerShouldNotKillAndRemoveContainerIfMachineManagerDetectedExistingThisContainerInTheAPI() throws Exception {
+        when(environmentEngine.getMachine(anyString(), anyString())).thenReturn(instance);
 
         cleaner.run();
 
         verify(dockerConnector, never()).killContainer(anyString());
 
-        verify(dockerConnector, never()).removeContainer(Matchers.<RemoveContainerParams>anyObject());
+        verify(dockerConnector, never()).removeContainer(Matchers.anyObject());
     }
 
     @Test
@@ -168,6 +175,6 @@ public class DockerContainerCleanerTest {
 
         verify(dockerConnector, never()).killContainer(anyString());
 
-        verify(dockerConnector, never()).removeContainer(Matchers.<RemoveContainerParams>anyObject());
+        verify(dockerConnector, never()).removeContainer(Matchers.anyObject());
     }
 }

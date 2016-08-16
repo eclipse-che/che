@@ -162,7 +162,7 @@ public class MachinePanelPresenterTest {
         when(service.getMachines(anyString())).thenReturn(machinesPromise);
         when(machinesPromise.then(Matchers.<Operation<List<MachineDto>>>anyObject())).thenReturn(machinesPromise);
 
-        when(service.getMachine(anyString())).thenReturn(machinePromise);
+        when(service.getMachine(anyString(), anyString())).thenReturn(machinePromise);
         when(machinePromise.then(Matchers.<Operation<MachineDto>>anyObject())).thenReturn(machinePromise);
 
         when(appContext.getWorkspace()).thenReturn(usersWorkspaceDto);
@@ -239,7 +239,7 @@ public class MachinePanelPresenterTest {
 
         verify(appliance).showAppliance(machine1);
 
-        verify(service, never()).getMachine(anyString());
+        verify(service, never()).getMachine(anyString(), anyString());
 
         assertThat(selectedMachine1, is(equalTo(presenter.getSelectedMachineState())));
         assertThat(presenter.isMachineRunning(), is(true));

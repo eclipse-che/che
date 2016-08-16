@@ -15,7 +15,6 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.api.user.server.ProfileService;
 import org.eclipse.che.inject.DynaModule;
 
 /** @author andrew00x */
@@ -62,7 +61,7 @@ public class WsMasterModule extends AbstractModule {
                    .toInstance("predefined-recipes.json");
 
 
-        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
+        bindConstant().annotatedWith(Names.named(org.eclipse.che.api.agent.server.wsagent.WsAgentLauncherImpl.WS_AGENT_PROCESS_START_COMMAND))
                       .to("rm -rf ~/che && mkdir -p ~/che && unzip -qq /mnt/che/ws-agent.zip -d ~/che/ws-agent && " +
                           "sudo sh -c \"chown -R $(id -u -n) /projects || true\" && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
@@ -75,10 +74,10 @@ public class WsMasterModule extends AbstractModule {
 
         bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
 
-        bind(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher.class)
-                .to(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.class);
+        bind(org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher.class)
+                .to(org.eclipse.che.api.agent.server.wsagent.WsAgentLauncherImpl.class);
 
-        bind(org.eclipse.che.api.machine.server.terminal.MachineTerminalLauncher.class);
+        bind(org.eclipse.che.api.agent.server.terminal.MachineTerminalLauncher.class);
         bind(org.eclipse.che.api.deploy.WsMasterAnalyticsAddresser.class);
 
         Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =

@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 public class ProcessesPresenterTest {
 
     private static final String MACHINE_ID = "someId";
+    private static final String WORKSPACE_ID = "wsId";
 
     //constructor mocks
     @Mock
@@ -66,11 +67,11 @@ public class ProcessesPresenterTest {
 
     @Test
     public void processesShouldBeGot() throws Exception {
-        when(service.getProcesses(MACHINE_ID)).thenReturn(processPromise);
+        when(service.getProcesses(WORKSPACE_ID, MACHINE_ID)).thenReturn(processPromise);
 
-        presenter.showProcesses(MACHINE_ID);
+        presenter.showProcesses(WORKSPACE_ID, MACHINE_ID);
 
-        verify(service).getProcesses(MACHINE_ID);
+        verify(service).getProcesses(WORKSPACE_ID, MACHINE_ID);
 
         verify(processPromise).then(operationCaptor.capture());
         operationCaptor.getValue().apply(descriptors);

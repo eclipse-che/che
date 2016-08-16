@@ -34,10 +34,6 @@ import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 
-import java.util.List;
-
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
-
 /**
  * Responsible to open files in editor when debugger stopped at breakpoint.
  *
@@ -92,7 +88,7 @@ public class GdbDebuggerFileHandler implements ActiveFileHandler {
             public void apply(Optional<File> file) throws OperationException {
                 if (file.isPresent()) {
                     handleActivatedFile(file.get(), callback, lineNumber);
-                    eventBus.fireEvent(new FileEvent(file.get(), OPEN));
+                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
                 } else {
                     callback.onFailure(new IllegalStateException("File is undefined"));
                 }

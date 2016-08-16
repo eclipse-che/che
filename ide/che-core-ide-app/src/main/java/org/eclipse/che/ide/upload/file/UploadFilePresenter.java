@@ -31,7 +31,6 @@ import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.resources.reveal.RevealResourceEvent;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 
@@ -103,7 +102,7 @@ public class UploadFilePresenter implements UploadFileView.ActionDelegate {
                         @Override
                         public void onClick(Notification notification) {
                             if (!clicked) {
-                                eventBus.fireEvent(new FileEvent(file.get(), OPEN));
+                                eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
                                 clicked = true;
                                 notification.setListener(null);
                                 notification.setContent("");

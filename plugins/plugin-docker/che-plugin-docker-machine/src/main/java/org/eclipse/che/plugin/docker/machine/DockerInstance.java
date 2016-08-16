@@ -211,11 +211,11 @@ public class DockerInstance extends AbstractInstance {
     }
 
     @Override
-    public MachineSource saveToSnapshot(String owner) throws MachineException {
+    public MachineSource saveToSnapshot() throws MachineException {
         try {
             String image = generateRepository();
             if(!snapshotUseRegistry) {
-                commitContainer(owner, image, LATEST_TAG);
+                commitContainer(image, LATEST_TAG);
                 return new DockerMachineSource(image).withTag(LATEST_TAG);
             }
 
@@ -224,7 +224,7 @@ public class DockerInstance extends AbstractInstance {
                                               .withTag(LATEST_TAG);
 
             final String fullRepo = pushParams.getFullRepo();
-            commitContainer(owner, fullRepo, LATEST_TAG);
+            commitContainer(fullRepo, LATEST_TAG);
             //TODO fix this workaround. Docker image is not visible after commit when using swarm
             Thread.sleep(2000);
             final ProgressLineFormatterImpl lineFormatter = new ProgressLineFormatterImpl();
@@ -246,10 +246,9 @@ public class DockerInstance extends AbstractInstance {
     }
 
     @VisibleForTesting
-    void commitContainer(String owner, String repository, String tag) throws IOException {
+    void commitContainer(String repository, String tag) throws IOException {
         String comment = format("Suspended at %1$ta %1$tb %1$td %1$tT %1$tZ %1$tY",
                                 System.currentTimeMillis());
-        comment = owner == null ? comment : comment + " by " + owner;
         // !! We SHOULD NOT pause container before commit because all execs will fail
         // to push image to private registry it should be tagged with registry in repo name
         // https://docs.docker.com/reference/api/docker_remote_api_v1.16/#push-an-image-on-the-registry

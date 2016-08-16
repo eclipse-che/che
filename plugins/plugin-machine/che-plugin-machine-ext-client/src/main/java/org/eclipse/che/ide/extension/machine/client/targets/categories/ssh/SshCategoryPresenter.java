@@ -462,7 +462,8 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         }
         sshView.setConnectButtonText(null);
 
-        machineService.destroyMachine(machine.getId()).then(new Operation<Void>() {
+        machineService.destroyMachine(machine.getWorkspaceId(),
+                                      machine.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
@@ -509,7 +510,8 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
             return;
         }
 
-        machineService.destroyMachine(machine.getId()).then(new Operation<Void>() {
+        machineService.destroyMachine(machine.getWorkspaceId(),
+                                      machine.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
@@ -557,14 +559,14 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
     /**
      * Ensures machine is started.
      */
-    private void onConnected(final String machineId) {
+    private void onConnected(final String workspaceId, final String machineId) {
         // There is a little bug in machine service on the server side.
         // The machine info is updated with a little delay after running a machine.
         // Using timer must fix the problem.
         new Timer() {
             @Override
             public void run() {
-                machineService.getMachine(machineId).then(new Operation<MachineDto>() {
+                machineService.getMachine(workspaceId, machineId).then(new Operation<MachineDto>() {
                     @Override
                     public void apply(MachineDto machineDto) throws OperationException {
                         if (machineDto.getStatus() == RUNNING) {
@@ -644,7 +646,7 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         if (MachineStatusEvent.EventType.RUNNING == event.getEventType()
                 && connectNotification != null && connectTargetName != null
                 && connectTargetName.equals(event.getMachineName())) {
-            onConnected(event.getMachineId());
+            onConnected(event.getWorkspaceId(), event.getMachineId());
             return;
         }
 

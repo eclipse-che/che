@@ -20,13 +20,14 @@ public class Constraints {
     public final static Constraints FIRST = new Constraints(Anchor.FIRST, null);
     public final static Constraints LAST  = new Constraints(Anchor.LAST, null);
     /** Anchor. */
-    public Anchor myAnchor;
+    public Anchor    myAnchor;
+    public Direction direction;
 
     /**
      * Id of the action to be positioned relative to. Used when anchor type
      * is either {@link Anchor#AFTER} or {@link Anchor#BEFORE}.
      */
-    public String myRelativeToActionId;
+    public String relativeId;
 
     /**
      * Creates a new constraints instance with the specified anchor type and
@@ -34,17 +35,34 @@ public class Constraints {
      *
      * @param anchor
      *         anchor
-     * @param relativeToActionId
-     *         Id of the relative action
+     * @param relativeId
+     *         Id of the relative
      */
-    public Constraints(Anchor anchor, String relativeToActionId) {
+    public Constraints(Anchor anchor, String relativeId) {
         myAnchor = anchor;
-        myRelativeToActionId = relativeToActionId;
+        this.relativeId = relativeId;
+    }
+
+    /**
+     * Creates a new constraints instance with the specified direction type and
+     * id of the relative item.
+     *
+     * @param direction
+     *         direction
+     * @param relativeId
+     *         Id of the relative
+     */
+    public Constraints(Direction direction, String relativeId) {
+        this.direction = direction;
+        this.relativeId = relativeId;
     }
 
     public Constraints clone() {
-        Constraints c = new Constraints(myAnchor, myRelativeToActionId);
-        return c;
+        if (myAnchor != null) {
+            return new Constraints(myAnchor, relativeId);
+        } else if (direction != null) {
+            return new Constraints(direction, relativeId);
+        }
+        return null;
     }
-
 }

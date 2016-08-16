@@ -15,7 +15,7 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.machine.server.terminal.MachineImplSpecificTerminalLauncher;
+import org.eclipse.che.api.agent.server.terminal.MachineImplSpecificTerminalLauncher;
 import org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher;
 import org.eclipse.che.plugin.docker.machine.ext.provider.TerminalServerConfProvider;
 

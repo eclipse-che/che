@@ -18,7 +18,7 @@ import com.google.gson.GsonBuilder;
 
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
-import org.eclipse.che.commons.test.SelfReturningAnswer;
+import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.docker.client.connection.CloseConnectionInputStream;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
