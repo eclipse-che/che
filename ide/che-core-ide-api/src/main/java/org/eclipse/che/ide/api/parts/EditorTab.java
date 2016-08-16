@@ -8,10 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.part.widgets.editortab;
+package org.eclipse.che.ide.api.parts;
 
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.PartStackView.TabItem;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -29,12 +30,21 @@ public interface EditorTab extends View<EditorTab.ActionDelegate>, TabItem, Doub
 
     void setWarningMark(boolean isVisible);
 
+    String getId();
+
     /**
      * Return virtual file associated with editor tab.
      *
      * @return {@link VirtualFile} file
      */
     VirtualFile getFile();
+
+    /**
+     * Get editor part which associated with given tab
+     *
+     * @return editor part which associated with given tab
+     */
+    EditorPartPresenter getRelativeEditorPart();
 
     /**
      * Set pin mark to editor tab item.
@@ -57,5 +67,4 @@ public interface EditorTab extends View<EditorTab.ActionDelegate>, TabItem, Doub
 
         void onTabClose(@NotNull TabItem tab);
     }
-
 }

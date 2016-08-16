@@ -16,27 +16,30 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.part.editor.event.CloseNonPinnedEditorsEvent;
+
+import static org.eclipse.che.ide.api.constraints.Direction.VERTICALLY;
 
 /**
- * Performs closing editor tabs with unpinned status for current editor part stack.
+ * Divides the area of the selected editor on two areas and displays copy vertically relative to selected editor.
  *
- * @author Vlad Zhukovskiy
+ * @author Roman Nikitenko
  */
 @Singleton
-public class CloseAllExceptPinnedAction extends EditorAbstractAction {
+public class SplitVerticallyAction extends EditorAbstractAction {
 
     @Inject
-    public CloseAllExceptPinnedAction(EditorAgent editorAgent,
-                                      EventBus eventBus,
-                                      CoreLocalizationConstant locale) {
-        super(locale.editorTabCloseAllButPinned(), locale.editorTabCloseAllButPinnedDescription(), null, editorAgent, eventBus);
+    public SplitVerticallyAction(EditorAgent editorAgent,
+                                 EventBus eventBus,
+                                 CoreLocalizationConstant locale) {
+        super(locale.editorTabSplitVertically(), locale.editorTabSplitVerticallyDescription(), null, editorAgent, eventBus);
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventBus.fireEvent(new CloseNonPinnedEditorsEvent(getEditorTab(e)));
+        Constraints constraints = new Constraints(VERTICALLY, getEditorTab(e).getId());
+        editorAgent.openEditor(getEditorFile(e), constraints);
     }
 }

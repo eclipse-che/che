@@ -12,48 +12,35 @@ package org.eclipse.che.ide.api.parts;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
 
 /**
- * Part Stack is tabbed layout element, containing Parts. EditorPartStack is shared
- * across the Perspectives and allows to display EditorParts
+ * Multi Part Stack is layout element, containing {@code EditorPartStack}s and provides methods to control them.
  *
- * @author Nikolay Zamosenchuk
  * @author Roman Nikitenko
  */
-public interface EditorPartStack extends PartStack {
-
-    /**
-     * Get opened editor by related file path
-     *
-     * @param path
-     *         path of the file opened in editor
-     * @return opened editor or null if it does not exist
-     */
-    @Nullable
-    PartPresenter getPartByPath(Path path);
-
-    /**
-     * Get {@link EditorTab} for given {@code editorPart}
-     *
-     * @param editorPart
-     *         editor part to find corresponding editor tab
-     * @return tab for given {@code editorPart} or null if this one is not found in {@link EditorPartStack}
-     */
-    @Nullable
-    EditorTab getTabByPart(EditorPartPresenter editorPart);
+public interface EditorMultiPartStack extends PartStack {
 
     /**
      * Get editor part which associated with given {@code tabId}
      *
      * @param tabId
      *         ID of tab to find corresponding editor part
-     * @return editor part or null if this one is not found in {@link EditorPartStack}
+     * @return editor part or null if this one is not found in any {@link EditorPartStack}
      */
     @Nullable
     EditorPartPresenter getPartByTabId(@NotNull String tabId);
+
+    /**
+     * Get {@link EditorTab} for given {@code editorPart}
+     *
+     * @param editorPart
+     *         editor part to find corresponding editor tab
+     * @return tab for given {@code editorPart} or null if this one is not found in any {@link EditorPartStack}
+     */
+    @Nullable
+    EditorTab getTabByPart(EditorPartPresenter editorPart);
 
     /**
      * Get next opened editor based on given {@code editorPart}
@@ -76,10 +63,12 @@ public interface EditorPartStack extends PartStack {
     EditorPartPresenter getPreviousFor(EditorPartPresenter editorPart);
 
     /**
-     * Get last closed editor for {@link EditorPartStack}
+     * Get last closed editor for {@link EditorPartStack} which contains given {@code editorPart}
      *
+     * @param editorPart
+     *         the starting point to evaluate last closed editor
      * @return opened editor or null if it does not exist
      */
     @Nullable
-    EditorPartPresenter getLastClosed();
+    EditorPartPresenter getLastClosedBasedOn(EditorPartPresenter editorPart);
 }

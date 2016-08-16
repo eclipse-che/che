@@ -48,9 +48,9 @@ public class PartsComparator implements Comparator<PartPresenter> {
             return 1;
         }
 
-        if (constr1 != null && constr1.myRelativeToActionId != null) {
+        if (constr1 != null && constr1.relativeId != null) {
             Anchor anchor1 = constr1.myAnchor;
-            String relative1 = constr1.myRelativeToActionId;
+            String relative1 = constr1.relativeId;
             if (anchor1 == Anchor.BEFORE && relative1.equals(title2)) {
                 return -1;
             }
@@ -59,9 +59,9 @@ public class PartsComparator implements Comparator<PartPresenter> {
             }
         }
 
-        if (constr2 != null && constr2.myRelativeToActionId != null) {
+        if (constr2 != null && constr2.relativeId != null) {
             Anchor anchor2 = constr2.myAnchor;
-            String relative2 = constr2.myRelativeToActionId;
+            String relative2 = constr2.relativeId;
             if (anchor2 == Anchor.BEFORE && relative2.equals(title1)) {
                 return 1;
             }

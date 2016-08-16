@@ -26,7 +26,6 @@ import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -60,7 +59,7 @@ public class EditFileAction extends AbstractPerspectiveAction {
         checkState(resources != null && resources.length == 1 && resources[0] instanceof File,
                    "Files only are allowed to be opened in editor");
 
-        eventBus.fireEvent(new FileEvent((File)resources[0], OPEN));
+        eventBus.fireEvent(FileEvent.createOpenFileEvent((File)resources[0]));
     }
 
     /** {@inheritDoc} */

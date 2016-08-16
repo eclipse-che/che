@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.editor;
+package org.eclipse.che.ide.part.editor.actions;
 
 import com.google.common.annotations.Beta;
 
@@ -18,20 +18,19 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * @author Vlad Zhukovskiy
+ * @author Roman Nikitenko
  */
 @Beta
 abstract class EditorSwitchAction extends AbstractPerspectiveAction {
 
-    private EditorAgent editorAgent;
+    protected final EditorAgent                   editorAgent;
 
     public EditorSwitchAction(String text, String description, EditorAgent editorAgent) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), text, description, null, null);
@@ -47,32 +46,12 @@ abstract class EditorSwitchAction extends AbstractPerspectiveAction {
     protected EditorPartPresenter getPreviousEditorBaseOn(EditorPartPresenter editor) {
         checkArgument(editor != null);
 
-        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
-
-        checkState(openedEditors != null && !openedEditors.isEmpty());
-
-        final int index = openedEditors.indexOf(editor);
-        if (index == 0) {
-            //return the last editor
-            return openedEditors.get(openedEditors.size() - 1);
-        }
-
-        return openedEditors.get(index - 1);
+        return editorAgent.getPreviousFor(editor);
     }
 
     protected EditorPartPresenter getNextEditorBaseOn(EditorPartPresenter editor) {
         checkArgument(editor != null);
 
-        final List<EditorPartPresenter> openedEditors = editorAgent.getOpenedEditors();
-
-        checkState(openedEditors != null && !openedEditors.isEmpty());
-
-        final int index = openedEditors.indexOf(editor);
-        if (index == openedEditors.size() - 1) {
-            //return the first editor
-            return openedEditors.get(0);
-        }
-
-        return openedEditors.get(index + 1);
+        return editorAgent.getNextFor(editor);
     }
 }

@@ -17,34 +17,26 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.part.editor.event.PinEditorTabEvent;
+import org.eclipse.che.ide.api.parts.EditorTab;
 
 /**
  * Pin/Unpin current selected editor tab.
  *
  * @author Vlad Zhukovskiy
+ * @author Roman Nikitenko
  */
 @Singleton
 public class PinEditorTabAction extends EditorAbstractAction {
 
-    public static final String PROP_PIN = "pin";
-
     @Inject
-    public PinEditorTabAction(EditorAgent editorAgent,
-                              EventBus eventBus,
-                              CoreLocalizationConstant locale) {
+    public PinEditorTabAction(EditorAgent editorAgent, EventBus eventBus, CoreLocalizationConstant locale) {
         super(locale.editorTabPin(), locale.editorTabPinDescription(), null, editorAgent, eventBus);
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventBus.fireEvent(new PinEditorTabEvent(getEditorFile(e), !isPinned(e)));
-    }
-
-    private boolean isPinned(ActionEvent e) {
-        Object o = e.getPresentation().getClientProperty(PROP_PIN);
-
-        return o instanceof Boolean && (Boolean)o;
+        EditorTab editorTab =  getEditorTab(e);
+        editorTab.setPinMark(!editorTab.isPinned());
     }
 }

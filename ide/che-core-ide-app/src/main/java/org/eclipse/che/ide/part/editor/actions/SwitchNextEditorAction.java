@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.editor;
+package org.eclipse.che.ide.part.editor.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -24,17 +24,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Switch to next opened editor based on current active.
  *
  * @author Vlad Zhukovskyi
+ * @author Roman Nikitenko
  */
 @Singleton
-public class SwitchPreviousEditorAction extends EditorSwitchAction {
-
-    private final EditorAgent editorAgent;
+public class SwitchNextEditorAction extends EditorSwitchAction {
 
     @Inject
-    public SwitchPreviousEditorAction(CoreLocalizationConstant constant,
-                                      EditorAgent editorAgent) {
-        super(constant.switchToLeftEditorAction(), constant.switchToLeftEditorActionDescription(), editorAgent);
-        this.editorAgent = editorAgent;
+    public SwitchNextEditorAction(CoreLocalizationConstant constant,
+                                  EditorAgent editorAgent) {
+        super(constant.switchToRightEditorAction(), constant.switchToRightEditorActionDescription(), editorAgent);
     }
 
     /** {@inheritDoc} */
@@ -44,8 +42,7 @@ public class SwitchPreviousEditorAction extends EditorSwitchAction {
 
         checkNotNull(activeEditor, "Null editor occurred");
 
-        final EditorPartPresenter previousEditor = getPreviousEditorBaseOn(activeEditor);
-
+        final EditorPartPresenter previousEditor = getNextEditorBaseOn(activeEditor);
         editorAgent.activateEditor(previousEditor);
     }
 }

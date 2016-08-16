@@ -18,12 +18,12 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.project.shared.dto.ItemReference;
-import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -40,7 +40,6 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.gwt.http.client.RequestBuilder.GET;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
 
 /**
@@ -132,7 +131,7 @@ public class NavigateToFilePresenter implements NavigateToFileView.ActionDelegat
             @Override
             public void apply(Optional<File> optFile) throws OperationException {
                 if (optFile.isPresent()) {
-                    eventBus.fireEvent(new FileEvent(optFile.get(), OPEN));
+                    eventBus.fireEvent(FileEvent.createOpenFileEvent(optFile.get()));
                 }
             }
         });
