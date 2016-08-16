@@ -43,8 +43,14 @@ export class WorkspaceStopEventPromiseMessageBusSubscriber implements MessageBus
             this.resolve(this.workspaceDto);
             this.messageBus.close();
         } else if ('ERROR' === message.eventType) {
-            this.reject('Error when stopping the workspace', message);
+            try {
+                let parsed: any = JSON.parse(message);
+                this.reject('Error when stopping the workspace' + parsed);
+            } catch (error) {
+                this.reject('Error when stopping the workspace' + message.toString());
+            }
             this.messageBus.close();
+
         } else {
             Log.getLogger().debug('Event on workspace : ', message.eventType);
         }

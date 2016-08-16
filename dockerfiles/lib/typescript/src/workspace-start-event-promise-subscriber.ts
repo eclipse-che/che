@@ -43,7 +43,15 @@ export class WorkspaceStartEventPromiseMessageBusSubscriber implements MessageBu
             this.resolve(this.workspaceDto);
             this.messageBus.close();
         } else if ('ERROR' === message.eventType) {
-            this.reject('Error when starting the workspace', message);
+            console.log('there is an error when starting workspace', message, message.eventType);
+            try {
+                let parsed: any = JSON.parse(message);
+                console.log('there is an error when starting workspace', parsed);
+
+                this.reject('Error when starting the workspace' + parsed);
+            } catch (error) {
+                this.reject('Error when starting the workspace' + message.toString());
+            }
             this.messageBus.close();
         } else {
             Log.getLogger().debug('Event on workspace : ', message.eventType);
