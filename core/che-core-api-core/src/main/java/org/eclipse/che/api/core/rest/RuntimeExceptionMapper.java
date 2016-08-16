@@ -20,11 +20,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 
 /**
- * Exception mapper that wrap RuntimeException message if it exists in to json.
+ * Exception mapper that provide error message with error time.
  *
  * @author Roman Nikitenko
  * @author Sergii Kabashniuk
@@ -36,18 +39,17 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
 
     @Override
     public Response toResponse(RuntimeException exception) {
-        final String errorMessage = exception.getLocalizedMessage();
-        if (!isNullOrEmpty(errorMessage)) {
-            LOG.error(errorMessage, exception);
-            ServiceError serviceError = DtoFactory.newDto(ServiceError.class).withMessage(errorMessage);
-            return Response.serverError()
-                           .entity(DtoFactory.getInstance().toJson(serviceError))
-                           .type(MediaType.APPLICATION_JSON)
-                           .build();
-        } else {
-            LOG.error("RuntimeException occurred", exception);
-        }
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        final String utcTime = dateFormat.format(new Date());
+        final String errorMessage = format("Internal Server Error occurred, error time: %s", utcTime);
 
-        return Response.serverError().build();
+        LOG.error(errorMessage, exception);
+
+        ServiceError serviceError = DtoFactory.newDto(ServiceError.class).withMessage(errorMessage);
+        return Response.serverError()
+                       .entity(DtoFactory.getInstance().toJson(serviceError))
+                       .type(MediaType.APPLICATION_JSON)
+                       .build();
     }
 }

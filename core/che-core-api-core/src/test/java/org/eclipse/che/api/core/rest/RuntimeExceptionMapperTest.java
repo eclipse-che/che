@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.rest;
 
-
 import org.everrest.assured.EverrestJetty;
 import org.hamcrest.Matchers;
 import org.testng.annotations.Listeners;
@@ -18,7 +17,6 @@ import org.testng.annotations.Test;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import static com.jayway.restassured.RestAssured.expect;
@@ -32,13 +30,6 @@ public class RuntimeExceptionMapperTest {
         public String reWithEmptyMessage() {
             throw new NullPointerException();
         }
-
-        @GET
-        @Path("/re-with-msg")
-        public String reWithMessage() {
-            throw new NullPointerException("Message");
-        }
-
     }
 
     RuntimeExceptionService service;
@@ -46,20 +37,12 @@ public class RuntimeExceptionMapperTest {
     RuntimeExceptionMapper mapper;
 
     @Test
-    public void shouldHandleREWithEmptyMessage() {
+    public void shouldHandleRuntimeException() {
+        final String expectedErrorMessage = "{\"message\":\"Internal Server Error occurred, error time:";
+
         expect()
                 .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-                .body(Matchers.isEmptyOrNullString())
+                .body(Matchers.startsWith(expectedErrorMessage))
                 .when().get("/runtime-exception/re-empty-msg");
     }
-
-    @Test
-    public void shouldHandleREWithMessage() {
-        expect()
-                .statusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Matchers.equalTo("{\"message\":\"Message\"}"))
-                .when().get("/runtime-exception/re-with-msg");
-    }
-
 }
