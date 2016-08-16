@@ -16,38 +16,37 @@ import {WorkspaceDto} from './dto/workspacedto';
 import {Log} from "./log";
 
 /**
- * Logic on events received by the remote workspace. When workspace is going to running state, we close the websocket and display the IDE URL.
+ * Handle a promise that will be resolved when workspace is started.
+ * If workspace has error, promise will be rejected
  * @author Florent Benoit
  */
-export class WorkspaceEventMessageBusSubscriber implements MessageBusSubscriber {
+export class WorkspaceStartEventPromiseMessageBusSubscriber implements MessageBusSubscriber {
 
     messageBus : MessageBus;
     workspaceDto : WorkspaceDto;
 
+    resolve : any;
+    reject : any;
+    promise: Promise<string>;
 
     constructor(messageBus : MessageBus, workspaceDto : WorkspaceDto) {
         this.messageBus = messageBus;
         this.workspaceDto = workspaceDto;
+        this.promise = new Promise<string>((resolve, reject) => {
+            this.resolve = resolve;
+            this.reject = reject;
+        });
     }
 
     handleMessage(message: any) {
         if ('RUNNING' === message.eventType) {
-
-            // search IDE url link
-            let ideUrl: string;
-            this.workspaceDto.getContent().links.forEach((link) => {
-                if ('ide url' === link.rel) {
-                    ideUrl = link.href;
-                }
-            });
-            Log.getLogger().info('Workspace is now running. Please connect to ' + ideUrl);
+            this.resolve(this.workspaceDto);
             this.messageBus.close();
         } else if ('ERROR' === message.eventType) {
-            Log.getLogger().error('Error when starting the workspace', message);
+            this.reject('Error when starting the workspace', message);
             this.messageBus.close();
-            process.exit(1);
         } else {
-            Log.getLogger().info('Event on workspace : ', message.eventType);
+            Log.getLogger().debug('Event on workspace : ', message.eventType);
         }
 
     }

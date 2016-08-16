@@ -12,6 +12,7 @@
 import {MessageBuilder} from './messagebuilder';
 import {MessageBusSubscriber} from './messagebus-subscriber';
 import {Log} from "./log";
+import {Websocket} from "./websocket";
 
 
 /**
@@ -28,10 +29,14 @@ export class MessageBus {
     delaySend: Array<string>;
     websocketClient : any;
     closed : boolean;
+    websocket : Websocket;
+    workspaceId : string;
 
-    constructor(websocketClient : any, url: string) {
+    constructor(websocketClient : any, url: string, workspaceId : string, websocket: Websocket) {
 
         this.websocketClient = websocketClient;
+        this.websocket = websocket;
+        this.workspaceId = workspaceId;
 
         this.closed = false;
         this.delaySend = [];
@@ -85,8 +90,8 @@ export class MessageBus {
 
     close() {
         this.closed = true;
+        this.websocket.cleanup(this.workspaceId);
         this.websocketConnection.close();
-
     }
 
 

@@ -15,7 +15,6 @@ import {Workspace, CreateWorkspaceConfig} from '../workspace';
 import {WorkspaceDto} from '../dto/workspacedto';
 import {Websocket} from '../websocket';
 import {MessageBus} from '../messagebus';
-import {WorkspaceEventMessageBusSubscriber} from '../workspace-event-subscriber';
 import {MessageBusSubscriber} from '../messagebus-subscriber';
 import {WorkspaceDisplayOutputMessageBusSubscriber} from '../workspace-log-output-subscriber';
 import {AuthData} from "../auth-data";
@@ -103,61 +102,20 @@ export class PostFlightCheckTest {
         // create the workspace
         let createWorkspaceConfig: CreateWorkspaceConfig = new CreateWorkspaceConfig();
         createWorkspaceConfig.name = 'your-first-workspace';
-
+        Log.getLogger().info('Generating '+ createWorkspaceConfig.name + ' workspace');
         var promise:Promise<WorkspaceDto> = this.workspace.createWorkspace(createWorkspaceConfig)
             .then(workspaceDto => {
-
-                // get id
-                let workspaceId:string = workspaceDto.getId();
-
-                var protocol: string;
-                if (this.authData.isSecured()) {
-                    protocol = 'wss';
-                } else {
-                    protocol = 'ws';
-                }
-
-                // get links for WS
-                var link: string;
-                workspaceDto.getContent().links.forEach(workspaceLink => {
-                    if ('get workspace events channel' === workspaceLink.rel) {
-                        link = workspaceLink.href;
-                    }
-                });
-
-                var messageBus:MessageBus = this.websocket.getMessageBus(link + '?token=' + this.authData.getToken() , workspaceId);
-
-                var callbackSubscriber:MessageBusSubscriber = new WorkspaceEventMessageBusSubscriber(messageBus, workspaceDto);
-                var displayOutputWorkspaceSubscriber:MessageBusSubscriber = new WorkspaceDisplayOutputMessageBusSubscriber();
-
-
-                messageBus.subscribe('workspace:' + workspaceId + ':ext-server:output', displayOutputWorkspaceSubscriber);
-                messageBus.subscribe(workspaceId + ':default:default', displayOutputWorkspaceSubscriber);
-                messageBus.subscribe('workspace:' + workspaceId, callbackSubscriber);
-
-                // wait to connect websocket
-                var waitTill = new Date(new Date().getTime() + 4 * 1000);
-                while(waitTill > new Date()){}
-
                 // start it
-                var startWorkspacePromise:Promise<WorkspaceDto> = this.workspace.startWorkspace(workspaceDto.getId());
-                startWorkspacePromise.then(workspaceDto => {
-                    return new Promise<WorkspaceDto>( (resolve, reject) => {
-                        Log.getLogger().info('Workspace is now starting...');
-                        resolve(workspaceDto);
-                    });
-                }, error => {
-                    return new Promise<WorkspaceDto>( (resolve, reject) => {
-                        reject(error);
-                    });
-                });
-
-                return startWorkspacePromise;
-
-            }, r => {
-                return new Promise<WorkspaceDto>( (resolve, reject) => {
-                    reject(r);
-                });
+                Log.getLogger().info('Starting workspace runtime');
+                return this.workspace.startWorkspace(workspaceDto.getId());
+            }).then((workspaceDto) => {
+                Log.getLogger().info('Stopping workspace runtime');
+                // now stop it
+                return this.workspace.stopWorkspace(workspaceDto.getId());
+            }).then((workspaceDto) => {
+                Log.getLogger().info('Deleting workspace runtime');
+                // now delete it
+                return this.workspace.deleteWorkspace(workspaceDto.getId());
             });
 
         return promise;

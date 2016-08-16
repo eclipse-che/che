@@ -24,9 +24,7 @@ import {CreateWorkspaceConfig} from "./workspace";
 import {resolve} from "url";
 import {MessageBus} from "./messagebus";
 import {MessageBusSubscriber} from "./messagebus-subscriber";
-import {WorkspaceEventMessageBusSubscriber} from "./workspace-event-subscriber";
 import {WorkspaceDisplayOutputMessageBusSubscriber} from "./workspace-log-output-subscriber";
-import {WorkspaceEventPromiseMessageBusSubscriber} from "./workspace-event-promise-subscriber";
 import {Project} from "./project";
 import {ContainerVersion} from "./container-version";
 
@@ -258,8 +256,6 @@ export class CheDir {
 
   performDown() : Promise<void> {
 
-    var callbackSubscriber:WorkspaceEventPromiseMessageBusSubscriber;
-
     return new Promise<string>((resolve, reject) => {
       this.parse();
 
@@ -295,9 +291,8 @@ export class CheDir {
 
   performUp() : Promise<string> {
 
-    var callbackSubscriber:WorkspaceEventPromiseMessageBusSubscriber;
     var workspaceId : string;
-    var ideUrl: string;
+    var userWorkspaceDto: WorkspaceDto;
 
     return new Promise<string>((resolve, reject) => {
       this.parse();
@@ -333,51 +328,23 @@ export class CheDir {
 
     }).then((workspaceDto) => {
       Log.getLogger().info('WORKSPACE CREATED');
-
-      // get id
-      let workspaceId:string = workspaceDto.getId();
-
-      var protocol: string;
-      if (this.authData.isSecured()) {
-        protocol = 'wss';
-      } else {
-        protocol = 'ws';
-      }
-
-      // get links for WS
-      var link: string;
-      workspaceDto.getContent().links.forEach(workspaceLink => {
-        if ('get workspace events channel' === workspaceLink.rel) {
-          link = workspaceLink.href;
-        }
-      });
-
-      var messageBus:MessageBus = this.websocket.getMessageBus(link + '?token=' + this.authData.getToken() , workspaceId);
-
-      callbackSubscriber = new WorkspaceEventPromiseMessageBusSubscriber(messageBus, workspaceDto);
-      messageBus.subscribe('workspace:' + workspaceId, callbackSubscriber);
-
+      Log.getLogger().info('WORKSPACE BOOTING...');
       return this.workspace.startWorkspace(workspaceDto.getId());
     }).then((workspaceDto) => {
-      Log.getLogger().info('WORKSPACE BOOTING...');
-
-      // keep id
-      workspaceId = workspaceDto.getId();
-
-      // wait websocket promise
-      return callbackSubscriber.promise;
-    }).then((url) => {
-      ideUrl = url;
-      // then get workspace details to get workspace agent
-      return this.workspace.getWorkspace(workspaceId);
-    }).then((workspaceDto) => {
+      userWorkspaceDto = workspaceDto;
       Log.getLogger().info('UPDATING PROJECT...');
       var project : Project = new Project(workspaceDto);
       // update created project to blank
       return project.updateType(this.folderName, 'blank');
-
-
     }).then(() => {
+      // search IDE url link
+      var ideUrl: string;
+      userWorkspaceDto.getContent().links.forEach((link) => {
+        if ('ide url' === link.rel) {
+          ideUrl = link.href;
+        }
+      });
+
       Log.getLogger().info(ideUrl);
       Log.getLogger().info('WORKSPACE BOOTED AND READY FOR DEVELOPMENT');
       return ideUrl;

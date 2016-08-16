@@ -46,10 +46,15 @@ export class Websocket {
         if (!bus) {
             var webSocketClient: any = new this.wsClient();
             var remoteWebsocketUrl: string = websocketURL;
-            bus = new MessageBus(webSocketClient, remoteWebsocketUrl);
+            bus = new MessageBus(webSocketClient, remoteWebsocketUrl, workspaceId, this);
             this.websocketConnections.set(workspaceId, bus);
         }
         return bus;
+    }
+
+
+    cleanup(workspaceId) {
+        this.websocketConnections.delete(workspaceId);
     }
 
 }
