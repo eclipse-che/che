@@ -1613,8 +1613,11 @@ class JGitConnection implements GitConnection {
                     }
                 };
                 command.setTransportConfigCallback(transport -> {
-                    SshTransport sshTransport = (SshTransport)transport;
-                    sshTransport.setSshSessionFactory(sshSessionFactory);
+                    // If recursive clone is performed and git-module added by http(s) url is present in the cloned project,
+                    // transport will be instance of TransportHttp in the step of cloning this module
+                    if (transport instanceof SshTransport) {
+                        ((SshTransport)transport).setSshSessionFactory(sshSessionFactory);
+                    }
                 });
             } else {
                 if (remoteUrl != null && GIT_URL_WITH_CREDENTIALS_PATTERN.matcher(remoteUrl).matches()) {
