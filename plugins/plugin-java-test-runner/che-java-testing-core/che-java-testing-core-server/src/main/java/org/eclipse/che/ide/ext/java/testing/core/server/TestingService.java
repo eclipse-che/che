@@ -15,9 +15,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.ide.ext.java.testing.core.server.classpath.TestClasspathRegistry;
 import org.eclipse.che.ide.ext.java.testing.core.server.framework.TestFrameworkRegistry;
+import org.eclipse.che.ide.ext.java.testing.core.server.framework.TestRunner;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -85,7 +87,14 @@ public class TestingService {
         }
         String testFramework = queryParameters.get("testFramework");
         System.out.println(queryParameters.toString());
-        System.out.println(frameworkRegistry.getTestRunner(testFramework));
+
+        TestRunner runner = frameworkRegistry.getTestRunner(testFramework);
+
+        if (runner == null) {
+            throw new Exception("No test frameworks found: " + testFramework);
+        }
+
+        System.out.println(runner);
         TestResult result = frameworkRegistry.getTestRunner(testFramework).execute(queryParameters,
                 classpathRegistry.getTestClasspathProvider(projectType));
         System.out.println(result);
