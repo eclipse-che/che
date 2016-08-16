@@ -278,7 +278,6 @@ execute_command_with_progress() {
   shift 2
 
   pid=""
-  printf "\n"
 
   case "$progress" in
     extended)
