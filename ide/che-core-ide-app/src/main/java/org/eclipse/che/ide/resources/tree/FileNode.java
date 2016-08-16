@@ -24,8 +24,6 @@ import org.eclipse.che.ide.project.shared.NodesResources;
 
 import java.util.Set;
 
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
-
 /**
  * Node that represents file node in the project tree.
  *
@@ -54,6 +52,6 @@ public class FileNode extends ResourceNode<File> implements HasAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed() {
-        eventBus.fireEvent(new FileEvent(getData(), OPEN));
+        eventBus.fireEvent(FileEvent.createOpenFileEvent(getData()));
     }
 }

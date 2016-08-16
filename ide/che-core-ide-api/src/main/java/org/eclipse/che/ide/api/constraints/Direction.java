@@ -8,21 +8,24 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.part.widgets;
-
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.parts.EditorTab;
-import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
-
-import javax.validation.constraints.NotNull;
+package org.eclipse.che.ide.api.constraints;
 
 /**
- * @author Dmitry Shnurenko
- * @author Vlad Zhukovskyi
+ * Defines possible directions of an item relative to another item.
+ *
+ * @author Roman Nikitenko
  */
-public interface TabItemFactory {
+public enum Direction {
 
-    PartButton createPartButton(@NotNull String title);
+    /**
+     * Direction type that specifies the item to be the horizontally at the
+     * moment of addition.
+     */
+    HORIZONTALLY,
 
-    EditorTab createEditorPartButton(@NotNull EditorPartPresenter relatedEditorPart);
+    /**
+     * Direction type that specifies the item to be the vertically at the
+     * moment of addition.
+     */
+    VERTICALLY
 }

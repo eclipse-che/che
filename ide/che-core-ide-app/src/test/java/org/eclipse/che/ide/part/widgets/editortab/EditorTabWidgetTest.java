@@ -20,10 +20,10 @@ import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.parts.EditorTab.ActionDelegate;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.part.editor.EditorTabContextMenuFactory;
-import org.eclipse.che.ide.part.widgets.editortab.EditorTab.ActionDelegate;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +38,7 @@ import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.BELOW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -76,6 +77,8 @@ public class EditorTabWidgetTest {
     private EventBus                    eventBus;
     @Mock
     private EditorPartPresenter         editorPartPresenter;
+    @Mock
+    private EditorInput                 editorInput;
 
     private EditorTabWidget tab;
 
@@ -83,8 +86,10 @@ public class EditorTabWidgetTest {
     public void setUp() {
         when(icon.getSvg()).thenReturn(svg);
         when(event.getNativeButton()).thenReturn(NativeEvent.BUTTON_LEFT);
+        when(editorPartPresenter.getEditorInput()).thenReturn(editorInput);
+        when(editorPartPresenter.getTitleImage()).thenReturn(icon);
 
-        tab = new EditorTabWidget(file, icon, SOME_TEXT, resources, editorTabContextMenuFactory, eventBus, fileTypeRegistry);
+        tab = new EditorTabWidget(editorPartPresenter, resources, editorTabContextMenuFactory, eventBus, fileTypeRegistry);
         tab.setDelegate(delegate);
     }
 
@@ -159,7 +164,7 @@ public class EditorTabWidgetTest {
 
         tab.update(editorPartPresenter);
 
-        verify(editorPartPresenter).getEditorInput();
+        verify(editorPartPresenter, times(2)).getEditorInput();
         verify(fileTypeRegistry).getFileTypeByFile(file);
         verify(tab.iconPanel).setWidget(Matchers.<SVGImage>anyObject());
     }

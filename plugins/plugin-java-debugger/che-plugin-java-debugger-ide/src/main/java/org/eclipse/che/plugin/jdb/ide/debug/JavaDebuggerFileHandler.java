@@ -39,8 +39,6 @@ import org.eclipse.che.ide.ext.java.shared.JarEntry;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
 
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
-
 /**
  * Responsible to open files in editor when debugger stopped at breakpoint.
  *
@@ -96,7 +94,7 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
             public void apply(Optional<File> file) throws OperationException {
                 if (file.isPresent()) {
                     handleActivatedFile(file.get(), callback, location.getLineNumber());
-                    eventBus.fireEvent(new FileEvent(file.get(), OPEN));
+                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
                 } else {
                     callback.onFailure(new IllegalStateException("File is undefined"));
                 }
@@ -136,7 +134,7 @@ public class JavaDebuggerFileHandler implements ActiveFileHandler {
                        };
 
                        handleActivatedFile(file, downloadSourceCallback, location.getLineNumber());
-                       eventBus.fireEvent(new FileEvent(file, OPEN));
+                       eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
                    }
                })
                .catchError(new Operation<PromiseError>() {
