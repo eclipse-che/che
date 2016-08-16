@@ -91,8 +91,8 @@ public class ConsolesPanelViewImpl extends Composite implements ConsolesPanelVie
 
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
             @Override
-            public void onAddTerminalClick(@NotNull String machineId) {
-                delegate.onAddTerminal(machineId);
+            public void onAddTerminalClick(@NotNull String workspaceId, @NotNull String machineId) {
+                delegate.onAddTerminal(workspaceId, machineId);
             }
         });
 

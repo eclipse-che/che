@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.commons.test;
+package org.eclipse.che.commons.test.mockito.answer;
 
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;

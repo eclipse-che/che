@@ -8,13 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.machine.server;
-
+package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.util.RecipeRetriever;
 
 import javax.inject.Inject;
@@ -27,24 +26,27 @@ import javax.ws.rs.core.MediaType;
 /**
  * Service for downloading recipe script for machine.
  *
- * @author Mihail Kuznyetsov.
+ * @author Mihail Kuznyetsov
+ * @author Alexander Garagatyi
  */
 @Path("/recipe/script")
 public class RecipeScriptDownloadService extends Service {
-
-    private final MachineManager  machineManager;
-    private final RecipeRetriever recipeRetriever;
+    private final WorkspaceManager workspaceManager;
+    private final RecipeRetriever  recipeRetriever;
 
     @Inject
-    public RecipeScriptDownloadService(MachineManager machineManager, RecipeRetriever recipeRetriever) {
-        this.machineManager = machineManager;
+    public RecipeScriptDownloadService(WorkspaceManager workspaceManager, RecipeRetriever recipeRetriever) {
+        this.workspaceManager = workspaceManager;
         this.recipeRetriever = recipeRetriever;
     }
 
     @GET
-    @Path("/{machineId}")
+    @Path("/{workspaceId}/{machineId}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String getRecipeScript(@PathParam("machineId") String machineId) throws ServerException, NotFoundException {
-        return recipeRetriever.getRecipe(machineManager.getMachine(machineId).getConfig()).getScript();
+    public String getRecipeScript(@PathParam("workspaceId") String workspaceId,
+                                  @PathParam("machineId") String machineId) throws ServerException,
+                                                                                   NotFoundException {
+        Instance machineInstance = workspaceManager.getMachineInstance(workspaceId, machineId);
+        return recipeRetriever.getRecipe(machineInstance.getConfig()).getScript();
     }
 }

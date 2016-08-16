@@ -95,28 +95,22 @@ public class WorkspaceRuntimeImpl implements WorkspaceRuntime {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof WorkspaceRuntimeImpl)) {
-            return false;
-        }
-        final WorkspaceRuntimeImpl other = (WorkspaceRuntimeImpl)obj;
-        return Objects.equals(activeEnv, other.activeEnv)
-               && Objects.equals(rootFolder, other.rootFolder)
-               && Objects.equals(devMachine, other.devMachine)
-               && getMachines().equals(getMachines());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof WorkspaceRuntimeImpl)) return false;
+        WorkspaceRuntimeImpl that = (WorkspaceRuntimeImpl)o;
+        return Objects.equals(activeEnv, that.activeEnv) &&
+               Objects.equals(rootFolder, that.rootFolder) &&
+               Objects.equals(devMachine, that.devMachine) &&
+               Objects.equals(machines, that.machines);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = hash * 31 + Objects.hashCode(activeEnv);
-        hash = 31 * hash + Objects.hashCode(rootFolder);
-        hash = 31 * hash + Objects.hashCode(devMachine);
-        hash = 31 * hash + getMachines().hashCode();
-        return hash;
+        return Objects.hash(activeEnv,
+                            rootFolder,
+                            devMachine,
+                            machines);
     }
 
     @Override

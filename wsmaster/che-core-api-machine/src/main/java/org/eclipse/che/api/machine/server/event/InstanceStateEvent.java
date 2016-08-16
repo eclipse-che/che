@@ -26,10 +26,14 @@ public class InstanceStateEvent {
     }
 
     private String machineId;
+    private String workspaceId;
     private Type   type;
 
-    public InstanceStateEvent(String machineId, Type type) {
+    public InstanceStateEvent(String machineId,
+                              String workspaceId,
+                              Type type) {
         this.machineId = machineId;
+        this.workspaceId = workspaceId;
         this.type = type;
     }
 
@@ -39,5 +43,9 @@ public class InstanceStateEvent {
 
     public Type getType() {
         return type;
+    }
+
+    public String getWorkspaceId() {
+        return workspaceId;
     }
 }

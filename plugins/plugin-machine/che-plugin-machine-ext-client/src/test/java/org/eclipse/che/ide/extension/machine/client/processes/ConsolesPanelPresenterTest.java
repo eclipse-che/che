@@ -155,10 +155,10 @@ public class ConsolesPanelPresenterTest {
         when(appContext.getDevMachine()).thenReturn(devMachine);
 
         when(machineService.getMachines(anyString())).thenReturn(machinesPromise);
-        when(machineService.getMachine(anyString())).thenReturn(machinePromise);
+        when(machineService.getMachine(anyString(), anyString())).thenReturn(machinePromise);
         when(machinePromise.then(Matchers.<Operation<MachineDto>>anyObject())).thenReturn(machinePromise);
 
-        when(machineService.getProcesses(anyString())).thenReturn(processesPromise);
+        when(machineService.getProcesses(anyString(), anyString())).thenReturn(processesPromise);
         when(processesPromise.then(Matchers.<Operation<List<MachineProcessDto>>>anyObject())).thenReturn(processesPromise);
         when(commandConsoleFactory.create(anyString())).thenReturn(mock(OutputConsole.class));
 
@@ -334,7 +334,7 @@ public class ConsolesPanelPresenterTest {
         when(terminal.getView()).thenReturn(terminalWidget);
 
         presenter.addCommandOutput(MACHINE_ID, outputConsole);
-        presenter.onAddTerminal(MACHINE_ID);
+        presenter.onAddTerminal(WORKSPACE_ID, MACHINE_ID);
 
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machineDto);
@@ -409,7 +409,7 @@ public class ConsolesPanelPresenterTest {
         IsWidget terminalWidget = mock(IsWidget.class);
         when(terminal.getView()).thenReturn(terminalWidget);
 
-        presenter.onAddTerminal(MACHINE_ID);
+        presenter.onAddTerminal(WORKSPACE_ID, MACHINE_ID);
 
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machineDto);

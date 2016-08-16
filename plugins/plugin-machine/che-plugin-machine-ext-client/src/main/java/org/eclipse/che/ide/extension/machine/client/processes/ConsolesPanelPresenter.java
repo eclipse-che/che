@@ -322,7 +322,8 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
     }
 
     private void restoreState(final org.eclipse.che.api.core.model.machine.Machine machine) {
-        machineService.getProcesses(machine.getId()).then(new Operation<List<MachineProcessDto>>() {
+        machineService.getProcesses(machine.getWorkspaceId(),
+                                    machine.getId()).then(new Operation<List<MachineProcessDto>>() {
             @Override
             public void apply(List<MachineProcessDto> arg) throws OperationException {
                 for (MachineProcessDto machineProcessDto : arg) {
@@ -418,17 +419,17 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
 
         if (selectedTreeNode == null) {
             if (appContext.getDevMachine() != null) {
-                onAddTerminal(appContext.getDevMachine().getId());
+                onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
             }
             return;
         }
 
         if (selectedTreeNode.getType() == MACHINE_NODE) {
-            onAddTerminal(selectedTreeNode.getId());
+            onAddTerminal(appContext.getWorkspaceId(), selectedTreeNode.getId());
         } else {
             if (selectedTreeNode.getParent() != null &&
                 selectedTreeNode.getParent().getType() == MACHINE_NODE) {
-                onAddTerminal(appContext.getDevMachine().getId());
+                onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
             }
         }
     }
@@ -440,8 +441,8 @@ public class ConsolesPanelPresenter implements ConsolesPanelView.ActionDelegate,
      *         id of machine in which the terminal will be added
      */
     @Override
-    public void onAddTerminal(@NotNull final String machineId) {
-        machineService.getMachine(machineId).then(new Operation<MachineDto>() {
+    public void onAddTerminal(@NotNull final String workspaceId, @NotNull final String machineId) {
+        machineService.getMachine(workspaceId, machineId).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto arg) throws OperationException {
                 org.eclipse.che.ide.extension.machine.client.machine.Machine machine = entityFactory.createMachine(arg);
