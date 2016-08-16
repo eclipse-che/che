@@ -51,7 +51,7 @@ public class ProjectConfigImpl implements ProjectConfig {
     @Column(nullable = false)
     private String path;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
     @Basic
