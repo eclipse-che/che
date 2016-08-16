@@ -12,6 +12,7 @@ package org.eclipse.che.ide.editor;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -26,7 +27,9 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter.EditorPartCloseHandler
 import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
+import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.api.editor.texteditor.HasReadOnlyProperty;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.event.FileEvent;
@@ -76,9 +79,10 @@ public class EditorAgentImpl implements EditorAgent,
     private final CoreLocalizationConstant      coreLocalizationConstant;
     private final EditorMultiPartStackPresenter editorMultiPartStack;
 
-    private final List<EditorPartPresenter> openedEditors;
-    private       List<EditorPartPresenter> dirtyEditors;
-    private       EditorPartPresenter       activeEditor;
+    private final List<EditorPartPresenter>           openedEditors;
+    private final Provider<EditorContentSynchronizer> editorContentSynchronizerProvider;
+    private       List<EditorPartPresenter>           dirtyEditors;
+    private       EditorPartPresenter                 activeEditor;
 
     @Inject
     public EditorAgentImpl(EventBus eventBus,
@@ -86,13 +90,15 @@ public class EditorAgentImpl implements EditorAgent,
                            EditorRegistry editorRegistry,
                            WorkspaceAgent workspaceAgent,
                            CoreLocalizationConstant coreLocalizationConstant,
-                           EditorMultiPartStackPresenter editorMultiPartStack) {
+                           EditorMultiPartStackPresenter editorMultiPartStack,
+                           Provider<EditorContentSynchronizer> editorContentSynchronizerProvider) {
         this.eventBus = eventBus;
         this.fileTypeRegistry = fileTypeRegistry;
         this.editorRegistry = editorRegistry;
         this.workspaceAgent = workspaceAgent;
         this.coreLocalizationConstant = coreLocalizationConstant;
         this.editorMultiPartStack = editorMultiPartStack;
+        this.editorContentSynchronizerProvider = editorContentSynchronizerProvider;
         this.openedEditors = newArrayList();
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
@@ -193,6 +199,10 @@ public class EditorAgentImpl implements EditorAgent,
 
         editor.close(false);
 
+        if (editor instanceof TextEditor) {
+            editorContentSynchronizerProvider.get().unTrackEditor(editor);
+        }
+
         if (activeEditor != null && activeEditor == editor) {
             activeEditor = null;
         }
@@ -233,6 +243,10 @@ public class EditorAgentImpl implements EditorAgent,
                 if (propId == EditorPartPresenter.PROP_INPUT) {
                     if (editor instanceof HasReadOnlyProperty) {
                         ((HasReadOnlyProperty)editor).setReadOnly(file.isReadOnly());
+                    }
+
+                    if (editor instanceof TextEditor) {
+                        editorContentSynchronizerProvider.get().trackEditor(editor);
                     }
 
                     callback.onEditorOpened(editor);
