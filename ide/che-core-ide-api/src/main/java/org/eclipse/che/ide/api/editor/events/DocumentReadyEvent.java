@@ -62,7 +62,7 @@ public class DocumentReadyEvent extends GwtEvent<DocumentReadyHandler> {
 
     /**
      * Don't use this method because {@link EditorHandle} will be removed in next version.
-     * It useless interface dont have any implementation and donr need in future
+     * It useless interface dont have any implementation and don't need in future
      */
     @Deprecated
     public EditorHandle getEditorHandle() {

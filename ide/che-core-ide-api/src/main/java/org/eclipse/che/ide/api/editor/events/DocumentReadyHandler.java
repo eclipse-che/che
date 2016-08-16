@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.editor.events;
 import com.google.gwt.event.shared.EventHandler;
 
 /**
- * Handel event then editor fully initialized
+ * Handle event then editor fully initialized
  */
 public interface DocumentReadyHandler extends EventHandler {
 
