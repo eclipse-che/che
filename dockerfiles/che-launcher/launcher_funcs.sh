@@ -34,6 +34,12 @@ error_exit() {
   exit 1
 }
 
+convert_windows_to_posix() {
+  # "/some/path" => /some/path
+  OUTPUT_PATH=${1//\"}
+  echo "/"$(echo "$OUTPUT_PATH" | sed 's/\\/\//g' | sed 's/://')
+}
+
 get_clean_path() {
   INPUT_PATH=$1
   # \some\path => /some/path
@@ -45,6 +51,12 @@ get_clean_path() {
   # "/some/path" => /some/path
   OUTPUT_PATH=${OUTPUT_PATH//\"}
   echo ${OUTPUT_PATH}
+}
+
+get_converted_and_clean_path() {
+  CONVERTED_PATH=$(convert_windows_to_posix "${1}")
+  CLEAN_PATH=$(get_clean_path "${CONVERTED_PATH}")
+  echo $CLEAN_PATH
 }
 
 get_che_launcher_container_id() {

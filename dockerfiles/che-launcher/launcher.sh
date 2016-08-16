@@ -60,8 +60,9 @@ init_global_variables() {
   DEFAULT_CHE_DATA_FOLDER="/home/user/che"
 
   # Clean eventual user provided paths
-  CHE_CONF_FOLDER=${CHE_CONF_FOLDER:+$(get_clean_path ${CHE_CONF_FOLDER})}
-  CHE_DATA_FOLDER=${CHE_DATA_FOLDER:+$(get_clean_path ${CHE_DATA_FOLDER})}
+  CHE_CONF_FOLDER=${CHE_CONF_FOLDER:+$(get_converted_and_clean_path "${CHE_CONF_FOLDER}")}
+  CHE_DATA_FOLDER=${CHE_DATA_FOLDER:+$(get_converted_and_clean_path "${CHE_DATA_FOLDER}")}
+  CHE_LOCAL_BINARY=${CHE_LOCAL_BINARY:+$(get_converted_and_clean_path "${CHE_LOCAL_BINARY}")}
 
   CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}
   CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME:-${DEFAULT_CHE_SERVER_IMAGE_NAME}}
@@ -78,16 +79,14 @@ init_global_variables() {
   #   - empty if CHE_CONF_FOLDER is not set
   #   - -v ${CHE_CONF_FOLDER}:/conf -e "CHE_LOCAL_CONF_DIR=/conf" if CHE_CONF_FOLDER is set
   CHE_CONF_ARGS=${CHE_CONF_FOLDER:+-v "${CHE_CONF_FOLDER}":/conf -e "CHE_LOCAL_CONF_DIR=/conf"}
-  CHE_LOCAL_BINARY_ARGS=${CHE_LOCAL_BINARY:+-v ${CHE_LOCAL_BINARY}:/home/user/che}
 
-  if is_docker_for_mac || is_docker_for_windows; then
-    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v "${CHE_DATA_FOLDER}/storage":/home/user/che/storage \
-                                        -e "CHE_WORKSPACE_STORAGE=${CHE_DATA_FOLDER}/workspaces" \
-                                        -e "CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false"}
-  else
-    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v "${CHE_DATA_FOLDER}/storage":/home/user/che/storage \
-                                        -v "${CHE_DATA_FOLDER}/workspaces":/home/user/che/workspaces}
-  fi
+  # CHE_LOCAL_BINARY is the path to a Che assembly that will be mounted into the Che server container
+  CHE_LOCAL_BINARY_ARGS=${CHE_LOCAL_BINARY:+-v "${CHE_LOCAL_BINARY}":/home/user/che}
+
+  # CHE_STORAGE_ARGS is where Che JSON files and workspace / project files are saved
+  CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v "${CHE_DATA_FOLDER}"/storage:/home/user/che/storage \
+                                      -e CHE_WORKSPACE_STORAGE="${CHE_DATA_FOLDER}"/workspaces \
+                                      -e CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false}
 
   if [ "${CHE_LOG_LEVEL}" = "debug" ]; then
     CHE_DEBUG_OPTION="--debug --log_level:debug"

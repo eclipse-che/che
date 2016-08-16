@@ -210,7 +210,11 @@ has_docker_for_windows_client(){
 }
 
 get_full_path() {
-  echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+  # "/some/path" => /some/path
+  OUTPUT_PATH=${1//\"}
+
+  # create full directory path
+  echo "$(cd "$(dirname "${OUTPUT_PATH}")"; pwd)/$(basename "$1")"
 }
 
 convert_windows_to_posix() {
@@ -231,7 +235,6 @@ get_clean_path() {
 }
 
 get_mount_path() {
-
   FULL_PATH=$(get_full_path "${1}")
 
   POSIX_PATH=$(convert_windows_to_posix "${FULL_PATH}")
