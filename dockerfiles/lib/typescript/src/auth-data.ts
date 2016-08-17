@@ -97,7 +97,13 @@ export class AuthData {
         } else {
             securedOrNot = '.';
         }
-        Log.getLogger().info('using hostname \"' + this.getHostname() + '\" and port \"' + this.getPort() + '\"' + securedOrNot);
+
+        var logMessage: string = 'Authenticating ';
+        if (this.username && this.password) {
+            logMessage += 'as ' + this.username;
+        }
+
+        Log.getLogger().info(logMessage, 'on \"' + this.getHostname() + ':' + this.getPort() + '\"' + securedOrNot);
 
         var options = {
             hostname: this.hostname,
