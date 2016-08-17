@@ -148,7 +148,8 @@ public class CheFluxLiveEditExtension{
             @Override
             public void onWorkspaceReady(WorkspaceReadyEvent workspaceReadyEvent) {
                 String machineId = appContext.getDevMachine().getId();
-                Promise<List<MachineProcessDto>> processesPromise = machineServiceClient.getProcesses(machineId);
+                String workspaceId = appContext.getWorkspaceId();
+                Promise<List<MachineProcessDto>> processesPromise = machineServiceClient.getProcesses(workspaceId,machineId);
                 processesPromise.then(new Operation<List<MachineProcessDto>>() {
                     @Override
                     public void apply(final List<MachineProcessDto> descriptors) throws OperationException {
@@ -335,7 +336,7 @@ public class CheFluxLiveEditExtension{
                      protected void onMessageReceived(MachineProcessEvent result) {
                          if (MachineProcessEvent.EventType.STARTED.equals(result.getEventType())) {
                              final int processId = result.getProcessId();
-                             machineServiceClient.getProcesses(appContext.getDevMachine().getId()).then(new Operation<List<MachineProcessDto>>() {
+                             machineServiceClient.getProcesses(appContext.getWorkspaceId(),appContext.getDevMachine().getId()).then(new Operation<List<MachineProcessDto>>() {
                                  @Override
                                  public void apply(List<MachineProcessDto> descriptors) throws OperationException {
                                      if (descriptors.isEmpty()) {
