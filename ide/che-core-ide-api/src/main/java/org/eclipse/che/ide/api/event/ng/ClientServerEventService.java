@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
 import org.eclipse.che.api.project.shared.dto.event.FileClosedDto;
 import org.eclipse.che.api.project.shared.dto.event.FileOpenedDto;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestTransmitter;
 import org.eclipse.che.ide.util.loging.Log;
@@ -40,7 +39,7 @@ public class ClientServerEventService {
         this.dtoFactory = dtoFactory;
 
         Log.info(getClass(), "Adding file event listener");
-        eventBus.addHandler(FileEvent.TYPE, new FileEventHandler() {
+        eventBus.addHandler(FileEvent.TYPE, new FileEvent.FileEventHandler() {
             @Override
             public void onFileOperation(FileEvent event) {
                 final String path = event.getFile().getLocation().toString();
