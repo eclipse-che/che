@@ -171,7 +171,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                 event.preventDefault();
 
                 if (addTerminalClickHandler != null) {
-                    addTerminalClickHandler.onAddTerminalClick(machine.getId());
+                    addTerminalClickHandler.onAddTerminalClick(machine.getWorkspaceId(), machine.getId());
                 }
             }
         }, true);

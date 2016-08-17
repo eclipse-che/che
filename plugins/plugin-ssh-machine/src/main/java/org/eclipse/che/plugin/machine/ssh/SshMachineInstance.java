@@ -141,7 +141,7 @@ public class SshMachineInstance extends AbstractInstance {
      * {@inheritDoc}
      */
     @Override
-    public MachineSource saveToSnapshot(String owner) throws MachineException {
+    public MachineSource saveToSnapshot() throws MachineException {
         throw new MachineException("Snapshot feature is unsupported for ssh machine implementation");
     }
 

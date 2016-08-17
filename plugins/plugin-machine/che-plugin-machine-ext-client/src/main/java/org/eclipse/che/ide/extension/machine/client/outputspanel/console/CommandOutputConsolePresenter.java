@@ -20,8 +20,8 @@ import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.CommandOutputMessageUnmarshaller;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
@@ -231,7 +231,9 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void stop() {
-        machineServiceClient.stopProcess(machine.getId(), pid);
+        machineServiceClient.stopProcess(machine.getWorkspaceId(),
+                                         machine.getId(),
+                                         pid);
     }
 
     @Override
@@ -249,7 +251,9 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
         if (isFinished()) {
             commandManager.executeCommand(commandConfiguration, machine);
         } else {
-            machineServiceClient.stopProcess(machine.getId(), pid).then(new Operation<Void>() {
+            machineServiceClient.stopProcess(machine.getWorkspaceId(),
+                                             machine.getId(),
+                                             pid).then(new Operation<Void>() {
                 @Override
                 public void apply(Void arg) throws OperationException {
                     commandManager.executeCommand(commandConfiguration, machine);

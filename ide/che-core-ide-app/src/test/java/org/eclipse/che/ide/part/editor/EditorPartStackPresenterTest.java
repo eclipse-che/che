@@ -13,7 +13,9 @@ package org.eclipse.che.ide.part.editor;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.inject.Provider;
+import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
@@ -26,7 +28,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 import org.eclipse.che.ide.part.PartsComparator;
-import org.eclipse.che.ide.part.widgets.editortab.EditorTab;
+import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.part.widgets.listtab.ListButton;
 import org.eclipse.che.ide.part.widgets.listtab.ListItem;
 import org.junit.Before;
@@ -41,7 +43,9 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -74,36 +78,46 @@ public class EditorPartStackPresenterTest {
 
     //additional mocks
     @Mock
-    private EditorTab                editorTab1;
+    private EditorTab               editorTab1;
     @Mock
-    private EditorTab                editorTab2;
+    private EditorTab               editorTab2;
     @Mock
-    private EditorWithErrors         withErrorsPart;
+    private EditorTab               editorTab3;
     @Mock
-    private AbstractEditorPresenter  partPresenter1;
+    private EditorWithErrors        withErrorsPart;
     @Mock
-    private SVGResource              resource1;
+    private AbstractEditorPresenter partPresenter1;
     @Mock
-    private AbstractEditorPresenter  partPresenter2;
+    private SVGResource             resource1;
     @Mock
-    private SVGResource              resource2;
+    private AbstractEditorPresenter partPresenter2;
     @Mock
-    private ProjectConfigDto         descriptor;
+    private AbstractEditorPresenter partPresenter3;
     @Mock
-    private EditorPartPresenter      editorPartPresenter;
+    private SVGResource             resource2;
     @Mock
-    private EditorInput              editorInput1;
+    private ProjectConfigDto        descriptor;
     @Mock
-    private EditorInput              editorInput2;
+    private EditorPartPresenter     editorPartPresenter;
     @Mock
-    private VirtualFile              file1;
+    private EditorInput             editorInput1;
     @Mock
-    private VirtualFile              file2;
+    private EditorInput             editorInput2;
+    @Mock
+    private EditorInput             editorInput3;
+    @Mock
+    private VirtualFile             file1;
+    @Mock
+    private VirtualFile             file2;
+    @Mock
+    private VirtualFile             file3;
+    @Mock
+    private HandlerRegistration     handlerRegistration;
 
     @Captor
-    private ArgumentCaptor<ListItem>                   itemCaptor;
+    private ArgumentCaptor<ListItem>            itemCaptor;
     @Captor
-    private ArgumentCaptor<AsyncCallback<Void>>        argumentCaptor;
+    private ArgumentCaptor<AsyncCallback<Void>> argumentCaptor;
 
     private EditorPartStackPresenter presenter;
 
@@ -121,8 +135,14 @@ public class EditorPartStackPresenterTest {
         when(partPresenter2.getEditorInput()).thenReturn(editorInput2);
         when(editorInput2.getFile()).thenReturn(file2);
 
-        when(tabItemFactory.createEditorPartButton(file1, resource1, SOME_TEXT)).thenReturn(editorTab1);
-        when(tabItemFactory.createEditorPartButton(file2, resource2, SOME_TEXT)).thenReturn(editorTab2);
+        when(partPresenter3.getEditorInput()).thenReturn(editorInput3);
+        when(editorInput3.getFile()).thenReturn(file3);
+
+        when(tabItemFactory.createEditorPartButton(partPresenter1)).thenReturn(editorTab1);
+        when(tabItemFactory.createEditorPartButton(partPresenter2)).thenReturn(editorTab2);
+        when(tabItemFactory.createEditorPartButton(partPresenter3)).thenReturn(editorTab3);
+
+        when(eventBus.addHandler((Event.Type<Object>)anyObject(), anyObject())).thenReturn(handlerRegistration);
 
         presenter = new EditorPartStackPresenter(view,
                                                  partsComparator,
@@ -152,10 +172,7 @@ public class EditorPartStackPresenterTest {
 
         verify(partPresenter1, times(2)).addPropertyListener(Matchers.<PropertyListener>anyObject());
 
-        verify(tabItemFactory).createEditorPartButton(file1, resource1, SOME_TEXT);
-
-        verify(partPresenter1).getTitleImage();
-        verify(partPresenter1).getTitle();
+        verify(tabItemFactory).createEditorPartButton(partPresenter1);
 
         verify(editorTab1).setDelegate(presenter);
 
@@ -238,5 +255,53 @@ public class EditorPartStackPresenterTest {
         presenter.onTabClose(editorTab1);
 
         assertThat(presenter.getActivePart(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldReturnNextPart() {
+        presenter.addPart(partPresenter1);
+        presenter.addPart(partPresenter2);
+        presenter.addPart(partPresenter3);
+
+        EditorPartPresenter result = presenter.getNextFor(partPresenter2);
+
+        assertNotNull(result);
+        assertEquals(partPresenter3, result);
+    }
+
+    @Test
+    public void shouldReturnFirstPart() {
+        presenter.addPart(partPresenter1);
+        presenter.addPart(partPresenter2);
+        presenter.addPart(partPresenter3);
+
+        EditorPartPresenter result = presenter.getNextFor(partPresenter3);
+
+        assertNotNull(result);
+        assertEquals(partPresenter1, result);
+    }
+
+    @Test
+    public void shouldReturnPreviousPart() {
+        presenter.addPart(partPresenter1);
+        presenter.addPart(partPresenter2);
+        presenter.addPart(partPresenter3);
+
+        EditorPartPresenter result = presenter.getPreviousFor(partPresenter2);
+
+        assertNotNull(result);
+        assertEquals(partPresenter1, result);
+    }
+
+    @Test
+    public void shouldReturnLastPart() {
+        presenter.addPart(partPresenter1);
+        presenter.addPart(partPresenter2);
+        presenter.addPart(partPresenter3);
+
+        EditorPartPresenter result = presenter.getPreviousFor(partPresenter1);
+
+        assertNotNull(result);
+        assertEquals(partPresenter3, result);
     }
 }

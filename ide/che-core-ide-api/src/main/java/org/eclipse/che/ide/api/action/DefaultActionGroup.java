@@ -92,15 +92,15 @@ public class DefaultActionGroup extends ActionGroup {
      *         ActionManager instance
      */
     public final void add(Action action, ActionManager actionManager) {
-        add(action, new Constraints(Anchor.LAST, null), actionManager);
+        add(action, Constraints.LAST, actionManager);
     }
 
     public final void add(Action action) {
-        addAction(action, new Constraints(Anchor.LAST, null));
+        addAction(action, Constraints.LAST);
     }
 
     public final void addAction(Action action) {
-        addAction(action, new Constraints(Anchor.LAST, null));
+        addAction(action, Constraints.LAST);
     }
 
     /** Adds a separator to the tail. */
@@ -223,7 +223,7 @@ public class DefaultActionGroup extends ActionGroup {
             } else {
                 // find related action in result list, if found, add action
                 // before or after it. If not, add to unsorted map
-                int index = findIndex(constraints.myRelativeToActionId, result, actionManager);
+                int index = findIndex(constraints.relativeId, result, actionManager);
                 if (index == -1) {
                     unsortedMap.put(action, constraints);
                 } else {
@@ -267,7 +267,7 @@ public class DefaultActionGroup extends ActionGroup {
 
             // if dependant action constraints match depends on our action
             // add it to result and remove from unsorted list
-            if (relatedConstraints.myRelativeToActionId.equals(actionId)) {
+            if (relatedConstraints.relativeId.equals(actionId)) {
                 if (relatedConstraints.myAnchor.equals(Anchor.BEFORE)) {
                     result.add(result.indexOf(action), relatedAction);
                 } else if (relatedConstraints.myAnchor.equals(Anchor.AFTER)) {

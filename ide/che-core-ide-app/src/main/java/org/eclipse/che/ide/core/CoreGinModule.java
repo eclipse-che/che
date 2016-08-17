@@ -63,7 +63,7 @@ import org.eclipse.che.ide.api.multisplitpanel.TabItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
-import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView;
@@ -110,6 +110,11 @@ import org.eclipse.che.ide.client.StartUpActionsProcessor;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.EditorRegistryImpl;
+import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
+import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizerImpl;
+import org.eclipse.che.ide.editor.synchronization.EditorGroupSychronizationFactory;
+import org.eclipse.che.ide.editor.synchronization.EditorGroupSynchronization;
+import org.eclipse.che.ide.editor.synchronization.EditorGroupSynchronizationImpl;
 import org.eclipse.che.ide.filetypes.FileTypeRegistryImpl;
 import org.eclipse.che.ide.hotkeys.dialog.HotKeysDialogView;
 import org.eclipse.che.ide.hotkeys.dialog.HotKeysDialogViewImpl;
@@ -131,9 +136,9 @@ import org.eclipse.che.ide.part.FocusManager;
 import org.eclipse.che.ide.part.PartStackPresenter;
 import org.eclipse.che.ide.part.PartStackPresenter.PartStackEventHandler;
 import org.eclipse.che.ide.part.PartStackViewImpl;
-import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
 import org.eclipse.che.ide.part.editor.EditorPartStackView;
 import org.eclipse.che.ide.part.editor.EditorTabContextMenuFactory;
+import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.part.editor.recent.RecentFileActionFactory;
 import org.eclipse.che.ide.part.editor.recent.RecentFileList;
 import org.eclipse.che.ide.part.editor.recent.RecentFileStore;
@@ -371,7 +376,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(WorkspaceAgent.class).to(WorkspacePresenter.class).in(Singleton.class);
         bind(IconRegistry.class).to(IconRegistryImpl.class).in(Singleton.class);
         // UI Model
-        bind(EditorPartStack.class).to(EditorPartStackPresenter.class).in(Singleton.class);
+        bind(EditorMultiPartStack.class).to(EditorMultiPartStackPresenter.class).in(Singleton.class);
         bind(ActionManager.class).to(ActionManagerImpl.class).in(Singleton.class);
 
         GinMultibinder<NodeInterceptor> nodeInterceptors = GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
@@ -406,6 +411,10 @@ public class CoreGinModule extends AbstractGinModule {
         bind(NotificationManagerView.class).to(NotificationManagerViewImpl.class).in(Singleton.class);
 
         bind(EditorPartStackView.class);
+
+        bind(EditorContentSynchronizer.class).to(EditorContentSynchronizerImpl.class).in(Singleton.class);
+        install(new GinFactoryModuleBuilder().implement(EditorGroupSynchronization.class, EditorGroupSynchronizationImpl.class)
+                                             .build(EditorGroupSychronizationFactory.class));
 
         bind(MessageDialogFooter.class);
         bind(MessageDialogView.class).to(MessageDialogViewImpl.class);

@@ -79,7 +79,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -506,7 +505,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                     final String imageName,
                                     final LineConsumer outputConsumer)
             throws MachineException {
-        Optional<String> containerIdOptional = null;
+        String containerIdCopy = null;
         try {
             final Map<String, Map<String, String>> portsToExpose;
             final String[] volumes;
@@ -558,7 +557,7 @@ public class DockerInstanceProvider implements InstanceProvider {
             final String containerId = docker.createContainer(CreateContainerParams.create(config)
                                                                                    .withContainerName(containerName))
                                                                                    .getId();
-            containerIdOptional = Optional.ofNullable(containerId);
+            containerIdCopy = containerId;
 
             docker.startContainer(StartContainerParams.create(containerId));
 
@@ -593,7 +592,9 @@ public class DockerInstanceProvider implements InstanceProvider {
                          machine.getId(), containerId, node.getHost());
             }
 
-            dockerInstanceStopDetector.startDetection(containerId, machine.getId());
+            dockerInstanceStopDetector.startDetection(containerId,
+                                                      machine.getId(),
+                                                      machine.getWorkspaceId());
 
             return dockerMachineFactory.createInstance(machine,
                                                        containerId,
@@ -601,18 +602,17 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                        node,
                                                        outputConsumer);
         } catch (IOException e) {
-            cleanUpContainer(containerIdOptional);
+            cleanUpContainer(containerIdCopy);
             throw new MachineException(e.getLocalizedMessage(), e);
         } catch (MachineException e) {
-            cleanUpContainer(containerIdOptional);
+            cleanUpContainer(containerIdCopy);
             throw e;
         }
     }
 
-    private void cleanUpContainer(Optional<String> containerIdOptional) {
+    private void cleanUpContainer(@Nullable  String containerId) {
         try {
-            if (containerIdOptional.isPresent()) {
-                String containerId = containerIdOptional.get();
+            if (containerId != null) {
                 docker.removeContainer(RemoveContainerParams.create(containerId).withRemoveVolumes(true).withForce(true));
             }
         } catch (Exception ex) {
