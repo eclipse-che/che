@@ -147,6 +147,10 @@ export class AuthData {
     }
 
     static parse(remoteUrl : string, username?: string, password?: string) : AuthData {
+        if (!remoteUrl) {
+            return new AuthData();
+        }
+        
         // extract hostname and port
         const url = require('url');
         var urlObject : any = url.parse(remoteUrl);
@@ -171,6 +175,7 @@ export class AuthData {
 
         authData.username = username;
         authData.password = password;
+
 
 
         return authData;
