@@ -169,6 +169,7 @@ export class WorkspaceDetailsProjectsCtrl {
       this.$q.all(deleteProjectPromises).finally(() => {
         this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey).then(() => {
           this.updateProjectsData();
+          this.updateSelectedStatus();
         }, (error) => {
           if (error.status === 304) {
             this.updateProjectsData();

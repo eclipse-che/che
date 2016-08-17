@@ -13,7 +13,7 @@
 /**
  * @ngdoc controller
  * @name workspaces.list.controller:WorkspaceItemStatusController
- * @description This class is handling the controller for listing the workspaces
+ * @description This class is handling the controller for workspace status widget
  * @author Oleksii Orel
  */
 export class WorkspaceStatusController {

@@ -1,6 +1,9 @@
 .che-list-item-checkbox
+  top 1px
   margin 0
   height 36px
+  display flex
+  vertical-align middle
 
   div
     margin 0
@@ -26,14 +29,14 @@
 
 .che-list-item-checkbox-main
   cursor pointer
+  float left
+  padding-left 12px
+
 /*
  * Handle the 3 possible states for the icon/checkbox zone.
  */
 
 /* hover one the icon/checkbox zone */
-
-.che-list-item-checkbox-main:hover md-checkbox.che-list-item-checkbox
-  display inline-block
 
 .che-list-item-checkbox-main:hover md-icon
   display none
@@ -53,3 +56,12 @@
 
 .che-list-item-checkbox-main md-icon
   display inline-block
+
+.che-checkbox-area
+  .che-list-item-checkbox-main md-checkbox.che-list-item-checkbox
+    display inline-block
+  .che-list-item-checkbox-main md-icon
+    display none
+
+.che-checkbox-area > *
+  width 100px

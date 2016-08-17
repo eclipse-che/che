@@ -5,7 +5,7 @@
   display block
   width 100%
   float left
-  padding 0 10px 15px 10px
+  padding 0 40px 15px 52px
 
   .che-list-add-button *,
   .che-list-delete-button *
@@ -23,18 +23,29 @@
     display inline-flex
 
   .che-list-search
-    line-height 34px
+    line-height 33px
+    margin-left 20px
 
 .che-list-search,
 .che-list-add-button > *,
 .che-list-delete-button > *
   display inline-block
-  box-sizing border-box
+  box-sizing content-box
   min-width 34px
-  height 36px
-  margin 15px 10px 0 10px
-  border 1px solid $list-blue-color
+  min-height 34px
+  line-height 33px
+  margin-top 15px
+  margin-bottom 0
+  border 1px solid $list-header-blue-color
   che-border-radius(2px)
+
+.che-list-add-button > *
+  margin-left 0
+  margin-right 20px
+
+.che-list-delete-button > *
+  margin-left 20px
+  margin-right 0
 
 .che-list-add-button > *:hover,
 .che-list-delete-button > *:hover
@@ -46,20 +57,20 @@
   width auto
   padding-left 20px
   padding-right 20px
-  background-color $list-blue-color
-  box-shadow-simple()
+  background-color $list-header-blue-color
+  box-shadow none !important
 
 .che-list-search
   float right
   width 150px
   overflow hidden
-  box-shadow-simple()
+  box-shadow none
 
   i:before
     font-size 16px
 
   .header-search-icon i
-    color $list-blue-color
+    color $list-header-blue-color
 
   .header-close-icon i
     color $default-color
@@ -79,15 +90,15 @@
   .header-search-input input::-webkit-input-placeholder
     position relative
     right 8px
-    color $list-blue-color
-    text-transform uppercase
+    color $list-header-blue-color
+    text-transform capitalize
     text-align center
 
   .header-search-input input::-moz-placeholder
     position relative
     right 8px
-    color $list-blue-color
-    text-transform uppercase
+    color $list-header-blue-color
+    text-transform capitalize
     text-align center
 
   & > *
@@ -116,3 +127,6 @@
   overflow hidden
   text-overflow ellipsis
   white-space nowrap
+
+  .che-list-item-checkbox-main
+    display inline-block

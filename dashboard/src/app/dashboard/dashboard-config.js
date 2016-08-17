@@ -13,8 +13,6 @@
 import {DashboardController} from './dashboard.controller';
 import {DashboardLastWorkspacesController} from './last-workspaces/last-workspaces.controller';
 import {DashboardLastWorkspaces} from './last-workspaces/last-workspaces.directive';
-import {DashboardLastProjectsController} from './last-projects/last-projects.controller';
-import {DashboardLastProjects} from './last-projects/last-projects.directive';
 
 export class DashboardConfig {
 
@@ -23,10 +21,6 @@ export class DashboardConfig {
     // last workspaces
     register.controller('DashboardLastWorkspacesController', DashboardLastWorkspacesController);
     register.directive('dashboardLastWorkspaces', DashboardLastWorkspaces);
-
-    // last projects
-    register.controller('DashboardLastProjectsController', DashboardLastProjectsController);
-    register.directive('dashboardLastProjects', DashboardLastProjects);
 
     // controller
     register.controller('DashboardController', DashboardController);

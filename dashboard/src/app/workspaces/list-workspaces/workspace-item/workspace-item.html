@@ -34,7 +34,7 @@
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Name</span>
         <workspace-status-indicator che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status-indicator>
-        <span tooltip="Last modified: {{ workspaceItemCtrl.workspace.attributes.updated | amTimeAgo}}"
+        <span tooltip="Last use: {{ workspaceItemCtrl.workspace.attributes.updated | amTimeAgo}}"
               class="che-hover">{{workspaceItemCtrl.workspace.config.name}}</span>
         <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.temporary"></i>
       </div>

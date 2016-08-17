@@ -32,6 +32,7 @@ export class CheListHeader {
       inputValue: '=?cheSearchModel',
       addButtonTitle: '@?cheAddButtonTitle',
       addButtonHref: '@?cheAddButtonHref',
+      onAdd: '&?cheOnAdd',
       deleteButtonTitle: '@?cheDeleteButtonTitle',
       onDelete: '&?cheOnDelete',
       hideDelete: '=?cheHideDelete',

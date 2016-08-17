@@ -16,22 +16,20 @@
        layout-align="start stretch"
        class="project-item-row">
     <div layout="row"
-         layout-align="center center"
-         class="workspace-list-item-checkbox">
-      <div>
-        <che-list-item-checked ng-model="projectItemCtrl.isSelect"
-                               che-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank"
-                               che-aria-label-checkbox="Project {{projectItemCtrl.project.name}}"
-                               ng-click="projectItemCtrl.onCheckboxClick()"></che-list-item-checked>
-      </div>
+         layout-align="start center"
+         class="che-checkbox-area">
+      <che-list-item-checked ng-model="projectItemCtrl.isSelect"
+                             che-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank"
+                             che-aria-label-checkbox="Project {{projectItemCtrl.project.name}}"
+                             ng-click="projectItemCtrl.onCheckboxClick()"></che-list-item-checked>
     </div>
     <div flex
          layout-xs="column" layout-gt-xs="row"
          layout-align-gt-xs="start center"
          layout-align-xs="start start"
-         class="workspace-item-details">
+         class="che-list-item-details">
       <div flex-gt-xs="30" ng-click="projectItemCtrl.redirectToProjectDetails()"
-           class="workspace-item-name"
+           class="che-list-item-name"
            ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
         <span class="che-xs-header noselect" hide-gt-xs>Name</span>
         <span class="che-hover">{{projectItemCtrl.project.name}}</span>

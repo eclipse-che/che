@@ -1,7 +1,11 @@
 <div class="che-list-header">
   <div class="che-list-header-additional">
     <che-button-primary class="che-list-add-button"
-                        ng-show="addButtonTitle && addButtonHref"
+                        ng-if="onAdd"
+                        che-button-title="{{addButtonTitle}}"
+                        ng-click="onAdd()"></che-button-primary>
+    <che-button-primary class="che-list-add-button"
+                        ng-if="addButtonHref"
                         che-button-title="{{addButtonTitle}}"
                         ng-href="{{addButtonHref}}"></che-button-primary>
     <div class="che-list-search"
@@ -15,7 +19,7 @@
       </div>
     </div>
     <che-button-primary class="che-list-delete-button"
-                        ng-show="deleteButtonTitle && onDelete && !hideDelete"
+                        ng-show="deleteButtonTitle && !hideDelete"
                         che-button-title="{{deleteButtonTitle}}"
                         ng-click="onDelete()"></che-button-primary>
   </div>

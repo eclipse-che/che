@@ -126,14 +126,7 @@ export class ListWorkspacesCtrl {
    * @returns {boolean}
    */
   isAllWorkspacesSelected() {
-    let disabled = true;
-    for (let key of this.workspacesById.keys()) {
-      if (!this.workspacesSelectedStatus[key]) {
-        disabled = false;
-        break;
-      }
-    }
-    return disabled;
+    return this.isAllSelected;
   }
 
   /**
@@ -141,14 +134,7 @@ export class ListWorkspacesCtrl {
    * @returns {boolean}
    */
   isNoWorkspacesSelected() {
-    let workspaceIds = Object.keys(this.workspacesSelectedStatus);
-    if (!workspaceIds.length) {
-      return true;
-    }
-
-    return workspaceIds.every((key) => {
-      return !this.workspacesSelectedStatus[key];
-    });
+    return this.isNoSelected;
   }
 
   /**
@@ -187,13 +173,23 @@ export class ListWorkspacesCtrl {
    * Update workspace selected status
    */
   updateSelectedStatus() {
-    this.isNoSelected = this.isNoWorkspacesSelected();
+    this.isNoSelected = true;
+    this.isAllSelected = true;
+
+    Object.keys(this.workspacesSelectedStatus).forEach((key) => {
+      if (this.workspacesSelectedStatus[key]) {
+        this.isNoSelected = false;
+      } else {
+        this.isAllSelected = false;
+      }
+    });
+
     if (this.isNoSelected) {
       this.isBulkChecked = false;
       return;
     }
 
-    if (this.isAllWorkspacesSelected()) {
+    if (this.isAllSelected) {
       this.isBulkChecked = true;
     }
   }
@@ -257,7 +253,7 @@ export class ListWorkspacesCtrl {
 
       this.$q.all(deleteWorkspacePromises).finally(() => {
         this.getUserWorkspaces();
-
+        this.updateSelectedStatus();
         if (isError) {
           this.cheNotification.showError('Delete failed.');
         }

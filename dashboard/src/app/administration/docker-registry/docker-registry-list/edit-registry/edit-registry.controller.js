@@ -20,9 +20,9 @@ export class EditRegistryController {
    * Default constructor.
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, cheProfile, cheNotification) {
+  constructor($mdDialog, chePreferences, cheNotification) {
     this.$mdDialog = $mdDialog;
-    this.cheProfile = cheProfile;
+    this.chePreferences = chePreferences;
     this.cheNotification = cheNotification;
 
     this.originRegistryUrl = angular.copy(this.registry.url);
@@ -43,12 +43,13 @@ export class EditRegistryController {
       return;
     }
 
-    let promise = this.cheProfile.addRegistry(this.registry.url, this.registry.username, this.registry.password);
+    let promise = this.chePreferences.addRegistry(this.registry.url, this.registry.username, this.registry.password);
 
     promise.then(() => {
       this.$mdDialog.hide();
       if(this.originRegistryUrl !== this.registry.url) {
-        this.cheProfile.removeRegistry(this.originRegistryUrl).then(() => {
+        this.chePreferences.removeRegistry(this.originRegistryUrl).then(() => {
+
           this.cheNotification.showInfo('Registry successfully edited.');
         }, (error) => {
           this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Edit registry error.');

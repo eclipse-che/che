@@ -23,10 +23,10 @@
     <div flex="100"
          layout="row"
          layout-align="start stretch"
-         class="workspace-item-row">
+         class="che-list-item-row">
       <div layout="column" layout-gt-xs="row"
-           layout-align="center center"
-           class="workspace-list-item-checkbox">
+           layout-align="start center"
+           class="che-checkbox-area">
         <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
           <md-checkbox class="che-list-item-checkbox"
                        ng-checked="workspaceDetailsProjectsCtrl.isBulkChecked"
@@ -35,7 +35,7 @@
       </div>
       <div flex hide-xs layout-gt-xs="row"
            layout-align="start center"
-           class="workspace-item-details">
+           class="che-list-item-details">
         <che-list-header-column flex-gt-xs="30"
                                 che-sort-value="workspaceDetailsProjectsCtrl.projectOrderBy"
                                 che-sort-item="name"
