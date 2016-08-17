@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server.jpa;
 
 import com.google.inject.Guice;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -49,7 +50,14 @@ public class JpaWorkspaceDaoTest {
 
     @Test
     public void shouldCascadeRemoveObjectsWhenTheyRemovedFromEntity() {
-        final WorkspaceImpl workspace = createWorkspace("id", "namespace", "name");
+        final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+        final WorkspaceImpl workspace = createWorkspace("id", account, "name");
+
+        // Persist the workspace
+        manager.getTransaction().begin();
+        manager.persist(account);
+        manager.getTransaction().commit();
+        manager.clear();
 
         // Persist the workspace
         manager.getTransaction().begin();

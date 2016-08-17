@@ -12,6 +12,8 @@ package org.eclipse.che.api;
 
 import com.google.common.collect.ImmutableMap;
 
+import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -58,15 +60,17 @@ public final class TestObjectsFactory {
                                              "preference3", "value3"));
     }
 
-    public static WorkspaceImpl createWorkspace(String id, String namespace) {
-        return new WorkspaceImpl(id,
-                                 namespace,
-                                 new WorkspaceConfigImpl(id + "_name",
-                                                         id + "description",
-                                                         "default-env",
-                                                         null,
-                                                         null,
-                                                         null));
+    public static WorkspaceConfigImpl createWorkspaceConfig(String id) {
+        return new WorkspaceConfigImpl(id + "_name",
+                                       id + "description",
+                                       "default-env",
+                                       null,
+                                       null,
+                                       null);
+    }
+
+    public static WorkspaceImpl createWorkspace(String id, Account account) {
+        return new WorkspaceImpl(id, account, createWorkspaceConfig(id));
     }
 
     public static SshPairImpl createSshPair(String owner, String service, String name) {
@@ -77,7 +81,7 @@ public final class TestObjectsFactory {
         return new FactoryImpl(id,
                                id + "-name",
                                "4.0",
-                               createWorkspace(id, creator).getConfig(),
+                               createWorkspaceConfig(id),
                                new AuthorImpl(creator, System.currentTimeMillis()),
                                null,
                                null,
@@ -114,7 +118,7 @@ public final class TestObjectsFactory {
                         .setCreator("user123")
                         .setDescription(id + "-description")
                         .setScope(id + "-scope")
-                        .setWorkspaceConfig(createWorkspace("test", "test").getConfig())
+                        .setWorkspaceConfig(createWorkspaceConfig("test"))
                         .setTags(asList(id + "-tag1", id + "-tag2"))
                         .setComponents(asList(new StackComponentImpl(id + "-component1", id + "-component1-version"),
                                               new StackComponentImpl(id + "-component2", id + "-component2-version")))

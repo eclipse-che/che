@@ -42,7 +42,9 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
+import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -56,11 +58,9 @@ import org.testng.annotations.Test;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.TestObjectsFactory.createFactory;
 import static org.eclipse.che.api.TestObjectsFactory.createPreferences;
@@ -188,7 +188,7 @@ public class JpaEntitiesCascadeRemovalTest {
         assertNotNull(profileDao.getById(user.getId()));
         assertFalse(preferenceDao.getPreferences(user.getId()).isEmpty());
         assertFalse(sshDao.get(user.getId()).isEmpty());
-        assertFalse(workspaceDao.getByNamespace(user.getId()).isEmpty());
+        assertFalse(workspaceDao.getByNamespace(user.getName()).isEmpty());
         assertFalse(factoryDao.getByAttribute(0, 0, singletonList(Pair.of("creator.userId", user.getId()))).isEmpty());
         assertFalse(snapshotDao.findSnapshots(workspace1.getId()).isEmpty());
         assertFalse(snapshotDao.findSnapshots(workspace2.getId()).isEmpty());
@@ -197,10 +197,10 @@ public class JpaEntitiesCascadeRemovalTest {
 
     @DataProvider(name = "beforeRemoveRollbackActions")
     public Object[][] beforeRemoveActions() {
-        // TODO add workspace after https://github.com/eclipse/che/issues/1950 is done
         return new Class[][] {
                 {RemovePreferencesBeforeUserRemovedEventSubscriber.class},
                 {RemoveProfileBeforeUserRemovedEventSubscriber.class},
+                {RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class},
                 {RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class},
                 {RemoveSshKeysBeforeUserRemovedEventSubscriber.class},
                 {RemoveFactoriesBeforeUserRemovedEventSubscriber.class}
@@ -214,8 +214,8 @@ public class JpaEntitiesCascadeRemovalTest {
 
         preferenceDao.setPreferences(user.getId(), preferences = createPreferences());
 
-        workspaceDao.create(workspace1 = createWorkspace("workspace1", user.getId()));
-        workspaceDao.create(workspace2 = createWorkspace("workspace2", user.getId()));
+        workspaceDao.create(workspace1 = createWorkspace("workspace1", user.getAccount()));
+        workspaceDao.create(workspace2 = createWorkspace("workspace2", user.getAccount()));
 
         sshDao.create(sshPair1 = createSshPair(user.getId(), "service", "name1"));
         sshDao.create(sshPair2 = createSshPair(user.getId(), "service", "name2"));

@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableSet;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.factory.server.FactoryImage;
 import org.eclipse.che.api.factory.server.model.impl.ActionImpl;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
@@ -28,12 +29,12 @@ import org.eclipse.che.api.factory.server.model.impl.OnAppLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.OnProjectsLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.PoliciesImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
-import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
@@ -73,32 +74,42 @@ public class FactoryDaoTest {
 
     private static final int ENTRY_COUNT = 5;
 
-    private List<FactoryImpl> factories;
+    private FactoryImpl[] factories;
+    private UserImpl[]    users;
 
     @Inject
     private FactoryDao factoryDao;
 
     @Inject
-    private TckRepository<FactoryImpl> tckRepository;
+    private TckRepository<FactoryImpl> factoryTckRepository;
+
+    @Inject
+    private TckRepository<UserImpl> userTckRepository;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        factories = new ArrayList<>(ENTRY_COUNT);
+        factories = new FactoryImpl[ENTRY_COUNT];
+        users = new UserImpl[ENTRY_COUNT];
         for (int i = 0; i < ENTRY_COUNT; i++) {
-            factories.add(createFactory(i));
+            users[i] = new UserImpl("userId_" + i, "email_" + i, "name" + i);
         }
-        tckRepository.createAll(factories);
+        for (int i = 0; i < ENTRY_COUNT; i++) {
+            factories[i] = createFactory(i, users[i].getId());
+        }
+        userTckRepository.createAll(asList(users));
+        factoryTckRepository.createAll(asList(factories));
     }
 
     @AfterMethod
     public void cleanUp() throws Exception {
-        tckRepository.removeAll();
+        factoryTckRepository.removeAll();
+        userTckRepository.removeAll();
     }
 
     @Test(dependsOnMethods = "shouldGetFactoryById")
     public void shouldCreateFactory() throws Exception {
-        final FactoryImpl factory = createFactory(10);
-        factory.getCreator().setUserId(factories.get(0).getCreator().getUserId());
+        final FactoryImpl factory = createFactory(10, users[0].getId());
+        factory.getCreator().setUserId(factories[0].getCreator().getUserId());
         factoryDao.create(factory);
 
         assertEquals(factoryDao.getById(factory.getId()), factory);
@@ -111,8 +122,8 @@ public class FactoryDaoTest {
 
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionWhenCreatingFactoryWithExistingId() throws Exception {
-        final FactoryImpl factory = createFactory(10);
-        final FactoryImpl existing = factories.get(0);
+        final FactoryImpl factory = createFactory(10, users[0].getId());
+        final FactoryImpl existing = factories[0];
         factory.getCreator().setUserId(existing.getCreator().getUserId());
         factory.setId(existing.getId());
         factoryDao.create(factory);
@@ -120,8 +131,8 @@ public class FactoryDaoTest {
 
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionWhenCreatingFactoryWithExistingNameAndUserId() throws Exception {
-        final FactoryImpl factory = createFactory(10);
-        final FactoryImpl existing = factories.get(0);
+        final FactoryImpl factory = createFactory(10, users[0].getId());
+        final FactoryImpl existing = factories[0];
         factory.getCreator().setUserId(existing.getCreator().getUserId());
         factory.setName(existing.getName());
         factoryDao.create(factory);
@@ -129,7 +140,7 @@ public class FactoryDaoTest {
 
     @Test
     public void shouldUpdateFactory() throws Exception {
-        final FactoryImpl update = factories.get(0);
+        final FactoryImpl update = factories[0];
         final String userId = update.getCreator().getUserId();
         update.setName("new-name");
         update.setV("5_0");
@@ -148,9 +159,9 @@ public class FactoryDaoTest {
 
     @Test(expectedExceptions = ConflictException.class)
     public void shouldThrowConflictExceptionWhenUpdateFactoryWithExistingNameAndUserId() throws Exception {
-        final FactoryImpl update = factories.get(0);
-        update.setName(factories.get(1).getName());
-        update.getCreator().setUserId(factories.get(1).getCreator().getUserId());
+        final FactoryImpl update = factories[0];
+        update.setName(factories[1].getName());
+        update.getCreator().setUserId(factories[1].getCreator().getUserId());
         factoryDao.update(update);
     }
 
@@ -161,12 +172,12 @@ public class FactoryDaoTest {
 
     @Test(expectedExceptions = NotFoundException.class)
     public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingFactory() throws Exception {
-        factoryDao.update(createFactory(10));
+        factoryDao.update(createFactory(10, users[0].getId()));
     }
 
     @Test
     public void shouldGetFactoryById() throws Exception {
-        final FactoryImpl factory = factories.get(0);
+        final FactoryImpl factory = factories[0];
 
         assertEquals(factoryDao.getById(factory.getId()), factory);
     }
@@ -183,7 +194,7 @@ public class FactoryDaoTest {
 
     @Test
     public void shouldGetFactoryByIdAttribute() throws Exception {
-        final FactoryImpl factory = factories.get(0);
+        final FactoryImpl factory = factories[0];
         final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("id", factory.getId()));
         final List<FactoryImpl> result = factoryDao.getByAttribute(1, 0, attributes);
 
@@ -195,28 +206,28 @@ public class FactoryDaoTest {
         final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("policies.match", "match"),
                                                                        Pair.of("policies.create", "perClick"),
                                                                        Pair.of("workspace.defaultEnv", "env1"));
-        final FactoryImpl factory1 = factories.get(1);
-        final FactoryImpl factory3 = factories.get(3);
+        final FactoryImpl factory1 = factories[1];
+        final FactoryImpl factory3 = factories[3];
         factory1.getPolicies().setCreate("perAccount");
         factory3.getPolicies().setMatch("update");
         factoryDao.update(factory1);
         factoryDao.update(factory3);
-        final List<FactoryImpl> result = factoryDao.getByAttribute(factories.size(), 0, attributes);
+        final List<FactoryImpl> result = factoryDao.getByAttribute(factories.length, 0, attributes);
 
-        assertEquals(new HashSet<>(result), ImmutableSet.of(factories.get(0), factories.get(2), factories.get(4)));
+        assertEquals(new HashSet<>(result), ImmutableSet.of(factories[0], factories[2], factories[4]));
     }
 
     @Test
     public void shouldFindAllFactoriesWhenAttributesNotSpecified() throws Exception {
         final List<Pair<String, String>> attributes = emptyList();
-        final List<FactoryImpl> result = factoryDao.getByAttribute(factories.size(), 0, attributes);
+        final List<FactoryImpl> result = factoryDao.getByAttribute(factories.length, 0, attributes);
 
-        assertEquals(new HashSet<>(result), new HashSet<>(factories));
+        assertEquals(new HashSet<>(result), new HashSet<>(asList(factories)));
     }
 
     @Test(expectedExceptions = NotFoundException.class, dependsOnMethods = "shouldGetFactoryById")
     public void shouldRemoveFactory() throws Exception {
-        final String factoryId = factories.get(0).getId();
+        final String factoryId = factories[0].getId();
         factoryDao.remove(factoryId);
         factoryDao.getById(factoryId);
     }
@@ -231,11 +242,11 @@ public class FactoryDaoTest {
         factoryDao.remove("non-existing");
     }
 
-    private static FactoryImpl createFactory(int index) {
+    private static FactoryImpl createFactory(int index, String userId) {
         final long timeMs = System.currentTimeMillis();
         final ButtonImpl factoryButton = new ButtonImpl(new ButtonAttributesImpl("red", "logo", "style", true),
                                                         Button.Type.LOGO);
-        final AuthorImpl creator = new AuthorImpl("id_" + index, timeMs);
+        final AuthorImpl creator = new AuthorImpl(userId , timeMs);
         final PoliciesImpl policies = new PoliciesImpl("referrer", "match", "perClick", timeMs, timeMs + 1000);
         final Set<FactoryImage> images = new HashSet<>();
         final List<ActionImpl> a1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));

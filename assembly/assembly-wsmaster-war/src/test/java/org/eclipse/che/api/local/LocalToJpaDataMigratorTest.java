@@ -187,7 +187,7 @@ public class LocalToJpaDataMigratorTest {
         localSshDao.create(pair);
         localSshDao.saveSshPairs();
 
-        final WorkspaceImpl workspace = createWorkspace("id", user.getId());
+        final WorkspaceImpl workspace = createWorkspace("id", user.getAccount());
         localWorkspaceDao.create(workspace);
         localWorkspaceDao.saveWorkspaces();
 

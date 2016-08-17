@@ -16,7 +16,6 @@
     <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>org.eclipse.che.account.spi.AccountImpl</class>
-        <class>org.eclipse.che.account.spi.tck.TestAccountImpl</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -78,6 +79,7 @@ public class WorkspaceRuntimesTest {
 
     private static final String WORKSPACE_ID = "workspace123";
     private static final String ENV_NAME     = "default-env";
+    private static final String NAMESPACE    = "wsNamespace";
 
     @Mock
     private MachineManager machineManager;
@@ -742,6 +744,6 @@ public class WorkspaceRuntimesTest {
                                                                 .setEnvironments(singletonList(environment))
                                                                 .setDefaultEnv(environment.getName())
                                                                 .build();
-        return new WorkspaceImpl(WORKSPACE_ID, "user123",  wsConfig);
+        return new WorkspaceImpl(WORKSPACE_ID, new AccountImpl("accountId", NAMESPACE, "test"), wsConfig);
     }
 }

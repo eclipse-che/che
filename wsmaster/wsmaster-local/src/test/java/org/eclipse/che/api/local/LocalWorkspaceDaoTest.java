@@ -13,6 +13,7 @@ package org.eclipse.che.api.local;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
@@ -171,7 +172,7 @@ public class LocalWorkspaceDaoTest {
                                                                commands,
                                                                projects,
                                                                environments))
-                            .setNamespace("user123")
+                            .setAccount(new AccountImpl("accountId", "user123", "test"))
                             .build();
     }
 }

@@ -11,13 +11,14 @@
 package org.eclipse.che.account.spi;
 
 import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.account.spi.jpa.AccountEntityListener;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -29,7 +30,6 @@ import java.util.Objects;
  * @author Sergii Leschenko
  */
 @Entity(name = "Account")
-@Inheritance(strategy = InheritanceType.JOINED)
 @NamedQueries(
         {
                 @NamedQuery(name = "Account.getByName",
@@ -39,18 +39,28 @@ import java.util.Objects;
         }
 )
 @Table(indexes = @Index(columnList = "name", unique = true))
-public abstract class AccountImpl implements Account {
+@EntityListeners(AccountEntityListener.class)
+public class AccountImpl implements Account {
+
     @Id
     protected String id;
 
     @Column(nullable = false)
     protected String name;
 
+    @Basic
+    private String type;
+
     public AccountImpl() {}
 
-    public AccountImpl(String id, String name) {
+    public AccountImpl(String id, String name, String type) {
         this.id = id;
         this.name = name;
+        this.type = type;
+    }
+
+    public AccountImpl(Account account) {
+        this(account.getId(), account.getName(), account.getType());
     }
 
     @Override
@@ -65,6 +75,15 @@ public abstract class AccountImpl implements Account {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public void setName(String name) {

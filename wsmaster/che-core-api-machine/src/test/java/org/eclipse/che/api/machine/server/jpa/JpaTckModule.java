@@ -11,24 +11,16 @@
 package org.eclipse.che.api.machine.server.jpa;
 
 import com.google.inject.TypeLiteral;
-import com.google.inject.persist.Transactional;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
+import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.repository.JpaTckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
-import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.persistence.EntityManager;
-import java.util.Collection;
 
 /**
  * @author Anton Korneta

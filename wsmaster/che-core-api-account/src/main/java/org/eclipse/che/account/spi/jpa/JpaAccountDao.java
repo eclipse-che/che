@@ -10,11 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.account.spi.jpa;
 
-import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.account.spi.AccountDao;
-
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.account.spi.AccountDao;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 

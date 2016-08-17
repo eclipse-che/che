@@ -11,21 +11,24 @@
 package org.eclipse.che.api.user.server.model.impl;
 
 import org.eclipse.che.account.spi.AccountImpl;
-
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.jpa.UserEntityListener;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,20 +45,27 @@ import java.util.Objects;
                 @NamedQuery(name = "User.getByAliasAndPassword",
                             query = "SELECT u " +
                                     "FROM Usr u " +
-                                    "WHERE :alias = u.name OR" +
+                                    "WHERE :alias = u.account.name OR" +
                                     "      :alias = u.email"),
                 @NamedQuery(name = "User.getByAlias",
                             query = "SELECT u FROM Usr u WHERE :alias MEMBER OF u.aliases"),
                 @NamedQuery(name = "User.getByName",
-                            query = "SELECT u FROM Usr u WHERE u.name = :name"),
+                            query = "SELECT u FROM Usr u WHERE u.account.name = :name"),
                 @NamedQuery(name = "User.getByEmail",
                             query = "SELECT u FROM Usr u WHERE u.email = :email")
         }
 )
 @EntityListeners(UserEntityListener.class)
 @Table(indexes = {@Index(columnList = "email", unique = true)})
-public class UserImpl extends AccountImpl implements User {
+public class UserImpl implements User {
     public static final String PERSONAL_ACCOUNT = "personal";
+
+    @Id
+    private String id;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(nullable = false)
+    private AccountImpl account;
 
     @Column(nullable = false)
     private String email;
@@ -72,14 +82,10 @@ public class UserImpl extends AccountImpl implements User {
 
     public UserImpl() {}
 
-    public UserImpl(String id) {
-        this.id = id;
-    }
-
     public UserImpl(String id, String email, String name) {
+        this.account = new AccountImpl(id, name, PERSONAL_ACCOUNT);
         this.id = id;
         this.email = email;
-        this.name = name;
     }
 
     public UserImpl(String id,
@@ -107,10 +113,6 @@ public class UserImpl extends AccountImpl implements User {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     @Override
     public String getEmail() {
         return email;
@@ -122,16 +124,16 @@ public class UserImpl extends AccountImpl implements User {
 
     @Override
     public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getType() {
-        return PERSONAL_ACCOUNT;
+        if (account != null) {
+            return account.getName();
+        }
+        return null;
     }
 
     public void setName(String name) {
-        this.name = name;
+        if (account != null) {
+            account.setName(name);
+        }
     }
 
     @Override
@@ -155,6 +157,14 @@ public class UserImpl extends AccountImpl implements User {
         this.aliases = aliases;
     }
 
+    public AccountImpl getAccount() {
+        return account;
+    }
+
+    public void setAccount(AccountImpl account) {
+        this.account = account;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -166,7 +176,7 @@ public class UserImpl extends AccountImpl implements User {
         final UserImpl that = (UserImpl)obj;
         return Objects.equals(id, that.id)
                && Objects.equals(email, that.email)
-               && Objects.equals(name, that.name)
+               && Objects.equals(getName(), that.getName())
                && Objects.equals(password, that.password)
                && getAliases().equals(that.getAliases());
     }
@@ -176,7 +186,7 @@ public class UserImpl extends AccountImpl implements User {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(email);
-        hash = 31 * hash + Objects.hashCode(name);
+        hash = 31 * hash + Objects.hashCode(getName());
         hash = 31 * hash + Objects.hashCode(password);
         hash = 31 * hash + getAliases().hashCode();
         return hash;
@@ -187,7 +197,7 @@ public class UserImpl extends AccountImpl implements User {
         return "UserImpl{" +
                "id='" + id + '\'' +
                ", email='" + email + '\'' +
-               ", name='" + name + '\'' +
+               ", name='" + getName() + '\'' +
                ", password='" + password + '\'' +
                ", aliases=" + aliases +
                '}';

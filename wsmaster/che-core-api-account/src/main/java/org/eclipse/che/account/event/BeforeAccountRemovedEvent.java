@@ -8,29 +8,25 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.account.spi.tck;
+package org.eclipse.che.account.event;
 
-import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.account.spi.AccountImpl;
 
-import javax.persistence.Entity;
-
 /**
- * Simple implementation of {@link AccountImpl} for testing {@link AccountDao} interface
+ * Published before {@link AccountImpl account} removed.
  *
- * @author Sergii Leschenko.
+ * @author Antona Korneta
  */
-@Entity(name = "TestAccount")
-public class TestAccountImpl extends AccountImpl {
-    public TestAccountImpl() {
+public class BeforeAccountRemovedEvent {
+
+    private final AccountImpl account;
+
+    public BeforeAccountRemovedEvent(AccountImpl account) {
+        this.account = account;
     }
 
-    public TestAccountImpl(String id, String name) {
-        super(id, name);
-    }
-
-    @Override
-    public String getType() {
-        return "test";
+    /** Returns account which is going to be removed. */
+    public AccountImpl getAccount() {
+        return account;
     }
 }
