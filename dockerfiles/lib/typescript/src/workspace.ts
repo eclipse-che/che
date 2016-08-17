@@ -92,22 +92,37 @@ export class Workspace {
      * Start a workspace and provide a Promise with WorkspaceDto.
      */
     startWorkspace(workspaceId: string, displayLog? : boolean) : Promise<WorkspaceDto> {
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime?environment=default', 200).setMethod('POST');
-        return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
-            return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
-        }).then((workspaceDto) => {
+
+        var callbackSubscriber : WorkspaceStartEventPromiseMessageBusSubscriber;
+
+        // get workspace DTO
+        return this.getWorkspace(workspaceId).then((workspaceDto) => {
             var messageBus:MessageBus = this.getMessageBus(workspaceDto);
             var displayOutputWorkspaceSubscriber:MessageBusSubscriber = new WorkspaceDisplayOutputMessageBusSubscriber();
-            var callbackSubscriber : WorkspaceStartEventPromiseMessageBusSubscriber = new WorkspaceStartEventPromiseMessageBusSubscriber(messageBus, workspaceDto);
+            callbackSubscriber = new WorkspaceStartEventPromiseMessageBusSubscriber(messageBus, workspaceDto);
             messageBus.subscribe('workspace:' + workspaceId, callbackSubscriber);
+            let channel:string = 'machine:status:' + workspaceId + ':default';
+            messageBus.subscribe(channel, callbackSubscriber);
             if (displayLog) {
                 messageBus.subscribe('workspace:' + workspaceId + ':ext-server:output', displayOutputWorkspaceSubscriber);
                 messageBus.subscribe(workspaceId + ':default:default', displayOutputWorkspaceSubscriber);
             }
-            return callbackSubscriber.promise;
-        }).then(() => {
-            return this.getWorkspace(workspaceId);
+            // wait to connect websocket
+            var waitTill = new Date(new Date().getTime() + 4 * 1000);
+            while(waitTill > new Date()){}
+            return workspaceDto;
+        }).then((workspaceDto) => {
+            var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime?environment=default', 200).setMethod('POST');
+            return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
+                return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
+            }).then((workspaceDto) => {
+                return callbackSubscriber.promise;
+            }).then(() => {
+                return this.getWorkspace(workspaceId);
+            });
         });
+
+
     }
 
 
