@@ -149,7 +149,10 @@ export class CheDir {
     }
 
     // load the chefile script if defined
-    var script_code = this.fs.readFileSync(this.cheFile);
+    var script_code = this.fs.readFileSync(this.cheFile).toString();
+
+    // strip the lines that are beginning with # as it may be comments
+    script_code = script_code.replace(/#[^\n]*/g, '');
 
     // create sandboxed object
     var sandbox = { "che": this.chefileStruct,  "workspace": this.chefileStructWorkspace, "console": console};
