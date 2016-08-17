@@ -99,8 +99,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
             @Override
-            public void onAddTerminalClick(String machineId) {
-                delegate.onAddTerminal(machineId);
+            public void onAddTerminalClick(String workspaceId, String machineId) {
+                delegate.onAddTerminal(workspaceId, machineId);
             }
         });
 

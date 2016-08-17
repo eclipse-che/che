@@ -221,17 +221,17 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         if (selectedTreeNode == null) {
             if (appContext.getDevMachine() != null) {
-                onAddTerminal(appContext.getDevMachine().getId());
+                onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
             }
             return;
         }
 
         if (selectedTreeNode.getType() == MACHINE_NODE) {
-            onAddTerminal(selectedTreeNode.getId());
+            onAddTerminal(appContext.getWorkspaceId(), selectedTreeNode.getId());
         } else {
             if (selectedTreeNode.getParent() != null &&
                 selectedTreeNode.getParent().getType() == MACHINE_NODE) {
-                onAddTerminal(appContext.getDevMachine().getId());
+                onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
             }
         }
     }
@@ -243,8 +243,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      *         id of machine in which the terminal will be added
      */
     @Override
-    public void onAddTerminal(final String machineId) {
-        machineServiceClient.getMachine(machineId).then(new Operation<MachineDto>() {
+    public void onAddTerminal(final String workspaceId, final String machineId) {
+        machineServiceClient.getMachine(workspaceId, machineId).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto arg) throws OperationException {
                 org.eclipse.che.ide.extension.machine.client.machine.Machine machine = entityFactory.createMachine(arg);
@@ -647,7 +647,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     private void restoreState(final Machine machine) {
-        machineServiceClient.getProcesses(machine.getId()).then(new Operation<List<MachineProcessDto>>() {
+        machineServiceClient.getProcesses(machine.getWorkspaceId(), machine.getId()).then(new Operation<List<MachineProcessDto>>() {
             @Override
             public void apply(List<MachineProcessDto> arg) throws OperationException {
                 for (MachineProcessDto machineProcessDto : arg) {
