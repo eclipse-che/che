@@ -33,6 +33,9 @@ export class PostFlightCheckTest {
     @Parameter({names: ["-w", "--password"], description: "Defines the password to be used"})
     password : string;
 
+    @Parameter({names: ["-p", "--port"], description: "Defines the optional port if no url is given"})
+    portNumber : number;
+
     authData: AuthData;
     workspace: Workspace;
 
@@ -45,6 +48,9 @@ export class PostFlightCheckTest {
             url = updatedArgs[0];
         }
         this.authData = AuthData.parse(url, this.username, this.password);
+        if (this.portNumber) {
+            this.authData.port = this.portNumber;
+        }
         this.workspace = new Workspace(this.authData);
     }
 
