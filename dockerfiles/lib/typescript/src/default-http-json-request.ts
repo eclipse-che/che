@@ -98,7 +98,13 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
             });
 
             req.on('error', (err) => {
-                reject('HTTP error: ' + err);
+                Log.getLogger().debug('http error using the following options', this.options, JSON.stringify(err));
+                if (err.code && err.code === 'ECONNREFUSED') {
+                    reject('Unable to connect to the remote host ' + this.options.hostname + ' on port ' + this.options.port
+                        + '. Please check the server is listening and that there is no network issue to reach this host. Full error: ' + err);
+                } else {
+                    reject('HTTP error: ' + err);
+                }
             });
 
             req.write(JSON.stringify(this.body));
