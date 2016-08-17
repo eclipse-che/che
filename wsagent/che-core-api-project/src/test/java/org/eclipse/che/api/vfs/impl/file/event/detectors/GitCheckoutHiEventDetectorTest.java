@@ -8,12 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event;
+package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
 import org.eclipse.che.api.project.shared.dto.event.GitBranchCheckoutEventDto;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.HiEvent;
+import org.eclipse.che.api.vfs.impl.file.event.HiEventClientBroadcaster;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +39,6 @@ import static org.mockito.Mockito.when;
  * Test for {@link GitCheckoutHiEventDetector}
  *
  * @author Dmitry Kuleshov
- *
  * @since 4.5
  */
 @RunWith(MockitoJUnitRunner.class)
