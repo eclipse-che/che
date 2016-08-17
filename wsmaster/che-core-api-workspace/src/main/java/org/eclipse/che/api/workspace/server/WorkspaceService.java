@@ -28,9 +28,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -53,7 +51,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.List;
@@ -235,9 +232,7 @@ public class WorkspaceService extends Service {
                                                                                         NotFoundException,
                                                                                         ConflictException,
                                                                                         ForbiddenException {
-        if (!workspaceManager.getSnapshot(id).isEmpty()) {
-            workspaceManager.removeSnapshots(id);
-        }
+        workspaceManager.removeSnapshots(id);
         workspaceManager.removeWorkspace(id);
     }
 
@@ -355,10 +350,12 @@ public class WorkspaceService extends Service {
                                                       "The snapshot doesn't exist for the workspace"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public List<SnapshotDto> getSnapshot(@ApiParam("The id of the workspace") @PathParam("id") String workspaceId) throws ServerException,
-                                                                                                                          BadRequestException,
-                                                                                                                          NotFoundException,
-                                                                                                                          ForbiddenException {
+    public List<SnapshotDto> getSnapshot(@ApiParam("The id of the workspace") @PathParam("id") String workspaceId)
+            throws ServerException,
+                   BadRequestException,
+                   NotFoundException,
+                   ForbiddenException {
+
         return workspaceManager.getSnapshot(workspaceId)
                                .stream()
                                .map(DtoConverter::asDto)
@@ -450,9 +447,9 @@ public class WorkspaceService extends Service {
         if (workspace.getConfig().getCommands().removeIf(command -> command.getName().equals(commandName))) {
             workspaceManager.updateWorkspace(id, workspace);
         } else {
-            throw new NotFoundException(
-                    String.format("Command with name '%s' was not found in workspace '%s'", commandName,
-                                  workspace.getConfig().getName()));
+            throw new NotFoundException(format("Command with name '%s' was not found in workspace '%s'",
+                                               commandName,
+                                               workspace.getConfig().getName()));
         }
     }
 
@@ -632,44 +629,6 @@ public class WorkspaceService extends Service {
         }
     }
 
-    @POST
-    @Path("/{id}/machine")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Create a new machine based on the configuration",
-                  notes = "This operation can be performed only by authorized user")
-    @ApiResponses({@ApiResponse(code = 201, message = "The machine successfully created"),
-                   @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-                   @ApiResponse(code = 403, message = "The user does not have access to create the new machine"),
-                   @ApiResponse(code = 409, message = "Conflict error occurred during the machine creation" +
-                                                      "(e.g. The machine with such name already exists)." +
-                                                      "Workspace is not in RUNNING state"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public Response createMachine(@ApiParam("The workspace id")
-                                  @PathParam("id")
-                                  String workspaceId,
-                                  @ApiParam(value = "The new machine configuration", required = true)
-                                  MachineConfigDto machineConfig) throws ForbiddenException,
-                                                                         NotFoundException,
-                                                                         ServerException,
-                                                                         ConflictException,
-                                                                         BadRequestException {
-        requiredNotNull(machineConfig, "Machine configuration");
-        requiredNotNull(machineConfig.getType(), "Machine type");
-        requiredNotNull(machineConfig.getSource(), "Machine source");
-        requiredNotNull(machineConfig.getSource().getType(), "Machine source type");
-        // definition of source should come either with a content or with location
-        requiredOnlyOneNotNull(machineConfig.getSource().getLocation(), machineConfig.getSource().getContent(),
-                               "Machine source should provide either location or content");
-
-        final MachineImpl machine = workspaceManager.startMachine(machineConfig, workspaceId);
-
-        return Response.status(201)
-                       .entity(linksInjector.injectMachineLinks(org.eclipse.che.api.machine.server.DtoConverter.asDto(machine),
-                                                                getServiceContext()))
-                       .build();
-    }
-
     private static Map<String, String> parseAttrs(List<String> attributes) throws BadRequestException {
         if (attributes == null) {
             return emptyMap();
@@ -699,27 +658,6 @@ public class WorkspaceService extends Service {
      */
     private void requiredNotNull(Object object, String subject) throws BadRequestException {
         if (object == null) {
-            throw new BadRequestException(subject + " required");
-        }
-    }
-
-    /**
-     * Checks only one of the given object reference is {@code null}
-     *
-     * @param object1
-     *         object reference to check
-     * @param object2
-     *         object reference to check
-     * @param subject
-     *         used as subject of exception message "{subject} required"
-     * @throws BadRequestException
-     *         when objects are both null or have both a value reference is {@code null}
-     */
-    private void requiredOnlyOneNotNull(Object object1, Object object2, String subject) throws BadRequestException {
-        if (object1 == null && object2 == null) {
-            throw new BadRequestException(subject + " required");
-        }
-        if (object1 != null && object2 != null) {
             throw new BadRequestException(subject + " required");
         }
     }

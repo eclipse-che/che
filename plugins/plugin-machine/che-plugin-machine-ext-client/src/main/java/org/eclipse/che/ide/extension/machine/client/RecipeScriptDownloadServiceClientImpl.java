@@ -35,7 +35,7 @@ public class RecipeScriptDownloadServiceClientImpl implements RecipeScriptDownlo
     @Override
     public Promise<String> getRecipeScript(Machine machine) {
         return asyncRequestFactory
-                .createGetRequest(restContext + "/recipe/script/" + machine.getId())
+                .createGetRequest(restContext + "/recipe/script/" + machine.getWorkspaceId() + "/" + machine.getId())
                 .send(new StringUnmarshaller());
     }
 }

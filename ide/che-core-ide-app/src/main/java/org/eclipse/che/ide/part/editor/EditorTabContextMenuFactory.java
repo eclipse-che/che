@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.editor;
 
-import org.eclipse.che.ide.part.widgets.editortab.EditorTab;
+import org.eclipse.che.ide.api.parts.EditorTab;
 
 /**
  * Editor tab context menu factory.

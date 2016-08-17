@@ -205,7 +205,7 @@ has_docker_for_windows_client(){
 }
 
 get_full_path() {
-  echo $(realpath $1)
+  echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
 }
 
 convert_windows_to_posix() {

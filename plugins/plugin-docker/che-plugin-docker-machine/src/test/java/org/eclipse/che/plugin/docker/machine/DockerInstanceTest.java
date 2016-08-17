@@ -139,9 +139,9 @@ public class DockerInstanceTest {
     @Test
     public void shouldCreateDockerImageLocally() throws Exception {
         final String comment = format("Suspended at %1$ta %1$tb %1$td %1$tT %1$tZ %1$tY",
-                                      System.currentTimeMillis()) + " by " + OWNER;
+                                      System.currentTimeMillis());
 
-        dockerInstance.commitContainer(OWNER, REPOSITORY, TAG);
+        dockerInstance.commitContainer(REPOSITORY, TAG);
 
         verify(dockerConnectorMock, times(1)).commit(CommitParams.create(CONTAINER)
                                                                  .withRepository(REPOSITORY)
@@ -151,7 +151,7 @@ public class DockerInstanceTest {
 
     @Test
     public void shouldSaveDockerInstanceStateIntoLocalImage() throws Exception {
-        final MachineSource result = dockerInstance.saveToSnapshot(OWNER);
+        final MachineSource result = dockerInstance.saveToSnapshot();
 
         assertTrue(result instanceof DockerMachineSource);
         DockerMachineSource dockerMachineSource = (DockerMachineSource) result;
@@ -173,7 +173,7 @@ public class DockerInstanceTest {
         dockerInstance = getDockerInstance(getMachine(), REGISTRY, CONTAINER, IMAGE, true);
         when(dockerConnectorMock.push(any(PushParams.class), any(ProgressMonitor.class))).thenReturn(digest);
 
-        final MachineSource result = dockerInstance.saveToSnapshot(OWNER);
+        final MachineSource result = dockerInstance.saveToSnapshot();
 
         assertTrue(result instanceof DockerMachineSource);
         DockerMachineSource dockerMachineSource = (DockerMachineSource) result;
@@ -186,7 +186,7 @@ public class DockerInstanceTest {
     public void shouldThrowMachineExceptionWhenDockerCommitFailed() throws Exception{
         when(dockerConnectorMock.commit(any(CommitParams.class))).thenThrow(new IOException("err"));
 
-        dockerInstance.saveToSnapshot(OWNER);
+        dockerInstance.saveToSnapshot();
     }
 
     @Test(expectedExceptions = MachineException.class)
@@ -195,7 +195,7 @@ public class DockerInstanceTest {
         when(dockerConnectorMock.push(any(PushParams.class),
                                       any(ProgressMonitor.class))).thenThrow(new IOException("err"));
 
-        dockerInstance.saveToSnapshot(OWNER);
+        dockerInstance.saveToSnapshot();
     }
 
     private DockerInstance getDockerInstance() {

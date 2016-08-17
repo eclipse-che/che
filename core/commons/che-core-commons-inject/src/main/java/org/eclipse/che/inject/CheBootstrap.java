@@ -124,6 +124,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         modules.add(new URIConverter());
         modules.add(new URLConverter());
         modules.add(new FileConverter());
+        modules.add(new PathConverter());
         modules.add(new StringArrayConverter());
         modules.add(new PairConverter());
         modules.add(new PairArrayConverter());

@@ -26,6 +26,4 @@ public interface Recipe {
      * Returns recipe script, which is used to instantiate new machine
      */
     String getScript();
-
-
 }

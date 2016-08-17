@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.machine.ssh;
 
+import org.eclipse.che.api.agent.server.terminal.MachineImplSpecificTerminalLauncher;
+import org.eclipse.che.api.agent.server.terminal.WebsocketTerminalFilesPathProvider;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.ListLineConsumer;
@@ -17,8 +19,6 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
-import org.eclipse.che.api.machine.server.terminal.MachineImplSpecificTerminalLauncher;
-import org.eclipse.che.api.machine.server.terminal.WebsocketTerminalFilesPathProvider;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

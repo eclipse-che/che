@@ -146,7 +146,8 @@ public class MachineManagerImpl implements MachineManager {
 
     @Override
     public Promise<Void> destroyMachine(final Machine machineState) {
-        return machineServiceClient.destroyMachine(machineState.getId()).then(new Operation<Void>() {
+        return machineServiceClient.destroyMachine(machineState.getWorkspaceId(),
+                                                   machineState.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new MachineStateEvent(machineState, DESTROYED));

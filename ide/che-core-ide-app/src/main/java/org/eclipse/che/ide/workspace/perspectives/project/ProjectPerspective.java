@@ -16,9 +16,9 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.PartStack;
 import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
+import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
@@ -50,7 +50,7 @@ public class ProjectPerspective extends AbstractPerspective {
 
     @Inject
     public ProjectPerspective(PerspectiveViewImpl view,
-                              EditorPartStack editorPartStackPresenter,
+                              EditorMultiPartStackPresenter editorMultiPartStackPresenter,
                               PartStackPresenterFactory stackPresenterFactory,
                               PartStackViewFactory partViewFactory,
                               WorkBenchControllerFactory controllerFactory,
@@ -61,7 +61,7 @@ public class ProjectPerspective extends AbstractPerspective {
 
         notificationManager.addRule(PROJECT_PERSPECTIVE_ID);
 
-        partStacks.put(EDITING, editorPartStackPresenter);
+        partStacks.put(EDITING, editorMultiPartStackPresenter);
 
         addPart(notificationManager, INFORMATION);
         addPart(projectExplorerPart, NAVIGATION);

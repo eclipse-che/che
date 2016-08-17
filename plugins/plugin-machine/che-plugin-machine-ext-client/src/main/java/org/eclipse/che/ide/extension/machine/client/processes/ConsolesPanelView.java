@@ -89,7 +89,7 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
          * @param machineId
          *         id of machine in which the terminal will be added
          */
-        void onAddTerminal(@NotNull String machineId);
+        void onAddTerminal(@NotNull String workspaceId, @NotNull String machineId);
 
         /**
          * Will be called when user clicks 'Preview Ssh' button

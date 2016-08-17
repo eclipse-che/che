@@ -46,6 +46,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.HttpMethod;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
@@ -161,6 +163,12 @@ public class DefaultHttpJsonRequestTest {
         assertEquals(listCaptor.getValue(), body);
     }
 
+    @Test
+    public void defaultMethodIsGet() throws Exception {
+        request.request();
+        verify(request).doRequest(0, DEFAULT_URL, HttpMethod.GET, null, null, null);
+    }
+
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionIfSetMethodArgumentIsNull() throws Exception {
         new DefaultHttpJsonRequest("http://localhost:8080").setMethod(null);
@@ -205,11 +213,6 @@ public class DefaultHttpJsonRequestTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNullPointerExceptionWhenLinkHrefIsNull() throws Exception {
         new DefaultHttpJsonRequest(createLink("GET", null, null));
-    }
-
-    @Test(expectedExceptions = IllegalStateException.class)
-    public void shouldThrowIllegalStateExceptionIfMethodWasNotSet() throws Exception {
-        new DefaultHttpJsonRequest(DEFAULT_URL).request();
     }
 
     @Test(expectedExceptions = BadRequestException.class)
