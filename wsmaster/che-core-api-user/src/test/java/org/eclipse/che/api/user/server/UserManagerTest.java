@@ -11,6 +11,7 @@
 package org.eclipse.che.api.user.server;
 
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
@@ -26,6 +27,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 
@@ -201,6 +203,28 @@ public class UserManagerTest {
         when(manager.getByEmail(user.getEmail())).thenReturn(user);
 
         assertEquals(manager.getByEmail(user.getEmail()), user);
+    }
+
+    @Test
+    public void shouldGetAllUsers() throws Exception {
+        final Page users = new Page(Arrays.asList(
+                new UserImpl("identifier1", "test1@email.com", "testName1", "password", Collections.singletonList("alias1")),
+                new UserImpl("identifier2", "test2@email.com", "testName2", "password", Collections.singletonList("alias2")),
+                new UserImpl("identifier3", "test3@email.com", "testName3", "password", Collections.singletonList("alias3"))), 0, 30, 3);
+        when(userDao.getAll(30, 0)).thenReturn(users);
+
+        assertEquals(manager.getAll(30, 0), users);
+        verify(userDao).getAll(30, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionsWhenGetAllUsersWithNegativeMaxItems() throws Exception {
+        manager.getAll(-5, 0);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldThrowIllegalArgumentExceptionsWhenGetAllUsersWithNegativeSkipCount() throws Exception {
+        manager.getAll(30, -11);
     }
 
     @Test(expectedExceptions = NullPointerException.class)

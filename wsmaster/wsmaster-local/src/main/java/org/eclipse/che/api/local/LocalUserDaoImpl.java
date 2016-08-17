@@ -16,6 +16,7 @@ import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.local.storage.LocalStorage;
@@ -32,9 +33,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -143,6 +146,18 @@ public class LocalUserDaoImpl implements UserDao {
     public synchronized UserImpl getByEmail(String email) throws NotFoundException, ServerException {
         requireNonNull(email, "Required non-null email");
         return new UserImpl(find(user -> user.getEmail().equals(email), "email", email));
+    }
+
+    @Override
+    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException {
+        return new Page<>(users.values()
+                               .stream()
+                               .skip(skipCount)
+                               .limit(maxItems)
+                               .collect(Collectors.toCollection(LinkedHashSet::new)),
+                          skipCount,
+                          maxItems,
+                          users.size());
     }
 
     private void checkConflicts(UserImpl user, String operation) throws ConflictException {

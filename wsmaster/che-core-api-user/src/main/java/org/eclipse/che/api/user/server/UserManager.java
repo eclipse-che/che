@@ -15,6 +15,7 @@ import com.google.common.collect.Sets;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.Profile;
 import org.eclipse.che.api.core.model.user.User;
@@ -33,6 +34,7 @@ import javax.inject.Singleton;
 import java.util.Set;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
@@ -205,6 +207,25 @@ public class UserManager {
     public User getByEmail(String email) throws NotFoundException, ServerException {
         requireNonNull(email, "Required non-null email");
         return userDao.getByEmail(email);
+    }
+
+    /**
+     * Finds all users {@code email}.
+     *
+     * @param maxItems
+     *         the maximum number of users to return
+     * @param skipCount
+     *         the number of users to skip
+     * @return user instance
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException {
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+        checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
+        return userDao.getAll(maxItems, skipCount);
     }
 
     /**
