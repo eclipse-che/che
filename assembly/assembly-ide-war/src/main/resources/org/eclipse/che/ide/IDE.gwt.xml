@@ -90,7 +90,4 @@
     <source path='client'/>
     <source path='shared'/>
 
-    <!--todo remove this-->
-    <set-property name="user.agent" value="safari"/>
-    <collapse-all-properties />
 </module>

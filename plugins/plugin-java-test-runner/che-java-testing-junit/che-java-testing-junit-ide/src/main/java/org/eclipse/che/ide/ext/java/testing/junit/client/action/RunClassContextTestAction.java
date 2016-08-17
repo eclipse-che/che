@@ -15,39 +15,27 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorInput;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-//import org.eclipse.che.ide.api.project.node.resource.SupportRename;
-import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.selection.SelectionAgent;
-import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
-//import org.eclipse.che.ide.ext.java.client.project.node.JavaFileNode;
-import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestServiceClient;
-import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestLocalizationConstant;
-import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestResources;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.TestResultPresenter;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
+import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestLocalizationConstant;
+import org.eclipse.che.ide.ext.java.testing.junit.client.JUnitTestResources;
 import org.eclipse.che.ide.resources.tree.FileNode;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
-import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,10 +43,12 @@ import java.util.Map;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.*;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
-//import org.eclipse.che.ide.ext.java.testing.junit.client.view.TestRunnerPresenter;
-//import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
-//import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 
+
+/**
+ *
+ * @author Mirage Abeysekara
+ */
 public class RunClassContextTestAction extends AbstractPerspectiveAction {
 
     private final NotificationManager notificationManager;
@@ -92,16 +82,13 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
 
         final Selection<?> selection = selectionAgent.getSelection();
         final Object possibleNode = selection.getHeadElement();
-        Log.info(RunClassContextTestAction.class, possibleNode.toString());
+        //Log.info(RunClassContextTestAction.class, possibleNode.toString());
         if (possibleNode instanceof FileNode) {
             VirtualFile file = ((FileNode) possibleNode).getData();
 
 
             final Project project = appContext.getRootProject();
-//        EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-//        final VirtualFile file = editorPart.getEditorInput().getFile();
             String fqn = JavaUtil.resolveFQN(file);
-            Unmarshallable<TestResult> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(TestResult.class);
 
             Map<String,String> parameters = new HashMap<>();
             parameters.put("fqn",fqn);
@@ -112,7 +99,6 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
             testResultPromise.then(new Operation<TestResult>() {
                 @Override
                 public void apply(TestResult result) throws OperationException {
-                    Log.info(RunClassContextTestAction.class, result);
                     notification.setStatus(SUCCESS);
                     if (result.isSuccess()) {
                         notification.setTitle("Test runner executed successfully");
@@ -153,7 +139,6 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
         }
 
         if (selection.isMultiSelection()) {
-            //this is temporary commented
             e.getPresentation().setEnabled(false);
             return;
         }

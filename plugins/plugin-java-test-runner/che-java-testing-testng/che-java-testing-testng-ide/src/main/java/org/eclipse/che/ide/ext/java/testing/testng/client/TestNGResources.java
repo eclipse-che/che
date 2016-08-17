@@ -12,7 +12,10 @@ package org.eclipse.che.ide.ext.java.testing.testng.client;
 
 import com.google.gwt.resources.client.ClientBundle;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
+/**
+ *
+ * @author Mirage Abeysekara
+ */
 public interface TestNGResources extends ClientBundle {
 
     @Source("org/eclipse/che/ide/ext/java/testing/core/client/svg/test.svg")

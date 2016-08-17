@@ -14,9 +14,9 @@ import com.google.gwt.i18n.client.Messages;
 
 /**
  * Localization constants. Interface to represent the constants defined in resource bundle:
- * 'JavaLocalizationConstant.properties'.
+ * 'TestNGLocalizationConstant.properties'.
  *
- * @author Artem Zatsarynnyi
+ * @author Mirage Abeysekara
  */
 public interface TestNGLocalizationConstant extends Messages {
 

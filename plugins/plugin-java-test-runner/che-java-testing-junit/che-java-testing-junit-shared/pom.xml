@@ -16,9 +16,10 @@
     <parent>
         <artifactId>che-java-testing-junit</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.7.0-SNAPSHOT</version>
+        <version>4.7.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>che-java-testing-junit-shared</artifactId>
+    <name>Che Plugin :: Java Testing :: JUnit Shared</name>
     <properties>
         <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>
     </properties>

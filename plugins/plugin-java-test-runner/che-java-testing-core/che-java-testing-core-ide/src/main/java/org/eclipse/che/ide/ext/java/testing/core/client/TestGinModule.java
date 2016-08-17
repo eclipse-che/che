@@ -14,10 +14,12 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.factory.TestResultNodeFactory;
-import org.eclipse.che.ide.util.loging.Log;
-
+/**
+ * Gin Module for test runner extension.
+ *
+ * @author Mirage Abeysekara
+ */
 @ExtensionGinModule
 public class TestGinModule extends AbstractGinModule{
     @Override

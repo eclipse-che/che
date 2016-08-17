@@ -15,7 +15,10 @@ import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 
 
 import java.util.List;
-
+/**
+ *
+ * @author Mirage Abeysekara
+ */
 @DTO
 public interface JUnitTestResult extends TestResult {
     String getFrameworkVersion();

@@ -23,31 +23,23 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.events.CursorActivityEvent;
-import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
-import org.eclipse.che.ide.api.data.tree.Node;
-import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
-//import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.TestClassNavigation;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.factory.TestResultNodeFactory;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.nodes.TestResultClassNode;
@@ -55,58 +47,38 @@ import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.nodes.Te
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.nodes.TestResultMethodNode;
 import org.eclipse.che.ide.ext.java.testing.core.shared.Failure;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
-import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
-import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.search.factory.FindResultNodeFactory;
 import org.eclipse.che.ide.ui.smartTree.NodeLoader;
 import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.util.loging.Log;
-//import org.eclipse.che.ide.ui.tree.Tree;
-//import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
-//import org.eclipse.che.ide.ui.smartTree.Tree;
-//import org.eclipse.che.ide.ui.smartTree.NodeLoader;
-//import org.eclipse.che.ide.ui.smartTree.NodeStorage;
-//import org.eclipse.che.ide.ui.smartTree.UniqueKeyProvider;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
+import java.util.*;
 
 /**
- * Implementation for FindResult view.
- * Uses tree for presenting search results.
+ * Implementation for TestResult view.
+ * Uses tree for presenting test results.
  *
- * @author Valeriy Svydenko
+ * @author Mirage Abeysekara
  */
 @Singleton
 class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> implements TestResultView, TestClassNavigation {
 
-//    private final Tree                  tree;
-//    private final FindResultNodeFactory findResultNodeFactory;
-
     interface TestResultViewImplUiBinder extends UiBinder<Widget, TestResultViewImpl> {
     }
+
+    private final AppContext appContext;
+    private final EditorAgent editorAgent;
+    private final EventBus eventBus;
+    private final TestResultNodeFactory nodeFactory;
+    private TestResult lastTestResult;
+    private Tree resultTree;
+    private int lastWentLine = 0;
 
     @UiField(provided = true)
     SplitLayoutPanel splitLayoutPanel;
 
-    private final AppContext appContext;
-    private final ProjectExplorerPresenter projectExplorer;
-    private final EditorAgent editorAgent;
-    private final EventBus eventBus;
-    private final TestResultNodeFactory nodeFactory;
-    //    @UiField(provided = true)
-//    Tree<String> processTree;
-    private TestResult lastTestResult;
-    private Tree resultTree;
-    private int lastWentLine = 0;
     @UiField
     Label outputResult;
 
@@ -117,33 +89,18 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
     public TestResultViewImpl(PartStackUIResources resources,
                               EditorAgent editorAgent,
                               AppContext appContext,
-                              ProjectExplorerPresenter projectExplorer,
                               EventBus eventBus,
-                              FindResultNodeFactory findResultNodeFactory,
-                              CoreLocalizationConstant localizationConstant,
                               TestResultViewImplUiBinder uiBinder,
                               TestResultNodeFactory nodeFactory) {
         super(resources);
 
         this.editorAgent = editorAgent;
         this.appContext = appContext;
-        this.projectExplorer = projectExplorer;
         this.eventBus = eventBus;
         this.nodeFactory = nodeFactory;
         splitLayoutPanel = new SplitLayoutPanel(1);
         setContentWidget(uiBinder.createAndBindUi(this));
 
-//        splitLayoutPanel.getElement().getStyle().setPropertyPx("width", 1);
-//        NodeList<com.google.gwt.dom.client.Node> nodes = splitLayoutPanel.getElement().getChildNodes();
-//        for (int i = 0; i < nodes.getLength(); i++) {
-//            com.google.gwt.dom.client.Node node = nodes.getItem(i);
-//            if (node.hasChildNodes()) {
-//                com.google.gwt.dom.client.Element el = node.getFirstChild().cast();
-//                if ("gwt-SplitLayoutPanel-HDragger".equals(el.getClassName())) {
-//                    el.getStyle().setPropertyPx("width", 2);
-//                }
-//            }
-//        }
         NodeUniqueKeyProvider idProvider = new NodeUniqueKeyProvider() {
             @NotNull
             @Override
@@ -164,35 +121,13 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
                 if (methodNode instanceof TestResultMethodNode) {
                     outputResult.setText(((TestResultMethodNode) methodNode).getStackTrace());
                 }
-                Log.info(TestResultViewImpl.class, event.getSelectedItem().getName());
+                //Log.info(TestResultViewImpl.class, event.getSelectedItem().getName());
             }
         });
 
         resultTree.getElement().getStyle().setWidth(100, Style.Unit.PCT);
         resultTree.getElement().getStyle().setHeight(100, Style.Unit.PCT);
         navigationPanel.add(resultTree);
-
-//        this.findResultNodeFactory = findResultNodeFactory;
-
-//        UniqueKeyProvider<Node> nodeIdProvider = new NodeUniqueKeyProvider() {
-//            @NotNull
-//            @Override
-//            public String getKey(@NotNull Node item) {
-//                if (item instanceof HasStorablePath) {
-//                    return ((HasStorablePath)item).getStorablePath();
-//                } else {
-//                    return String.valueOf(item.hashCode());
-//                }
-//            }
-//        };
-//
-//        NodeStorage nodeStorage = new NodeStorage(nodeIdProvider);
-//        NodeLoader loader = new NodeLoader(Collections.<NodeInterceptor>emptySet());
-//        tree = new Tree(nodeStorage, loader);
-
-//        setContentWidget(tree);
-
-//        tree.setAutoSelect(true);
 
     }
 
@@ -209,18 +144,13 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
      */
     @Override
     public void showResults(TestResult result) {
-//        tree.getNodeStorage().clear();
-//        tree.getNodeStorage().add(findResultNodeFactory.newResultNode(nodes, request));
-//        tree.expandAll();
-//        tree.getSelectionModel().select(tree.getRootNodes().get(0), false);
+
         this.lastTestResult = result;
         setTitle("Test Results (Framework: " + result.getTestFramework() + ")");
 
         buildTree();
 
         focusView();
-//        outputResult.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
-//        outputResult.getElement().getStyle().setProperty("webkitUserSelect","text");
     }
 
     private void buildTree() {
@@ -258,13 +188,6 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
     @Override
     public void gotoClass(String packagePath, int line) {
 
-        EditorPartPresenter editorPart = editorAgent.getActiveEditor();
-        final VirtualFile file = editorPart.getEditorInput().getFile();
-//        appContext.getCurrentProject().
-//        Document doc = ((TextEditor) editorPart).getDocument();
-//        Log.info(TestRunnerPresenter.class, doc.getLineStart(2));
-//        doc.setCursorPosition(new TextPosition(5, 0));
-//        Log.info(TestRunnerPresenter.class, file);
         lastWentLine = line;
 
         final Project project = appContext.getRootProject();
@@ -272,20 +195,13 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
 
         String testSrcPath = project.getPath() + "/src/test/java/";
 
-        Log.info(TestResultViewImpl.class, "hi");
-        Log.info(TestResultViewImpl.class, testSrcPath + packagePath);
         appContext.getWorkspaceRoot().getFile(testSrcPath + packagePath).then(new Operation<Optional<File>>() {
             @Override
             public void apply(Optional<File> file) throws OperationException {
                 if (file.isPresent()) {
 
-                    eventBus.fireEvent(new FileEvent(file.get(), OPEN));
-
-                    Log.info(TestResultViewImpl.class, file.get());
-
-                    eventBus.fireEvent(new FileEvent(file.get(), OPEN));
+                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
 //
-//                // // TODO: 6/8/16 find a way to get a call back
                     Timer t = new Timer() {
                         @Override
                         public void run() {

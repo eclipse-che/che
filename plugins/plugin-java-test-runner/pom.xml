@@ -16,25 +16,15 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.7.0-SNAPSHOT</version>
+        <version>4.7.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-test-runner-parent</artifactId>
     <packaging>pom</packaging>
+    <name>Che Plugin :: Java Testing :: Parent</name>
     <modules>
         <module>che-java-testing-core</module>
         <module>che-java-testing-junit</module>
         <module>che-java-testing-testng</module>
         <module>che-java-testing-classpath</module>
     </modules>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-java-testing-core-shared</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
 </project>

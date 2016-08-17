@@ -14,7 +14,10 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestAction;
-
+/**
+ *
+ * @author Mirage Abeysekara
+ */
 @ExtensionGinModule
 public class TestNGGinModule extends AbstractGinModule {
     @Override

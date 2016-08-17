@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.testing.junit.server;
 
-//import org.junit.runner.JUnitCore;
-//import org.junit.runner.Result;
 
 import org.eclipse.che.dto.server.DtoFactory;
 
@@ -40,14 +38,13 @@ public class JUnitTestRunner implements TestRunner {
 
     private static final String JUNIT4X_RUNNER_CLASS = "org.junit.runner.JUnitCore";
     private static final String JUNIT3X_RUNNER_CLASS = "junit.textui.TestRunner";
-    String projectPath;
-    ClassLoader projectClassLoader;
+    private String projectPath;
+    private ClassLoader projectClassLoader;
 
 
     private TestResult run4x(String testClass) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTest = Class.forName(testClass, true, classLoader);
-//        Result r = JUnitCore.runClasses(clsTest);
         return run4xTestClasses(clsTest);
 
     }
@@ -223,7 +220,7 @@ public class JUnitTestRunner implements TestRunner {
 
         boolean isSuccess = (Boolean) clsTestResult.getMethod("wasSuccessful").invoke(testResult);
         Enumeration failures = (Enumeration) clsTestResult.getMethod("failures").invoke(testResult);
-        List<Failure> jUnitFailures = new ArrayList<Failure>();
+        List<Failure> jUnitFailures = new ArrayList<>();
 
         while(failures.hasMoreElements()){
             Failure dtoFailure = DtoFactory.getInstance().createDto(Failure.class);

@@ -16,30 +16,42 @@
     <parent>
         <artifactId>che-java-testing-core</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.7.0-SNAPSHOT</version>
+        <version>4.7.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>che-java-testing-core-server</artifactId>
+    <name>Che Plugin :: Java Testing :: Core Server</name>
     <dependencies>
-        <!--<dependency>-->
-        <!--<groupId>javax.inject</groupId>-->
-        <!--<artifactId>javax.inject</artifactId>-->
-        <!--<version>1</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-multibindings</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-core</artifactId>
+            <artifactId>che-core-api-dto</artifactId>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.core</groupId>-->
-        <!--<artifactId>che-core-api-project</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-dto</artifactId>
+            <artifactId>che-core-api-project</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -54,8 +66,13 @@
             <artifactId>org.eclipse.core.resources</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.everrest</groupId>
+            <artifactId>everrest-assured</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -68,14 +85,9 @@
             <artifactId>mockitong</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.everrest</groupId>-->
-            <!--<artifactId>everrest-core</artifactId>-->
-            <!--<scope>test</scope>-->
-        <!--</dependency>-->
         <dependency>
-            <groupId>org.everrest</groupId>
-            <artifactId>everrest-assured</artifactId>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

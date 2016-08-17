@@ -16,24 +16,14 @@
     <parent>
         <artifactId>che-plugin-java-test-runner-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.7.0-SNAPSHOT</version>
+        <version>4.7.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>che-java-testing-testng</artifactId>
     <packaging>pom</packaging>
+    <name>Che Plugin :: Java Testing :: TestNG Parent</name>
     <modules>
         <module>che-java-testing-testng-server</module>
-        <!--<module>che-java-testing-testng-shared</module>-->
         <module>che-java-testing-testng-ide</module>
     </modules>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-java-testing-core-shared</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
 </project>

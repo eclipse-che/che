@@ -51,7 +51,4 @@ public class TestClasspathRegistry {
         return classpathProviders.get(projectType);
     }
 
-//    public void addTestRunner(String name,TestRunner2 a){
-//            frameworks.put(name,a);
-//    }
 }

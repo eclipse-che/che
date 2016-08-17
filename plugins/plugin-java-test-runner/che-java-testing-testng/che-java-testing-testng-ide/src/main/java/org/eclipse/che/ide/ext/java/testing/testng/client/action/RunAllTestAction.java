@@ -23,25 +23,23 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 import org.eclipse.che.ide.ext.java.testing.core.client.TestServiceClient;
-import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGLocalizationConstant;
-import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGResources;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.TestResultPresenter;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
+import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGLocalizationConstant;
+import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGResources;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
-import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-//import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
-//import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.*;
 
+/**
+ *
+ * @author Mirage Abeysekara
+ */
 public class RunAllTestAction extends JavaEditorAction {
 
     private final NotificationManager notificationManager;
@@ -70,8 +68,6 @@ public class RunAllTestAction extends JavaEditorAction {
 
         final Project project = appContext.getRootProject();
 
-        Unmarshallable<TestResult> unmarshaller = dtoUnmarshallerFactory.newWSUnmarshaller(TestResult.class);
-
         Map<String, String> parameters = new HashMap<>();
         parameters.put("updateClasspath", "true");
 
@@ -79,7 +75,6 @@ public class RunAllTestAction extends JavaEditorAction {
         testResultPromise.then(new Operation<TestResult>() {
             @Override
             public void apply(TestResult result) throws OperationException {
-                Log.info(RunAllTestAction.class, result);
                 notification.setStatus(SUCCESS);
                 if (result.isSuccess()) {
                     notification.setTitle("Test runner executed successfully");

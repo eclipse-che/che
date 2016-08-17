@@ -20,7 +20,10 @@ import org.eclipse.che.ide.ext.java.testing.core.client.TestAction;
 import org.eclipse.che.ide.ext.java.testing.junit.client.action.RunAllTestAction;
 import org.eclipse.che.ide.ext.java.testing.junit.client.action.RunClassContextTestAction;
 import org.eclipse.che.ide.ext.java.testing.junit.client.action.RunClassTestAction;
-
+/**
+ * JUnit 3.x and 4.x ide implementation.
+ * @author Mirage Abeysekara
+ */
 public class JUnitTestAction implements TestAction {
 
     private final Action runClassTestAction;

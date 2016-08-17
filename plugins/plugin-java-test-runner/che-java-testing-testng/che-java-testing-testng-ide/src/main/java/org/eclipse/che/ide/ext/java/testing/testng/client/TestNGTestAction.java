@@ -21,7 +21,10 @@ import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunAllTestActio
 import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunClassContextTestAction;
 import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunClassTestAction;
 import org.eclipse.che.ide.ext.java.testing.testng.client.action.RunTestXMLAction;
-
+/**
+ * TestNG ide implementation.
+ * @author Mirage Abeysekara
+ */
 public class TestNGTestAction implements TestAction {
 
     private final Action runClassTestAction;

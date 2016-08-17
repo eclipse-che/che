@@ -14,10 +14,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import org.eclipse.che.api.project.shared.dto.ItemReference;
-import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
@@ -25,8 +21,6 @@ import org.eclipse.che.ide.ext.java.testing.core.client.TestLocalizationConstant
 import org.eclipse.che.ide.ext.java.testing.core.client.TestResources;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.vectomatic.dom.svg.ui.SVGResource;
-
-import java.util.List;
 
 /**
  * Presenter for the displaying the test results on the workspace.

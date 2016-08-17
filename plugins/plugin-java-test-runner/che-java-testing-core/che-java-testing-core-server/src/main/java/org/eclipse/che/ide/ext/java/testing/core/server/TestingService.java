@@ -15,7 +15,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.ide.ext.java.testing.core.server.classpath.TestClasspathRegistry;
 import org.eclipse.che.ide.ext.java.testing.core.server.framework.TestFrameworkRegistry;

@@ -17,14 +17,16 @@ import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.HasAction;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.testing.core.client.TestResources;
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.TestClassNavigation;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-
+/**
+ *
+ * @author Mirage Abeysekara
+ */
 public class TestResultMethodNode extends AbstractTreeNode implements HasAction, HasPresentation {
 
     private String methodName;

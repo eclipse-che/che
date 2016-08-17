@@ -17,13 +17,15 @@ import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.data.tree.AbstractTreeNode;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.testing.core.client.TestResources;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-
+/**
+ *
+ * @author Mirage Abeysekara
+ */
 public class TestResultClassNode extends AbstractTreeNode implements HasPresentation {
 
     private String className;

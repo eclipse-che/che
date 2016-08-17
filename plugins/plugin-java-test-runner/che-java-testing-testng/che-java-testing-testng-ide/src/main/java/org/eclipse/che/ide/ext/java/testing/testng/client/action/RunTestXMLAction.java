@@ -11,8 +11,6 @@
 package org.eclipse.che.ide.ext.java.testing.testng.client.action;
 
 import com.google.inject.Inject;
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -31,17 +29,17 @@ import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGLocalizationCons
 import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGResources;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.rest.RequestCallback;
-import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.*;
-//import org.eclipse.che.ide.ext.java.client.projecttree.JavaSourceFolderUtil;
-//import org.eclipse.che.ide.ext.java.client.action.JavaEditorAction;
 
+/**
+ *
+ * @author Mirage Abeysekara
+ */
 public class RunTestXMLAction extends JavaEditorAction {
 
     private final NotificationManager notificationManager;
@@ -80,7 +78,6 @@ public class RunTestXMLAction extends JavaEditorAction {
         testResultPromise.then(new Operation<TestResult>() {
             @Override
             public void apply(TestResult result) throws OperationException {
-                Log.info(RunTestXMLAction.class, result);
                 notification.setStatus(SUCCESS);
                 if (result.isSuccess()) {
                     notification.setTitle("Test runner executed successfully");

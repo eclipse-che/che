@@ -16,9 +16,10 @@
     <parent>
         <artifactId>che-java-testing-testng</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.7.0-SNAPSHOT</version>
+        <version>4.7.0-RC2-SNAPSHOT</version>
     </parent>
     <artifactId>che-java-testing-testng-ide</artifactId>
+    <name>Che Plugin :: Java Testing :: TestNG IDE</name>
     <dependencies>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -27,32 +28,7 @@
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>1.1.0.Final</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>com.google.inject.extensions</groupId>-->
-        <!--<artifactId>guice-assistedinject</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>javax.inject</groupId>-->
-        <!--<artifactId>javax.inject</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.core</groupId>-->
-        <!--<artifactId>che-core-api-workspace</artifactId>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace-shared</artifactId>
-        </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.core</groupId>-->
-        <!--<artifactId>che-core-client-gwt-machine</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.eclipse.che.core</groupId>-->
-        <!--<artifactId>che-core-client-gwt-project</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-gwt</artifactId>
@@ -66,10 +42,6 @@
             <artifactId>che-core-ide-app</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-ui</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-java-testing-core-ide</artifactId>
         </dependency>
@@ -80,10 +52,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-lang-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-machine-ext-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.vectomatic</groupId>

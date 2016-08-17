@@ -11,18 +11,14 @@
 package org.eclipse.che.ide.ext.java.testing.core.client.view;
 
 import com.google.inject.ImplementedBy;
-
-import org.eclipse.che.api.project.shared.dto.ItemReference;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 
-import java.util.List;
-
 /**
- * View for the result of search.
+ * View for the result of java tests.
  *
- * @author Valeriy Svydenko
+ * @author Mirage Abeysekara
  */
 @ImplementedBy(TestResultViewImpl.class)
 public interface TestResultView extends View<TestResultView.ActionDelegate> {
@@ -35,12 +31,10 @@ public interface TestResultView extends View<TestResultView.ActionDelegate> {
     void setVisible(boolean visible);
 
     /**
-     * Activate Find results part and showing all occurrences.
+     * Activate Test results part.
      *
-     * @param nodes
-     *         list of files which contains requested text
-     * @param request
-     *         requested text
+     * @param result
+     *         test results which comes from the server
      */
     void showResults(TestResult result);
 

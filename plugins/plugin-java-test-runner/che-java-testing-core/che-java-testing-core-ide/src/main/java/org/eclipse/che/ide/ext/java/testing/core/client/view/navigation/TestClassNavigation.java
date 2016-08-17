@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.testing.core.client.view.navigation;
 
+/**
+ *
+ * @author Mirage Abeysekara
+ */
 public interface TestClassNavigation {
 
     void gotoClass(String packagePath, int line);
