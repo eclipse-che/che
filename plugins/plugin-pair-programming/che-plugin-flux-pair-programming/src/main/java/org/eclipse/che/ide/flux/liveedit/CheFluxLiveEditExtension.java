@@ -28,7 +28,7 @@ import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.events.*;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -88,7 +88,7 @@ public class CheFluxLiveEditExtension{
     private DtoUnmarshallerFactory               dtoUnmarshallerFactory;
 
     private EditorAgent editorAgent;
-    private TextEditorPresenter textEditor;
+    private TextEditor textEditor;
     private EditorPartPresenter openedEditor;
     private Path path;
     private Document documentMain;
@@ -232,8 +232,8 @@ public class CheFluxLiveEditExtension{
                 isUpdatingModel = true;
                 path = document.getFile().getLocation();
                 openedEditor = editorAgent.getOpenedEditor(path);
-                if (openedEditor instanceof TextEditorPresenter){
-                    textEditor  = (TextEditorPresenter)openedEditor;
+                if (openedEditor instanceof TextEditor){
+                    textEditor  = (TextEditor) openedEditor;
                 }
 
                 String annotationStyle;
@@ -262,7 +262,7 @@ public class CheFluxLiveEditExtension{
                 if (cursorHandlerForPairProgramming.getMarkerRegistration()!= null){
                     cursorHandlerForPairProgramming.clearMark();
                 }
-                cursorHandlerForPairProgramming.setMarkerRegistration(textEditor.getHasTextMarkers().addMarker(textRange,annotationStyle));
+                cursorHandlerForPairProgramming.setMarkerRegistration(textEditor.getEditorWidget().addMarker(textRange,annotationStyle));
                 cursorHandlers.remove(username);
                 cursorHandlers.put(username,cursorHandlerForPairProgramming);
                 isUpdatingModel = false;
@@ -280,8 +280,8 @@ public class CheFluxLiveEditExtension{
                 isUpdatingModel = true;
                 path = document.getFile().getLocation();
                 openedEditor = editorAgent.getOpenedEditor(path);
-                if (openedEditor instanceof TextEditorPresenter){
-                    textEditor  = (TextEditorPresenter)openedEditor;
+                if (openedEditor instanceof TextEditor){
+                    textEditor  = (TextEditor) openedEditor;
                 }
 
                 String annotationStyle;
@@ -297,7 +297,7 @@ public class CheFluxLiveEditExtension{
                     if (cursorHandlerForPairProgramming.getMarkerRegistration()!= null){
                         cursorHandlerForPairProgramming.clearMark();
                     }
-                    cursorHandlerForPairProgramming.setMarkerRegistration(textEditor.getHasTextMarkers().addMarker(textRange,annotationStyle));
+                    cursorHandlerForPairProgramming.setMarkerRegistration(textEditor.getEditorWidget().addMarker(textRange,annotationStyle));
                     cursorHandlers.remove(username);
                     cursorHandlers.put(username,cursorHandlerForPairProgramming);
                     isUpdatingModel = false;

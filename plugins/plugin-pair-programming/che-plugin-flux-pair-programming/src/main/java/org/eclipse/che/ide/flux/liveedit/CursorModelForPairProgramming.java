@@ -8,13 +8,12 @@ import org.eclipse.che.ide.api.editor.events.CursorActivityHandler;
 import org.eclipse.che.ide.api.editor.text.Position;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.CursorModelWithHandler;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.socketio.Message;
 import org.eclipse.che.ide.socketio.SocketOverlay;
 import org.eclipse.che.ide.util.ListenerManager;
 import org.eclipse.che.ide.util.ListenerRegistrar;
-import org.eclipse.che.ide.util.loging.Log;
 
 
 public class CursorModelForPairProgramming implements CursorModelWithHandler, CursorActivityHandler {
@@ -25,7 +24,7 @@ public class CursorModelForPairProgramming implements CursorModelWithHandler, Cu
     private Path path;
     private EditorAgent editorAgent;
     private EditorPartPresenter openedEditor;
-    private TextEditorPresenter textEditor;
+    private TextEditor textEditor;
     private String channelName;
     private String userId;
     private boolean isUpdatingModel = false;
@@ -64,8 +63,8 @@ public class CursorModelForPairProgramming implements CursorModelWithHandler, Cu
         if (socket != null) {
             path = document.getFile().getLocation();
             openedEditor = editorAgent.getOpenedEditor(path);
-            if (openedEditor instanceof TextEditorPresenter){
-                textEditor  = (TextEditorPresenter)openedEditor;
+            if (openedEditor instanceof TextEditor){
+                textEditor  = (TextEditor) openedEditor;
             }
             int offset = textEditor.getCursorOffset();
             /*here withUserName method sets the channel name and the withchannelName sets the username*/
