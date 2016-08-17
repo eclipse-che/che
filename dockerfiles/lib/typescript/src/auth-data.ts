@@ -148,7 +148,10 @@ export class AuthData {
 
     static parse(remoteUrl : string, username?: string, password?: string) : AuthData {
         if (!remoteUrl) {
-            return new AuthData();
+            let authData: AuthData = new AuthData();
+            authData.username = username;
+            authData.password = password;
+            return authData;
         }
         
         // extract hostname and port
@@ -175,8 +178,6 @@ export class AuthData {
 
         authData.username = username;
         authData.password = password;
-
-
 
         return authData;
     }
