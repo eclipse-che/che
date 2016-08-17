@@ -32,6 +32,8 @@ export class EntryPoint {
     @Parameter({names: ["--logger-debug"], description: "Enable the logger in debug mode"})
     debugLogger : boolean;
 
+    @Parameter({names: ["--logger-prefix-off"], description: "Disable prefix mode in logging"})
+    prefixOffLogger : boolean;
 
     constructor() {
         this.args = ArgumentProcessor.inject(this, process.argv.slice(2));
@@ -46,6 +48,11 @@ export class EntryPoint {
         if (this.debugLogger) {
             Log.enableDebug();
         }
+
+        if (this.prefixOffLogger) {
+            Log.disablePrefix();
+        }
+
 
         var promise : Promise<any>;
 

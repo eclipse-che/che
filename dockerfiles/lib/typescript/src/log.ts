@@ -19,6 +19,7 @@ export class Log {
     static debugEnabled : boolean = false;
     static context : string = 'che';
     static logger : Log;
+    static disabledPrefix : boolean = false;
 
     BLUE: string = '\u001b[34m';
     GREEN : string = '\u001b[32m';
@@ -69,7 +70,10 @@ export class Log {
         }
 
         if (Log.context) {
-            prefix += ' ' + Log.context + ':';
+            prefix += ' ' + Log.context + ': ';
+        }
+        if (Log.disabledPrefix) {
+            prefix = '';
         }
 
         var consoleMethod : any;
@@ -81,9 +85,9 @@ export class Log {
 
 
         if (optional) {
-            consoleMethod(prefix, message, optional.join(' '));
+            consoleMethod(prefix + message, optional.join(' '));
         } else {
-            consoleMethod(prefix, message);
+            consoleMethod(prefix + message);
         }
 
     }
@@ -91,6 +95,10 @@ export class Log {
 
     static enableDebug() : void {
         Log.debugEnabled = true;
+    }
+
+    static disablePrefix() : void {
+        Log.disabledPrefix = true;
     }
 
 }
