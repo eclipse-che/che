@@ -316,15 +316,15 @@
                 <type>zip</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-websocket-terminal</artifactId>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>org.eclipse.che.exec-agent</artifactId>
                 <version>${che.lib.version}</version>
                 <type>zip</type>
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>che-websocket-terminal</artifactId>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>org.eclipse.che.exec-agent</artifactId>
                 <version>${che.lib.version}</version>
                 <type>zip</type>
                 <classifier>linux_arm7</classifier>

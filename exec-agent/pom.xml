@@ -51,37 +51,6 @@
                 <artifactId>iterator-maven-plugin</artifactId>
                 <version>0.4</version>
                 <executions>
-                    <!--<execution>-->
-                    <!--<id>copy-go-sources</id>-->
-                    <!--<phase>process-resources</phase>-->
-                    <!--<goals>-->
-                    <!--<goal>iterator</goal>-->
-                    <!--</goals>-->
-                    <!--<configuration>-->
-                    <!--<items>-->
-                    <!--<item>linux_arm5</item>-->
-                    <!--<item>linux_arm6</item>-->
-                    <!--<item>linux_arm7</item>-->
-                    <!--<item>linux_amd64</item>-->
-                    <!--<item>linux_i386</item>-->
-                    <!--</items>-->
-                    <!--<pluginExecutors>-->
-                    <!--<pluginExecutor>-->
-                    <!--<plugin>-->
-                    <!--<artifactId>maven-antrun-plugin</artifactId>-->
-                    <!--</plugin>-->
-                    <!--<goal>run</goal>-->
-                    <!--<configuration>-->
-                    <!--<target>-->
-                    <!--<copy todir="${project.build.directory}/${item}/go">-->
-                    <!--<fileset dir="./" includes="**/*.*go **/static/*"/>-->
-                    <!--</copy>-->
-                    <!--</target>-->
-                    <!--</configuration>-->
-                    <!--</pluginExecutor>-->
-                    <!--</pluginExecutors>-->
-                    <!--</configuration>-->
-                    <!--</execution>-->
                     <execution>
                         <id>compile-terminal</id>
                         <phase>compile</phase>
@@ -138,7 +107,9 @@
                                     <goal>exec</goal>
                                     <configuration>
                                         <executable>go</executable>
-                                        <workingDirectory>${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/exec-agent</workingDirectory>
+                                        <workingDirectory>
+                                            ${project.build.directory}/${go.workspace.name}/src/github.com/eclipse/che/exec-agent
+                                        </workingDirectory>
                                         <arguments>
                                             <argument>build</argument>
                                             <argument>-o</argument>

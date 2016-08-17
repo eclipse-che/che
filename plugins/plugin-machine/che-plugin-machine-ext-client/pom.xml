@@ -178,7 +178,7 @@
                         <id>analyze</id>
                         <configuration>
                             <ignoredDependencies>
-                                <ignoredDependency>org.eclipse.che.lib:che-websocket-terminal:zip</ignoredDependency>
+                                <ignoredDependency>org.eclipse.che:org.eclipse.che.exec-agent:zip</ignoredDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>

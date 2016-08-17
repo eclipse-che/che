@@ -38,6 +38,18 @@
             <type>war</type>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>org.eclipse.che.exec-agent</artifactId>
+            <type>zip</type>
+            <classifier>linux_amd64</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>org.eclipse.che.exec-agent</artifactId>
+            <type>zip</type>
+            <classifier>linux_arm7</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-stacks</artifactId>
             <type>jar</type>
@@ -61,18 +73,6 @@
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-tomcat8-slf4j-logback</artifactId>
             <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-websocket-terminal</artifactId>
-            <type>zip</type>
-            <classifier>linux_amd64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-websocket-terminal</artifactId>
-            <type>zip</type>
-            <classifier>linux_arm7</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>

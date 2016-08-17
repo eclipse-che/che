@@ -69,7 +69,7 @@
             <unpack>true</unpack>
             <outputDirectory>lib/linux_amd64</outputDirectory>
             <includes>
-                <include>org.eclipse.che.lib:che-websocket-terminal:zip:linux_amd64</include>
+                <include>org.eclipse.che:org.eclipse.che.exec-agent:zip:linux_amd64</include>
             </includes>
             <unpackOptions>
                 <excludes>
@@ -82,7 +82,7 @@
             <unpack>true</unpack>
             <outputDirectory>lib/linux_arm7</outputDirectory>
             <includes>
-                <include>org.eclipse.che.lib:che-websocket-terminal:zip:linux_arm7</include>
+                <include>org.eclipse.che:org.eclipse.che.exec-agent:zip:linux_arm7</include>
             </includes>
             <unpackOptions>
                 <excludes>
