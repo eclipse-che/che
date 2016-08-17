@@ -26,10 +26,10 @@ export class Permissions {
     /**
      * Authentication data
      */
-    authData : AuthData;
+    authData:AuthData;
 
 
-    constructor(authData : AuthData) {
+    constructor(authData:AuthData) {
         this.authData = authData;
     }
 
@@ -37,11 +37,11 @@ export class Permissions {
     /**
      * list all permissions
      */
-    listPermissions() : Promise<Array<DomainDto>> {
+    listPermissions():Promise<Array<DomainDto>> {
 
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/permissions', 200);
-        return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
-            let domainsDto : Array<DomainDto>  = new Array<DomainDto>();
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/permissions', 200);
+        return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
+            let domainsDto:Array<DomainDto> = new Array<DomainDto>();
             JSON.parse(jsonResponse.getData()).forEach((entry)=> {
                 domainsDto.push(new DomainDto(entry));
             });
@@ -53,22 +53,51 @@ export class Permissions {
     /**
      * get permissions for a given domain
      */
-    getPermission(domain: string) : Promise<PermissionDto> {
+    getPermission(domain:string):Promise<PermissionDto> {
 
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/permissions/' + domain, 200);
-        return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
-           return new PermissionDto(JSON.parse(jsonResponse.getData()));
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/permissions/' + domain, 200);
+        return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
+            return new PermissionDto(JSON.parse(jsonResponse.getData()));
         }, (error) => {
-            console.log('we have the error on getPermission, return empty', error);
             return new PermissionDto({});
         });
     }
 
-    updatePermissions(permissionDto: PermissionDto) {
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/permissions', 204);
-        return jsonRequest.setMethod('POST').setBody(permissionDto.getContent()).request().then((jsonResponse : HttpJsonResponse) => {
+    updatePermissions(permissionDto:PermissionDto) {
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/permissions', 204);
+        return jsonRequest.setMethod('POST').setBody(permissionDto.getContent()).request().then((jsonResponse:HttpJsonResponse) => {
             return new PermissionDto(jsonResponse.getData());
         });
     }
 
+
+    copyCurrentPermissionsToUser(newUserId:string):Promise<boolean> {
+        return this.listPermissions().then(
+            (domainsDto:Array<DomainDto>) => {
+                let adminPermissionsPromises:Array<Promise<PermissionDto>> = new Array<Promise<PermissionDto>>();
+                domainsDto.forEach((domain) => {
+                    adminPermissionsPromises.push(this.getPermission(domain.getContent().id));
+                });
+                return Promise.all(adminPermissionsPromises);
+            }
+        ).then((adminsPermissions:Array<PermissionDto>) => {
+
+            let updatedPermissionsPromises:Array<Promise<PermissionDto>> = new Array<Promise<PermissionDto>>();
+            adminsPermissions.forEach((adminPermission:PermissionDto)=> {
+                if (adminPermission.getContent().domain) {
+                    // we replace the user by the new user
+                    adminPermission.getContent().user = newUserId;
+                    // update permissions
+                    updatedPermissionsPromises.push(this.updatePermissions(adminPermission).then((updatedDto)=> {
+                        return updatedDto;
+                    }));
+                }
+
+            });
+
+            return Promise.all(updatedPermissionsPromises);
+        }).then(() => {
+            return true;
+        });
+    }
 }

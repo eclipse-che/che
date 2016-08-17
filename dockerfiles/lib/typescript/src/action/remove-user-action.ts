@@ -23,19 +23,13 @@ import {DomainDto} from "../dto/domaindto";
 import {UserDto} from "../dto/userdto";
 
 /**
- * This class is handling the add of a user and also consider to add user as being admin.
+ * This class is handling the removal of a user
  * @author Florent Benoit
  */
-export class AddUserAction {
+export class RemoveUserAction {
 
-    @Argument({description: "Name of the user to create"})
-    userToAdd : string;
-
-    @Argument({description: "Email of the user to create"})
-    emailToAdd : string;
-
-    @Argument({description: "Password of the user to create "})
-    passwordToAdd : string;
+    @Argument({description: "name of the user to remove"})
+    usernameToDelete : string;
 
     @Parameter({names: ["-s", "--url"], description: "Defines the url to be used"})
     url : string;
@@ -45,9 +39,6 @@ export class AddUserAction {
 
     @Parameter({names: ["-w", "--password"], description: "Defines the password to be used"})
     password : string;
-
-    @Parameter({names: ["-a", "--admin"], description: "Grant admin role to the user"})
-    admin : boolean;
 
 
     authData: AuthData;
@@ -62,19 +53,12 @@ export class AddUserAction {
     run() : Promise<any> {
         // first, login
         return this.authData.login().then(() => {
-            // then create user
-            Log.getLogger().info('Creating user ' + this.userToAdd);
-            return this.user.createUser(this.userToAdd, this.emailToAdd, this.passwordToAdd).then((userDto : UserDto) => {
-                Log.getLogger().info('User', this.userToAdd, 'created with id', userDto.getContent().id);
-
-                // if user should not be addes as admin, job is done
-                if (!this.admin) {
-                    return Promise.resolve(true);
-                } else {
-                    let permissions: Permissions = new Permissions(this.authData);
-                    return permissions.copyCurrentPermissionsToUser(userDto.getContent().id);
-                }
-            })
+            Log.getLogger().info('Searching user with name ' + this.usernameToDelete);
+            return this.user.findUserName(this.usernameToDelete).then((userDto: UserDto) => {
+                // then delete user
+                Log.getLogger().info('Removing user with name ' + this.usernameToDelete, 'and id', userDto.getId());
+                return this.user.deleteUser(userDto.getId());
+            });
         });
     }
 

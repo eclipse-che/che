@@ -15,6 +15,7 @@ import {ArgumentProcessor} from "./parameter/argument-processor";
 import {Log} from "./log";
 import {CreateStartWorkspaceAction} from "./action/create-start-workspace-action";
 import {AddUserAction} from "./action/add-user-action";
+import {RemoveUserAction} from "./action/remove-user-action";
 /**
  * Entrypoint for the Actions.
  * @author Florent Benoit
@@ -46,6 +47,8 @@ export class CheAction {
         this.mapOfActions = new Map<string, any>();
         this.mapOfActions.set('create-start-workspace', CreateStartWorkspaceAction);
         this.mapOfActions.set('add-user', AddUserAction);
+        this.mapOfActions.set('remove-user', RemoveUserAction);
+
     }
 
    /**

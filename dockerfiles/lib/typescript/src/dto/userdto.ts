@@ -18,6 +18,10 @@ export class UserDto {
         this.content = userObject;
     }
 
+    getId() : string {
+        return this.content.id;
+    }
+
     getContent() : any {
         return this.content;
     }

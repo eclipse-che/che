@@ -52,4 +52,33 @@ export class User {
         });
     }
 
+
+    /**
+     * Removes user based on given user id
+     * @param userId the id (not email) of the user
+     * @returns {Promise<UserDto>}
+     */
+    deleteUser(userId: string) : Promise<boolean> {
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/user/' + userId, 204).setMethod('DELETE')
+        return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
+            return true;
+        });
+    }
+
+    /**
+     * Search user by its username
+     * @param username the name of the user (not the id)
+     * @returns {Promise<UserDto>}
+     */
+    findUserName(username : string) : Promise<UserDto> {
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/user/find?name=' + username, 200);
+        return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
+            return new UserDto(JSON.parse(jsonResponse.getData()));
+        });
+    }
+
+
+
+
+
 }
