@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2016 www.rnavagamuwa.com
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Randika Navagamuwa <randikanavagamuwa@gmail.com> - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.che.ide.flux.liveedit;
 
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -15,7 +25,11 @@ import org.eclipse.che.ide.socketio.SocketOverlay;
 import org.eclipse.che.ide.util.ListenerManager;
 import org.eclipse.che.ide.util.ListenerRegistrar;
 
-
+/**
+ * Che product information constant.
+ *
+ * @author Randika Navagamuwa
+ */
 public class CursorModelForPairProgramming implements CursorModelWithHandler, CursorActivityHandler {
     private final Document document;
     private final ListenerManager<CursorModelWithHandler.CursorHandler> cursorHandlerManager = ListenerManager.create();

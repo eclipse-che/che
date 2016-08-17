@@ -7,6 +7,7 @@
  *
  * Contributors:
  *   Sun Seng David TAN <sunix@sunix.org> - initial API and implementation
+ *   Randika Navagamuwa <randikanavagamuwa@gmail.com> - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.flux.liveedit;
 
@@ -15,7 +16,12 @@ import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.socketio.Message;
 
 import com.google.gwt.core.client.JsonUtils;
-
+/**
+ * Che product information constant.
+ *
+ * @author Randika Navagamuwa
+ * @author Sun
+ */
 public class FluxMessageBuilder {
     private String fullPath;
     private String addedCharacters;

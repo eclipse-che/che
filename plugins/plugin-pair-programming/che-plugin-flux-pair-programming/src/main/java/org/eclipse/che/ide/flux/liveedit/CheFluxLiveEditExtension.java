@@ -7,6 +7,7 @@
  *
  * Contributors:
  *   Sun Seng David TAN <sunix@sunix.org> - initial API and implementation
+ *   Randika Navagamuwa <randikanavagamuwa@gmail.com> - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.flux.liveedit;
 
@@ -63,6 +64,12 @@ import static org.eclipse.che.ide.api.notification.ReadState.READ;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 
+/**
+ * Che product information constant.
+ *
+ * @author Sun Seng David TAN
+ * @author Randika Navagamuwa
+ */
 
 @Extension(title = "Che Flux extension", version = "1.0.0")
 public class CheFluxLiveEditExtension{

@@ -11,7 +11,12 @@
 package org.eclipse.che.ide.flux.liveedit;
 
 import com.google.gwt.core.client.JavaScriptObject;
-
+/**
+ * Che product information constant.
+ *
+ * @author Sun Seng David TAN
+ * @author Randika Navagamuwa
+ */
 public class FluxResourceChangedEventDataOverlay extends JavaScriptObject {
 
     protected FluxResourceChangedEventDataOverlay() {
