@@ -570,7 +570,9 @@ execute_profile(){
       env | grep CHE_ >> ~/.che/"${3}"
 
       # Remove duplicates, if any
-      cat ~/.che/"${3}" | sort | uniq > ~/.che/"${3}"
+      cat ~/.che/"${3}" | sort | uniq > ~/.che/tmp
+      mv -f ~/.che/tmp ~/.che/"${3}"
+
 
       info ""
       info "Added new Che CLI profile ~/.che/${3}."
@@ -600,6 +602,8 @@ execute_profile(){
       echo "CHE_TEST_CONTAINER_NAME=$CHE_TEST_CONTAINER_NAME" >> ~/.che/"${3}"
 
       env | grep CHE_ >> "${3}"
+      cat ~/.che/"${3}" | sort | uniq > ~/.che/"${3}"
+
       info ""
       info "Updated Che CLI profile ~/.che/${3}."
       info ""
