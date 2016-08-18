@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.MessageProcessor;
 import org.eclipse.che.plugin.docker.client.json.Event;
@@ -43,10 +44,10 @@ import java.util.concurrent.TimeUnit;
 public class DockerInstanceStopDetector {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceStopDetector.class);
 
-    private final EventService          eventService;
-    private final DockerConnector       dockerConnector;
-    private final ExecutorService       executorService;
-    private final Map<String, String>   instances;
+    private final EventService                      eventService;
+    private final DockerConnector                   dockerConnector;
+    private final ExecutorService                   executorService;
+    private final Map<String, Pair<String, String>> instances;
     /*
        Helps differentiate container main process OOM from other processes OOM
        Algorithm:
@@ -59,7 +60,7 @@ public class DockerInstanceStopDetector {
        That's why cache expires in X seconds.
        X was set as 10 empirically.
     */
-    private final Cache<String, String> containersOomTimestamps;
+    private final Cache<String, String>             containersOomTimestamps;
 
     private long lastProcessedEventDate = 0;
 
@@ -84,9 +85,13 @@ public class DockerInstanceStopDetector {
      *         id of a container to start detection for
      * @param machineId
      *         id of a machine which container implements
+     * @param workspaceId
+     *         id of a workspace that owns machine
      */
-    public void startDetection(String containerId, String machineId) {
-        instances.put(containerId, machineId);
+    public void startDetection(String containerId,
+                               String machineId,
+                               String workspaceId) {
+        instances.put(containerId, Pair.of(machineId, workspaceId));
     }
 
     /**
@@ -140,9 +145,11 @@ public class DockerInstanceStopDetector {
                     } else {
                         instanceStateChangeType = InstanceStateEvent.Type.DIE;
                     }
-                    final String instanceId = instances.get(message.getId());
-                    if (instanceId != null) {
-                        eventService.publish(new InstanceStateEvent(instanceId, instanceStateChangeType));
+                    Pair<String, String> instanceIds = instances.get(message.getId());
+                    if (instanceIds != null) {
+                        eventService.publish(new InstanceStateEvent(instanceIds.first,
+                                                                    instanceIds.second,
+                                                                    instanceStateChangeType));
                         lastProcessedEventDate = message.getTime();
                     }
                     break;

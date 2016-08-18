@@ -149,11 +149,7 @@ public final class DtoConverter {
             envDto.withRecipe(newDto(RecipeDto.class).withType(env.getRecipe().getType())
                                                      .withScript(env.getRecipe().getScript()));
         }
-        return newDto(EnvironmentDto.class).withName(env.getName())
-                                           .withMachineConfigs(env.getMachineConfigs()
-                                                                  .stream()
-                                                                  .map(org.eclipse.che.api.machine.server.DtoConverter::asDto)
-                                                                  .collect(toList()));
+        return envDto;
     }
 
     /** Converts {@link WorkspaceRuntime} to {@link WorkspaceRuntimeDto}. */
@@ -182,7 +178,7 @@ public final class DtoConverter {
                                         .withType(snapshot.getType())
                                         .withWorkspaceId(snapshot.getWorkspaceId())
                                         .withEnvName(snapshot.getEnvName())
-                                        .withMachineName(snapshot.getEnvName());
+                                        .withMachineName(snapshot.getMachineName());
     }
 
     private DtoConverter() {}

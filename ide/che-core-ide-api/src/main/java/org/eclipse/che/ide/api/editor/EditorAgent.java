@@ -13,6 +13,10 @@ package org.eclipse.che.ide.api.editor;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.constraints.Direction;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.resource.Path;
 
@@ -34,11 +38,27 @@ public interface EditorAgent {
     void openEditor(@NotNull final VirtualFile file);
 
     /**
-     * Close editor with given file
+     * Open editor with given file and constraints.
+     * Constraints contain info about way how view of editor should be displayed.
+     * Editor will be opened in the current {@link EditorPartStack} if {@code constraints} is {@code null},
+     * otherwise view of relative Editor Part will be split corresponding to {@code
+     * constraints} on two areas and editor will be added into created area.
+     * In the latter case you need to specify {@link Direction} and ID of relative {@link EditorTab}.
      *
-     * @param file the file to close
+     * @param file
+     *         the file to open
+     * @param constraints
+     *         contains info about way how view of the editor should be opened
      */
-    void closeEditor(@NotNull final VirtualFile file);
+    void openEditor(@NotNull final VirtualFile file, Constraints constraints);
+
+    /**
+     * Close editor part
+     *
+     * @param editorPart
+     *         the part to close
+     */
+    void closeEditor(EditorPartPresenter editorPart);
 
     /**
      * Open editor with given file, call callback when editor fully loaded and initialized.
@@ -69,7 +89,15 @@ public interface EditorAgent {
     List<EditorPartPresenter> getOpenedEditors();
 
     /**
-     * Get opened editor by related file path
+     * Get all opened editors for {@link EditorPartStack} which contains given {@code editorPart}
+     *
+     * @return list with all opened editors for evaluated {@link EditorPartStack} or empty list when {@link EditorPartStack} is not found
+     */
+    @NotNull
+    List<EditorPartPresenter> getOpenedEditorsBasedOn(EditorPartPresenter editorPart);
+
+    /**
+     * Get opened editor by related file path for current {@link EditorPartStack}
      *
      * @param path path of the file opened in editor
      * @return opened editor or null if it does not exist
@@ -91,6 +119,36 @@ public interface EditorAgent {
      */
     @Nullable
     EditorPartPresenter getActiveEditor();
+
+    /**
+     * Get next opened editor based on given {@code editorPart}
+     *
+     * @param editorPart
+     *         the starting point to evaluate next opened editor
+     * @return opened editor or null if it does not exist
+     */
+    @Nullable
+    EditorPartPresenter getNextFor(EditorPartPresenter editorPart);
+
+    /**
+     * Get previous opened editor based on given {@code editorPart}
+     *
+     * @param editorPart
+     *         the starting point to evaluate previous opened editor
+     * @return opened editor or null if it does not exist
+     */
+    @Nullable
+    EditorPartPresenter getPreviousFor(EditorPartPresenter editorPart);
+
+    /**
+     * Get last closed editor for {@link EditorPartStack} which contains given {@code editorPart}
+     *
+     * @param editorPart
+     *         the starting point to evaluate last closed editor
+     * @return opened editor or null if it does not exist
+     */
+    @Nullable
+    EditorPartPresenter getLastClosedBasedOn(EditorPartPresenter editorPart);
 
     interface OpenEditorCallback {
         void onEditorOpened(EditorPartPresenter editor);

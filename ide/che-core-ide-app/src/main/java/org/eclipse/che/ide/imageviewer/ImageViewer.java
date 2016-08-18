@@ -30,7 +30,7 @@ import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorAgent.OpenEditorCallback;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEventHandler;
+import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.vectomatic.dom.svg.ui.SVGResource;

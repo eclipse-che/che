@@ -15,7 +15,6 @@ import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -81,9 +80,12 @@ public class EnvironmentImpl implements Environment {
     }
 
     @Override
-    @Nullable
     public Recipe getRecipe() {
         return recipe;
+    }
+
+    public void setRecipe(RecipeImpl recipe) {
+        this.recipe = recipe;
     }
 
     @Override
@@ -99,22 +101,18 @@ public class EnvironmentImpl implements Environment {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof EnvironmentImpl)) return false;
-        final EnvironmentImpl other = (EnvironmentImpl)obj;
-        return Objects.equals(name, other.name) &&
-               Objects.equals(recipe, other.recipe) &&
-               getMachineConfigs().equals(other.getMachineConfigs());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EnvironmentImpl)) return false;
+        EnvironmentImpl that = (EnvironmentImpl)o;
+        return Objects.equals(name, that.name) &&
+               Objects.equals(recipe, that.recipe) &&
+               Objects.equals(machineConfigs, that.machineConfigs);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = hash * 31 + Objects.hashCode(name);
-        hash = hash * 31 + Objects.hashCode(recipe);
-        hash = hash * 31 + getMachineConfigs().hashCode();
-        return hash;
+        return Objects.hash(name, recipe, machineConfigs);
     }
 
     @Override

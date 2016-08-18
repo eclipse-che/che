@@ -24,8 +24,8 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
-import org.eclipse.che.api.machine.server.MachineManager;
-import org.eclipse.che.api.machine.server.MachineServiceLinksInjector;
+import org.eclipse.che.api.environment.server.MachineProcessManager;
+import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -35,6 +35,7 @@ import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
+import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -51,7 +52,6 @@ import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
 import org.everrest.core.GenericContainerRequest;
 import org.everrest.core.RequestFilter;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -59,10 +59,14 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
@@ -121,13 +125,13 @@ public class WorkspaceServiceTest {
     private static final EnvironmentFilter  FILTER       = new EnvironmentFilter();
 
     @Mock
-    private WorkspaceManager   wsManager;
+    private WorkspaceManager      wsManager;
     @Mock
-    private MachineManager     machineManager;
+    private MachineProcessManager machineProcessManager;
     @Mock
-    private WorkspaceValidator validator;
-    @InjectMocks
-    private WorkspaceService   service;
+    private WorkspaceValidator    validator;
+
+    private WorkspaceService      service;
 
     @BeforeMethod
     public void setup() {
@@ -713,17 +717,18 @@ public class WorkspaceServiceTest {
     public void testWorkspaceLinks() throws Exception {
         // given
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv());
-        final MachineConfigImpl devCfg = workspace.getConfig()
-                                                  .getEnvironment(workspace.getConfig().getDefaultEnv())
-                                                  .get()
-                                                  .getMachineConfigs()
-                                                  .iterator()
-                                                  .next();
+        Optional<EnvironmentImpl> environmentOpt = workspace.getConfig().getEnvironment(workspace.getConfig().getDefaultEnv());
+        assertTrue(environmentOpt.isPresent());
+        EnvironmentImpl environment = environmentOpt.get();
+
+        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(environment.getName());
+        final MachineConfigImpl devCfg = environment.getMachineConfigs()
+                                                    .iterator()
+                                                    .next();
         runtime.setDevMachine(new MachineImpl(devCfg,
                                               "machine123",
                                               workspace.getId(),
-                                              workspace.getConfig().getDefaultEnv(),
+                                              environment.getName(),
                                               USER_ID,
                                               MachineStatus.RUNNING,
                                               new MachineRuntimeInfoImpl(emptyMap(),
@@ -769,6 +774,62 @@ public class WorkspaceServiceTest {
         assertNotNull(workspaceDto.getRuntime().getLink(LINK_REL_STOP_WORKSPACE), "Runtime doesn't contain stop link");
         assertNotNull(workspaceDto.getRuntime().getLink(WSAGENT_REFERENCE), "Runtime doesn't contain wsagent link");
         assertNotNull(workspaceDto.getRuntime().getLink(WSAGENT_WEBSOCKET_REFERENCE), "Runtime doesn't contain wsagent.websocket link");
+    }
+
+    @Test
+    public void shouldReturnSnapshotsOnGetSnapshot() throws Exception {
+        // given
+        String workspaceId = "testWsId1";
+        SnapshotImpl.SnapshotBuilder snapshotBuilder = SnapshotImpl.builder()
+                                                                   .setCreationDate(System.currentTimeMillis())
+                                                                   .setDescription("description")
+                                                                   .setDev(true)
+                                                                   .setEnvName("envName")
+                                                                   .setId("snap1")
+                                                                   .setMachineName("machine1")
+                                                                   .setMachineSource(new MachineSourceImpl("type")
+                                                                                             .setContent("content"))
+                                                                   .setType("type")
+                                                                   .setWorkspaceId(workspaceId);
+        SnapshotImpl snapshot1 = snapshotBuilder.build();
+        SnapshotImpl snapshot2 = snapshotBuilder.setDev(false).build();
+
+        List<SnapshotImpl> originSnapshots = Arrays.asList(snapshot1, snapshot2);
+        when(wsManager.getSnapshot(workspaceId)).thenReturn(originSnapshots);
+
+        // when
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/" + workspaceId + "/snapshot");
+
+        // then
+        assertEquals(response.getStatusCode(), 200);
+        List<SnapshotDto> snapshotDtos = unwrapDtoList(response, SnapshotDto.class);
+        List<SnapshotImpl> newSnapshots = snapshotDtos.stream().map(SnapshotImpl::new).collect(Collectors.toList());
+        originSnapshots.forEach(snapshot -> snapshot.setMachineSource(null));
+        assertEquals(newSnapshots, originSnapshots);
+        verify(wsManager).getSnapshot(workspaceId);
+    }
+
+    @Test
+    public void shouldReturnEmptyListIfNotSnapshotsFound() throws Exception {
+        // given
+        String workspaceId = "testWsId1";
+
+        when(wsManager.getSnapshot(workspaceId)).thenReturn(Collections.emptyList());
+
+        // when
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/" + workspaceId + "/snapshot");
+
+        // then
+        assertEquals(response.getStatusCode(), 200);
+        List<SnapshotDto> snapshotDtos = unwrapDtoList(response, SnapshotDto.class);
+        assertTrue(snapshotDtos.isEmpty());
+        verify(wsManager).getSnapshot(workspaceId);
     }
 
     private static String unwrapError(Response response) {

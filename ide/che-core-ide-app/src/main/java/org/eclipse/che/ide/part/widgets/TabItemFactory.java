@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.widgets;
 
-import org.eclipse.che.ide.api.resources.VirtualFile;
-import org.eclipse.che.ide.part.widgets.editortab.EditorTab;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * @author Dmitry Shnurenko
@@ -26,5 +24,5 @@ public interface TabItemFactory {
 
     PartButton createPartButton(@NotNull String title);
 
-    EditorTab createEditorPartButton(@Nullable VirtualFile virtualFile, @Nullable SVGResource icon, @NotNull String title);
+    EditorTab createEditorPartButton(@NotNull EditorPartPresenter relatedEditorPart);
 }

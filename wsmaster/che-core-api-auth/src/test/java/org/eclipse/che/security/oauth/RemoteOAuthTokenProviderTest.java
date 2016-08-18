@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
-import org.eclipse.che.commons.test.SelfReturningAnswer;
+import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;

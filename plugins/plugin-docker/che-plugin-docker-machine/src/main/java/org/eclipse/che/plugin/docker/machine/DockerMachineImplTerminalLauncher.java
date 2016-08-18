@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.machine.server.terminal.MachineImplSpecificTerminalLauncher;
+import org.eclipse.che.api.agent.server.terminal.MachineImplSpecificTerminalLauncher;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.Exec;
 import org.eclipse.che.plugin.docker.client.LogMessage;

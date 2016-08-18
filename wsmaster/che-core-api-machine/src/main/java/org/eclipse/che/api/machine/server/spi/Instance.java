@@ -71,13 +71,11 @@ public interface Instance extends Machine {
     /**
      * Save state of the instance
      *
-     * @param owner
-     *         id of the user that is owner of the snapshot
      * @return {@code InstanceSnapshotKey} that describe implementation specific keys of snapshot
      * @throws MachineException
      *         if error occurs on storing state of the instance
      */
-    MachineSource saveToSnapshot(String owner) throws MachineException;
+    MachineSource saveToSnapshot() throws MachineException;
 
     /**
      * Destroy instance

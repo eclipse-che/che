@@ -16,4 +16,6 @@
     <inherits name='com.google.gwt.user.User'/>
     <inherits name="com.google.gwt.json.JSON"/>
     <source path='rest/shared'/>
+    <source path='jsonrpc/shared'/>
+    <source path='websocket/shared'/>
 </module>

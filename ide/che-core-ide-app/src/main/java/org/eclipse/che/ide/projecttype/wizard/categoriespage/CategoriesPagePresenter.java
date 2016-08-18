@@ -97,7 +97,7 @@ public class CategoriesPagePresenter extends AbstractWizardPage<MutableProjectCo
 
         final ProjectWizardMode wizardMode = ProjectWizardMode.parse(context.get(WIZARD_MODE_KEY));
 
-        originParent = Path.valueOf(dataObject.getPath());
+        originParent = Path.valueOf(dataObject.getPath()).parent();
         view.setParentPath(originParent);
 
         if (CREATE == wizardMode) {

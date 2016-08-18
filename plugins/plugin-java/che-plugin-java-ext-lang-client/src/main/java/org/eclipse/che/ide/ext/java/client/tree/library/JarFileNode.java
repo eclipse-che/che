@@ -39,7 +39,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 
 /**
  * It might be used for any jar content.
@@ -87,7 +86,7 @@ public class JarFileNode extends SyntheticNode<JarEntry> implements VirtualFile,
     /** {@inheritDoc} */
     @Override
     public void actionPerformed() {
-        eventBus.fireEvent(new FileEvent(this, OPEN));
+        eventBus.fireEvent(FileEvent.createOpenFileEvent(this));
     }
 
     /** {@inheritDoc} */
