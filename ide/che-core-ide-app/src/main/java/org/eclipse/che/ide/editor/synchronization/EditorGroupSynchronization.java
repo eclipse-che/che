@@ -12,8 +12,10 @@ package org.eclipse.che.ide.editor.synchronization;
 
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.resource.Path;
 
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 /**
@@ -31,6 +33,9 @@ public interface EditorGroupSynchronization {
      *         editor to sync content
      */
     void addEditor(EditorPartPresenter editor);
+
+    /** Notify group that active editor has changed */
+    void onActiveEditorChanged(@NotNull EditorPartPresenter activeEditor);
 
     /**
      * Removes given editor from the group and stops to track changes of content for this one.

@@ -28,5 +28,5 @@ public interface EditorGroupSychronizationFactory {
      *         list opened editors o sync the content for them
      * @return an instance of {@link EditorGroupSynchronization}
      */
-    EditorGroupSynchronization create(List<EditorPartPresenter> editorsToSync);
+    EditorGroupSynchronization create();
 }

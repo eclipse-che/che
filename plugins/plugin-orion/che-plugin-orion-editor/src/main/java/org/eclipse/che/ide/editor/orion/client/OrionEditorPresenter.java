@@ -112,6 +112,7 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -387,24 +388,25 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
          *     -clear history
          * -restore current cursor position
          */
-        final TextPosition currentCursor = getCursorPosition();
-        this.documentStorage.getDocument(document.getFile(), new DocumentStorage.DocumentCallback() {
-
-            @Override
-            public void onDocumentReceived(final String content) {
-                editorWidget.setValue(content, new ContentInitializedHandler() {
-                    @Override
-                    public void onContentInitialized() {
-                        document.setCursorPosition(currentCursor);
-                    }
-                });
-            }
-
-            @Override
-            public void onDocumentLoadFailure(final Throwable caught) {
-                displayErrorPanel(constant.editorFileErrorMessage());
-            }
-        });
+//        final TextPosition currentCursor = getCursorPosition();
+//        this.documentStorage.getDocument(document.getFile(), new DocumentStorage.DocumentCallback() {
+//
+//            @Override
+//            public void onDocumentReceived(final String content) {
+//                Log.error(getClass(), "=== UPDATE " + OrionEditorPresenter.this.hashCode());
+//                editorWidget.setValue(content, new ContentInitializedHandler() {
+//                    @Override
+//                    public void onContentInitialized() {
+//                        document.setCursorPosition(currentCursor);
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onDocumentLoadFailure(final Throwable caught) {
+//                displayErrorPanel(constant.editorFileErrorMessage());
+//            }
+//        });
     }
 
     private void displayErrorPanel(final String message) {
