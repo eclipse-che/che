@@ -12,6 +12,7 @@ package org.eclipse.che.api.user.server.spi;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
@@ -161,4 +162,19 @@ public interface UserDao {
      *         when any other error occurs
      */
     UserImpl getByEmail(String email) throws NotFoundException, ServerException;
+
+    /**
+     * Gets all users from persistent layer.
+     *
+     * @param maxItems
+     *         the maximum number of users to return
+     * @param skipCount
+     *         the number of users to skip
+     * @return list of users POJO or empty list if no users were found
+     * @throws IllegalArgumentException
+     *         when {@code maxItems} or {@code skipCount} is negative
+     * @throws ServerException
+     *         when any other error occurs
+     */
+    Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException;
 }

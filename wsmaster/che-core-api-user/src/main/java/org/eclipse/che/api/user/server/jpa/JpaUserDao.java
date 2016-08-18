@@ -14,6 +14,7 @@ import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -26,6 +27,9 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -38,7 +42,7 @@ public class JpaUserDao implements UserDao {
     @Inject
     protected Provider<EntityManager> managerProvider;
     @Inject
-    private PasswordEncryptor       encryptor;
+    private   PasswordEncryptor       encryptor;
 
     @Override
     @Transactional
@@ -155,6 +159,33 @@ public class JpaUserDao implements UserDao {
                                   .getSingleResult();
         } catch (NoResultException x) {
             throw new NotFoundException(format("User with email '%s' doesn't exist", email));
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException {
+        // TODO need to ensure that 'getAll' query works with same data as 'getTotalCount'
+        checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+        checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
+        try {
+            List<UserImpl> list = managerProvider.get()
+                                                 .createNamedQuery("User.getAll", UserImpl.class)
+                                                 .setMaxResults(maxItems)
+                                                 .setFirstResult(skipCount)
+                                                 .getResultList();
+            return new Page<>(list, skipCount, maxItems, getTotalCount());
+        } catch (RuntimeException x) {
+            throw new ServerException(x.getLocalizedMessage(), x);
+        }
+    }
+
+    @Transactional
+    protected long getTotalCount() throws ServerException {
+        try {
+            return managerProvider.get().createNamedQuery("User.getTotalCount", Long.class).getSingleResult();
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }

@@ -12,6 +12,7 @@ package org.eclipse.che.api.user.server.spi.tck;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.Constants;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -28,12 +29,14 @@ import org.testng.annotations.Test;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * Tests {@link UserDao} contract.
@@ -181,6 +184,50 @@ public class UserDaoTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenGettingUserByNullAlias() throws Exception {
         userDao.getByAlias(null);
+    }
+
+    @Test
+    public void getAllShouldReturnAllUsersWithinSingleResponse() throws Exception {
+        List<UserImpl> result = userDao.getAll(6, 0).getItems();
+        assertEquals(result.size(), 5);
+
+        result.sort((User o1, User o2) -> o1.getName().compareTo(o2.getName()));
+        for (int i = 0; i < result.size(); i++) {
+            assertEqualsNoPassword(users[i], result.get(i));
+        }
+    }
+
+    @Test
+    public void shouldReturnGetAllWithSkipCountAndMaxItems() throws Exception {
+        List<UserImpl> users = userDao.getAll(3, 0).getItems();
+        assertEquals(users.size(), 3);
+
+        users = userDao.getAll(3, 3).getItems();
+        assertEquals(users.size(), 2);
+    }
+
+    @Test
+    public void shouldReturnEmptyListIfNoMoreUsers() throws Exception {
+        List<UserImpl> users = userDao.getAll(1, 6).getItems();
+        assertTrue(users.isEmpty());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void getAllShouldThrowIllegalArgumentExceptionIfMaxItemsWrong() throws Exception {
+        userDao.getAll(-1, 5);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void getAllShouldThrowIllegalArgumentExceptionIfSkipCountWrong() throws Exception {
+        userDao.getAll(2, -1);
+    }
+
+    @Test
+    public void shouldReturnCorrectTotalCountAlongWithRequestedUsers() throws Exception {
+        final Page<UserImpl> page = userDao.getAll(2, 0);
+
+        assertEquals(page.getItems().size(), 2);
+        assertEquals(page.getTotalItemsCount(), 5);
     }
 
     @Test(dependsOnMethods = "shouldGetUserById")
