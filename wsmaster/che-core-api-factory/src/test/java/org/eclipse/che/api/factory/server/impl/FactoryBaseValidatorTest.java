@@ -82,7 +82,7 @@ public class FactoryBaseValidatorTest {
     public void setUp() throws ParseException, NotFoundException, ServerException {
         factory = newDto(FactoryDto.class).withV("4.0")
                                           .withCreator(newDto(AuthorDto.class).withUserId("userid"));
-        final UserImpl user = new UserImpl("userid");
+        final UserImpl user = new UserImpl("userid", "email", "name");
 
         when(userDao.getById("userid")).thenReturn(user);
         validator = new TesterFactoryBaseValidator();

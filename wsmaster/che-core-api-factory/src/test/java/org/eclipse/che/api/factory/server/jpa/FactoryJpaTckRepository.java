@@ -47,6 +47,5 @@ public class FactoryJpaTckRepository implements TckRepository<FactoryImpl> {
         manager.createQuery("SELECT factory FROM Factory factory", FactoryImpl.class)
                .getResultList()
                .forEach(manager::remove);
-        manager.createQuery("DELETE FROM Usr").executeUpdate();
     }
 }

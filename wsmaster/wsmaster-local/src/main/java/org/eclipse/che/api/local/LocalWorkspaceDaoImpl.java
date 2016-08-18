@@ -27,7 +27,6 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -93,15 +92,17 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
                                                workspace.getConfig().getName(),
                                                workspace.getNamespace()));
         }
+
         workspace.setRuntime(null);
         workspace.setStatus(WorkspaceStatus.STOPPED);
-        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace));
+        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace, workspace.getAccount()));
         return workspace;
     }
 
     @Override
-    public synchronized WorkspaceImpl update(WorkspaceImpl workspace)
-            throws NotFoundException, ConflictException, ServerException {
+    public synchronized WorkspaceImpl update(WorkspaceImpl workspace) throws NotFoundException,
+                                                                             ConflictException,
+                                                                             ServerException {
         requireNonNull(workspace, "Required non-null workspace");
         if (!workspaces.containsKey(workspace.getId())) {
             throw new NotFoundException("Workspace with id " + workspace.getId() + " was not found");
@@ -113,7 +114,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         }
         workspace.setStatus(null);
         workspace.setRuntime(null);
-        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace));
+        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace, workspace.getAccount()));
         return workspace;
     }
 
@@ -130,7 +131,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         if (workspace == null) {
             throw new NotFoundException("Workspace with id " + id + " was not found");
         }
-        return new WorkspaceImpl(workspace);
+        return new WorkspaceImpl(workspace, workspace.getAccount());
     }
 
     @Override
@@ -141,7 +142,8 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         if (!wsOpt.isPresent()) {
             throw new NotFoundException(format("Workspace with name %s and owner %s was not found", name, namespace));
         }
-        return new WorkspaceImpl(wsOpt.get());
+        WorkspaceImpl workspace = wsOpt.get();
+        return new WorkspaceImpl(workspace, workspace.getAccount());
     }
 
     @Override
@@ -150,7 +152,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         return workspaces.values()
                          .stream()
                          .filter(ws -> ws.getNamespace().equals(namespace))
-                         .map(WorkspaceImpl::new)
+                         .map(ws -> new WorkspaceImpl(ws, ws.getAccount()))
                          .collect(toList());
     }
 

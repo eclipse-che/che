@@ -14,6 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.account.spi.AccountDao;
+import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.account.spi.jpa.JpaAccountDao;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.local.storage.stack.StackLocalStorage;
@@ -39,6 +42,7 @@ import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,6 +85,7 @@ public class LocalTckModule extends TckModule {
         bind(new TypeLiteral<TckRepository<StackImpl>>() {}).to(LocalStackTckRepository.class);
         bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).to(SnapshotTckRepository.class);
         bind(new TypeLiteral<TckRepository<SshPairImpl>>() {}).to(LocalSshTckRepository.class);
+        bind(new TypeLiteral<TckRepository<AccountImpl>>() {}).to(LocalAccountTckRepository.class);
 
         bind(UserDao.class).to(LocalUserDaoImpl.class);
         bind(ProfileDao.class).to(LocalProfileDaoImpl.class);
@@ -154,6 +159,14 @@ public class LocalTckModule extends TckModule {
         @Inject
         public LocalSshTckRepository(LocalSshDaoImpl sshDao) {
             super(sshDao.pairs, List::add, List::clear, sshDao);
+        }
+    }
+
+    @Singleton
+    private static class LocalAccountTckRepository extends LocalMapTckRepository<AccountImpl> {
+        @Inject
+        public LocalAccountTckRepository() {
+            super(new HashMap<>(), AccountImpl::getId, null);
         }
     }
 }

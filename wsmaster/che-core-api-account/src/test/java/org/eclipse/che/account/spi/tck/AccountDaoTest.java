@@ -47,10 +47,10 @@ public class AccountDaoTest {
 
     @BeforeMethod
     private void setUp() throws TckRepositoryException {
-        accounts = new TestAccountImpl[2];
+        accounts = new AccountImpl[2];
 
-        accounts[0] = new TestAccountImpl(NameGenerator.generate("account", 10), "test1");
-        accounts[1] = new TestAccountImpl(NameGenerator.generate("account", 10), "test2");
+        accounts[0] = new AccountImpl(NameGenerator.generate("account", 10), "test1", "test");
+        accounts[1] = new AccountImpl(NameGenerator.generate("account", 10), "test2", "test");
 
         accountRepo.createAll(asList(accounts));
     }

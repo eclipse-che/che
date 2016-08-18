@@ -14,6 +14,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -90,6 +92,7 @@ public class WorkspaceManager {
     private final EventService      eventService;
     private final ExecutorService   executor;
     private final MachineManager    machineManager;
+    private final AccountManager    accountManager;
     private final boolean           defaultAutoSnapshot;
     private final boolean           defaultAutoRestore;
 
@@ -98,10 +101,12 @@ public class WorkspaceManager {
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
                             MachineManager machineManager,
+                            AccountManager accountManager,
                             @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
                             @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
+        this.accountManager = accountManager;
         this.eventService = eventService;
         this.machineManager = machineManager;
         this.defaultAutoSnapshot = defaultAutoSnapshot;
@@ -136,7 +141,7 @@ public class WorkspaceManager {
         requireNonNull(config, "Required non-null config");
         requireNonNull(namespace, "Required non-null namespace");
         return normalizeState(doCreateWorkspace(config,
-                                                namespace,
+                                                accountManager.getByName(namespace),
                                                 emptyMap(),
                                                 false));
     }
@@ -170,7 +175,7 @@ public class WorkspaceManager {
         requireNonNull(namespace, "Required non-null namespace");
         requireNonNull(attributes, "Required non-null attributes");
         return normalizeState(doCreateWorkspace(config,
-                                                namespace,
+                                                accountManager.getByName(namespace),
                                                 attributes,
                                                 false));
     }
@@ -384,7 +389,7 @@ public class WorkspaceManager {
         requireNonNull(config, "Required non-null configuration");
         requireNonNull(namespace, "Required non-null namespace");
         final WorkspaceImpl workspace = doCreateWorkspace(config,
-                                                          namespace,
+                                                          accountManager.getByName(namespace),
                                                           emptyMap(),
                                                           isTemporary);
         performAsyncStart(workspace, workspace.getConfig().getDefaultEnv(), false);
@@ -683,7 +688,7 @@ public class WorkspaceManager {
     }
 
     private WorkspaceImpl doCreateWorkspace(WorkspaceConfig config,
-                                            String namespace,
+                                            Account account,
                                             Map<String, String> attributes,
                                             boolean isTemporary) throws NotFoundException,
                                                                         ServerException,
@@ -691,14 +696,14 @@ public class WorkspaceManager {
         final WorkspaceImpl workspace = WorkspaceImpl.builder()
                                                      .generateId()
                                                      .setConfig(config)
-                                                     .setNamespace(namespace)
+                                                     .setAccount(account)
                                                      .setAttributes(attributes)
                                                      .setTemporary(isTemporary)
                                                      .build();
         workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspaceDao.create(workspace);
         LOG.info("Workspace '{}:{}' with id '{}' created by user '{}'",
-                 namespace,
+                 account.getName(),
                  workspace.getConfig().getName(),
                  workspace.getId(),
                  sessionUserNameOr("undefined"));

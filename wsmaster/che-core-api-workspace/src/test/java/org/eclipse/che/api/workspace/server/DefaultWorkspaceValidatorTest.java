@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
@@ -129,7 +130,8 @@ public class DefaultWorkspaceValidatorTest {
     @Test(expectedExceptions = BadRequestException.class,
           expectedExceptionsMessageRegExp = "Attribute name 'null' is not valid")
     public void shouldFailValidationIfAttributeNameIsNull() throws Exception {
-        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
+        final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", account, createConfig());
         workspace.getAttributes().put(null, "value1");
 
 
@@ -139,7 +141,8 @@ public class DefaultWorkspaceValidatorTest {
     @Test(expectedExceptions = BadRequestException.class,
           expectedExceptionsMessageRegExp = "Attribute name '' is not valid")
     public void shouldFailValidationIfAttributeNameIsEmpty() throws Exception {
-        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
+        final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", account, createConfig());
         workspace.getAttributes().put("", "value1");
 
         wsValidator.validateWorkspace(workspace);
@@ -148,7 +151,8 @@ public class DefaultWorkspaceValidatorTest {
     @Test(expectedExceptions = BadRequestException.class,
           expectedExceptionsMessageRegExp = "Attribute name '.*' is not valid")
     public void shouldFailValidationIfAttributeNameStartsWithWordCodenvy() throws Exception {
-        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", createConfig());
+        final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", account, createConfig());
         workspace.getAttributes().put("codenvy_key", "value1");
 
         wsValidator.validateWorkspace(workspace);

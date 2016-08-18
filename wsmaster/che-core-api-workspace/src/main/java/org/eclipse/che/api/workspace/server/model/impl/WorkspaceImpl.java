@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.model.impl;
 
+import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
@@ -27,12 +29,11 @@ import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -50,13 +51,13 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
  * @author Yevhenii Voevodin
  */
 @Entity(name = "Workspace")
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "namespace"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"name", "accountId"}))
 @NamedQueries(
         {
                 @NamedQuery(name = "Workspace.getByNamespace",
-                            query = "SELECT w FROM Workspace w WHERE w.namespace = :namespace"),
+                            query = "SELECT w FROM Workspace w WHERE w.account.name = :namespace"),
                 @NamedQuery(name = "Workspace.getByName",
-                            query = "SELECT w FROM Workspace w WHERE w.namespace = :namespace AND w.name = :name"),
+                            query = "SELECT w FROM Workspace w WHERE w.account.name = :namespace AND w.name = :name"),
                 @NamedQuery(name = "Workspace.getAll",
                             query = "SELECT w FROM Workspace w")
         }
@@ -70,9 +71,6 @@ public class WorkspaceImpl implements Workspace {
 
     @Id
     private String id;
-
-    @Column(nullable = false)
-    private String namespace;
 
     @Column(nullable = false)
     private String name;
@@ -93,6 +91,10 @@ public class WorkspaceImpl implements Workspace {
     @JoinColumn(name = "workspaceId", insertable = false, updatable = false)
     private List<SnapshotImpl> snapshots;
 
+    @ManyToOne
+    @JoinColumn(name = "accountId", nullable = false)
+    private AccountImpl account;
+
     @Transient
     private WorkspaceStatus status = STOPPED;
 
@@ -101,12 +103,12 @@ public class WorkspaceImpl implements Workspace {
 
     public WorkspaceImpl() {}
 
-    public WorkspaceImpl(String id, String namespace, WorkspaceConfig config) {
-        this(id, namespace, config.getName(), config, null, null, false, STOPPED);
+    public WorkspaceImpl(String id, Account account, WorkspaceConfig config) {
+        this(id, account, config.getName(), config, null, null, false, STOPPED);
     }
 
     public WorkspaceImpl(String id,
-                         String namespace,
+                         Account account,
                          String name,
                          WorkspaceConfig config,
                          WorkspaceRuntime runtime,
@@ -114,9 +116,13 @@ public class WorkspaceImpl implements Workspace {
                          boolean isTemporary,
                          WorkspaceStatus status) {
         this.id = id;
-        this.namespace = namespace;
         this.name = name;
-        this.config = new WorkspaceConfigImpl(config);
+        if (account != null) {
+            this.account = new AccountImpl(account);
+        }
+        if (config != null) {
+            this.config = new WorkspaceConfigImpl(config);
+        }
         if (runtime != null) {
             this.runtime = new WorkspaceRuntimeImpl(runtime);
         }
@@ -127,14 +133,15 @@ public class WorkspaceImpl implements Workspace {
         this.isTemporary = isTemporary;
     }
 
-    public WorkspaceImpl(Workspace workspace) {
-        this(workspace.getId(), workspace.getNamespace(), workspace.getConfig());
-        this.attributes = new HashMap<>(workspace.getAttributes());
-        if (workspace.getRuntime() != null) {
-            this.runtime = new WorkspaceRuntimeImpl(workspace.getRuntime());
-        }
-        this.isTemporary = workspace.isTemporary();
-        this.status = firstNonNull(workspace.getStatus(), STOPPED);
+    public WorkspaceImpl(Workspace workspace, Account account) {
+        this(workspace.getId(),
+             account,
+             workspace.getConfig().getName(),
+             workspace.getConfig(),
+             workspace.getRuntime(),
+             workspace.getAttributes(),
+             workspace.isTemporary(),
+             workspace.getStatus());
     }
 
     @Override
@@ -148,11 +155,18 @@ public class WorkspaceImpl implements Workspace {
 
     @Override
     public String getNamespace() {
-        return namespace;
+        if (account != null) {
+            return account.getName();
+        }
+        return null;
     }
 
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
+    public void setAccount(AccountImpl account) {
+        this.account = account;
+    }
+
+    public AccountImpl getAccount() {
+        return account;
     }
 
     public String getName() {
@@ -217,7 +231,7 @@ public class WorkspaceImpl implements Workspace {
         if (!(obj instanceof WorkspaceImpl)) return false;
         final WorkspaceImpl other = (WorkspaceImpl)obj;
         return Objects.equals(id, other.id)
-               && Objects.equals(namespace, other.namespace)
+               && Objects.equals(getNamespace(), other.getNamespace())
                && Objects.equals(name, other.name)
                && Objects.equals(status, other.status)
                && isTemporary == other.isTemporary
@@ -230,7 +244,7 @@ public class WorkspaceImpl implements Workspace {
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(id);
-        hash = 31 * hash + Objects.hashCode(namespace);
+        hash = 31 * hash + Objects.hashCode(getNamespace());
         hash = 31 * hash + Objects.hashCode(name);
         hash = 31 * hash + Objects.hashCode(status);
         hash = 31 * hash + Objects.hashCode(config);
@@ -244,7 +258,7 @@ public class WorkspaceImpl implements Workspace {
     public String toString() {
         return "WorkspaceImpl{" +
                "id='" + id + '\'' +
-               ", namespace='" + namespace + '\'' +
+               ", namespace='" + getNamespace() + '\'' +
                ", name='" + name + '\'' +
                ", config=" + config +
                ", isTemporary=" + isTemporary +
@@ -262,7 +276,7 @@ public class WorkspaceImpl implements Workspace {
     public static class WorkspaceImplBuilder {
 
         private String               id;
-        private String               namespace;
+        private Account              account;
         private String               name;
         private boolean              isTemporary;
         private WorkspaceStatus      status;
@@ -273,7 +287,7 @@ public class WorkspaceImpl implements Workspace {
         private WorkspaceImplBuilder() {}
 
         public WorkspaceImpl build() {
-            return new WorkspaceImpl(id, namespace, name, config, runtime, attributes, isTemporary, status);
+            return new WorkspaceImpl(id, account, name, config, runtime, attributes, isTemporary, status);
         }
 
         public WorkspaceImplBuilder generateId() {
@@ -292,8 +306,8 @@ public class WorkspaceImpl implements Workspace {
             return this;
         }
 
-        public WorkspaceImplBuilder setNamespace(String namespace) {
-            this.namespace = namespace;
+        public WorkspaceImplBuilder setAccount(Account account) {
+            this.account = account;
             return this;
         }
 

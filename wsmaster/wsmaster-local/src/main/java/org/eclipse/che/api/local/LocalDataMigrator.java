@@ -14,6 +14,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.account.spi.AccountDao;
 import org.eclipse.che.api.local.storage.stack.StackLocalStorage;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
@@ -93,7 +94,7 @@ public class LocalDataMigrator {
         migrations.add(new ProfileMigration(factory.create(LocalProfileDaoImpl.FILENAME), profileDao));
         migrations.add(new PreferencesMigration(factory.create(LocalPreferenceDaoImpl.FILENAME), preferenceDao));
         migrations.add(new SshKeyMigration(factory.create(LocalSshDaoImpl.FILENAME), sshDao));
-        migrations.add(new WorkspaceMigration(factory.create(LocalWorkspaceDaoImpl.FILENAME), workspaceDao));
+        migrations.add(new WorkspaceMigration(factory.create(LocalWorkspaceDaoImpl.FILENAME), workspaceDao, userDao));
         migrations.add(new SnapshotMigration(factory.create(LocalSnapshotDaoImpl.FILENAME), snapshotDao));
         migrations.add(new RecipeMigration(factory.create(LocalRecipeDaoImpl.FILENAME), recipeDao));
         migrations.add(new StackMigration(factory.create(StackLocalStorage.STACK_STORAGE_FILE), stackDao));
@@ -247,7 +248,7 @@ public class LocalDataMigrator {
 
         @Override
         public void migrate(ProfileImpl entity) throws Exception {
-            profileDao.create(entity);
+            profileDao.create(new ProfileImpl(entity));
         }
 
         @Override
@@ -321,10 +322,12 @@ public class LocalDataMigrator {
     public static class WorkspaceMigration extends Migration<WorkspaceImpl> {
 
         private final WorkspaceDao workspaceDao;
+        private final UserDao userDao;
 
-        public WorkspaceMigration(LocalStorage localStorage, WorkspaceDao workspaceDao) {
+        public WorkspaceMigration(LocalStorage localStorage, WorkspaceDao workspaceDao, UserDao userDao) {
             super("Workspace", localStorage);
             this.workspaceDao = workspaceDao;
+            this.userDao = userDao;
         }
 
         @Override
@@ -334,6 +337,7 @@ public class LocalDataMigrator {
 
         @Override
         public void migrate(WorkspaceImpl entity) throws Exception {
+            entity.setAccount(userDao.getByName(entity.getNamespace()).getAccount());
             entity.setName(entity.getConfig().getName());
             workspaceDao.create(entity);
         }

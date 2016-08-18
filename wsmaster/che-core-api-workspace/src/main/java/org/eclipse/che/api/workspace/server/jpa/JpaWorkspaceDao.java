@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server.jpa;
 
 import com.google.inject.persist.Transactional;
 
+import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -20,7 +21,6 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
-import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -174,7 +174,7 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     }
 
     @Singleton
-    public static class RemoveWorkspaceBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveWorkspaceBeforeAccountRemovedEventSubscriber implements EventSubscriber<BeforeAccountRemovedEvent> {
         @Inject
         private EventService eventService;
         @Inject
@@ -191,13 +191,13 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
+        public void onEvent(BeforeAccountRemovedEvent event) {
             try {
-                for (WorkspaceImpl workspace : workspaceDao.getByNamespace(event.getUser().getId())) {
+                for (WorkspaceImpl workspace : workspaceDao.getByNamespace(event.getAccount().getName())) {
                     workspaceDao.remove(workspace.getId());
                 }
             } catch (Exception x) {
-                LOG.error(format("Couldn't remove workspaces before user '%s' is removed", event.getUser().getId()), x);
+                LOG.error(format("Couldn't remove workspaces before account '%s' is removed", event.getAccount().getId()), x);
             }
         }
     }

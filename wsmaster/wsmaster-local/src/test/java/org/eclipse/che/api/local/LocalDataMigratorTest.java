@@ -52,6 +52,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -99,6 +100,8 @@ public class LocalDataMigratorTest {
         dataMigrator = new LocalDataMigrator();
         storeTestData();
         doThrow(new NotFoundException("not-found")).when(userDao).getById(anyString());
+        // needed by workspace
+        when(userDao.getByName(anyString())).thenReturn(new UserImpl("id", "email", "name"));
         doThrow(new NotFoundException("not-found")).when(profileDao).getById(anyString());
         doReturn(emptyMap()).when(preferenceDao).getPreferences(anyString());
         doThrow(new NotFoundException("not-found")).when(sshDao).get(anyString(), anyString(), anyString());
@@ -202,7 +205,7 @@ public class LocalDataMigratorTest {
         final ProfileImpl profile = new ProfileImpl(user.getId());
         final Map<String, String> prefs = singletonMap("key", "value");
         final SshPairImpl sshPair = new SshPairImpl(user.getId(), "service", "name", "public", "private");
-        final WorkspaceImpl workspace = new WorkspaceImpl("id", "namespace", new WorkspaceConfigImpl());
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", user.getAccount(), new WorkspaceConfigImpl());
         final SnapshotImpl snapshot = new SnapshotImpl();
         snapshot.setId("snapshotId");
         snapshot.setWorkspaceId(workspace.getId());
