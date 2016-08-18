@@ -213,7 +213,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
             }
         }
 
-        String message = "<b>" + mergeResult.getMergeStatus().getValue() + "</b>";
+        String message = mergeResult.getMergeStatus().getValue();
         String conflictText = conflictMessage.toString();
         message += (!conflictText.isEmpty()) ? constant.mergedConflicts() : "";
 
