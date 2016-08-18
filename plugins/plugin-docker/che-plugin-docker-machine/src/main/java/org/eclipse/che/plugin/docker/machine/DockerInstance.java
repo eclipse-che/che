@@ -280,8 +280,7 @@ public class DockerInstance extends AbstractInstance {
                 node.unbindWorkspace();
             }
 
-            docker.killContainer(container);
-
+            // kill container is not needed here, because we removing container with force flag
             docker.removeContainer(RemoveContainerParams.create(container)
                                                         .withRemoveVolumes(true)
                                                         .withForce(true));
