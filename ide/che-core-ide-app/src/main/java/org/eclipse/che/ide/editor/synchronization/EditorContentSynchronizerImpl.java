@@ -14,23 +14,22 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.resource.Path;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
  * The default implementation of {@link EditorContentSynchronizer}.
  * The synchronizer of content for opened files with the same {@link Path}.
- * Used to sync the content of opened files in different {@link org.eclipse.che.ide.api.parts.EditorPartStack}s.
+ * Used to sync the content of opened files in different {@link EditorPartStack}s.
  * Note: this implementation disables autosave feature for implementations of {@link EditorWithAutoSave} with the same {@link Path} except
  * active editor.
  *

@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor.synchronization;
 
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-
-import java.util.List;
-
 /**
  * The factory creates instances of {@link EditorGroupSynchronization} to provide the synchronization of
  * the content for them.
@@ -24,8 +20,6 @@ public interface EditorGroupSychronizationFactory {
     /**
      * Creates implementation of {@link EditorGroupSynchronization}.
      *
-     * @param editorsToSync
-     *         list opened editors o sync the content for them
      * @return an instance of {@link EditorGroupSynchronization}
      */
     EditorGroupSynchronization create();
