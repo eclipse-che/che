@@ -34,8 +34,8 @@ public class WorkspaceImpl implements Workspace {
         return new WorkspaceImplBuilder();
     }
 
-    private final String id;
-    private final String namespace;
+    private String id;
+    private String namespace;
 
     private WorkspaceConfigImpl  config;
     private boolean              isTemporary;
