@@ -110,6 +110,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-flux-live-edit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-gdb-ide</artifactId>
         </dependency>
         <dependency>
@@ -239,10 +243,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-flux-live-edit</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>

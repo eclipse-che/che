@@ -1,13 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016 Serli SAS.
+ * Copyright (c) 2012-2016 Codenvy, S.A.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Sun Seng David TAN <sunix@sunix.org> - initial API and implementation
- *   Randika Navagamuwa <randikanavagamuwa@gmail.com> - initial API and implementation
+ *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
 package org.eclipse.che.ide.flux.liveedit;
 
@@ -20,7 +19,7 @@ import com.google.gwt.core.client.JsonUtils;
  * Che product information constant.
  *
  * @author Randika Navagamuwa
- * @author Sun
+ * @author Sun Seng David TAN
  */
 public class FluxMessageBuilder {
     private String fullPath;
