@@ -15,9 +15,12 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
 import org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto;
 import org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto.Status;
+import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestTransmitter;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
@@ -36,6 +39,7 @@ public class ClientServerEventService {
 
     @Inject
     public ClientServerEventService(final JsonRpcRequestTransmitter transmitter,
+                                    final EditorAgent editorAgent,
                                     final EventBus eventBus,
                                     final DtoFactory dtoFactory) {
         this.transmitter = transmitter;
@@ -45,17 +49,23 @@ public class ClientServerEventService {
         eventBus.addHandler(FileEvent.TYPE, new FileEvent.FileEventHandler() {
             @Override
             public void onFileOperation(FileEvent event) {
-                final String path = event.getFile().getLocation().toString();
+                final Path path = event.getFile().getLocation();
 
                 switch (event.getOperationType()) {
                     case OPEN: {
-                        transmit(path, OPENED);
+                        transmit(path.toString(), OPENED);
 
                         break;
                     }
                     case CLOSE: {
-                        transmit(path, CLOSED);
-
+                        EditorPartPresenter editorToClose = event.getEditorTab().getRelativeEditorPart();
+                        for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
+                            Path currentPath = editor.getEditorInput().getFile().getLocation();
+                            if (path.equals(currentPath) && editorToClose != editor) {
+                                transmit(path.toString(), CLOSED);
+                                return;
+                            }
+                        }
                         break;
                     }
                 }
