@@ -696,7 +696,7 @@
     "displayName": "web-php-simple",
     "path": "/web-php-simple",
     "description": "A hello world PHP script.",
-    "projectType": "blank",
+    "projectType": "php",
     "mixins": [],
     "attributes": {
       "language": [
@@ -748,7 +748,7 @@
     "displayName": "web-php-gae-simple",
     "path": "/web-php-gae-simple",
     "description": "A hello world PHP script to deploy to GAE.",
-    "projectType": "blank",
+    "projectType": "php",
     "mixins": [],
     "attributes": {
       "language": [
