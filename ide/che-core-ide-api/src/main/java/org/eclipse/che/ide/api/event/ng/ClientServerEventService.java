@@ -59,13 +59,18 @@ public class ClientServerEventService {
                     }
                     case CLOSE: {
                         EditorPartPresenter editorToClose = event.getEditorTab().getRelativeEditorPart();
+                        boolean isNeedToTransmit = true;
                         for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
                             Path currentPath = editor.getEditorInput().getFile().getLocation();
                             if (path.equals(currentPath) && editorToClose != editor) {
-                                transmit(path.toString(), CLOSED);
-                                return;
+                                isNeedToTransmit = false;
                             }
                         }
+
+                        if (isNeedToTransmit) {
+                            transmit(path.toString(), CLOSED);
+                        }
+
                         break;
                     }
                 }
