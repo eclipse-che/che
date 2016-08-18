@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event.ng;
 
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
@@ -39,7 +40,7 @@ public class ClientServerEventService {
 
     @Inject
     public ClientServerEventService(final JsonRpcRequestTransmitter transmitter,
-                                    final EditorAgent editorAgent,
+                                    final Provider<EditorAgent> editorAgentProvider,
                                     final EventBus eventBus,
                                     final DtoFactory dtoFactory) {
         this.transmitter = transmitter;
@@ -60,7 +61,7 @@ public class ClientServerEventService {
                     case CLOSE: {
                         EditorPartPresenter editorToClose = event.getEditorTab().getRelativeEditorPart();
                         boolean isNeedToTransmit = true;
-                        for (EditorPartPresenter editor : editorAgent.getOpenedEditors()) {
+                        for (EditorPartPresenter editor : editorAgentProvider.get().getOpenedEditors()) {
                             Path currentPath = editor.getEditorInput().getFile().getLocation();
                             if (path.equals(currentPath) && editorToClose != editor) {
                                 isNeedToTransmit = false;
