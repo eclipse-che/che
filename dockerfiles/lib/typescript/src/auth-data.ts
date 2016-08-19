@@ -24,6 +24,7 @@ export class AuthData {
     DEFAULT_HOSTNAME : string = new RemoteIp().getIp();
     DEFAULT_PORT : number = 8080;
 
+    printInfo : boolean = true;
 
     hostname : string;
     port : number;
@@ -103,7 +104,9 @@ export class AuthData {
             logMessage += 'as ' + this.username;
         }
 
-        Log.getLogger().info(logMessage, 'on \"' + this.getHostname() + ':' + this.getPort() + '\"' + securedOrNot);
+        if (this.printInfo) {
+            Log.getLogger().info(logMessage, 'on \"' + this.getHostname() + ':' + this.getPort() + '\"' + securedOrNot);
+        }
 
         var options = {
             hostname: this.hostname,
