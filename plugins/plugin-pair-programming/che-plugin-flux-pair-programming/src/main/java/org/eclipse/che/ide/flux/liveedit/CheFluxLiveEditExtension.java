@@ -49,6 +49,7 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
+import com.google.gwt.dom.client.StyleInjector;
 
 import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.core.client.ScriptInjector;
@@ -137,11 +138,28 @@ public class CheFluxLiveEditExtension{
 
 
     private void injectCssStyles(){
-        com.google.gwt.dom.client.StyleInjector.inject(".pairProgramminigUser1 { outline: 1px solid #f3ff20; animation: blinker 1s linear infinite;} @keyframes blinker { 50% { opacity: 0.0; }}");
-        com.google.gwt.dom.client.StyleInjector.inject(".pairProgramminigUser2 { outline: 1px solid #10ff22; animation: blinker 1s linear infinite;} @keyframes blinker { 50% { opacity: 0.0; }}");
-        com.google.gwt.dom.client.StyleInjector.inject(".pairProgramminigUser3 { outline: 1px solid #00a1ff; animation: blinker 1s linear infinite;} @keyframes blinker { 50% { opacity: 0.0; }}");
-        com.google.gwt.dom.client.StyleInjector.inject(".pairProgramminigUser4 { outline: 1px solid #ff00fb; animation: blinker 1s linear infinite;} @keyframes blinker { 50% { opacity: 0.0; }}");
-        com.google.gwt.dom.client.StyleInjector.inject(".pairProgramminigUser5 { outline: 1px solid #10fdff; animation: blinker 1s linear infinite;} @keyframes blinker { 50% { opacity: 0.0; }}");
+
+        Map<Integer,String> colorMap = new HashMap<Integer,String>();
+        colorMap.put(1,"#FFFF00");
+        colorMap.put(2,"#00FF00");
+        colorMap.put(3,"#00FFFF");
+        colorMap.put(4,"#FF00FF");
+        colorMap.put(5,"#FFFFFF");
+        colorMap.put(6,"#C0C0C0");
+        colorMap.put(7,"#808080");
+        colorMap.put(8,"#FF0000");
+        colorMap.put(9,"#800000");
+        colorMap.put(10,"#808000");
+        colorMap.put(11,"#008000");
+        colorMap.put(12,"#008080");
+        colorMap.put(13,"#0000FF");
+        colorMap.put(14,"#800080");
+
+        String css = null;
+        for (int i =1 ; i<colorMap.size()+1;i++){
+            css = ".pairProgramminigUser"+i+" { outline: 1px solid "+colorMap.get(i)+"; animation: blinker 1s linear infinite;} @keyframes blinker { 50% { opacity: 0.0; }}";
+            StyleInjector.inject(css);
+        }
     }
 
     private void injectSocketIO() {
@@ -317,7 +335,7 @@ public class CheFluxLiveEditExtension{
         if (cursorHandlers.get(username)==null){
             cursorHandlerForPairProgramming = new CursorHandlerForPairProgramming();
             cursorHandlerForPairProgramming.setUser(username);
-            if (userCount==5){
+            if (userCount==14){
                 userCount =0;
             }
             userCount++;
