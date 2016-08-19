@@ -33,31 +33,23 @@ export class Workspace {
     /**
      * Authentication data
      */
-    authData : AuthData;
+    authData:AuthData;
 
     /**
      * websocket.
      */
-    websocket : Websocket;
+    websocket:Websocket;
 
-    http : any;
-
-
-    constructor(authData : AuthData) {
+    constructor(authData:AuthData) {
         this.authData = authData;
         this.websocket = new Websocket();
-        if (authData.isSecured()) {
-            this.http = require('https');
-        } else {
-            this.http = require('http');
-        }
     }
 
 
     /**
      * Create a workspace and return a promise with content of WorkspaceDto in case of success
      */
-    createWorkspace(createWorkspaceConfig: CreateWorkspaceConfig) : Promise<WorkspaceDto> {
+    createWorkspace(createWorkspaceConfig:CreateWorkspaceConfig):Promise<WorkspaceDto> {
 
         var workspace = {
             "defaultEnv": "default",
@@ -80,8 +72,8 @@ export class Workspace {
             "description": null
         };
 
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace?account=', 201).setMethod('POST').setBody(workspace);
-        return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace?account=', 201).setMethod('POST').setBody(workspace);
+        return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
         });
 
@@ -91,15 +83,17 @@ export class Workspace {
     /**
      * Start a workspace and provide a Promise with WorkspaceDto.
      */
-    startWorkspace(workspaceId: string, displayLog? : boolean) : Promise<WorkspaceDto> {
+    startWorkspace(workspaceId:string, displayLog?:boolean):Promise<WorkspaceDto> {
 
-        var callbackSubscriber : WorkspaceStartEventPromiseMessageBusSubscriber;
-
+        var callbackSubscriber:WorkspaceStartEventPromiseMessageBusSubscriber;
+        let userWorkspaceDto : WorkspaceDto;
         // get workspace DTO
         return this.getWorkspace(workspaceId).then((workspaceDto) => {
-            var messageBus:MessageBus = this.getMessageBus(workspaceDto);
+            userWorkspaceDto = workspaceDto;
+            return this.getMessageBus(workspaceDto);
+        }).then((messageBus: MessageBus) => {
             var displayOutputWorkspaceSubscriber:MessageBusSubscriber = new WorkspaceDisplayOutputMessageBusSubscriber();
-            callbackSubscriber = new WorkspaceStartEventPromiseMessageBusSubscriber(messageBus, workspaceDto);
+            callbackSubscriber = new WorkspaceStartEventPromiseMessageBusSubscriber(messageBus, userWorkspaceDto);
             messageBus.subscribe('workspace:' + workspaceId, callbackSubscriber);
             let channel:string = 'machine:status:' + workspaceId + ':default';
             messageBus.subscribe(channel, callbackSubscriber);
@@ -107,13 +101,10 @@ export class Workspace {
                 messageBus.subscribe('workspace:' + workspaceId + ':ext-server:output', displayOutputWorkspaceSubscriber);
                 messageBus.subscribe(workspaceId + ':default:default', displayOutputWorkspaceSubscriber);
             }
-            // wait to connect websocket
-            var waitTill = new Date(new Date().getTime() + 4 * 1000);
-            while(waitTill > new Date()){}
-            return workspaceDto;
+            return userWorkspaceDto;
         }).then((workspaceDto) => {
-            var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime?environment=default', 200).setMethod('POST');
-            return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
+            var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime?environment=default', 200).setMethod('POST');
+            return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
                 return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
             }).then((workspaceDto) => {
                 return callbackSubscriber.promise;
@@ -127,17 +118,27 @@ export class Workspace {
 
 
     /**
+     * Search a workspace data by returning a Promise with WorkspaceDto.
+     */
+    searchWorkspace(key:string):Promise<WorkspaceDto> {
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + key, 200);
+        return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
+            return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
+        });
+    }
+
+    /**
      * Get a workspace data by returning a Promise with WorkspaceDto.
      */
-    getWorkspace(workspaceId: string) : Promise<WorkspaceDto> {
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId, 200);
-        return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
+    getWorkspace(workspaceId:string):Promise<WorkspaceDto> {
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId, 200);
+        return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
             return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
         });
     }
 
 
-    getMessageBus(workspaceDto: WorkspaceDto) : MessageBus {
+    getMessageBus(workspaceDto:WorkspaceDto): Promise<MessageBus> {
         // get id
         let workspaceId:string = workspaceDto.getId();
 
@@ -160,14 +161,13 @@ export class Workspace {
     }
 
 
-
     /**
      * Delete a workspace and returns a Promise with WorkspaceDto.
      */
-    deleteWorkspace(workspaceId: string) : Promise<WorkspaceDto> {
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId, 204).setMethod('DELETE');
-        return this.getWorkspace(workspaceId).then((workspaceDto : WorkspaceDto) => {
-            return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
+    deleteWorkspace(workspaceId:string):Promise<WorkspaceDto> {
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId, 204).setMethod('DELETE');
+        return this.getWorkspace(workspaceId).then((workspaceDto:WorkspaceDto) => {
+            return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
                 return workspaceDto;
             });
         });
@@ -177,22 +177,22 @@ export class Workspace {
     /**
      * Stop a workspace and returns a Promise with WorkspaceDto.
      */
-    stopWorkspace(workspaceId: string) : Promise<WorkspaceDto> {
+    stopWorkspace(workspaceId:string):Promise<WorkspaceDto> {
 
-        var jsonRequest : HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime', 204).setMethod('DELETE');
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + workspaceId + '/runtime', 204).setMethod('DELETE');
         var callbackSubscriber:WorkspaceStopEventPromiseMessageBusSubscriber;
 
+        var userWorkspaceDto : WorkspaceDto;
         // get workspace DTO
         return this.getWorkspace(workspaceId).then((workspaceDto) => {
-            var messageBus:MessageBus = this.getMessageBus(workspaceDto);
-            callbackSubscriber = new WorkspaceStopEventPromiseMessageBusSubscriber(messageBus, workspaceDto);
+            userWorkspaceDto = workspaceDto;
+            return this.getMessageBus(workspaceDto);
+        }).then((messageBus : MessageBus) => {
+            callbackSubscriber = new WorkspaceStopEventPromiseMessageBusSubscriber(messageBus, userWorkspaceDto);
             messageBus.subscribe('workspace:' + workspaceId, callbackSubscriber);
-            // wait to connect websocket
-            var waitTill = new Date(new Date().getTime() + 4 * 1000);
-            while(waitTill > new Date()){}
-            return workspaceDto;
+            return userWorkspaceDto;
         }).then((workspaceDto) => {
-            return jsonRequest.request().then((jsonResponse : HttpJsonResponse) => {
+            return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
                 return workspaceDto;
             });
         }).then((workspaceDto) => {
@@ -200,9 +200,34 @@ export class Workspace {
         });
     }
 
+    getWorkspaceAgent(workspaceDTO:WorkspaceDto):any {
+        // search the workspace agent link
+        let links:Array<any> = workspaceDTO.getContent().runtime.links;
+        var hrefWsAgent;
+        links.forEach((link) => {
+            if ('wsagent' === link.rel) {
+                hrefWsAgent = link.href;
+            }
+        });
+        return require('url').parse(hrefWsAgent);
+    }
+
+    /**
+     * Provides machine token for given workspace
+     * @param workspaceId the ID of the workspace
+     * @returns {*}
+     */
+    getMachineToken(workspaceDto:WorkspaceDto) {
+
+
+        var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/machine/token/' + workspaceDto.getId(), 200);
+        return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
+            return JSON.parse(jsonResponse.getData()).machineToken;
+        });
+
+    }
+
 }
-
-
 
 export class CreateWorkspaceConfig {
 
