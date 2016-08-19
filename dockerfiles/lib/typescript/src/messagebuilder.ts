@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 
+import {UUID} from "./uuid";
 /**
  * Generator of the messages to send with the {@link MessageBus} object.
  * @author Florent Benoit
@@ -36,7 +37,7 @@ export class MessageBuilder {
 
         this.message = {};
         // add uuid
-        this.message.uuid = this.buildUUID();
+        this.message.uuid = UUID.build();
 
         this.message.method = this.method;
         this.message.path = this.path;
@@ -72,15 +73,5 @@ export class MessageBuilder {
     build() {
         return this.message;
     }
-
-    buildUUID() {
-        var time = new Date().getTime();
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (match) => {
-            var rem = (time + 16 * Math.random()) % 16 | 0;
-            time = Math.floor(time / 16);
-            return (match === 'x' ? rem : rem & 7 | 8).toString(16);
-        });
-    }
-
 
 }
