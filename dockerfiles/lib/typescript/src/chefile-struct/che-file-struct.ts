@@ -27,10 +27,13 @@ export class CheFileServerStruct {
     port: number;
     user: string;
     pass: string;
-    startup: Array<String>;
+    startup: Array<string>;
+
+    properties : Map<string, string>;
 
     constructor() {
-        this.startup = new Array<String>();
+        this.startup = new Array<string>();
+        this.properties = new Map<string, string>();
     }
 }
 

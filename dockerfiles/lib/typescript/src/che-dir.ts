@@ -475,7 +475,14 @@ export class CheDir {
   cheBoot() {
     let containerVersion : string = new ContainerVersion().getVersion();
 
-    var commandLine: string = 'docker run ' +
+    var commandLine: string = 'docker run ';
+
+    for(var property in this.chefileStruct.server.properties){
+      let envProperty : string = ' --env ' + property + '=\"' + this.chefileStruct.server.properties[property] + '\"';
+      commandLine += envProperty;
+    }
+
+    commandLine +=
         ' -v /var/run/docker.sock:/var/run/docker.sock' +
         ' -e CHE_PORT=' + this.chefileStruct.server.port +
         ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
@@ -483,6 +490,7 @@ export class CheDir {
         ' codenvy/che-launcher:' + containerVersion + ' start';
 
     Log.getLogger().debug('Executing command line', commandLine);
+
     var child = this.exec(commandLine , function callback(error, stdout, stderr) {
         }
     );
