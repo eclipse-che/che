@@ -260,15 +260,15 @@ public class FactoryImpl implements Factory {
      */
     public static class FactoryImplBuilder {
 
-        private String              id;
-        private String              name;
-        private String              version;
-        private WorkspaceConfigImpl workspace;
-        private AuthorImpl          creator;
-        private PoliciesImpl        policies;
-        private IdeImpl             ide;
-        private ButtonImpl          button;
-        private Set<FactoryImage>   images;
+        private String            id;
+        private String            name;
+        private String            version;
+        private WorkspaceConfig   workspace;
+        private Author            creator;
+        private Policies          policies;
+        private Ide               ide;
+        private Button            button;
+        private Set<FactoryImage> images;
 
         private FactoryImplBuilder() {}
 
@@ -310,26 +310,26 @@ public class FactoryImpl implements Factory {
         }
 
         public FactoryImplBuilder setWorkspace(WorkspaceConfig workspace) {
-            this.workspace = new WorkspaceConfigImpl(workspace);
+            this.workspace = workspace;
             return this;
         }
 
-        public FactoryImplBuilder setCreator(AuthorImpl creator) {
+        public FactoryImplBuilder setCreator(Author creator) {
             this.creator = creator;
             return this;
         }
 
-        public FactoryImplBuilder setPolicies(PoliciesImpl policies) {
+        public FactoryImplBuilder setPolicies(Policies policies) {
             this.policies = policies;
             return this;
         }
 
-        public FactoryImplBuilder setIde(IdeImpl ide) {
+        public FactoryImplBuilder setIde(Ide ide) {
             this.ide = ide;
             return this;
         }
 
-        public FactoryImplBuilder setButton(ButtonImpl button) {
+        public FactoryImplBuilder setButton(Button button) {
             this.button = button;
             return this;
         }

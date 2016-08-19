@@ -275,14 +275,14 @@ public class WorkspaceImpl implements Workspace {
      */
     public static class WorkspaceImplBuilder {
 
-        private String               id;
-        private Account              account;
-        private String               name;
-        private boolean              isTemporary;
-        private WorkspaceStatus      status;
-        private WorkspaceConfigImpl  config;
-        private WorkspaceRuntimeImpl runtime;
-        private Map<String, String>  attributes;
+        private String              id;
+        private Account             account;
+        private String              name;
+        private boolean             isTemporary;
+        private WorkspaceStatus     status;
+        private WorkspaceConfig     config;
+        private WorkspaceRuntime    runtime;
+        private Map<String, String> attributes;
 
         private WorkspaceImplBuilder() {}
 
@@ -296,7 +296,7 @@ public class WorkspaceImpl implements Workspace {
         }
 
         public WorkspaceImplBuilder setConfig(WorkspaceConfig workspaceConfig) {
-            this.config = new WorkspaceConfigImpl(workspaceConfig);
+            this.config = workspaceConfig;
             this.name = workspaceConfig.getName();
             return this;
         }
@@ -326,7 +326,7 @@ public class WorkspaceImpl implements Workspace {
             return this;
         }
 
-        public WorkspaceImplBuilder setRuntime(WorkspaceRuntimeImpl runtime) {
+        public WorkspaceImplBuilder setRuntime(WorkspaceRuntime runtime) {
             this.runtime = runtime;
             return this;
         }
