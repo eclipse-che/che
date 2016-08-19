@@ -1,8 +1,8 @@
 package process_test
 
 import (
-	"github.com/evoevodin/machine-agent/op"
-	"github.com/evoevodin/machine-agent/process"
+	"github.com/eclipse/che/exec-agent/op"
+	"github.com/eclipse/che/exec-agent/process"
 	"testing"
 	"time"
 	"os"

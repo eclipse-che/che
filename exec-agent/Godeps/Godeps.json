@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/evoevodin/machine-agent",
+	"ImportPath": "github.com/eclipse/che/exec-agent",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v74",
 	"Deps": [

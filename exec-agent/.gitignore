@@ -1,4 +1,3 @@
-.idea/
-*.iml
 logs/
-machine-agent
+exec-agent
+g

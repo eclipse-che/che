@@ -2,7 +2,7 @@ package process_test
 
 import (
 	"fmt"
-	"github.com/evoevodin/machine-agent/process"
+	"github.com/eclipse/che/exec-agent/process"
 	"io/ioutil"
 	"os"
 	"testing"

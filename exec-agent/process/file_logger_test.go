@@ -2,7 +2,7 @@ package process_test
 
 import (
 	"encoding/json"
-	"github.com/evoevodin/machine-agent/process"
+	"github.com/eclipse/che/exec-agent/process"
 	"io/ioutil"
 	"math/rand"
 	"os"
