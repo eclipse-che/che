@@ -41,15 +41,22 @@ export class Websocket {
      * @param websocketURL the remote host base WS url
      * @param workspaceId the workspaceID used as suffix for the URL
      */
-    getMessageBus(websocketURL, workspaceId) : MessageBus {
+    getMessageBus(websocketURL, workspaceId) : Promise<MessageBus> {
         var bus: MessageBus = this.websocketConnections.get(workspaceId);
-        if (!bus) {
-            var webSocketClient: any = new this.wsClient();
-            var remoteWebsocketUrl: string = websocketURL;
-            bus = new MessageBus(webSocketClient, remoteWebsocketUrl, workspaceId, this);
-            this.websocketConnections.set(workspaceId, bus);
+        if (bus) {
+            return Promise.resolve(bus);
         }
-        return bus;
+        var webSocketClient: any = new this.wsClient();
+        var remoteWebsocketUrl: string = websocketURL;
+        let promise : Promise<MessageBus> = new Promise<MessageBus>((resolve, reject) => {
+            bus = new MessageBus(webSocketClient, remoteWebsocketUrl, workspaceId, this, resolve, reject);
+            this.websocketConnections.set(workspaceId, bus);
+        });
+
+        return promise.then(() => {
+            return bus;
+        });
+
     }
 
 

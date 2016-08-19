@@ -32,7 +32,7 @@ export class MessageBus {
     websocket : Websocket;
     workspaceId : string;
 
-    constructor(websocketClient : any, url: string, workspaceId : string, websocket: Websocket) {
+    constructor(websocketClient : any, url: string, workspaceId : string, websocket: Websocket, resolve : any, reject : any) {
 
         this.websocketClient = websocketClient;
         this.websocket = websocket;
@@ -41,14 +41,20 @@ export class MessageBus {
         this.closed = false;
         this.delaySend = [];
 
-        var client = websocketClient.on('connectFailed', function(error) {
+        var client = websocketClient.on('connectFailed', (error) => {
             Log.getLogger().error('Connect Error: ' + error.toString());
-            });
+            reject(error);
+        });
 
 
-        client.on('error', error => Log.getLogger().error('websocketclient error', error.toString()));
+        client.on('error', error => {
+            Log.getLogger().error('websocketclient error', error.toString());
+            reject(error);
+        });
 
         client.on('connect', (connection) => {
+            // resolve the promise of connecting to the bus
+            resolve(true);
             this.websocketConnection = connection;
             // push all previous messages
             this.delaySend.forEach((subscribeOrder) => this.send(subscribeOrder));
