@@ -56,6 +56,7 @@ import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
@@ -135,6 +136,7 @@ import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestTransmitter;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseDispatcher;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseTransmitter;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
+import org.eclipse.che.ide.machine.CommandPropertyValueProviderRegistryImpl;
 import org.eclipse.che.ide.menu.MainMenuView;
 import org.eclipse.che.ide.menu.MainMenuViewImpl;
 import org.eclipse.che.ide.menu.StatusPanelGroupView;
@@ -454,6 +456,9 @@ public class CoreGinModule extends AbstractGinModule {
 
         GinMultibinder<NodeInterceptor> nodeInterceptors = GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
         nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
+
+        // Machine
+        bind(CommandPropertyValueProviderRegistry.class).to(CommandPropertyValueProviderRegistryImpl.class).in(Singleton.class);
     }
 
     /** Configure Core UI components, resources and views */

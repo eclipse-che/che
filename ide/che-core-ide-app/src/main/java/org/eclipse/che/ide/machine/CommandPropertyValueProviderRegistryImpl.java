@@ -8,10 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.machine.client.command.valueproviders;
+package org.eclipse.che.ide.machine;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
