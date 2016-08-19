@@ -121,11 +121,26 @@ export class Workspace {
      * Search a workspace data by returning a Promise with WorkspaceDto.
      */
     searchWorkspace(key:string):Promise<WorkspaceDto> {
+        Log.getLogger().debug('search workspace with key', key);
         var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace/' + key, 200);
         return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
+            Log.getLogger().debug('got workspace with key', key, 'result: ', jsonResponse.getData());
             return new WorkspaceDto(JSON.parse(jsonResponse.getData()));
         });
     }
+
+    /**
+     * Search a workspace data by returning a Promise with WorkspaceDto.
+     */
+    existsWorkspace(key:string):Promise<WorkspaceDto> {
+        Log.getLogger().debug('search workspace with key', key);
+
+        return this.searchWorkspace(key).catch((error) => {
+            return undefined;
+        })
+    }
+
+
 
     /**
      * Get a workspace data by returning a Promise with WorkspaceDto.

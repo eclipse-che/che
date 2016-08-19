@@ -29,6 +29,10 @@ import {Project} from "./project";
 import {ContainerVersion} from "./container-version";
 import {CheFileStructWorkspaceCommand} from "./chefile-struct/che-file-struct";
 import {CheFileStructWorkspaceCommandImpl} from "./chefile-struct/che-file-struct";
+import {UUID} from "./uuid";
+import {HttpJsonRequest} from "./default-http-json-request";
+import {HttpJsonResponse} from "./default-http-json-request";
+import {DefaultHttpJsonRequest} from "./default-http-json-request";
 
 
 /**
@@ -64,6 +68,7 @@ export class CheDir {
   confFolder : any;
   workspacesFolder : any;
   chePropertiesFile : any;
+  dotCheIdFile : any;
 
   mode;
   args : Array<string>;
@@ -82,6 +87,7 @@ export class CheDir {
     this.folderName = this.path.basename(this.currentFolder);
     this.cheFile = this.path.resolve(this.currentFolder, 'Chefile');
     this.dotCheFolder = this.path.resolve(this.currentFolder, '.che');
+    this.dotCheIdFile = this.path.resolve(this.dotCheFolder, 'id');
     this.confFolder = this.path.resolve(this.dotCheFolder, 'conf');
     this.workspacesFolder = this.path.resolve(this.dotCheFolder, 'workspaces');
     this.chePropertiesFile = this.path.resolve(this.confFolder, 'che.properties');
@@ -277,17 +283,22 @@ export class CheDir {
 
       resolve();
     }).then(() => {
-      this.dockerContent = new RecipeBuilder().getDockerContent();
+      Log.getLogger().info('Search For A Running Eclipse Che...');
 
-      // loop to check startup (during 30seconds)
-      return this.loopWaitChePing();
-    }).then((value) => {
-      Log.getLogger().info('FOUND ECLIPSE CHE', this.buildLocalCheURL());
+      // Try to connect to Eclipse Che instance
+      return this.checkCheIsRunning();
+    }).then((isRunning) => {
+      if (!isRunning) {
+        return Promise.reject('No Eclipse Che Instance Running.');
+      }
+      Log.getLogger().info('Found Running Eclipse Che At', this.buildLocalCheURL());
+      Log.getLogger().info('Stopping Eclipse Che...');
 
       // call docker stop on the docker launcher
-      this.cheStop();
-      Log.getLogger().info('STOP ACTION CALLED');
-    })
+      return this.cheStop();
+    }).then(() => {
+      Log.getLogger().info('Eclipse Che Instance Successfully Stopped');
+    });
   }
 
 
@@ -309,6 +320,8 @@ export class CheDir {
 
     var ideUrl : string;
 
+    var needToSetupProject: boolean = true;
+
     return new Promise<string>((resolve, reject) => {
       this.parse();
 
@@ -318,48 +331,78 @@ export class CheDir {
       } catch (e) {
         reject('No che configured. che init has been done ?');
       }
-
-      Log.getLogger().info('Starting Eclipse Che Silently');
-      resolve('starting...');
+      resolve('parsed');
     }).then(() => {
+        return this.checkCheIsNotRunning();
+    }).then((isNotRunning) => {
+      return new Promise<boolean>((resolve, reject) => {
+        if (isNotRunning) {
+          resolve(true);
+        } else {
+          reject('Found existing instance of Che running on the same host/port. So aborting as che is already up.');
+        }
+      });
+    }).then((checkOk) => {
+      Log.getLogger().info('Starting Eclipse Che Silently');
       // needs to invoke docker run
       return this.cheBoot();
     }).then((data) => {
       // loop to check startup (during 30seconds)
       return this.loopWaitChePing();
     }).then((value) => {
-      Log.getLogger().info('Found Eclipse Che Running At', this.buildLocalCheURL());
-
-      // now create the workspace
-      let createWorkspaceConfig : CreateWorkspaceConfig = new CreateWorkspaceConfig();
-      createWorkspaceConfig.commands = this.chefileStructWorkspace.commands;
-      createWorkspaceConfig.name = this.chefileStructWorkspace.name;
-      createWorkspaceConfig.ram = this.chefileStructWorkspace.ram;
+      Log.getLogger().info('Eclipse Che Is Now Running At', this.buildLocalCheURL());
+      // check workspace exists
       this.workspace = new Workspace(this.authData);
-      return this.workspace.createWorkspace(createWorkspaceConfig);
+      return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
     }).then((workspaceDto) => {
-      Log.getLogger().info('Workspace Created');
-      Log.getLogger().info('Workspace Booting...');
-      return this.workspace.startWorkspace(workspaceDto.getId());
+      // found it
+      if (!workspaceDto) {
+        // workspace is not existing
+        // now create the workspace
+        let createWorkspaceConfig:CreateWorkspaceConfig = new CreateWorkspaceConfig();
+        createWorkspaceConfig.commands = this.chefileStructWorkspace.commands;
+        createWorkspaceConfig.name = this.chefileStructWorkspace.name;
+        createWorkspaceConfig.ram = this.chefileStructWorkspace.ram;
+        Log.getLogger().info('Workspace Created');
+        return this.workspace.createWorkspace(createWorkspaceConfig)
+      } else {
+        // do not create it, just return current one
+        Log.getLogger().info('Workspace Exists From A Previous Start');
+        needToSetupProject = false;
+        return workspaceDto;
+      }
+    }).then((workspaceDto) => {
+        Log.getLogger().info('Workspace Booting...');
+        return this.workspace.startWorkspace(workspaceDto.getId());
     }).then((workspaceDto) => {
       return this.workspace.getWorkspace(workspaceDto.getId())
     }).then((workspaceDto) => {
-      Log.getLogger().info('Updating Project...');
       // search IDE url link
       workspaceDto.getContent().links.forEach((link) => {
         if ('ide url' === link.rel) {
           ideUrl = link.href;
         }
       });
-      var project : Project = new Project(workspaceDto);
-      // update created project to blank
-      return project.updateType(this.folderName, 'blank');
+      if (needToSetupProject) {
+        Log.getLogger().info('Updating Project...');
+        var project:Project = new Project(workspaceDto);
+        // update created project to blank
+        return project.updateType(this.folderName, 'blank');
+      } else {
+        Promise.resolve('existing project')
+      }
     }).then(() => {
       Log.getLogger().info('Workspace Booted And Ready For Development');
       Log.getLogger().info('Connect to', ideUrl);
       return ideUrl;
     });
+
+
+
+
   }
+
+
 
 
 
@@ -394,6 +437,12 @@ export class CheDir {
     // create .che folder
     try {
       this.fs.mkdirSync(this.dotCheFolder, 0o744);
+    } catch (e) {
+      // already exist
+    }
+
+    try {
+      this.fs.writeFileSync(this.dotCheIdFile, UUID.build());
     } catch (e) {
       // already exist
     }
@@ -526,29 +575,77 @@ export class CheDir {
 
   }
 
-  /**
-   * Command used to stop the che instance that has been launched
-   */
-  cheStop() {
-    let containerVersion : string = new ContainerVersion().getVersion();
 
-    var commandLine: string = 'docker run ' +
-        ' -v /var/run/docker.sock:/var/run/docker.sock' +
-        ' -e CHE_PORT=' + this.chefileStruct.server.port +
-        ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
-        ' -e CHE_CONF_FOLDER=' + this.confFolder +
-        ' codenvy/che-launcher:' + containerVersion + ' stop';
 
-    Log.getLogger().debug('Executing command line', commandLine);
-    var child = this.exec(commandLine , function callback(error, stdout, stderr) {
+  cheStop() : Promise<any> {
+
+    let promise : Promise<any> = new Promise<any>((resolve, reject) => {
+      let containerVersion : string = new ContainerVersion().getVersion();
+
+      var commandLine: string = 'docker run ' +
+          ' -v /var/run/docker.sock:/var/run/docker.sock' +
+          ' -e CHE_PORT=' + this.chefileStruct.server.port +
+          ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
+          ' -e CHE_CONF_FOLDER=' + this.confFolder +
+          ' codenvy/che-launcher:' + containerVersion + ' stop';
+
+      Log.getLogger().debug('Executing command line', commandLine);
+
+
+      var child = this.exec(commandLine , (error, stdout, stderr) => {
+        if (error) {
+          Log.getLogger().error('Error when stopping che with che-launcher: ' + error.toString() + '. exit code was ' + error.code);
+          Log.getLogger().error('Stopping traces were on stdout:\n', stdout.toString());
+          Log.getLogger().error('Stopping traces were on stderr:\n', stderr.toString());
+        } else {
+          resolve({
+            childProcess: child,
+            stdout: stdout,
+            stderr: stderr
+          });
         }
-    );
+      });
+
+      child.stdout.on('data', (data) => {
+        Log.getLogger().debug(data.toString());
+      });
 
 
-    child.stdout.on('data', (data) => {
-      Log.getLogger().info(data.toString());
+      child.on('exit', (exitCode) => {
+        if (exitCode == 0) {
+          resolve('success');
+        } else {
+          reject('process has exited');
+        }
+
+      });
+
     });
 
+    return promise;
+
+  }
+
+
+  checkCheIsNotRunning() : Promise <boolean> {
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace', 200);
+    return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
+      return false;
+    }, (error) => {
+      // find error when connecting so probaly not running
+      return true;
+    });
+  }
+
+
+  checkCheIsRunning() : Promise<boolean> {
+    var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, '/api/workspace', 200);
+    return jsonRequest.request().then((jsonResponse:HttpJsonResponse) => {
+      return true;
+    }, (error) => {
+      // find error when connecting so probaly not running
+      return false;
+    });
   }
 
 

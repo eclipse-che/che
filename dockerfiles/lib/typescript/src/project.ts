@@ -54,6 +54,9 @@ export class Project {
                hrefWsAgent = link.href;
            }
         });
+        if (!hrefWsAgent) {
+            throw new Error('unable to find the workspace agent in dto :' + JSON.stringify(this.workspaceDTO.getContent()));
+        }
         var urlObject : any = require('url').parse(hrefWsAgent);
 
         this.authData = AuthData.parse(urlObject);
