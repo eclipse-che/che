@@ -28,7 +28,6 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -85,7 +84,10 @@ public class UserImpl implements User {
                      joinColumns = @JoinColumn(name = "user_id"))
     private List<String> aliases;
 
-    public UserImpl() {}
+    public UserImpl() {
+        this.account = new AccountImpl();
+        account.setType(PERSONAL_ACCOUNT);
+    }
 
     public UserImpl(String id, String email, String name) {
         this.account = new AccountImpl(id, name, PERSONAL_ACCOUNT);
@@ -116,6 +118,13 @@ public class UserImpl implements User {
     @Override
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+        if (account != null) {
+            account.setId(id);
+        }
     }
 
     @Override
