@@ -27,6 +27,8 @@ import {MessageBusSubscriber} from "./messagebus-subscriber";
 import {WorkspaceDisplayOutputMessageBusSubscriber} from "./workspace-log-output-subscriber";
 import {Project} from "./project";
 import {ContainerVersion} from "./container-version";
+import {CheFileStructWorkspaceCommand} from "./chefile-struct/che-file-struct";
+import {CheFileStructWorkspaceCommandImpl} from "./chefile-struct/che-file-struct";
 
 
 /**
@@ -102,7 +104,6 @@ export class CheDir {
     this.chefileStructWorkspace = new CheFileStructWorkspace();
     this.chefileStructWorkspace.name = 'local';
     this.chefileStructWorkspace.ram = 2048;
-    this.chefileStructWorkspace.commands[0] = {name: 'my command', commandLine : 'echo hello', type: 'custom'};
 
   }
 
@@ -160,10 +161,22 @@ export class CheDir {
     var script = this.vm.createScript(script_code);
     script.runInNewContext(sandbox);
 
+
+    // now, cleanup invalid commands
+    for (let i : number = this.chefileStructWorkspace.commands.length - 1; i >= 0 ; i--) {
+      // no name, drop it
+      if (!this.chefileStructWorkspace.commands[i].name) {
+        this.chefileStructWorkspace.commands.splice(i, 1);
+      }
+    }
+
     Log.getLogger().debug('Che file parsing object is ', JSON.stringify(this.chefileStruct));
     Log.getLogger().debug('Che workspace parsing object is ', JSON.stringify(this.chefileStructWorkspace));
 
     this.authData.port = this.chefileStruct.server.port;
+
+
+
 
   }
 

@@ -74,5 +74,10 @@ export class CheFileStructWorkspace {
     constructor() {
         this.commands = new Array<CheFileStructWorkspaceCommandImpl>();
         this.runtime = new CheFileStructWorkspaceRuntime();
+        // init some commands
+        for (let i : number = 0; i < 255; i++) {
+            this.commands[i] = new CheFileStructWorkspaceCommandImpl();
+        }
+
     }
 }
