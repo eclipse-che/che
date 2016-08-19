@@ -129,7 +129,7 @@ export class CheDir {
   }
 
   run() : Promise<string> {
-    Log.context = 'ECLIPSE CHE FILE';
+    Log.context = 'che(dir)';
 
     // call the method analyzed from the argument
     return this.parseArgument().then((methodName) => {
@@ -307,8 +307,7 @@ export class CheDir {
 
   performUp() : Promise<string> {
 
-    var workspaceId : string;
-    var userWorkspaceDto: WorkspaceDto;
+    var ideUrl : string;
 
     return new Promise<string>((resolve, reject) => {
       this.parse();
@@ -320,49 +319,44 @@ export class CheDir {
         reject('No che configured. che init has been done ?');
       }
 
-      Log.getLogger().info('STARTING ECLIPSE CHE SILENTLY');
-      // needs to invoke docker run
-      this.cheBoot();
-      resolve();
+      Log.getLogger().info('Starting Eclipse Che Silently');
+      resolve('starting...');
     }).then(() => {
-      this.dockerContent = new RecipeBuilder().getDockerContent();
-
+      // needs to invoke docker run
+      return this.cheBoot();
+    }).then((data) => {
       // loop to check startup (during 30seconds)
       return this.loopWaitChePing();
     }).then((value) => {
-      Log.getLogger().info('FOUND ECLIPSE CHE', this.buildLocalCheURL());
+      Log.getLogger().info('Found Eclipse Che Running At', this.buildLocalCheURL());
 
       // now create the workspace
       let createWorkspaceConfig : CreateWorkspaceConfig = new CreateWorkspaceConfig();
       createWorkspaceConfig.commands = this.chefileStructWorkspace.commands;
       createWorkspaceConfig.name = this.chefileStructWorkspace.name;
       createWorkspaceConfig.ram = this.chefileStructWorkspace.ram;
-
       this.workspace = new Workspace(this.authData);
-
       return this.workspace.createWorkspace(createWorkspaceConfig);
-
     }).then((workspaceDto) => {
-      Log.getLogger().info('WORKSPACE CREATED');
-      Log.getLogger().info('WORKSPACE BOOTING...');
+      Log.getLogger().info('Workspace Created');
+      Log.getLogger().info('Workspace Booting...');
       return this.workspace.startWorkspace(workspaceDto.getId());
     }).then((workspaceDto) => {
-      userWorkspaceDto = workspaceDto;
-      Log.getLogger().info('UPDATING PROJECT...');
-      var project : Project = new Project(workspaceDto);
-      // update created project to blank
-      return project.updateType(this.folderName, 'blank');
-    }).then(() => {
+      return this.workspace.getWorkspace(workspaceDto.getId())
+    }).then((workspaceDto) => {
+      Log.getLogger().info('Updating Project...');
       // search IDE url link
-      var ideUrl: string;
-      userWorkspaceDto.getContent().links.forEach((link) => {
+      workspaceDto.getContent().links.forEach((link) => {
         if ('ide url' === link.rel) {
           ideUrl = link.href;
         }
       });
-
-      Log.getLogger().info(ideUrl);
-      Log.getLogger().info('WORKSPACE BOOTED AND READY FOR DEVELOPMENT');
+      var project : Project = new Project(workspaceDto);
+      // update created project to blank
+      return project.updateType(this.folderName, 'blank');
+    }).then(() => {
+      Log.getLogger().info('Workspace Booted And Ready For Development');
+      Log.getLogger().info('Connect to', ideUrl);
       return ideUrl;
     });
   }
@@ -383,7 +377,7 @@ export class CheDir {
       var link = links[i];
       if (link.rel === 'ide url') {
         found = true;
-        Log.getLogger().info('WORKSPACE AT ' + link.href);
+        Log.getLogger().info('Workspace At ' + link.href);
       }
       i++;
 
