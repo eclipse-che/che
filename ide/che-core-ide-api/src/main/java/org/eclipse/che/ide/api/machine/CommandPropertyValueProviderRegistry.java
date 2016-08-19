@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.machine.client.command.valueproviders;
+package org.eclipse.che.ide.api.machine;
 
 import java.util.List;
 import java.util.Set;
