@@ -472,34 +472,63 @@ export class CheDir {
 
   }
 
-  cheBoot() {
-    let containerVersion : string = new ContainerVersion().getVersion();
+  cheBoot() : Promise<any> {
 
-    var commandLine: string = 'docker run ';
+    let promise : Promise<any> = new Promise<any>((resolve, reject) => {
+      let containerVersion : string = new ContainerVersion().getVersion();
 
-    for(var property in this.chefileStruct.server.properties){
-      let envProperty : string = ' --env ' + property + '=\"' + this.chefileStruct.server.properties[property] + '\"';
-      commandLine += envProperty;
-    }
+      // create command line to execute
+      var commandLine: string = 'docker run ';
 
-    commandLine +=
-        ' -v /var/run/docker.sock:/var/run/docker.sock' +
-        ' -e CHE_PORT=' + this.chefileStruct.server.port +
-        ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
-        ' -e CHE_CONF_FOLDER=' + this.confFolder +
-        ' codenvy/che-launcher:' + containerVersion + ' start';
+      // add extra properties
+      for(var property in this.chefileStruct.server.properties){
+        let envProperty : string = ' --env ' + property + '=\"' + this.chefileStruct.server.properties[property] + '\"';
+        commandLine += envProperty;
+      }
 
-    Log.getLogger().debug('Executing command line', commandLine);
+      // continue with own properties
+      commandLine +=
+          ' -v /var/run/docker.sock:/var/run/docker.sock' +
+          ' -e CHE_PORT=' + this.chefileStruct.server.port +
+          ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
+          ' -e CHE_CONF_FOLDER=' + this.confFolder +
+          ' codenvy/che-launcher:' + containerVersion + ' start';
 
-    var child = this.exec(commandLine , function callback(error, stdout, stderr) {
+      Log.getLogger().debug('Executing command line', commandLine);
+
+
+      var child = this.exec(commandLine , (error, stdout, stderr) => {
+            if (error) {
+              Log.getLogger().error('Error when starting che with che-launcher: ' + error.toString() + '. exit code was ' + error.code);
+              Log.getLogger().error('Startup traces were on stdout:\n', stdout.toString());
+              Log.getLogger().error('Startup traces were on stderr:\n', stderr.toString());
+            } else {
+              resolve({
+                childProcess: child,
+                stdout: stdout,
+                stderr: stderr
+              });
+            }
+          });
+
+      child.stdout.on('data', (data) => {
+        Log.getLogger().debug(data.toString());
+      });
+
+
+      child.on('exit', (exitCode) => {
+        if (exitCode == 0) {
+          resolve('success');
+        } else {
+          reject('process has exited');
         }
-    );
 
+      });
 
-    child.stdout.on('data', (data) => {
-      Log.getLogger().debug(data.toString());
+      this.dockerContent = new RecipeBuilder().getDockerContent();
     });
 
+    return promise;
 
   }
 
