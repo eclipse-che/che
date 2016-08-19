@@ -11,21 +11,21 @@
 
 import {MessageBusSubscriber} from './messagebus-subscriber';
 import {Log} from "./log";
+import {StringUtils} from "./string-utils";
 
 /**
- * Class that will display to console all workspace output messages.
+ * Class that will display to console all process output messages.
  * @author Florent Benoit
  */
-export class WorkspaceDisplayOutputMessageBusSubscriber implements MessageBusSubscriber {
+export class ProcesLogOutputMessageBusSubscriber implements MessageBusSubscriber {
 
     handleMessage(message: string) {
-        try {
-            let stringify = JSON.stringify(message);
-            Log.getLogger().info(stringify);
-        } catch (error) {
-            // maybe parse data to add colors
-            Log.getLogger().info(message);
+        if (StringUtils.startsWith(message, '[STDOUT] ')) {
+            console.log(Log.GREEN + message.substr('[STDOUT] '.length) + Log.NC);
+        } else if (StringUtils.startsWith(message, '[STDERR] ')) {
+            console.log(Log.RED + message.substr('[STDERR] '.length) + Log.NC);
+        } else {
+            console.log(message);
         }
     }
-
 }

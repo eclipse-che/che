@@ -31,7 +31,7 @@ export class Log {
     static DEBUG_PREFIX: string = Log.BLUE +  'DEBUG:' + Log.NC;
     static WARN_PREFIX: string = Log.ORANGE +  'WARN:' + Log.NC;
     static ERROR_PREFIX: string = Log.RED +  'ERROR:' + Log.NC;
-    
+
     static getLogger() : Log {
         if (!Log.logger) {
             Log.logger = new Log();
