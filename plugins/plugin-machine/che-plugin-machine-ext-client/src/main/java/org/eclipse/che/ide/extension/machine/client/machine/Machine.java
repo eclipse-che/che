@@ -23,6 +23,7 @@ import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server.Server;
+import org.eclipse.che.ide.util.UrlUtils;
 import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
@@ -118,7 +119,7 @@ public class Machine {
     public String getTerminalUrl() {
         for (Link link : machineLinks) {
             if (Constants.TERMINAL_REFERENCE.equals(link.getRel())) {
-                return link.getHref();
+                return UrlUtils.fixHostName(link.getHref());
             }
         }
 

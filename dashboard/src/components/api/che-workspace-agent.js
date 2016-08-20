@@ -23,13 +23,14 @@ export class CheWorkspaceAgent {
   /**
    * Default constructor that is using resource
    */
-  constructor($resource, $q, cheWebsocket, workspaceAgentData) {
+  constructor($resource, $q, cheWebsocket, workspaceAgentData, urlAdapter) {
     this.$resource = $resource;
     this.workspaceAgentData = workspaceAgentData;
+    this.urlAdapter = urlAdapter;
 
-    this.project = new CheProject($resource, $q, cheWebsocket, this.workspaceAgentData.path);
-    this.git = new CheGit($resource, this.workspaceAgentData.path);
-    this.projectType = new CheProjectType($resource, $q, this.workspaceAgentData.path);
+    this.project = new CheProject($resource, $q, cheWebsocket, this.urlAdapter.fixHostName(this.workspaceAgentData.path), this.urlAdapter);
+    this.git = new CheGit($resource, this.urlAdapter.fixHostName(this.workspaceAgentData.path));
+    this.projectType = new CheProjectType($resource, $q, this.urlAdapter.fixHostName(this.workspaceAgentData.path));
   }
 
   getProject() {

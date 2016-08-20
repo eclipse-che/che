@@ -21,7 +21,7 @@ export class CheProject {
   /**
    * Default constructor that is using resource
    */
-  constructor($resource, $q, cheWebsocket, wsagentPath) {
+  constructor($resource, $q, cheWebsocket, wsagentUrl, urlAdapter) {
 
     // keep resource
     this.$resource = $resource;
@@ -29,6 +29,8 @@ export class CheProject {
     this.cheWebsocket = cheWebsocket;
 
     this.$q = $q;
+
+    this.urlAdapter = urlAdapter;
 
     // project details map with key projectPath
     this.projectDetailsMap = new Map();
@@ -39,16 +41,18 @@ export class CheProject {
     // map of resolve per project  <project:projectType> --> Source Estimation
     this.resolveMap = new Map();
 
+    this.wsagentUrl = this.urlAdapter.fixHostName(wsagentUrl);
+
     // remote call
-    this.remoteProjectsAPI = this.$resource(wsagentPath + '/project', {}, {
-      import: {method: 'POST', url: wsagentPath + '/project/import/:path'},
-      create: {method: 'POST', url: wsagentPath + '/project?name=:path'},
-      details: {method: 'GET', url: wsagentPath + '/project/:path'},
-      estimate: {method: 'GET', url: wsagentPath + '/project/estimate/:path?type=:type'},
-      rename: {method: 'POST', url: wsagentPath + '/project/rename/:path?name=:name'},
-      remove: {method: 'DELETE', url: wsagentPath + '/project/:path'},
-      resolve: {method: 'GET', url: wsagentPath + '/project/resolve/:path', isArray: true},
-      update: {method: 'PUT', url: wsagentPath + '/project/:path'}
+    this.remoteProjectsAPI = this.$resource(this.wsagentUrl + '/project', {}, {
+      import: {method: 'POST', url: this.wsagentUrl + '/project/import/:path'},
+      create: {method: 'POST', url: this.wsagentUrl + '/project?name=:path'},
+      details: {method: 'GET', url: this.wsagentUrl + '/project/:path'},
+      estimate: {method: 'GET', url: this.wsagentUrl + '/project/estimate/:path?type=:type'},
+      rename: {method: 'POST', url: this.wsagentUrl + '/project/rename/:path?name=:name'},
+      remove: {method: 'DELETE', url: this.wsagentUrl + '/project/:path'},
+      resolve: {method: 'GET', url: this.wsagentUrl + '/project/resolve/:path', isArray: true},
+      update: {method: 'PUT', url: this.wsagentUrl + '/project/:path'}
     });
   }
 

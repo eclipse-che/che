@@ -23,12 +23,13 @@ export class CheWorkspace {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($resource, $q, cheWebsocket, lodash) {
+  constructor ($resource, $q, cheWebsocket, lodash, urlAdapter) {
     // keep resource
     this.$resource = $resource;
     this.$q = $q;
     this.lodash = lodash;
     this.cheWebsocket = cheWebsocket;
+    this.urlAdapter = urlAdapter;
 
     // current list of workspaces
     this.workspaces = [];
@@ -78,7 +79,7 @@ export class CheWorkspace {
       }
 
       let workspaceAgentData = {path : wsAgentLink.href};
-      let wsagent = new CheWorkspaceAgent(this.$resource, this.$q, this.cheWebsocket, workspaceAgentData);
+      let wsagent = new CheWorkspaceAgent(this.$resource, this.$q, this.cheWebsocket, workspaceAgentData, this.urlAdapter);
       this.workspaceAgents.set(workspaceId, wsagent);
       return wsagent;
     }
@@ -409,7 +410,7 @@ export class CheWorkspace {
       return '';
     }
     let websocketLink = this.lodash.find(workspace.runtime.devMachine.links, l => l.rel === "wsagent.websocket");
-    return websocketLink ? websocketLink.href : '';
+    return websocketLink ? this.urlAdapter.fixHostName(websocketLink.href) : '';
   }
 
   getIdeUrl(namespace, workspaceName) {

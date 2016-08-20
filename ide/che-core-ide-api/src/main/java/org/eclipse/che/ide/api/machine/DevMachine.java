@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.machine.shared.Constants;
+import org.eclipse.che.ide.util.UrlUtils;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.validation.constraints.NotNull;
@@ -68,7 +69,7 @@ public class DevMachine {
     public String getWsAgentWebSocketUrl() {
         for (Link link : devMachineLinks) {
             if (Constants.WSAGENT_WEBSOCKET_REFERENCE.equals(link.getRel())) {
-                return link.getHref();
+                return UrlUtils.fixHostName(link.getHref());
             }
         }
         //should not be
@@ -80,7 +81,7 @@ public class DevMachine {
     public String getTerminalUrl() {
         for (Link link : devMachineLinks) {
             if (Constants.TERMINAL_REFERENCE.equals(link.getRel())) {
-                return link.getHref();
+                return UrlUtils.fixHostName(link.getHref());
             }
         }
         //should not be
@@ -100,7 +101,7 @@ public class DevMachine {
             if (url.endsWith("/")) {
                 url = url.substring(0, url.length() - 1);
             }
-            return url;
+            return UrlUtils.fixHostName(url);
         } else {
             //should not be
             String message = "Reference " + Constants.WSAGENT_REFERENCE + " not found in DevMachine description";
@@ -139,7 +140,7 @@ public class DevMachine {
     /** Returns address (protocol://host:port) of the Workspace Agent. */
     public String getAddress() {
         final DevMachineServer server = getServer(Constants.WSAGENT_REFERENCE);
-        return server.getProtocol() + "://" + server.getAddress();
+        return UrlUtils.fixHostName(server.getProtocol() + "://" + server.getAddress());
     }
 
     /** Returns {@link Machine descriptor} of the Workspace Agent. */
