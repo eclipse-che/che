@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.project;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
@@ -211,7 +212,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<ItemReference> createFile(Path path, String content) {
-        final String url = getBaseUrl() + FILE + path(path.parent().toString()) + "?name=" + path.lastSegment();
+        final String url = getBaseUrl() + FILE + path(path.parent().toString()) + "?name=" + URL.encodeQueryString(path.lastSegment());
 
         return reqFactory.createPostRequest(url, null)
                          .data(content)
