@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
 import org.eclipse.che.ide.api.resources.Resource;
 
 /**

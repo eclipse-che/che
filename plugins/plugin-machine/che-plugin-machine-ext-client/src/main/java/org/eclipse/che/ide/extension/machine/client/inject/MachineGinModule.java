@@ -28,9 +28,7 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsView;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsViewImpl;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProviderRegistry;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProviderRegistryImpl;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectRelativePathProvider;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.DevMachineHostNameProvider;
@@ -109,8 +107,6 @@ public class MachineGinModule extends AbstractGinModule {
         bind(TargetsView.class).to(TargetsViewImpl.class).in(Singleton.class);
 
         GinMultibinder.newSetBinder(binder(), CommandType.class).addBinding().to(CustomCommandType.class);
-
-        bind(CommandPropertyValueProviderRegistry.class).to(CommandPropertyValueProviderRegistryImpl.class).in(Singleton.class);
 
         final GinMultibinder<CommandPropertyValueProvider> valueProviderBinder =
                 GinMultibinder.newSetBinder(binder(), CommandPropertyValueProvider.class);
