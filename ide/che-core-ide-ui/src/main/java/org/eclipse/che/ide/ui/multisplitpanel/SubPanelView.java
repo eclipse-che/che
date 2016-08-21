@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ui.multisplitpanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.ide.api.multisplitpanel.CloseCallback;
 import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
 import org.eclipse.che.ide.api.mvp.View;
 
@@ -44,7 +45,7 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
         /** Called when the {@code widget} gains the focus. */
         void onWidgetFocused(IsWidget widget);
 
-        /** Called when the {@code widget} has been removed from the panel. */
-        void onWidgetRemoved(IsWidget widget);
+        /** Called when the {@code widget} is going to be removed from the panel. */
+        void onWidgetRemoving(IsWidget widget, CloseCallback closeCallback);
     }
 }

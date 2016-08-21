@@ -15,8 +15,8 @@ package org.eclipse.che.ide.api.multisplitpanel;
  *
  * @author Artem Zatsarynnyi
  */
-public interface CloseListener {
+public interface ClosingListener {
 
     /** Invoked when a tab that contains widget is closed. */
-    void tabClosed();
+    void onTabClosing(CloseCallback closeCallback);
 }

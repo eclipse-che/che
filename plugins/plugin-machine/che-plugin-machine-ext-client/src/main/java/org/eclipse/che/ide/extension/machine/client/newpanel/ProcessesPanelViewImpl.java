@@ -27,7 +27,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.multisplitpanel.CloseListener;
+import org.eclipse.che.ide.api.multisplitpanel.CloseCallback;
+import org.eclipse.che.ide.api.multisplitpanel.ClosingListener;
 import org.eclipse.che.ide.api.multisplitpanel.FocusListener;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanelFactory;
@@ -46,6 +47,7 @@ import org.eclipse.che.ide.ui.tree.SelectionModel;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.HashMap;
@@ -268,17 +270,18 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         widget2Panels.put(widgetToShow, focusedSubPanel);
 
-        focusedSubPanel.addWidget(widgetToShow, new CloseListener() {
+        focusedSubPanel.addWidget(widgetToShow, new ClosingListener() {
             @Override
-            public void tabClosed() {
-                ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
+            public void onTabClosing(CloseCallback closeCallback) {
+                final ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
 
                 switch (treeNode.getType()) {
                     case COMMAND_NODE:
-                        delegate.onCloseCommandOutputClick(treeNode);
+                        delegate.onCommandTabClosing(treeNode, closeCallback);
                         break;
                     case TERMINAL_NODE:
-                        delegate.onCloseTerminal(treeNode);
+                        delegate.onTerminalTabClosing(treeNode);
+                        closeCallback.close();
                         break;
                 }
             }
@@ -376,6 +379,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     protected void focusView() {
         getElement().focus();
+        Log.info(ProcessesPanelViewImpl.class, "focus gained");
     }
 
     @Override

@@ -26,6 +26,10 @@ public interface TabItem extends View<TabItem.ActionDelegate>, ClickHandler {
 
     String getTitleText();
 
+    void select();
+
+    void unSelect();
+
     interface ActionDelegate {
 
         void onTabClicked(TabItem tab);

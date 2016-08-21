@@ -14,7 +14,6 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 
 /**
  * //
@@ -25,8 +24,8 @@ public class CloseAllTabsInPaneAction extends Action {
 
     private final SubPanel subPanel;
 
-    public CloseAllTabsInPaneAction(PartStackUIResources resources, SubPanel subPanel) {
-        super("Close All Tabs In Pane", "Close All Tabs In Pane", null, resources.closeIcon());
+    public CloseAllTabsInPaneAction(SubPanel subPanel) {
+        super("Close All Tabs In Pane", "Close All Tabs In Pane", null, null);
         this.subPanel = subPanel;
     }
 

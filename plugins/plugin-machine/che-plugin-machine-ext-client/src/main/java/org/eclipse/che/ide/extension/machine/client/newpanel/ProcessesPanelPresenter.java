@@ -30,6 +30,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.multisplitpanel.CloseCallback;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -82,21 +83,21 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     public static final  String SSH_PORT              = "22";
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
-    final Map<String, OutputConsole> consoles;
-    final Map<OutputConsole, String> consoleCommands;
-    private final ProcessesPanelView          view;
-    private final MachineLocalizationConstant localizationConstant;
-    private final MachineResources            resources;
-    private final MachineServiceClient        machineServiceClient;
-    private final WorkspaceAgent              workspaceAgent;
-    private final AppContext                  appContext;
-    private final NotificationManager         notificationManager;
-    private final EntityFactory               entityFactory;
-    private final TerminalFactory             terminalFactory;
-    private final CommandConsoleFactory       commandConsoleFactory;
-    private final DialogFactory               dialogFactory;
-    private final DtoFactory                  dtoFactory;
-    private final CommandTypeRegistry         commandTypeRegistry;
+    final         Map<String, OutputConsole>     consoles;
+    final         Map<OutputConsole, String>     consoleCommands;
+    private final ProcessesPanelView             view;
+    private final MachineLocalizationConstant    localizationConstant;
+    private final MachineResources               resources;
+    private final MachineServiceClient           machineServiceClient;
+    private final WorkspaceAgent                 workspaceAgent;
+    private final AppContext                     appContext;
+    private final NotificationManager            notificationManager;
+    private final EntityFactory                  entityFactory;
+    private final TerminalFactory                terminalFactory;
+    private final CommandConsoleFactory          commandConsoleFactory;
+    private final DialogFactory                  dialogFactory;
+    private final DtoFactory                     dtoFactory;
+    private final CommandTypeRegistry            commandTypeRegistry;
     private final Map<String, ProcessTreeNode>   machineNodes;
     private final Map<String, TerminalPresenter> terminals;
     private       List<ProcessTreeNode>          rootNodes;
@@ -207,6 +208,16 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onCloseTerminal(ProcessTreeNode node) {
+        closeTerminal(node);
+        view.hideProcessOutput(node.getId());
+    }
+
+    @Override
+    public void onTerminalTabClosing(ProcessTreeNode node) {
+        closeTerminal(node);
+    }
+
+    private void closeTerminal(ProcessTreeNode node) {
         String terminalId = node.getId();
         if (terminals.containsKey(terminalId)) {
             onStopProcess(node);
@@ -436,11 +447,26 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
-    public void onCloseCommandOutputClick(ProcessTreeNode node) {
+    public void onCloseCommandOutputClick(final ProcessTreeNode node) {
+        closeCommandOutput(node, new CloseCallback() {
+            @Override
+            public void close() {
+                view.hideProcessOutput(node.getId());
+            }
+        });
+    }
+
+    @Override
+    public void onCommandTabClosing(ProcessTreeNode node, CloseCallback closeCallback) {
+        closeCommandOutput(node, closeCallback);
+    }
+
+    private void closeCommandOutput(ProcessTreeNode node, CloseCallback closeCallback) {
         String commandId = node.getId();
         OutputConsole console = consoles.get(commandId);
 
         if (console == null) {
+            closeCallback.close();
             return;
         }
 
@@ -449,14 +475,21 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             onStopProcess(node);
             consoles.remove(commandId);
             consoleCommands.remove(console);
+
+            closeCallback.close();
+
             return;
         }
 
-        dialogFactory.createConfirmDialog("", localizationConstant.outputsConsoleViewStopProcessConfirmation(console.getTitle()),
-                                          getConfirmCloseConsoleCallback(console, node), null).show();
+        dialogFactory.createConfirmDialog("",
+                                          localizationConstant.outputsConsoleViewStopProcessConfirmation(console.getTitle()),
+                                          getConfirmCloseConsoleCallback(console, node, closeCallback),
+                                          null).show();
     }
 
-    private ConfirmCallback getConfirmCloseConsoleCallback(final OutputConsole console, final ProcessTreeNode node) {
+    private ConfirmCallback getConfirmCloseConsoleCallback(final OutputConsole console,
+                                                           final ProcessTreeNode node,
+                                                           final CloseCallback closeCallback) {
         return new ConfirmCallback() {
             @Override
             public void accepted() {
@@ -466,6 +499,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 console.close();
                 consoles.remove(node.getId());
                 consoleCommands.remove(console);
+
+                closeCallback.close();
             }
         };
     }
@@ -487,7 +522,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         removeChildFromMachineNode(node, parentNode);
         view.selectNode(neighborNode);
-        view.hideProcessOutput(processId);
+//        view.hideProcessOutput(processId);
     }
 
     private String getUniqueTerminalName(ProcessTreeNode machineNode) {

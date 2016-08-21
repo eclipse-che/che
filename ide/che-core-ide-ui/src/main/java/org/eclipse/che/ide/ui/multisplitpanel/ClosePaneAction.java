@@ -14,7 +14,6 @@ import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 
 /**
  * //
@@ -25,8 +24,8 @@ public class ClosePaneAction extends Action {
 
     private final SubPanel subPanel;
 
-    public ClosePaneAction(PartStackUIResources resources, SubPanel subPanel) {
-        super("Close Pane", "Close Pane", null, resources.closeIcon());
+    public ClosePaneAction(SubPanel subPanel) {
+        super("Close Pane", "Close Pane", null, null);
         this.subPanel = subPanel;
     }
 

@@ -40,10 +40,10 @@ public interface SubPanel {
      *
      * @param widget
      *         widget to add
-     * @param closeListener
+     * @param closingListener
      *         listener to be notified when tab with the specified {@code widget} is closed
      */
-    void addWidget(WidgetToShow widget, @Nullable CloseListener closeListener);
+    void addWidget(WidgetToShow widget, @Nullable ClosingListener closingListener);
 
     /** Show (activate) the {@code widget} if it exists on this panel. */
     void activateWidget(WidgetToShow widget);
@@ -65,4 +65,5 @@ public interface SubPanel {
      * this panel or on any child sub-panel gains the focus.
      */
     void setFocusListener(FocusListener listener);
+
 }

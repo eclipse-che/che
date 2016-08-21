@@ -15,15 +15,14 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.multisplitpanel.CloseListener;
+import org.eclipse.che.ide.api.multisplitpanel.CloseCallback;
+import org.eclipse.che.ide.api.multisplitpanel.ClosingListener;
 import org.eclipse.che.ide.api.multisplitpanel.FocusListener;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanelFactory;
 import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,26 +34,25 @@ import java.util.Map;
  */
 public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate {
 
-    private final SubPanelView                 view;
-    private final SubPanelFactory              subPanelFactory;
-    private final List<WidgetToShow>           widgets;
-    private final Map<IsWidget, CloseListener> closeListeners;
+    private final SubPanelView                   view;
+    private final SubPanelFactory                subPanelFactory;
+    private final List<WidgetToShow>             widgets;
+    private final Map<IsWidget, ClosingListener> closeListeners;
 
     private FocusListener focusListener;
 
     @Inject
     public SubPanelPresenter(SubPanelFactory subPanelFactory,
                              SubPanelViewFactory subPanelViewFactory,
-                             PartStackUIResources resources,
                              @Assisted @Nullable SubPanel parentPanel) {
         this.subPanelFactory = subPanelFactory;
 
         widgets = new ArrayList<>();
 
-        this.view = subPanelViewFactory.createView(new ClosePaneAction(resources, this),
-                                                   new CloseAllTabsInPaneAction(resources, this),
-                                                   new SplitHorizontallyAction(resources, this),
-                                                   new SplitVerticallyAction(resources, this));
+        this.view = subPanelViewFactory.createView(new ClosePaneAction(this),
+                                                   new CloseAllTabsInPaneAction(this),
+                                                   new SplitHorizontallyAction(this),
+                                                   new SplitVerticallyAction(this));
 
         closeListeners = new HashMap<>();
 
@@ -85,13 +83,13 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     }
 
     @Override
-    public void addWidget(WidgetToShow widget, @Nullable CloseListener closeListener) {
+    public void addWidget(WidgetToShow widget, @Nullable ClosingListener closingListener) {
         // TODO: just activate the widget if it's already exists on the panel
 
         widgets.add(widget);
 
-        if (closeListener != null) {
-            closeListeners.put(widget.getWidget(), closeListener);
+        if (closingListener != null) {
+            closeListeners.put(widget.getWidget(), closingListener);
         }
 
         view.addWidget(widget);
@@ -129,10 +127,10 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     }
 
     @Override
-    public void onWidgetRemoved(IsWidget widget) {
-        CloseListener listener = closeListeners.get(widget);
+    public void onWidgetRemoving(IsWidget widget, CloseCallback closeCallback) {
+        final ClosingListener listener = closeListeners.remove(widget);
         if (listener != null) {
-            listener.tabClosed();
+            listener.onTabClosing(closeCallback);
         }
     }
 }

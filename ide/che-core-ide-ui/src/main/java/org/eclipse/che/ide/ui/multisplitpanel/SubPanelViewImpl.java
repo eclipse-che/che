@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.multisplitpanel.CloseCallback;
 import org.eclipse.che.ide.api.multisplitpanel.TabItem;
 import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
 
@@ -139,12 +140,24 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, ListBut
 
     @Override
     public void activateWidget(WidgetToShow widget) {
+        final TabItem tab = widgets2Tabs.get(widget);
+        if (tab != null) {
+            selectTab(tab);
+        }
+
         widgetsPanel.showWidget(widget.getWidget().asWidget());
     }
 
     @Override
     public void removeWidget(WidgetToShow widget) {
-        TabItem tabItem = widgets2Tabs.remove(widget);
+        final TabItem tabItem = widgets2Tabs.get(widget);
+        if (tabItem != null) {
+            closeTab(tabItem);
+        }
+    }
+
+    private void removeWidgetFromUI(WidgetToShow widget) {
+        final TabItem tabItem = widgets2Tabs.remove(widget);
         if (tabItem != null) {
             tabsPanel.remove(tabItem);
             widgetsPanel.remove(widget.getWidget());
@@ -168,7 +181,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, ListBut
 
         splitLayoutPanel.remove(mainPanel);
 
-        Widget lastWidget = splitLayoutPanel.getWidget(0);
+        // move widget from east/south part to the center
+        final Widget lastWidget = splitLayoutPanel.getWidget(0);
         splitLayoutPanel.setWidgetSize(lastWidget, 0);
         splitLayoutPanel.remove(lastWidget);
         splitLayoutPanel.add(lastWidget);
@@ -195,6 +209,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, ListBut
     public void onListButtonClicked(ListItem tab) {
         final Object data = tab.getTabItem();
         if (data instanceof TabItem) {
+            selectTab((TabItem)data);
+
             WidgetToShow widget = tabs2Widgets.get(data);
             if (widget != null) {
                 activateWidget(widget);
@@ -207,17 +223,16 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, ListBut
 
     @Override
     public void onListButtonClosing(ListItem tab) {
-        final Object data = tab.getTabItem();
+        Object data = tab.getTabItem();
         if (data instanceof TabItem) {
-            WidgetToShow widget = tabs2Widgets.get(data);
-            if (widget != null) {
-                delegate.onWidgetRemoved(widget.getWidget());
-            }
+            closeTab((TabItem)data);
         }
     }
 
     @Override
     public void onTabClicked(TabItem tab) {
+        selectTab(tab);
+
         // TODO: extract code to the separate method
         WidgetToShow widget = tabs2Widgets.get(tab);
         if (widget != null) {
@@ -226,12 +241,30 @@ public class SubPanelViewImpl extends Composite implements SubPanelView, ListBut
         }
     }
 
+    private void selectTab(TabItem tab) {
+        for (TabItem tabItem : tabs2Widgets.keySet()) {
+            tabItem.unSelect();
+        }
+
+        tab.select();
+    }
+
     @Override
+
     public void onTabClosing(TabItem tab) {
-        // TODO: extract code to the separate method
-        WidgetToShow widget = tabs2Widgets.get(tab);
+        closeTab(tab);
+    }
+
+    private void closeTab(TabItem tab) {
+        final WidgetToShow widget = tabs2Widgets.get(tab);
+
         if (widget != null) {
-            delegate.onWidgetRemoved(widget.getWidget());
+            delegate.onWidgetRemoving(widget.getWidget(), new CloseCallback() {
+                @Override
+                public void close() {
+                    removeWidgetFromUI(widget);
+                }
+            });
         }
     }
 

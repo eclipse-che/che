@@ -13,7 +13,6 @@ package org.eclipse.che.ide.ui.multisplitpanel;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
-import org.eclipse.che.ide.api.parts.PartStackUIResources;
 
 /**
  * //
@@ -24,8 +23,8 @@ public class SplitVerticallyAction extends Action {
 
     private final SubPanel subPanel;
 
-    public SplitVerticallyAction(PartStackUIResources resources, SubPanel subPanel) {
-        super("Split Pane In Two Columns", "Split Pane In Two Columns", null, resources.closeIcon());
+    public SplitVerticallyAction(SubPanel subPanel) {
+        super("Split Pane In Two Columns", "Split Pane In Two Columns", null, null);
         this.subPanel = subPanel;
     }
 

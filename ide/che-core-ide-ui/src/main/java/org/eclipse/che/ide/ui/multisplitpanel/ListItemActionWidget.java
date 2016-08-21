@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.vectomatic.dom.svg.ui.SVGImage;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * @author Dmitry Shnurenko
@@ -29,30 +30,23 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  */
 public class ListItemActionWidget extends Composite implements ListItem<Action> {
 
-    interface ListItemWidgetUiBinder extends UiBinder<Widget, ListItemActionWidget> {
-    }
-
     private static final ListItemWidgetUiBinder UI_BINDER = GWT.create(ListItemWidgetUiBinder.class);
-
-    private Action action;
-
     @UiField
     FlowPanel iconPanel;
-
     @UiField
-    Label title;
-
-    @UiField
-    FlowPanel closeButton;
-
+    Label     title;
+    private Action         action;
     private ActionDelegate delegate;
 
     public ListItemActionWidget(Action action) {
         initWidget(UI_BINDER.createAndBindUi(this));
         this.action = action;
 
-        Widget icon = new SVGImage(action.getTemplatePresentation().getSVGResource());
-        iconPanel.add(icon);
+        final SVGResource actionIcon = action.getTemplatePresentation().getSVGResource();
+        if (actionIcon != null) {
+            iconPanel.add(new SVGImage(actionIcon));
+        }
+
         title.setText(action.getTemplatePresentation().getText());
 
         addDomHandler(new ClickHandler() {
@@ -60,18 +54,6 @@ public class ListItemActionWidget extends Composite implements ListItem<Action> 
             public void onClick(ClickEvent event) {
                 if (delegate != null) {
                     delegate.onItemClicked(ListItemActionWidget.this);
-                }
-            }
-        }, ClickEvent.getType());
-
-        closeButton.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                clickEvent.stopPropagation();
-                clickEvent.preventDefault();
-
-                if (delegate != null) {
-                    delegate.onCloseButtonClicked(ListItemActionWidget.this);
                 }
             }
         }, ClickEvent.getType());
@@ -85,5 +67,8 @@ public class ListItemActionWidget extends Composite implements ListItem<Action> 
     @Override
     public Action getTabItem() {
         return action;
+    }
+
+    interface ListItemWidgetUiBinder extends UiBinder<Widget, ListItemActionWidget> {
     }
 }

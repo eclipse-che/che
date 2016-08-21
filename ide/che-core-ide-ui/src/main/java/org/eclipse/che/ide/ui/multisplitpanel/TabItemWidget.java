@@ -90,6 +90,18 @@ public class TabItemWidget extends Composite implements TabItem {
     }
 
     @Override
+    public void select() {
+        // Marks tab is focused
+        getElement().setAttribute("focused", "");
+    }
+
+    @Override
+    public void unSelect() {
+        // Marks tab is not focused
+        getElement().removeAttribute("focused");
+    }
+
+    @Override
     public void onClick(@NotNull ClickEvent event) {
         if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
             delegate.onTabClicked(this);
