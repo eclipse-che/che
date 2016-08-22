@@ -30,7 +30,6 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.api.multisplitpanel.CloseCallback;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
@@ -52,6 +51,7 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Default
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -448,25 +448,25 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onCloseCommandOutputClick(final ProcessTreeNode node) {
-        closeCommandOutput(node, new CloseCallback() {
+        closeCommandOutput(node, new SubPanel.RemoveCallback() {
             @Override
-            public void close() {
+            public void remove() {
                 view.hideProcessOutput(node.getId());
             }
         });
     }
 
     @Override
-    public void onCommandTabClosing(ProcessTreeNode node, CloseCallback closeCallback) {
-        closeCommandOutput(node, closeCallback);
+    public void onCommandTabClosing(ProcessTreeNode node, SubPanel.RemoveCallback removeCallback) {
+        closeCommandOutput(node, removeCallback);
     }
 
-    private void closeCommandOutput(ProcessTreeNode node, CloseCallback closeCallback) {
+    private void closeCommandOutput(ProcessTreeNode node, SubPanel.RemoveCallback removeCallback) {
         String commandId = node.getId();
         OutputConsole console = consoles.get(commandId);
 
         if (console == null) {
-            closeCallback.close();
+            removeCallback.remove();
             return;
         }
 
@@ -476,20 +476,20 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             consoles.remove(commandId);
             consoleCommands.remove(console);
 
-            closeCallback.close();
+            removeCallback.remove();
 
             return;
         }
 
         dialogFactory.createConfirmDialog("",
                                           localizationConstant.outputsConsoleViewStopProcessConfirmation(console.getTitle()),
-                                          getConfirmCloseConsoleCallback(console, node, closeCallback),
+                                          getConfirmCloseConsoleCallback(console, node, removeCallback),
                                           null).show();
     }
 
     private ConfirmCallback getConfirmCloseConsoleCallback(final OutputConsole console,
                                                            final ProcessTreeNode node,
-                                                           final CloseCallback closeCallback) {
+                                                           final SubPanel.RemoveCallback removeCallback) {
         return new ConfirmCallback() {
             @Override
             public void accepted() {
@@ -500,7 +500,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 consoles.remove(node.getId());
                 consoleCommands.remove(console);
 
-                closeCallback.close();
+                removeCallback.remove();
             }
         };
     }

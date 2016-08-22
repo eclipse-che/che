@@ -7,23 +7,26 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.api.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.tab;
 
 import com.google.gwt.event.dom.client.ClickHandler;
 
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * //
+ * Interface for a tab associated with some widget on the {@link SubPanel}.
  *
  * @author Artem Zatsarynnyi
  */
-public interface TabItem extends View<TabItem.ActionDelegate>, ClickHandler {
+public interface Tab extends View<Tab.ActionDelegate>, ClickHandler {
 
+    /** Returns the icon associated with tab. */
     SVGResource getIcon();
 
+    /** Returns the title text for the tab. */
     String getTitleText();
 
     void select();
@@ -32,9 +35,10 @@ public interface TabItem extends View<TabItem.ActionDelegate>, ClickHandler {
 
     interface ActionDelegate {
 
-        void onTabClicked(TabItem tab);
+        /** Called when {@code tab} is clicked. */
+        void onTabClicked(Tab tab);
 
-        /** Called just before the {@code tab} closes. */
-        void onTabClosing(TabItem tab);
+        /** Called when {@code tab} is going to be closed. */
+        void onTabClosing(Tab tab);
     }
 }

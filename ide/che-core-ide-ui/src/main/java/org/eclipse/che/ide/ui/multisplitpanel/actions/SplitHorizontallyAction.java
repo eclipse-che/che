@@ -7,34 +7,29 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.ui.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.actions;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
-import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 
 /**
- * //
+ * Action for horizontally splitting the given {@link SubPanel} on the two sub-panels.
  *
  * @author Artem Zatsarynnyi
  */
-public class ClosePaneAction extends Action {
+public class SplitHorizontallyAction extends Action {
 
     private final SubPanel subPanel;
 
-    public ClosePaneAction(SubPanel subPanel) {
-        super("Close Pane", "Close Pane", null, null);
+    public SplitHorizontallyAction(SubPanel subPanel) {
+        super("Split Pane In Two Rows", "Split Pane In Two Rows", null, null);
         this.subPanel = subPanel;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        for (WidgetToShow widget : subPanel.getAllWidgets()) {
-            subPanel.removeWidget(widget);
-        }
-
-        subPanel.closePane();
+        subPanel.splitHorizontally();
     }
 }

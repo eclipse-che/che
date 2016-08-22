@@ -12,10 +12,10 @@ package org.eclipse.che.ide.extension.machine.client.newpanel;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
-import org.eclipse.che.ide.api.multisplitpanel.CloseCallback;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -137,6 +137,6 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
          */
         void onCloseCommandOutputClick(ProcessTreeNode node);
 
-        void onCommandTabClosing(ProcessTreeNode node, CloseCallback closeCallback);
+        void onCommandTabClosing(ProcessTreeNode node, SubPanel.RemoveCallback removeCallback);
     }
 }

@@ -28,12 +28,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.multisplitpanel.CloseCallback;
-import org.eclipse.che.ide.api.multisplitpanel.ClosingListener;
-import org.eclipse.che.ide.api.multisplitpanel.FocusListener;
-import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
-import org.eclipse.che.ide.api.multisplitpanel.SubPanelFactory;
-import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.theme.Style;
@@ -62,7 +59,7 @@ import java.util.Map;
  * @author Artem Zatsarynnyi
  */
 public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDelegate> implements ProcessesPanelView,
-                                                                                                   FocusListener,
+                                                                                                   SubPanel.FocusListener,
                                                                                                    RequiresResize {
 
     @UiField(provided = true)
@@ -189,7 +186,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         setContentWidget(uiBinder.createAndBindUi(this));
         navigationPanel.getElement().setTabIndex(0);
 
-        SubPanel subPanel = subPanelFactory.newPanel(null);
+        SubPanel subPanel = subPanelFactory.newPanel();
         subPanel.setFocusListener(this);
         splitLayoutPanel.add(subPanel.getView());
         focusedSubPanel = subPanel;
@@ -276,18 +273,18 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         widget2Panels.put(widgetToShow, focusedSubPanel);
 
-        focusedSubPanel.addWidget(widgetToShow, new ClosingListener() {
+        focusedSubPanel.addWidget(widgetToShow, new SubPanel.WidgetRemovingListener() {
             @Override
-            public void onTabClosing(CloseCallback closeCallback) {
+            public void onWidgetRemoving(SubPanel.RemoveCallback removeCallback) {
                 final ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
 
                 switch (treeNode.getType()) {
                     case COMMAND_NODE:
-                        delegate.onCommandTabClosing(treeNode, closeCallback);
+                        delegate.onCommandTabClosing(treeNode, removeCallback);
                         break;
                     case TERMINAL_NODE:
                         delegate.onTerminalTabClosing(treeNode);
-                        closeCallback.close();
+                        removeCallback.remove();
                         break;
                 }
             }

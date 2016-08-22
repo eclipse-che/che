@@ -7,8 +7,8 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.ui.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.menu;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -27,49 +27,46 @@ import com.google.inject.Inject;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * @author Dmitry Shnurenko
- * @author Vitaliy Guliy
+ * Widget that represents the {@link Menu}.
+ *
+ * @author Artem Zatsarynnyi
  */
-public class ListButtonWidget extends Composite implements ListButton {
+public class MenuWidget extends Composite implements Menu {
 
-    public interface Resources extends ClientBundle {
-        interface Styles extends CssResource {
-            String listItemPanel();
-        }
-
-        @Source({"style.css", "org/eclipse/che/ide/api/ui/style.css"})
-        Resources.Styles css();
-
-        @Source("multi-file-icon.svg")
-        SVGResource multiFileIcon();
-    }
-
-    interface ListButtonWidgetUiBinder extends UiBinder<Widget, ListButtonWidget> {
-    }
-
-    private static final String GWT_POPUP_STANDARD_STYLE = "gwt-PopupPanel";
-
-    private static final ListButtonWidgetUiBinder UI_BINDER = GWT.create(ListButtonWidgetUiBinder.class);
-
-    private final PopupPanel     popupPanel;
-
-    private final FlowPanel      listPanel;
-
-    private final List<ListItem> items = new ArrayList<>();
+    private static final String                   GWT_POPUP_STANDARD_STYLE = "gwt-PopupPanel";
+    private static final ListButtonWidgetUiBinder UI_BINDER                = GWT.create(ListButtonWidgetUiBinder.class);
 
     @UiField(provided = true)
     final Resources resources;
 
-    private ActionDelegate delegate;
+    private final PopupPanel popupPanel;
+    private final FlowPanel  listPanel;
 
-    private long closeTime;
+    private ActionDelegate delegate;
+    private long           closeTime;
+
+    private MenuItem.ActionDelegate itemDelegate = new MenuItem.ActionDelegate() {
+
+        @Override
+        public void onItemSelected(MenuItem menuItem) {
+            popupPanel.hide();
+            if (delegate != null) {
+                delegate.onMenuItemSelected(menuItem);
+            }
+        }
+
+        @Override
+        public void onItemClosing(MenuItem menuItem) {
+            popupPanel.hide();
+            if (delegate != null) {
+                delegate.onMenuItemClosing(menuItem);
+            }
+        }
+    };
 
     @Inject
-    public ListButtonWidget(Resources resources) {
+    public MenuWidget(Resources resources) {
         this.resources = resources;
         resources.css().ensureInjected();
 
@@ -114,41 +111,35 @@ public class ListButtonWidget extends Composite implements ListButton {
         popupPanel.getElement().getStyle().setProperty("top", "" + y + "px");
     }
 
-    private ListItem.ActionDelegate itemDelegate = new ListItem.ActionDelegate() {
-
-        @Override
-        public void onItemClicked(ListItem listItem) {
-            popupPanel.hide();
-            if (delegate != null) {
-                delegate.onListButtonClicked(listItem);
-            }
-        }
-
-        @Override
-        public void onCloseButtonClicked(ListItem listItem) {
-            popupPanel.hide();
-            if (delegate != null) {
-                delegate.onListButtonClosing(listItem);
-            }
-        }
-    };
-
     @Override
-    public void addListItem(ListItem listItem) {
-        items.add(listItem);
-        listPanel.add(listItem);
-        listItem.setDelegate(itemDelegate);
+    public void addListItem(MenuItem menuItem) {
+        menuItem.setDelegate(itemDelegate);
+        listPanel.add(menuItem);
     }
 
     @Override
-    public void removeListItem(ListItem listItem) {
-        items.remove(listItem);
-        listPanel.remove(listItem);
+    public void removeListItem(MenuItem menuItem) {
+        listPanel.remove(menuItem);
     }
 
     @Override
     public void setDelegate(ActionDelegate delegate) {
         this.delegate = delegate;
+    }
+
+    public interface Resources extends ClientBundle {
+        @Source({"style.css", "org/eclipse/che/ide/api/ui/style.css"})
+        Resources.Styles css();
+
+        @Source("multi-file-icon.svg")
+        SVGResource multiFileIcon();
+
+        interface Styles extends CssResource {
+            String listItemPanel();
+        }
+    }
+
+    interface ListButtonWidgetUiBinder extends UiBinder<Widget, MenuWidget> {
     }
 
 }

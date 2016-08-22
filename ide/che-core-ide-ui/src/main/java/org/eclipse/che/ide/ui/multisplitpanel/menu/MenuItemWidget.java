@@ -7,8 +7,8 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.ui.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.menu;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,46 +20,41 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-import org.eclipse.che.ide.api.multisplitpanel.TabItem;
+import org.eclipse.che.ide.ui.multisplitpanel.tab.Tab;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
- * @author Dmitry Shnurenko
- * @author Vitaliy Guliy
+ * Implementation of {@link MenuItem} that represents {@link Tab}.
+ *
+ * @author Artem Zatsarynnyi
  */
-public class ListItemWidget extends Composite implements ListItem<TabItem> {
+public class MenuItemWidget extends Composite implements MenuItem<Tab> {
 
-    interface ListItemWidgetUiBinder extends UiBinder<Widget, ListItemWidget> {
-    }
-
-    private static final ListItemWidgetUiBinder UI_BINDER = GWT.create(ListItemWidgetUiBinder.class);
-
-    private TabItem tabItem;
+    private static final MenuItemWidgetUiBinder UI_BINDER = GWT.create(MenuItemWidgetUiBinder.class);
 
     @UiField
     FlowPanel iconPanel;
-
     @UiField
-    Label title;
-
+    Label     title;
     @UiField
     FlowPanel closeButton;
 
+    private Tab            tab;
     private ActionDelegate delegate;
 
-    public ListItemWidget(TabItem tabItem) {
+    public MenuItemWidget(Tab tab) {
         initWidget(UI_BINDER.createAndBindUi(this));
-        this.tabItem = tabItem;
+        this.tab = tab;
 
-        Widget icon = new SVGImage(tabItem.getIcon());
+        Widget icon = new SVGImage(tab.getIcon());
         iconPanel.add(icon);
-        title.setText(tabItem.getTitleText());
+        title.setText(tab.getTitleText());
 
         addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (delegate != null) {
-                    delegate.onItemClicked(ListItemWidget.this);
+                    delegate.onItemSelected(MenuItemWidget.this);
                 }
             }
         }, ClickEvent.getType());
@@ -71,7 +66,7 @@ public class ListItemWidget extends Composite implements ListItem<TabItem> {
                 clickEvent.preventDefault();
 
                 if (delegate != null) {
-                    delegate.onCloseButtonClicked(ListItemWidget.this);
+                    delegate.onItemClosing(MenuItemWidget.this);
                 }
             }
         }, ClickEvent.getType());
@@ -83,8 +78,10 @@ public class ListItemWidget extends Composite implements ListItem<TabItem> {
     }
 
     @Override
-    public TabItem getTabItem() {
-        return tabItem;
+    public Tab getData() {
+        return tab;
     }
 
+    interface MenuItemWidgetUiBinder extends UiBinder<Widget, MenuItemWidget> {
+    }
 }

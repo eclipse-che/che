@@ -7,20 +7,21 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.ui.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.panel;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.api.multisplitpanel.CloseCallback;
-import org.eclipse.che.ide.api.multisplitpanel.ClosingListener;
-import org.eclipse.che.ide.api.multisplitpanel.FocusListener;
-import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
-import org.eclipse.che.ide.api.multisplitpanel.SubPanelFactory;
-import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
+import org.eclipse.che.ide.ui.multisplitpanel.actions.ClosePaneAction;
+import org.eclipse.che.ide.ui.multisplitpanel.actions.RemoveAllWidgetsInPaneAction;
+import org.eclipse.che.ide.ui.multisplitpanel.actions.SplitHorizontallyAction;
+import org.eclipse.che.ide.ui.multisplitpanel.actions.SplitVerticallyAction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,20 +29,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * //
+ * Presenter for {@link SubPanel}.
  *
  * @author Artem Zatsarynnyi
  */
 public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate {
 
-    private final SubPanelView                   view;
-    private final SubPanelFactory                subPanelFactory;
-    private final List<WidgetToShow>             widgets;
-    private final Map<IsWidget, ClosingListener> closeListeners;
+    private final SubPanelView                          view;
+    private final SubPanelFactory                       subPanelFactory;
+    private final List<WidgetToShow>                    widgets;
+    private final Map<IsWidget, WidgetRemovingListener> removingListeners;
 
     private FocusListener focusListener;
 
-    @Inject
+
+    @AssistedInject
+    public SubPanelPresenter(SubPanelFactory subPanelFactory, SubPanelViewFactory subPanelViewFactory) {
+        this(subPanelFactory, subPanelViewFactory, null);
+    }
+
+    @AssistedInject
     public SubPanelPresenter(SubPanelFactory subPanelFactory,
                              SubPanelViewFactory subPanelViewFactory,
                              @Assisted @Nullable SubPanel parentPanel) {
@@ -50,11 +57,11 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
         widgets = new ArrayList<>();
 
         this.view = subPanelViewFactory.createView(new ClosePaneAction(this),
-                                                   new CloseAllTabsInPaneAction(this),
+                                                   new RemoveAllWidgetsInPaneAction(this),
                                                    new SplitHorizontallyAction(this),
                                                    new SplitVerticallyAction(this));
 
-        closeListeners = new HashMap<>();
+        removingListeners = new HashMap<>();
 
         view.setDelegate(this);
 
@@ -83,13 +90,13 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     }
 
     @Override
-    public void addWidget(WidgetToShow widget, @Nullable ClosingListener closingListener) {
+    public void addWidget(WidgetToShow widget, @Nullable WidgetRemovingListener widgetRemovingListener) {
         // TODO: just activate the widget if it's already exists on the panel
 
         widgets.add(widget);
 
-        if (closingListener != null) {
-            closeListeners.put(widget.getWidget(), closingListener);
+        if (widgetRemovingListener != null) {
+            removingListeners.put(widget.getWidget(), widgetRemovingListener);
         }
 
         view.addWidget(widget);
@@ -113,7 +120,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
 
     @Override
     public void closePane() {
-        view.removeCentralPanel();
+        view.closePanel();
     }
 
     @Override
@@ -127,10 +134,10 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     }
 
     @Override
-    public void onWidgetRemoving(IsWidget widget, CloseCallback closeCallback) {
-        final ClosingListener listener = closeListeners.remove(widget);
+    public void onWidgetRemoving(IsWidget widget, RemoveCallback removeCallback) {
+        final WidgetRemovingListener listener = removingListeners.remove(widget);
         if (listener != null) {
-            listener.onTabClosing(closeCallback);
+            listener.onWidgetRemoving(removeCallback);
         }
     }
 }

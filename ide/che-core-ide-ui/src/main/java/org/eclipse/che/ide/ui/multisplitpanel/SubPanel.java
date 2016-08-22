@@ -7,8 +7,8 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.api.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -23,6 +23,9 @@ import java.util.List;
  * <p>
  * A panel may be split on two sub-panels vertically or horizontally.
  * Each sub-panel may be closed.
+ * <p>
+ * {@link SubPanelFactory#newPanel()} should be used
+ * in order to create new {@link SubPanel}.
  *
  * @author Artem Zatsarynnyi
  */
@@ -31,8 +34,10 @@ public interface SubPanel {
     /** Returns the panel's view. */
     IsWidget getView();
 
+    /** Split this panel horizontally on two sub-panels. */
     void splitHorizontally();
 
+    /** Split this panel vertically on two sub-panels. */
     void splitVertically();
 
     /**
@@ -40,14 +45,16 @@ public interface SubPanel {
      *
      * @param widget
      *         widget to add
-     * @param closingListener
-     *         listener to be notified when tab with the specified {@code widget} is closed
+     * @param widgetRemovingListener
+     *         listener to be notified when the specified {@code widget}
+     *         is going to be removed from the panel
      */
-    void addWidget(WidgetToShow widget, @Nullable ClosingListener closingListener);
+    void addWidget(WidgetToShow widget, @Nullable WidgetRemovingListener widgetRemovingListener);
 
     /** Show (activate) the {@code widget} if it exists on this panel. */
     void activateWidget(WidgetToShow widget);
 
+    /** Returns list of all widgets added to the panel. */
     List<WidgetToShow> getAllWidgets();
 
     /**
@@ -58,6 +65,7 @@ public interface SubPanel {
      */
     void removeWidget(WidgetToShow widget);
 
+    /** Close this panel. Note that each widget will be removed from the panel before it close. */
     void closePane();
 
     /**
@@ -66,4 +74,22 @@ public interface SubPanel {
      */
     void setFocusListener(FocusListener listener);
 
+    interface WidgetRemovingListener {
+
+        /** Invoked when a widget is going to be removed. */
+        void onWidgetRemoving(RemoveCallback removeCallback);
+    }
+
+    /** Callback that may be used for actual removing widget. */
+    interface RemoveCallback {
+
+        /** Tells panel to remove widget. */
+        void remove();
+    }
+
+    interface FocusListener {
+
+        /** Invoked when a {@code widget} on a {@code panel} gains the focus. */
+        void focusGained(SubPanel panel, IsWidget widget);
+    }
 }

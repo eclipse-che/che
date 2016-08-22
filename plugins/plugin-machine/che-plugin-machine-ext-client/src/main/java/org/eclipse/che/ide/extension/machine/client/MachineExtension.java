@@ -112,15 +112,14 @@ public class MachineExtension {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                /* There is a bug in perspective management and it's unable to add Consoles part in
-                 * OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
-                 */
+                // There is a bug in perspective management and it's unable to add Consoles part in
+                // OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
 
-                /* Add Processes part to Operation perspective */
+                // Add Processes part to Operation perspective
                 perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
-//                workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
+                workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
 
-                /* Add Processes part to Project perspective */
+                // Add Processes part to Project perspective
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
                 workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 if (appContext.getFactory() == null) {
@@ -217,5 +216,4 @@ public class MachineExtension {
 
         iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
     }
-
 }

@@ -7,23 +7,18 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.api.multisplitpanel;
-
-import com.google.gwt.user.client.ui.IsWidget;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.tab;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * Contract for the widget to display on tab of the {@link SubPanel}.
+ * Factory for {@link Tab} instances.
  *
  * @author Artem Zatsarynnyi
  */
-public interface WidgetToShow {
+public interface TabItemFactory {
 
-    IsWidget getWidget();
-
-    String getTitle();
-
-    SVGResource getIcon();
+    /** Create new {@link Tab} instance with the given title text and icon. */
+    Tab createTabItem(String title, SVGResource icon);
 }

@@ -7,18 +7,23 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.ui.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.panel;
+
+import org.eclipse.che.ide.ui.multisplitpanel.actions.ClosePaneAction;
+import org.eclipse.che.ide.ui.multisplitpanel.actions.RemoveAllWidgetsInPaneAction;
+import org.eclipse.che.ide.ui.multisplitpanel.actions.SplitHorizontallyAction;
+import org.eclipse.che.ide.ui.multisplitpanel.actions.SplitVerticallyAction;
 
 /**
- * //
+ * Factory for the {@link SubPanelView} instances.
  *
  * @author Artem Zatsarynnyi
  */
 public interface SubPanelViewFactory {
 
     SubPanelView createView(ClosePaneAction closePaneAction,
-                            CloseAllTabsInPaneAction closeAllTabsInPaneAction,
+                            RemoveAllWidgetsInPaneAction removeAllWidgetsInPaneAction,
                             SplitHorizontallyAction splitHorizontallyAction,
                             SplitVerticallyAction splitVerticallyAction);
 }

@@ -7,8 +7,8 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.ui.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.tab;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.ide.api.multisplitpanel.TabItem;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -32,15 +31,15 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import javax.validation.constraints.NotNull;
 
 /**
- * //
+ * Widget that represents a tab.
  *
  * @author Artem Zatsarynnyi
  */
-public class TabItemWidget extends Composite implements TabItem {
+public class TabWidget extends Composite implements Tab {
 
     private static final TabItemWidgetUiBinder UI_BINDER = GWT.create(TabItemWidgetUiBinder.class);
 
-    private final String title;
+    private final String      title;
     private final SVGResource icon;
 
     @UiField
@@ -58,7 +57,7 @@ public class TabItemWidget extends Composite implements TabItem {
     private ActionDelegate delegate;
 
     @Inject
-    public TabItemWidget(PartStackUIResources resources, @Assisted String title, @Assisted SVGResource icon) {
+    public TabWidget(PartStackUIResources resources, @Assisted String title, @Assisted SVGResource icon) {
         this.resources = resources;
         this.title = title;
         this.icon = icon;
@@ -74,7 +73,7 @@ public class TabItemWidget extends Composite implements TabItem {
         closeButton.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                delegate.onTabClosing(TabItemWidget.this);
+                delegate.onTabClosing(TabWidget.this);
             }
         }, ClickEvent.getType());
     }
@@ -91,13 +90,11 @@ public class TabItemWidget extends Composite implements TabItem {
 
     @Override
     public void select() {
-        // Marks tab is focused
         getElement().setAttribute("focused", "");
     }
 
     @Override
     public void unSelect() {
-        // Marks tab is not focused
         getElement().removeAttribute("focused");
     }
 
@@ -115,6 +112,6 @@ public class TabItemWidget extends Composite implements TabItem {
         this.delegate = delegate;
     }
 
-    interface TabItemWidgetUiBinder extends UiBinder<Widget, TabItemWidget> {
+    interface TabItemWidgetUiBinder extends UiBinder<Widget, TabWidget> {
     }
 }

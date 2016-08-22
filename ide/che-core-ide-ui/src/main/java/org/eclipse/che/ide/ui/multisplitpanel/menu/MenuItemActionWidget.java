@@ -7,8 +7,8 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.ui.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.menu;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -25,20 +25,23 @@ import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * @author Dmitry Shnurenko
- * @author Vitaliy Guliy
+ * Implementation of {@link MenuItem} that represents {@link Action}.
+ *
+ * @author Artem Zatsarynnyi
  */
-public class ListItemActionWidget extends Composite implements ListItem<Action> {
+public class MenuItemActionWidget extends Composite implements MenuItem<Action> {
 
-    private static final ListItemWidgetUiBinder UI_BINDER = GWT.create(ListItemWidgetUiBinder.class);
+    private static final MenuItemActionWidgetUiBinder UI_BINDER = GWT.create(MenuItemActionWidgetUiBinder.class);
+
     @UiField
     FlowPanel iconPanel;
     @UiField
     Label     title;
+
     private Action         action;
     private ActionDelegate delegate;
 
-    public ListItemActionWidget(Action action) {
+    public MenuItemActionWidget(Action action) {
         initWidget(UI_BINDER.createAndBindUi(this));
         this.action = action;
 
@@ -53,7 +56,7 @@ public class ListItemActionWidget extends Composite implements ListItem<Action> 
             @Override
             public void onClick(ClickEvent event) {
                 if (delegate != null) {
-                    delegate.onItemClicked(ListItemActionWidget.this);
+                    delegate.onItemSelected(MenuItemActionWidget.this);
                 }
             }
         }, ClickEvent.getType());
@@ -65,10 +68,10 @@ public class ListItemActionWidget extends Composite implements ListItem<Action> 
     }
 
     @Override
-    public Action getTabItem() {
+    public Action getData() {
         return action;
     }
 
-    interface ListItemWidgetUiBinder extends UiBinder<Widget, ListItemActionWidget> {
+    interface MenuItemActionWidgetUiBinder extends UiBinder<Widget, MenuItemActionWidget> {
     }
 }

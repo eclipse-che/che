@@ -7,16 +7,21 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.api.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel;
+
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * //
+ * Factory for {@link SubPanel}.
  *
  * @author Artem Zatsarynnyi
  */
-public interface ClosingListener {
+public interface SubPanelFactory {
 
-    /** Invoked when a tab that contains widget is closed. */
-    void onTabClosing(CloseCallback closeCallback);
+    /** Create new instance of {@link SubPanel}. */
+    SubPanel newPanel();
+
+    /** For internal use only. Not intended to be used by client code. */
+    SubPanel newPanel(@Nullable SubPanel parentPanel);
 }

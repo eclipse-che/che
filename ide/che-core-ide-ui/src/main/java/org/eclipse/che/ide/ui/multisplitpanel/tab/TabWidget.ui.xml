@@ -133,20 +133,8 @@
             display: block;
         }
 
-        /**
-         * Please note that 'active' attribute is NOT the same as 'focused' attribute.
-         * The 'active' attribute indicates tab currently selected in editor area.
-         */
         .mainPanel[active] {
             background-color: activeEditorTabBackgroundColor;
-        }
-
-        .mainPanel[readonly] {
-            background-color: editorReadonlyTabBackgroundColor;
-        }
-
-        .mainPanel[active][readonly] {
-            background-color: activeEditorReadonlyTabBackgroundColor;
         }
 
         .mainPanel[active] .closeTabPanel svg {
@@ -195,9 +183,6 @@
             }
         }
 
-        /**
-         * The 'focused' attribute indicates the editor having focus.
-         */
         .mainPanel[focused] {
             background-color: focusedEditorTabBackgroundColor;
             border-bottom-color: focusedEditorTabBorderBottomColor;
@@ -210,8 +195,8 @@
     </ui:style>
 
     <g:FlowPanel addStyleNames="{style.mainPanel}">
-        <g:SimplePanel ui:field="iconPanel" styleName="{style.iconPanel}" />
-        <g:Label ui:field="titleLabel" styleName="{style.titlePanel}" />
+        <g:SimplePanel ui:field="iconPanel" styleName="{style.iconPanel}"/>
+        <g:Label ui:field="titleLabel" styleName="{style.titlePanel}"/>
         <g:FlowPanel styleName="{style.closeTabPanel}">
             <g:FlowPanel ui:field="closeButton" styleName="{style.closeTabButton}">
                 <svg:SVGImage resource="{resources.closeIcon}"/>

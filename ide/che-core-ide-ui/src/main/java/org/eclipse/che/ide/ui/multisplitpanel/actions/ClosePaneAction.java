@@ -7,25 +7,25 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
-package org.eclipse.che.ide.ui.multisplitpanel;
+ *******************************************************************************/
+package org.eclipse.che.ide.ui.multisplitpanel.actions;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.multisplitpanel.SubPanel;
-import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
+import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
 
 /**
- * //
+ * Action for removing all widgets in the given {@link SubPanel} and closing the panel.
  *
  * @author Artem Zatsarynnyi
  */
-public class CloseAllTabsInPaneAction extends Action {
+public class ClosePaneAction extends Action {
 
     private final SubPanel subPanel;
 
-    public CloseAllTabsInPaneAction(SubPanel subPanel) {
-        super("Close All Tabs In Pane", "Close All Tabs In Pane", null, null);
+    public ClosePaneAction(SubPanel subPanel) {
+        super("Close Pane", "Close Pane", null, null);
         this.subPanel = subPanel;
     }
 
@@ -34,5 +34,7 @@ public class CloseAllTabsInPaneAction extends Action {
         for (WidgetToShow widget : subPanel.getAllWidgets()) {
             subPanel.removeWidget(widget);
         }
+
+        subPanel.closePane();
     }
 }
