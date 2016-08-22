@@ -51,8 +51,6 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Command
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
-import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -218,7 +216,7 @@ public class ProcessesPanelPresenterTest {
 
         verify(workspaceAgent).setActivePart(anyObject());
         verify(commandConsoleFactory).create(eq("machine_name"));
-        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), anyObject());
+        verify(view).addWidget(anyString(), anyString(), anyObject(), anyObject(), anyBoolean());
         verify(view).selectNode(anyObject());
         verify(view).setProcessesData(eq(presenter.rootNode));
     }
@@ -252,7 +250,7 @@ public class ProcessesPanelPresenterTest {
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
-        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(widget));
+        verify(view).addWidget(anyString(), anyString(), anyObject(), eq(widget), anyBoolean());
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
         verify(view).getNodeById(anyString());
@@ -283,7 +281,7 @@ public class ProcessesPanelPresenterTest {
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
-        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(widget));
+        verify(view).addWidget(anyString(), anyString(), anyObject(), eq(widget), anyBoolean());
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
         verify(view).getNodeById(anyString());
@@ -314,7 +312,7 @@ public class ProcessesPanelPresenterTest {
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
-        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(widget));
+        verify(view).addWidget(anyString(), anyString(), anyObject(), eq(widget), anyBoolean());
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
         verify(view).getNodeById(anyString());
@@ -353,7 +351,7 @@ public class ProcessesPanelPresenterTest {
         verify(terminal).getView();
         verify(view, times(2)).setProcessesData(anyObject());
         verify(view, times(2)).selectNode(anyObject());
-        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(terminalWidget));
+        verify(view).addWidget(anyString(), anyString(), anyObject(), eq(terminalWidget), anyBoolean());
         verify(view, times(2)).addProcessNode(anyObject());
         verify(terminal).setVisible(eq(true));
         verify(terminal).connect();
@@ -392,7 +390,7 @@ public class ProcessesPanelPresenterTest {
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
         verify(view).hideProcessOutput(eq(commandId));
-        verify(view).addProcessWidget(eq(commandId), anyString(), anyObject(), eq(widget));
+        verify(view).addWidget(eq(commandId), anyString(), anyObject(), eq(widget), anyBoolean());
         verify(view).selectNode(anyObject());
         verify(view).getNodeById(eq(commandId));
     }
@@ -428,7 +426,7 @@ public class ProcessesPanelPresenterTest {
         verify(terminal).getView();
         verify(view).setProcessesData(anyObject());
         verify(view).selectNode(anyObject());
-        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(terminalWidget));
+        verify(view).addWidget(anyString(), anyString(), anyObject(), eq(terminalWidget), anyBoolean());
         verify(view).addProcessNode(anyObject());
         verify(terminal).setVisible(eq(true));
         verify(terminal).connect();

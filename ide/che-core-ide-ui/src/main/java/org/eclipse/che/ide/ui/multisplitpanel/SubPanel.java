@@ -45,11 +45,13 @@ public interface SubPanel {
      *
      * @param widget
      *         widget to add
+     * @param removable
+     *         whether the {@code widget} may be removed by user from UI
      * @param widgetRemovingListener
      *         listener to be notified when the specified {@code widget}
      *         is going to be removed from the panel
      */
-    void addWidget(WidgetToShow widget, @Nullable WidgetRemovingListener widgetRemovingListener);
+    void addWidget(WidgetToShow widget, boolean removable, @Nullable WidgetRemovingListener widgetRemovingListener);
 
     /** Show (activate) the {@code widget} if it exists on this panel. */
     void activateWidget(WidgetToShow widget);

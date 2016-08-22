@@ -57,7 +57,7 @@ public class TabWidget extends Composite implements Tab {
     private ActionDelegate delegate;
 
     @Inject
-    public TabWidget(PartStackUIResources resources, @Assisted String title, @Assisted SVGResource icon) {
+    public TabWidget(PartStackUIResources resources, @Assisted String title, @Assisted SVGResource icon, @Assisted boolean closable) {
         this.resources = resources;
         this.title = title;
         this.icon = icon;
@@ -70,12 +70,16 @@ public class TabWidget extends Composite implements Tab {
 
         addDomHandler(this, ClickEvent.getType());
 
-        closeButton.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onTabClosing(TabWidget.this);
-            }
-        }, ClickEvent.getType());
+        if (closable) {
+            closeButton.addDomHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    delegate.onTabClosing(TabWidget.this);
+                }
+            }, ClickEvent.getType());
+        } else {
+            closeButton.setVisible(false);
+        }
     }
 
     @Override

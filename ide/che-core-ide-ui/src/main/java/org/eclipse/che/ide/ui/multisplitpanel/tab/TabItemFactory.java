@@ -20,5 +20,5 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 public interface TabItemFactory {
 
     /** Create new {@link Tab} instance with the given title text and icon. */
-    Tab createTabItem(String title, SVGResource icon);
+    Tab createTabItem(String title, SVGResource icon, boolean closable);
 }

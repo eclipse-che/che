@@ -90,7 +90,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
     }
 
     @Override
-    public void addWidget(WidgetToShow widget, @Nullable WidgetRemovingListener widgetRemovingListener) {
+    public void addWidget(WidgetToShow widget, boolean removable, @Nullable WidgetRemovingListener widgetRemovingListener) {
         // TODO: just activate the widget if it's already exists on the panel
 
         widgets.add(widget);
@@ -99,7 +99,7 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
             removingListeners.put(widget.getWidget(), widgetRemovingListener);
         }
 
-        view.addWidget(widget);
+        view.addWidget(widget, removable);
     }
 
     @Override

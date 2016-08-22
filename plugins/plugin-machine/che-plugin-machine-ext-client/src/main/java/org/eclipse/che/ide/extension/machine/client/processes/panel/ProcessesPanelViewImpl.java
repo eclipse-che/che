@@ -28,9 +28,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
-import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
-import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.theme.Style;
@@ -42,11 +39,13 @@ import org.eclipse.che.ide.extension.machine.client.processes.ProcessDataAdapter
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeRenderer;
 import org.eclipse.che.ide.extension.machine.client.processes.StopProcessHandler;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
 import org.eclipse.che.ide.ui.tree.SelectionModel;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
-import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.HashMap;
@@ -148,7 +147,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public void onNodeContextMenu(int mouseX, int mouseY, TreeNodeElement<ProcessTreeNode> node) {
-//                delegate.onContextMenu(mouseX, mouseY, node.getData());
             }
 
             @Override
@@ -253,7 +251,11 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
-    public void addProcessWidget(final String processId, final String title, final SVGResource icon, final IsWidget widget) {
+    public void addWidget(final String processId,
+                          final String title,
+                          final SVGResource icon,
+                          final IsWidget widget,
+                          final boolean machineConsole) {
         final WidgetToShow widgetToShow = new WidgetToShow() {
             @Override
             public IsWidget getWidget() {
@@ -273,7 +275,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         widget2Panels.put(widgetToShow, focusedSubPanel);
 
-        focusedSubPanel.addWidget(widgetToShow, new SubPanel.WidgetRemovingListener() {
+        focusedSubPanel.addWidget(widgetToShow, !machineConsole, new SubPanel.WidgetRemovingListener() {
             @Override
             public void onWidgetRemoving(SubPanel.RemoveCallback removeCallback) {
                 final ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
@@ -378,11 +380,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         } else {
             processTreeNode.getTreeNodeElement().getClassList().add(machineResources.getCss().hideStopButton());
         }
-    }
-
-    protected void focusView() {
-        getElement().focus();
-        Log.info(ProcessesPanelViewImpl.class, "focus gained");
     }
 
     @Override

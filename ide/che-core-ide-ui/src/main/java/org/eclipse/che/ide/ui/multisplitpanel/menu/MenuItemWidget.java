@@ -42,7 +42,7 @@ public class MenuItemWidget extends Composite implements MenuItem<Tab> {
     private Tab            tab;
     private ActionDelegate delegate;
 
-    public MenuItemWidget(Tab tab) {
+    public MenuItemWidget(Tab tab, boolean closable) {
         initWidget(UI_BINDER.createAndBindUi(this));
         this.tab = tab;
 
@@ -59,17 +59,21 @@ public class MenuItemWidget extends Composite implements MenuItem<Tab> {
             }
         }, ClickEvent.getType());
 
-        closeButton.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                clickEvent.stopPropagation();
-                clickEvent.preventDefault();
+        if (closable) {
+            closeButton.addDomHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent clickEvent) {
+                    clickEvent.stopPropagation();
+                    clickEvent.preventDefault();
 
-                if (delegate != null) {
-                    delegate.onItemClosing(MenuItemWidget.this);
+                    if (delegate != null) {
+                        delegate.onItemClosing(MenuItemWidget.this);
+                    }
                 }
-            }
-        }, ClickEvent.getType());
+            }, ClickEvent.getType());
+        } else {
+            closeButton.setVisible(false);
+        }
     }
 
     @Override

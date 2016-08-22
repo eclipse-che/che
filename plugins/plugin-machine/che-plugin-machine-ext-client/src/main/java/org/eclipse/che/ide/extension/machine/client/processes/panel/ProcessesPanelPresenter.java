@@ -285,7 +285,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 final String terminalId = terminalNode.getId();
                 terminals.put(terminalId, newTerminal);
                 view.addProcessNode(terminalNode);
-                view.addProcessWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget);
+                view.addWidget(terminalId, terminalName, terminalNode.getTitleIcon(), terminalWidget, false);
                 refreshStopButtonState(terminalId);
 
                 newTerminal.setVisible(true);
@@ -392,7 +392,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             addChildToMachineNode(commandNode, machineTreeNode);
         }
 
-        updateCommandOutput(commandId, outputConsole);
+        addOutputConsole(commandId, outputConsole, false);
 
         refreshStopButtonState(commandId);
         workspaceAgent.setActivePart(this);
@@ -412,15 +412,15 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         return consoles.containsKey(commandId) && consoles.get(commandId).isFinished();
     }
 
-    protected void updateCommandOutput(final String command, final OutputConsole outputConsole) {
-        consoles.put(command, outputConsole);
-        consoleCommands.put(outputConsole, command);
+    private void addOutputConsole(final String id, final OutputConsole outputConsole, final boolean machineConsole) {
+        consoles.put(id, outputConsole);
+        consoleCommands.put(outputConsole, id);
 
         outputConsole.go(new AcceptsOneWidget() {
             @Override
             public void setWidget(final IsWidget widget) {
-                view.addProcessWidget(command, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget);
-                view.selectNode(view.getNodeById(command));
+                view.addWidget(id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, machineConsole);
+                view.selectNode(view.getNodeById(id));
             }
         });
 
@@ -589,7 +589,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         rootNodes.add(machineNode);
 
         OutputConsole outputConsole = commandConsoleFactory.create(machine.getConfig().getName());
-        updateCommandOutput(machine.getId(), outputConsole);
+        addOutputConsole(machine.getId(), outputConsole, true);
 
         view.setProcessesData(rootNode);
 

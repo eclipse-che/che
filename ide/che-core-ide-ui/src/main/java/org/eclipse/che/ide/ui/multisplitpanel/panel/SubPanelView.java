@@ -41,8 +41,10 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
      *
      * @param widget
      *         widget to add
+     * @param removable
+     *         whether the {@code widget} may be removed by user from the UI
      */
-    void addWidget(WidgetToShow widget);
+    void addWidget(WidgetToShow widget, boolean removable);
 
     /** Show (activate) the {@code widget} if it exists on this panel. */
     void activateWidget(WidgetToShow widget);

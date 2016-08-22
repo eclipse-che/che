@@ -132,8 +132,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
     }
 
     @Override
-    public void addWidget(WidgetToShow widget) {
-        Tab tab = tabItemFactory.createTabItem(widget.getTitle(), widget.getIcon());
+    public void addWidget(WidgetToShow widget, boolean removable) {
+        final Tab tab = tabItemFactory.createTabItem(widget.getTitle(), widget.getIcon(), removable);
         tab.setDelegate(this);
 
         tabs2Widgets.put(tab, widget);
@@ -143,7 +143,7 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         widgetsPanel.setWidget(widget.getWidget());
 
         // add item to drop-down menu
-        final MenuItemWidget listItemWidget = new MenuItemWidget(tab);
+        final MenuItemWidget listItemWidget = new MenuItemWidget(tab, removable);
         menu.addListItem(listItemWidget);
         widgets2ListItems.put(widget, listItemWidget);
     }
