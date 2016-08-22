@@ -91,7 +91,11 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
 
     @Override
     public void addWidget(WidgetToShow widget, boolean removable, @Nullable WidgetRemovingListener widgetRemovingListener) {
-        // TODO: just activate the widget if it's already exists on the panel
+        // just activate the widget if it's already exists on the panel
+        if (widgets.contains(widget)) {
+            activateWidget(widget);
+            return;
+        }
 
         widgets.add(widget);
 
