@@ -22,14 +22,13 @@ export class CheAPI {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace, cheProfile, chePreferences, cheProjectTemplate, cheWebsocket, cheSvn, cheService,
+  constructor(cheWorkspace, cheProfile, chePreferences, cheProjectTemplate, cheWebsocket, cheService,
               cheAdminPlugins, cheAdminService, cheRecipe, cheRecipeTemplate, cheStack, cheOAuthProvider) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.chePreferences = chePreferences;
     this.cheProjectTemplate = cheProjectTemplate;
     this.cheWebsocket = cheWebsocket;
-    this.cheSvn = cheSvn;
     this.cheService = cheService;
     this.cheAdminPlugins = cheAdminPlugins;
     this.cheAdminService = cheAdminService;
@@ -86,14 +85,6 @@ export class CheAPI {
    */
   getWebsocket() {
     return this.cheWebsocket;
-  }
-
-  /**
-   * The Che Svn API
-   * @returns {CheSvn|*}
-   */
-  getSvn() {
-    return this.cheSvn;
   }
 
   /**

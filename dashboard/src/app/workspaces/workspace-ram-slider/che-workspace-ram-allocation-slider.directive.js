@@ -32,12 +32,13 @@ export class CheWorkspaceRamAllocationSlider {
 
     this.bindToController = true;
 
-    this.controller = 'CheWorkspaceRamAllocationSliderCtrl';
-    this.controllerAs = 'cheWorkspaceRamAllocationSliderCtrl';
+    this.controller = 'CheWorkspaceRamAllocationSliderController';
+    this.controllerAs = 'cheWorkspaceRamAllocationSliderController';
 
     // scope values
     this.scope = {
-      ngModel : '='
+      ngModel: '=',
+      cheOnChange: '&'
     };
   }
 }

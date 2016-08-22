@@ -31,7 +31,7 @@ export class CreateProjectStackLibrary {
     this.restrict = 'E';
     this.templateUrl = 'app/workspaces/create-workspace/select-stack/stack-library/create-project-stack-library.html';
 
-    this.controller = 'CreateProjectStackLibraryCtrl';
+    this.controller = 'CreateProjectStackLibraryController';
     this.controllerAs = 'createProjectStackLibraryCtrl';
     this.bindToController = true;
 

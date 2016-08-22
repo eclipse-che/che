@@ -12,6 +12,7 @@
 
 import {CheProject} from './che-project';
 import {CheGit} from './che-git';
+import {CheSvn} from './che-svn';
 import {CheProjectType} from './che-project-type';
 
 /**
@@ -29,6 +30,7 @@ export class CheWorkspaceAgent {
 
     this.project = new CheProject($resource, $q, cheWebsocket, this.workspaceAgentData.path);
     this.git = new CheGit($resource, this.workspaceAgentData.path);
+    this.svn = new CheSvn($resource, this.workspaceAgentData.path);
     this.projectType = new CheProjectType($resource, $q, this.workspaceAgentData.path);
   }
 
@@ -42,5 +44,9 @@ export class CheWorkspaceAgent {
 
   getProjectType() {
     return this.projectType;
+  }
+
+  getSvn() {
+    return this.svn;
   }
 }

@@ -131,7 +131,7 @@ export class CheToolbar {
     }
 
     if (buttonName) {
-      template += '<che-button-primary-flat class=\"che-toolbar-open-button\"';
+      template += '<che-button-default class=\"che-toolbar-open-button\"';
       template += ' che-button-title=\"' + buttonName + '\"';
       if (buttonIcon) {
         template += ' che-button-icon=\"' + buttonIcon + '\"';
@@ -140,7 +140,7 @@ export class CheToolbar {
       if (buttonHrefTarget) {
         template = template + ' target=\"' + buttonHrefTarget + '\"';
       }
-      template += '</che-button-primary-flat>';
+      template += '</che-button-default>';
     }
 
     if (addButtonName) {

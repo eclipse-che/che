@@ -12,52 +12,61 @@
 -->
 <che-toolbar che-title="New Workspace"></che-toolbar>
 
-<md-content md-scroll-y flex md-theme="maincontent-theme">
+<md-content md-scroll-y flex class="create-workspace">
   <ng-form name="workspaceInformationForm">
-    <che-panel id="create-project-source-id" che-title="Select Source"
-               che-tooltip="Create workspace from a recipe, stack or by importing workspace configuration">
+    <!-- Source -->
+    <che-label-container id="create-project-source-id"
+                         che-label-name="Select Source"
+                         che-label-description="Create workspace from a recipe, stack or by importing workspace configuration">
       <md-radio-group ng-model="createWorkspaceCtrl.selectSourceOption">
         <md-radio-button value="select-source-recipe">Workspace using recipe</md-radio-button>
         <md-radio-button value="select-source-import">Import an existing workspace configuration</md-radio-button>
       </md-radio-group>
-    </che-panel>
-    <che-panel che-title="Import workspace" ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-import'">
+    </che-label-container>
 
+    <che-label-container che-label-name="Import workspace"
+                         ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-import'">
       <ui-codemirror class="workspace-editor" ui-codemirror="createWorkspaceCtrl.editorOptions"
                      ng-model="createWorkspaceCtrl.importWorkspace"></ui-codemirror>
+    </che-label-container>
 
-    </che-panel>
-    <che-panel che-title="Select Stack"
-               che-tooltip="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
-      <che-workspace-select-stack ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-recipe'"
+    <che-label-container ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-recipe'"
+                         che-label-name="Select Stack"
+                         che-label-description="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
+      <che-workspace-select-stack
                                   che-tab-name="tabName"
                                   che-on-tab-change="createWorkspaceCtrl.setStackTab(tabName)"
                                   che-stack="stack"
                                   che-stack-change="createWorkspaceCtrl.cheStackLibrarySelecter(stack)"
                                   che-recipe-script="createWorkspaceCtrl.recipeScript"
                                   che-recipe-url="createWorkspaceCtrl.recipeUrl"/>
-    </che-panel>
-    <che-panel che-title="Information">
-      <che-input che-form="workspaceInformationForm"
-                 che-name="name"
-                 che-label-name="Name"
-                 che-place-holder="Name of the workspace"
-                 ng-model="createWorkspaceCtrl.workspaceName"
-                 required
-                 unique-workspace-name="createWorkspaceCtrl.workspaceName"
-                 ng-minlength="3"
-                 ng-maxlength="20"
-                 ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-        <div ng-message="required">A name is required.</div>
-        <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only with digits, latin
-          letters or underscores
-        </div>
-        <div ng-message="minlength">The name has to be more then 3 characters long.</div>
-        <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-        <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
-      </che-input>
-      <che-workspace-ram-allocation-slider ng-model="createWorkspaceCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
-    </che-panel>
+    </che-label-container>
+    <che-label-container che-label-name="Name">
+      <div class="create-workspace-input">
+        <che-input che-form="workspaceInformationForm"
+                   che-name="name"
+                   che-place-holder="Name of the workspace"
+                   ng-model="createWorkspaceCtrl.workspaceName"
+                   required
+                   unique-workspace-name=""
+                   ng-minlength="3"
+                   ng-maxlength="20"
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only
+            with digits, latin
+            letters or underscores
+          </div>
+          <div ng-message="minlength">The name has to be more then 3 characters long.</div>
+          <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+          <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
+        </che-input>
+      </div>
+    </che-label-container>
+    <che-label-container che-label-name="RAM">
+      <che-workspace-ram-allocation-slider
+        ng-model="createWorkspaceCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
+    </che-label-container>
   </ng-form>
   <che-button-primary id="create-project-button-import"
                       che-button-title="Create Workspace"

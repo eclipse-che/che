@@ -10,9 +10,9 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<che-toolbar che-title="New Project">
+<che-toolbar che-title="New Workspace">
   <che-button-primary class="create-project-header-button"
-                      che-button-title="{{createProjectCtrl.getCreateButtonTitle()}}"
+                      che-button-title="Create"
                       ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
                       ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
                       ng-show="!createProjectCtrl.isCreateProjectInProgress() || createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)">
@@ -22,9 +22,10 @@
 <md-progress-linear md-mode="indeterminate" class="projects-list-projects-progress"
                     ng-hide="createProjectCtrl.stacksInitialized || createProjectCtrl.workspaces.length"></md-progress-linear>
 
-<md-content id="create-project-content-page" md-scroll-y flex class="projects-create-project"
-            ng-show="createProjectCtrl.stacksInitialized || createProjectCtrl.workspaces.length"
-            md-theme="maincontent-theme">
+<md-content id="create-project-content-page"
+            md-scroll-y flex
+            class="projects-create-project"
+            ng-show="createProjectCtrl.stacksInitialized || createProjectCtrl.workspaces.length">
   <div ng-show="createProjectCtrl.isCreateProjectInProgress()">
     <div id="create-project-panel" class="create-project-progress-panel">
       <che-loader class="che-loader-panel" layout="column">
@@ -70,8 +71,9 @@
               </div>
               <div layout="column" layout-align="end end"
                    ng-show="createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].hasError">
-                <che-button-danger che-button-title="{{createProjectCtrl.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"
-                                   ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>
+                <che-button-danger
+                  che-button-title="{{createProjectCtrl.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"
+                  ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>
                 <che-link class="create-project-download-logs-link"
                           ng-click="createProjectCtrl.downloadLogs()"
                           che-link-text="Problem? download logs"></che-link>
@@ -85,15 +87,18 @@
 
   <div ng-hide="createProjectCtrl.isCreateProjectInProgress()">
 
-    <che-panel id="create-project-source-id" che-title="Select Source"
-               che-tooltip="Choose where the initial source code for this project will come from. The choice of templates and samples will vary by the stack chosen.">
-      <md-radio-group ng-model="createProjectCtrl.selectSourceOption" ng-change="createProjectCtrl.onSourceOptionChanged()">
+    <!-- Select source -->
+    <che-label-container id="create-project-source-id"
+                         che-label-name="Select Source"
+                         che-label-description="Choose where the initial source code for this project will come from. The choice of templates and samples will vary by the stack chosen.">
+      <md-radio-group ng-model="createProjectCtrl.selectSourceOption"
+                      ng-change="createProjectCtrl.onSourceOptionChanged()">
         <md-radio-button value="select-source-new">New from blank, template, or sample project</md-radio-button>
         <md-radio-button value="select-source-existing">Import from existing location</md-radio-button>
       </md-radio-group>
 
       <div ng-show="createProjectCtrl.selectSourceOption === 'select-source-existing'">
-        <md-tabs md-stretch-tabs="always" md-dynamic-height md-selected="createProjectCtrl.selectedTabIndex">
+        <md-tabs md-stretch-tabs="auto" md-dynamic-height md-selected="createProjectCtrl.selectedTabIndex">
           <md-tab md-on-select="createProjectCtrl.setCurrentTab('git')">
             <md-tab-label>
               <md-icon md-font-icon="fa-git" class="fa che-tab-label-icon"></md-icon>
@@ -109,7 +114,7 @@
               <span class="che-tab-label-title">Github</span>
             </md-tab-label>
             <md-tab-body>
-              <form name="createProjectGitHubForm" >
+              <form name="createProjectGitHubForm">
                 <create-project-github ng-init="createProjectCtrl.setForm(createProjectGitHubForm, 'github')"
                                        class="projects-create-project-tab"
                                        che-form="createProjectGitHubForm"
@@ -132,10 +137,11 @@
           </md-tab>
         </md-tabs>
       </div>
+    </che-label-container>
 
-    </che-panel>
-    <che-panel che-title="{{createProjectCtrl.workspaces.length ? 'Select Workspace' : 'Select Stack'}}"
-               che-tooltip="{{createProjectCtrl.workspaces.length ? 'Select existing workspace or create it from stack' : 'Select stack'}}, recipe or image used to define your environment runtime. Workspace environments are used to build and run your project.">
+    <!-- Select stack -->
+    <che-label-container che-label-name="{{createProjectCtrl.workspaces.length ? 'Select Workspace' : 'Select Stack'}}"
+                         che-label-description="{{createProjectCtrl.workspaces.length ? 'Select existing workspace or create it from stack' : 'Select stack'}}, recipe or image used to define your environment runtime. Workspace environments are used to build and run your project.">
       <md-radio-group ng-show="createProjectCtrl.workspaces.length" ng-model="createProjectCtrl.workspaceResource">
         <md-radio-button value="existing-workspace">Select existing workspace</md-radio-button>
         <div ng-if="createProjectCtrl.workspaceResource === 'existing-workspace'">
@@ -152,87 +158,113 @@
                                   che-recipe-script="createProjectCtrl.recipeScript"
                                   che-recipe-url="createProjectCtrl.recipeUrl"
                                   ng-if="!createProjectCtrl.workspaces.length || createProjectCtrl.workspaceResource === 'from-stack'"/>
-    </che-panel>
-    <che-panel id="create-project-workspace" che-title="Configure Workspace" che-panel-id="create-project-workspace"
-               che-tooltip="A workspace contains projects and runtime environments. If your stack requires a new workspace, configure it here.">
+    </che-label-container>
+
+    <!-- Workspace -->
+    <che-label-container ng-show="createProjectCtrl.stackLibraryOption !== 'existing-workspace'"
+                         che-label-name="Configure workspace"
+                         che-panel-id="create-project-workspace"
+                         che-label-description="A workspace contains projects and runtime environments. If your stack requires a new workspace, configure it here.">
       <ng-form name="workspaceInformationForm">
-
-        <che-label-container che-label-name="Name">
-          <che-input che-form="workspaceInformationForm"
-                     che-name="name"
-                     che-label-name=""
-                     che-place-holder="Name of the workspace"
-                     ng-model="createProjectCtrl.workspaceName"
-                     required
-                     unique-workspace-name="createProjectCtrl.workspaceName"
-                     ng-minlength="3"
-                     ng-maxlength="20"
-                     ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-            <div ng-message="required">A name is required.</div>
-            <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start only with digits, latin
-              letters or underscores
+        <div class="create-project-nested-container">
+          <che-label-container che-label-name="Name">
+            <div class="create-project-input">
+              <che-input che-form="workspaceInformationForm"
+                         che-name="workspaceName"
+                         che-place-holder="Name of the workspace"
+                         aria-label="Name of the workspace"
+                         ng-model="createProjectCtrl.workspaceName"
+                         required
+                         unique-workspace-name="createProjectCtrl.workspaceName"
+                         ng-minlength="3"
+                         ng-maxlength="20"
+                         ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+                <div ng-message="required">A name is required.</div>
+                <div ng-message="pattern">Workspace name may contain digits, latin letters, _ , . , - and should start
+                  only with digits, latin
+                  letters or underscores
+                </div>
+                <div ng-message="minlength">The name has to be more then 3 characters long.</div>
+                <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+                <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
+              </che-input>
             </div>
-            <div ng-message="minlength">The name has to be more then 3 characters long.</div>
-            <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
-            <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
-          </che-input>
-        </che-label-container>
-        <che-workspace-ram-allocation-slider ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
-
+          </che-label-container>
+          <che-label-container che-label-name="RAM">
+            <che-workspace-ram-allocation-slider
+              ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
+          </che-label-container>
+        </div>
       </ng-form>
-    </che-panel>
+    </che-label-container>
 
-    <che-panel id="create-project-source-template" ng-show="createProjectCtrl.selectSourceOption === 'select-source-new'"
-               che-title="Select Template" che-tooltip="Create new projects with templates configured by you using a wizard in the IDE.">
+    <!-- Template -->
+    <che-label-container id="create-project-source-template"
+                         ng-show="createProjectCtrl.selectSourceOption === 'select-source-new'"
+                         che-label-name="Template"
+                         che-label-description="Select a code template to create a new project in the workspace.">
       <md-radio-group ng-model="createProjectCtrl.templatesChoice">
         <md-radio-button value="templates-samples">Ready-to-run project samples</md-radio-button>
-        <create-project-samples ng-if="createProjectCtrl.templatesChoice === 'templates-samples'"></create-project-samples>
-        <md-radio-button ng-if="createProjectCtrl.enableWizardProject" ng-click="createProjectCtrl.selectWizardProject()"
+        <create-project-samples
+          ng-if="createProjectCtrl.templatesChoice === 'templates-samples'"></create-project-samples>
+        <md-radio-button ng-if="createProjectCtrl.enableWizardProject"
+                         ng-click="createProjectCtrl.selectWizardProject()"
                          value="templates-wizard">Wizard-driven templates
         </md-radio-button>
       </md-radio-group>
-    </che-panel>
+    </che-label-container>
 
-    <ng-form name="projectInformationForm">
-      <che-panel che-title="Project Metadata" id="create-project-source-information"
-                 ng-init="createProjectCtrl.setProjectInformationForm(projectInformationForm);">
-
-        <che-input che-form="projectInformationForm"
-                   che-name="name"
-                   che-label-name="Name"
-                   che-place-holder="Name of the project"
-                   ng-model="createProjectCtrl.projectName"
-                   required
-                   unique-project-name="createProjectCtrl.getWorkspaceProjects()"
-                   ng-maxlength="128"
-                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
-          <div ng-message="required">A name is required.</div>
-          <div ng-message="uniqueProjectName">This project name is already used.</div>
-          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
-          <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-          <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-        </che-input>
-        <div ng-show="createProjectCtrl.importProjectData.project.type && createProjectCtrl.importProjectData.project.type.length > 0">
-          <che-input che-form="projectInformationForm"
-                     che-name="description"
-                     che-label-name="Description"
-                     che-place-holder="Description of the project"
-                     ng-model="createProjectCtrl.projectDescription"
-                     ng-maxlength="256">
-            <div ng-message="maxlength">The name has to be less than 256 characters long.</div>
-            <div ng-message="md-maxlength">The name has to be less than 256 characters long.</div>
-          </che-input>
+    <!-- Project -->
+    <che-label-container che-label-name="Project Metadata"
+                         id="create-project-source-information"
+                         class="che-label-container-last">
+      <ng-form name="projectInformationForm">
+        <div class="create-project-nested-container"
+             ng-init="createProjectCtrl.setProjectInformationForm(projectInformationForm);">
+          <che-label-container che-label-name="Name">
+            <div class="create-project-input">
+              <che-input che-form="projectInformationForm"
+                         che-name="name"
+                         che-place-holder="Name of the project"
+                         aria-label="Name of the project"
+                         ng-model="createProjectCtrl.projectName"
+                         required
+                         unique-project-name="createProjectCtrl.getWorkspaceProjects()"
+                         ng-maxlength="128"
+                         ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+                <div ng-message="required">A name is required.</div>
+                <div ng-message="uniqueProjectName">This project name is already used.</div>
+                <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+                <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+                <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+              </che-input>
+            </div>
+          </che-label-container>
+          <che-label-container che-label-name="Description"
+                               ng-if="createProjectCtrl.importProjectData.project.type && createProjectCtrl.importProjectData.project.type.length > 0">
+            <div class="create-project-input">
+              <che-input che-form="projectInformationForm"
+                         che-name="description"
+                         che-place-holder="Description of the project"
+                         aria-label="Description of the project"
+                         che-width="auto"
+                         ng-model="createProjectCtrl.projectDescription"
+                         ng-maxlength="256">
+                <div ng-message="maxlength">The name has to be less than 256 characters long.</div>
+                <div ng-message="md-maxlength">The name has to be less than 256 characters long.</div>
+              </che-input>
+            </div>
+          </che-label-container>
         </div>
-
-      </che-panel>
-    </ng-form>
+      </ng-form>
+    </che-label-container>
 
     <che-button-primary id="create-project-button-import"
-                        che-button-title="{{createProjectCtrl.getCreateButtonTitle()}}"
+                        che-button-title="Create"
                         ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
                         ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
                         class="projects-create-project-button"
-      ></che-button-primary>
+    ></che-button-primary>
 
     <div class="create-project-empty-space"></div>
 

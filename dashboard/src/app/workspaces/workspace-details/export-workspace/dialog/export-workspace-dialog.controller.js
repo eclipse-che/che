@@ -22,7 +22,7 @@ export class ExportWorkspaceDialogController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q, $filter, lodash, cheRemote, cheNotification, $http, cheRecipeTemplate, $mdDialog, $log, $window) {
+  constructor($q, $filter, lodash, cheRemote, cheNotification, $http, cheRecipeTemplate, $mdDialog, $log, $window, $scope) {
     this.$q = $q;
     this.$filter = $filter;
     this.$http = $http;
@@ -47,6 +47,8 @@ export class ExportWorkspaceDialogController {
 
     this.copyOfConfig = this.getCopyOfConfig();
     this.exportConfigContent = this.$filter('json')(angular.fromJson(this.copyOfConfig), 2);
+
+    $scope.selectedIndex = this.destination === 'file' ? 0 : 1;
   }
 
   /**
