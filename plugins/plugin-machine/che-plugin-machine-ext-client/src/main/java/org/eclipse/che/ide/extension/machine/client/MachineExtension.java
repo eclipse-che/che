@@ -45,7 +45,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAct
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier;
-import org.eclipse.che.ide.extension.machine.client.newpanel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;

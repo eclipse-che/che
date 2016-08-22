@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
-import org.eclipse.che.ide.extension.machine.client.newpanel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.machine.client.newpanel;
+package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
 import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;

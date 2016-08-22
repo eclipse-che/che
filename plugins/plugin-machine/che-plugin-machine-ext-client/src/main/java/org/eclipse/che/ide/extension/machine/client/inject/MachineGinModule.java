@@ -38,8 +38,8 @@ import org.eclipse.che.ide.extension.machine.client.inject.factories.WidgetsFact
 import org.eclipse.che.ide.extension.machine.client.machine.MachineManagerImpl;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineView;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineViewImpl;
-import org.eclipse.che.ide.extension.machine.client.newpanel.ProcessesPanelView;
-import org.eclipse.che.ide.extension.machine.client.newpanel.ProcessesPanelViewImpl;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelView;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelViewImpl;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsolePresenter;
