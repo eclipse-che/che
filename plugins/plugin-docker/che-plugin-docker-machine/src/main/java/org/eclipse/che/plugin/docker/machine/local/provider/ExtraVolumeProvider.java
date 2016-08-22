@@ -26,28 +26,12 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class ExtraVolumeProvider implements Provider<String> {
-
-    public static final String CHE_WORKSPACE_VOLUME = "CHE_WORKSPACE_VOLUME";
-
     @Inject(optional = true)
     @Named("machine.server.extra.volume")
     private String volume;
 
-    @Inject(optional = true)
-    @Named("che.workspace.volume")
-    private String volumeNew;
-
     @Override
     public String get() {
-    	// Logic:
-    	//   If CHE_
-    	String cheWorkspaceVolumeVar = System.getenv(CHE_WORKSPACE_VOLUME);
-        if (cheWorkspaceVolumeVar != null && !cheWorkspaceVolumeVar.isEmpty()) {
-        	return cheWorkspaceVolumeVar;
-        } else if (volumeNew != null ){
-        	return volumeNew;
-        } else {
-	        return volume == null ? "" : volume;
-        }
+        return volume == null ? "" : volume;
     }
 }
