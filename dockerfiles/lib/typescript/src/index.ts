@@ -10,14 +10,14 @@
  */
 
 /// <reference path='./typings/tsd.d.ts' />
-import {CheDir} from "./che-dir";
-import {Log} from "./log";
-import {Argument} from "./parameter/parameter";
-import {ArgumentProcessor} from "./parameter/argument-processor";
-import {Parameter} from "./parameter/parameter";
-import {CheTest} from "./che-test";
-import {CheAction} from "./che-action";
 
+import {Argument} from "./spi/decorator/parameter";
+import {Parameter} from "./spi/decorator/parameter";
+import {ArgumentProcessor} from "./spi/decorator/argument-processor";
+import {Log} from "./spi/log/log";
+import {CheDir} from "./internal/dir/che-dir";
+import {CheTest} from "./internal/test/che-test";
+import {CheAction} from "./internal/action/che-action";
 /**
  * Entry point of this library providing commands.
  * @author Florent Benoit
