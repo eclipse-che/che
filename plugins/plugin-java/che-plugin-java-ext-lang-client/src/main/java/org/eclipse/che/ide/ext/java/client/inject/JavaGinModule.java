@@ -65,7 +65,7 @@ import org.eclipse.che.ide.ext.java.client.tree.LibraryNodeProvider;
 import org.eclipse.che.ide.ext.java.client.tree.SourceFolderDecorator;
 import org.eclipse.che.ide.ext.java.client.tree.TestFolderDecorator;
 import org.eclipse.che.ide.extension.machine.client.command.CommandType;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
 import org.eclipse.che.ide.project.node.icon.NodeIconProvider;
 
 import static org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction.JAVA_ORGANIZE_IMPORT_ID;
