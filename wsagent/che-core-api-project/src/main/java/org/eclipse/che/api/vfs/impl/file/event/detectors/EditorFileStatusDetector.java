@@ -38,8 +38,6 @@ import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -90,7 +88,16 @@ public class EditorFileStatusDetector implements HiEventDetector<FileInVfsStatus
         filterAndTransmit(files, UPDATED);
         filterAndTransmit(files, REMOVED);
 
+        filterAndClean(files);
+
         return Optional.empty();
+    }
+
+    private void filterAndClean(Set<EventTreeNode> files) {
+        files.stream()
+             .filter(event -> DELETED == event.getLastEventType())
+             .map(EventTreeNode::getPath)
+             .forEach(fileRegistry::remove);
     }
 
     private void filterAndTransmit(Set<EventTreeNode> files, Status status) {
@@ -111,7 +118,7 @@ public class EditorFileStatusDetector implements HiEventDetector<FileInVfsStatus
 
         final boolean contentUpdated = fileRegistry.updateHash(path);
 
-        if (contentUpdated) {
+        if (contentUpdated || REMOVED == status) {
             fileRegistry.getEndpoints(path).forEach(endpoint -> transmitter.transmit(request, endpoint));
         }
     }
@@ -137,14 +144,14 @@ public class EditorFileStatusDetector implements HiEventDetector<FileInVfsStatus
     }
 
     private class FileRegistry {
-        private final Map<String, HashCode>      hashRegistry     = new HashMap<>();
-        private final Map<String, List<Integer>> endpointRegistry = new HashMap<>();
+        private final Map<String, HashCode>     hashRegistry     = new HashMap<>();
+        private final Map<String, Set<Integer>> endpointRegistry = new HashMap<>();
 
         private void add(String path, int endpoint) {
-            List<Integer> endpoints = endpointRegistry.get(path);
+            Set<Integer> endpoints = endpointRegistry.get(path);
 
             if (endpoints == null) {
-                endpoints = new LinkedList<>();
+                endpoints = new HashSet<>();
                 endpointRegistry.put(path, endpoints);
                 hashRegistry.put(path, getHash(path));
             }
@@ -153,18 +160,22 @@ public class EditorFileStatusDetector implements HiEventDetector<FileInVfsStatus
         }
 
         private void remove(String path, int endpoint) {
-            final List<Integer> endpoints = endpointRegistry.get(path);
+            final Set<Integer> endpoints = endpointRegistry.get(path);
 
             if (endpoints == null) {
                 return;
             }
 
-            endpoints.remove((Integer)endpoint);
+            endpoints.remove(endpoint);
 
             if (endpoints.isEmpty()) {
-                hashRegistry.remove(path);
-                endpointRegistry.remove(path);
+                remove(path);
             }
+        }
+
+        private void remove(String path) {
+            hashRegistry.remove(path);
+            endpointRegistry.remove(path);
         }
 
         private boolean updateHash(String path) {
