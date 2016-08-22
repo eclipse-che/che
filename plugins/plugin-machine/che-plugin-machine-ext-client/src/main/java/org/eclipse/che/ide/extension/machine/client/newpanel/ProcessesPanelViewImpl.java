@@ -7,7 +7,7 @@
  *
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
- ******************************************************************************/
+ *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.newpanel;
 
 import elemental.events.KeyboardEvent;
