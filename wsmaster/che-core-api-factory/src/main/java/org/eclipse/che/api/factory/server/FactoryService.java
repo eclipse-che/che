@@ -461,10 +461,12 @@ public class FactoryService extends Service {
      */
     private FactoryDto injectLinks(FactoryDto factory, Set<FactoryImage> images) {
         String username = null;
-        try {
-            username = userManager.getById(factory.getCreator().getUserId()).getName();
-        } catch (ApiException ignored) {
-            // when impossible to get username then named factory link won't be injected
+        if (factory.getCreator() != null && factory.getCreator().getUserId() != null) {
+            try {
+                username = userManager.getById(factory.getCreator().getUserId()).getName();
+            } catch (ApiException ignored) {
+                // when impossible to get username then named factory link won't be injected
+            }
         }
         return factory.withLinks(images != null && !images.isEmpty()
                                  ? createLinks(factory, images, getServiceContext(), username)
