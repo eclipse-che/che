@@ -22,15 +22,16 @@ export class WorkspaceStatusController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheWorkspace) {
+  constructor(cheWorkspace, cheNotification) {
     this.cheWorkspace = cheWorkspace;
+    this.cheNotification = cheNotification;
 
     this.isLoading = false;
   }
 
 
   startWorkspace() {
-    if(this.isLoading || !this.workspace || !this.workspace.config){
+    if (this.isLoading || !this.workspace || !this.workspace.config || this.workspace.status !== 'STOPPED') {
       return;
     }
 
@@ -39,13 +40,14 @@ export class WorkspaceStatusController {
 
     promise.then(() => {
       this.isLoading = false;
-    }, () => {
+    }, (error) => {
       this.isLoading = false;
+      this.cheNotification.showError(error.data.message ? error.data.message : 'Run workspace error.');
     });
   }
 
   stopWorkspace() {
-    if(this.isLoading || !this.workspace){
+    if (this.isLoading || !this.workspace || this.workspace.status !== 'RUNNING') {
       return;
     }
 
@@ -54,8 +56,9 @@ export class WorkspaceStatusController {
 
     promise.then(() => {
       this.isLoading = false;
-    }, () => {
+    }, (error) => {
       this.isLoading = false;
+      this.cheNotification.showError(error.data.message ? error.data.message : 'Stop workspace error.');
     });
   }
 

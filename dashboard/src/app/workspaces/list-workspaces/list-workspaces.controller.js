@@ -114,9 +114,7 @@ export class ListWorkspacesCtrl {
       promises.push(promiseWorkspace);
     }
 
-    this.$q.all(promises).then(() => {
-      this.isInfoLoading = false;
-    }, () => {
+    this.$q.all(promises).finally(() => {
       this.isInfoLoading = false;
     });
   }
@@ -278,8 +276,7 @@ export class ListWorkspacesCtrl {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
       confirmTitle += 'these ' + numberToDelete + ' workspaces?';
-    }
-    else {
+    } else {
       confirmTitle += 'this selected workspace?';
     }
     let confirm = this.$mdDialog.confirm()
