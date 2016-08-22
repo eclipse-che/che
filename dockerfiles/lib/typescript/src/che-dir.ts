@@ -122,13 +122,14 @@ export class CheDir {
 
   parseArgument() : Promise<string> {
     return new Promise<string>( (resolve, reject) => {
+      let invalidCommand : string = 'only init, up, down and status commands are supported.';
       if (this.args.length == 0) {
-        reject('only init and up commands are supported.');
-      } else if ('init' === this.args[1] || 'up' === this.args[1] || 'down' === this.args[1]) {
+        reject(invalidCommand);
+      } else if ('init' === this.args[1] || 'up' === this.args[1] || 'down' === this.args[1] || 'status' === this.args[1]) {
         // return method found based on arguments
         resolve(this.args[1]);
       } else {
-        reject('Invalid arguments ' + this.args +': Only init and up commands are supported.');
+        reject('Invalid arguments ' + this.args +': ' + invalidCommand);
       }
     });
 
@@ -255,6 +256,46 @@ export class CheDir {
         return true;
       }
 
+    });
+
+  }
+
+  status() : Promise<any> {
+    return this.isInitialized().then((isInitialized) => {
+      if (!isInitialized) {
+        return Promise.reject('This directory has not been initialized. So, status is not available.');
+      }
+
+      return new Promise<string>((resolve, reject) => {
+        this.parse();
+        resolve('parsed');
+      }).then(() => {
+        return this.checkCheIsRunning();
+      }).then((isRunning) => {
+        if (!isRunning) {
+          return Promise.reject('No Eclipse Che Instance Running.');
+        }
+
+        // check workspace exists
+        this.workspace = new Workspace(this.authData);
+        return this.workspace.existsWorkspace(':' + this.chefileStructWorkspace.name);
+      }).then((workspaceDto) => {
+        // found it
+        if (!workspaceDto) {
+          return Promise.reject('Eclipse Che is running ' + this.buildLocalCheURL() + ' but workspace (' + this.chefileStructWorkspace.name + ') has not been found');
+        }
+
+        // search IDE url link
+        let ideUrl : string;
+        workspaceDto.getContent().links.forEach((link) => {
+          if ('ide url' === link.rel) {
+            ideUrl = link.href;
+          }
+        });
+        Log.getLogger().info('Workspace name\t', this.chefileStructWorkspace.name);
+        Log.getLogger().info('Workspace url\t', ideUrl);
+        return true;
+      });
     });
 
   }
