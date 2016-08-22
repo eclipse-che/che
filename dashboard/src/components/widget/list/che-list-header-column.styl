@@ -6,15 +6,17 @@
   color $list-header-blue-color
 
   .header-sort-direction
-    margin-left 4px
+    padding 0 4px 0 4px
     text-align center
     vertical-align middle
 
     *::before
       position relative
-      top 1px
       font-size 12px
       color $menu-bg-color
+
+    .fa-sort-desc::before
+      top 1px
 
     .fa-sort-asc::before
       top 3px

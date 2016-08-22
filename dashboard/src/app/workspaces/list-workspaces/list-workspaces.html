@@ -33,6 +33,7 @@
              class="che-checkbox-area">
           <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
             <md-checkbox class="che-list-item-checkbox"
+                         aria-label="Workspace list"
                          ng-checked="listWorkspacesCtrl.isBulkChecked"
                          ng-click="listWorkspacesCtrl.changeBulkSelection()"></md-checkbox>
           </div>
@@ -40,15 +41,23 @@
         <div flex hide-xs layout-gt-xs="row"
              layout-align="start center"
              class="che-list-item-details">
-          <che-list-header-column flex-gt-xs="50"
+          <che-list-header-column flex-gt-xs="25"
                                   che-sort-value='listWorkspacesCtrl.workspaceOrderBy'
                                   che-sort-item='config.name'
                                   che-column-title='Name'></che-list-header-column>
-          <che-list-header-column flex-gt-xs="25"
+          <che-list-header-column flex-gt-xs="15"
                                   che-sort-value='listWorkspacesCtrl.workspaceOrderBy'
                                   che-sort-item='config.environments[0].machineConfigs[0].limits.ram'
                                   che-column-title='RAM'></che-list-header-column>
-          <che-list-header-column flex-gt-xs="25"
+          <che-list-header-column flex-gt-xs="15"
+                                  che-sort-value='listWorkspacesCtrl.workspaceOrderBy'
+                                  che-sort-item='config.projects'
+                                  che-column-title='Projects'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="30"
+                                  che-sort-value='listWorkspacesCtrl.workspaceOrderBy'
+                                  che-sort-item='attributes.stackId'
+                                  che-column-title='Stack'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="15"
                                   che-column-title='Actions'></che-list-header-column>
         </div>
       </div>
@@ -61,7 +70,7 @@
               che-on-checkbox-click="listWorkspacesCtrl.updateSelectedStatus()"
               che-workspace-item="workspace"></che-workspace-item>
     </che-list>
-    <div class="workspace-list-empty">
+    <div class="che-list-empty">
         <span ng-show="listWorkspacesCtrl.userWorkspaces.length > 0 && (listWorkspacesCtrl.userWorkspaces | filter:listWorkspacesCtrl.workspaceFilter).length === 0">
           No workspaces found
         </span>

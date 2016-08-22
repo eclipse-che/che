@@ -28,7 +28,8 @@
            layout-align="start center"
            class="che-checkbox-area">
         <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
-          <md-checkbox class="che-list-item-checkbox"
+          <md-checkbox class="che-list-item-checkbox md-default-theme"
+                       aria-label="Project list"
                        ng-checked="workspaceDetailsProjectsCtrl.isBulkChecked"
                        ng-click="workspaceDetailsProjectsCtrl.changeBulkSelection()"></md-checkbox>
         </div>
@@ -59,7 +60,7 @@
             che-profile-creation-date="workspaceDetailsProjectsCtrl.profileCreationDate"
             flex-gt-sm="100" flex="33"></che-project-item>
   </che-list>
-  <div class="workspace-list-empty">
+  <div class="che-list-empty">
         <span ng-show="workspaceDetailsProjectsCtrl.projects.length > 0 && (workspaceDetailsProjectsCtrl.projects | filter:workspaceDetailsProjectsCtrl.projectFilter).length === 0">
           No projects found
         </span>

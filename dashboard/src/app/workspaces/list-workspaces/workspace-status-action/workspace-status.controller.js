@@ -39,7 +39,7 @@ export class WorkspaceStatusController {
 
     promise.then(() => {
       this.isLoading = false;
-    }, (error) => {
+    }, () => {
       this.isLoading = false;
     });
   }
@@ -54,7 +54,7 @@ export class WorkspaceStatusController {
 
     promise.then(() => {
       this.isLoading = false;
-    }, (error) => {
+    }, () => {
       this.isLoading = false;
     });
   }

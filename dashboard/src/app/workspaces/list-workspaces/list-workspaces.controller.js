@@ -116,7 +116,7 @@ export class ListWorkspacesCtrl {
 
     this.$q.all(promises).then(() => {
       this.isInfoLoading = false;
-    }, (error) => {
+    }, () => {
       this.isInfoLoading = false;
     });
   }

@@ -153,7 +153,7 @@ export class DockerRegistryListController {
 
       this.$q.all(deleteRegistryPromises).finally(() => {
         this.chePreferences.fetchPreferences().then(() => {
-          updateSelectedStatus();
+          this.updateSelectedStatus();
         }, (error) => {
           this.$log.error(error);
         });

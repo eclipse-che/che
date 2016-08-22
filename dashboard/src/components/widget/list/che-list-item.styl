@@ -21,7 +21,7 @@
   white-space normal
 
   *.tooltip
-   overflow visible
+    overflow visible
 
 .che-list-item-row
   min-height 40px
@@ -53,3 +53,42 @@
 
   .spinner > *
     float left
+
+.che-list-actions
+  margin-right 10px
+  display inline-block
+  vertical-align middle
+  color $list-action-color
+
+  *
+    text-decoration none
+    color inherit
+
+  & > *:hover
+    color $list-action-hover-color
+
+  & > *:not(.tooltip)
+    display inline-block
+    float left
+    width 16px
+    height 16px
+    max-width 16px
+    max-height 16px
+    line-height 16px
+    margin-right 10px
+
+  .tooltip
+    color $white-color
+
+  *:before
+    font-size 16px
+
+.che-list-empty
+  width 100%
+  text-align center
+  float left
+
+  *
+    font-size 14px
+    line-height 60px
+    color $label-info-color
