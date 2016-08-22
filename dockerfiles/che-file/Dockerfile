@@ -27,6 +27,7 @@ RUN set -x \
 
 COPY lib/typescript/lib /lib
 COPY lib/typescript/dependencies/runtime/node_modules /lib/node_modules
+COPY lib/typescript/src/*.properties /lib/
 ADD  che-file/src/che.properties /lib/che.properties
 
 ENTRYPOINT ["node", "/lib/index.js", "che-dir"]

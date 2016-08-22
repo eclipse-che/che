@@ -33,6 +33,8 @@ import {UUID} from "./uuid";
 import {HttpJsonRequest} from "./default-http-json-request";
 import {HttpJsonResponse} from "./default-http-json-request";
 import {DefaultHttpJsonRequest} from "./default-http-json-request";
+import {I18n} from "./i18n/i18n";
+import {Message} from "./i18n/message";
 
 
 /**
@@ -78,6 +80,8 @@ export class CheDir {
   authData: AuthData;
   workspace: Workspace;
 
+  @Message('che-dir-constant')
+  i18n : I18n;
 
   constructor(args) {
     this.args = args;
@@ -292,8 +296,8 @@ export class CheDir {
             ideUrl = link.href;
           }
         });
-        Log.getLogger().info('Workspace name\t', this.chefileStructWorkspace.name);
-        Log.getLogger().info('Workspace url\t', ideUrl);
+        Log.getLogger().info(this.i18n.get('status.workspace.name', this.chefileStructWorkspace.name));
+        Log.getLogger().info(this.i18n.get('status.workspace.url', ideUrl));
         return true;
       });
     });
