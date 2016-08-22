@@ -83,26 +83,30 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     public static final  String SSH_PORT              = "22";
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
-    final         Map<String, OutputConsole>     consoles;
-    final         Map<OutputConsole, String>     consoleCommands;
-    final         Map<String, TerminalPresenter> terminals;
-    private final ProcessesPanelView             view;
-    private final MachineLocalizationConstant    localizationConstant;
-    private final MachineResources               resources;
-    private final MachineServiceClient           machineServiceClient;
-    private final WorkspaceAgent                 workspaceAgent;
-    private final AppContext                     appContext;
-    private final NotificationManager            notificationManager;
-    private final EntityFactory                  entityFactory;
-    private final TerminalFactory                terminalFactory;
-    private final CommandConsoleFactory          commandConsoleFactory;
-    private final DialogFactory                  dialogFactory;
-    private final DtoFactory                     dtoFactory;
-    private final CommandTypeRegistry            commandTypeRegistry;
-    private final Map<String, ProcessTreeNode>   machineNodes;
+
+    final Map<String, OutputConsole>     consoles;
+    final Map<OutputConsole, String>     consoleCommands;
+    final Map<String, TerminalPresenter> terminals;
+
+    private final ProcessesPanelView           view;
+    private final MachineLocalizationConstant  localizationConstant;
+    private final MachineResources             resources;
+    private final MachineServiceClient         machineServiceClient;
+    private final WorkspaceAgent               workspaceAgent;
+    private final AppContext                   appContext;
+    private final NotificationManager          notificationManager;
+    private final EntityFactory                entityFactory;
+    private final TerminalFactory              terminalFactory;
+    private final CommandConsoleFactory        commandConsoleFactory;
+    private final DialogFactory                dialogFactory;
+    private final DtoFactory                   dtoFactory;
+    private final CommandTypeRegistry          commandTypeRegistry;
+    private final Map<String, ProcessTreeNode> machineNodes;
+
     ProcessTreeNode rootNode;
-    private       List<ProcessTreeNode>          rootNodes;
-    private       ProcessTreeNode                selectedTreeNode;
+
+    private List<ProcessTreeNode> rootNodes;
+    private ProcessTreeNode       selectedTreeNode;
 
     @Inject
     public ProcessesPanelPresenter(ProcessesPanelView view,
@@ -351,7 +355,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return null;
         }
     }
-
+4
     /**
      * Adds command node to process tree and displays command output
      *
