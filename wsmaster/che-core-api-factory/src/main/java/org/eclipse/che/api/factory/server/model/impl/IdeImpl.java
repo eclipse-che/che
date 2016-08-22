@@ -48,9 +48,15 @@ public class IdeImpl implements Ide {
     public IdeImpl(OnAppLoaded onAppLoaded,
                    OnProjectsLoaded onProjectsLoaded,
                    OnAppClosed onAppClosed) {
-        this.onAppLoaded = new OnAppLoadedImpl(onAppLoaded);
-        this.onProjectsLoaded = new OnProjectsLoadedImpl(onProjectsLoaded);
-        this.onAppClosed = new OnAppClosedImpl(onAppClosed);
+        if (onAppLoaded != null) {
+            this.onAppLoaded = new OnAppLoadedImpl(onAppLoaded);
+        }
+        if (onProjectsLoaded != null) {
+            this.onProjectsLoaded = new OnProjectsLoadedImpl(onProjectsLoaded);
+        }
+        if (onAppClosed != null) {
+            this.onAppClosed = new OnAppClosedImpl(onAppClosed);
+        }
     }
 
     public IdeImpl(Ide ide) {

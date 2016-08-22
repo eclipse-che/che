@@ -11,17 +11,16 @@
 package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.core.model.factory.Author;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.factory.server.FactoryImage;
 import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.factory.Ide;
 import org.eclipse.che.api.core.model.factory.Policies;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.factory.server.FactoryImage;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -42,7 +41,9 @@ import java.util.Set;
  * @author Anton Korneta
  */
 @Entity(name = "Factory")
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "userId"})})
+@Table
+// TODO fix after issue: https://github.com/eclipse/che/issues/2110
+//(uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "userId"})})
 public class FactoryImpl implements Factory {
 
     public static FactoryImplBuilder builder() {
@@ -52,7 +53,7 @@ public class FactoryImpl implements Factory {
     @Id
     private String id;
 
-    @Basic
+    @Column(nullable = true)
     private String name;
 
     @Column(nullable = false)

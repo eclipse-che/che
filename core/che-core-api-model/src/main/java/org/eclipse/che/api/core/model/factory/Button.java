@@ -29,6 +29,15 @@ public interface Button {
             public String toString() {
                 return "nologo";
             }
+        };
+
+        public static Type getIgnoreCase(String name) {
+            for (Type type : values()) {
+                if (name.equalsIgnoreCase(type.toString())) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException();
         }
     }
 
