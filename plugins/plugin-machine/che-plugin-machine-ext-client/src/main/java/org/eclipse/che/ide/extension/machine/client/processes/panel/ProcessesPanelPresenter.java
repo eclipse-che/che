@@ -355,7 +355,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return null;
         }
     }
-4
+
     /**
      * Adds command node to process tree and displays command output
      *
