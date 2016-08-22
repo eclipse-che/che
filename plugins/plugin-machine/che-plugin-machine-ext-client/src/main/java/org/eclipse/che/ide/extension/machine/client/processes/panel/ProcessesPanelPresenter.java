@@ -68,7 +68,7 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.TERMINAL_NODE;
 
 /**
- * //
+ * Presenter for the panel for managing processes.
  *
  * @author Artem Zatsarynnyi
  */
