@@ -37,7 +37,9 @@ import java.util.Map;
  *
  * @author Artem Zatsarynnyi
  */
-public class SubPanelViewImpl extends Composite implements SubPanelView, ListButton.ActionDelegate, TabItem.ActionDelegate {
+public class SubPanelViewImpl extends Composite implements SubPanelView,
+                                                           ListButton.ActionDelegate,
+                                                           TabItem.ActionDelegate {
 
     private final TabItemFactory tabItemFactory;
     private final ListButton     listButton;

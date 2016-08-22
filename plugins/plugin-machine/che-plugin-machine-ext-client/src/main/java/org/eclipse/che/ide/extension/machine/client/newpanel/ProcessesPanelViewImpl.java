@@ -22,6 +22,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -36,6 +37,7 @@ import org.eclipse.che.ide.api.multisplitpanel.WidgetToShow;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.base.BaseView;
 import org.eclipse.che.ide.api.theme.Style;
+import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.processes.AddTerminalClickHandler;
 import org.eclipse.che.ide.extension.machine.client.processes.PreviewSshClickHandler;
@@ -59,7 +61,9 @@ import java.util.Map;
  *
  * @author Artem Zatsarynnyi
  */
-public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDelegate> implements ProcessesPanelView, FocusListener {
+public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDelegate> implements ProcessesPanelView,
+                                                                                                   FocusListener,
+                                                                                                   RequiresResize {
 
     @UiField(provided = true)
     MachineResources machineResources;
@@ -90,8 +94,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
                                   ProcessTreeRenderer renderer,
                                   ProcessDataAdapter adapter,
                                   ProcessesPartViewImplUiBinder uiBinder,
-                                  SubPanelFactory subPanelFactory) {
+                                  SubPanelFactory subPanelFactory,
+                                  MachineLocalizationConstant localizationConstants) {
         super(partStackUIResources);
+        setTitle(localizationConstants.viewProcessesTitle());
         this.machineResources = machineResources;
 
         processTreeNodes = new LinkedHashMap<>();
@@ -388,7 +394,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
             processId = "";
         }
 
-//            onResize();
+        onResize();
 
         final WidgetToShow widgetToShow = processWidgets.get(processId);
         final SubPanel subPanel = widget2Panels.get(widgetToShow);
@@ -442,6 +448,16 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         ProcessTreeNode processTreeNode = widget2TreeNodes.get(widget);
         selectNode(processTreeNode);
+    }
+
+    @Override
+    public void onResize() {
+        for (WidgetToShow widgetToShow : widget2Panels.keySet()) {
+            final IsWidget widget = widgetToShow.getWidget();
+            if (widget instanceof RequiresResize) {
+                ((RequiresResize)widget).onResize();
+            }
+        }
     }
 
     interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {

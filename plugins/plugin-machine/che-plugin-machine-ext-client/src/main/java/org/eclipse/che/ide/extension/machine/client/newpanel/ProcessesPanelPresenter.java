@@ -85,6 +85,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
     final         Map<String, OutputConsole>     consoles;
     final         Map<OutputConsole, String>     consoleCommands;
+    final         Map<String, TerminalPresenter> terminals;
     private final ProcessesPanelView             view;
     private final MachineLocalizationConstant    localizationConstant;
     private final MachineResources               resources;
@@ -99,9 +100,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final DtoFactory                     dtoFactory;
     private final CommandTypeRegistry            commandTypeRegistry;
     private final Map<String, ProcessTreeNode>   machineNodes;
-    private final Map<String, TerminalPresenter> terminals;
+    ProcessTreeNode rootNode;
     private       List<ProcessTreeNode>          rootNodes;
-    private       ProcessTreeNode                rootNode;
     private       ProcessTreeNode                selectedTreeNode;
 
     @Inject

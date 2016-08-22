@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.machine.client.processes;
+package org.eclipse.che.ide.extension.machine.client.newpanel;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -16,8 +16,6 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -27,12 +25,15 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
-import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -48,9 +49,8 @@ import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
-import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
+import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,7 +81,7 @@ import static org.mockito.Mockito.when;
  * @author Roman Nikitenko
  */
 @RunWith(GwtMockitoTestRunner.class)
-public class ConsolesPanelPresenterTest {
+public class ProcessesPanelPresenterTest {
     private static final String MACHINE_ID     = "machineID";
     private static final String WORKSPACE_ID   = "workspaceID";
     private static final String PROCESS_ID     = "processID";
@@ -90,39 +90,37 @@ public class ConsolesPanelPresenterTest {
     private static final int    PID            = 101;
 
     @Mock
-    private DtoFactory                    dtoFactory;
+    private DtoFactory                  dtoFactory;
     @Mock
-    private CommandConsoleFactory         commandConsoleFactory;
+    private CommandConsoleFactory       commandConsoleFactory;
     @Mock
-    private CommandTypeRegistry           commandTypeRegistry;
+    private CommandTypeRegistry         commandTypeRegistry;
     @Mock
-    private DialogFactory                 dialogFactory;
+    private DialogFactory               dialogFactory;
     @Mock
-    private WorkspaceAgent                workspaceAgent;
+    private WorkspaceAgent              workspaceAgent;
     @Mock
-    private NotificationManager           notificationManager;
+    private NotificationManager         notificationManager;
     @Mock
-    private MachineLocalizationConstant   localizationConstant;
+    private MachineLocalizationConstant localizationConstant;
     @Mock
-    private TerminalFactory               terminalFactory;
+    private TerminalFactory             terminalFactory;
     @Mock
-    private ConsolesPanelView             view;
+    private ProcessesPanelView          view;
     @Mock
-    private MachineResources              resources;
+    private MachineResources            resources;
     @Mock
-    private AppContext                    appContext;
+    private AppContext                  appContext;
     @Mock
-    private MachineServiceClient          machineService;
+    private MachineServiceClient        machineService;
     @Mock
-    private EntityFactory                 entityFactory;
+    private EntityFactory               entityFactory;
     @Mock
-    private EventBus                      eventBus;
+    private EventBus                    eventBus;
     @Mock
-    private WorkspaceDto                  workspace;
+    private WorkspaceDto                workspace;
     @Mock
-    private OutputConsole                 outputConsole;
-    @Mock
-    private ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
+    private OutputConsole               outputConsole;
 
     @Mock
     private Promise<List<MachineDto>> machinesPromise;
@@ -146,7 +144,7 @@ public class ConsolesPanelPresenterTest {
     @Captor
     private ArgumentCaptor<Operation<PromiseError>>            errorOperation;
 
-    private ConsolesPanelPresenter presenter;
+    private ProcessesPanelPresenter presenter;
 
     @Before
     public void setUp() {
@@ -164,12 +162,20 @@ public class ConsolesPanelPresenterTest {
 
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
-        presenter =
-                new ConsolesPanelPresenter(view, eventBus, dtoFactory, dialogFactory, entityFactory, terminalFactory, commandConsoleFactory,
-                                           commandTypeRegistry, workspaceAgent, notificationManager, localizationConstant,
-                                           machineService, resources, appContext, consoleTreeContextMenuFactory);
-        PartPresenter parent = mock(PartPresenter.class);
-        presenter.setParent(parent);
+        presenter = new ProcessesPanelPresenter(view,
+                                                localizationConstant,
+                                                resources,
+                                                eventBus,
+                                                machineService,
+                                                workspaceAgent,
+                                                appContext,
+                                                notificationManager,
+                                                entityFactory,
+                                                terminalFactory,
+                                                commandConsoleFactory,
+                                                dialogFactory,
+                                                dtoFactory,
+                                                commandTypeRegistry);
     }
 
     @Test
@@ -193,13 +199,14 @@ public class ConsolesPanelPresenterTest {
         MachineDto machineDto = mock(MachineDto.class);
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
         OutputConsole outputConsole = mock(OutputConsole.class);
+        when(machineConfigDto.getName()).thenReturn("machine_name");
         when(machineDto.getConfig()).thenReturn(machineConfigDto);
         when(appContext.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(commandConsoleFactory.create("")).thenReturn(outputConsole);
+        when(commandConsoleFactory.create(eq("machine_name"))).thenReturn(outputConsole);
 
         MachineStateEvent machineStateEvent = mock(MachineStateEvent.class);
         when(machineStateEvent.getMachine()).thenReturn(machineDto);
-        verify(eventBus, times(6)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
+        verify(eventBus, times(5)).addHandler(anyObject(), machineStateHandlerCaptor.capture());
         MachineStateEvent.Handler machineStateHandler = machineStateHandlerCaptor.getAllValues().get(0);
         machineStateHandler.onMachineCreating(machineStateEvent);
 
@@ -208,8 +215,8 @@ public class ConsolesPanelPresenterTest {
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
         verify(workspaceAgent).setActivePart(anyObject());
-        verify(commandConsoleFactory).create(eq(""));
-        verify(view).addProcessWidget(anyString(), anyObject());
+        verify(commandConsoleFactory).create(eq("machine_name"));
+        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), anyObject());
         verify(view).selectNode(anyObject());
         verify(view).setProcessesData(eq(presenter.rootNode));
     }
@@ -243,7 +250,7 @@ public class ConsolesPanelPresenterTest {
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
-        verify(view).addProcessWidget(anyString(), eq(widget));
+        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(widget));
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
         verify(view).getNodeById(anyString());
@@ -274,7 +281,7 @@ public class ConsolesPanelPresenterTest {
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
-        verify(view).addProcessWidget(anyString(), eq(widget));
+        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(widget));
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
         verify(view).getNodeById(anyString());
@@ -305,7 +312,7 @@ public class ConsolesPanelPresenterTest {
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
-        verify(view).addProcessWidget(anyString(), eq(widget));
+        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(widget));
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
         verify(view).getNodeById(anyString());
@@ -344,7 +351,7 @@ public class ConsolesPanelPresenterTest {
         verify(terminal).getView();
         verify(view, times(2)).setProcessesData(anyObject());
         verify(view, times(2)).selectNode(anyObject());
-        verify(view).addProcessWidget(anyString(), eq(terminalWidget));
+        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(terminalWidget));
         verify(view, times(2)).addProcessNode(anyObject());
         verify(terminal).setVisible(eq(true));
         verify(terminal).connect();
@@ -383,7 +390,7 @@ public class ConsolesPanelPresenterTest {
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
         verify(view).hideProcessOutput(eq(commandId));
-        verify(view).addProcessWidget(eq(commandId), eq(widget));
+        verify(view).addProcessWidget(eq(commandId), anyString(), anyObject(), eq(widget));
         verify(view).selectNode(anyObject());
         verify(view).getNodeById(eq(commandId));
     }
@@ -419,7 +426,7 @@ public class ConsolesPanelPresenterTest {
         verify(terminal).getView();
         verify(view).setProcessesData(anyObject());
         verify(view).selectNode(anyObject());
-        verify(view).addProcessWidget(anyString(), eq(terminalWidget));
+        verify(view).addProcessWidget(anyString(), anyString(), anyObject(), eq(terminalWidget));
         verify(view).addProcessNode(anyObject());
         verify(terminal).setVisible(eq(true));
         verify(terminal).connect();
@@ -521,7 +528,7 @@ public class ConsolesPanelPresenterTest {
 
         presenter.onCloseCommandOutputClick(commandNode);
 
-        verify(commandNode, times(2)).getId();
+        verify(commandNode, times(3)).getId();
         verify(commandNode).getParent();
         verify(view).getNodeIndex(eq(PROCESS_ID));
         verify(view).hideProcessOutput(eq(PROCESS_ID));
@@ -584,7 +591,7 @@ public class ConsolesPanelPresenterTest {
         presenter.onCloseTerminal(terminalNode);
 
         verify(terminal).stopTerminal();
-        verify(terminalNode, times(2)).getId();
+        verify(terminalNode, times(3)).getId();
         verify(terminalNode).getParent();
         verify(view).getNodeIndex(eq(PROCESS_ID));
         verify(view).hideProcessOutput(eq(PROCESS_ID));

@@ -47,9 +47,6 @@ import org.eclipse.che.ide.extension.machine.client.command.valueproviders.Serve
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier;
 import org.eclipse.che.ide.extension.machine.client.newpanel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
-import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
-import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
-import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProcessAction;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
@@ -73,11 +70,11 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Extension(title = "Machine", version = "1.0.0")
 public class MachineExtension {
 
-    public static final String GROUP_MACHINE_TOOLBAR         = "MachineGroupToolbar";
-    public static final String GROUP_COMMANDS_DROPDOWN       = "CommandsSelector";
-    public static final String GROUP_COMMANDS_LIST           = "CommandsListGroup";
-    public static final String GROUP_MACHINES_DROPDOWN       = "MachinesSelector";
-    public static final String GROUP_MACHINES_LIST           = "MachinesListGroup";
+    public static final String GROUP_MACHINE_TOOLBAR   = "MachineGroupToolbar";
+    public static final String GROUP_COMMANDS_DROPDOWN = "CommandsSelector";
+    public static final String GROUP_COMMANDS_LIST     = "CommandsListGroup";
+    public static final String GROUP_MACHINES_DROPDOWN = "MachinesSelector";
+    public static final String GROUP_MACHINES_LIST     = "MachinesListGroup";
 
     @Inject
     public MachineExtension(final MachineResources machineResources,
@@ -127,7 +124,7 @@ public class MachineExtension {
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
                 workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 if (appContext.getFactory() == null) {
-                     workspaceAgent.setActivePart(processesPanelPresenter);
+                    workspaceAgent.setActivePart(processesPanelPresenter);
                 }
             }
         });
@@ -152,10 +149,7 @@ public class MachineExtension {
                                 NewTerminalAction newTerminalAction,
                                 EditTargetsAction editTargetsAction,
                                 IconRegistry iconRegistry,
-                                MachineResources machineResources,
-                                ReRunProcessAction reRunProcessAction,
-                                StopProcessAction stopProcessAction,
-                                CloseConsoleAction closeConsoleAction) {
+                                MachineResources machineResources) {
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
 
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
@@ -217,14 +211,6 @@ public class MachineExtension {
         final DefaultActionGroup commandList = new DefaultActionGroup(GROUP_COMMANDS_DROPDOWN, true, actionManager);
         actionManager.registerAction(GROUP_COMMANDS_LIST, commandList);
         commandList.add(editCommandsAction, FIRST);
-
-        // Consoles tree context menu group
-        DefaultActionGroup consolesTreeContextMenu =
-                (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU);
-
-        consolesTreeContextMenu.add(reRunProcessAction);
-        consolesTreeContextMenu.add(stopProcessAction);
-        consolesTreeContextMenu.add(closeConsoleAction);
 
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");

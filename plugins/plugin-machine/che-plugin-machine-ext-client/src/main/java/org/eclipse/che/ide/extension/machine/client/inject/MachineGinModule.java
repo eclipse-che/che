@@ -19,6 +19,7 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.Perspective;
@@ -28,7 +29,6 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsView;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsViewImpl;
-import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectRelativePathProvider;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.DevMachineHostNameProvider;
@@ -53,11 +53,7 @@ import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.Tab;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.TabImpl;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeader;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeaderImpl;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelView;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelViewImpl;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerView;
-import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerViewImpl;
 import org.eclipse.che.ide.extension.machine.client.targets.BaseTarget;
 import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
 import org.eclipse.che.ide.extension.machine.client.targets.Target;
@@ -96,9 +92,6 @@ public class MachineGinModule extends AbstractGinModule {
                         .implement(CommandOutputConsole.class, Names.named("command"), CommandOutputConsolePresenter.class)
                         .implement(OutputConsole.class, Names.named("default"), DefaultOutputConsole.class)
                         .build(CommandConsoleFactory.class));
-
-        bind(ConsolesPanelView.class).to(ConsolesPanelViewImpl.class);
-        bind(ConsolesContainerView.class).to(ConsolesContainerViewImpl.class).in(Singleton.class);
 
         bind(ProcessesPanelView.class).to(ProcessesPanelViewImpl.class).in(Singleton.class);
 
