@@ -94,7 +94,7 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         widgets2Tabs = new HashMap<>();
         widgets2ListItems = new HashMap<>();
 
-        splitLayoutPanel = new SplitLayoutPanel(5);
+        splitLayoutPanel = new SplitLayoutPanel(3);
 
         initWidget(uiBinder.createAndBindUi(this));
 

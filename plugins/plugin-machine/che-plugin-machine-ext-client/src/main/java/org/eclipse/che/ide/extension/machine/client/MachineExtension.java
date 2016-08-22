@@ -46,7 +46,6 @@ import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommand
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier;
 import org.eclipse.che.ide.extension.machine.client.newpanel.ProcessesPanelPresenter;
-import org.eclipse.che.ide.extension.machine.client.perspective.OperationsPerspective;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
@@ -112,13 +111,6 @@ public class MachineExtension {
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-                // There is a bug in perspective management and it's unable to add Consoles part in
-                // OperationsPerspective and ProjectPerspective directly. Following code resolves the issue.
-
-                // Add Processes part to Operation perspective
-                perspectiveManager.setPerspectiveId(OperationsPerspective.OPERATIONS_PERSPECTIVE_ID);
-                workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
-
                 // Add Processes part to Project perspective
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
                 workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
