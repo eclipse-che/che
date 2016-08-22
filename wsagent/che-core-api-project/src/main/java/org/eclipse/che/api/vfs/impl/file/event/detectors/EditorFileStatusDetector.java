@@ -24,6 +24,7 @@ import org.eclipse.che.api.project.shared.dto.event.FileInVfsStatusDto;
 import org.eclipse.che.api.project.shared.dto.event.FileInVfsStatusDto.Status;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.event.EventTreeNode;
 import org.eclipse.che.api.vfs.impl.file.event.HiEvent;
@@ -183,10 +184,15 @@ public class EditorFileStatusDetector implements HiEventDetector<FileInVfsStatus
 
         private HashCode getHash(String path) {
             try {
-                final String content = vfsProvider.getVirtualFileSystem()
-                                                  .getRoot()
-                                                  .getChild(Path.of(path))
-                                                  .getContentAsString();
+                final VirtualFile file = vfsProvider.getVirtualFileSystem()
+                                                    .getRoot()
+                                                    .getChild(Path.of(path));
+                String content;
+                if (file == null) {
+                    content = "";
+                } else {
+                    content = file.getContentAsString();
+                }
 
                 return Hashing.sha1().hashString(content, defaultCharset());
             } catch (ServerException | ForbiddenException e) {
