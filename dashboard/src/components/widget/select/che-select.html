@@ -1,7 +1,7 @@
 <div class="che-select">
   <!-- Mobile version -->
   <md-input-container class="che-select-mobile" hide-gt-xs>
-    <label>{{value ? labelName : placeHolder}}</label>
+    <label ng-if="labelName">{{value ? labelName : placeHolder}}</label>
     <md-select ng-model="value"
                md-container-class="che-custom-dropdown"
                placeholder="{{placeHolder}}">
@@ -13,10 +13,10 @@
 
   <!-- Desktop version -->
   <div class="che-select-desktop" hide-xs layout="column" flex>
-    <div layout="row" flex layout-align="space-around start">
-      <label flex="15">{{labelName}}: </label>
+    <div layout="row" flex layout-align="start start">
+      <label flex="15" ng-if="labelName">{{labelName}}: </label>
 
-      <div layout="column" class="che-select-container" flex="85">
+      <div layout="column" class="che-select-container" flex="{{labelName ? 85 : 'none'}}">
         <md-select ng-model="value"
                    md-container-class="che-custom-dropdown"
                    placeholder="{{placeHolder}}">

@@ -15,7 +15,7 @@
  * @author Florent Benoit
  * @author Oleksii Orel
  */
-export class ReadyToGoStacksCtrl {
+export class ReadyToGoStacksController {
 
   /**
    * Default constructor that is using resource

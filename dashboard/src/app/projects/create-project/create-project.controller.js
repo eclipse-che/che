@@ -9,13 +9,12 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-/*global $:false, window:false */
 
 /**
  * This class is handling the controller for the projects
  * @author Florent Benoit
  */
-export class CreateProjectCtrl {
+export class CreateProjectController {
 
   /**
    * Default constructor that is using resource
@@ -125,20 +124,25 @@ export class CreateProjectCtrl {
       // ignore the error
     }
 
-    $rootScope.$on('create-project-stacks:initialized', () => {
+    let deregFunc1 = $rootScope.$on('create-project-stacks:initialized', () => {
       this.stacksInitialized = true;
     });
 
     // sets isReady status after selection
-    $rootScope.$on('create-project-github:selected', () => {
+    let deregFunc2 = $rootScope.$on('create-project-github:selected', () => {
       if (!this.isReady && this.currentTab === 'github') {
         this.isReady = true;
       }
     });
-    $rootScope.$on('create-project-samples:selected', () => {
+    let deregFunc3 = $rootScope.$on('create-project-samples:selected', () => {
       if (!this.isReady && this.currentTab === 'samples') {
         this.isReady = true;
       }
+    });
+    $rootScope.$on('$destroy', () => {
+      deregFunc1();
+      deregFunc2();
+      deregFunc3();
     });
 
     // channels on which we will subscribe on the workspace bus websocket
@@ -513,11 +517,7 @@ export class CreateProjectCtrl {
       // redirect to IDE from crane loader page
       let currentPath = this.$location.path();
       if (/create-project/.test(currentPath)) {
-        let link = this.getIDELink();
-        if (link.indexOf('#') === 0) {
-          link = link.substring(1, link.length);
-        }
-        this.$location.path(link);
+        this.createProjectSvc.redirectToIDE();
       }
     }, (error) => {
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
@@ -1219,14 +1219,6 @@ export class CreateProjectCtrl {
       logs += step.logs + '\n';
     });
     this.$window.open('data:text/csv,' + encodeURIComponent(logs));
-  }
-
-  getCreateButtonTitle() {
-    if (this.workspaceResource === 'from-stack') {
-      return "Create Workspace and Project";
-    } else {
-      return "Load Workspace and Create Project";
-    }
   }
 
   /**

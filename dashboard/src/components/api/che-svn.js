@@ -20,7 +20,7 @@ export class CheSvn {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($resource) {
+  constructor($resource, wsagentPath) {
 
     // keep resource
     this.$resource = $resource;
@@ -28,8 +28,8 @@ export class CheSvn {
     this.remoteUrlMap = new Map();
 
     // remote call
-    this.remoteSvnAPI = this.$resource('/api/svn', {}, {
-      getRemoteUrl: {method: 'POST', url: '/api/svn/:workspaceId/info'}
+    this.remoteSvnAPI = this.$resource(wsagentPath + '/svn', {}, {
+      getRemoteUrl: {method: 'POST', url: wsagentPath + '/svn/info'}
     });
   }
 
@@ -47,8 +47,13 @@ export class CheSvn {
 
     // check if it was OK or not
     let parsedResultPromise = promise.then((svnInfo) => {
-      if(svnInfo.repositoryUrl){
-        this.remoteUrlMap.set(workspaceId + projectPath, svnInfo.repositoryUrl);
+      if(svnInfo.items){
+        svnInfo.items.forEach((item) => {
+          this.remoteUrlMap.set(workspaceId + projectPath, {
+            name: item.path,
+            url: item.uRL
+          });
+        });
       }
     });
 

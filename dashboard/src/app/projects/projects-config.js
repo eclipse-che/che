@@ -10,12 +10,12 @@
  */
 'use strict';
 
-import {CreateProjectCtrl} from './create-project/create-project.controller';
+import {CreateProjectController} from './create-project/create-project.controller';
 import {CreateProjectSvc} from './create-project/create-project.service.js';
-import {CreateProjectGithubCtrl} from './create-project/github/create-project-github.controller';
+import {CreateProjectGithubController} from './create-project/github/create-project-github.controller';
 
 import {CreateProjectGit} from './create-project/git/create-project-git.directive';
-import {CreateProjectGitCtrl} from './create-project/git/create-project-git.controller';
+import {CreateProjectGitController} from './create-project/git/create-project-git.controller';
 import {CreateProjectGithub} from './create-project/github/create-project-github.directive';
 import {AddSecretKeyNotificationCtrl} from './create-project/add-ssh-key-notification/add-ssh-key-notification.controller';
 import {NoGithubOauthDialogController} from './create-project/github/oauth-dialog/no-github-oauth-dialog.controller';
@@ -46,10 +46,10 @@ export class ProjectsConfig {
 
     register.controller('ProjectDetailsController', ProjectDetailsController);
 
-    register.controller('CreateProjectGitCtrl', CreateProjectGitCtrl);
+    register.controller('CreateProjectGitController', CreateProjectGitController);
     register.directive('createProjectGit', CreateProjectGit);
 
-    register.controller('CreateProjectGithubCtrl', CreateProjectGithubCtrl);
+    register.controller('CreateProjectGithubController', CreateProjectGithubController);
     register.directive('createProjectGithub', CreateProjectGithub);
 
     register.controller('NoGithubOauthDialogController', NoGithubOauthDialogController);
@@ -67,7 +67,7 @@ export class ProjectsConfig {
     register.directive('createProjectConfFile', CreateProjectConfFile);
 
     register.service('createProjectSvc', CreateProjectSvc);
-    register.controller('CreateProjectCtrl', CreateProjectCtrl);
+    register.controller('CreateProjectController', CreateProjectController);
 
     register.directive('cheProjectItem', CheProjectItem);
 
@@ -77,7 +77,7 @@ export class ProjectsConfig {
     let locationCreateProjectProvider = {
       title: 'New Project',
       templateUrl: 'app/projects/create-project/create-project.html',
-      controller: 'CreateProjectCtrl',
+      controller: 'CreateProjectController',
       controllerAs: 'createProjectCtrl'
     };
 
