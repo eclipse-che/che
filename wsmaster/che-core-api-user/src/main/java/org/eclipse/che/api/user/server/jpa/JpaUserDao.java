@@ -26,15 +26,18 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
+ * JPA based implementation of {@link UserDao}.
+ *
  * @author Yevhenii Voevodin
+ * @author Anton Korneta
  */
 @Singleton
 public class JpaUserDao implements UserDao {
@@ -57,7 +60,7 @@ public class JpaUserDao implements UserDao {
             if (!encryptor.test(password, user.getPassword())) {
                 throw new NotFoundException(format("User with email or name '%s' and given password doesn't exist", emailOrName));
             }
-            return user;
+            return erasePassword(user);
         } catch (NoResultException x) {
             throw new NotFoundException(format("User with email or name '%s' and given password doesn't exist", emailOrName));
         } catch (RuntimeException x) {
@@ -69,6 +72,7 @@ public class JpaUserDao implements UserDao {
     public void create(UserImpl user) throws ConflictException, ServerException {
         requireNonNull(user, "Required non-null user");
         try {
+            user.setPassword(encryptor.encrypt(user.getPassword()));
             doCreate(user);
         } catch (DuplicateKeyException x) {
             // TODO make more concrete
@@ -106,10 +110,10 @@ public class JpaUserDao implements UserDao {
     public UserImpl getByAlias(String alias) throws NotFoundException, ServerException {
         requireNonNull(alias, "Required non-null alias");
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("User.getByAlias", UserImpl.class)
-                                  .setParameter("alias", alias)
-                                  .getSingleResult();
+            return erasePassword(managerProvider.get()
+                                                .createNamedQuery("User.getByAlias", UserImpl.class)
+                                                .setParameter("alias", alias)
+                                                .getSingleResult());
         } catch (NoResultException x) {
             throw new NotFoundException(format("User with alias '%s' doesn't exist", alias));
         } catch (RuntimeException x) {
@@ -126,7 +130,7 @@ public class JpaUserDao implements UserDao {
             if (user == null) {
                 throw new NotFoundException(format("User with id '%s' doesn't exist", id));
             }
-            return user;
+            return erasePassword(user);
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }
@@ -137,10 +141,10 @@ public class JpaUserDao implements UserDao {
     public UserImpl getByName(String name) throws NotFoundException, ServerException {
         requireNonNull(name, "Required non-null name");
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("User.getByName", UserImpl.class)
-                                  .setParameter("name", name)
-                                  .getSingleResult();
+            return erasePassword(managerProvider.get()
+                                                .createNamedQuery("User.getByName", UserImpl.class)
+                                                .setParameter("name", name)
+                                                .getSingleResult());
         } catch (NoResultException x) {
             throw new NotFoundException(format("User with name '%s' doesn't exist", name));
         } catch (RuntimeException x) {
@@ -153,10 +157,10 @@ public class JpaUserDao implements UserDao {
     public UserImpl getByEmail(String email) throws NotFoundException, ServerException {
         requireNonNull(email, "Required non-null email");
         try {
-            return managerProvider.get()
-                                  .createNamedQuery("User.getByEmail", UserImpl.class)
-                                  .setParameter("email", email)
-                                  .getSingleResult();
+            return erasePassword(managerProvider.get()
+                                                .createNamedQuery("User.getByEmail", UserImpl.class)
+                                                .setParameter("email", email)
+                                                .getSingleResult());
         } catch (NoResultException x) {
             throw new NotFoundException(format("User with email '%s' doesn't exist", email));
         } catch (RuntimeException x) {
@@ -171,11 +175,14 @@ public class JpaUserDao implements UserDao {
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
         try {
-            List<UserImpl> list = managerProvider.get()
-                                                 .createNamedQuery("User.getAll", UserImpl.class)
-                                                 .setMaxResults(maxItems)
-                                                 .setFirstResult(skipCount)
-                                                 .getResultList();
+            final List<UserImpl> list = managerProvider.get()
+                                                       .createNamedQuery("User.getAll", UserImpl.class)
+                                                       .setMaxResults(maxItems)
+                                                       .setFirstResult(skipCount)
+                                                       .getResultList()
+                                                       .stream()
+                                                       .map(JpaUserDao::erasePassword)
+                                                       .collect(toList());
             return new Page<>(list, skipCount, maxItems, getTotalCount());
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
@@ -199,8 +206,15 @@ public class JpaUserDao implements UserDao {
     @Transactional
     protected void doUpdate(UserImpl update) throws NotFoundException {
         final EntityManager manager = managerProvider.get();
-        if (manager.find(UserImpl.class, update.getId()) == null) {
+        final UserImpl user = manager.find(UserImpl.class, update.getId());
+        if (user == null) {
             throw new NotFoundException(format("Couldn't update user with id '%s' because it doesn't exist", update.getId()));
+        }
+        final String password = update.getPassword();
+        if (password != null) {
+            update.setPassword(encryptor.encrypt(password));
+        } else {
+            update.setPassword(user.getPassword());
         }
         manager.merge(update);
     }
@@ -212,5 +226,14 @@ public class JpaUserDao implements UserDao {
         if (user != null) {
             manager.remove(user);
         }
+    }
+
+    // Returns user instance copy without password
+    private static UserImpl erasePassword(UserImpl source) {
+        return new UserImpl(source.getId(),
+                            source.getEmail(),
+                            source.getName(),
+                            null,
+                            source.getAliases());
     }
 }
