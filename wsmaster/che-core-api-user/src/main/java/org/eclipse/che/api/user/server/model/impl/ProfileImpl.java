@@ -41,7 +41,7 @@ public class ProfileImpl implements Profile {
 
     @ElementCollection
     @MapKeyColumn(name = "name")
-    @Column(name = "value")
+    @Column(name = "value", nullable = false)
     @CollectionTable(joinColumns = @JoinColumn(name = "user_id"),
                      uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "name"}))
     private Map<String, String> attributes;
