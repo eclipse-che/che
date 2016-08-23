@@ -43,7 +43,7 @@ export class ProjectDetailsController {
 
     if (!this.workspace || !this.workspace.runtime) {
       cheAPI.getWorkspace().fetchWorkspaceDetails(this.namespace + ':' + this.workspaceName).then(() => {
-        this.workspace = cheAPI.getWorkspace().getWorkspaceByName(this.namespace, this.workspsaceName);
+        this.workspace = cheAPI.getWorkspace().getWorkspaceByName(this.namespace, this.workspaceName);
         if (this.workspace && this.workspace.runtime) {
          this.fetchProjectDetails();
         } else {
