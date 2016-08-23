@@ -39,7 +39,7 @@ export class EntryPoint {
         this.args = ArgumentProcessor.inject(this, process.argv.slice(2));
 
         process.on('SIGINT', () => {
-            console.log("CTRL-C hit, exiting...");
+            Log.getLogger().warn('CTRL-C hit, exiting...');
             process.exit(1);
         });
 
