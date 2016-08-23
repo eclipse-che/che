@@ -13,7 +13,7 @@ package org.eclipse.che.ide.api.event.ng;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
-import org.eclipse.che.api.project.shared.dto.event.FileInVfsStatusDto;
+import org.eclipse.che.api.project.shared.dto.event.VfsFileStatusUpdateDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -28,8 +28,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.eclipse.che.api.project.shared.dto.event.FileInVfsStatusDto.Status.REMOVED;
-import static org.eclipse.che.api.project.shared.dto.event.FileInVfsStatusDto.Status.UPDATED;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.DELETED;
+import static org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType.MODIFIED;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.junit.Assert.assertEquals;
@@ -61,20 +61,20 @@ public class EditorFileStatusNotificationReceiverTest {
     private NotificationManager notificationManager;
 
     @Mock
-    private FileInVfsStatusDto dto;
+    private VfsFileStatusUpdateDto dto;
     @Mock
-    private JsonRpcRequest     request;
+    private JsonRpcRequest         request;
     @Mock
-    private Container          container;
+    private Container              container;
 
     @Before
     public void setUp() throws Exception {
         receiver.inject(notificationManager);
 
-        when(dtoFactory.createDtoFromJson(any(), eq(FileInVfsStatusDto.class))).thenReturn(dto);
+        when(dtoFactory.createDtoFromJson(any(), eq(VfsFileStatusUpdateDto.class))).thenReturn(dto);
 
         when(dto.getPath()).thenReturn(FILE_PATH);
-        when(dto.getStatus()).thenReturn(UPDATED);
+        when(dto.getType()).thenReturn(MODIFIED);
 
         when(appContext.getWorkspaceRoot()).thenReturn(container);
     }
@@ -88,12 +88,13 @@ public class EditorFileStatusNotificationReceiverTest {
     public void shouldRunDtoFactory() {
         receiver.receive(request);
 
-        verify(dtoFactory).createDtoFromJson(any(), eq(FileInVfsStatusDto.class));
+        verify(dtoFactory).createDtoFromJson(any(), eq(VfsFileStatusUpdateDto.class));
     }
 
     @Test
     public void shouldNotifyAboutUpdate() {
-        when(dto.getStatus()).thenReturn(UPDATED);
+        when(dto.getType()).thenReturn(MODIFIED);
+
 
         receiver.receive(request);
 
@@ -110,7 +111,8 @@ public class EditorFileStatusNotificationReceiverTest {
 
     @Test
     public void shouldNotifyAboutRemove() {
-        when(dto.getStatus()).thenReturn(REMOVED);
+        when(dto.getType()).thenReturn(DELETED);
+
 
         receiver.receive(request);
 

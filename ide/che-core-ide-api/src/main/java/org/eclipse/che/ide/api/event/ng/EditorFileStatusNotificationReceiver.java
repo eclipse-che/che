@@ -14,8 +14,8 @@ package org.eclipse.che.ide.api.event.ng;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
-import org.eclipse.che.api.project.shared.dto.event.FileInVfsStatusDto;
-import org.eclipse.che.api.project.shared.dto.event.FileInVfsStatusDto.Status;
+import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
+import org.eclipse.che.api.project.shared.dto.event.VfsFileStatusUpdateDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -60,14 +60,14 @@ public class EditorFileStatusNotificationReceiver implements JsonRpcRequestRecei
     @Override
     public void receive(JsonRpcRequest request) {
         final String params = request.getParams();
-        final FileInVfsStatusDto fileInVfsStatusDto = dtoFactory.createDtoFromJson(params, FileInVfsStatusDto.class);
+        final VfsFileStatusUpdateDto vfsFileStatusUpdateDto = dtoFactory.createDtoFromJson(params, VfsFileStatusUpdateDto.class);
 
-        final Status status = fileInVfsStatusDto.getStatus();
-        final String path = fileInVfsStatusDto.getPath();
+        final FileWatcherEventType status = vfsFileStatusUpdateDto.getType();
+        final String path = vfsFileStatusUpdateDto.getPath();
         final String name = path.substring(path.lastIndexOf("/") + 1);
 
         switch (status) {
-            case UPDATED: {
+            case MODIFIED: {
                 Log.info(getClass(), "Received updated file event status: " + path);
 
                 eventBus.fireEvent(new FileContentUpdateEvent(path));
@@ -77,7 +77,7 @@ public class EditorFileStatusNotificationReceiver implements JsonRpcRequestRecei
 
                 break;
             }
-            case REMOVED: {
+            case DELETED: {
 
                 Log.info(getClass(), "Received removed file event status: " + path);
 

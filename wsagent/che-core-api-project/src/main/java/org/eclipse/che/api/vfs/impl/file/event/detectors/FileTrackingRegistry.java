@@ -1,0 +1,198 @@
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.che.api.vfs.impl.file.event.detectors;
+
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.inject.Singleton;
+
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.nio.charset.Charset.defaultCharset;
+import static java.util.Collections.unmodifiableSet;
+import static java.util.stream.Collectors.toSet;
+
+/**
+ * @author Dmitry Kuleshov
+ */
+@Singleton
+public class FileTrackingRegistry {
+    private static final Logger LOG = LoggerFactory.getLogger(FileTrackingRegistry.class);
+
+    private final Map<String, FileTrackingMetadata> registry = new ConcurrentHashMap<>();
+
+    private final VirtualFileSystemProvider vfsProvider;
+
+    @Inject
+    public FileTrackingRegistry(VirtualFileSystemProvider vfsProvider) {
+        this.vfsProvider = vfsProvider;
+    }
+
+    public void add(String path, int endpoint) {
+        final FileTrackingMetadata fileTrackingMetadata = registry.get(path);
+
+        if (fileTrackingMetadata == null) {
+            registry.put(path, new FileTrackingMetadata(path, endpoint));
+        } else {
+            fileTrackingMetadata.addEndpoint(endpoint);
+        }
+    }
+
+    public void suspend(int endpoint) {
+        registry.values().stream().filter(m -> m.getNotSuspendedEndpoints().contains(endpoint)).forEach(m -> m.suspend(endpoint));
+    }
+
+    public void resume(int endpoint) {
+        registry.values().stream().filter(m -> m.getSuspendedEndpoints().contains(endpoint)).forEach(m -> m.resume(endpoint));
+    }
+
+    public void move(String oldPath, String newPath) {
+        final FileTrackingMetadata fileTrackingMetadata = registry.remove(oldPath);
+
+        if (fileTrackingMetadata == null) {
+            return;
+        }
+
+        registry.put(newPath, fileTrackingMetadata);
+    }
+
+    public void remove(String path, int endpoint) {
+        final FileTrackingMetadata fileTrackingMetadata = registry.get(path);
+
+        if (fileTrackingMetadata == null) {
+            return;
+        }
+
+        fileTrackingMetadata.removeEndpoint(endpoint);
+
+        if (!fileTrackingMetadata.hasEndpoints()) {
+            registry.remove(path);
+        }
+    }
+
+    public void remove(String path) {
+        registry.remove(path);
+    }
+
+    public HashCode getHashCode(String path) {
+        return registry.get(path).getHashCode();
+    }
+
+    public boolean updateHash(String path) {
+        final HashCode newHash = getHash(path);
+
+        final FileTrackingMetadata fileTrackingMetadata = registry.get(path);
+        final HashCode oldHash = fileTrackingMetadata.getHashCode();
+        fileTrackingMetadata.setHashCode(newHash);
+
+        return !Objects.equals(oldHash, newHash);
+    }
+
+    public boolean contains(String path) {
+        return registry.entrySet()
+                       .stream()
+                       .map(Entry::getKey)
+                       .collect(toSet())
+                       .contains(path);
+    }
+
+    public Set<Integer> getEndpoints(String path) {
+        return registry.get(path).getNotSuspendedEndpoints();
+    }
+
+    public Set<String> getPaths() {
+        return unmodifiableSet(registry.keySet());
+    }
+
+    private HashCode getHash(String path) {
+        try {
+            final VirtualFile file = vfsProvider.getVirtualFileSystem()
+                                                .getRoot()
+                                                .getChild(Path.of(path));
+            String content;
+            if (file == null) {
+                content = "";
+            } else {
+                content = file.getContentAsString();
+            }
+
+            return Hashing.sha1().hashString(content, defaultCharset());
+        } catch (ServerException | ForbiddenException e) {
+            LOG.error("Error trying to read {} file and broadcast it", path, e);
+        }
+        return null;
+    }
+
+    private class FileTrackingMetadata {
+        private static final boolean ACTIVE     = true;
+        private static final boolean NOT_ACTIVE = false;
+        private HashCode hashCode;
+        private Map<Integer, Boolean> endpoints = new ConcurrentHashMap<>();
+
+        public FileTrackingMetadata(String path, int endpoint) {
+            this.hashCode = getHash(path);
+            this.endpoints.put(endpoint, ACTIVE);
+        }
+
+        public void suspend(int endpoint) {
+            if (endpoints.containsKey(endpoint)) {
+                endpoints.put(endpoint, NOT_ACTIVE);
+            }
+        }
+
+        public void resume(int endpoint) {
+            if (endpoints.containsKey(endpoint)) {
+                endpoints.put(endpoint, ACTIVE);
+            }
+        }
+
+        public HashCode getHashCode() {
+            return hashCode;
+        }
+
+        public void setHashCode(HashCode hashCode) {
+            this.hashCode = hashCode;
+        }
+
+        public void addEndpoint(int endpoint) {
+            endpoints.put(endpoint, ACTIVE);
+        }
+
+        public void removeEndpoint(int endpoint) {
+            endpoints.remove(endpoint);
+        }
+
+        public Set<Integer> getNotSuspendedEndpoints() {
+            return endpoints.entrySet().stream().filter(Entry::getValue).map(Entry::getKey).collect(toSet());
+        }
+
+        public Set<Integer> getSuspendedEndpoints() {
+            return endpoints.entrySet().stream().filter(e -> !e.getValue()).map(Entry::getKey).collect(toSet());
+        }
+
+        public boolean hasEndpoints() {
+            return !endpoints.isEmpty();
+        }
+    }
+}

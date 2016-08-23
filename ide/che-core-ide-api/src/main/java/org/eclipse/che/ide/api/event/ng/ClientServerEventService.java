@@ -14,21 +14,14 @@ import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
-import org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto;
-import org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto.Status;
+import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestTransmitter;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import static org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto.Status.CLOSED;
-import static org.eclipse.che.api.project.shared.dto.event.FileInEditorStatusDto.Status.OPENED;
 
 /**
  * @author Dmitry Kuleshov
@@ -40,56 +33,35 @@ public class ClientServerEventService {
 
     @Inject
     public ClientServerEventService(final JsonRpcRequestTransmitter transmitter,
-                                    final Provider<EditorAgent> editorAgentProvider,
                                     final EventBus eventBus,
                                     final DtoFactory dtoFactory) {
         this.transmitter = transmitter;
         this.dtoFactory = dtoFactory;
 
         Log.info(getClass(), "Adding file event listener");
-        eventBus.addHandler(FileEvent.TYPE, new FileEvent.FileEventHandler() {
+        eventBus.addHandler(FileTrackingEvent.TYPE, new FileTrackingEvent.FileTrackingEventHandler() {
             @Override
-            public void onFileOperation(FileEvent event) {
-                final Path path = event.getFile().getLocation();
+            public void onEvent(FileTrackingEvent event) {
+                final FileTrackingOperationDto.Type type = event.getType();
+                final String path = event.getPath();
+                final String oldPath = event.getOldPath();
 
-                switch (event.getOperationType()) {
-                    case OPEN: {
-                        transmit(path.toString(), OPENED);
-
-                        break;
-                    }
-                    case CLOSE: {
-                        EditorPartPresenter editorToClose = event.getEditorTab().getRelativeEditorPart();
-                        boolean isNeedToTransmit = true;
-                        for (EditorPartPresenter editor : editorAgentProvider.get().getOpenedEditors()) {
-                            Path currentPath = editor.getEditorInput().getFile().getLocation();
-                            if (path.equals(currentPath) && editorToClose != editor) {
-                                isNeedToTransmit = false;
-                            }
-                        }
-
-                        if (isNeedToTransmit) {
-                            transmit(path.toString(), CLOSED);
-                        }
-
-                        break;
-                    }
-                }
+                transmit(path, oldPath, type);
             }
         });
     }
 
-    private void transmit(String path, Status status) {
-        Log.info(getClass(), "Sending file status changed event: " + path);
-
-        final FileInEditorStatusDto fileInEditorStatusDto = dtoFactory.createDto(FileInEditorStatusDto.class)
-                                                                      .withPath(path)
-                                                                      .withStatus(status);
+    private void transmit(String path, String oldPath, FileTrackingOperationDto.Type type) {
+        final String params = dtoFactory.createDto(FileTrackingOperationDto.class)
+                                        .withPath(path)
+                                        .withType(type)
+                                        .withOldPath(oldPath)
+                                        .toString();
 
         final JsonRpcRequest request = dtoFactory.createDto(JsonRpcRequest.class)
                                                  .withJsonrpc("2.0")
-                                                 .withMethod("event:file-in-editor-status-changed")
-                                                 .withParams(fileInEditorStatusDto.toString());
+                                                 .withMethod("track:editor-file")
+                                                 .withParams(params);
 
         transmitter.transmit(request);
     }

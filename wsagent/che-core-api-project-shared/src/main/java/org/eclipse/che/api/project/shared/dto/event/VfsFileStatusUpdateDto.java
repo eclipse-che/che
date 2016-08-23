@@ -10,20 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.shared.dto.event;
 
+import com.google.common.hash.HashCode;
+
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface FileInEditorStatusDto {
-    Status getStatus();
+public interface VfsFileStatusUpdateDto {
+    FileWatcherEventType getType();
 
-    FileInEditorStatusDto withStatus(Status status);
+    VfsFileStatusUpdateDto withType(FileWatcherEventType type);
 
     String getPath();
 
-    FileInEditorStatusDto withPath(String path);
+    VfsFileStatusUpdateDto withPath(String path);
 
-    enum Status {
-        OPENED,
-        CLOSED,
-    }
+    String getHashCode();
+
+    VfsFileStatusUpdateDto withHashCode(String hashCode);
 }
