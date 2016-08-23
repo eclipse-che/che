@@ -15,13 +15,15 @@
 - [ ] Major change = changes existing features or docs
 
 ### Minor change checklist
-- [ ] APIs updated
+- [ ] New API required?
+- [ ] API updated
 - [ ] Tests provided / updated
 - [ ] Tests passed
 
 ### Major change checklist
+- [ ] New API required?
+- [ ] API updated
 - [ ] Documentation provided (include here or link to docs)
-- [ ] APIs updated
 - [ ] Tests provided / updated
 - [ ] Tests passed
 
