@@ -13,8 +13,24 @@ package org.eclipse.che.api.project.shared.dto.event;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface FileUpdatedDto {
+public interface FileTrackingOperationDto {
     String getPath();
 
-    FileUpdatedDto withPath(String path);
+    FileTrackingOperationDto withPath(String path);
+
+    String getOldPath();
+
+    FileTrackingOperationDto withOldPath(String oldPath);
+
+    Type getType();
+
+    FileTrackingOperationDto withType(Type type);
+
+    enum Type {
+        START,
+        STOP,
+        SUSPEND,
+        RESUME,
+        MOVE
+    }
 }

@@ -17,6 +17,8 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.Resources;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.GitCheckoutStatusNotificationReceiver;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationListener;
@@ -28,6 +30,7 @@ import org.eclipse.che.ide.api.notification.StatusNotificationListener;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,6 +95,14 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
         this.view.setContainer(nContainer);
         this.view.setTitle(TITLE);
         this.resources = resources;
+    }
+
+    @Inject
+    @PostConstruct
+    public void inject(EditorFileStatusNotificationReceiver editorFileStatusNotificationReceiver,
+                       GitCheckoutStatusNotificationReceiver gitCheckoutStatusNotificationReceiver) {
+        editorFileStatusNotificationReceiver.inject(this);
+        gitCheckoutStatusNotificationReceiver.inject(this);
     }
 
     /** {@inheritDoc} */

@@ -12,6 +12,7 @@ package org.eclipse.che.ide.ext.java.client.refactoring.move.wizard;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -21,6 +22,8 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.event.ng.FileTrackingEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
 import org.eclipse.che.ide.api.resources.Container;
@@ -36,6 +39,7 @@ import org.eclipse.che.ide.ext.java.client.refactoring.service.RefactoringServic
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeCreationResult;
+import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.CreateMoveRefactoring;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ElementToMove;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.MoveSettings;
@@ -43,11 +47,13 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSession;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ReorgDestination;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.FATAL;
@@ -72,6 +78,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
     private final JavaNavigationService    navigationService;
     private final JavaLocalizationConstant locale;
     private final NotificationManager      notificationManager;
+    private final EventBus                 eventBus;
 
     protected RefactorInfo refactorInfo;
     private   String       refactoringSessionId;
@@ -85,10 +92,11 @@ public class MovePresenter implements MoveView.ActionDelegate {
                          JavaNavigationService navigationService,
                          DtoFactory dtoFactory,
                          JavaLocalizationConstant locale,
-                         NotificationManager notificationManager) {
+                         NotificationManager notificationManager, EventBus eventBus) {
         this.view = view;
         this.refactoringUpdater = refactoringUpdater;
         this.editorAgent = editorAgent;
+        this.eventBus = eventBus;
         this.view.setDelegate(this);
 
         this.previewPresenter = previewPresenter;
@@ -218,6 +226,8 @@ public class MovePresenter implements MoveView.ActionDelegate {
             @Override
             public void apply(ChangeCreationResult arg) throws OperationException {
                 if (arg.isCanShowPreviewPage()) {
+                    eventBus.fireEvent(new FileTrackingEvent(null, null, SUSPEND));
+
                     refactorService.applyRefactoring(session).then(new Operation<RefactoringResult>() {
                         @Override
                         public void apply(RefactoringResult arg) throws OperationException {
@@ -234,6 +244,14 @@ public class MovePresenter implements MoveView.ActionDelegate {
                             } else {
                                 view.showErrorMessage(arg);
                             }
+
+                            for (ChangeInfo change : arg.getChanges()) {
+                                final String path = change.getPath();
+                                final String oldPath = change.getOldPath();
+
+                                eventBus.fireEvent(new FileTrackingEvent(path, oldPath, MOVE));
+                            }
+                            eventBus.fireEvent(new FileTrackingEvent(null, null, RESUME));
                         }
                     });
                 } else {

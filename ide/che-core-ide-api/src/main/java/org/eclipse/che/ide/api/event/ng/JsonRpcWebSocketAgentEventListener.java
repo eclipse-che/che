@@ -63,8 +63,7 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     private void internalInitialize() {
         final DevMachine devMachine = appContext.getDevMachine();
         final String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
-        // Ugly temporary shi^wmeasure
-        final String url = wsAgentWebSocketUrl.split("wsagent")[0] + "wsagent/websocket/" + ENDPOINT_ID;
+        final String url = wsAgentWebSocketUrl.replaceFirst("(ext)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
 
         initializer.initialize(singletonMap("url", url));
     }
