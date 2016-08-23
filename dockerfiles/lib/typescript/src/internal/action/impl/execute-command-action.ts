@@ -21,6 +21,8 @@ import {Log} from "../../../spi/log/log";
 import {MachineServiceClientImpl} from "../../../api/wsmaster/machine/machine-service-client";
 import {UUID} from "../../../utils/uuid";
 import {MachineProcessDto} from "../../../api/wsmaster/machine/dto/machine-process-dto";
+import {CheFileStructWorkspaceCommand} from "../../dir/chefile-struct/che-file-struct";
+import {CheFileStructWorkspaceCommandImpl} from "../../dir/chefile-struct/che-file-struct";
 /**
  * This class is handling the removal of a user
  * @author Florent Benoit
@@ -73,7 +75,10 @@ export class ExecuteCommandAction {
                 let uuid : string = UUID.build();
                 let channel : string = 'process:output:' + uuid;
                 let machineServiceClient : MachineServiceClientImpl = new MachineServiceClientImpl(this.workspace, this.authData);
-                return machineServiceClient.executeCommand(workspaceDto, machineId, this.args.join(" "), channel);
+
+                let workspaceCommand : CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
+                workspaceCommand.commandLine = this.args.join(" ");
+                return machineServiceClient.executeCommand(workspaceDto, machineId, workspaceCommand, channel);
             }).then((machineProcessDto: MachineProcessDto) => {
                 // command executed
             });

@@ -29,6 +29,11 @@ import {DefaultHttpJsonRequest} from "../../spi/http/default-http-json-request";
 import {HttpJsonRequest} from "../../spi/http/default-http-json-request";
 import {HttpJsonResponse} from "../../spi/http/default-http-json-request";
 import {UUID} from "../../utils/uuid";
+import {WorkspaceDto} from "../../api/wsmaster/workspace/dto/workspacedto";
+import {MachineServiceClientImpl} from "../../api/wsmaster/machine/machine-service-client";
+import {CheFileStructWorkspaceCommand} from "./chefile-struct/che-file-struct";
+import {CheFileStructWorkspaceCommandImpl} from "./chefile-struct/che-file-struct";
+import {CheFileStructWorkspaceLoadingCommand} from "./chefile-struct/che-file-struct";
 
 
 /**
@@ -167,6 +172,20 @@ export class CheDir {
     script.runInNewContext(sandbox);
 
 
+    this.cleanupArrays();
+
+    Log.getLogger().debug('Che file parsing object is ', JSON.stringify(this.chefileStruct));
+    Log.getLogger().debug('Che workspace parsing object is ', JSON.stringify(this.chefileStructWorkspace));
+
+    this.authData.port = this.chefileStruct.server.port;
+
+  }
+
+
+  /**
+   * Cleanup arrays by removing extra elements
+   */
+  cleanupArrays() {
     // now, cleanup invalid commands
     for (let i : number = this.chefileStructWorkspace.commands.length - 1; i >= 0 ; i--) {
       // no name, drop it
@@ -174,14 +193,13 @@ export class CheDir {
         this.chefileStructWorkspace.commands.splice(i, 1);
       }
     }
-
-    Log.getLogger().debug('Che file parsing object is ', JSON.stringify(this.chefileStruct));
-    Log.getLogger().debug('Che workspace parsing object is ', JSON.stringify(this.chefileStructWorkspace));
-
-    this.authData.port = this.chefileStruct.server.port;
-
-
-
+    // now, cleanup invalid commands
+    for (let i : number = this.chefileStructWorkspace.loading.commands.length - 1; i >= 0 ; i--) {
+        // no name, drop it
+        if (!this.chefileStructWorkspace.loading.commands[i].name && !this.chefileStructWorkspace.loading.commands[i].commandLine) {
+          this.chefileStructWorkspace.loading.commands.splice(i, 1);
+        }
+    }
 
   }
 
@@ -207,6 +225,15 @@ export class CheDir {
    */
   writeDefaultChefile() {
 
+
+    //
+    this.chefileStructWorkspace.commands[0].name = "my-first-command";
+    this.chefileStructWorkspace.commands[0].commandLine = "echo this is my first command && read";
+    this.chefileStructWorkspace.loading.commands[0].name = "my-first-command";
+    this.chefileStructWorkspace.loading.commands[1].commandLine = "echo 'this is my custom command' && while true; do echo $(date); sleep 1; done";
+
+
+    this.cleanupArrays();
     // get json string from object
     let stringified = JSON.stringify(this.chefileStruct, null, 4);
 
@@ -350,6 +377,7 @@ export class CheDir {
       var ideUrl : string;
 
       var needToSetupProject: boolean = true;
+      var userWorkspaceDto: WorkspaceDto;
 
       return new Promise<string>((resolve, reject) => {
         this.parse();
@@ -406,6 +434,7 @@ export class CheDir {
       }).then((workspaceDto) => {
         return this.workspace.getWorkspace(workspaceDto.getId())
       }).then((workspaceDto) => {
+        userWorkspaceDto = workspaceDto;
         // search IDE url link
         workspaceDto.getContent().links.forEach((link) => {
           if ('ide url' === link.rel) {
@@ -421,6 +450,9 @@ export class CheDir {
           Promise.resolve('existing project')
         }
       }).then(() => {
+        return this.executeCommandsFromCurrentWorkspace(userWorkspaceDto);
+
+      }).then(() => {
         Log.getLogger().info(this.i18n.get('up.workspace-booted'));
         Log.getLogger().info(this.i18n.get('up.workspace-connect-to', ideUrl));
         return ideUrl;
@@ -428,6 +460,47 @@ export class CheDir {
 
     });
   }
+
+  executeCommandsFromCurrentWorkspace(workspaceDto : WorkspaceDto) : Promise<any> {
+    // get dev machine
+    let machineId : string = workspaceDto.getContent().runtime.devMachine.id;
+
+
+    let promises : Array<Promise<any>> = new Array<Promise<any>>();
+    let workspaceCommands : Array<any> = workspaceDto.getContent().config.commands;
+    let machineServiceClient:MachineServiceClientImpl = new MachineServiceClientImpl(this.workspace, this.authData);
+
+    this.chefileStructWorkspace.loading.commands.forEach((postLoadingCommand: CheFileStructWorkspaceLoadingCommand) => {
+      let uuid:string = UUID.build();
+      let channel:string = 'process:output:' + uuid;
+
+      if (postLoadingCommand.name) {
+        workspaceCommands.forEach((workspaceCommand) => {
+          if (postLoadingCommand.name === workspaceCommand.name) {
+            let customCommand:CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
+            customCommand.commandLine = workspaceCommand.commandLine;
+            customCommand.name = workspaceCommand.name;
+            customCommand.type = workspaceCommand.type;
+            customCommand.attributes = workspaceCommand.attributes;
+            Log.getLogger().info('Executing post-loading workspace command \'' + postLoadingCommand.name + '\'.');
+            promises.push(machineServiceClient.executeCommand(workspaceDto, machineId, customCommand, channel, false));
+          }
+        });
+      } else if (postLoadingCommand.commandLine.length) {
+        let customCommand:CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
+        customCommand.commandLine = postLoadingCommand.commandLine;
+        customCommand.name = 'custom postloading command';
+        Log.getLogger().info('Executing post-loading commandLine \'' + postLoadingCommand.commandLine + '\'.');
+        promises.push(machineServiceClient.executeCommand(workspaceDto, machineId, customCommand, channel, false));
+      }
+
+
+    });
+
+    return Promise.all(promises);
+  }
+
+
 
 
   buildLocalCheURL() : string {
@@ -734,7 +807,7 @@ export class CheDir {
       if (this.isNumber(jsonData)) {
         map.set(prop, jsonData);
       } else {
-        map.set(prop, "'" + jsonData + "'");
+        map.set(prop, "\"" + jsonData + "\"");
       }
     } else if (Array.isArray(jsonData)) {
       let arr : Array<any> = jsonData;

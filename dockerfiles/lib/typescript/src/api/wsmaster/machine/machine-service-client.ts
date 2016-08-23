@@ -21,6 +21,7 @@ import {MessageBus} from "../../../spi/websocket/messagebus";
 import {HttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {DefaultHttpJsonRequest} from "../../../spi/http/default-http-json-request";
 import {HttpJsonResponse} from "../../../spi/http/default-http-json-request";
+import {CheFileStructWorkspaceCommand} from "../../../internal/dir/chefile-struct/che-file-struct";
 
 /**
  * Workspace class allowing to manage a workspace, like create/start/stop, etc operations
@@ -52,13 +53,14 @@ export class MachineServiceClientImpl {
      */
     executeCommand(workspaceDto : WorkspaceDto,
                    machineId:string,
-                   commandLine:any,
-                   outputChannel:string):Promise<MachineProcessDto> {
+                   cheFileStructWorkspaceCommand:CheFileStructWorkspaceCommand,
+                   outputChannel:string,
+                   asynchronous : boolean = true):Promise<MachineProcessDto> {
 
         let command:any = {
-            "name" : "custom",
-            "type" : "custom",
-            "commandLine": commandLine
+            "name" : !cheFileStructWorkspaceCommand.name ? "custom-command" : cheFileStructWorkspaceCommand.name,
+            "type" : !cheFileStructWorkspaceCommand.type ? "custom" : cheFileStructWorkspaceCommand.type,
+            "commandLine": cheFileStructWorkspaceCommand.commandLine
         };
 
         let path : string = '/api/machine/' + machineId + '/command/?outputChannel=' + outputChannel;
@@ -66,14 +68,16 @@ export class MachineServiceClientImpl {
         var displayOutputWorkspaceSubscriber:MessageBusSubscriber = new ProcesLogOutputMessageBusSubscriber();
         let processTerminatedEventPromiseMessageBusSubscriber : ProcessTerminatedEventPromiseMessageBusSubscriber;
         let userMachineProcessDto : MachineProcessDto;
+        let userMessageBus : MessageBus;
         return this.workspace.getMessageBus(workspaceDto).then((messageBus:MessageBus) => {
-
+            userMessageBus = messageBus;
             processTerminatedEventPromiseMessageBusSubscriber = new ProcessTerminatedEventPromiseMessageBusSubscriber(messageBus);
 
             // subscribe to websocket
-            messageBus.subscribe(outputChannel, displayOutputWorkspaceSubscriber);
-            messageBus.subscribe('machine:process:' + machineId, processTerminatedEventPromiseMessageBusSubscriber);
-
+            if (asynchronous) {
+                messageBus.subscribe(outputChannel, displayOutputWorkspaceSubscriber);
+                messageBus.subscribe('machine:process:' + machineId, processTerminatedEventPromiseMessageBusSubscriber);
+            }
 
             var jsonRequest:HttpJsonRequest = new DefaultHttpJsonRequest(this.authData, path, 200).setMethod('POST').setBody(command);
             return jsonRequest.request();
@@ -86,7 +90,13 @@ export class MachineServiceClientImpl {
             let pid: number = machineProcessDto.getContent().pid;
 
             // subscribe to pid event end
-            return processTerminatedEventPromiseMessageBusSubscriber.promise;
+            if (asynchronous) {
+                return processTerminatedEventPromiseMessageBusSubscriber.promise;
+            } else {
+                // do not wait the end
+                userMessageBus.close();
+                return true;
+            }
         }).then(() => {
             return userMachineProcessDto;
         });

@@ -24,11 +24,11 @@ export class ProcessTerminatedEventPromiseMessageBusSubscriber implements Messag
 
     resolve : any;
     reject : any;
-    promise: Promise<string>;
+    promise: Promise<boolean>;
 
     constructor(messageBus : MessageBus) {
         this.messageBus = messageBus;
-        this.promise = new Promise<string>((resolve, reject) => {
+        this.promise = new Promise<boolean>((resolve, reject) => {
             this.resolve = resolve;
             this.reject = reject;
         });
