@@ -77,6 +77,8 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
                 });
 
                 res.on('end', () => {
+                    Log.getLogger().debug('Reply for call', this.options.path, 'with method', this.options.method, 'statusCode:', res.statusCode, 'and got body:', data);
+
                     if (res.statusCode == this.expectedStatusCode) {
                         // workspace created, continue
                         resolve(new DefaultHttpJsonResponse(res.statusCode, data));
@@ -107,7 +109,9 @@ export class DefaultHttpJsonRequest implements HttpJsonRequest {
                 }
             });
 
-            req.write(JSON.stringify(this.body));
+            let stringified : string = JSON.stringify(this.body);
+            Log.getLogger().debug('Send for request', this.options.path, 'with method', this.options.method, ' body:', stringified);
+            req.write(stringified);
             req.end();
 
         });
