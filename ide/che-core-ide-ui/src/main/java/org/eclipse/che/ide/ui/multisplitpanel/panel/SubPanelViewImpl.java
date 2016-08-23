@@ -156,6 +156,12 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         }
 
         widgetsPanel.showWidget(widget.getWidget().asWidget());
+
+        // add 'active' attribute for active widget for testing purpose
+        for (WidgetToShow widgetToShow : widgets2Tabs.keySet()) {
+            widgetToShow.getWidget().asWidget().getElement().removeAttribute("active");
+        }
+        widget.getWidget().asWidget().getElement().setAttribute("active", "");
     }
 
     @Override
