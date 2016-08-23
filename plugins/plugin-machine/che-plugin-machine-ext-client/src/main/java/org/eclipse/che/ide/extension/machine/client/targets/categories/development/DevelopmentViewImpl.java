@@ -50,7 +50,7 @@ public class DevelopmentViewImpl implements DevelopmentView {
     TextBox sourceType;
 
     @UiField
-    TextBox sourceUrl;
+    TextBox source;
 
     @UiField
     TextArea sourceContent;
@@ -61,7 +61,7 @@ public class DevelopmentViewImpl implements DevelopmentView {
         this.rootElement = UI_BINDER.createAndBindUi(this);
         this.rootElement.setVisible(true);
 
-        buttonBuilder.withResourceWidget(sourceUrl).build();
+        buttonBuilder.withResourceWidget(source).build();
         buttonBuilder.withResourceWidget(sourceContent).build();
     }
 
@@ -97,8 +97,8 @@ public class DevelopmentViewImpl implements DevelopmentView {
     }
 
     @Override
-    public void setSourceUrl(String sourceUrl) {
-        this.sourceUrl.setValue(sourceUrl);
+    public void setSource(String source) {
+        this.source.setValue(source);
     }
 
     @Override
@@ -112,11 +112,11 @@ public class DevelopmentViewImpl implements DevelopmentView {
         this.setType(target.getType());
         this.setSourceType(target.getSourceType());
 
-        final String sourceUrl = target.getSourceUrl();
+        final String source = target.getSource();
 
-        if (sourceUrl != null && sourceUrl.length() > 0) {
-            this.setSourceUrl(target.getSourceUrl());
-            this.sourceUrl.getParent().setVisible(true);
+        if (source != null && source.length() > 0) {
+            this.setSource(target.getSource());
+            this.source.getParent().setVisible(true);
         } else {
             this.setSourceContent(target.getSourceContent());
             this.sourceContent.getParent().setVisible(true);

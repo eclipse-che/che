@@ -12,6 +12,8 @@
 
 import {ListWorkspacesCtrl} from './list-workspaces/list-workspaces.controller';
 import {CheWorkspaceItem} from './list-workspaces/workspace-item/workspace-item.directive';
+import {CheWorkspaceStatus} from './list-workspaces/workspace-status-action/workspace-status.directive';
+import {WorkspaceStatusController} from './list-workspaces/workspace-status-action/workspace-status.controller';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive';
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
@@ -59,6 +61,9 @@ export class WorkspacesConfig {
     register.directive('cheWorkspaceItem', CheWorkspaceItem);
     register.controller('WorkspaceItemCtrl', WorkspaceItemCtrl);
     register.directive('usageChart', UsageChart);
+
+    register.directive('cheWorkspaceStatus', CheWorkspaceStatus);
+    register.controller('WorkspaceStatusController', WorkspaceStatusController);
 
     register.controller('WorkspaceDetailsController', WorkspaceDetailsController);
 

@@ -10,9 +10,17 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<che-toolbar che-title="Administration"
-             che-add-button-name="New Project"
-             che-add-button-href="#/create-project"></che-toolbar>
-<md-content layout="column" class="dashboard-content" md-scroll-y flex>
-  <docker-registry-list></docker-registry-list>
+<che-toolbar che-title="Administration"></che-toolbar>
+<md-content md-scroll-y flex>
+  <md-tabs md-dynamic-height md-stretch-tabs="auto" md-center-tabs="">
+    <md-tab>
+      <md-tab-label>
+        <md-icon md-font-icon="material-design icon-ic_widgets_24px" class="che-tab-label-icon"></md-icon>
+        <span class="che-tab-label-title">Docker Registries</span>
+      </md-tab-label>
+      <md-tab-body>
+        <docker-registry-list></docker-registry-list>
+      </md-tab-body>
+    </md-tab>
+  </md-tabs>
 </md-content>

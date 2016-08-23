@@ -22,7 +22,8 @@ export class DockerRegistryListController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, $document, chePreferences, cheNotification) {
+  constructor($q, $mdDialog, $document, chePreferences, cheNotification) {
+    this.$q = $q;
     this.$mdDialog = $mdDialog;
     this.$document = $document;
     this.chePreferences = chePreferences;
@@ -30,6 +31,13 @@ export class DockerRegistryListController {
 
     this.registries = chePreferences.getRegistries();
     this.isLoading = true;
+
+    this.registryOrderBy = 'registry.username';
+    this.registryFilter = {username: ''};
+    this.registriesSelectedStatus = {};
+    this.isNoSelected = true;
+    this.isAllSelected = false;
+    this.isBulkChecked = false;
 
     let promise = chePreferences.fetchPreferences();
     promise.then(() => {
@@ -41,7 +49,151 @@ export class DockerRegistryListController {
   }
 
   /**
-   * Clicked on the '+' button to add a docker registry. Show the dialog
+   * Check all registries in list
+   */
+  selectAllRegistries() {
+    this.registries.forEach((registry) => {
+      this.registriesSelectedStatus[registry.url] = true;
+    });
+  }
+
+  /**
+   * Uncheck all registries in list
+   */
+  deselectAllRegistries() {
+    this.registries.forEach((registry) => {
+      this.registriesSelectedStatus[registry.url] = false;
+    });
+  }
+
+  /**
+   * Change bulk selection value
+   */
+  changeBulkSelection() {
+    if (this.isBulkChecked) {
+      this.deselectAllRegistries();
+      this.isBulkChecked = false;
+    } else {
+      this.selectAllRegistries();
+      this.isBulkChecked = true;
+    }
+    this.updateSelectedStatus();
+  }
+
+  /**
+   * Update registries selected status
+   */
+  updateSelectedStatus() {
+    this.isNoSelected = true;
+    this.isAllSelected = true;
+
+    this.registries.forEach((registry) => {
+      if (this.registriesSelectedStatus[registry.url]) {
+        this.isNoSelected = false;
+      } else {
+        this.isAllSelected = false;
+      }
+    });
+
+    if (this.isNoSelected) {
+      this.isBulkChecked = false;
+      return;
+    }
+
+    if (this.isAllSelected) {
+      this.isBulkChecked = true;
+    }
+  }
+
+  /**
+   * Delete all selected registries
+   */
+  deleteSelectedRegistries() {
+    let registriesSelectedStatusKeys = Object.keys(this.registriesSelectedStatus);
+    let checkedRegistriesKeys = [];
+
+    if (!registriesSelectedStatusKeys.length) {
+      this.cheNotification.showError('No such registries.');
+      return;
+    }
+
+    registriesSelectedStatusKeys.forEach((key) => {
+      if (this.registriesSelectedStatus[key] === true) {
+        checkedRegistriesKeys.push(key);
+      }
+    });
+
+    let queueLength = checkedRegistriesKeys.length;
+    if (!queueLength) {
+      this.cheNotification.showError('No such registry.');
+      return;
+    }
+
+    let confirmationPromise = this.showDeleteRegistriesConfirmation(queueLength);
+
+    confirmationPromise.then(() => {
+      let numberToDelete = queueLength;
+      let isError = false;
+      let deleteRegistryPromises = [];
+      let currentRegistryAddress;
+
+      checkedRegistriesKeys.forEach((registryAddress) => {
+        currentRegistryAddress = registryAddress;
+        this.registriesSelectedStatus[registryAddress] = false;
+
+        let promise = this.chePreferences.removeRegistry(registryAddress);
+        promise.then(() => {
+          queueLength--;
+        }, (error) => {
+          isError = true;
+          this.$log.error('Cannot delete registry: ', error);
+        });
+        deleteRegistryPromises.push(promise);
+      });
+
+      this.$q.all(deleteRegistryPromises).finally(() => {
+        this.chePreferences.fetchPreferences().then(() => {
+          this.updateSelectedStatus();
+        }, (error) => {
+          this.$log.error(error);
+        });
+        if (isError) {
+          this.cheNotification.showError('Delete failed.');
+        } else {
+          if (numberToDelete === 1) {
+            this.cheNotification.showInfo(currentRegistryAddress + ' has been removed.');
+          } else {
+            this.cheNotification.showInfo('Selected registries have been removed.');
+          }
+        }
+      });
+    });
+  }
+
+  /**
+   * Show confirmation popup before delete registries
+   * @param numberToDelete
+   * @returns {*}
+   */
+  showDeleteRegistriesConfirmation(numberToDelete) {
+    let confirmTitle = 'Would you like to delete ';
+    if (numberToDelete > 1) {
+      confirmTitle += 'these ' + numberToDelete + ' registries?';
+    } else {
+      confirmTitle += 'this selected registry?';
+    }
+    let confirm = this.$mdDialog.confirm()
+      .title(confirmTitle)
+      .ariaLabel('Remove registries')
+      .ok('Delete!')
+      .cancel('Cancel')
+      .clickOutsideToClose(true);
+
+    return this.$mdDialog.show(confirm);
+  }
+
+  /**
+   * Add docker registry. Show the dialog
    * @param  event - the $event
    */
   showAddRegistryDialog(event) {
@@ -56,9 +208,8 @@ export class DockerRegistryListController {
     });
   }
 
-
   /**
-   * Clicked on the 'edit' button to edit a docker registry. Show the dialog
+   * Edit docker registry. Show the dialog
    * @param  event - the $event
    * @param  registry - the selected registry
    */
@@ -74,31 +225,4 @@ export class DockerRegistryListController {
       templateUrl: 'app/administration/docker-registry/docker-registry-list/edit-registry/edit-registry.html'
     });
   }
-
-  /**
-   * Clicked on the '-' button to remove the registry. Show the dialog
-   * @param  event - the $event
-   * @param registry - the selected registry
-   */
-  removeRegistry(event, registry) {
-    let confirm = this.$mdDialog.confirm()
-      .title('Would you like to remove registry ' + registry.url + ' ?')
-      .content('Please confirm for the registry removal.')
-      .ariaLabel('Remove registry')
-      .ok('Remove')
-      .cancel('Cancel')
-      .clickOutsideToClose(true)
-      .targetEvent(event);
-    this.$mdDialog.show(confirm).then(() => {
-      this.isLoading = true;
-      let promise = this.chePreferences.removeRegistry(registry.url);
-      promise.then(() => {
-        this.isLoading = false;
-      }, (error) => {
-        this.isLoading = false;
-        this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Delete registry failed.');
-      });
-    });
-  }
-
 }

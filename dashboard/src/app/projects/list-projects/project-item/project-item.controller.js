@@ -27,17 +27,6 @@ export class ProjectItemCtrl {
     this.cheWorkspace = cheWorkspace;
   }
 
-
-  getProjectModificationDate() {
-    if (this.project.modificationDate !== -1) {
-      return this.project.modificationDate;
-    } else if (this.project.creationDate !== -1) {
-      return this.project.creationDate;
-    }
-    return this.profileCreationDate;
-  }
-
-
   redirectToProjectDetails() {
     this.$location.path('/project/' + this.workspace.namespace + '/' + this.workspace.config.name + '/' + this.project.name);
   }
