@@ -105,8 +105,6 @@ public class EditorFileStatusNotificationReceiverTest {
 
         verify(appContext, never()).getWorkspaceRoot();
         verify(container, never()).synchronize(any());
-
-        verify(notificationManager).notify(eq("External operation"), eq("File '" + "file" + "' is updated"), eq(SUCCESS), eq(EMERGE_MODE));
     }
 
     @Test

@@ -70,10 +70,7 @@ public class EditorFileStatusNotificationReceiver implements JsonRpcRequestRecei
             case MODIFIED: {
                 Log.info(getClass(), "Received updated file event status: " + path);
 
-                eventBus.fireEvent(new FileContentUpdateEvent(path));
-                if (notificationManager != null) {
-                    notificationManager.notify("External operation", "File '" + name + "' is updated", SUCCESS, EMERGE_MODE);
-                }
+                eventBus.fireEvent(new FileContentUpdateEvent(path, vfsFileStatusUpdateDto.getHashCode()));
 
                 break;
             }

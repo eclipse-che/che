@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
-import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.inject.Singleton;
 
@@ -105,15 +104,15 @@ public class FileTrackingRegistry {
         registry.remove(path);
     }
 
-    public HashCode getHashCode(String path) {
+    public String getHashCode(String path) {
         return registry.get(path).getHashCode();
     }
 
     public boolean updateHash(String path) {
-        final HashCode newHash = getHash(path);
+        final String newHash = getHash(path);
 
         final FileTrackingMetadata fileTrackingMetadata = registry.get(path);
-        final HashCode oldHash = fileTrackingMetadata.getHashCode();
+        final String oldHash = fileTrackingMetadata.getHashCode();
         fileTrackingMetadata.setHashCode(newHash);
 
         return !Objects.equals(oldHash, newHash);
@@ -135,7 +134,7 @@ public class FileTrackingRegistry {
         return unmodifiableSet(registry.keySet());
     }
 
-    private HashCode getHash(String path) {
+    private String getHash(String path) {
         try {
             final VirtualFile file = vfsProvider.getVirtualFileSystem()
                                                 .getRoot()
@@ -147,7 +146,7 @@ public class FileTrackingRegistry {
                 content = file.getContentAsString();
             }
 
-            return Hashing.sha1().hashString(content, defaultCharset());
+            return Hashing.md5().hashString(content, defaultCharset()).toString();
         } catch (ServerException | ForbiddenException e) {
             LOG.error("Error trying to read {} file and broadcast it", path, e);
         }
@@ -157,7 +156,7 @@ public class FileTrackingRegistry {
     private class FileTrackingMetadata {
         private static final boolean ACTIVE     = true;
         private static final boolean NOT_ACTIVE = false;
-        private HashCode hashCode;
+        private String hashCode;
         private Map<Integer, Boolean> endpoints = new ConcurrentHashMap<>();
 
         public FileTrackingMetadata(String path, int endpoint) {
@@ -177,11 +176,11 @@ public class FileTrackingRegistry {
             }
         }
 
-        public HashCode getHashCode() {
+        public String getHashCode() {
             return hashCode;
         }
 
-        public void setHashCode(HashCode hashCode) {
+        public void setHashCode(String hashCode) {
             this.hashCode = hashCode;
         }
 

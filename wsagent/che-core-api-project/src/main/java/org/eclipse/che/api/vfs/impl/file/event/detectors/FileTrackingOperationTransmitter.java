@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.impl.file.event.detectors;
 
-import com.google.common.hash.HashCode;
-
 import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestTransmitter;
 import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
 import org.eclipse.che.api.core.notification.EventService;
@@ -88,7 +86,7 @@ public class FileTrackingOperationTransmitter {
 
         private void transmitModified(String path) {
             if (registry.updateHash(path)) {
-                final HashCode hashCode = registry.getHashCode(path);
+                final String hashCode = registry.getHashCode(path);
                 final String params = getParams(path, hashCode, MODIFIED);
                 final JsonRpcRequest request = getJsonRpcRequest(params);
 
@@ -96,8 +94,8 @@ public class FileTrackingOperationTransmitter {
             }
         }
 
-        private String getParams(String path, HashCode hashCode, FileWatcherEventType type) {
-            return newDto(VfsFileStatusUpdateDto.class).withPath(path).withType(type).withHashCode(String.valueOf(hashCode)).toString();
+        private String getParams(String path, String hashCode, FileWatcherEventType type) {
+            return newDto(VfsFileStatusUpdateDto.class).withPath(path).withType(type).withHashCode(hashCode).toString();
         }
 
         private JsonRpcRequest getJsonRpcRequest(String params) {
