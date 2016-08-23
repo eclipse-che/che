@@ -97,7 +97,6 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
-import org.eclipse.che.ide.api.event.FileContentUpdateHandler;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -112,7 +111,6 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -312,15 +310,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                         }
                     }
                 });
-
-        this.generalEventBus.addHandler(FileContentUpdateEvent.TYPE, new FileContentUpdateHandler() {
-            @Override
-            public void onFileContentUpdate(final FileContentUpdateEvent event) {
-                if (event.getFilePath() != null && Path.valueOf(event.getFilePath()).equals(document.getFile().getLocation())) {
-                    updateContent();
-                }
-            }
-        });
     }
 
     private void onResourceCreated(ResourceDelta delta) {
@@ -382,31 +371,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     private void updateContent() {
-        /* -save current cursor and (ideally) viewport
-         * -set editor content which is also expected to
-         *     -reset dirty flag
-         *     -clear history
-         * -restore current cursor position
-         */
-//        final TextPosition currentCursor = getCursorPosition();
-//        this.documentStorage.getDocument(document.getFile(), new DocumentStorage.DocumentCallback() {
-//
-//            @Override
-//            public void onDocumentReceived(final String content) {
-//                Log.error(getClass(), "=== UPDATE " + OrionEditorPresenter.this.hashCode());
-//                editorWidget.setValue(content, new ContentInitializedHandler() {
-//                    @Override
-//                    public void onContentInitialized() {
-//                        document.setCursorPosition(currentCursor);
-//                    }
-//                });
-//            }
-//
-//            @Override
-//            public void onDocumentLoadFailure(final Throwable caught) {
-//                displayErrorPanel(constant.editorFileErrorMessage());
-//            }
-//        });
+        generalEventBus.fireEvent(new FileContentUpdateEvent(document.getFile().getLocation().toString()));
     }
 
     private void displayErrorPanel(final String message) {
