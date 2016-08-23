@@ -21,6 +21,7 @@ import org.eclipse.che.ide.api.editor.document.DocumentHandle;
 import org.eclipse.che.ide.api.editor.document.DocumentStorage;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
+import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.event.FileContentUpdateHandler;
@@ -128,7 +129,7 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
         }
 
         final VirtualFile virtualFile = groupLeaderEditor.getEditorInput().getFile();
-        if (!event.getFilePath().equals(virtualFile.getPath())) {
+        if (!event.getFilePath().equals(virtualFile.getLocation().toString())) {
             return;
         }
 
@@ -153,8 +154,10 @@ public class EditorGroupSynchronizationImpl implements EditorGroupSynchronizatio
         }
 
         String oldContent = documentHandle.getDocument().getContents();
+        TextPosition cursorPosition = documentHandle.getDocument().getCursorPosition();
         if (!newContent.equals(oldContent)) {
             documentHandle.getDocument().replace(0, oldContent.length(), newContent);
+            documentHandle.getDocument().setCursorPosition(cursorPosition);
         }
     }
 

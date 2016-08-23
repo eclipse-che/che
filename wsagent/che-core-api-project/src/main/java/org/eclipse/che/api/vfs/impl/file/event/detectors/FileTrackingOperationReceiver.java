@@ -77,7 +77,10 @@ public class FileTrackingOperationReceiver implements JsonRpcRequestReceiver {
             case MOVE: {
                 LOG.debug("Received file tracking operation MOVE trigger.");
 
-                registry.move(oldPath, path);
+                registry.copy(oldPath, path);
+                // TODO temporary workaround to support multi-client refactoring
+                // file remove notification
+//                registry.move(oldPath, path);
 
                 break;
             }

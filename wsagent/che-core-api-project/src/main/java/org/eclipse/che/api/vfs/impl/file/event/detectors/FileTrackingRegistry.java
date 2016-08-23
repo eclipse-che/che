@@ -77,6 +77,16 @@ public class FileTrackingRegistry {
         registry.put(newPath, fileTrackingMetadata);
     }
 
+    public void copy(String oldPath, String newPath) {
+        final FileTrackingMetadata fileTrackingMetadata = registry.get(oldPath);
+
+        if (fileTrackingMetadata == null) {
+            return;
+        }
+
+        registry.put(newPath, fileTrackingMetadata);
+    }
+
     public void remove(String path, int endpoint) {
         final FileTrackingMetadata fileTrackingMetadata = registry.get(path);
 
