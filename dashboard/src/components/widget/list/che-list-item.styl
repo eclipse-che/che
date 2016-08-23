@@ -9,19 +9,18 @@
   border-bottom 1px solid $list-separator-color
 
 .che-list-item-content
+  line-height 40px
   overflow hidden
   width 100%
-
-  & > *
-    line-height 40px
 
 .che-list-item-content *:not(.tooltip)
   overflow inherit
   text-overflow ellipsis
   white-space normal
 
-  *.tooltip
-    overflow visible
+.che-list-item-content *.tooltip
+  color $white-color
+  overflow visible
 
 .che-list-item-row
   min-height 40px
@@ -30,7 +29,7 @@
   outline none
 
 .che-list-item-details
-  line-height 22px
+  line-height inherit
   font-size 12px
   cursor pointer
 
@@ -41,13 +40,17 @@
     vertical-align middle
     color $primary-color
     min-width 65px
+    max-width 65px
 
 .che-list-item-name
   color $label-primary-color
 
+  .tooltip.top
+    color $white-color
+    margin-top 10px
+
   & > *
     display inline-block
-    line-height 22px
     font-size 12px
     float left
 
