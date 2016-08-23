@@ -51,7 +51,6 @@ export class CheDir {
 
   chefileStruct: CheFileStruct;
   chefileStructWorkspace: CheFileStructWorkspace;
-  dockerContent;
 
   // requirements
   path = require('path');
@@ -417,6 +416,10 @@ export class CheDir {
           // workspace is not existing
           // now create the workspace
           let createWorkspaceConfig:CreateWorkspaceConfig = new CreateWorkspaceConfig();
+
+          let dockerContent: string = new RecipeBuilder(this.currentFolder).getDockerContent();
+
+          createWorkspaceConfig.machineConfigSource = {"type": "dockerfile", "content": dockerContent};
           createWorkspaceConfig.commands = this.chefileStructWorkspace.commands;
           createWorkspaceConfig.name = this.chefileStructWorkspace.name;
           createWorkspaceConfig.ram = this.chefileStructWorkspace.ram;
@@ -643,7 +646,6 @@ export class CheDir {
 
       });
 
-      this.dockerContent = new RecipeBuilder().getDockerContent();
     });
 
     return promise;

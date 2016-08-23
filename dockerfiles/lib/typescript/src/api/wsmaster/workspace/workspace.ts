@@ -248,7 +248,6 @@ export class Workspace {
 export class CreateWorkspaceConfig {
 
     ram : number = 2048;
-    dockerContent: string;
     machineConfigSource : any = {"type": "dockerfile", "content": RecipeBuilder.DEFAULT_DOCKERFILE_CONTENT};
     name: string = "default";
     commands: Array<CheFileStructWorkspaceCommand> = [];

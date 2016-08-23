@@ -20,17 +20,19 @@ export class RecipeBuilder {
     static DEFAULT_DOCKERFILE_CONTENT: string = 'FROM codenvy/ubuntu_jdk8';
     path: any;
     fs: any;
+    currentFolder : any;
 
-    constructor() {
+    constructor(currentFolder) {
         this.path = require('path');
         this.fs = require('fs');
+        this.currentFolder = currentFolder;
     }
 
 
     getDockerContent() : string {
 
         // build path to the Dockerfile in current directory
-        var dockerFilePath = this.path.resolve('./Dockerfile');
+        var dockerFilePath = this.path.resolve(this.currentFolder, 'Dockerfile');
 
         // use synchronous API
         try {
