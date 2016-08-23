@@ -14,22 +14,22 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.commons.exception.ServerException;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class MergePresenter implements MergeView.ActionDelegate {
     private final MergeView               view;
     private final DialogFactory           dialogFactory;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
     private final GitServiceClient        service;
     private final GitLocalizationConstant constant;
     private final AppContext              appContext;
@@ -75,11 +75,11 @@ public class MergePresenter implements MergeView.ActionDelegate {
                           NotificationManager notificationManager,
                           DialogFactory dialogFactory,
                           GitOutputConsoleFactory gitOutputConsoleFactory,
-                          ConsolesPanelPresenter consolesPanelPresenter) {
+                          ProcessesPanelPresenter processesPanelPresenter) {
         this.view = view;
         this.dialogFactory = dialogFactory;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.consolesPanelPresenter = processesPanelPresenter;
         this.view.setDelegate(this);
         this.service = service;
         this.constant = constant;

@@ -22,10 +22,5 @@
                 <ideui:Tree ui:field="processTree"/>
             </g:FlowPanel>
         </g:west>
-        <g:center>
-            <g:DeckLayoutPanel ui:field="outputPanel" addStyleNames="{machineResources.getCss.processOutputPanel}"
-                               debugId="processes-output-panel"/>
-        </g:center>
     </g:SplitLayoutPanel>
-
 </ui:UiBinder>

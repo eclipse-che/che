@@ -112,25 +112,6 @@ public interface MachineLocalizationConstant extends Messages {
     String notificationMachineDestroyed(String machineId);
 
 
-    @Key("control.rerun.title")
-    String reRunControlTitle();
-
-    @Key("control.rerun.description")
-    String reRunControlDescription();
-
-    @Key("control.stop.title")
-    String stopControlTitle();
-
-    @Key("control.stop.description")
-    String stopControlDescription();
-
-    @Key("control.close.title")
-    String closeControlTitle();
-
-    @Key("control.close.description")
-    String closeControlDescription();
-
-
     /* MachinePanelPresenter */
     @Key("view.machinePanel.title")
     String machinePanelTitle();
@@ -415,6 +396,11 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("consoles.autoScrollButton.tooltip")
     String consolesAutoScrollButtonTooltip();
 
+    @Key("view.processes.title")
+    String viewProcessesTitle();
+
+    @Key("view.processes.tooltip")
+    String viewProcessesTooltip();
 
     @Key("consoles.defaultMode.tooltip")
     String consolesDefaultModeTooltip();
@@ -424,9 +410,6 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("consoles.splitVertically.tooltip")
     String consolesSplitVerticallyTooltip();
-
-    @Key("view.processes.tooltip")
-    String viewProcessesTooltip();
 
     @Key("view.processes.dev.title")
     String viewProcessesDevTitle();

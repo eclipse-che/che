@@ -14,12 +14,13 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Project;
@@ -30,8 +31,7 @@ import org.eclipse.che.ide.ext.git.client.compare.FileStatus.Status;
 import org.eclipse.che.ide.ext.git.client.compare.changedList.ChangedListPresenter;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
@@ -58,7 +58,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
     private final ComparePresenter         comparePresenter;
     private final ChangedListPresenter     changedListPresenter;
     private final GitOutputConsoleFactory  gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter   consolesPanelPresenter;
+    private final ProcessesPanelPresenter  consolesPanelPresenter;
     private final BranchListView           view;
     private final DialogFactory            dialogFactory;
     private final GitServiceClient         service;
@@ -80,7 +80,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
                                NotificationManager notificationManager,
                                DialogFactory dialogFactory,
                                GitOutputConsoleFactory gitOutputConsoleFactory,
-                               ConsolesPanelPresenter consolesPanelPresenter) {
+                               ProcessesPanelPresenter processesPanelPresenter) {
         this.view = view;
         this.comparePresenter = comparePresenter;
         this.changedListPresenter = changedListPresenter;
@@ -90,7 +90,7 @@ public class BranchListPresenter implements BranchListView.ActionDelegate {
         this.appContext = appContext;
         this.notificationManager = notificationManager;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.consolesPanelPresenter = processesPanelPresenter;
 
         this.view.setDelegate(this);
     }

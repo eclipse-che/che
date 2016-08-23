@@ -8,17 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.parts;
+package org.eclipse.che.ide.ui.multisplitpanel.tab;
 
-import org.eclipse.che.ide.api.mvp.View;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
- * Determines an object containing View.
+ * Factory for {@link Tab} instances.
  *
- * @author Vitaliy Guliy
+ * @author Artem Zatsarynnyi
  */
-public interface HasView<V extends View> {
+public interface TabItemFactory {
 
-    V getView();
-
+    /** Create new {@link Tab} instance with the given title text and icon. */
+    Tab createTabItem(String title, SVGResource icon, boolean closable);
 }

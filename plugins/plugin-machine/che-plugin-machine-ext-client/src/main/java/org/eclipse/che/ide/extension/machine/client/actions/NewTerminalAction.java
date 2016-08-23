@@ -11,17 +11,16 @@
 package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.inject.Inject;
-
 import com.google.inject.Singleton;
+
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
-import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
@@ -32,29 +31,27 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class NewTerminalAction extends AbstractPerspectiveAction {
 
-    private final ConsolesPanelPresenter consolesPanelPresenter;
+    private final ProcessesPanelPresenter processesPanelPresenter;
 
     @Inject
     public NewTerminalAction(MachineLocalizationConstant locale,
                              MachineResources machineResources,
-                             ConsolesPanelPresenter consolesPanelPresenter) {
-        super(Collections.singletonList( PROJECT_PERSPECTIVE_ID),
-                locale.newTerminal(),
-                locale.newTerminalDescription(),
-                null, machineResources.addTerminalIcon());
+                             ProcessesPanelPresenter processesPanelPresenter) {
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
+              locale.newTerminal(),
+              locale.newTerminalDescription(),
+              null,
+              machineResources.addTerminalIcon());
 
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.processesPanelPresenter = processesPanelPresenter;
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
+    public void updateInPerspective(ActionEvent event) {
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void actionPerformed(@NotNull ActionEvent event) {
-        consolesPanelPresenter.newTerminal();
+    public void actionPerformed(ActionEvent event) {
+        processesPanelPresenter.newTerminal();
     }
-
 }

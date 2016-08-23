@@ -8,21 +8,25 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.machine.client.processes;
+package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
 import org.eclipse.che.ide.api.mvp.View;
+import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
+import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
+import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 
 /**
- * View of {@link ConsolesPanelPresenter}.
+ * View of {@link ProcessesPanelPresenter}.
  *
- * @author Anna Shumilova
- * @author Roman Nikitenko
+ * @author Artem Zatsarynnyi
  */
-public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate> {
+public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelegate> {
+
     /**
      * Sets whether this view is visible.
      *
@@ -33,13 +37,25 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
     void setVisible(boolean visible);
 
     /** Add process widget */
-    void addProcessWidget(String processId, IsWidget widget);
+    void addWidget(String processId, String title, SVGResource icon, IsWidget widget, boolean machineConsole);
+
+    /** Select given process node */
+    void selectNode(ProcessTreeNode node);
+
+    /** Returns index for node with given ID */
+    int getNodeIndex(String processId);
+
+    /** Returns node by given index */
+    ProcessTreeNode getNodeByIndex(@NotNull int index);
+
+    /** Returns node by given ID */
+    ProcessTreeNode getNodeById(@NotNull String nodeId);
 
     /** Add process node */
-    void addProcessNode(@NotNull ProcessTreeNode node);
+    void addProcessNode(ProcessTreeNode node);
 
     /** Remove process node */
-    void removeProcessNode(@NotNull ProcessTreeNode node);
+    void removeProcessNode(ProcessTreeNode node);
 
     /**
      * Set process data to be displayed.
@@ -47,10 +63,15 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
      * @param root
      *         data which will be displayed
      */
-    void setProcessesData(@NotNull ProcessTreeNode root);
+    void setProcessesData(ProcessTreeNode root);
 
-    /** Select given process node */
-    void selectNode(ProcessTreeNode node);
+    /**
+     * Sets visibility of 'Stop process' button for node with given ID
+     *
+     * @param nodeId
+     *         id of process node
+     */
+    void setStopButtonVisibility(String nodeId, boolean visible);
 
     /** Displays output for process with given ID */
     void showProcessOutput(String processId);
@@ -64,24 +85,17 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
     /** Removes all process widgets from the view */
     void clear();
 
-    /** Returns index for node with given ID */
-    int getNodeIndex(String processId);
+    interface ActionDelegate extends BaseActionDelegate {
 
-    /** Returns node by given index */
-    ProcessTreeNode getNodeByIndex(@NotNull int index);
+        /**
+         * Will be called when user clicks 'Close' button
+         *
+         * @param node
+         *         terminal node to close
+         */
+        void onCloseTerminal(ProcessTreeNode node);
 
-    /** Returns node by given ID */
-    ProcessTreeNode getNodeById(@NotNull String nodeId);
-
-    /**
-     * Sets visibility of 'Stop process' button for node with given ID
-     *
-     * @param nodeId
-     *         id of process node
-     */
-    void setStopButtonVisibility(String nodeId, boolean visible);
-
-    interface ActionDelegate {
+        void onTerminalTabClosing(ProcessTreeNode node);
 
         /**
          * Will be called when user clicks 'Add new terminal' button
@@ -89,7 +103,7 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
          * @param machineId
          *         id of machine in which the terminal will be added
          */
-        void onAddTerminal(@NotNull String workspaceId, @NotNull String machineId);
+        void onAddTerminal(String workspaceId, String machineId);
 
         /**
          * Will be called when user clicks 'Preview Ssh' button
@@ -97,7 +111,7 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
          * @param machineId
          *         id of machine in which ssh keys are located
          */
-        void onPreviewSsh(@NotNull String machineId);
+        void onPreviewSsh(String machineId);
 
         /**
          * Perform actions when tree node is selected.
@@ -113,15 +127,7 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
          * @param node
          *         node of process to stop without closing output
          */
-        void onStopCommandProcess(@NotNull ProcessTreeNode node);
-
-        /**
-         * Will be called when user clicks 'Close' button
-         *
-         * @param node
-         *         terminal node to close
-         */
-        void onCloseTerminal(@NotNull ProcessTreeNode node);
+        void onStopCommandProcess(ProcessTreeNode node);
 
         /**
          * Will be called when user clicks 'Close' button
@@ -129,19 +135,8 @@ public interface ConsolesPanelView extends View<ConsolesPanelView.ActionDelegate
          * @param node
          *         node of process to stop with closing output
          */
-        void onCloseCommandOutputClick(@NotNull ProcessTreeNode node);
+        void onCloseCommandOutputClick(ProcessTreeNode node);
 
-        /**
-         * Is called when user clicked right mouse button.
-         *
-         * @param mouseX
-         *          mouse x coordinate
-         * @param mouseY
-         *          mouse y coordinate
-         * @param node
-         *          process tree node
-         */
-        void onContextMenu(int mouseX, int mouseY, ProcessTreeNode node);
+        void onCommandTabClosing(ProcessTreeNode node, SubPanel.RemoveCallback removeCallback);
     }
-
 }
