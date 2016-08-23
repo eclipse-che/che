@@ -4,22 +4,22 @@
 ### What issues does this PR fix or reference?
 
 
-### Previous Behavior
+### Previous behavior
 (Remove this section if not relevant)
 
-### New Behavior
+### New behavior
 (Explain the PR as it should appear in the release notes)
 
-### PR Type
-- [ ] Minor change (no change to existing features or docs)
-- [ ] Major change (changes existing features or docs)
+### PR type
+- [ ] Minor change = no change to existing features or docs
+- [ ] Major change = changes existing features or docs
 
-### Minor Change Checklist
+### Minor change checklist
 - [ ] APIs updated
 - [ ] Tests provided / updated
 - [ ] Tests passed
 
-### Major Change Checklist
+### Major change checklist
 - [ ] Documentation provided (include here or link to docs)
 - [ ] APIs updated
 - [ ] Tests provided / updated
