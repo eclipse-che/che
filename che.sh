@@ -586,27 +586,8 @@ execute_profile(){
         return
       fi
 
-      rm ~/.che/"${3}"
-      touch ~/.che/"${3}"
-
-      echo "CHE_LAUNCHER_IMAGE_NAME=$CHE_LAUNCHER_IMAGE_NAME" > ~/.che/"${3}"
-      echo "CHE_SERVER_IMAGE_NAME=$CHE_SERVER_IMAGE_NAME" >> ~/.che/"${3}"
-      echo "CHE_FILE_IMAGE_NAME=$CHE_FILE_IMAGE_NAME" >> ~/.che/"${3}"
-      echo "CHE_MOUNT_IMAGE_NAME=$CHE_MOUNT_IMAGE_NAME" >> ~/.che/"${3}"
-      echo "CHE_TEST_IMAGE_NAME=$CHE_TEST_IMAGE_NAME" >> ~/.che/"${3}"
-
-      echo "CHE_LAUNCHER_CONTAINER_NAME=$CHE_LAUNCHER_CONTAINER_NAME" >> ~/.che/"${3}"
-      echo "CHE_SERVER_CONTAINER_NAME=$CHE_SERVER_CONTAINER_NAME" >> ~/.che/"${3}"
-      echo "CHE_FILE_CONTAINER_NAME=$CHE_FILE_CONTAINER_NAME" >> ~/.che/"${3}"
-      echo "CHE_MOUNT_CONTAINER_NAME=$CHE_MOUNT_CONTAINER_NAME" >> ~/.che/"${3}"
-      echo "CHE_TEST_CONTAINER_NAME=$CHE_TEST_CONTAINER_NAME" >> ~/.che/"${3}"
-
-      env | grep CHE_ >> "${3}"
-      cat ~/.che/"${3}" | sort | uniq > ~/.che/"${3}"
-
-      info ""
-      info "Updated Che CLI profile ~/.che/${3}."
-      info ""
+      execute_profile profile rm "${3}"
+      execute_profile profile add "${3}"
     ;;
     rm)
       if [ ! -f ~/.che/"${3}" ]; then
