@@ -11,20 +11,20 @@
 
 start_che_server() {
   if che_container_exist; then
-    error_exit "A container named \"${CHE_SERVER_CONTAINER_NAME}\" already exists. Please remove it manually (docker rm -f ${CHE_SERVER_CONTAINER_NAME}) and try again."
+    error_exit "A container named \"${CHE_SERVER_CONTAINER_NAME}\" already exists. Remove it manually (docker rm -f ${CHE_SERVER_CONTAINER_NAME}) and try again."
   fi
 
   CURRENT_IMAGE=$(docker images -q "${CHE_SERVER_IMAGE_NAME}":"${CHE_VERSION}")
 
   if [ "${CURRENT_IMAGE}" != "" ]; then
-    info "ECLIPSE CHE: ALREADY HAVE IMAGE ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}"
+    info "${CHE_PRODUCT_NAME}: Already have image ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}"
   else
     update_che_server
   fi
 
   ENV_FILE=$(get_list_of_che_system_environment_variables)
 
-  info "ECLIPSE CHE: CONTAINER STARTING"
+  info "${CHE_PRODUCT_NAME}: Starting container..."
   docker run -d --name "${CHE_SERVER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /home/user/che/lib:/home/user/che/lib-copy \
@@ -46,37 +46,35 @@ start_che_server() {
   
   wait_until_container_is_running 10
   if ! che_container_is_running; then
-    error_exit "ECLIPSE CHE: Timeout waiting Che container to start."
+    error_exit "${CHE_PRODUCT_NAME}: Timeout waiting for ${CHE_PRODUCT_NAME} container to start."
   fi
 
-  info "ECLIPSE CHE: SERVER LOGS AT \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
-  info "ECLIPSE CHE: SERVER BOOTING..."
+  info "${CHE_PRODUCT_NAME}: Server logs at \"docker logs -f ${CHE_SERVER_CONTAINER_NAME}\""
+  info "${CHE_PRODUCT_NAME}: Server booting..."
   wait_until_server_is_booted 60
 
   if server_is_booted; then
-    info "ECLIPSE CHE: BOOTED AND REACHABLE"
-    info "ECLIPSE CHE: http://${CHE_HOSTNAME}:${CHE_PORT}"
+    info "${CHE_PRODUCT_NAME}: Booted and reachable"
+    info "${CHE_PRODUCT_NAME}: http://${CHE_HOSTNAME}:${CHE_PORT}"
   else
-    error_exit "ECLIPSE CHE: Timeout waiting Che server to boot. Run \"docker logs ${CHE_SERVER_CONTAINER_NAME}\" to see the logs."
+    error_exit "${CHE_PRODUCT_NAME}: Timeout waiting for server. Run \"docker logs ${CHE_SERVER_CONTAINER_NAME}\" to inspect the issue."
   fi
 }
 
 stop_che_server() {
   if ! che_container_is_running; then
-    info "-------------------------------------------------------"
-    info "ECLIPSE CHE: CONTAINER IS NOT RUNNING. NOTHING TO DO."
-    info "-------------------------------------------------------"
+    info "${CHE_PRODUCT_NAME}: Container is not running. Nothing to do."
   else
-    info "ECLIPSE CHE: STOPPING SERVER..."
+    info "${CHE_PRODUCT_NAME}: Stopping server..."
     docker exec ${CHE_SERVER_CONTAINER_NAME} /home/user/che/bin/che.sh -c -s:uid stop > /dev/null
     wait_until_container_is_stopped 60
     if che_container_is_running; then
-      error_exit "ECLIPSE CHE: Timeout waiting Che container to stop."
+      error_exit "${CHE_PRODUCT_NAME}: Timeout waiting for the ${CHE_PRODUCT_NAME} container to stop."
     fi
 
-    info "ECLIPSE CHE: REMOVING CONTAINER"
+    info "${CHE_PRODUCT_NAME}: Removing container"
     docker rm ${CHE_SERVER_CONTAINER_NAME} > /dev/null
-    info "ECLIPSE CHE: STOPPED"
+    info "${CHE_PRODUCT_NAME}: Stopped"
   fi
 }
 
@@ -92,13 +90,13 @@ update_che_server() {
     CHE_VERSION=${DEFAULT_CHE_VERSION}
   fi
 
-  info "ECLIPSE CHE: PULLING IMAGE ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}"
+  info "${CHE_PRODUCT_NAME}: Pulling image ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}"
   execute_command_with_progress extended docker pull ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}
 }
 
 print_debug_info() {
   debug "---------------------------------------"
-  debug "---------  CHE DEBUG INFO  ------------"
+  debug "---------    DEBUG INFO    ------------"
   debug "---------------------------------------"
   debug ""
   debug "---------  PLATFORM INFO  -------------"
