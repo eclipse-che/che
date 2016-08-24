@@ -16,6 +16,15 @@
     },
     "reflect-metadata/reflect-metadata.d.ts": {
       "commit": "df11fe36a12b5e24fc607c6923a21f6bddbb5357"
+    },
+    "assertion-error/assertion-error.d.ts": {
+      "commit": "324169800cb792855a96272f5d58f646e7b1d56d"
+    },
+    "chai/chai.d.ts": {
+      "commit": "324169800cb792855a96272f5d58f646e7b1d56d"
+    },
+    "mocha/mocha.d.ts": {
+      "commit": "324169800cb792855a96272f5d58f646e7b1d56d"
     }
   }
 }
