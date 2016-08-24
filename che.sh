@@ -40,6 +40,8 @@ check_docker() {
 
 init_global_variables() {
 
+  DEFAULT_CHE_PRODUCT_NAME="ECLIPSE CHE"
+
   DEFAULT_CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
   DEFAULT_CHE_SERVER_IMAGE_NAME="codenvy/che-server"
   DEFAULT_CHE_FILE_IMAGE_NAME="codenvy/che-file"
@@ -55,6 +57,7 @@ init_global_variables() {
   DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
 
+  CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
   CHE_LAUNCHER_IMAGE_NAME=${CHE_LAUNCHER_IMAGE_NAME:-${DEFAULT_CHE_LAUNCHER_IMAGE_NAME}}
   CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME:-${DEFAULT_CHE_SERVER_IMAGE_NAME}}
   CHE_FILE_IMAGE_NAME=${CHE_FILE_IMAGE_NAME:-${DEFAULT_CHE_FILE_IMAGE_NAME}}
@@ -315,7 +318,7 @@ check_current_image_and_update_if_not_found() {
   CURRENT_IMAGE=$(docker images -q "$1":"${CHE_VERSION}")
 
   if [ "${CURRENT_IMAGE}" != "" ]; then
-    info "ECLIPSE CHE: FOUND IMAGE $1:${CHE_VERSION}"
+    info "${CHE_PRODUCT_NAME}: Found image $1:${CHE_VERSION}"
   else
     update_che_image $1
   fi
@@ -325,7 +328,7 @@ execute_che_launcher() {
 
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
 
-  info "ECLIPSE CHE: LAUNCHING LAUNCHER"
+  info "${CHE_PRODUCT_NAME}: Starting launcher"
 
   docker_exec run -t --rm --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
     -v /var/run/docker.sock:/var/run/docker.sock \
@@ -339,7 +342,7 @@ execute_che_launcher() {
 execute_che_file() {
 
   check_current_image_and_update_if_not_found ${CHE_FILE_IMAGE_NAME}
-  info "ECLIPSE CHE FILE: LAUNCHING CONTAINER"
+  info "${CHE_PRODUCT_NAME}: Starting che-dir container"
 
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
 
@@ -355,7 +358,7 @@ update_che_image() {
     CHE_VERSION=${DEFAULT_CHE_VERSION}
   fi
 
-  info "ECLIPSE CHE: PULLING IMAGE $1:${CHE_VERSION}"
+  info "${CHE_PRODUCT_NAME}: Pulling image $1:${CHE_VERSION}"
   docker pull $1:${CHE_VERSION}
   echo ""
 }
@@ -428,11 +431,11 @@ execute_che_test() {
 
 print_che_cli_debug() {
   debug "---------------------------------------"
-  debug "---------  CHE CLI DEBUG INFO  --------"
+  debug "---------    CLI DEBUG INFO    --------"
   debug "---------------------------------------"
   debug ""
   debug "---------  PLATFORM INFO  -------------"
-  debug "CHE CLI DEFAULT PROFILE   = $(has_default_profile && echo $(get_default_profile) || echo "not set")"
+  debug "CLI DEFAULT PROFILE       = $(has_default_profile && echo $(get_default_profile) || echo "not set")"
   debug "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
   debug "DOCKER_HOST_IP            = ${GLOBAL_GET_DOCKER_HOST_IP}"
   debug "IS_DOCKER_FOR_WINDOWS     = $(is_docker_for_windows && echo "YES" || echo "NO")"
@@ -450,7 +453,7 @@ print_che_cli_debug() {
 run_connectivity_tests() {
   debug ""
   debug "---------------------------------------"
-  debug "-------- CHE CONNECTIVITY TEST --------"
+  debug "--------   CONNECTIVITY TEST   --------"
   debug "---------------------------------------"
   # Start a fake workspace agent
   docker_exec run -d -p 12345:80 --name fakeagent alpine httpd -f -p 80 -h /etc/ > /dev/null
@@ -701,27 +704,27 @@ init_logging
 check_docker
 init_global_variables
 parse_command_line "$@"
-load_profile
 
 if is_boot2docker; then
   debug ""
-  debug "Boot2docker detected - limited mounting"
-  debug "Host OS -> Che folder mapping disabled"
-  debug "Consider Docker for Mac or Windows to activate mounting"
+  debug "!!! Boot2docker detected - save workspaces only in %userprofile% !!!"
   debug ""
 fi
 
 case ${CHE_CLI_ACTION} in
   start|stop|restart)
+    load_profile
     execute_che_launcher
   ;;
   profile)
     execute_profile "$@"
   ;;
   init|up)
+    load_profile
     execute_che_file
   ;;
   update)
+    load_profile
     update_che_image ${CHE_LAUNCHER_IMAGE_NAME}
     update_che_image ${CHE_MOUNT_IMAGE_NAME}
     update_che_image ${CHE_FILE_IMAGE_NAME}
@@ -730,9 +733,11 @@ case ${CHE_CLI_ACTION} in
     execute_che_launcher
   ;;
   mount)
+    load_profile
     mount_local_directory "$@"
   ;;
   info)
+    load_profile
     execute_che_debug "$@"
   ;;
   help)
