@@ -172,9 +172,43 @@ export class CheDir {
     // create sandboxed object
     var sandbox = { "che": this.chefileStruct,  "workspace": this.chefileStructWorkspace, "console": console};
 
-    var script = this.vm.createScript(script_code);
-    script.runInNewContext(sandbox);
+    let options = {
+      filename : this.cheFile,
+      displayErrors : true
+    };
 
+    try {
+      this.vm.runInNewContext(script_code, sandbox, options);
+    } catch (error) {
+      if (error.stack) {
+        // search correct line
+        let splitLines = error.stack.split('\n');
+        var found : boolean = false;
+        var i : number = 0;
+        while (!found && i < splitLines.length) {
+          let currentStackLine = splitLines[i];
+          if (currentStackLine.indexOf(this.cheFile) != -1) {
+            // found matching line
+            found = true;
+            let splitColumns = currentStackLine.split(':');
+            // check line number only or both line+column number
+            if (splitColumns.length == 3) {
+              // line and column number
+              let lineNumber = splitColumns[1];
+              let colNumber = splitColumns[2];
+              throw new Error('Error while parsing the file \'' + this.cheFile + '\' at line ' + lineNumber + ' and column ' + colNumber + '. The error is :' + error.message);
+            } else if (splitColumns.length == 2) {
+              // only line number
+              let lineNumber = splitColumns[1];
+              throw new Error('Error while parsing the file \'' + this.cheFile + '\' at line ' + lineNumber + '. The error is :' + error.message);
+            }
+          }
+          i++;
+        }
+        }
+      // not able to parse error
+      throw error;
+    }
 
     this.cleanupArrays();
 
