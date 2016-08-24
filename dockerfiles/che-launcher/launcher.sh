@@ -22,10 +22,6 @@ init_logging() {
 
 init_global_variables() {
 
-  CHE_SERVER_CONTAINER_NAME="che-server"
-  CHE_SERVER_IMAGE_NAME="codenvy/che-server"
-  CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
-
   # Set variables that use docker as utilities to avoid over container execution
   ETH0_ADDRESS=$(docker run --rm --net host alpine /bin/sh -c "ifconfig eth0 2> /dev/null" | \
                                                             grep "inet addr:" | \
@@ -52,6 +48,8 @@ init_global_variables() {
   DOCKER_INSTALL_TYPE=$(get_docker_install_type)
 
   # User configurable variables
+  DEFAULT_CHE_SERVER_CONTAINER_NAME="che-server"
+  DEFAULT_CHE_SERVER_IMAGE_NAME="codenvy/che-server"
   DEFAULT_DOCKER_HOST_IP=$(get_docker_host_ip)
   DEFAULT_CHE_HOSTNAME=$(get_che_hostname)
   DEFAULT_CHE_PORT="8080"
@@ -62,9 +60,12 @@ init_global_variables() {
   DEFAULT_CHE_DATA_FOLDER="/home/user/che"
 
   # Clean eventual user provided paths
-  CHE_CONF_FOLDER=${CHE_CONF_FOLDER:+$(get_clean_path ${CHE_CONF_FOLDER})}
-  CHE_DATA_FOLDER=${CHE_DATA_FOLDER:+$(get_clean_path ${CHE_DATA_FOLDER})}
+  CHE_CONF_FOLDER=${CHE_CONF_FOLDER:+$(get_converted_and_clean_path "${CHE_CONF_FOLDER}")}
+  CHE_DATA_FOLDER=${CHE_DATA_FOLDER:+$(get_converted_and_clean_path "${CHE_DATA_FOLDER}")}
+  CHE_LOCAL_BINARY=${CHE_LOCAL_BINARY:+$(get_converted_and_clean_path "${CHE_LOCAL_BINARY}")}
 
+  CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME:-${DEFAULT_CHE_SERVER_IMAGE_NAME}}
+  CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}
   CHE_HOSTNAME=${CHE_HOSTNAME:-${DEFAULT_CHE_HOSTNAME}}
   CHE_PORT=${CHE_PORT:-${DEFAULT_CHE_PORT}}
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
@@ -78,16 +79,14 @@ init_global_variables() {
   #   - empty if CHE_CONF_FOLDER is not set
   #   - -v ${CHE_CONF_FOLDER}:/conf -e "CHE_LOCAL_CONF_DIR=/conf" if CHE_CONF_FOLDER is set
   CHE_CONF_ARGS=${CHE_CONF_FOLDER:+-v "${CHE_CONF_FOLDER}":/conf -e "CHE_LOCAL_CONF_DIR=/conf"}
-  CHE_LOCAL_BINARY_ARGS=${CHE_LOCAL_BINARY:+-v ${CHE_LOCAL_BINARY}:/home/user/che}
 
-  if is_docker_for_mac || is_docker_for_windows; then
-    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v "${CHE_DATA_FOLDER}/storage":/home/user/che/storage \
-                                        -e "CHE_WORKSPACE_STORAGE=${CHE_DATA_FOLDER}/workspaces" \
-                                        -e "CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false"}
-  else
-    CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v "${CHE_DATA_FOLDER}/storage":/home/user/che/storage \
-                                        -v "${CHE_DATA_FOLDER}/workspaces":/home/user/che/workspaces}
-  fi
+  # CHE_LOCAL_BINARY is the path to a Che assembly that will be mounted into the Che server container
+  CHE_LOCAL_BINARY_ARGS=${CHE_LOCAL_BINARY:+-v "${CHE_LOCAL_BINARY}":/home/user/che}
+
+  # CHE_STORAGE_ARGS is where Che JSON files and workspace / project files are saved
+  CHE_STORAGE_ARGS=${CHE_DATA_FOLDER:+-v "${CHE_DATA_FOLDER}"/storage:/home/user/che/storage \
+                                      -e CHE_WORKSPACE_STORAGE="${CHE_DATA_FOLDER}"/workspaces \
+                                      -e CHE_WORKSPACE_STORAGE_CREATE_FOLDERS=false}
 
   if [ "${CHE_LOG_LEVEL}" = "debug" ]; then
     CHE_DEBUG_OPTION="--debug --log_level:debug"
@@ -97,7 +96,7 @@ init_global_variables() {
 
   USAGE="
 Usage:
-  docker run -v /var/run/docker.sock:/var/run/docker.sock ${CHE_LAUNCHER_IMAGE_NAME} [COMMAND]
+  docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock eclipse/che [COMMAND]
      start                              Starts Che server
      stop                               Stops Che server
      restart                            Restart Che server

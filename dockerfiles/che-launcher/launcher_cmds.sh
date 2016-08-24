@@ -94,7 +94,6 @@ update_che_server() {
 
   info "ECLIPSE CHE: PULLING IMAGE ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}"
   execute_command_with_progress extended docker pull ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION}
-  info "ECLIPSE CHE: IMAGE ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} INSTALLED"
 }
 
 print_debug_info() {
