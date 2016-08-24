@@ -38,9 +38,6 @@ export class CheFileServerStruct {
 }
 
 
-export class CheFileStructWorkspaceRuntime {
-    recipe: string;
-}
 
 export class CheFileStructWorkspaceCommandAttributes {
     previewUrl: string;
@@ -67,7 +64,6 @@ export class CheFileStructWorkspaceCommandImpl implements CheFileStructWorkspace
 
 
 export class CheFileStructWorkspace {
-    runtime: CheFileStructWorkspaceRuntime;
 
     name: string;
 
@@ -78,7 +74,6 @@ export class CheFileStructWorkspace {
 
     constructor() {
         this.commands = new Array<CheFileStructWorkspaceCommandImpl>();
-        this.runtime = new CheFileStructWorkspaceRuntime();
         this.postload = new CheFileStructWorkspacePostLoad();
         // init some commands
         for (let i : number = 0; i < 255; i++) {
