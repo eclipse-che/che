@@ -34,6 +34,8 @@ import {MachineServiceClientImpl} from "../../api/wsmaster/machine/machine-servi
 import {CheFileStructWorkspaceCommand} from "./chefile-struct/che-file-struct";
 import {CheFileStructWorkspaceCommandImpl} from "./chefile-struct/che-file-struct";
 import {CheFileStructWorkspaceLoadingCommand} from "./chefile-struct/che-file-struct";
+import {ArgumentProcessor} from "../../spi/decorator/argument-processor";
+import {Parameter} from "../../spi/decorator/parameter";
 
 
 /**
@@ -42,6 +44,9 @@ import {CheFileStructWorkspaceLoadingCommand} from "./chefile-struct/che-file-st
  * @author Florent Benoit
  */
 export class CheDir {
+
+  @Parameter({names: ["--verbose"], description: "Display in verbose mode."})
+  isVerbose : boolean = false;
 
   // Try 30s to ping a che server when booting it
   times: number = 30;
@@ -82,7 +87,7 @@ export class CheDir {
   i18n : I18n;
 
   constructor(args) {
-    this.args = args;
+    this.args = ArgumentProcessor.inject(this, args);
 
 
     this.currentFolder = this.path.resolve(args[0]);
@@ -433,7 +438,7 @@ export class CheDir {
         }
       }).then((workspaceDto) => {
         Log.getLogger().info(this.i18n.get('up.workspace-booting'));
-        return this.workspace.startWorkspace(workspaceDto.getId());
+        return this.workspace.startWorkspace(workspaceDto.getId(), this.isVerbose);
       }).then((workspaceDto) => {
         return this.workspace.getWorkspace(workspaceDto.getId())
       }).then((workspaceDto) => {
