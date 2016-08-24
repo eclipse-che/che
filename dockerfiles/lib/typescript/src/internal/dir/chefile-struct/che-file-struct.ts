@@ -74,12 +74,12 @@ export class CheFileStructWorkspace {
     ram: number;
     commands : Array<CheFileStructWorkspaceCommand>;
 
-    loading : CheFileStructWorkspaceLoading;
+    postload : CheFileStructWorkspacePostLoad;
 
     constructor() {
         this.commands = new Array<CheFileStructWorkspaceCommandImpl>();
         this.runtime = new CheFileStructWorkspaceRuntime();
-        this.loading = new CheFileStructWorkspaceLoading();
+        this.postload = new CheFileStructWorkspacePostLoad();
         // init some commands
         for (let i : number = 0; i < 255; i++) {
             this.commands[i] = new CheFileStructWorkspaceCommandImpl();
@@ -89,12 +89,12 @@ export class CheFileStructWorkspace {
 }
 
 export class CheFileStructWorkspaceLoadingCommand {
-    name: string;
+    execute: string;
 
-    commandLine : string;
+    inline : string;
 }
 
-export class CheFileStructWorkspaceLoading {
+export class CheFileStructWorkspacePostLoad {
     commands : Array<CheFileStructWorkspaceLoadingCommand>;
 
     constructor() {

@@ -193,10 +193,10 @@ export class CheDir {
       }
     }
     // now, cleanup invalid commands
-    for (let i : number = this.chefileStructWorkspace.loading.commands.length - 1; i >= 0 ; i--) {
+    for (let i : number = this.chefileStructWorkspace.postload.commands.length - 1; i >= 0 ; i--) {
         // no name, drop it
-        if (!this.chefileStructWorkspace.loading.commands[i].name && !this.chefileStructWorkspace.loading.commands[i].commandLine) {
-          this.chefileStructWorkspace.loading.commands.splice(i, 1);
+        if (!this.chefileStructWorkspace.postload.commands[i].execute && !this.chefileStructWorkspace.postload.commands[i].inline) {
+          this.chefileStructWorkspace.postload.commands.splice(i, 1);
         }
     }
 
@@ -228,8 +228,8 @@ export class CheDir {
     //
     this.chefileStructWorkspace.commands[0].name = "my-first-command";
     this.chefileStructWorkspace.commands[0].commandLine = "echo this is my first command && read";
-    this.chefileStructWorkspace.loading.commands[0].name = "my-first-command";
-    this.chefileStructWorkspace.loading.commands[1].commandLine = "echo 'this is my custom command' && while true; do echo $(date); sleep 1; done";
+    this.chefileStructWorkspace.postload.commands[0].execute = "my-first-command";
+    this.chefileStructWorkspace.postload.commands[1].inline = "echo 'this is my custom command' && while true; do echo $(date); sleep 1; done";
 
 
     this.cleanupArrays();
@@ -473,27 +473,31 @@ export class CheDir {
     let workspaceCommands : Array<any> = workspaceDto.getContent().config.commands;
     let machineServiceClient:MachineServiceClientImpl = new MachineServiceClientImpl(this.workspace, this.authData);
 
-    this.chefileStructWorkspace.loading.commands.forEach((postLoadingCommand: CheFileStructWorkspaceLoadingCommand) => {
+    if (this.chefileStructWorkspace.postload.commands && this.chefileStructWorkspace.postload.commands.length > 0) {
+      Log.getLogger().info(this.i18n.get("executeCommandsFromCurrentWorkspace.executing"));
+    }
+
+    this.chefileStructWorkspace.postload.commands.forEach((postLoadingCommand: CheFileStructWorkspaceLoadingCommand) => {
       let uuid:string = UUID.build();
       let channel:string = 'process:output:' + uuid;
 
-      if (postLoadingCommand.name) {
+      if (postLoadingCommand.execute) {
         workspaceCommands.forEach((workspaceCommand) => {
-          if (postLoadingCommand.name === workspaceCommand.name) {
+          if (postLoadingCommand.execute === workspaceCommand.name) {
             let customCommand:CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
             customCommand.commandLine = workspaceCommand.commandLine;
             customCommand.name = workspaceCommand.name;
             customCommand.type = workspaceCommand.type;
             customCommand.attributes = workspaceCommand.attributes;
-            Log.getLogger().info('Executing post-loading workspace command \'' + postLoadingCommand.name + '\'.');
+            Log.getLogger().debug('Executing post-loading workspace command \'' + postLoadingCommand.execute + '\'.');
             promises.push(machineServiceClient.executeCommand(workspaceDto, machineId, customCommand, channel, false));
           }
         });
-      } else if (postLoadingCommand.commandLine.length) {
+      } else if (postLoadingCommand.inline) {
         let customCommand:CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
-        customCommand.commandLine = postLoadingCommand.commandLine;
+        customCommand.commandLine = postLoadingCommand.inline;
         customCommand.name = 'custom postloading command';
-        Log.getLogger().info('Executing post-loading commandLine \'' + postLoadingCommand.commandLine + '\'.');
+        Log.getLogger().debug('Executing post-loading commandLine \'' + postLoadingCommand.inline + '\'.');
         promises.push(machineServiceClient.executeCommand(workspaceDto, machineId, customCommand, channel, false));
       }
 
