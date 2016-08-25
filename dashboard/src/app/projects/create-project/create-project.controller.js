@@ -821,48 +821,37 @@ export class CreateProjectController {
     this.resetCreateProgress();
     this.setCreateProjectInProgress();
 
+    let source = {};
+    source.type = 'dockerfile';
     // logic to decide if we create workspace based on a stack or reuse existing workspace
-    let option;
-
     if (this.workspaceResource === 'existing-workspace') {
-      option = 'reuse-workspace';
+      // reuse existing workspace
       this.recipeUrl = null;
       this.stack = null;
-    } else {
-      switch (this.stackTab) {
-        case 'ready-to-go':
-          option = 'create-workspace';
-          this.stack = this.readyToGoStack;
-          break;
-        case 'stack-library':
-          option = 'create-workspace';
-          this.stack = this.stackLibraryUser;
-          break;
-        case 'custom-stack':
-          option = 'create-workspace';
-          this.stack = null;
-          break;
-      }
-    }
-    // check workspace is selected
-    if (option === 'create-workspace') {
-      if (this.stack) {
-        this.createWorkspace(this.getSourceFromStack(this.stack));
-      } else {
-        let source = {};
-        source.type = 'dockerfile';
-        if (this.recipeUrl && this.recipeUrl.length > 0) {
-          source.location = this.recipeUrl;
-          this.createWorkspace(source);
-        } else {
-          source.content = this.recipeScript;
-          this.createWorkspace(source);
-        }
-      }
-    } else {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
       this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
+    } else {
+      // create workspace based on a stack
+      switch (this.stackTab) {
+        case 'ready-to-go':
+          source = this.getSourceFromStack(this.readyToGoStack);
+          this.stack = this.readyToGoStack;
+          break;
+        case 'stack-library':
+          source = this.getSourceFromStack(this.stackLibraryUser);
+          this.stack = this.stackLibraryUser;
+          break;
+        case 'custom-stack':
+          if (this.recipeUrl && this.recipeUrl.length > 0) {
+            source.location = this.recipeUrl;
+          } else {
+            source.content = this.recipeScript;
+          }
+          this.stack = null;
+          break;
+      }
+      this.createWorkspace(source);
     }
   }
 
@@ -1026,7 +1015,17 @@ export class CreateProjectController {
   }
 
   isReadyToCreate() {
-    return !this.isCreateProjectInProgress() && this.isReady;
+    let isCustomStack = this.stackTab === 'custom-stack';
+    let isCreateProjectInProgress = this.isCreateProjectInProgress();
+    
+    if (!isCustomStack) {
+      return !isCreateProjectInProgress && this.isReady
+    }
+
+    let isRecipeUrl = this.recipeUrl && this.recipeUrl.length > 0;
+    let isRecipeScript = this.recipeScript && this.recipeScript.length > 0;
+
+    return !isCreateProjectInProgress && this.isReady && (isRecipeUrl || isRecipeScript);
   }
 
   resetCreateProgress() {
