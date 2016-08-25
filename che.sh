@@ -555,6 +555,8 @@ execute_profile(){
       test -d ~/.che/profiles || mkdir -p ~/.che/profiles
       touch ~/.che/profiles/"${3}"
 
+      echo "CHE_PRODUCT_NAME=$CHE_PRODUCT_NAME" > ~/.che/profiles/"${3}"
+      echo "CHE_MINI_PRODUCT_NAME=$CHE_MINI_PRODUCT_NAME" > ~/.che/profiles/"${3}"
       echo "CHE_LAUNCHER_IMAGE_NAME=$CHE_LAUNCHER_IMAGE_NAME" > ~/.che/profiles/"${3}"
       echo "CHE_SERVER_IMAGE_NAME=$CHE_SERVER_IMAGE_NAME" >> ~/.che/profiles/"${3}"
       echo "CHE_FILE_IMAGE_NAME=$CHE_FILE_IMAGE_NAME" >> ~/.che/profiles/"${3}"
