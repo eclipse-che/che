@@ -219,30 +219,47 @@ public class DockerInstance extends AbstractInstance {
                 return new DockerMachineSource(image).withTag(LATEST_TAG);
             }
 
-            PushParams pushParams = PushParams.create(image)
-                                              .withRegistry(registry)
-                                              .withTag(LATEST_TAG);
-
-            final String fullRepo = pushParams.getFullRepo();
-            commitContainer(fullRepo, LATEST_TAG);
-            //TODO fix this workaround. Docker image is not visible after commit when using swarm
-            Thread.sleep(2000);
-            final ProgressLineFormatterImpl lineFormatter = new ProgressLineFormatterImpl();
-            final String digest = docker.push(pushParams,
-                                              progressMonitor -> {
-                                                  try {
-                                                      outputConsumer.writeLine(lineFormatter.format(progressMonitor));
-                                                  } catch (IOException ignored) {
-                                                  }
-                                              });
-            docker.removeImage(RemoveImageParams.create(fullRepo).withForce(false));
-            return new DockerMachineSource(image).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
+           return createAndPushSnapshotToRemoteRegistry(image, registry);
         } catch (IOException ioEx) {
             throw new MachineException(ioEx);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new MachineException(e.getLocalizedMessage(), e);
         }
+    }
+
+    /**
+     * Creates snapshot of workspace and push it to remote docker registry.
+     * This method has protected access because it can be extended to improve flexibility.
+     *
+     * @param image
+     *         snapshot image name (may include namespace)
+     * @param registry
+     *         registry to which snapshot image should be pushed
+     * @return Docker machine source
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    protected DockerMachineSource createAndPushSnapshotToRemoteRegistry(String image, String registry) throws IOException,
+                                                                                                              InterruptedException {
+        PushParams pushParams = PushParams.create(image)
+                                          .withRegistry(registry)
+                                          .withTag(LATEST_TAG);
+
+        final String fullRepo = pushParams.getFullRepo();
+        commitContainer(fullRepo, LATEST_TAG);
+        //TODO fix this workaround. Docker image is not visible after commit when using swarm
+        Thread.sleep(2000);
+        final ProgressLineFormatterImpl lineFormatter = new ProgressLineFormatterImpl();
+        final String digest = docker.push(pushParams,
+                                          progressMonitor -> {
+                                              try {
+                                                  outputConsumer.writeLine(lineFormatter.format(progressMonitor));
+                                              } catch (IOException ignored) {
+                                              }
+                                          });
+        docker.removeImage(RemoveImageParams.create(fullRepo).withForce(false));
+        return new DockerMachineSource(image).withRegistry(registry).withDigest(digest).withTag(LATEST_TAG);
     }
 
     @VisibleForTesting
