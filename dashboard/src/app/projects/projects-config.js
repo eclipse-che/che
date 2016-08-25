@@ -11,7 +11,7 @@
 'use strict';
 
 import {CreateProjectController} from './create-project/create-project.controller';
-import {CreateProjectSvc} from './create-project/create-project.service.js';
+import {CreateProjectSvc} from './create-project/create-project.service';
 import {CreateProjectGithubController} from './create-project/github/create-project-github.controller';
 
 import {CreateProjectGit} from './create-project/git/create-project-git.directive';

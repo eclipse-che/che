@@ -16,7 +16,7 @@ import {CheProjectDetailsBuilder} from './che-projectdetails-builder';
 import {CheProjectTypeBuilder} from './che-projecttype-builder';
 import {CheProjectTemplateBuilder} from './che-projecttemplate-builder';
 import {CheProjectTypeAttributeDescriptorBuilder} from './che-projecttype-attribute-descriptor-builder';
-import {CheProfileBuilder} from './che-profile-builder.js';
+import {CheProfileBuilder} from './che-profile-builder';
 
 /**
  * This class is providing the entry point for accessing the builders
