@@ -29,7 +29,6 @@ import org.testng.annotations.Test;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
@@ -367,6 +366,43 @@ public class UserDaoTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenRemovingNull() throws Exception {
         userDao.remove(null);
+    }
+
+    @Test(dependsOnMethods = "shouldGetUserById")
+    public void shouldReturnUserWithNullPasswordWhenGetUserById() throws Exception {
+        assertEquals(userDao.getById(users[0].getId()).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = "shouldGetUserByAlias")
+    public void shouldReturnUserWithNullPasswordWhenGetUserByAliases() throws Exception {
+        assertEquals(userDao.getByAlias(users[0].getAliases().get(0)).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = "shouldGetUserByName")
+    public void shouldReturnUserWithNullPasswordWhenGetUserByName() throws Exception {
+        assertEquals(userDao.getByName(users[0].getName()).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = "shouldGetUserByEmail")
+    public void shouldReturnUserWithNullPasswordWhenGetUserByEmail() throws Exception {
+        assertEquals(userDao.getByEmail(users[0].getEmail()).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = {"shouldGetUserByNameAndPassword",
+                              "shouldGetUserByEmailAndPassword"})
+    public void shouldReturnUserWithNullPasswordWhenGetUserByAliasAndPassword() throws Exception {
+        final UserImpl user = users[0];
+        assertEquals(userDao.getByAliasAndPassword(user.getName(), user.getPassword()).getPassword(), null);
+        assertEquals(userDao.getByAliasAndPassword(user.getEmail(), user.getPassword()).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = "getAllShouldReturnAllUsersWithinSingleResponse")
+    public void shouldReturnUserWithNullPasswordWhenGetAllUser() throws Exception {
+        assertEquals(userDao.getAll(users.length, 0)
+                            .getItems()
+                            .stream()
+                            .filter(u -> u.getPassword() == null)
+                            .count(), users.length);
     }
 
     private static void assertEqualsNoPassword(User actual, User expected) {

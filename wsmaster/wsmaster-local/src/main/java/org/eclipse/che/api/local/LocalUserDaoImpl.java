@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * In-memory implementation of {@link UserDao}.
@@ -89,7 +90,7 @@ public class LocalUserDaoImpl implements UserDao {
         if (!userOpt.isPresent() || !userOpt.get().getPassword().equals(password)) {
             throw new NotFoundException(format("User '%s' doesn't exist", emailOrName));
         }
-        return new UserImpl(userOpt.get());
+        return erasePassword(userOpt.get());
     }
 
     @Override
@@ -123,7 +124,7 @@ public class LocalUserDaoImpl implements UserDao {
     @Override
     public synchronized UserImpl getByAlias(String alias) throws NotFoundException {
         requireNonNull(alias, "Required non-null alias");
-        return new UserImpl(find(user -> user.getAliases().contains(alias), "alias", alias));
+        return erasePassword(find(user -> user.getAliases().contains(alias), "alias", alias));
     }
 
     @Override
@@ -133,19 +134,19 @@ public class LocalUserDaoImpl implements UserDao {
         if (user == null) {
             throw new NotFoundException(format("User with id '%s' doesn't exist", id));
         }
-        return new UserImpl(user);
+        return erasePassword(user);
     }
 
     @Override
     public synchronized UserImpl getByName(String name) throws NotFoundException {
         requireNonNull(name, "Required non-null name");
-        return new UserImpl(find(user -> user.getName().equals(name), "name", name));
+        return erasePassword(find(user -> user.getName().equals(name), "name", name));
     }
 
     @Override
     public synchronized UserImpl getByEmail(String email) throws NotFoundException, ServerException {
         requireNonNull(email, "Required non-null email");
-        return new UserImpl(find(user -> user.getEmail().equals(email), "email", email));
+        return erasePassword(find(user -> user.getEmail().equals(email), "email", email));
     }
 
     @Override
@@ -154,6 +155,7 @@ public class LocalUserDaoImpl implements UserDao {
                                .stream()
                                .skip(skipCount)
                                .limit(maxItems)
+                               .map(LocalUserDaoImpl::erasePassword)
                                .collect(Collectors.toCollection(LinkedHashSet::new)),
                           skipCount,
                           maxItems,
@@ -195,5 +197,14 @@ public class LocalUserDaoImpl implements UserDao {
             throw new NotFoundException(format("User with %s '%s' doesn't exist", subjectName, subject));
         }
         return userOpt.get();
+    }
+
+    // Returns user instance copy without password
+    private static UserImpl erasePassword(User source) {
+        return new UserImpl(source.getId(),
+                            source.getEmail(),
+                            source.getName(),
+                            null,
+                            source.getAliases());
     }
 }
