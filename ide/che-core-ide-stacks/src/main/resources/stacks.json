@@ -28,7 +28,7 @@
       {
         "name": "Tomcat",
         "version": "8.0.29"
-      }
+      },
       {
         "name": "Docker",
         "version": "1.12.0"
