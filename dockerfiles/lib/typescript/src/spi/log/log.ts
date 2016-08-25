@@ -10,6 +10,7 @@
  */
 
 
+import {ProductName} from "../../utils/product-name";
 /**
  * Logging class allowing to log message
  * @author Florent Benoit
@@ -17,7 +18,7 @@
 export class Log {
 
     static debugEnabled : boolean = false;
-    static context : string = 'che';
+    static context : string = ProductName.getShortDisplayName();
     static logger : Log;
     static disabledPrefix : boolean = false;
 

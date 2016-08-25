@@ -16,6 +16,7 @@ import {Argument} from "../../spi/decorator/parameter";
 import {ArgumentProcessor} from "../../spi/decorator/argument-processor";
 import {PostFlightCheckTest} from "./impl/post-flight-check-test";
 import {Log} from "../../spi/log/log";
+import {ProductName} from "../../utils/product-name";
 /**
  * Entrypoint for the Tests.
  * @author Florent Benoit
@@ -56,7 +57,7 @@ export class CheTest {
        let classOfTest: any = this.mapOfTests.get(this.testName);
        if (classOfTest) {
            // update logger
-           Log.context = 'che(test/' + this.testName + ')';
+           Log.context = ProductName.getShortDisplayName() + '(test/' + this.testName + ')';
 
            var instance = Object.create(classOfTest.prototype);
            // here we use an array of array as constructor instance is an array and apply method is also using array to give parameter

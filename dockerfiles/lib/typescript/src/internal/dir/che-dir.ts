@@ -36,6 +36,7 @@ import {CheFileStructWorkspaceCommandImpl} from "./chefile-struct/che-file-struc
 import {CheFileStructWorkspaceLoadingCommand} from "./chefile-struct/che-file-struct";
 import {ArgumentProcessor} from "../../spi/decorator/argument-processor";
 import {Parameter} from "../../spi/decorator/parameter";
+import {ProductName} from "../../utils/product-name";
 
 
 /**
@@ -154,7 +155,7 @@ export class CheDir {
   }
 
   run() : Promise<string> {
-    Log.context = 'che(dir)';
+    Log.context = ProductName.getShortDisplayName() + '(dir)';
 
     // call the method analyzed from the argument
     return this.parseArgument().then((methodName) => {
