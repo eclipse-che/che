@@ -333,22 +333,30 @@ execute_che_launcher() {
                   --env-file=$(get_list_of_che_system_environment_variables) \
                   "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
 
-  # Remove temporary file
+  # Remove temporary file -- only due to POSIX weirdness with --env-file
   rm -rf "tmp" > /dev/null 2>&1
 }
 
-execute_che_file() {
+execute_che_dir() {
   check_current_image_and_update_if_not_found ${CHE_FILE_IMAGE_NAME}
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
   docker_exec run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                  --env-file=$(get_list_of_che_system_environment_variables) \
                   -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
                   "${CHE_FILE_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
+
+  # Remove temporary file -- only due to POSIX weirdness with --env-file
+  rm -rf "tmp" > /dev/null 2>&1
 }
 
 execute_che_action() {
   check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME}
   docker_exec run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                  --env-file=$(get_list_of_che_system_environment_variables) \
                   "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+
+  # Remove temporary file -- only due to POSIX weirdness with --env-file
+  rm -rf "tmp" > /dev/null 2>&1
 }
 
 
@@ -383,8 +391,12 @@ mount_local_directory() {
   docker_exec run --rm -it 
                   --cap-add SYS_ADMIN \
                   --device /dev/fuse \
+                  --env-file=$(get_list_of_che_system_environment_variables) \
                   -v "${MOUNT_PATH}":/mnthost \
                   "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
+
+  # Remove temporary file -- only due to POSIX weirdness with --env-file
+  rm -rf "tmp" > /dev/null 2>&1
 }
 
 execute_che_debug() {
@@ -726,7 +738,7 @@ case ${CHE_CLI_ACTION} in
     # remove "dir" arg by shifting it
     shift
     load_profile
-    execute_che_file "$@"
+    execute_che_dir "$@"
   ;;
   action)
     # remove "action" arg by shifting it
