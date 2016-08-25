@@ -46,6 +46,7 @@ init_global_variables() {
   DEFAULT_CHE_SERVER_IMAGE_NAME="codenvy/che-server"
   DEFAULT_CHE_FILE_IMAGE_NAME="codenvy/che-file"
   DEFAULT_CHE_MOUNT_IMAGE_NAME="codenvy/che-mount"
+  DEFAULT_CHE_ACTION_IMAGE_NAME="codenvy/che-action"
   DEFAULT_CHE_TEST_IMAGE_NAME="codenvy/che-test"
 
   DEFAULT_CHE_LAUNCHER_CONTAINER_NAME="che-launcher"
@@ -62,6 +63,7 @@ init_global_variables() {
   CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME:-${DEFAULT_CHE_SERVER_IMAGE_NAME}}
   CHE_FILE_IMAGE_NAME=${CHE_FILE_IMAGE_NAME:-${DEFAULT_CHE_FILE_IMAGE_NAME}}
   CHE_MOUNT_IMAGE_NAME=${CHE_MOUNT_IMAGE_NAME:-${DEFAULT_CHE_MOUNT_IMAGE_NAME}}
+  CHE_ACTION_IMAGE_NAME=${CHE_ACTION_IMAGE_NAME:-${DEFAULT_CHE_ACTION_IMAGE_NAME}}
   CHE_TEST_IMAGE_NAME=${CHE_TEST_IMAGE_NAME:-${DEFAULT_CHE_TEST_IMAGE_NAME}}
 
   CHE_LAUNCHER_CONTAINER_NAME=${CHE_LAUNCHER_CONTAINER_NAME:-${DEFAULT_CHE_LAUNCHER_CONTAINER_NAME}}
@@ -92,8 +94,12 @@ Usage: che [COMMAND]
            profile info <name>                Print the profile configuration
            profile list                       List available profiles
            mount <local-path> <ws-ssh-port>   Synchronize workspace to a local directory
-           init                               Initialize directory with Che configuration
-           up                                 Create workspace from source in current directory
+           dir init                           Initialize directory with Che configuration
+           dir up                             Create workspace from source in current directory
+           dir down                           Stop workspace running in current directory
+           dir status                         Display status about Che in current directory
+           action <action-name> [--help]      Start action on Eclipse Che instance
+           test <test-name> [--help]          Start test on Eclipse Che instance
            info [ --all                       Run all debugging tests
                   --server                    Run Che launcher and server debugging tests
                   --networking                Test connectivity between Che sub-systems
@@ -125,7 +131,7 @@ parse_command_line () {
     CHE_CLI_ACTION="help"
   else
     case $1 in
-      start|stop|restart|update|info|profile|init|up|mount|test|help|-h|--help)
+      start|stop|restart|update|info|profile|action|dir|mount|test|help|-h|--help)
         CHE_CLI_ACTION=$1
       ;;
       *)
@@ -342,7 +348,6 @@ execute_che_launcher() {
 execute_che_file() {
 
   check_current_image_and_update_if_not_found ${CHE_FILE_IMAGE_NAME}
-  info "${CHE_PRODUCT_NAME}: Starting che-dir container"
 
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
 
@@ -350,8 +355,19 @@ execute_che_file() {
          -v /var/run/docker.sock:/var/run/docker.sock \
          -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
          "${CHE_FILE_IMAGE_NAME}":"${CHE_VERSION}" \
-         "${CURRENT_DIRECTORY}" "${CHE_CLI_ACTION}"
+         "${CURRENT_DIRECTORY}" "$@"
 }
+
+execute_che_action() {
+
+  check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME}
+
+  docker_exec run -it --rm  \
+         -v /var/run/docker.sock:/var/run/docker.sock \
+         "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" \
+         "$@"
+}
+
 
 update_che_image() {
   if [ -z "${CHE_VERSION}" ]; then
@@ -401,7 +417,7 @@ execute_che_debug() {
       print_che_cli_debug
       execute_che_launcher
       run_connectivity_tests
-      execute_che_test "$@"
+      execute_che_test post-flight-check "$@"
     ;;
     --cli|-cli)
       print_che_cli_debug
@@ -422,7 +438,9 @@ execute_che_debug() {
   esac
 }
 
+
 execute_che_test() {
+  check_current_image_and_update_if_not_found ${CHE_TEST_IMAGE_NAME}
 
   docker_exec run --rm -it --name "${CHE_TEST_CONTAINER_NAME}" \
                   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -719,9 +737,23 @@ case ${CHE_CLI_ACTION} in
   profile)
     execute_profile "$@"
   ;;
-  init|up)
+  dir)
+    # remove "dir" arg by shifting it
+    shift
     load_profile
-    execute_che_file
+    execute_che_file "$@"
+  ;;
+  action)
+    # remove "action" arg by shifting it
+    shift
+    load_profile
+    execute_che_action "$@"
+  ;;
+  test)
+    # remove "test" arg by shifting it
+    shift
+    load_profile
+    execute_che_test "$@"
   ;;
   update)
     load_profile
