@@ -74,9 +74,11 @@ export class CheDir {
   workspacesFolder : any;
   chePropertiesFile : any;
   dotCheIdFile : any;
+  instanceId: string;
 
   mode;
   args : Array<string>;
+
 
 
   websocket: Websocket;
@@ -117,6 +119,15 @@ export class CheDir {
     this.chefileStructWorkspace = new CheFileStructWorkspace();
     this.chefileStructWorkspace.name = 'local';
     this.chefileStructWorkspace.ram = 2048;
+
+    try {
+      this.fs.statSync(this.dotCheIdFile);
+      // we have a file
+      this.instanceId = this.fs.readFileSync(this.dotCheIdFile).toString();
+    } catch (e) {
+      this.instanceId = UUID.build();
+      this.writeInstanceId();
+    }
 
   }
 
@@ -349,7 +360,7 @@ export class CheDir {
         }
 
         // search IDE url link
-        let ideUrl : string;
+        let ideUrl : string = 'N/A';
         workspaceDto.getContent().links.forEach((link) => {
           if ('ide url' === link.rel) {
             ideUrl = link.href;
@@ -357,6 +368,7 @@ export class CheDir {
         });
         Log.getLogger().info(this.i18n.get('status.workspace.name', this.chefileStructWorkspace.name));
         Log.getLogger().info(this.i18n.get('status.workspace.url', ideUrl));
+        Log.getLogger().info(this.i18n.get('status.instance.id', this.instanceId));
         return true;
       });
     });
@@ -562,11 +574,8 @@ export class CheDir {
       // already exist
     }
 
-    try {
-      this.fs.writeFileSync(this.dotCheIdFile, UUID.build());
-    } catch (e) {
-      // already exist
-    }
+    // write instance id
+    this.writeInstanceId();
 
     // create .che/workspaces folder
     try {
@@ -595,6 +604,13 @@ export class CheDir {
 
   }
 
+  writeInstanceId() {
+    try {
+      this.fs.writeFileSync(this.dotCheIdFile, this.instanceId);
+    } catch (e) {
+      // already exist
+    }
+  }
 
   setupConfigFile() {
     // need to setup che.properties file with workspaces folder
@@ -636,13 +652,18 @@ export class CheDir {
 
   }
 
+
+  getCheServerContainerName() : string {
+    return 'che-server-' + this.instanceId;
+  }
+
   cheBoot() : Promise<any> {
 
     let promise : Promise<any> = new Promise<any>((resolve, reject) => {
       let containerVersion : string = new ContainerVersion().getVersion();
 
       // create command line to execute
-      var commandLine: string = 'docker run ';
+      var commandLine: string = 'docker run --rm';
 
       // add extra properties
       for(var property in this.chefileStruct.server.properties){
@@ -656,6 +677,7 @@ export class CheDir {
           ' -e CHE_PORT=' + this.chefileStruct.server.port +
           ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
           ' -e CHE_CONF_FOLDER=' + this.confFolder +
+          ' -e CHE_SERVER_CONTAINER_NAME=' + this.getCheServerContainerName() +
           ' codenvy/che-launcher:' + containerVersion + ' start';
 
       Log.getLogger().debug('Executing command line', commandLine);
@@ -702,11 +724,12 @@ export class CheDir {
     let promise : Promise<any> = new Promise<any>((resolve, reject) => {
       let containerVersion : string = new ContainerVersion().getVersion();
 
-      var commandLine: string = 'docker run ' +
+      var commandLine: string = 'docker run --rm' +
           ' -v /var/run/docker.sock:/var/run/docker.sock' +
           ' -e CHE_PORT=' + this.chefileStruct.server.port +
           ' -e CHE_DATA_FOLDER=' + this.workspacesFolder +
           ' -e CHE_CONF_FOLDER=' + this.confFolder +
+          ' -e CHE_SERVER_CONTAINER_NAME=' + this.getCheServerContainerName() +
           ' codenvy/che-launcher:' + containerVersion + ' stop';
 
       Log.getLogger().debug('Executing command line', commandLine);
