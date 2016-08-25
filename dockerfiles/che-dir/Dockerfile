@@ -25,8 +25,8 @@ RUN set -x \
     && curl -sL "https://${DOCKER_BUCKET}/builds/Linux/x86_64/docker-$DOCKER_VERSION" \
     > /usr/bin/docker; chmod +x /usr/bin/docker
 
-
 COPY lib/typescript/lib /lib
 COPY lib/typescript/dependencies/runtime/node_modules /lib/node_modules
+ADD  che-dir/src/che.properties /lib/internal/dir/che.properties
 
-ENTRYPOINT ["node", "/lib/index.js", "che-test"]
+ENTRYPOINT ["node", "/lib/index.js", "che-dir"]

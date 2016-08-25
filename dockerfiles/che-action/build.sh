@@ -4,6 +4,7 @@
 # are made available under the terms of the Eclipse Public License v1.0
 # which accompanies this distribution, and is available at
 # http://www.eclipse.org/legal/epl-v10.html
+
 if [ "latest" = "$1" ]
 then
   TAG="latest"
@@ -11,4 +12,6 @@ else
   TAG="nightly"
 fi
 
-docker build -t codenvy/che-launcher:$TAG .
+DIR=$(cd "$(dirname "$0")"; cd ..; pwd)
+echo "Building Docker Image from $DIR directory with tag $TAG"
+cd $DIR && docker build -t codenvy/che-action:$TAG -f che-action/Dockerfile .

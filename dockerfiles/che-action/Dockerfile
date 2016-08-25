@@ -29,4 +29,4 @@ RUN set -x \
 COPY lib/typescript/lib /lib
 COPY lib/typescript/dependencies/runtime/node_modules /lib/node_modules
 
-ENTRYPOINT ["node", "/lib/index.js", "che-test"]
+ENTRYPOINT ["node", "/lib/index.js", "che-action"]

@@ -1,0 +1,3 @@
+@echo off
+echo "Compiling from directory %cd%"
+docker run --rm -v %cd%:/usr/src/app -w /usr/src/app node:6 /bin/bash -c "cd /usr/src/app/dependencies/compile && npm install -no-bin-links && cd /usr/src/app/dependencies/runtime && npm install -no-bin-links && npm install -g tsd && cd /usr/src/app/src && tsd install && cd /usr/src/app/src && find . -name "*.properties" -exec install -D {} /usr/src/app/lib/{} \; && cd /usr/src/app && /usr/src/app/dependencies/compile/node_modules/typescript/bin/tsc --target ES5 --experimentalDecorators --emitDecoratorMetadata --outDir /usr/src/app/lib /usr/src/app/src/index.ts"
