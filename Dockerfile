@@ -9,7 +9,7 @@
 #   Codenvy S.A
 #
 # To build it, run in the repository root:
-#  `docker build -t codenvy/che-server -f $(pwd)/dockerfiles/che-server/Dockerfile .`
+#  `docker build -t codenvy/che-server .`
 #
 # To run it:
 #  docker run --net=host \
