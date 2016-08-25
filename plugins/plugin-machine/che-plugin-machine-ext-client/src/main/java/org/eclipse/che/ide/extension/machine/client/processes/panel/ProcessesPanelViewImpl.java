@@ -147,6 +147,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             @Override
             public void onNodeContextMenu(int mouseX, int mouseY, TreeNodeElement<ProcessTreeNode> node) {
+                delegate.onContextMenu(mouseX, mouseY, node.getData());
             }
 
             @Override

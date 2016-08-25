@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
@@ -51,6 +52,8 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Default
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
+import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenu;
+import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -88,25 +91,27 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     final Map<OutputConsole, String>     consoleCommands;
     final Map<String, TerminalPresenter> terminals;
 
-    private final ProcessesPanelView           view;
-    private final MachineLocalizationConstant  localizationConstant;
-    private final MachineResources             resources;
-    private final MachineServiceClient         machineServiceClient;
-    private final WorkspaceAgent               workspaceAgent;
-    private final AppContext                   appContext;
-    private final NotificationManager          notificationManager;
-    private final EntityFactory                entityFactory;
-    private final TerminalFactory              terminalFactory;
-    private final CommandConsoleFactory        commandConsoleFactory;
-    private final DialogFactory                dialogFactory;
-    private final DtoFactory                   dtoFactory;
-    private final CommandTypeRegistry          commandTypeRegistry;
-    private final Map<String, ProcessTreeNode> machineNodes;
+    private final ProcessesPanelView            view;
+    private final MachineLocalizationConstant   localizationConstant;
+    private final MachineResources              resources;
+    private final MachineServiceClient          machineServiceClient;
+    private final WorkspaceAgent                workspaceAgent;
+    private final AppContext                    appContext;
+    private final NotificationManager           notificationManager;
+    private final EntityFactory                 entityFactory;
+    private final TerminalFactory               terminalFactory;
+    private final CommandConsoleFactory         commandConsoleFactory;
+    private final DialogFactory                 dialogFactory;
+    private final DtoFactory                    dtoFactory;
+    private final CommandTypeRegistry           commandTypeRegistry;
+    private final ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
+    private final Map<String, ProcessTreeNode>  machineNodes;
 
     ProcessTreeNode rootNode;
 
     private List<ProcessTreeNode> rootNodes;
     private ProcessTreeNode       selectedTreeNode;
+    private ProcessTreeNode       contextTreeNode;
 
     @Inject
     public ProcessesPanelPresenter(ProcessesPanelView view,
@@ -122,7 +127,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    CommandConsoleFactory commandConsoleFactory,
                                    DialogFactory dialogFactory,
                                    DtoFactory dtoFactory,
-                                   CommandTypeRegistry commandTypeRegistry) {
+                                   CommandTypeRegistry commandTypeRegistry,
+                                   ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory) {
         this.view = view;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
@@ -136,6 +142,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.dialogFactory = dialogFactory;
         this.dtoFactory = dtoFactory;
         this.commandTypeRegistry = commandTypeRegistry;
+        this.consoleTreeContextMenuFactory = consoleTreeContextMenuFactory;
 
         machineNodes = new HashMap<>();
         rootNodes = new ArrayList<>();
@@ -381,16 +388,16 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             // actually - remove 'already used' console
             commandId = processTreeNode.getId();
             view.hideProcessOutput(commandId);
-        } else {
-            ProcessTreeNode commandNode = new ProcessTreeNode(COMMAND_NODE,
-                                                              machineTreeNode,
-                                                              outputConsoleTitle,
-                                                              outputConsole.getTitleIcon(),
-                                                              null);
-            commandId = commandNode.getId();
-            view.addProcessNode(commandNode);
-            addChildToMachineNode(commandNode, machineTreeNode);
         }
+
+        ProcessTreeNode commandNode = new ProcessTreeNode(COMMAND_NODE,
+                                                          machineTreeNode,
+                                                          outputConsoleTitle,
+                                                          outputConsole.getTitleIcon(),
+                                                          null);
+        commandId = commandNode.getId();
+        view.addProcessNode(commandNode);
+        addChildToMachineNode(commandNode, machineTreeNode);
 
         addOutputConsole(commandId, outputConsole, false);
 
@@ -526,7 +533,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         removeChildFromMachineNode(node, parentNode);
         view.selectNode(neighborNode);
-//        view.hideProcessOutput(processId);
     }
 
     private String getUniqueTerminalName(ProcessTreeNode machineNode) {
@@ -733,5 +739,58 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         if (console != null && console instanceof DefaultOutputConsole) {
             ((DefaultOutputConsole)console).printText(text);
         }
+    }
+
+    /**
+     * Prints text to the machine console.
+     *
+     * @param machineId
+     *          machine Id
+     * @param text
+     *          text to be printed
+     * @param color
+     *          color of the text or NULL
+     */
+    public void printMachineOutput(String machineId, String text, String color) {
+        OutputConsole console = consoles.get(machineId);
+        if (console != null && console instanceof DefaultOutputConsole) {
+            ((DefaultOutputConsole)console).printText(text, color);
+        }
+    }
+
+    /**
+     * Returns context selected tree node.
+     *
+     * @return tree node
+     */
+    public ProcessTreeNode getContextTreeNode() {
+        return contextTreeNode;
+    }
+
+    /**
+     * Returns context selected output console.
+     *
+     * @return output console
+     */
+    public OutputConsole getContextOutputConsole() {
+        if (contextTreeNode == null) {
+            return null;
+        }
+
+        return consoles.get(contextTreeNode.getId());
+    }
+
+    @Override
+    public void onContextMenu(final int mouseX, final int mouseY, final ProcessTreeNode node) {
+        view.selectNode(node);
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                contextTreeNode = node;
+                ConsoleTreeContextMenu contextMenu = consoleTreeContextMenuFactory.newContextMenu(node);
+                contextMenu.show(mouseX, mouseY);
+            }
+        });
     }
 }
