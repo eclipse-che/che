@@ -48,7 +48,7 @@ init_global_variables() {
 
   DEFAULT_CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
   DEFAULT_CHE_SERVER_IMAGE_NAME="codenvy/che-server"
-  DEFAULT_CHE_FILE_IMAGE_NAME="codenvy/che-file"
+  DEFAULT_CHE_DIR_IMAGE_NAME="codenvy/che-dir"
   DEFAULT_CHE_MOUNT_IMAGE_NAME="codenvy/che-mount"
   DEFAULT_CHE_ACTION_IMAGE_NAME="codenvy/che-action"
   DEFAULT_CHE_TEST_IMAGE_NAME="codenvy/che-test"
@@ -60,7 +60,7 @@ init_global_variables() {
   CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
   CHE_LAUNCHER_IMAGE_NAME=${CHE_LAUNCHER_IMAGE_NAME:-${DEFAULT_CHE_LAUNCHER_IMAGE_NAME}}
   CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME:-${DEFAULT_CHE_SERVER_IMAGE_NAME}}
-  CHE_FILE_IMAGE_NAME=${CHE_FILE_IMAGE_NAME:-${DEFAULT_CHE_FILE_IMAGE_NAME}}
+  CHE_DIR_IMAGE_NAME=${CHE_DIR_IMAGE_NAME:-${DEFAULT_CHE_DIR_IMAGE_NAME}}
   CHE_MOUNT_IMAGE_NAME=${CHE_MOUNT_IMAGE_NAME:-${DEFAULT_CHE_MOUNT_IMAGE_NAME}}
   CHE_ACTION_IMAGE_NAME=${CHE_ACTION_IMAGE_NAME:-${DEFAULT_CHE_ACTION_IMAGE_NAME}}
   CHE_TEST_IMAGE_NAME=${CHE_TEST_IMAGE_NAME:-${DEFAULT_CHE_TEST_IMAGE_NAME}}
@@ -338,12 +338,12 @@ execute_che_launcher() {
 }
 
 execute_che_dir() {
-  check_current_image_and_update_if_not_found ${CHE_FILE_IMAGE_NAME}
+  check_current_image_and_update_if_not_found ${CHE_DIR_IMAGE_NAME}
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
   docker_exec run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
                   --env-file=$(get_list_of_che_system_environment_variables) \
                   -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
-                  "${CHE_FILE_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
+                  "${CHE_DIR_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
 
   # Remove temporary file -- only due to POSIX weirdness with --env-file
   rm -rf "tmp" > /dev/null 2>&1
@@ -571,7 +571,7 @@ execute_profile(){
       echo "CHE_MINI_PRODUCT_NAME=$CHE_MINI_PRODUCT_NAME" > ~/.che/profiles/"${3}"
       echo "CHE_LAUNCHER_IMAGE_NAME=$CHE_LAUNCHER_IMAGE_NAME" > ~/.che/profiles/"${3}"
       echo "CHE_SERVER_IMAGE_NAME=$CHE_SERVER_IMAGE_NAME" >> ~/.che/profiles/"${3}"
-      echo "CHE_FILE_IMAGE_NAME=$CHE_FILE_IMAGE_NAME" >> ~/.che/profiles/"${3}"
+      echo "CHE_DIR_IMAGE_NAME=$CHE_DIR_IMAGE_NAME" >> ~/.che/profiles/"${3}"
       echo "CHE_MOUNT_IMAGE_NAME=$CHE_MOUNT_IMAGE_NAME" >> ~/.che/profiles/"${3}"
       echo "CHE_TEST_IMAGE_NAME=$CHE_TEST_IMAGE_NAME" >> ~/.che/profiles/"${3}"
       echo "CHE_SERVER_CONTAINER_NAME=$CHE_SERVER_CONTAINER_NAME" >> ~/.che/profiles/"${3}"
@@ -756,7 +756,9 @@ case ${CHE_CLI_ACTION} in
     load_profile
     update_che_image ${CHE_LAUNCHER_IMAGE_NAME}
     update_che_image ${CHE_MOUNT_IMAGE_NAME}
-    update_che_image ${CHE_FILE_IMAGE_NAME}
+    update_che_image ${CHE_DIR_IMAGE_NAME}
+    update_che_image ${CHE_ACTION_IMAGE_NAME}
+    update_che_image ${CHE_TEST_IMAGE_NAME}
 
     # Delegate updating che-server to the launcher
     execute_che_launcher
