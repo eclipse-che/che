@@ -145,6 +145,14 @@ docker_exec() {
   fi
 }
 
+docker_run() {
+  docker_exec run --rm -it -v /var/run/docker.sock:/var/run/docker.sock \
+                  --env-file=$(get_list_of_che_system_environment_variables) "$@"
+
+  # Remove temporary file -- only due to POSIX weirdness with --env-file
+  rm -rf "tmp" > /dev/null 2>&1
+}
+
 get_docker_host_ip() {
   case $(get_docker_install_type) in
    boot2docker)
@@ -324,39 +332,19 @@ check_current_image_and_update_if_not_found() {
 }
 
 execute_che_launcher() {
-
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
-
-#  info "${CHE_PRODUCT_NAME}: Starting launcher"
-
-  docker_exec run -t --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                  --env-file=$(get_list_of_che_system_environment_variables) \
-                  "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
-
-  # Remove temporary file -- only due to POSIX weirdness with --env-file
-  rm -rf "tmp" > /dev/null 2>&1
+  docker_run "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
 }
 
 execute_che_dir() {
   check_current_image_and_update_if_not_found ${CHE_DIR_IMAGE_NAME}
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
-  docker_exec run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                  --env-file=$(get_list_of_che_system_environment_variables) \
-                  -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
-                  "${CHE_DIR_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
-
-  # Remove temporary file -- only due to POSIX weirdness with --env-file
-  rm -rf "tmp" > /dev/null 2>&1
+  docker_run -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
 }
 
 execute_che_action() {
   check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME}
-  docker_exec run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
-                  --env-file=$(get_list_of_che_system_environment_variables) \
-                  "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
-
-  # Remove temporary file -- only due to POSIX weirdness with --env-file
-  rm -rf "tmp" > /dev/null 2>&1
+  docker_run "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
 }
 
 
@@ -388,15 +376,10 @@ mount_local_directory() {
     return
   fi
 
-  docker_exec run --rm -it 
-                  --cap-add SYS_ADMIN \
-                  --device /dev/fuse \
-                  --env-file=$(get_list_of_che_system_environment_variables) \
-                  -v "${MOUNT_PATH}":/mnthost \
-                  "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
-
-  # Remove temporary file -- only due to POSIX weirdness with --env-file
-  rm -rf "tmp" > /dev/null 2>&1
+  docker_run --cap-add SYS_ADMIN \
+              --device /dev/fuse \
+              -v "${MOUNT_PATH}":/mnthost \
+              "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
 }
 
 execute_che_debug() {
@@ -436,10 +419,7 @@ execute_che_debug() {
 
 execute_che_test() {
   check_current_image_and_update_if_not_found ${CHE_TEST_IMAGE_NAME}
-
-  docker_exec run --rm -it -v /var/run/docker.sock:/var/run/docker.sock \
-                  "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
-
+  docker_run "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
 }
 
 print_che_cli_debug() {
