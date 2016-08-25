@@ -14,4 +14,4 @@ fi
 
 DIR=$(cd "$(dirname "$0")"; cd ..; pwd)
 echo "Building Docker Image from $DIR directory with tag $TAG"
-cd $DIR && docker build -t codenvy/che-file:$TAG -f che-file/Dockerfile .
+cd $DIR && docker build -t codenvy/che-dir:$TAG -f che-dir/Dockerfile .

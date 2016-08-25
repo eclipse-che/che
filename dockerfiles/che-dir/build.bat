@@ -4,7 +4,7 @@ for %%i in ("%~dp0..") do set "folder=%%~fi"
 echo "Building Docker Image from %folder% directory with tag %tag%"
 cd %folder%
 echo current folder is %cd%
-docker build -t codenvy/che-file:nightly -f che-file/Dockerfile .
+docker build -t codenvy/che-dir:nightly -f che-dir/Dockerfile .
 
 if %ERRORLEVEL% == 0 goto :end
 
