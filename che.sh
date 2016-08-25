@@ -49,11 +49,7 @@ init_global_variables() {
   DEFAULT_CHE_ACTION_IMAGE_NAME="codenvy/che-action"
   DEFAULT_CHE_TEST_IMAGE_NAME="codenvy/che-test"
 
-  DEFAULT_CHE_LAUNCHER_CONTAINER_NAME="che-launcher"
   DEFAULT_CHE_SERVER_CONTAINER_NAME="che-server"
-  DEFAULT_CHE_FILE_CONTAINER_NAME="che-file"
-  DEFAULT_CHE_MOUNT_CONTAINER_NAME="che-mount"
-  DEFAULT_CHE_TEST_CONTAINER_NAME="che-test"
 
   DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
@@ -66,11 +62,7 @@ init_global_variables() {
   CHE_ACTION_IMAGE_NAME=${CHE_ACTION_IMAGE_NAME:-${DEFAULT_CHE_ACTION_IMAGE_NAME}}
   CHE_TEST_IMAGE_NAME=${CHE_TEST_IMAGE_NAME:-${DEFAULT_CHE_TEST_IMAGE_NAME}}
 
-  CHE_LAUNCHER_CONTAINER_NAME=${CHE_LAUNCHER_CONTAINER_NAME:-${DEFAULT_CHE_LAUNCHER_CONTAINER_NAME}}
   CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}
-  CHE_FILE_CONTAINER_NAME=${CHE_FILE_CONTAINER_NAME:-${DEFAULT_CHE_FILE_CONTAINER_NAME}}
-  CHE_MOUNT_CONTAINER_NAME=${CHE_MOUNT_CONTAINER_NAME:-${DEFAULT_CHE_MOUNT_CONTAINER_NAME}}
-  CHE_TEST_CONTAINER_NAME=${CHE_TEST_CONTAINER_NAME:-${DEFAULT_CHE_TEST_CONTAINER_NAME}}
 
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
@@ -323,9 +315,7 @@ check_current_image_and_update_if_not_found() {
 
   CURRENT_IMAGE=$(docker images -q "$1":"${CHE_VERSION}")
 
-  if [ "${CURRENT_IMAGE}" != "" ]; then
-    info "${CHE_PRODUCT_NAME}: Found image $1:${CHE_VERSION}"
-  else
+  if [ "${CURRENT_IMAGE}" == "" ]; then
     update_che_image $1
   fi
 }
@@ -336,36 +326,26 @@ execute_che_launcher() {
 
   info "${CHE_PRODUCT_NAME}: Starting launcher"
 
-  docker_exec run -t --rm --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    --env-file=$(get_list_of_che_system_environment_variables) \
-    "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
+  docker_exec run -t --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                  --env-file=$(get_list_of_che_system_environment_variables) \
+                  "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
 
   # Remove temporary file
   rm -rf "tmp" > /dev/null 2>&1
 }
 
 execute_che_file() {
-
   check_current_image_and_update_if_not_found ${CHE_FILE_IMAGE_NAME}
-
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
-
-  docker_exec run -it --rm --name "${CHE_FILE_CONTAINER_NAME}" \
-         -v /var/run/docker.sock:/var/run/docker.sock \
-         -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
-         "${CHE_FILE_IMAGE_NAME}":"${CHE_VERSION}" \
-         "${CURRENT_DIRECTORY}" "$@"
+  docker_exec run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                  -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
+                  "${CHE_FILE_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
 }
 
 execute_che_action() {
-
   check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME}
-
-  docker_exec run -it --rm  \
-         -v /var/run/docker.sock:/var/run/docker.sock \
-         "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" \
-         "$@"
+  docker_exec run -it --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                  "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
 }
 
 
@@ -397,9 +377,9 @@ mount_local_directory() {
     return
   fi
 
-  docker_exec run --rm -it --cap-add SYS_ADMIN \
+  docker_exec run --rm -it 
+                  --cap-add SYS_ADMIN \
                   --device /dev/fuse \
-                  --name "${CHE_MOUNT_CONTAINER_NAME}" \
                   -v "${MOUNT_PATH}":/mnthost \
                   "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
 }
@@ -442,9 +422,9 @@ execute_che_debug() {
 execute_che_test() {
   check_current_image_and_update_if_not_found ${CHE_TEST_IMAGE_NAME}
 
-  docker_exec run --rm -it --name "${CHE_TEST_CONTAINER_NAME}" \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
+  docker_exec run --rm -it -v /var/run/docker.sock:/var/run/docker.sock \
                   "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+
 }
 
 print_che_cli_debug() {
@@ -580,12 +560,7 @@ execute_profile(){
       echo "CHE_FILE_IMAGE_NAME=$CHE_FILE_IMAGE_NAME" >> ~/.che/"${3}"
       echo "CHE_MOUNT_IMAGE_NAME=$CHE_MOUNT_IMAGE_NAME" >> ~/.che/"${3}"
       echo "CHE_TEST_IMAGE_NAME=$CHE_TEST_IMAGE_NAME" >> ~/.che/"${3}"
-
-      echo "CHE_LAUNCHER_CONTAINER_NAME=$CHE_LAUNCHER_CONTAINER_NAME" >> ~/.che/"${3}"
       echo "CHE_SERVER_CONTAINER_NAME=$CHE_SERVER_CONTAINER_NAME" >> ~/.che/"${3}"
-      echo "CHE_FILE_CONTAINER_NAME=$CHE_FILE_CONTAINER_NAME" >> ~/.che/"${3}"
-      echo "CHE_MOUNT_CONTAINER_NAME=$CHE_MOUNT_CONTAINER_NAME" >> ~/.che/"${3}"
-      echo "CHE_TEST_CONTAINER_NAME=$CHE_TEST_CONTAINER_NAME" >> ~/.che/"${3}"
 
       # Add all other variables to the profile
       env | grep CHE_ >> ~/.che/"${3}"
