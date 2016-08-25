@@ -33,7 +33,7 @@ import {WorkspaceDto} from "../../api/wsmaster/workspace/dto/workspacedto";
 import {MachineServiceClientImpl} from "../../api/wsmaster/machine/machine-service-client";
 import {CheFileStructWorkspaceCommand} from "./chefile-struct/che-file-struct";
 import {CheFileStructWorkspaceCommandImpl} from "./chefile-struct/che-file-struct";
-import {CheFileStructWorkspaceLoadingCommand} from "./chefile-struct/che-file-struct";
+import {CheFileStructWorkspaceLoadingAction} from "./chefile-struct/che-file-struct";
 import {ArgumentProcessor} from "../../spi/decorator/argument-processor";
 import {Parameter} from "../../spi/decorator/parameter";
 import {ProductName} from "../../utils/product-name";
@@ -244,10 +244,10 @@ export class CheDir {
       }
     }
     // now, cleanup invalid commands
-    for (let i : number = this.chefileStructWorkspace.postload.commands.length - 1; i >= 0 ; i--) {
+    for (let i : number = this.chefileStructWorkspace.postload.actions.length - 1; i >= 0 ; i--) {
         // no name, drop it
-        if (!this.chefileStructWorkspace.postload.commands[i].execute && !this.chefileStructWorkspace.postload.commands[i].inline) {
-          this.chefileStructWorkspace.postload.commands.splice(i, 1);
+        if (!this.chefileStructWorkspace.postload.actions[i].command && !this.chefileStructWorkspace.postload.actions[i].script) {
+          this.chefileStructWorkspace.postload.actions.splice(i, 1);
         }
     }
 
@@ -279,8 +279,8 @@ export class CheDir {
     //
     this.chefileStructWorkspace.commands[0].name = "my-first-command";
     this.chefileStructWorkspace.commands[0].commandLine = "echo this is my first command && read";
-    this.chefileStructWorkspace.postload.commands[0].execute = "my-first-command";
-    this.chefileStructWorkspace.postload.commands[1].inline = "echo 'this is my custom command' && while true; do echo $(date); sleep 1; done";
+    this.chefileStructWorkspace.postload.actions[0].command = "my-first-command";
+    this.chefileStructWorkspace.postload.actions[1].script = "echo 'this is my custom command' && while true; do echo $(date); sleep 1; done";
 
 
     this.cleanupArrays();
@@ -525,31 +525,31 @@ export class CheDir {
     let workspaceCommands : Array<any> = workspaceDto.getContent().config.commands;
     let machineServiceClient:MachineServiceClientImpl = new MachineServiceClientImpl(this.workspace, this.authData);
 
-    if (this.chefileStructWorkspace.postload.commands && this.chefileStructWorkspace.postload.commands.length > 0) {
+    if (this.chefileStructWorkspace.postload.actions && this.chefileStructWorkspace.postload.actions.length > 0) {
       Log.getLogger().info(this.i18n.get("executeCommandsFromCurrentWorkspace.executing"));
     }
 
-    this.chefileStructWorkspace.postload.commands.forEach((postLoadingCommand: CheFileStructWorkspaceLoadingCommand) => {
+    this.chefileStructWorkspace.postload.actions.forEach((postLoadingCommand: CheFileStructWorkspaceLoadingAction) => {
       let uuid:string = UUID.build();
       let channel:string = 'process:output:' + uuid;
 
-      if (postLoadingCommand.execute) {
+      if (postLoadingCommand.command) {
         workspaceCommands.forEach((workspaceCommand) => {
-          if (postLoadingCommand.execute === workspaceCommand.name) {
+          if (postLoadingCommand.command === workspaceCommand.name) {
             let customCommand:CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
             customCommand.commandLine = workspaceCommand.commandLine;
             customCommand.name = workspaceCommand.name;
             customCommand.type = workspaceCommand.type;
             customCommand.attributes = workspaceCommand.attributes;
-            Log.getLogger().debug('Executing post-loading workspace command \'' + postLoadingCommand.execute + '\'.');
+            Log.getLogger().debug('Executing post-loading workspace command \'' + postLoadingCommand.command + '\'.');
             promises.push(machineServiceClient.executeCommand(workspaceDto, machineId, customCommand, channel, false));
           }
         });
-      } else if (postLoadingCommand.inline) {
+      } else if (postLoadingCommand.script) {
         let customCommand:CheFileStructWorkspaceCommand = new CheFileStructWorkspaceCommandImpl();
-        customCommand.commandLine = postLoadingCommand.inline;
+        customCommand.commandLine = postLoadingCommand.script;
         customCommand.name = 'custom postloading command';
-        Log.getLogger().debug('Executing post-loading commandLine \'' + postLoadingCommand.inline + '\'.');
+        Log.getLogger().debug('Executing post-loading script \'' + postLoadingCommand.script + '\'.');
         promises.push(machineServiceClient.executeCommand(workspaceDto, machineId, customCommand, channel, false));
       }
 

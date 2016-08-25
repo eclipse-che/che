@@ -83,20 +83,20 @@ export class CheFileStructWorkspace {
     }
 }
 
-export class CheFileStructWorkspaceLoadingCommand {
-    execute: string;
+export class CheFileStructWorkspaceLoadingAction {
+    command: string;
 
-    inline : string;
+    script : string;
 }
 
 export class CheFileStructWorkspacePostLoad {
-    commands : Array<CheFileStructWorkspaceLoadingCommand>;
+    actions : Array<CheFileStructWorkspaceLoadingAction>;
 
     constructor() {
-        this.commands = new Array<CheFileStructWorkspaceLoadingCommand>();
+        this.actions = new Array<CheFileStructWorkspaceLoadingAction>();
         // init some commands
         for (let i : number = 0; i < 255; i++) {
-            this.commands[i] = new CheFileStructWorkspaceLoadingCommand();
+            this.actions[i] = new CheFileStructWorkspaceLoadingAction();
         }
 
     }
