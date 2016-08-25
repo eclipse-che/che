@@ -138,5 +138,17 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
         void onCloseCommandOutputClick(ProcessTreeNode node);
 
         void onCommandTabClosing(ProcessTreeNode node, SubPanel.RemoveCallback removeCallback);
+
+        /**
+         * Is called when user clicked right mouse button.
+         *
+         * @param mouseX
+         *          mouse x coordinate
+         * @param mouseY
+         *          mouse y coordinate
+         * @param node
+         *          process tree node
+         */
+        void onContextMenu(int mouseX, int mouseY, ProcessTreeNode node);
     }
 }
