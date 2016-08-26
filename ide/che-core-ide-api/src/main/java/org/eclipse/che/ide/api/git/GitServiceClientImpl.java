@@ -53,6 +53,7 @@ import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.rest.AsyncRequest;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.AsyncRequestLoader;
@@ -105,7 +106,7 @@ public class GitServiceClientImpl implements GitServiceClient {
     private static final String PUSH        = "/git/push";
     private static final String PULL        = "/git/pull";
     private static final String REMOTE      = "/git/remote";
-    private static final String REMOVE      = "/git/rm";
+    private static final String REMOVE      = "/git/remove";
     private static final String RESET       = "/git/reset";
     private static final String COMMITERS   = "/git/commiters";
     private static final String REPOSITORY  = "/git/repository";
@@ -207,6 +208,7 @@ public class GitServiceClientImpl implements GitServiceClient {
     }
 
     @Override
+    @Deprecated
     public void statusText(DevMachine devMachine, ProjectConfigDto project, StatusFormat format, AsyncRequestCallback<String> callback) {
         String params = "?projectPath=" + project.getPath() + "&format=" + format;
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + STATUS + params;
@@ -433,8 +435,10 @@ public class GitServiceClientImpl implements GitServiceClient {
 
     @Override
     public Promise<List<Remote>> remoteList(DevMachine devMachine, ProjectConfig project, @Nullable String remoteName, boolean verbose) {
-        String params = "?projectPath=" + project.getPath() + (remoteName != null ? "&remoteName=" + remoteName : "") +
-                        "&verbose=" + String.valueOf(verbose);
+        String params = "?projectPath=" + project.getPath() + "&verbose=" + String.valueOf(verbose);
+        if (remoteName != null) {
+            params += "&remoteName=" + remoteName;
+        }
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + REMOTE + params;
         return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)
@@ -452,6 +456,7 @@ public class GitServiceClientImpl implements GitServiceClient {
     }
 
     @Override
+    @Deprecated
     public void branchList(DevMachine devMachine,
                            ProjectConfig project,
                            BranchListMode listMode,
@@ -466,17 +471,6 @@ public class GitServiceClientImpl implements GitServiceClient {
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH + "?projectPath=" + project.toString() + "&listMode=" +
                      listMode;
         return asyncRequestFactory.createGetRequest(url).send(dtoUnmarshallerFactory.newListUnmarshaller(Branch.class));
-    }
-
-    @Override
-    public Promise<Status> status(DevMachine devMachine, ProjectConfig project) {
-        final String params = "?projectPath=" + project.getPath() + "&format=" + PORCELAIN;
-        final String url = appContext.getDevMachine().getWsAgentBaseUrl() + STATUS + params;
-        return asyncRequestFactory.createGetRequest(url)
-                                  .loader(loader)
-                                  .header(CONTENTTYPE, APPLICATION_JSON)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(Status.class));
     }
 
     @Override
@@ -787,6 +781,19 @@ public class GitServiceClientImpl implements GitServiceClient {
     }
 
     @Override
+    public void diff(DevMachine devMachine,
+                     ProjectConfigDto project,
+                     List<String> fileFilter,
+                     DiffType type,
+                     boolean noRenames,
+                     int renameLimit,
+                     String commitA,
+                     boolean cached,
+                     AsyncRequestCallback<String> callback) {
+        diff(Path.valueOf(project.getPath()), fileFilter, type, noRenames, renameLimit, commitA, null, cached).send(callback);
+    }
+
+    @Override
     public Promise<String> diff(DevMachine devMachine,
                                 Path project,
                                 List<String> fileFilter,
@@ -795,21 +802,49 @@ public class GitServiceClientImpl implements GitServiceClient {
                                 int renameLimit,
                                 String commitA,
                                 String commitB) {
+        return diff(project, fileFilter, type, noRenames, renameLimit, commitA, commitB, false).send(new StringUnmarshaller());
+    }
+
+    @Override
+    public Promise<String> diff(DevMachine devMachine,
+                                Path project,
+                                List<String> files,
+                                DiffType type,
+                                boolean noRenames,
+                                int renameLimit,
+                                String commitA,
+                                boolean cached) {
+        return diff(project, files, type, noRenames, renameLimit, commitA, null, cached).send(new StringUnmarshaller());
+    }
+
+    private AsyncRequest diff(Path project,
+                              List<String> fileFilter,
+                              DiffType type,
+                              boolean noRenames,
+                              int renameLimit,
+                              String commitA,
+                              String commitB,
+                              boolean cached) {
         StringBuilder params = new StringBuilder().append("?projectPath=").append(project.toString());
         if (fileFilter != null) {
             for (String file : fileFilter) {
+                if (file.isEmpty()) {
+                    continue;
+                }
                 params.append("&fileFilter=").append(file);
             }
         }
         params.append("&diffType=").append(type);
-        params.append("&noRenames=").append(String.valueOf(noRenames));
-        params.append("&renameLimit=").append(String.valueOf(renameLimit));
+        params.append("&noRenames=").append(noRenames);
+        params.append("&renameLimit=").append(renameLimit);
         params.append("&commitA=").append(commitA);
-        params.append("&commitB=").append(commitB);
+        if (commitB != null) {
+            params.append("&commitB=").append(commitB);
+        }
+        params.append("&cached=").append(cached);
 
         String url = appContext.getDevMachine().getWsAgentBaseUrl() + DIFF + params;
-
-        return asyncRequestFactory.createGetRequest(url).loader(loader).send(new StringUnmarshaller());
+        return asyncRequestFactory.createGetRequest(url).loader(loader);
     }
 
     @Override
@@ -830,65 +865,6 @@ public class GitServiceClientImpl implements GitServiceClient {
         return asyncRequestFactory.createGetRequest(url)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(ShowFileContentResponse.class));
-    }
-
-    @Override
-    public void diff(DevMachine devMachine,
-                     ProjectConfigDto project,
-                     List<String> fileFilter,
-                     DiffType type,
-                     boolean noRenames,
-                     int renameLimit,
-                     String commitA,
-                     boolean cached,
-                     AsyncRequestCallback<String> callback) {
-        StringBuilder params = new StringBuilder().append("?projectPath=").append(project.getPath());
-        if (fileFilter != null) {
-            for (String file : fileFilter) {
-                if (file.isEmpty()) {
-                    continue;
-                }
-                params.append("&fileFilter=").append(file);
-            }
-        }
-        params.append("&diffType=").append(type);
-        params.append("&noRenames=").append(noRenames);
-        params.append("&renameLimit=").append(renameLimit);
-        params.append("&commitA=").append(commitA);
-        params.append("&cached=").append(cached);
-
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + DIFF + params;
-
-        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
-    }
-
-    @Override
-    public Promise<String> diff(DevMachine devMachine,
-                                Path project,
-                                List<String> files,
-                                DiffType type,
-                                boolean noRenames,
-                                int renameLimit,
-                                String commitA,
-                                boolean cached) {
-        StringBuilder params = new StringBuilder().append("?projectPath=").append(project.toString());
-        if (files != null) {
-            for (String file : files) {
-                if (file.isEmpty()) {
-                    continue;
-                }
-                params.append("&fileFilter=").append(file);
-            }
-        }
-        params.append("&diffType=").append(type);
-        params.append("&noRenames=").append(noRenames);
-        params.append("&renameLimit=").append(renameLimit);
-        params.append("&commitA=").append(commitA);
-        params.append("&cached=").append(cached);
-
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + DIFF + params;
-
-        return asyncRequestFactory.createGetRequest(url).loader(loader).send(new StringUnmarshaller());
     }
     
     @Override

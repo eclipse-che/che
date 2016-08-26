@@ -11,6 +11,7 @@
 package org.eclipse.che.api.git;
 
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.git.exception.GitException;
 import org.eclipse.che.api.git.params.AddParams;
 import org.eclipse.che.api.git.params.CheckoutParams;
@@ -157,10 +158,11 @@ public class GitService {
     @GET
     @Path("branch")
     @Produces({MediaType.APPLICATION_JSON})
-    public GenericEntity<List<Branch>> branchList(@QueryParam("listMode") String listMode) throws ApiException {
+    public List<Branch> branchList(@QueryParam("listMode") String listMode) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
-            return new GenericEntity<List<Branch>>(gitConnection.branchList(listMode == null ? null : BranchListMode.valueOf(listMode))) {
-            };
+            return gitConnection.branchList(listMode == null ? null : BranchListMode.valueOf(listMode));
+        } catch (IllegalArgumentException exception) {
+            throw new BadRequestException(exception.getMessage());
         }
     }
 
@@ -305,7 +307,7 @@ public class GitService {
     }
 
     @POST
-    @Path("mv")
+    @Path("move")
     @Consumes(MediaType.APPLICATION_JSON)
     public void mv(MoveRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {
@@ -314,7 +316,7 @@ public class GitService {
     }
 
     @POST
-    @Path("rm")
+    @Path("remove")
     @Consumes(MediaType.APPLICATION_JSON)
     public void rm(RmRequest request) throws ApiException {
         try (GitConnection gitConnection = getGitConnection()) {

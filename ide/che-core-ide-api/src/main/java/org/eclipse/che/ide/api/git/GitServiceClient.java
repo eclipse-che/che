@@ -1078,23 +1078,10 @@ public interface GitServiceClient {
      *         current machine
      * @param project
      *         project (root of GIT repository)
-     * @deprecated use {@link #status(DevMachine, ProjectConfig)}
-     */
-    @Deprecated
-    void status(DevMachine devMachine, ProjectConfigDto project, AsyncRequestCallback<Status> callback);
-
-    /**
-     * Returns the current working tree status.
-     *
-     * @param devMachine
-     *         current machine
-     * @param project
-     *         the project.
-     * @return the promise which either resolves working tree status or rejects with an error
      * @deprecated use {@link #getStatus(DevMachine, Path)}
      */
     @Deprecated
-    Promise<Status> status(DevMachine devMachine, ProjectConfig project);
+    void status(DevMachine devMachine, ProjectConfigDto project, AsyncRequestCallback<Status> callback);
 
     /**
      * Returns the current working tree status.
