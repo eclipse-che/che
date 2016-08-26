@@ -13,6 +13,7 @@
 import {DashboardController} from './dashboard.controller';
 import {DashboardLastWorkspacesController} from './last-workspaces/last-workspaces.controller';
 import {DashboardLastWorkspaces} from './last-workspaces/last-workspaces.directive';
+import {DashboardPanel} from './dashboard-panel/dashboard-panel.directive';
 
 export class DashboardConfig {
 
@@ -24,6 +25,9 @@ export class DashboardConfig {
 
     // controller
     register.controller('DashboardController', DashboardController);
+
+    // panel of last used entries
+    register.directive('dashboardPanel', DashboardPanel);
 
     // config routes
     register.app.config(($routeProvider) => {
