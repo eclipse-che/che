@@ -21,6 +21,7 @@ import {CheButtonDropdownCtrl} from './button-dropdown/che-button-dropdown.contr
 import {CheButtonDropdown} from './button-dropdown/che-button-dropdown.directive';
 import {CheClipboard} from './copy-clipboard/che-clipboard.directive';
 import {CheCompile} from './compile/che-compile.directive';
+import {CheDescription} from './description/che-description.directive';
 import {CheDropZoneCtrl} from './dropzone/che-dropzone.controller';
 import {CheDropZone} from './dropzone/che-dropzone.directive';
 import {CheEmptyState} from './empty-state/che-empty-state.directive';
@@ -37,6 +38,8 @@ import {CheLearnMoreTemplate} from './learn-more/che-learn-more-template.directi
 import {CheLink} from './link/che-link.directive';
 import {CheList} from './list/che-list.directive';
 import {CheListItem} from './list/che-list-item.directive';
+import {CheListHeader} from './list/che-list-header.directive';
+import {CheListHeaderColumn} from './list/che-list-header-column.directive';
 import {CheListTitle} from './list/che-list-title.directive';
 import {CheListItemChecked} from './list/che-list-item-checked.directive';
 import {CheLoader} from './loader/che-loader.directive';
@@ -78,6 +81,7 @@ export class WidgetConfig {
       //clipboard
       .directive('cheClipboard', CheClipboard)
       .directive('cheCompile', CheCompile)
+      .directive('cheDescription', CheDescription)
       //dropzone
       .controller('CheDropZoneCtrl', CheDropZoneCtrl)
       .directive('cheDropzone', CheDropZone)
@@ -100,6 +104,8 @@ export class WidgetConfig {
       .directive('cheListTitle', CheListTitle)
       .directive('cheList', CheList)
       .directive('cheListItem', CheListItem)
+      .directive('cheListHeader', CheListHeader)
+      .directive('cheListHeaderColumn', CheListHeaderColumn)
 
       .directive('cheLoader', CheLoader)
       .directive('cheLoaderCrane', CheLoaderCrane)

@@ -5,11 +5,93 @@
 .che-list-item:hover
   background-color $hover-on-list-color
 
-.che-list-item:not(:last-child)
-  border-bottom 1px solid $list-separator-color
-
-div:not(:last-of-type) > .che-list-item
+.che-list-item
   border-bottom 1px solid $list-separator-color
 
 .che-list-item-content
+  line-height 40px
+  overflow hidden
   width 100%
+
+.che-list-item-content *:not(.tooltip)
+  overflow inherit
+  text-overflow ellipsis
+  white-space normal
+
+.che-list-item-content *.tooltip
+  color $white-color
+  overflow visible
+
+.che-list-item-row
+  min-height 40px
+
+.che-list-item-row *
+  outline none
+
+.che-list-item-details
+  line-height inherit
+  font-size 12px
+  cursor pointer
+
+  & .che-xs-header
+    display inline-block
+    float left
+    text-transform uppercase
+    vertical-align middle
+    color $primary-color
+    min-width 65px
+    max-width 65px
+
+.che-list-item-name
+  color $label-primary-color
+
+  .tooltip.top
+    color $white-color
+    margin-top 10px
+
+  & > *
+    display inline-block
+    font-size 12px
+    float left
+
+  .spinner > *
+    float left
+
+.che-list-actions
+  margin-right 10px
+  display inline-block
+  vertical-align middle
+  color $list-action-color
+
+  *
+    text-decoration none
+    color inherit
+
+  & > *:hover
+    color $list-action-hover-color
+
+  & > *:not(.tooltip)
+    display inline-block
+    float left
+    width 16px
+    height 16px
+    max-width 16px
+    max-height 16px
+    line-height 16px
+    margin-right 10px
+
+  .tooltip
+    color $white-color
+
+  *:before
+    font-size 16px
+
+.che-list-empty
+  width 100%
+  text-align center
+  float left
+
+  *
+    font-size 14px
+    line-height 60px
+    color $label-info-color

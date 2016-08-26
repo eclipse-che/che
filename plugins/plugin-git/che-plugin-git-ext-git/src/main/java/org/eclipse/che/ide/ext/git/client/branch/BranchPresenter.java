@@ -14,23 +14,23 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.CheckoutRequest;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
-import org.eclipse.che.ide.api.dialogs.InputCallback;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -57,7 +57,7 @@ public class BranchPresenter implements BranchView.ActionDelegate {
     private final DtoFactory              dtoFactory;
     private final BranchView              view;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
     private final DialogFactory           dialogFactory;
     private final GitServiceClient        service;
     private final GitLocalizationConstant constant;
@@ -76,12 +76,12 @@ public class BranchPresenter implements BranchView.ActionDelegate {
                            AppContext appContext,
                            NotificationManager notificationManager,
                            GitOutputConsoleFactory gitOutputConsoleFactory,
-                           ConsolesPanelPresenter consolesPanelPresenter,
+                           ProcessesPanelPresenter processesPanelPresenter,
                            DialogFactory dialogFactory) {
         this.view = view;
         this.dtoFactory = dtoFactory;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.consolesPanelPresenter = processesPanelPresenter;
         this.dialogFactory = dialogFactory;
         this.view.setDelegate(this);
         this.service = service;

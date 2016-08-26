@@ -12,12 +12,12 @@
 
 /**
  * @ngdoc controller
- * @name workspaces.create.workspace.controller:CreateWorkspaceCtrl
+ * @name workspaces.create.workspace.controller:CreateWorkspaceController
  * @description This class is handling the controller for workspace creation
  * @author Ann Shumilova
  * @author Oleksii Orel
  */
-export class CreateWorkspaceCtrl {
+export class CreateWorkspaceController {
 
   /**
    * Default constructor that is using resource
@@ -195,11 +195,12 @@ export class CreateWorkspaceCtrl {
       // update list of workspaces
       // for new workspace to show in recent workspaces
       this.updateRecentWorkspace(workspaceData.id);
-      this.cheAPI.cheWorkspace.fetchWorkspaces();
 
       let infoMessage = 'Workspace ' + workspaceData.config.name + ' successfully created.';
       this.cheNotification.showInfo(infoMessage);
-      this.$location.path('/workspace/' + workspaceData.namespace + '/' +  workspaceData.config.name);
+      this.cheAPI.cheWorkspace.fetchWorkspaces().then(() => {
+        this.$location.path('/workspace/' + workspaceData.namespace + '/' +  workspaceData.config.name);
+      });
     }, (error) => {
       let errorMessage = error.data.message ? error.data.message : 'Error during workspace creation.';
       this.cheNotification.showError(errorMessage);

@@ -24,7 +24,6 @@ import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.data.tree.settings.NodeSettings;
 import org.eclipse.che.ide.api.data.tree.settings.SettingsProvider;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.HasView;
 import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Container;
@@ -67,7 +66,6 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 @Singleton
 public class ProjectExplorerPresenter extends BasePresenter implements ActionDelegate,
                                                                        ProjectExplorerPart,
-                                                                       HasView,
                                                                        ResourceChangedHandler,
                                                                        MarkerChangedHandler,
                                                                        SyntheticNodeUpdateEvent.SyntheticNodeUpdateHandler {

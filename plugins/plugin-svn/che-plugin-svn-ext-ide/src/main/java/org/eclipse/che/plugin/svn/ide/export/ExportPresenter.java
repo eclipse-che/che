@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
@@ -58,13 +58,13 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
     @Inject
     public ExportPresenter(AppContext appContext,
                            SubversionOutputConsoleFactory consoleFactory,
-                           ConsolesPanelPresenter consolesPanelPresenter,
+                           ProcessesPanelPresenter processesPanelPresenter,
                            ExportView view,
                            SubversionClientService service,
                            NotificationManager notificationManager,
                            SubversionExtensionLocalizationConstants constants,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
         this.appContext = appContext;
         this.view = view;
         this.service = service;

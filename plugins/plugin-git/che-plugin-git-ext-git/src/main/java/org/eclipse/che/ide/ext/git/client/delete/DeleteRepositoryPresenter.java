@@ -16,14 +16,14 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -40,7 +40,7 @@ public class DeleteRepositoryPresenter {
 
     private final GitServiceClient        service;
     private final GitLocalizationConstant constant;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
     private final AppContext              appContext;
     private final NotificationManager     notificationManager;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
@@ -49,13 +49,13 @@ public class DeleteRepositoryPresenter {
     public DeleteRepositoryPresenter(GitServiceClient service,
                                      GitLocalizationConstant constant,
                                      GitOutputConsoleFactory gitOutputConsoleFactory,
-                                     ConsolesPanelPresenter consolesPanelPresenter,
+                                     ProcessesPanelPresenter processesPanelPresenter,
                                      AppContext appContext,
                                      NotificationManager notificationManager) {
         this.service = service;
         this.constant = constant;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.consolesPanelPresenter = processesPanelPresenter;
         this.appContext = appContext;
         this.notificationManager = notificationManager;
     }

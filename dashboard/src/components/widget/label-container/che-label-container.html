@@ -1,9 +1,11 @@
-<div class="che-label-container">
-  <div layout="row" flex layout-align="space-around center" class="che-label-container-row">
-    <label flex="15" class="che-label-container-label">{{labelName}}: </label>
-
-    <div layout="column" flex="85" class="che-label-container-info">
-      <div flex ng-transclude></div>
+<div class="che-label-container" layout="column" flex>
+  <div layout="row" flex layout-align="start start" class="che-label-container-row">
+    <div layout="column" class="che-label-container-label">
+      <label class="che-label-container-label-name">{{labelName}}</label>
+      <div layout="row" class="che-label-container-description" ng-if="labelDescription">
+        <div flex="60">{{labelDescription}}</div>
+      </div>
     </div>
+    <div layout="column" flex class="che-label-container-content" ng-transclude></div>
   </div>
 </div>

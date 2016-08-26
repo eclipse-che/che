@@ -31,7 +31,7 @@ export class CheSelect {
     // scope values
     this.scope = {
       value: '=cheValue',
-      labelName: '@cheLabelName',
+      labelName: '@?cheLabelName',
       placeHolder: '@chePlaceHolder',
       optionValues: '=cheOptionValues'
     };

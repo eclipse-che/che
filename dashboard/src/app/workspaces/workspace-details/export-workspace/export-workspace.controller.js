@@ -26,15 +26,19 @@ export class ExportWorkspaceController {
     this.$mdDialog = $mdDialog;
   }
 
-  showExport($event) {
+  showExport($event, destination) {
     this.$mdDialog.show({
       targetEvent: $event,
       controller: 'ExportWorkspaceDialogController',
       controllerAs: 'exportWorkspaceDialogController',
       bindToController: true,
       clickOutsideToClose: true,
-      locals: {workspaceId: this.workspaceId,
-        workspaceDetails: this.workspaceDetails, callbackController: this},
+      locals: {
+        workspaceId: this.workspaceId,
+        workspaceDetails: this.workspaceDetails,
+        callbackController: this,
+        destination: destination
+      },
       templateUrl: 'app/workspaces/workspace-details/export-workspace/dialog/export-tab-dialog.html'
     });
   }

@@ -1,5 +1,10 @@
 .workspace-status-indicator
   display inline-block
+  line-height inherit
+  width 20px
+
+  & > *
+    display inline
 
   .workspace-status-stopped
     color #d3d3d3 !important
@@ -10,9 +15,14 @@
   .workspace-status-running
     color #46af00 !important
 
+  .workspace-status-spinner
+    display inline-block
+    line-height inherit
+    vertical-align middle
+
   .workspace-status-spinner .spinner
     width 20px
-    height 20px
+    height 22px
     font-size 8px
 
     div

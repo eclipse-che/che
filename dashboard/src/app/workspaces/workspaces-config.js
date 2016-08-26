@@ -12,34 +12,36 @@
 
 import {ListWorkspacesCtrl} from './list-workspaces/list-workspaces.controller';
 import {CheWorkspaceItem} from './list-workspaces/workspace-item/workspace-item.directive';
-import {CreateWorkspaceCtrl} from './create-workspace/create-workspace.controller';
+import {CheWorkspaceStatus} from './list-workspaces/workspace-status-action/workspace-status.directive';
+import {WorkspaceStatusController} from './list-workspaces/workspace-status-action/workspace-status.controller';
+import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive';
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
-import {WorkspaceDetailsCtrl} from './workspace-details/workspace-details.controller';
+import {WorkspaceDetailsController} from './workspace-details/workspace-details.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
-import {WorkspaceDetailsService} from './workspace-details/workspace-details.service.js';
+import {WorkspaceDetailsService} from './workspace-details/workspace-details.service';
 import {ExportWorkspaceController} from './workspace-details/export-workspace/export-workspace.controller';
 import {ExportWorkspace} from './workspace-details/export-workspace/export-workspace.directive';
 import {ExportWorkspaceDialogController} from  './workspace-details/export-workspace/dialog/export-workspace-dialog.controller';
 import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
-import {ReadyToGoStacksCtrl} from './create-workspace/select-stack/ready-to-go-stacks/ready-to-go-stacks.controller';
+import {ReadyToGoStacksController} from './create-workspace/select-stack/ready-to-go-stacks/ready-to-go-stacks.controller';
 import {ReadyToGoStacks} from './create-workspace/select-stack/ready-to-go-stacks/ready-to-go-stacks.directive';
-import {WorkspaceRecipeCtrl} from './create-workspace/select-stack/recipe/workspace-recipe.controller';
+import {WorkspaceRecipeController} from './create-workspace/select-stack/recipe/workspace-recipe.controller';
 import {WorkspaceRecipe} from './create-workspace/select-stack/recipe/workspace-recipe.directive';
 import {CheStackLibrarySelecter} from './create-workspace/select-stack/stack-library/stack-library-selecter/che-stack-library-selecter.directive';
-import {CreateProjectStackLibraryCtrl} from './create-workspace/select-stack/stack-library/create-project-stack-library.controller';
+import {CreateProjectStackLibraryController} from './create-workspace/select-stack/stack-library/create-project-stack-library.controller';
 import {CreateProjectStackLibrary} from './create-workspace/select-stack/stack-library/create-project-stack-library.directive';
-import {WorkspaceSelectStackCtrl} from './create-workspace/select-stack/workspace-select-stack.controller';
+import {WorkspaceSelectStackController} from './create-workspace/select-stack/workspace-select-stack.controller';
 import {WorkspaceSelectStack} from './create-workspace/select-stack/workspace-select-stack.directive';
 
-import {CheWorkspaceRamAllocationSliderCtrl} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
+import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/che-workspace-ram-allocation-slider.controller';
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
 import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
 import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indicator.directive';
 
-import {CheStackLibraryFilterCtrl} from './create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.controller';
+import {CheStackLibraryFilterController} from './create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.controller';
 import {CheStackLibraryFilter}     from './create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.directive';
-import {CreateProjectStackLibrarySelectedStackFilter} from './create-workspace/select-stack/stack-library/create-project-stack-library-selected-stack.filter.js';
+import {CreateProjectStackLibrarySelectedStackFilter} from './create-workspace/select-stack/stack-library/create-project-stack-library-selected-stack.filter';
 
 /**
  * @ngdoc controller
@@ -54,13 +56,16 @@ export class WorkspacesConfig {
     new CreateProjectStackLibrarySelectedStackFilter(register);
 
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);
-    register.controller('CreateWorkspaceCtrl', CreateWorkspaceCtrl);
+    register.controller('CreateWorkspaceController', CreateWorkspaceController);
 
     register.directive('cheWorkspaceItem', CheWorkspaceItem);
     register.controller('WorkspaceItemCtrl', WorkspaceItemCtrl);
     register.directive('usageChart', UsageChart);
 
-    register.controller('WorkspaceDetailsCtrl', WorkspaceDetailsCtrl);
+    register.directive('cheWorkspaceStatus', CheWorkspaceStatus);
+    register.controller('WorkspaceStatusController', WorkspaceStatusController);
+
+    register.controller('WorkspaceDetailsController', WorkspaceDetailsController);
 
     register.controller('WorkspaceDetailsProjectsCtrl', WorkspaceDetailsProjectsCtrl);
     register.directive('workspaceDetailsProjects', WorkspaceDetailsProjects);
@@ -70,33 +75,33 @@ export class WorkspacesConfig {
     register.controller('ExportWorkspaceController', ExportWorkspaceController);
     register.directive('exportWorkspace', ExportWorkspace);
 
-    register.controller('WorkspaceRecipeCtrl', WorkspaceRecipeCtrl);
+    register.controller('WorkspaceRecipeController', WorkspaceRecipeController);
     register.directive('cheWorkspaceRecipe', WorkspaceRecipe);
 
-    register.controller('CheWorkspaceRamAllocationSliderCtrl', CheWorkspaceRamAllocationSliderCtrl);
+    register.controller('CheWorkspaceRamAllocationSliderController', CheWorkspaceRamAllocationSliderController);
     register.directive('cheWorkspaceRamAllocationSlider', CheWorkspaceRamAllocationSlider);
 
     register.directive('workspaceStatus', WorkspaceStatus);
     register.directive('workspaceStatusIndicator', WorkspaceStatusIndicator);
 
-    register.controller('ReadyToGoStacksCtrl', ReadyToGoStacksCtrl);
+    register.controller('ReadyToGoStacksController', ReadyToGoStacksController);
     register.directive('readyToGoStacks', ReadyToGoStacks);
 
-    register.controller('CreateProjectStackLibraryCtrl', CreateProjectStackLibraryCtrl);
+    register.controller('CreateProjectStackLibraryController', CreateProjectStackLibraryController);
 
     register.directive('createProjectStackLibrary', CreateProjectStackLibrary);
     register.directive('cheStackLibrarySelecter', CheStackLibrarySelecter);
 
-    register.controller('WorkspaceSelectStackCtrl', WorkspaceSelectStackCtrl);
+    register.controller('WorkspaceSelectStackController', WorkspaceSelectStackController);
     register.directive('cheWorkspaceSelectStack', WorkspaceSelectStack);
 
-    register.controller('CheStackLibraryFilterCtrl', CheStackLibraryFilterCtrl);
+    register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
 
     let locationProvider = {
       title: (params) => { return params.workspaceName;},
       templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
-      controller: 'WorkspaceDetailsCtrl',
+      controller: 'WorkspaceDetailsController',
       controllerAs: 'workspaceDetailsCtrl'
     }
 
@@ -113,7 +118,7 @@ export class WorkspacesConfig {
       .accessWhen('/create-workspace', {
           title: 'New Workspace',
           templateUrl: 'app/workspaces/create-workspace/create-workspace.html',
-          controller: 'CreateWorkspaceCtrl',
+          controller: 'CreateWorkspaceController',
           controllerAs: 'createWorkspaceCtrl'
         });
     });

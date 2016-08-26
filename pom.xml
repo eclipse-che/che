@@ -681,6 +681,21 @@
                 <version>${che.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-wizard-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-wizard-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-wizard-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-test</artifactId>
                 <version>${che.version}</version>

@@ -21,27 +21,26 @@ export class CheInput {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
+  constructor() {
     this.restrict = 'E';
-    this.replace= true;
-    this.transclude= true;
+    this.replace = true;
+    this.transclude = true;
 
     // we require ngModel as we want to use it inside our directive
     this.require = ['ngModel'];
 
     // scope values
     this.scope = {
-      valueModel : '=ngModel',
-      inputName:'@cheName',
-      labelName:'@cheLabelName',
-      placeHolder:'@chePlaceHolder',
+      valueModel: '=ngModel',
+      inputName: '@cheName',
+      labelName: '@?cheLabelName',
+      placeHolder: '@chePlaceHolder',
       pattern: '@chePattern',
       myForm: '=cheForm',
       isChanged: '&ngChange'
     };
 
   }
-
 
 
   /**
@@ -52,48 +51,53 @@ export class CheInput {
    */
   template(element, attrs) {
 
-      var inputName = attrs.cheName;
-      var labelName = attrs.cheLabelName;
-      var placeHolder = attrs.chePlaceHolder;
-      var pattern = attrs.chePattern;
+    var inputName = attrs.cheName;
+    var labelName = attrs.cheLabelName || '';
+    var placeHolder = attrs.chePlaceHolder;
+    var pattern = attrs.chePattern;
 
-      var template = '<div class="che-input">'
-          + '<md-input-container hide-gt-xs>'
-          + '<label>' + labelName + '</label>'
-          + '<input type="text" name="' + inputName + '"';
-      if (attrs.chePattern) {
-          template = template + ' pattern="' + pattern + '"';
-      }
+    var template = '<div class="che-input">'
+      + '<md-input-container hide-gt-xs ng-class="{\'che-input-mobile-no-label\': !labelName}">'
+      + '<label ng-if="labelName">' + labelName + '</label>'
+      + '<input type="text" name="' + inputName + '"';
+    if (attrs.chePattern) {
+      template = template + ' pattern="' + pattern + '"';
+    }
 
-      template = template + ' ng-trim="false" data-ng-model="valueModel" >'
-          + '<!-- display error messages for the form -->'
-          + '<div ng-messages="myForm.' + inputName + '.$error"></div>'
-          + '</md-input-container>'
-          + ''
-          + '    <div class="che-input-desktop" hide-xs layout="column" flex>'
-          + '<div layout="row" flex layout-align="space-around start">'
-          + ' <label flex="15" class="che-input-desktop-label" ng-if="labelName">' + labelName + ': </label>'
-          + ''
-          + '<div layout="column" class="che-input-desktop-value-column" flex="{{labelName ? 85 : 100}}">'
-          + '<input type="text" placeholder="' + placeHolder + '" ng-trim="false" name="desk' + inputName + '"';
-      if (attrs.chePattern) {
-          template = template + ' pattern="' + pattern + '"';
-      }
+    template = template + ' ng-trim="false" data-ng-model="valueModel" >'
+      + '<md-icon class="fa fa-pencil che-input-icon che-input-icon-xs"></md-icon>'
+      + '<!-- display error messages for the form -->'
+      + '<div ng-messages="myForm.' + inputName + '.$error"></div>'
+      + '</md-input-container>'
+      + ''
+      + '<div class="che-input-desktop" hide-xs layout="column">'
+      + '<div layout="row" layout-align="start start">'
+      + '<label flex="15" class="che-input-desktop-label" ng-if="labelName">' + labelName + ': </label>'
+      + ''
+      + '<div layout="column" class="che-input-desktop-value-column" flex="{{labelName ? 85 : \'none\'}}">'
+      + '<input type="text" placeholder="' + placeHolder + '" ng-trim="false" name="desk' + inputName + '" style="{{labelName ? \'width: 100%\' : \'\'}}"';
+    if (attrs.chePattern) {
+      template = template + ' pattern="' + pattern + '"';
+    }
+    template = template + ' data-ng-model="valueModel">';
 
+    if (attrs.cheWidth === 'auto') {
+      template = template + '<div class="che-input-desktop-hidden-text">{{valueModel ? valueModel : placeHolder}}</div>';
+    }
 
-      template = template + ' data-ng-model="valueModel">'
+    template = template + '<md-icon class="fa fa-pencil che-input-icon"></md-icon>'
       + '<!-- display error messages for the form -->'
       + '<div ng-messages="myForm.desk' + inputName + '.$error" ng-transclude></div>'
       + '</div>'
       + '</div>'
-      + ' </div>'
+      + '</div>'
       + '</div>';
 
-      return template;
+    return template;
   }
 
 
-    compile(element, attrs) {
+  compile(element, attrs) {
 
     var keys = Object.keys(attrs);
 
@@ -158,7 +162,9 @@ export class CheInput {
    * Keep reference to the model controller
    */
   link($scope, element, attr) {
-    $scope.$watch(function() { return element.is(':visible'); }, function() {
+    $scope.$watch(function () {
+      return element.is(':visible');
+    }, function () {
       //Since there are two inputs (for mobile and desktop versions) - add id attr only for visible one:
       if (attr.id) {
         element.find('input:hidden').removeAttr('id');

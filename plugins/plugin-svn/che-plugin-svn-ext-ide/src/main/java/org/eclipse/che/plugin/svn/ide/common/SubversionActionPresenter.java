@@ -13,7 +13,7 @@ package org.eclipse.che.plugin.svn.ide.common;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.action.SubversionAction;
@@ -27,17 +27,17 @@ import java.util.List;
 public class SubversionActionPresenter {
 
     protected final AppContext                     appContext;
-    private final SubversionOutputConsoleFactory consoleFactory;
-    private final ConsolesPanelPresenter         consolesPanelPresenter;
-    private final StatusColors                   statusColors;
+    private final   SubversionOutputConsoleFactory consoleFactory;
+    private final   ProcessesPanelPresenter        consolesPanelPresenter;
+    private final   StatusColors                   statusColors;
 
     protected SubversionActionPresenter(AppContext appContext,
                                         SubversionOutputConsoleFactory consoleFactory,
-                                        ConsolesPanelPresenter consolesPanelPresenter,
+                                        ProcessesPanelPresenter processesPanelPresenter,
                                         StatusColors statusColors) {
         this.appContext = appContext;
         this.consoleFactory = consoleFactory;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.consolesPanelPresenter = processesPanelPresenter;
         this.statusColors = statusColors;
     }
 

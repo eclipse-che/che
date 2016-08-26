@@ -108,9 +108,6 @@ class CreateWorkspaceViewImpl extends Window implements CreateWorkspaceView, Rec
 
         setTitle(locale.createWsTitle());
 
-        hideCrossButton();
-        setHideOnEscapeEnabled(false);
-
         wsName.setText(locale.createWsDefaultName());
 
         predefinedRecipes.getElement().setPropertyString("placeholder", locale.placeholderChoosePredefined());

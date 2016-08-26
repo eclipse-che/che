@@ -40,21 +40,32 @@ check_docker() {
 
 init_global_variables() {
 
-  CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
-  CHE_SERVER_IMAGE_NAME="codenvy/che-server"
-  CHE_FILE_IMAGE_NAME="codenvy/che-file"
-  CHE_MOUNT_IMAGE_NAME="codenvy/che-mount"
-  CHE_TEST_IMAGE_NAME="codenvy/che-test"
+  # Name used in INFO statements
+  DEFAULT_CHE_PRODUCT_NAME="ECLIPSE CHE"
 
-  CHE_LAUNCHER_CONTAINER_NAME="che-launcher"
-  CHE_SERVER_CONTAINER_NAME="che-server"
-  CHE_FILE_CONTAINER_NAME="che-file"
-  CHE_MOUNT_CONTAINER_NAME="che-mount"
-  CHE_TEST_CONTAINER_NAME="che-test"
+  # Name used in CLI statements
+  DEFAULT_CHE_MINI_PRODUCT_NAME="che"
 
-  # User configurable variables
+  DEFAULT_CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
+  DEFAULT_CHE_SERVER_IMAGE_NAME="codenvy/che-server"
+  DEFAULT_CHE_DIR_IMAGE_NAME="codenvy/che-dir"
+  DEFAULT_CHE_MOUNT_IMAGE_NAME="codenvy/che-mount"
+  DEFAULT_CHE_ACTION_IMAGE_NAME="codenvy/che-action"
+  DEFAULT_CHE_TEST_IMAGE_NAME="codenvy/che-test"
+  DEFAULT_CHE_SERVER_CONTAINER_NAME="che-server"
   DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
+
+  CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
+  CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
+  CHE_LAUNCHER_IMAGE_NAME=${CHE_LAUNCHER_IMAGE_NAME:-${DEFAULT_CHE_LAUNCHER_IMAGE_NAME}}
+  CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME:-${DEFAULT_CHE_SERVER_IMAGE_NAME}}
+  CHE_DIR_IMAGE_NAME=${CHE_DIR_IMAGE_NAME:-${DEFAULT_CHE_DIR_IMAGE_NAME}}
+  CHE_MOUNT_IMAGE_NAME=${CHE_MOUNT_IMAGE_NAME:-${DEFAULT_CHE_MOUNT_IMAGE_NAME}}
+  CHE_ACTION_IMAGE_NAME=${CHE_ACTION_IMAGE_NAME:-${DEFAULT_CHE_ACTION_IMAGE_NAME}}
+  CHE_TEST_IMAGE_NAME=${CHE_TEST_IMAGE_NAME:-${DEFAULT_CHE_TEST_IMAGE_NAME}}
+
+  CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}
 
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
@@ -65,19 +76,30 @@ init_global_variables() {
   GLOBAL_GET_DOCKER_HOST_IP=$(get_docker_host_ip)
 
   USAGE="
-Usage: che [COMMAND]
-           start                              Starts Che server
-           stop                               Stops Che server
-           restart                            Restart Che server
+Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
+           start                              Starts ${CHE_MINI_PRODUCT_NAME} server
+           stop                               Stops ${CHE_MINI_PRODUCT_NAME} server
+           restart                            Restart ${CHE_MINI_PRODUCT_NAME} server
            update                             Pulls specific version, respecting CHE_VERSION
+           profile add <name>                 Add a profile to ~/.che/ 
+           profile set <name>                 Set this profile as the default for ${CHE_MINI_PRODUCT_NAME} CLI
+           profile unset                      Removes the default profile - leaves it unset
+           profile rm <name>                  Remove this profile from ~/.che/
+           profile update <name>              Update profile in ~/.che/
+           profile info <name>                Print the profile configuration
+           profile list                       List available profiles
            mount <local-path> <ws-ssh-port>   Synchronize workspace to a local directory
-           init                               Initialize directory with Che configuration
-           up                                 Create workspace from source in current directory
+           dir init                           Initialize directory with ${CHE_MINI_PRODUCT_NAME} configuration
+           dir up                             Create workspace from source in current directory
+           dir down                           Stop workspace running in current directory
+           dir status                         Display status of ${CHE_MINI_PRODUCT_NAME} in current directory
+           action <action-name> [--help]      Start action on ${CHE_MINI_PRODUCT_NAME} instance
+           test <test-name> [--help]          Start test on ${CHE_MINI_PRODUCT_NAME} instance
            info [ --all                       Run all debugging tests
-                  --server                    Run Che launcher and server debugging tests
-                  --networking                Test connectivity between Che sub-systems
-                  --cli                       Print CLI (this program)debugging info
-                  --create [<url>]            Test creating a workspace and project in Che
+                  --server                    Run ${CHE_MINI_PRODUCT_NAME} launcher and server debugging tests
+                  --networking                Test connectivity between ${CHE_MINI_PRODUCT_NAME} sub-systems
+                  --cli                       Print CLI (this program) debugging info
+                  --create [<url>]            Test creating a workspace and project in ${CHE_MINI_PRODUCT_NAME}
                            [<user>] 
                            [<pass>] ]
 "
@@ -104,7 +126,7 @@ parse_command_line () {
     CHE_CLI_ACTION="help"
   else
     case $1 in
-      start|stop|restart|update|info|init|up|mount|test|help|-h|--help)
+      start|stop|restart|update|info|profile|action|dir|mount|test|help|-h|--help)
         CHE_CLI_ACTION=$1
       ;;
       *)
@@ -121,6 +143,14 @@ docker_exec() {
   else
     "$(which docker)" "$@"
   fi
+}
+
+docker_run() {
+  docker_exec run --rm -it -v /var/run/docker.sock:/var/run/docker.sock \
+                  --env-file=$(get_list_of_che_system_environment_variables) "$@"
+
+  # Remove temporary file -- only due to POSIX weirdness with --env-file
+  rm -rf "tmp" > /dev/null 2>&1
 }
 
 get_docker_host_ip() {
@@ -205,7 +235,11 @@ has_docker_for_windows_client(){
 }
 
 get_full_path() {
-  echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+  # "/some/path" => /some/path
+  OUTPUT_PATH=${1//\"}
+
+  # create full directory path
+  echo "$(cd "$(dirname "${OUTPUT_PATH}")"; pwd)/$(basename "$1")"
 }
 
 convert_windows_to_posix() {
@@ -226,11 +260,13 @@ get_clean_path() {
 }
 
 get_mount_path() {
-  FULL_PATH=$(get_full_path $1)
-  POSIX_PATH=$(convert_windows_to_posix $FULL_PATH)
-  echo $(get_clean_path $POSIX_PATH)
-}
+  FULL_PATH=$(get_full_path "${1}")
 
+  POSIX_PATH=$(convert_windows_to_posix "${FULL_PATH}")
+
+  CLEAN_PATH=$(get_clean_path "${POSIX_PATH}")
+  echo $CLEAN_PATH
+}
 
 has_docker_for_windows_ip() {
   if [ "${GLOBAL_GET_DOCKER_HOST_IP}" = "10.0.75.2" ]; then
@@ -255,27 +291,32 @@ get_list_of_che_system_environment_variables() {
   DOCKER_ENV="tmp"
   RETURN=""
 
-  CHE_VARIABLES=$(env | grep CHE_)
+  if has_default_profile; then
+    cat ~/.che/${CHE_PROFILE} >> $DOCKER_ENV
+    RETURN=$DOCKER_ENV
+  else
+    CHE_VARIABLES=$(env | grep CHE_)
 
-  if [ ! -z ${CHE_VARIABLES+x} ]; then
-    env | grep CHE_ >> $DOCKER_ENV
-    RETURN="--env-file=$DOCKER_ENV"
-  fi
+    if [ ! -z ${CHE_VARIABLES+x} ]; then
+      env | grep CHE_ >> $DOCKER_ENV
+      RETURN=$DOCKER_ENV
+    fi
 
-  # Add in known proxy variables
-  if [ ! -z ${http_proxy+x} ]; then
-    echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
-    RETURN="--env-file=$DOCKER_ENV"
-  fi
+    # Add in known proxy variables
+    if [ ! -z ${http_proxy+x} ]; then
+      echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
+      RETURN=$DOCKER_ENV
+    fi
 
-  if [ ! -z ${https_proxy+x} ]; then
-    echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
-    RETURN="--env-file=$DOCKER_ENV"
-  fi
+    if [ ! -z ${https_proxy+x} ]; then
+      echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
+      RETURN=$DOCKER_ENV
+    fi
 
-  if [ ! -z ${no_proxy+x} ]; then
-    echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
-    RETURN="--env-file=$DOCKER_ENV"
+    if [ ! -z ${no_proxy+x} ]; then
+      echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
+      RETURN=$DOCKER_ENV
+    fi
   fi
 
   echo $RETURN
@@ -285,51 +326,36 @@ check_current_image_and_update_if_not_found() {
 
   CURRENT_IMAGE=$(docker images -q "$1":"${CHE_VERSION}")
 
-  if [ "${CURRENT_IMAGE}" != "" ]; then
-    info "ECLIPSE CHE: FOUND IMAGE $1:${CHE_VERSION}"
-  else
+  if [ "${CURRENT_IMAGE}" == "" ]; then
     update_che_image $1
   fi
 }
 
 execute_che_launcher() {
-
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
-
-  info "ECLIPSE CHE: LAUNCHING LAUNCHER"
-  docker_exec run -t --rm --name "${CHE_LAUNCHER_CONTAINER_NAME}" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    $(get_list_of_che_system_environment_variables) \
-    "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
-
-  # Remove temporary file
-  rm -rf "tmp" > /dev/null 2>&1
+  docker_run "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
 }
 
-execute_che_file() {
-
-  check_current_image_and_update_if_not_found ${CHE_FILE_IMAGE_NAME}
-  info "ECLIPSE CHE FILE: LAUNCHING CONTAINER"
-
+execute_che_dir() {
+  check_current_image_and_update_if_not_found ${CHE_DIR_IMAGE_NAME}
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
-  docker_exec run -it --rm --name "${CHE_FILE_CONTAINER_NAME}" \
-         -v /var/run/docker.sock:/var/run/docker.sock \
-         -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" \
-         "${CHE_FILE_IMAGE_NAME}":"${CHE_VERSION}" \
-         "${CURRENT_DIRECTORY}" "${CHE_CLI_ACTION}"
-    # > /dev/null 2>&1
+  docker_run -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
 }
+
+execute_che_action() {
+  check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME}
+  docker_run "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+}
+
 
 update_che_image() {
   if [ -z "${CHE_VERSION}" ]; then
     CHE_VERSION=${DEFAULT_CHE_VERSION}
   fi
 
-  info "ECLIPSE CHE: PULLING IMAGE $1:${CHE_VERSION}"
-  info ""
+  info "${CHE_PRODUCT_NAME}: Pulling image $1:${CHE_VERSION}"
   docker pull $1:${CHE_VERSION}
-  info ""
-  info "ECLIPSE CHE: IMAGE $1:${CHE_VERSION} INSTALLED"
+  echo ""
 }
 
 mount_local_directory() {
@@ -338,7 +364,7 @@ mount_local_directory() {
     return
   fi
 
-  MOUNT_PATH=$(get_mount_path $2)
+  MOUNT_PATH=$(get_mount_path "${2}")
 
   if [ ! -e "${MOUNT_PATH}" ]; then
     error "che mount: Path provided does not exist."
@@ -350,11 +376,10 @@ mount_local_directory() {
     return
   fi
 
-  docker_exec run --rm -it --cap-add SYS_ADMIN \
-                  --device /dev/fuse \
-                  --name "${CHE_MOUNT_CONTAINER_NAME}" \
-                  -v "${MOUNT_PATH}":/mnthost \
-                  "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
+  docker_run --cap-add SYS_ADMIN \
+              --device /dev/fuse \
+              -v "${MOUNT_PATH}":/mnthost \
+              "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
 }
 
 execute_che_debug() {
@@ -370,7 +395,7 @@ execute_che_debug() {
       print_che_cli_debug
       execute_che_launcher
       run_connectivity_tests
-      execute_che_test "$@"
+      execute_che_test post-flight-check "$@"
     ;;
     --cli|-cli)
       print_che_cli_debug
@@ -380,7 +405,6 @@ execute_che_debug() {
     ;;
     --server|-server)
       print_che_cli_debug
-      info ""
       execute_che_launcher
     ;;
     --create|-create)
@@ -390,22 +414,21 @@ execute_che_debug() {
       debug "Unknown debug flag passed: $2. Exiting."
     ;;
   esac
-
 }
 
-execute_che_test() {
 
-  docker_exec run --rm -it --name "${CHE_TEST_CONTAINER_NAME}" \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
-                  "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+execute_che_test() {
+  check_current_image_and_update_if_not_found ${CHE_TEST_IMAGE_NAME}
+  docker_run "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
 }
 
 print_che_cli_debug() {
   debug "---------------------------------------"
-  debug "---------  CHE CLI DEBUG INFO  --------"
+  debug "---------    CLI DEBUG INFO    --------"
   debug "---------------------------------------"
   debug ""
   debug "---------  PLATFORM INFO  -------------"
+  debug "CLI DEFAULT PROFILE       = $(has_default_profile && echo $(get_default_profile) || echo "not set")"
   debug "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
   debug "DOCKER_HOST_IP            = ${GLOBAL_GET_DOCKER_HOST_IP}"
   debug "IS_DOCKER_FOR_WINDOWS     = $(is_docker_for_windows && echo "YES" || echo "NO")"
@@ -415,16 +438,12 @@ print_che_cli_debug() {
   debug "HAS_DOCKER_FOR_WINDOWS_IP = $(has_docker_for_windows_ip && echo "YES" || echo "NO")"
   debug "IS_MOBY_VM                = $(is_moby_vm && echo "YES" || echo "NO")"
   debug ""
-  debug "---------------------------------------"
-  debug "---------------------------------------"
-  debug "---------------------------------------"
-  # Clenaup from any previous lingering tests
 }
 
 run_connectivity_tests() {
   debug ""
   debug "---------------------------------------"
-  debug "-------- CHE CONNECTIVITY TEST --------"
+  debug "--------   CONNECTIVITY TEST   --------"
   debug "---------------------------------------"
   # Start a fake workspace agent
   docker_exec run -d -p 12345:80 --name fakeagent alpine httpd -f -p 80 -h /etc/ > /dev/null
@@ -488,6 +507,191 @@ run_connectivity_tests() {
   docker rm -f fakeagent > /dev/null
 }
 
+execute_profile(){
+
+  if [ ! $# -ge 2 ]; then 
+    error ""
+    error "${CHE_MINI_PRODUCT_NAME} profile: Wrong number of arguments."
+    error ""
+    return
+  fi
+
+  case ${2} in
+    add|rm|set|info|update)
+    if [ ! $# -eq 3 ]; then 
+      error ""
+      error "${CHE_MINI_PRODUCT_NAME} profile: Wrong number of arguments."
+      error ""
+      return
+    fi
+    ;;
+    unset|list)
+    if [ ! $# -eq 2 ]; then 
+      error ""
+      error "${CHE_MINI_PRODUCT_NAME} profile: Wrong number of arguments."
+      error ""
+      return
+    fi
+    ;;
+  esac
+
+  case ${2} in
+    add)
+      if [ -f ~/.che/profiles/"${3}" ]; then
+        error ""
+        error "Profile ~/.che/profiles/${3} already exists. Nothing to do. Exiting."
+        error ""
+        return
+      fi
+
+      test -d ~/.che/profiles || mkdir -p ~/.che/profiles
+      touch ~/.che/profiles/"${3}"
+
+      echo "CHE_PRODUCT_NAME=$CHE_PRODUCT_NAME" > ~/.che/profiles/"${3}"
+      echo "CHE_MINI_PRODUCT_NAME=$CHE_MINI_PRODUCT_NAME" > ~/.che/profiles/"${3}"
+      echo "CHE_LAUNCHER_IMAGE_NAME=$CHE_LAUNCHER_IMAGE_NAME" > ~/.che/profiles/"${3}"
+      echo "CHE_SERVER_IMAGE_NAME=$CHE_SERVER_IMAGE_NAME" >> ~/.che/profiles/"${3}"
+      echo "CHE_DIR_IMAGE_NAME=$CHE_DIR_IMAGE_NAME" >> ~/.che/profiles/"${3}"
+      echo "CHE_MOUNT_IMAGE_NAME=$CHE_MOUNT_IMAGE_NAME" >> ~/.che/profiles/"${3}"
+      echo "CHE_TEST_IMAGE_NAME=$CHE_TEST_IMAGE_NAME" >> ~/.che/profiles/"${3}"
+      echo "CHE_SERVER_CONTAINER_NAME=$CHE_SERVER_CONTAINER_NAME" >> ~/.che/profiles/"${3}"
+
+      # Add all other variables to the profile
+      env | grep CHE_ >> ~/.che/profiles/"${3}"
+
+      # Remove duplicates, if any
+      cat ~/.che/profiles/"${3}" | sort | uniq > ~/.che/profiles/tmp
+      mv -f ~/.che/profiles/tmp ~/.che/profiles/"${3}"
+
+
+      info ""
+      info "Added new ${CHE_MINI_PRODUCT_NAME} CLI profile ~/.che/profiles/${3}."
+      info ""
+    ;;
+    update)
+      if [ ! -f ~/.che/profiles/"${3}" ]; then
+        error ""
+        error "Profile ~/.che/profiles/${3} does not exist. Nothing to update. Exiting."
+        error ""
+        return
+      fi
+
+      execute_profile profile rm "${3}"
+      execute_profile profile add "${3}"
+    ;;
+    rm)
+      if [ ! -f ~/.che/profiles/"${3}" ]; then
+        error ""
+        error "Profile ~/.che/profiles/${3} does not exist. Nothing to do. Exiting."
+        error ""
+        return
+      fi
+
+      rm ~/.che/profiles/"${3}" > /dev/null
+
+      info ""
+      info "Removed ${CHE_MINI_PRODUCT_NAME} CLI profile ~/.che/profiles/${3}."
+      info ""
+    ;;
+    info)
+      if [ ! -f ~/.che/profiles/"${3}" ]; then
+        error ""
+        error "Profile ~/.che/profiles/${3} does not exist. Nothing to do. Exiting."
+        error ""
+        return
+      fi
+ 
+
+      debug "---------------------------------------"
+      debug "---------   CLI PROFILE INFO   --------"
+      debug "---------------------------------------"
+      debug ""
+      debug "Profile ~/.che/profiles/${3} contains:"
+      while IFS= read line
+      do
+        # display $line or do somthing with $line
+        debug "$line"
+      done <~/.che/profiles/"${3}"
+    ;;
+    set)
+      if [ ! -f ~/.che/profiles/"${3}" ]; then
+        error ""
+        error "Profile ~/.che/${3} does not exist. Nothing to do. Exiting."
+        error ""
+        return
+      fi
+      
+      echo "CHE_PROFILE=${3}" > ~/.che/profiles/.profile
+
+      info ""
+      info "Set active ${CHE_MINI_PRODUCT_NAME} CLI profile to ~/.che/profiles/${3}."
+      info ""
+    ;;
+    unset)
+      if [ ! -f ~/.che/profiles/.profile ]; then
+        error ""
+        error "Default profile not set. Nothing to do. Exiting."
+        error ""
+        return
+      fi
+      
+      rm -rf ~/.che/profiles/.profile
+
+      info ""
+      info "Unset the default ${CHE_MINI_PRODUCT_NAME} CLI profile. No profile currently set."
+      info ""
+    ;;
+    list)
+      if [ -d ~/.che ]; then
+        info "Available ${CHE_MINI_PRODUCT_NAME} CLI profiles:"
+        ls ~/.che/profiles
+      else
+        info "No ${CHE_MINI_PRODUCT_NAME} CLI profiles currently set."
+      fi
+
+      if has_default_profile; then
+        info "Default profile set to:"
+        get_default_profile
+      else
+        info "Default profile currently unset."
+      fi
+    ;;
+  esac
+}
+
+has_default_profile() {
+  if [ -f ~/.che/profiles/.profile ]; then
+    return 0
+  else 
+    return 1
+  fi 
+}
+
+get_default_profile() {
+  if [ has_default_profile ]; then
+    source ~/.che/profiles/.profile
+    echo "${CHE_PROFILE}"
+  else
+    echo ""
+  fi
+}
+
+load_profile() {
+  if has_default_profile; then
+
+    source ~/.che/profiles/.profile
+
+    if [ ! -f ~/.che/profiles/"${CHE_PROFILE}" ]; then
+      error ""
+      error "${CHE_MINI_PRODUCT_NAME} CLI profile set in ~/.che/profiles/.profile to '${CHE_PROFILE}' but ~/.che/profiles/${CHE_PROFILE} does not exist."
+      error ""
+      return
+    fi
+
+    source ~/.che//profiles/"${CHE_PROFILE}"
+  fi
+}
+
 # See: https://sipb.mit.edu/doc/safe-shell/
 set -e
 set -u
@@ -497,29 +701,54 @@ init_global_variables
 parse_command_line "$@"
 
 if is_boot2docker; then
-  debug "Boot2docker detected - limited mounting"
-  debug "Host OS -> Che folder mapping disabled"
-  debug "Consider Docker for Mac or Windows to activate mounting"
+  debug ""
+  debug "!!! Boot2docker detected - save workspaces only in %userprofile% !!!"
   debug ""
 fi
 
 case ${CHE_CLI_ACTION} in
   start|stop|restart)
+    load_profile
     execute_che_launcher
   ;;
-  init|up)
-    execute_che_file
+  profile)
+    execute_profile "$@"
+  ;;
+  dir)
+    # remove "dir" arg by shifting it
+    shift
+    load_profile
+    execute_che_dir "$@"
+  ;;
+  action)
+    # remove "action" arg by shifting it
+    shift
+    load_profile
+    execute_che_action "$@"
+  ;;
+  test)
+    # remove "test" arg by shifting it
+    shift
+    load_profile
+    execute_che_test "$@"
   ;;
   update)
+    load_profile
     update_che_image ${CHE_LAUNCHER_IMAGE_NAME}
-    update_che_image ${CHE_SERVER_IMAGE_NAME}
     update_che_image ${CHE_MOUNT_IMAGE_NAME}
-    update_che_image ${CHE_FILE_IMAGE_NAME}
+    update_che_image ${CHE_DIR_IMAGE_NAME}
+    update_che_image ${CHE_ACTION_IMAGE_NAME}
+    update_che_image ${CHE_TEST_IMAGE_NAME}
+
+    # Delegate updating che-server to the launcher
+    execute_che_launcher
   ;;
   mount)
+    load_profile
     mount_local_directory "$@"
   ;;
   info)
+    load_profile
     execute_che_debug "$@"
   ;;
   help)

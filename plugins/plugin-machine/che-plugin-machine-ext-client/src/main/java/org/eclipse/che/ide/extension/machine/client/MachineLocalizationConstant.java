@@ -415,6 +415,11 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("consoles.autoScrollButton.tooltip")
     String consolesAutoScrollButtonTooltip();
 
+    @Key("view.processes.title")
+    String viewProcessesTitle();
+
+    @Key("view.processes.tooltip")
+    String viewProcessesTooltip();
 
     @Key("consoles.defaultMode.tooltip")
     String consolesDefaultModeTooltip();
@@ -424,9 +429,6 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("consoles.splitVertically.tooltip")
     String consolesSplitVerticallyTooltip();
-
-    @Key("view.processes.tooltip")
-    String viewProcessesTooltip();
 
     @Key("view.processes.dev.title")
     String viewProcessesDevTitle();

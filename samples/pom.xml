@@ -27,5 +27,6 @@
     <modules>
         <module>sample-plugin-json</module>
         <module>sample-plugin-filetype</module>
+        <module>sample-plugin-wizard</module>
     </modules>
 </project>

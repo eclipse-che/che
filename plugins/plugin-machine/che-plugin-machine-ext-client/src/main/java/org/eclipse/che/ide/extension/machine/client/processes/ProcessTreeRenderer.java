@@ -35,7 +35,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter.SSH_PORT;
+import static org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter.SSH_PORT;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 

@@ -28,7 +28,8 @@ export class CheLabelContainer {
 
     // scope values
     this.scope = {
-      labelName:'@cheLabelName'
+      labelName:'@cheLabelName',
+      labelDescription: '@?cheLabelDescription'
     };
 
   }
