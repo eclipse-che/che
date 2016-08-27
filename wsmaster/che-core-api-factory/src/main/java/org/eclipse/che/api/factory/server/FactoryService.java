@@ -26,13 +26,13 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.factory.server.builder.FactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.AuthorDto;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.user.server.PreferenceManager;
 import org.eclipse.che.api.user.server.UserManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -241,10 +241,12 @@ public class FactoryService extends Service {
     @GET
     @Path("/find")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Get factory by attribute",
+    @ApiOperation(value = "Get factory by attribute, " +
+                          "the attribute must match one of the Factory model fields with type 'String', " +
+                          "e.g. (factory.name, factory.creator.name)",
                   notes = "If specify more than one value for a single query parameter then will be taken the first one")
-    @ApiResponses({@ApiResponse(code = 200, message = "Response contains requested factory entry"),
-                   @ApiResponse(code = 400, message = "Failed to validate factory e.g. when factory expires"),
+    @ApiResponses({@ApiResponse(code = 200, message = "Response contains list requested factories"),
+                   @ApiResponse(code = 400, message = "When query does not contain at least one attribute to search for"),
                    @ApiResponse(code = 500, message = "Internal server error")})
     public List<FactoryDto> getFactoryByAttribute(@DefaultValue("0")
                                                   @QueryParam("skipCount")
@@ -265,10 +267,7 @@ public class FactoryService extends Service {
                                                                                                            .iterator()
                                                                                                            .next()))
                                                                 .collect(toList());
-        if (query.isEmpty()) {
-            throw new BadRequestException("Query must contain at least one attribute");
-        }
-
+        checkArgument(!query.isEmpty(), "Query must contain at least one attribute");
         final List<FactoryDto> factories = new ArrayList<>();
         for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query)) {
             factories.add(injectLinks(asDto(factory), null));
@@ -383,11 +382,8 @@ public class FactoryService extends Service {
                                                             BadRequestException,
                                                             ServerException {
         final String factorySnippet = factoryManager.getFactorySnippet(factoryId, type, uriInfo);
-        if (factorySnippet != null) {
-            return factorySnippet;
-        }
-        LOG.warn("Snippet type {} is unsupported", type);
-        throw new BadRequestException("Snippet type \"" + type + "\" is unsupported.");
+        checkArgument(factorySnippet != null, "Snippet type \"" + type + "\" is unsupported.");
+        return factorySnippet;
     }
 
     @GET
@@ -447,7 +443,6 @@ public class FactoryService extends Service {
                 if (validate) {
                     acceptValidator.validateOnAccept(factory);
                 }
-
                 return injectLinks(factory, null);
             }
         }
@@ -457,7 +452,7 @@ public class FactoryService extends Service {
 
     /**
      * Injects factory links. If factory is named then accept named link will be injected,
-     * if images set is not null and not empty then image links will be injected
+     * if {@code images} is not null and not empty then image links will be injected
      */
     private FactoryDto injectLinks(FactoryDto factory, Set<FactoryImage> images) {
         String username = null;
@@ -474,14 +469,14 @@ public class FactoryService extends Service {
     }
 
     /**
-     * Filters workspace projects, removes projects which don't have location set.
-     * If all workspace projects don't have location throws {@link BadRequestException}.
+     * Filters workspace projects and removes projects without source location.
+     * If there is no at least one project with source location then {@link BadRequestException} will be thrown
      */
-    private void excludeProjectsWithoutLocation(WorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
+    private static void excludeProjectsWithoutLocation(WorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
         final boolean notEmptyPath = projectPath != null;
         //Condition for sifting valid project in user's workspace
         Predicate<ProjectConfig> predicate = projectConfig -> {
-            // if project is a subproject (it's path contains another project) , then location can be null
+            // if project is a sub project (it's path contains another project) , then location can be null
             final boolean isSubProject = projectConfig.getPath().indexOf('/', 1) != -1;
             final boolean hasNotEmptySource = projectConfig.getSource() != null
                                               && projectConfig.getSource().getType() != null
@@ -491,16 +486,14 @@ public class FactoryService extends Service {
                    && (isSubProject || hasNotEmptySource);
         };
 
-        //Filtered out projects by path and source storage presence.
+        // Filtered out projects by path and source storage presence
         final List<ProjectConfigImpl> filtered = usersWorkspace.getConfig()
                                                                .getProjects()
                                                                .stream()
                                                                .filter(predicate)
                                                                .collect(toList());
-        if (filtered.isEmpty()) {
-            throw new BadRequestException("Unable to create factory from this workspace, " +
-                                          "because it does not contains projects with source storage");
-        }
+        checkArgument(!filtered.isEmpty(), "Unable to create factory from this workspace, " +
+                                           "because it does not contains projects with source storage");
         usersWorkspace.getConfig().setProjects(filtered);
     }
 
@@ -562,22 +555,6 @@ public class FactoryService extends Service {
     }
 
     /**
-     * Checks object reference is not {@code null}
-     *
-     * @param object
-     *         object reference to check
-     * @param subject
-     *         used as subject of exception message "{subject} required"
-     * @throws BadRequestException
-     *         when object reference is {@code null}
-     */
-    private void requiredNotNull(Object object, String subject) throws BadRequestException {
-        if (object == null) {
-            throw new BadRequestException(subject + " required");
-        }
-    }
-
-    /**
      * Creates factory image from input stream.
      * InputStream should be closed manually.
      *
@@ -614,6 +591,33 @@ public class FactoryService extends Service {
             return new FactoryImage(out.toByteArray(), mediaType, name);
         } catch (IOException ioEx) {
             throw new ServerException(ioEx.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * Checks object reference is not {@code null}
+     *
+     * @param object
+     *         object reference to check
+     * @param subject
+     *         used as subject of exception message "{subject} required"
+     * @throws BadRequestException
+     *         when object reference is {@code null}
+     */
+    private static void requiredNotNull(Object object, String subject) throws BadRequestException {
+        if (object == null) {
+            throw new BadRequestException(subject + " required");
+        }
+    }
+
+    /**
+     * Checks that expression is true, throws {@link BadRequestException} otherwise.
+     *
+     * <p>Exception uses error message built from error message template and error message parameters.
+     */
+    private static void checkArgument(boolean expression, String errorMessage) throws BadRequestException {
+        if (!expression) {
+            throw new BadRequestException(errorMessage);
         }
     }
 }

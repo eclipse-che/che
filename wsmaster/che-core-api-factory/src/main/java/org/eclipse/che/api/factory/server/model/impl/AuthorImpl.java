@@ -11,7 +11,6 @@
 package org.eclipse.che.api.factory.server.model.impl;
 
 import org.eclipse.che.api.core.model.factory.Author;
-import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.persistence.Basic;
 import javax.persistence.Embeddable;

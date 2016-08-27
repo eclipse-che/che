@@ -26,8 +26,10 @@ import javax.inject.Singleton;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
@@ -226,10 +228,11 @@ public class FactoryManager {
      * @throws ServerException
      *         when any server errors occurs
      */
-    public List<? extends Factory> getByAttribute(int maxItems,
-                                                  int skipCount,
-                                                  List<Pair<String, String>> attributes) throws ServerException {
-        return factoryDao.getByAttribute(maxItems, skipCount, attributes);
+    @SuppressWarnings("unchecked")
+    public <T extends List<? extends Factory>> T getByAttribute(int maxItems,
+                                                                int skipCount,
+                                                                List<Pair<String, String>> attributes) throws ServerException {
+        return (T)factoryDao.getByAttribute(maxItems, skipCount, attributes);
     }
 
     /**

@@ -30,7 +30,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;

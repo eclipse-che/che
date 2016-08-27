@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -44,6 +45,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.assured.EverrestJetty;
@@ -78,6 +80,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toSet;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.factory.server.DtoConverter.asDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
@@ -99,11 +102,17 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 
+/**
+ * Tests for {@link FactoryService}.
+ *
+ * @author Anton Korneta
+ */
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class FactoryServiceTest {
 
     private static final String SERVICE_PATH            = "/factory";
     private static final String FACTORY_ID              = "correctFactoryId";
+    private static final String FACTORY_NAME            = "factory";
     private static final String USER_ID                 = "userId";
     private static final String USER_EMAIL              = "email";
     private static final String WORKSPACE_NAME          = "workspace";
@@ -211,7 +220,7 @@ public class FactoryServiceTest {
                                          .expect()
                                          .statusCode(200)
                                          .when()
-                                         .post("/private" + SERVICE_PATH);
+                                         .post(SERVICE_PATH);
         final FactoryDto result = getFromResponse(response, FactoryDto.class);
         factoryDto.withLinks(result.getLinks())
                   .getCreator()
@@ -220,7 +229,7 @@ public class FactoryServiceTest {
     }
 
     @Test
-    public void shouldSaveFactoryWithSetImageButWithOutImageContent() throws Exception {
+    public void shouldSaveFactoryWithImagesWhenImagesWithoutContent() throws Exception {
         final Factory factory = createFactory();
         when(factoryManager.saveFactory(any(FactoryDto.class), anySetOf(FactoryImage.class))).thenReturn(factory);
         when(factoryManager.getById(FACTORY_ID)).thenReturn(factory);
@@ -234,7 +243,7 @@ public class FactoryServiceTest {
                .expect()
                .statusCode(200)
                .when()
-               .post("/private" + SERVICE_PATH);
+               .post(SERVICE_PATH);
 
         verify(factoryManager).saveFactory(eq(factoryDto), eq(Collections.<FactoryImage>emptySet()));
     }
@@ -248,7 +257,7 @@ public class FactoryServiceTest {
                                          .expect()
                                          .statusCode(400)
                                          .when()
-                                         .post("/private" + SERVICE_PATH);
+                                         .post(SERVICE_PATH);
 
         final ServiceError err = getFromResponse(response, ServiceError.class);
         assertEquals(err.getMessage(), "Invalid JSON value of the field 'factory' provided");
@@ -262,14 +271,14 @@ public class FactoryServiceTest {
                                          .expect()
                                          .statusCode(400)
                                          .when()
-                                         .post("/private" + SERVICE_PATH);
+                                         .post(SERVICE_PATH);
 
         final ServiceError err = getFromResponse(response, ServiceError.class);
         assertEquals(err.getMessage(), "factory configuration required");
     }
 
     @Test
-    public void shouldThrowServerExceptionWhenImpossibleToBuildFactoryFromProvidedData() throws Exception {
+    public void shouldThrowServerExceptionWhenProvidedFactoryDataInvalid() throws Exception {
         final String errMessage = "eof";
         when(factoryBuilder.build(any(InputStream.class))).thenThrow(new IOException(errMessage));
         final Response response = given().auth()
@@ -278,7 +287,7 @@ public class FactoryServiceTest {
                                          .expect()
                                          .statusCode(500)
                                          .when()
-                                         .post("/private" + SERVICE_PATH);
+                                         .post(SERVICE_PATH);
 
         final ServiceError err = getFromResponse(response, ServiceError.class);
         assertEquals(err.getMessage(), errMessage);
@@ -358,11 +367,65 @@ public class FactoryServiceTest {
         assertEquals(getFromResponse(response, ServiceError.class).getMessage(), errMessage);
     }
 
+    @Test
+    public void shouldReturnFactoryListByNameAttribute() throws Exception {
+        final Factory factory = createFactory();
+        when(factoryManager.getByAttribute(1, 0, ImmutableList.of(Pair.of("factory.name", factory.getName()))))
+                .thenReturn(ImmutableList.of(factory));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType(APPLICATION_JSON)
+                                         .when()
+                                         .expect()
+                                         .statusCode(200)
+                                         .get(SERVICE_PATH + "/find?maxItems=1&skipCount=0&factory.name=" + factory.getName());
+
+        final List<FactoryDto> res = unwrapDtoList(response, FactoryDto.class);
+        assertEquals(res.size(), 1);
+        assertEquals(res.get(0).withLinks(emptyList()), asDto(factory, user));
+    }
+
+    @Test
+    public void shouldReturnFactoryListByCreatorAttribute() throws Exception {
+        final Factory factory1 = createNamedFactory("factory1");
+        final Factory factory2 = createNamedFactory("factory2");
+        when(factoryManager.getByAttribute(2, 0, ImmutableList.of(Pair.of("factory.creator.name", user.getName()))))
+                .thenReturn(ImmutableList.of(factory1, factory2));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType(APPLICATION_JSON)
+                                         .when()
+                                         .expect()
+                                         .statusCode(200)
+                                         .get(SERVICE_PATH + "/find?maxItems=2&skipCount=0&factory.creator.name=" + user.getName());
+
+        final Set<FactoryDto> res = unwrapDtoList(response, FactoryDto.class).stream()
+                                                                             .map(f -> f.withLinks(emptyList()))
+                                                                             .collect(toSet());
+        assertEquals(res.size(), 2);
+        assertTrue(res.containsAll(ImmutableList.of(asDto(factory1, user), asDto(factory2, user))));
+    }
+
+    @Test
+    public void shouldThrowBadRequestWhenGettingFactoryByEmptyAttributeList() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType(APPLICATION_JSON)
+                                         .when()
+                                         .expect()
+                                         .get(SERVICE_PATH + "/find?maxItems=1&skipCount=0");
+
+        assertEquals(response.getStatusCode(), 400);
+        assertEquals(DTO.createDtoFromJson(response.getBody().asString(), ServiceError.class)
+                        .getMessage(), "Query must contain at least one attribute");
+    }
 
     @Test
     public void shouldBeAbleToUpdateFactory() throws Exception {
         final Factory existed = createFactory();
-        final Factory update = createFactoryWithStorage("git", "http://github.com/codenvy/platform-api1.git");
+        final Factory update = createFactoryWithStorage(null, "git", "http://github.com/codenvy/platform-api1.git");
         when(factoryManager.getById(FACTORY_ID)).thenReturn(existed);
         when(factoryManager.updateFactory(any())).thenReturn(update);
 
@@ -373,7 +436,7 @@ public class FactoryServiceTest {
                                          .when()
                                          .expect()
                                          .statusCode(200)
-                                         .put("/private" + SERVICE_PATH + "/" + FACTORY_ID);
+                                         .put(SERVICE_PATH + "/" + FACTORY_ID);
 
         final FactoryDto result = getFromResponse(response, FactoryDto.class);
         verify(factoryManager, times(1)).updateFactory(any());
@@ -382,7 +445,9 @@ public class FactoryServiceTest {
 
     @Test
     public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingFactory() throws Exception {
-        final Factory factory = createFactoryWithStorage("git", "http://github.com/codenvy/platform-api.git");
+        final Factory factory = createFactoryWithStorage(FACTORY_NAME,
+                                                         "git",
+                                                         "http://github.com/codenvy/platform-api.git");
         doThrow(new NotFoundException(format("Factory with id %s is not found.", FACTORY_ID))).when(factoryManager)
                                                                                               .getById(anyString());
 
@@ -390,7 +455,7 @@ public class FactoryServiceTest {
                                          .contentType(APPLICATION_JSON)
                                          .body(JsonHelper.toJson(factory))
                                          .when()
-                                         .put("/private" + SERVICE_PATH + "/" + FACTORY_ID);
+                                         .put(SERVICE_PATH + "/" + FACTORY_ID);
 
         assertEquals(response.getStatusCode(), 404);
         assertEquals(DTO.createDtoFromJson(response.getBody().asString(), ServiceError.class).getMessage(),
@@ -403,15 +468,13 @@ public class FactoryServiceTest {
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                          .contentType(APPLICATION_JSON)
                                          .when()
-                                         .put("/private" + SERVICE_PATH + "/" + FACTORY_ID);
+                                         .put(SERVICE_PATH + "/" + FACTORY_ID);
 
         assertEquals(response.getStatusCode(), 400);
         assertEquals(DTO.createDtoFromJson(response.getBody().asString(), ServiceError.class)
                         .getMessage(), "Factory configuration required");
 
     }
-
-    // FactoryService#removeFactory(String id) tests:
 
     @Test
     public void shouldRemoveFactoryByGivenIdentifier() throws Exception {
@@ -424,7 +487,7 @@ public class FactoryServiceTest {
                .expect()
                .statusCode(204)
                .when()
-               .delete("/private" + SERVICE_PATH + "/" + FACTORY_ID);
+               .delete(SERVICE_PATH + "/" + FACTORY_ID);
 
         verify(factoryManager).removeFactory(FACTORY_ID);
     }
@@ -437,7 +500,7 @@ public class FactoryServiceTest {
                                    .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
                                    .param("id", FACTORY_ID)
                                    .when()
-                                   .delete("/private" + SERVICE_PATH + "/" + FACTORY_ID);
+                                   .delete(SERVICE_PATH + "/" + FACTORY_ID);
 
         assertEquals(response.getStatusCode(), 204);
     }
@@ -501,15 +564,20 @@ public class FactoryServiceTest {
     }
 
     private Factory createFactory() {
-        return createFactoryWithStorage(PROJECT_SOURCE_TYPE, PROJECT_SOURCE_LOCATION);
+        return createNamedFactory(FACTORY_NAME);
     }
 
-    private Factory createFactoryWithStorage(String type, String location) {
+    private Factory createNamedFactory(String name) {
+        return createFactoryWithStorage(name, PROJECT_SOURCE_TYPE, PROJECT_SOURCE_LOCATION);
+    }
+
+    private Factory createFactoryWithStorage(String name, String type, String location) {
         return FactoryImpl.builder()
                           .setId(FACTORY_ID)
                           .setVersion("4.0")
                           .setWorkspace(createWorkspaceConfig(type, location))
                           .setCreator(new AuthorImpl(USER_ID, 12L))
+                          .setName(name)
                           .build();
     }
 
@@ -548,6 +616,10 @@ public class FactoryServiceTest {
 
     private static <T> T getFromResponse(Response response, Class<T> clazz) throws Exception {
         return DTO.createDtoFromJson(response.getBody().asInputStream(), clazz);
+    }
+
+    private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass) {
+        return FluentIterable.from(DtoFactory.getInstance().createListDtoFromJson(response.body().print(), dtoClass)).toList();
     }
 
     private static Path getImagePath() throws Exception {
