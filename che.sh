@@ -56,6 +56,7 @@ init_global_variables() {
   DEFAULT_CHE_SERVER_CONTAINER_NAME="che-server"
   DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
+  DEFAULT_IS_INTERACTIVE="true"
 
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
   CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
@@ -66,11 +67,10 @@ init_global_variables() {
   CHE_ACTION_IMAGE_NAME=${CHE_ACTION_IMAGE_NAME:-${DEFAULT_CHE_ACTION_IMAGE_NAME}}
   CHE_TEST_IMAGE_NAME=${CHE_TEST_IMAGE_NAME:-${DEFAULT_CHE_TEST_IMAGE_NAME}}
   CHE_DEV_IMAGE_NAME=${CHE_DEV_IMAGE_NAME:-${DEFAULT_CHE_DEV_IMAGE_NAME}}
-
   CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}
-
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
+  IS_INTERACTIVE=${IS_INTERACTIVE:-${DEFAULT_IS_INTERACTIVE}}
 
   GLOBAL_NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
   GLOBAL_HOST_ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
@@ -149,17 +149,50 @@ docker_exec() {
 }
 
 docker_run() {
-  ENV_VARS=$(get_list_of_che_system_environment_variables)
+  docker_exec run --rm -v /var/run/docker.sock:/var/run/docker.sock "$@"
+}
 
-  if [ "$ENV_VARS" = "" ]; then
-    docker_exec run --rm -it -v /var/run/docker.sock:/var/run/docker.sock "$@"
+docker_run_with_env_file() {
+  if has_che_env_variables; then
+    get_list_of_che_system_environment_variables
+    docker_run --env-file="tmp" "$@"
+    rm -rf "tmp" > /dev/null
   else
-    docker_exec run --rm -it -v /var/run/docker.sock:/var/run/docker.sock \
-                    --env-file="tmp" "$@"
+    docker_run "$@"
   fi
+}
 
-  # Remove temporary file -- only due to POSIX weirdness with --env-file
-  rm -rf "tmp" > /dev/null 2>&1
+docker_run_with_interactive() {
+  if has_interactive; then
+    docker_run_with_env_file -it "$@"
+  else
+    docker_run_with_env_file -t "$@"
+  fi
+}
+
+docker_run_with_che_properties() {
+  if [ ! -z ${CHE_CONF_FOLDER+x} ]; then
+
+    # Configuration directory set by user - this has precedence.
+    docker_run_with_interactive -e "CHE_CONF_FOLDER=${CHE_CONF_FOLDER}" "$@"
+  else 
+    if has_che_properties; then
+      # No user configuration directory, but CHE_PROPERTY_ values set
+      generate_temporary_che_properties_file
+      docker_run_with_interactive -e "CHE_CONF_FOLDER=$(get_mount_path ~/.che/conf)" "$@"
+      rm -rf ~/.che/conf/che.properties > /dev/null
+    else
+      docker_run_with_interactive "$@"
+    fi
+  fi
+}
+
+has_interactive() {
+  if [ "${IS_INTERACTIVE}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 get_docker_host_ip() {
@@ -294,43 +327,45 @@ get_che_hostname() {
   fi
 }
 
+has_che_env_variables() {
+  PROPERTIES=$(env | grep CHE_)
+
+  if [ "$PROPERTIES" = "" ]; then
+    return 1
+  else 
+    return 0
+  fi 
+}
+
 get_list_of_che_system_environment_variables() {
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
   DOCKER_ENV="tmp"
-  RETURN=""
 
   touch "tmp"
   
   if has_default_profile; then
     cat ~/.che/profiles/${CHE_PROFILE} >> $DOCKER_ENV
-    RETURN=$DOCKER_ENV
   else
     CHE_VARIABLES=$(env | grep CHE_)
 
     if [ ! -z ${CHE_VARIABLES+x} ]; then
       env | grep CHE_ >> $DOCKER_ENV
-      RETURN=$DOCKER_ENV
     fi
 
     # Add in known proxy variables
     if [ ! -z ${http_proxy+x} ]; then
       echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
-      RETURN=$DOCKER_ENV
     fi
 
     if [ ! -z ${https_proxy+x} ]; then
       echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
-      RETURN=$DOCKER_ENV
     fi
 
     if [ ! -z ${no_proxy+x} ]; then
       echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
-      RETURN=$DOCKER_ENV
     fi
   fi
-
-  echo $RETURN
 }
 
 check_current_image_and_update_if_not_found() {
@@ -342,6 +377,45 @@ check_current_image_and_update_if_not_found() {
   fi
 }
 
+has_che_properties() {
+  PROPERTIES=$(env | grep CHE_PROPERTY_)
+
+  if [ "$PROPERTIES" = "" ]; then
+    return 1
+  else 
+    return 0
+  fi 
+}
+
+generate_temporary_che_properties_file() {
+  if has_che_properties; then
+    test -d ~/.che/conf || mkdir -p ~/.che/conf
+    touch ~/.che/conf/che.properties
+
+    # Get list of properties
+    PROPERTIES_ARRAY=($(env | grep CHE_PROPERTY_))
+    for PROPERTY in "${PROPERTIES_ARRAY[@]}"
+    do
+      # CHE_PROPERTY_NAME=value ==> NAME=value
+      PROPERTY_WITHOUT_PREFIX=${PROPERTY#CHE_PROPERTY_}
+
+      # NAME=value ==> separate name / value into different variables
+      PROPERTY_NAME=$(echo $PROPERTY_WITHOUT_PREFIX | cut -f1 -d=)
+      PROPERTY_VALUE=$(echo $PROPERTY_WITHOUT_PREFIX | cut -f2 -d=)
+     
+      # Replace "_" in names to periods
+
+      # Replace "_" in names to periods
+      CONVERTED_PROPERTY_NAME=$(echo "$PROPERTY_NAME" | tr _ .)
+
+      # Replace ".." in names to "_"
+      SUPER_CONVERTED_PROPERTY_NAME="${CONVERTED_PROPERTY_NAME//../_}"
+
+      echo "$SUPER_CONVERTED_PROPERTY_NAME=$PROPERTY_VALUE" >> ~/.che/conf/che.properties
+    done
+  fi
+}
+
 ###########################################################################
 ### END HELPER FUNCTIONS
 ###
@@ -350,7 +424,7 @@ check_current_image_and_update_if_not_found() {
 
 execute_che_launcher() {
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
-  docker_run "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
+  docker_run_with_che_properties "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
 }
 
 execute_profile(){
@@ -541,12 +615,12 @@ load_profile() {
 execute_che_dir() {
   check_current_image_and_update_if_not_found ${CHE_DIR_IMAGE_NAME}
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
-  docker_run -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
+  docker_run_with_che_properties -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
 }
 
 execute_che_action() {
   check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME}
-  docker_run "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+  docker_run_with_che_properties "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
 }
 
 update_che_image() {
@@ -577,7 +651,7 @@ execute_che_mount() {
     return
   fi
 
-  docker_run --cap-add SYS_ADMIN \
+  docker_run_with_che_properties --cap-add SYS_ADMIN \
               --device /dev/fuse \
               -v "${MOUNT_PATH}":/mnthost \
               "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
@@ -591,15 +665,15 @@ execute_che_compile() {
 
   check_current_image_and_update_if_not_found ${CHE_DEV_IMAGE_NAME}
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
-  docker_run -v "$CURRENT_DIRECTORY":/home/user/che-build \
-             -v "$HOME/.m2:/home/user/.m2" \
-             -w /home/user/che-build \
-             "${CHE_DEV_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+  docker_run_with_che_properties -v "$CURRENT_DIRECTORY":/home/user/che-build \
+                                 -v "$(get_mount_path ~/.m2):/home/user/.m2" \
+                                 -w /home/user/che-build \
+                                 "${CHE_DEV_IMAGE_NAME}":"${CHE_VERSION}" "$@"
 }
 
 execute_che_test() {
   check_current_image_and_update_if_not_found ${CHE_TEST_IMAGE_NAME}
-  docker_run "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+  docker_run_with_che_properties "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
 }
 
 execute_che_info() {
@@ -650,6 +724,9 @@ print_che_cli_debug() {
   debug "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
   debug "HAS_DOCKER_FOR_WINDOWS_IP = $(has_docker_for_windows_ip && echo "YES" || echo "NO")"
   debug "IS_MOBY_VM                = $(is_moby_vm && echo "YES" || echo "NO")"
+  debug "HAS_CHE_ENV_VARIABLES     = $(has_che_env_variables && echo "YES" || echo "NO")"
+  debug "HAS_TEMP_CHE_PROPERTIES   = $(has_che_properties && echo "YES" || echo "NO")"
+  debug "HAS_INTERACTIVE           = $(has_interactive && echo "YES" || echo "NO")"
   debug ""
 }
 
