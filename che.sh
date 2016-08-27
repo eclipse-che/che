@@ -52,6 +52,7 @@ init_global_variables() {
   DEFAULT_CHE_MOUNT_IMAGE_NAME="codenvy/che-mount"
   DEFAULT_CHE_ACTION_IMAGE_NAME="codenvy/che-action"
   DEFAULT_CHE_TEST_IMAGE_NAME="codenvy/che-test"
+  DEFAULT_CHE_DEV_IMAGE_NAME="codenvy/che-dev"
   DEFAULT_CHE_SERVER_CONTAINER_NAME="che-server"
   DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
@@ -64,6 +65,7 @@ init_global_variables() {
   CHE_MOUNT_IMAGE_NAME=${CHE_MOUNT_IMAGE_NAME:-${DEFAULT_CHE_MOUNT_IMAGE_NAME}}
   CHE_ACTION_IMAGE_NAME=${CHE_ACTION_IMAGE_NAME:-${DEFAULT_CHE_ACTION_IMAGE_NAME}}
   CHE_TEST_IMAGE_NAME=${CHE_TEST_IMAGE_NAME:-${DEFAULT_CHE_TEST_IMAGE_NAME}}
+  CHE_DEV_IMAGE_NAME=${CHE_DEV_IMAGE_NAME:-${DEFAULT_CHE_DEV_IMAGE_NAME}}
 
   CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}
 
@@ -94,6 +96,7 @@ Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
            dir down                           Stop workspace running in current directory
            dir status                         Display status of ${CHE_MINI_PRODUCT_NAME} in current directory
            action <action-name> [--help]      Start action on ${CHE_MINI_PRODUCT_NAME} instance
+           compile <mvn-command>              SDK - Builds Che source code or modules
            test <test-name> [--help]          Start test on ${CHE_MINI_PRODUCT_NAME} instance
            info [ --all                       Run all debugging tests
                   --server                    Run ${CHE_MINI_PRODUCT_NAME} launcher and server debugging tests
@@ -126,7 +129,7 @@ parse_command_line () {
     CHE_CLI_ACTION="help"
   else
     case $1 in
-      start|stop|restart|update|info|profile|action|dir|mount|test|help|-h|--help)
+      start|stop|restart|update|info|profile|action|dir|mount|compile|test|help|-h|--help)
         CHE_CLI_ACTION=$1
       ;;
       *)
@@ -339,180 +342,15 @@ check_current_image_and_update_if_not_found() {
   fi
 }
 
+###########################################################################
+### END HELPER FUNCTIONS
+###
+### START CLI COMMANDS
+###########################################################################
+
 execute_che_launcher() {
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
   docker_run "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
-}
-
-execute_che_dir() {
-  check_current_image_and_update_if_not_found ${CHE_DIR_IMAGE_NAME}
-  CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
-  docker_run -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
-}
-
-execute_che_action() {
-  check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME}
-  docker_run "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
-}
-
-
-update_che_image() {
-  if [ -z "${CHE_VERSION}" ]; then
-    CHE_VERSION=${DEFAULT_CHE_VERSION}
-  fi
-
-  info "${CHE_PRODUCT_NAME}: Pulling image $1:${CHE_VERSION}"
-  docker pull $1:${CHE_VERSION}
-  echo ""
-}
-
-mount_local_directory() {
-  if [ ! $# -eq 3 ]; then 
-    error "che mount: Wrong number of arguments provided."
-    return
-  fi
-
-  MOUNT_PATH=$(get_mount_path "${2}")
-
-  if [ ! -e "${MOUNT_PATH}" ]; then
-    error "che mount: Path provided does not exist."
-    return
-  fi
-
-  if [ ! -d "${MOUNT_PATH}" ]; then
-    error "che mount: Path provided is not a valid directory."
-    return
-  fi
-
-  docker_run --cap-add SYS_ADMIN \
-              --device /dev/fuse \
-              -v "${MOUNT_PATH}":/mnthost \
-              "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
-}
-
-execute_che_debug() {
-
-  if [ $# -eq 1 ]; then
-    TESTS="--server"
-  else
-    TESTS=$2
-  fi
-  
-  case $TESTS in
-    --all|-all)
-      print_che_cli_debug
-      execute_che_launcher
-      run_connectivity_tests
-      execute_che_test post-flight-check "$@"
-    ;;
-    --cli|-cli)
-      print_che_cli_debug
-    ;;
-    --networking|-networking)
-      run_connectivity_tests
-    ;;
-    --server|-server)
-      print_che_cli_debug
-      execute_che_launcher
-    ;;
-    --create|-create)
-      execute_che_test "$@"
-    ;;
-    *)
-      debug "Unknown debug flag passed: $2. Exiting."
-    ;;
-  esac
-}
-
-
-execute_che_test() {
-  check_current_image_and_update_if_not_found ${CHE_TEST_IMAGE_NAME}
-  docker_run "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
-}
-
-print_che_cli_debug() {
-  debug "---------------------------------------"
-  debug "---------    CLI DEBUG INFO    --------"
-  debug "---------------------------------------"
-  debug ""
-  debug "---------  PLATFORM INFO  -------------"
-  debug "CLI DEFAULT PROFILE       = $(has_default_profile && echo $(get_default_profile) || echo "not set")"
-  debug "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
-  debug "DOCKER_HOST_IP            = ${GLOBAL_GET_DOCKER_HOST_IP}"
-  debug "IS_DOCKER_FOR_WINDOWS     = $(is_docker_for_windows && echo "YES" || echo "NO")"
-  debug "IS_DOCKER_FOR_MAC         = $(is_docker_for_mac && echo "YES" || echo "NO")"
-  debug "IS_BOOT2DOCKER            = $(is_boot2docker && echo "YES" || echo "NO")"
-  debug "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
-  debug "HAS_DOCKER_FOR_WINDOWS_IP = $(has_docker_for_windows_ip && echo "YES" || echo "NO")"
-  debug "IS_MOBY_VM                = $(is_moby_vm && echo "YES" || echo "NO")"
-  debug ""
-}
-
-run_connectivity_tests() {
-  debug ""
-  debug "---------------------------------------"
-  debug "--------   CONNECTIVITY TEST   --------"
-  debug "---------------------------------------"
-  # Start a fake workspace agent
-  docker_exec run -d -p 12345:80 --name fakeagent alpine httpd -f -p 80 -h /etc/ > /dev/null
-
-  AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
-  AGENT_INTERNAL_PORT=80
-  AGENT_EXTERNAL_IP=$GLOBAL_GET_DOCKER_HOST_IP
-  AGENT_EXTERNAL_PORT=12345
-
-
-  ### TEST 1: Simulate browser ==> workspace agent HTTP connectivity
-  HTTP_CODE=$(curl -I $(get_che_hostname):${AGENT_EXTERNAL_PORT}/alpine-release \
-                          -s -o /dev/null --connect-timeout 5 \
-                          --write-out "%{http_code}") || echo "28" > /dev/null
-
-  if [ "${HTTP_CODE}" = "200" ]; then
-      debug "Browser             => Workspace Agent (Hostname)   : Connection succeeded"
-  else
-      debug "Browser             => Workspace Agent (Hostname)   : Connection failed"
-  fi
-
-  ### TEST 1a: Simulate browser ==> workspace agent HTTP connectivity
-  HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                          -s -o /dev/null --connect-timeout 5 \
-                          --write-out "%{http_code}") || echo "28" > /dev/null
-
-  if [ "${HTTP_CODE}" = "200" ]; then
-      debug "Browser             => Workspace Agent (External IP): Connection succeeded"
-  else
-      debug "Browser             => Workspace Agent (External IP): Connection failed"
-  fi
-
-  ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
-  export HTTP_CODE=$(docker run --rm --name fakeserver \
-                                --entrypoint=curl \
-                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
-                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                                  -s -o /dev/null \
-                                  --write-out "%{http_code}")
-  
-  if [ "${HTTP_CODE}" = "200" ]; then
-      debug "Che Server          => Workspace Agent (External IP): Connection succeeded"
-  else
-      debug "Che Server          => Workspace Agent (External IP): Connection failed"
-  fi
-
-  ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity 
-  export HTTP_CODE=$(docker run --rm --name fakeserver \
-                                --entrypoint=curl \
-                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
-                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
-                                  -s -o /dev/null \
-                                  --write-out "%{http_code}")
-
-  if [ "${HTTP_CODE}" = "200" ]; then
-      debug "Che Server          => Workspace Agent (Internal IP): Connection succeeded"
-  else
-      debug "Che Server          => Workspace Agent (Internal IP): Connection failed"
-  fi
-
-  docker rm -f fakeagent > /dev/null
 }
 
 execute_profile(){
@@ -565,7 +403,7 @@ execute_profile(){
       echo "CHE_SERVER_CONTAINER_NAME=$CHE_SERVER_CONTAINER_NAME" >> ~/.che/profiles/"${3}"
 
       # Add all other variables to the profile
-      env | grep CHE_ >> ~/.che/profiles/"${3}"
+      env | grep CHE_ >> ~/.che/profiles/"${3}" || true
 
       # Remove duplicates, if any
       cat ~/.che/profiles/"${3}" | sort | uniq > ~/.che/profiles/tmp
@@ -700,6 +538,188 @@ load_profile() {
   fi
 }
 
+execute_che_dir() {
+  check_current_image_and_update_if_not_found ${CHE_DIR_IMAGE_NAME}
+  CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
+  docker_run -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
+}
+
+execute_che_action() {
+  check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME}
+  docker_run "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+}
+
+update_che_image() {
+  if [ -z "${CHE_VERSION}" ]; then
+    CHE_VERSION=${DEFAULT_CHE_VERSION}
+  fi
+
+  info "${CHE_PRODUCT_NAME}: Pulling image $1:${CHE_VERSION}"
+  docker pull $1:${CHE_VERSION}
+  echo ""
+}
+
+execute_che_mount() {
+  if [ ! $# -eq 3 ]; then 
+    error "${CHE_MINI_PRODUCT_NAME} mount: Wrong number of arguments provided."
+    return
+  fi
+
+  MOUNT_PATH=$(get_mount_path "${2}")
+
+  if [ ! -e "${MOUNT_PATH}" ]; then
+    error "${CHE_MINI_PRODUCT_NAME} mount: Path provided does not exist."
+    return
+  fi
+
+  if [ ! -d "${MOUNT_PATH}" ]; then
+    error "${CHE_MINI_PRODUCT_NAME} mount: Path provided is not a valid directory."
+    return
+  fi
+
+  docker_run --cap-add SYS_ADMIN \
+              --device /dev/fuse \
+              -v "${MOUNT_PATH}":/mnthost \
+              "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
+}
+
+execute_che_compile() {
+  if [ $# -eq 0 ]; then 
+    error "${CHE_MINI_PRODUCT_NAME} compile: Missing argument - pass compilation command as paramters."
+    return
+  fi
+
+  check_current_image_and_update_if_not_found ${CHE_DEV_IMAGE_NAME}
+  CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
+  docker_run -v "$CURRENT_DIRECTORY":/home/user/che-build \
+             -v "$HOME/.m2:/home/user/.m2" \
+             -w /home/user/che-build \
+             "${CHE_DEV_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+}
+
+execute_che_test() {
+  check_current_image_and_update_if_not_found ${CHE_TEST_IMAGE_NAME}
+  docker_run "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+}
+
+execute_che_info() {
+  if [ $# -eq 1 ]; then
+    TESTS="--server"
+  else
+    TESTS=$2
+  fi
+  
+  case $TESTS in
+    --all|-all)
+      print_che_cli_debug
+      execute_che_launcher
+      run_connectivity_tests
+      execute_che_test post-flight-check "$@"
+    ;;
+    --cli|-cli)
+      print_che_cli_debug
+    ;;
+    --networking|-networking)
+      run_connectivity_tests
+    ;;
+    --server|-server)
+      print_che_cli_debug
+      execute_che_launcher
+    ;;
+    --create|-create)
+      execute_che_test "$@"
+    ;;
+    *)
+      debug "Unknown debug flag passed: $2. Exiting."
+    ;;
+  esac
+}
+
+print_che_cli_debug() {
+  debug "---------------------------------------"
+  debug "---------    CLI DEBUG INFO    --------"
+  debug "---------------------------------------"
+  debug ""
+  debug "---------  PLATFORM INFO  -------------"
+  debug "CLI DEFAULT PROFILE       = $(has_default_profile && echo $(get_default_profile) || echo "not set")"
+  debug "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
+  debug "DOCKER_HOST_IP            = ${GLOBAL_GET_DOCKER_HOST_IP}"
+  debug "IS_DOCKER_FOR_WINDOWS     = $(is_docker_for_windows && echo "YES" || echo "NO")"
+  debug "IS_DOCKER_FOR_MAC         = $(is_docker_for_mac && echo "YES" || echo "NO")"
+  debug "IS_BOOT2DOCKER            = $(is_boot2docker && echo "YES" || echo "NO")"
+  debug "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
+  debug "HAS_DOCKER_FOR_WINDOWS_IP = $(has_docker_for_windows_ip && echo "YES" || echo "NO")"
+  debug "IS_MOBY_VM                = $(is_moby_vm && echo "YES" || echo "NO")"
+  debug ""
+}
+
+run_connectivity_tests() {
+  debug ""
+  debug "---------------------------------------"
+  debug "--------   CONNECTIVITY TEST   --------"
+  debug "---------------------------------------"
+  # Start a fake workspace agent
+  docker_exec run -d -p 12345:80 --name fakeagent alpine httpd -f -p 80 -h /etc/ > /dev/null
+
+  AGENT_INTERNAL_IP=$(docker inspect --format='{{.NetworkSettings.IPAddress}}' fakeagent)
+  AGENT_INTERNAL_PORT=80
+  AGENT_EXTERNAL_IP=$GLOBAL_GET_DOCKER_HOST_IP
+  AGENT_EXTERNAL_PORT=12345
+
+
+  ### TEST 1: Simulate browser ==> workspace agent HTTP connectivity
+  HTTP_CODE=$(curl -I $(get_che_hostname):${AGENT_EXTERNAL_PORT}/alpine-release \
+                          -s -o /dev/null --connect-timeout 5 \
+                          --write-out "%{http_code}") || echo "28" > /dev/null
+
+  if [ "${HTTP_CODE}" = "200" ]; then
+      debug "Browser             => Workspace Agent (Hostname)   : Connection succeeded"
+  else
+      debug "Browser             => Workspace Agent (Hostname)   : Connection failed"
+  fi
+
+  ### TEST 1a: Simulate browser ==> workspace agent HTTP connectivity
+  HTTP_CODE=$(curl -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                          -s -o /dev/null --connect-timeout 5 \
+                          --write-out "%{http_code}") || echo "28" > /dev/null
+
+  if [ "${HTTP_CODE}" = "200" ]; then
+      debug "Browser             => Workspace Agent (External IP): Connection succeeded"
+  else
+      debug "Browser             => Workspace Agent (External IP): Connection failed"
+  fi
+
+  ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
+  export HTTP_CODE=$(docker run --rm --name fakeserver \
+                                --entrypoint=curl \
+                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
+                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                                  -s -o /dev/null \
+                                  --write-out "%{http_code}")
+  
+  if [ "${HTTP_CODE}" = "200" ]; then
+      debug "Che Server          => Workspace Agent (External IP): Connection succeeded"
+  else
+      debug "Che Server          => Workspace Agent (External IP): Connection failed"
+  fi
+
+  ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity 
+  export HTTP_CODE=$(docker run --rm --name fakeserver \
+                                --entrypoint=curl \
+                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
+                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                                  -s -o /dev/null \
+                                  --write-out "%{http_code}")
+
+  if [ "${HTTP_CODE}" = "200" ]; then
+      debug "Che Server          => Workspace Agent (Internal IP): Connection succeeded"
+  else
+      debug "Che Server          => Workspace Agent (Internal IP): Connection failed"
+  fi
+
+  docker rm -f fakeagent > /dev/null
+}
+
 # See: https://sipb.mit.edu/doc/safe-shell/
 set -e
 set -u
@@ -734,12 +754,6 @@ case ${CHE_CLI_ACTION} in
     load_profile
     execute_che_action "$@"
   ;;
-  test)
-    # remove "test" arg by shifting it
-    shift
-    load_profile
-    execute_che_test "$@"
-  ;;
   update)
     load_profile
     update_che_image ${CHE_LAUNCHER_IMAGE_NAME}
@@ -747,17 +761,30 @@ case ${CHE_CLI_ACTION} in
     update_che_image ${CHE_DIR_IMAGE_NAME}
     update_che_image ${CHE_ACTION_IMAGE_NAME}
     update_che_image ${CHE_TEST_IMAGE_NAME}
+    update_che_image ${CHE_DEV_IMAGE_NAME}
 
     # Delegate updating che-server to the launcher
     execute_che_launcher
   ;;
   mount)
     load_profile
-    mount_local_directory "$@"
+    execute_che_mount "$@"
+  ;;
+  compile)
+    # remove "compile" arg by shifting it
+    shift
+    load_profile
+    execute_che_compile "$@"
+  ;;
+  test)
+    # remove "test" arg by shifting it
+    shift
+    load_profile
+    execute_che_test "$@"
   ;;
   info)
     load_profile
-    execute_che_debug "$@"
+    execute_che_info "$@"
   ;;
   help)
     usage
