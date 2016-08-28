@@ -66,12 +66,14 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
         view.setDelegate(this);
 
         if (parentPanel != null) {
-            view.setParentPanel((SubPanelView)parentPanel.getView());
+            view.setParentPanel(parentPanel.getView());
+        } else {
+            view.setParentPanel(null);
         }
     }
 
     @Override
-    public IsWidget getView() {
+    public SubPanelView getView() {
         return view;
     }
 

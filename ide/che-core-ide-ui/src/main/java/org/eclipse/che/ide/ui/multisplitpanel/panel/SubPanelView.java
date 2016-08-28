@@ -11,8 +11,8 @@
 package org.eclipse.che.ide.ui.multisplitpanel.panel;
 
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Widget;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
@@ -28,13 +28,13 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
      * Split panel horizontally on two sub-panels
      * and set the given {@code widget} for additional panel.
      */
-    void splitHorizontally(IsWidget view);
+    void splitHorizontally(SubPanelView view);
 
     /**
      * Split panel vertically on two sub-panels
      * and set the given {@code widget} for additional panel.
      */
-    void splitVertically(IsWidget view);
+    void splitVertically(SubPanelView view);
 
     /**
      * Add the given {@code widget} to this panel.
@@ -57,18 +57,11 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
      */
     void removeWidget(WidgetToShow widget);
 
-    /**
-     * Close panel. It may mean removing panel from it's
-     * parent in case this panel is the last one or
-     * removing only central part and moving additional part to the center.
-     */
+    /** Close panel. */
     void closePanel();
 
-    /** Remove child panel. */
-    void removeChildSubPanel(Widget widget);
-
     /** Set parent {@link SubPanelView} in case this panel is 'child' of another panel. */
-    void setParentPanel(SubPanelView parentPanel);
+    void setParentPanel(@Nullable SubPanelView parentPanel);
 
     interface ActionDelegate {
 
