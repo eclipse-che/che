@@ -22,7 +22,7 @@ error_exit() {
   error "!!! ${1}"
   error "!!!"
   echo  "---------------------------------------"
-  exit 1
+  return
 }
 
 check_docker() {
@@ -141,7 +141,7 @@ parse_command_line () {
 }
 
 docker_exec() {
-  if is_boot2docker || is_docker_for_windows; then
+  if has_docker_for_windows_client; then
     MSYS_NO_PATHCONV=1 docker.exe "$@"
   else
     "$(which docker)" "$@"
@@ -722,6 +722,7 @@ print_che_cli_debug() {
   debug "IS_DOCKER_FOR_MAC         = $(is_docker_for_mac && echo "YES" || echo "NO")"
   debug "IS_BOOT2DOCKER            = $(is_boot2docker && echo "YES" || echo "NO")"
   debug "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
+  debug "IS_WINDOWS                = $(has_docker_for_windows_client && echo "YES" || echo "NO")"
   debug "HAS_DOCKER_FOR_WINDOWS_IP = $(has_docker_for_windows_ip && echo "YES" || echo "NO")"
   debug "IS_MOBY_VM                = $(is_moby_vm && echo "YES" || echo "NO")"
   debug "HAS_CHE_ENV_VARIABLES     = $(has_che_env_variables && echo "YES" || echo "NO")"
