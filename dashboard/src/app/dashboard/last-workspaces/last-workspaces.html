@@ -1,8 +1,9 @@
-<dashboard-panel panel-title="Last Workspaces">
+<dashboard-panel panel-title="Recent Workspaces">
   <md-progress-linear md-mode="indeterminate"
                       ng-show="dashboardLastWorkspacesController.state == 'loading'"></md-progress-linear>
 
-  <span ng-show="dashboardLastWorkspacesController.state == 'OK' && dashboardLastWorkspacesController.getWorkspaces().length == 0">No workspaces found</span>
+  <span ng-show="dashboardLastWorkspacesController.state == 'OK' && dashboardLastWorkspacesController.getWorkspaces().length == 0"
+    class="last-workspaces-empty-label">No workspaces found</span>
   <che-list ng-show="dashboardLastWorkspacesController.getWorkspaces().length > 0 && dashboardLastWorkspacesController.state =='OK'">
 
     <che-workspace-item ng-repeat="workspace in dashboardLastWorkspacesController.getWorkspaces() | limitTo:'5'"
