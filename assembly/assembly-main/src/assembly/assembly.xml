@@ -67,7 +67,7 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
-            <outputDirectory>lib/terminal/linux_amd64</outputDirectory>
+            <outputDirectory>lib/linux_amd64/terminal</outputDirectory>
             <outputFileNameMapping>websocket-terminal-linux_amd64.tar.gz</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.lib:che-websocket-terminal:tar.gz:linux_amd64</include>
@@ -76,7 +76,7 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
-            <outputDirectory>lib/terminal/linux_arm7</outputDirectory>
+            <outputDirectory>lib/linux_arm7/terminal</outputDirectory>
             <outputFileNameMapping>websocket-terminal-linux_arm7.tar.gz</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.lib:che-websocket-terminal:tar.gz:linux_arm7</include>
