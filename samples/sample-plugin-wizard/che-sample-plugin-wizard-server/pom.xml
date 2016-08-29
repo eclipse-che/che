@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-sample-plugin-wizard-parent</artifactId>
         <groupId>org.eclipse.che.sample</groupId>
-        <version>4.7.0-RC2-SNAPSHOT</version>
+        <version>4.8.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-sample-plugin-wizard-server</artifactId>
     <name>Che Sample :: Plugin Wizard :: Server</name>
