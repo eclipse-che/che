@@ -347,6 +347,13 @@ get_list_of_che_system_environment_variables() {
   if has_default_profile; then
     cat ~/.che/profiles/${CHE_PROFILE} >> $DOCKER_ENV
   else
+
+    # Grab these values to send to other utilities - they need to know the values  
+    echo "CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME}" >> $DOCKER_ENV
+    echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> $DOCKER_ENV
+    echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
+    echo "CHE_MINI_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
+
     CHE_VARIABLES=$(env | grep CHE_)
 
     if [ ! -z ${CHE_VARIABLES+x} ]; then
