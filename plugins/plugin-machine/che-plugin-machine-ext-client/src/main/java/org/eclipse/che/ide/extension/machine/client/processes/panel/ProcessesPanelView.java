@@ -12,6 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
@@ -44,6 +45,10 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
 
     /** Returns index for node with given ID */
     int getNodeIndex(String processId);
+
+    /** Returns the currently selected node of the Processes tree. */
+    @Nullable
+    ProcessTreeNode getSelectedTreeNode();
 
     /** Returns node by given index */
     ProcessTreeNode getNodeByIndex(@NotNull int index);
@@ -143,11 +148,11 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
          * Is called when user clicked right mouse button.
          *
          * @param mouseX
-         *          mouse x coordinate
+         *         mouse x coordinate
          * @param mouseY
-         *          mouse y coordinate
+         *         mouse y coordinate
          * @param node
-         *          process tree node
+         *         process tree node
          */
         void onContextMenu(int mouseX, int mouseY, ProcessTreeNode node);
     }

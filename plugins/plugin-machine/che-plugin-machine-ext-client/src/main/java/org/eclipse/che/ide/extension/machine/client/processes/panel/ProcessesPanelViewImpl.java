@@ -50,6 +50,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -185,7 +186,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         setContentWidget(uiBinder.createAndBindUi(this));
         navigationPanel.getElement().setTabIndex(0);
 
-        SubPanel subPanel = subPanelFactory.newPanel();
+        final SubPanel subPanel = subPanelFactory.newPanel();
         subPanel.setFocusListener(this);
         splitLayoutPanel.add(subPanel.getView());
         focusedSubPanel = subPanel;
@@ -302,11 +303,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     @Override
     public void selectNode(ProcessTreeNode node) {
-        SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
+        final SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
 
         if (node == null) {
             selectionModel.clearSelections();
-            return;
         } else {
             selectionModel.setTreeActive(true);
             selectionModel.clearSelections();
@@ -314,8 +314,6 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             node.getTreeNodeElement().scrollIntoView();
         }
-
-        delegate.onTreeNodeSelected(node);
     }
 
     @Override
@@ -330,6 +328,16 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         }
 
         return -1;
+    }
+
+    @Nullable
+    @Override
+    public ProcessTreeNode getSelectedTreeNode() {
+        List<ProcessTreeNode> selectedNodes = processTree.getSelectionModel().getSelectedNodes();
+        if (!selectedNodes.isEmpty()) {
+            return selectedNodes.get(0);
+        }
+        return null;
     }
 
     @Override
@@ -441,8 +449,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     public void focusGained(SubPanel subPanel, IsWidget widget) {
         focusedSubPanel = subPanel;
 
-        ProcessTreeNode processTreeNode = widget2TreeNodes.get(widget);
-        selectNode(processTreeNode);
+        final ProcessTreeNode processTreeNode = widget2TreeNodes.get(widget);
+        if (processTreeNode != null) {
+            selectNode(processTreeNode);
+        }
     }
 
     @Override

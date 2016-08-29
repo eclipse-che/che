@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
@@ -38,8 +39,12 @@ import org.eclipse.che.ide.ui.multisplitpanel.menu.MenuItemWidget;
 import org.eclipse.che.ide.ui.multisplitpanel.tab.Tab;
 import org.eclipse.che.ide.ui.multisplitpanel.tab.TabItemFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static com.google.gwt.user.client.ui.DockLayoutPanel.Direction.CENTER;
 
 /**
  * Implementation of {@link SubPanelView}.
@@ -55,6 +60,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
     private final Map<Tab, WidgetToShow>            tabs2Widgets;
     private final Map<WidgetToShow, Tab>            widgets2Tabs;
     private final Map<WidgetToShow, MenuItemWidget> widgets2ListItems;
+    private final MenuItem                          closePaneMenuItem;
+
 
     @UiField(provided = true)
     SplitLayoutPanel splitLayoutPanel;
@@ -68,9 +75,10 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
     @UiField
     DeckLayoutPanel widgetsPanel;
 
-    private ActionDelegate delegate;
-
-    private SubPanelView parentPanel;
+    private ActionDelegate     delegate;
+    private SubPanelView       parentPanel;
+    private List<SubPanelView> eastSubPanels;
+    private List<SubPanelView> southSubPanels;
 
     @Inject
     public SubPanelViewImpl(SubPanelViewImplUiBinder uiBinder,
@@ -83,7 +91,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         this.tabItemFactory = tabItemFactory;
         this.menu = menu;
 
-        menu.addListItem(new MenuItemActionWidget(closePaneAction));
+        closePaneMenuItem = new MenuItemActionWidget(closePaneAction);
+        menu.addListItem(closePaneMenuItem);
         menu.addListItem(new MenuItemActionWidget(removeAllWidgetsInPaneAction));
         menu.addListItem(new MenuItemActionWidget(splitHorizontallyAction));
         menu.addListItem(new MenuItemActionWidget(splitVerticallyAction));
@@ -93,6 +102,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         tabs2Widgets = new HashMap<>();
         widgets2Tabs = new HashMap<>();
         widgets2ListItems = new HashMap<>();
+        eastSubPanels = new ArrayList<>();
+        southSubPanels = new ArrayList<>();
 
         splitLayoutPanel = new SplitLayoutPanel(3);
 
@@ -114,8 +125,10 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
     }
 
     @Override
-    public void splitHorizontally(IsWidget subPanelView) {
-        int height = splitLayoutPanel.getOffsetHeight() / 2;
+    public void splitHorizontally(SubPanelView subPanelView) {
+        southSubPanels.add(0, subPanelView);
+
+        final int height = mainPanel.getOffsetHeight() / 2;
 
         splitLayoutPanel.remove(mainPanel);
         splitLayoutPanel.addSouth(subPanelView, height);
@@ -123,8 +136,10 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
     }
 
     @Override
-    public void splitVertically(IsWidget subPanelView) {
-        int width = splitLayoutPanel.getOffsetWidth() / 2;
+    public void splitVertically(SubPanelView subPanelView) {
+        eastSubPanels.add(0, subPanelView);
+
+        final int width = mainPanel.getOffsetWidth() / 2;
 
         splitLayoutPanel.remove(mainPanel);
         splitLayoutPanel.addEast(subPanelView, width);
@@ -172,6 +187,19 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         }
     }
 
+    private void closeTab(Tab tab) {
+        final WidgetToShow widget = tabs2Widgets.get(tab);
+
+        if (widget != null) {
+            delegate.onWidgetRemoving(widget.getWidget(), new SubPanel.RemoveCallback() {
+                @Override
+                public void remove() {
+                    removeWidgetFromUI(widget);
+                }
+            });
+        }
+    }
+
     private void removeWidgetFromUI(WidgetToShow widget) {
         final Tab tab = widgets2Tabs.remove(widget);
         if (tab != null) {
@@ -190,44 +218,75 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
 
     @Override
     public void closePanel() {
-        if (splitLayoutPanel.getWidgetCount() == 1) {
-            parentPanel.removeChildSubPanel(this);
+        if (parentPanel == null) {
+            // do not allow to close root panel
             return;
         }
 
-        splitLayoutPanel.remove(mainPanel);
+        if (splitLayoutPanel.getWidgetCount() == 1 && !isInTheCenterOfTheParent()) {
+            // this panel doesn't have any child sub-panels
+            // so just remove it from it's parent
+            ((SubPanelViewImpl)parentPanel).removeWidgetFromSplitPanel(this);
+            return;
+        }
 
-        // move widget from east/south part to the center
-        final Widget lastWidget = splitLayoutPanel.getWidget(0);
-        splitLayoutPanel.setWidgetSize(lastWidget, 0);
-        splitLayoutPanel.remove(lastWidget);
-        splitLayoutPanel.add(lastWidget);
+        if (isInTheCenterOfTheParent()) {
+            ((SubPanelViewImpl)parentPanel).removeChildSubPanel(this);
+        } else {
+            removeChildSubPanel(mainPanel);
+        }
     }
 
-    @Override
-    public void removeChildSubPanel(Widget widget) {
-        if (splitLayoutPanel.getWidgetDirection(widget) == DockLayoutPanel.Direction.CENTER) {
-            // this is the only widget on the panel
-            // don't allow to remove it
-            return;
+    /** Checks whether this panel is in the central part of it's parent. */
+    private boolean isInTheCenterOfTheParent() {
+        return ((SubPanelViewImpl)parentPanel).splitLayoutPanel.getWidgetDirection(this) == CENTER;
+    }
+
+    private void removeChildSubPanel(Widget widget) {
+        removeWidgetFromSplitPanel(widget.asWidget());
+
+        IsWidget lastWidget = null;
+        if (!southSubPanels.isEmpty()) {
+            lastWidget = southSubPanels.get(0);
+        } else if (!eastSubPanels.isEmpty()) {
+            lastWidget = eastSubPanels.get(0);
         }
 
-        splitLayoutPanel.setWidgetSize(widget, 0);
+        if (lastWidget != null) {
+            removeWidgetFromSplitPanel(lastWidget.asWidget());
+            splitLayoutPanel.add(lastWidget);
+        } else {
+            ((SubPanelViewImpl)parentPanel).removeWidgetFromSplitPanel(this);
+        }
+    }
+
+    private void removeWidgetFromSplitPanel(Widget widget) {
+        if (splitLayoutPanel.getWidgetDirection(widget) != CENTER) {
+            // collapse east/south part in order to maximize central part
+            splitLayoutPanel.setWidgetSize(widget, 0);
+        }
+
         splitLayoutPanel.remove(widget);
+
+        southSubPanels.remove(widget);
+        eastSubPanels.remove(widget);
     }
 
     @Override
-    public void setParentPanel(SubPanelView parentPanel) {
+    public void setParentPanel(@Nullable SubPanelView parentPanel) {
         this.parentPanel = parentPanel;
+
+        if (parentPanel == null) {
+            // do not allow to remove root panel (if it doesn't have parent)
+            menu.removeListItem(closePaneMenuItem);
+        }
     }
 
     @Override
     public void onMenuItemSelected(MenuItem menuItem) {
         final Object data = menuItem.getData();
         if (data instanceof Tab) {
-            selectTab((Tab)data);
-
-            WidgetToShow widget = tabs2Widgets.get(data);
+            final WidgetToShow widget = tabs2Widgets.get(data);
             if (widget != null) {
                 activateWidget(widget);
                 delegate.onWidgetFocused(widget.getWidget());
@@ -247,10 +306,7 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
 
     @Override
     public void onTabClicked(Tab tab) {
-        selectTab(tab);
-
-        // TODO: extract code to the separate method
-        WidgetToShow widget = tabs2Widgets.get(tab);
+        final WidgetToShow widget = tabs2Widgets.get(tab);
         if (widget != null) {
             activateWidget(widget);
             delegate.onWidgetFocused(widget.getWidget());
@@ -266,22 +322,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
     }
 
     @Override
-
     public void onTabClosing(Tab tab) {
         closeTab(tab);
-    }
-
-    private void closeTab(Tab tab) {
-        final WidgetToShow widget = tabs2Widgets.get(tab);
-
-        if (widget != null) {
-            delegate.onWidgetRemoving(widget.getWidget(), new SubPanel.RemoveCallback() {
-                @Override
-                public void remove() {
-                    removeWidgetFromUI(widget);
-                }
-            });
-        }
     }
 
     interface SubPanelViewImplUiBinder extends UiBinder<Widget, SubPanelViewImpl> {
