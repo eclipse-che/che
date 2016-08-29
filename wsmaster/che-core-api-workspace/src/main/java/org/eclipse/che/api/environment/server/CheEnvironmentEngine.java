@@ -86,15 +86,14 @@ public class CheEnvironmentEngine {
 
     private static final Logger LOG = getLogger(CheEnvironmentEngine.class);
 
-    private final Map<String, EnvironmentHolder> environments;
-    private final StripedLocks                   stripedLocks;
-    private final SnapshotDao                    snapshotDao;
-    private final File                           machineLogsDir;
-    private final MachineInstanceProviders       machineInstanceProviders;
-    private final int                            defaultMachineMemorySizeMB;
-    private final EventService                   eventService;
-
-    private volatile boolean isPreDestroyInvoked;
+    private final    Map<String, EnvironmentHolder> environments;
+    private final    StripedLocks                   stripedLocks;
+    private final    SnapshotDao                    snapshotDao;
+    private final    File                           machineLogsDir;
+    private final    MachineInstanceProviders       machineInstanceProviders;
+    private final    int                            defaultMachineMemorySizeMB;
+    private final    EventService                   eventService;
+    private volatile boolean                        isPreDestroyInvoked;
 
     @Inject
     public CheEnvironmentEngine(SnapshotDao snapshotDao,
@@ -269,8 +268,8 @@ public class CheEnvironmentEngine {
      */
     public Instance startMachine(String workspaceId,
                                  MachineConfig machineConfig) throws ServerException,
-                                                                         EnvironmentNotRunningException,
-                                                                         ConflictException {
+                                                                     EnvironmentNotRunningException,
+                                                                     ConflictException {
         MachineConfig machineConfigCopy = new MachineConfigImpl(machineConfig);
         EnvironmentHolder environmentHolder;
         try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {

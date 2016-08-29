@@ -37,8 +37,8 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 @Singleton
 public class ExtServerVolumeProvider implements Provider<String> {
 
-    private static final String CONTAINER_TARGET = ":/mnt/che/ws-agent.zip:ro,Z";
-    private static final String WS_AGENT         = "ws-agent.zip";
+    private static final String CONTAINER_TARGET = ":/mnt/che/ws-agent.tar.gz:ro,Z";
+    private static final String WS_AGENT         = "ws-agent.tar.gz";
 
     private static final Logger LOG = LoggerFactory.getLogger(ExtServerVolumeProvider.class);
 

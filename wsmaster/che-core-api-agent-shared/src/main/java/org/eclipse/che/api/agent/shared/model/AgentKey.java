@@ -8,24 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server.terminal;
+package org.eclipse.che.api.agent.shared.model;
 
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
- * Machine implementation specific launcher of websocket terminal.
- *
- * @author Alexander Garagatyi
+ * @author Anatolii Bazko
  */
-public interface MachineImplSpecificTerminalLauncher {
+public interface AgentKey {
     /**
-     * Type of machine implementation this terminal fits.
+     * @return the name of the agent
      */
-    String getMachineType();
+    String getName();
 
     /**
-     * Starts websocket terminal inside of machine.
+     * @return the version of the agent
      */
-    void launchTerminal(Instance machine) throws MachineException;
+    @Nullable
+    String getVersion();
 }

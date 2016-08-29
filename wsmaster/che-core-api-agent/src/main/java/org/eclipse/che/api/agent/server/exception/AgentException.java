@@ -8,18 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server.wsagent;
-
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.machine.Machine;
+package org.eclipse.che.api.agent.server.exception;
 
 /**
- * Starts ws agent in the machine and wait until ws agent sends notification about its start
- *
- * @author Alexander Garagatyi
+ * @author Anatoliy Bazko
  */
-public interface WsAgentLauncher {
-    void startWsAgent(Machine devMachine) throws NotFoundException,
-                                                 ServerException;
+public class AgentException extends Exception {
+    public AgentException(String message) {
+        super(message);
+    }
+
+    public AgentException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

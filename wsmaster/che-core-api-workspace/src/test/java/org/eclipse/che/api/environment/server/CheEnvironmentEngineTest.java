@@ -67,7 +67,7 @@ public class CheEnvironmentEngineTest {
     @Mock
     MessageConsumer<MachineLogMessage> messageConsumer;
     @Mock
-    InstanceProvider instanceProvider;
+    InstanceProvider                   instanceProvider;
 
     @Mock
     SnapshotDao              snapshotDao;
@@ -75,6 +75,7 @@ public class CheEnvironmentEngineTest {
     MachineInstanceProviders machineInstanceProviders;
     @Mock
     EventService             eventService;
+
 
     CheEnvironmentEngine engine;
 

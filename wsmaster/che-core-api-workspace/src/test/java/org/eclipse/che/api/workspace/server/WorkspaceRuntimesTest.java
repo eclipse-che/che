@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
+import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
+import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -76,19 +77,19 @@ public class WorkspaceRuntimesTest {
     private static String ENV_NAME     = "default-env";
 
     @Mock
-    private EventService eventService;
-
+    private EventService         eventService;
     @Mock
     private CheEnvironmentEngine environmentEngine;
-
     @Mock
-    private WsAgentLauncher wsAgentLauncher;
+    private AgentSorter          agentSorter;
+    @Mock
+    private AgentLauncherFactory agentLauncherFactory;
 
     private WorkspaceRuntimes runtimes;
 
     @BeforeMethod
     public void setUp(Method method) throws Exception {
-        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, wsAgentLauncher));
+        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, agentSorter, agentLauncherFactory));
 
         List<Instance> machines = asList(createMachine(true), createMachine(false));
         when(environmentEngine.start(anyString(),
