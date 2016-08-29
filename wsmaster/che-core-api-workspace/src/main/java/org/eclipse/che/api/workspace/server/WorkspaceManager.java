@@ -737,6 +737,18 @@ public class WorkspaceManager {
                 SnapshotImpl snapshot = runtimes.saveMachine(namespace,
                                                              workspaceId,
                                                              machine.getId());
+                try {
+                    SnapshotImpl oldSnapshot = snapshotDao.getSnapshot(snapshot.getWorkspaceId(),
+                                                                       snapshot.getEnvName(),
+                                                                       snapshot.getMachineName());
+                    try {
+                        runtimes.removeSnapshot(oldSnapshot);
+                    } catch (ServerException srvEx) {
+                        LOG.warn("Failed to remove old snapshot {}.", oldSnapshot);
+                    }
+                    snapshotDao.removeSnapshot(oldSnapshot.getId());
+                } catch (NotFoundException ignore) {}
+
                 snapshotDao.saveSnapshot(snapshot);
             } catch (ApiException apiEx) {
                 if (machine.getConfig().isDev()) {
