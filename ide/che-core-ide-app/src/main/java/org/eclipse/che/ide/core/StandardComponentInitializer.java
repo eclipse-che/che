@@ -62,6 +62,10 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.connection.WsConnectionListener;
+import org.eclipse.che.ide.machine.macro.ServerHostNameMacroProvider;
+import org.eclipse.che.ide.machine.macro.ServerMacroProvider;
+import org.eclipse.che.ide.machine.macro.ServerPortMacroProvider;
+import org.eclipse.che.ide.machine.macro.ServerProtocolMacroProvider;
 import org.eclipse.che.ide.part.editor.actions.SwitchNextEditorAction;
 import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
@@ -339,6 +343,19 @@ public class StandardComponentInitializer {
 
     @Inject
     private TreeResourceRevealer treeResourceRevealer; //just to work with it
+
+    // do not remove the injections below
+    @Inject
+    private ServerMacroProvider serverMacroProvider;
+
+    @Inject
+    private ServerProtocolMacroProvider serverProtocolMacroProvider;
+
+    @Inject
+    private ServerHostNameMacroProvider serverHostNameMacroProvider;
+
+    @Inject
+    private ServerPortMacroProvider serverPortMacroProvider;
 
 
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
