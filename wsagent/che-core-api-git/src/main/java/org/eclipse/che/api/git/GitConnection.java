@@ -126,7 +126,7 @@ public interface GitConnection extends Closeable {
      *
      * @param listMode
      *         specifies what branches to list.
-     *         "List all" mode will be set if parameter is not specified
+     *         {@link BranchListMode#LIST_ALL} will be set if parameter is not specified
      * @throws GitException
      *         if any error occurs
      */

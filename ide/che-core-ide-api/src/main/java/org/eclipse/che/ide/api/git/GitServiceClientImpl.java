@@ -763,21 +763,7 @@ public class GitServiceClientImpl implements GitServiceClient {
                      int renameLimit,
                      String commitA,
                      String commitB, @NotNull AsyncRequestCallback<String> callback) {
-        StringBuilder params = new StringBuilder().append("?projectPath=").append(project.getPath());
-        if (fileFilter != null) {
-            for (String file : fileFilter) {
-                params.append("&fileFilter=").append(file);
-            }
-        }
-        params.append("&diffType=").append(type);
-        params.append("&noRenames=").append(String.valueOf(noRenames));
-        params.append("&renameLimit=").append(String.valueOf(renameLimit));
-        params.append("&commitA=").append(commitA);
-        params.append("&commitB=").append(commitB);
-
-        String url = appContext.getDevMachine().getWsAgentBaseUrl() + DIFF + params;
-
-        asyncRequestFactory.createGetRequest(url).loader(loader).send(callback);
+        diff(Path.valueOf(project.getPath()), fileFilter, type, noRenames, renameLimit, commitA, commitB, false).send(callback);
     }
 
     @Override

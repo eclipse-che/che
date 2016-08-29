@@ -11,20 +11,26 @@
 package org.eclipse.che.api.git.shared;
 
 /**
- * Set of branch list modes.
+ * Branch list modes.
  *
  * @author Igor Vinokur
  */
 public enum BranchListMode {
     /**
      * Show both remote and local branches. <br/>
-     * Corresponds to -a option in C git.
+     * Corresponds to -a option in console git.
      */
     LIST_ALL,
+
     /**
      * Show only remote branches. <br/>
-     * Corresponds to -r option in C git.
+     * Corresponds to -r option in console git.
      */
     LIST_REMOTE,
+
+    /**
+     * Show only local branches. <br/>
+     * Corresponds to -l or empty option in console git.
+     */
     LIST_LOCAL
 }
