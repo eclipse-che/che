@@ -110,7 +110,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     ProcessTreeNode rootNode;
 
     private List<ProcessTreeNode> rootNodes;
-    private ProcessTreeNode       selectedTreeNode;
     private ProcessTreeNode       contextTreeNode;
 
     @Inject
@@ -241,20 +240,21 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     public void newTerminal() {
         workspaceAgent.setActivePart(this);
 
-        if (selectedTreeNode == null) {
-            if (appContext.getDevMachine() != null) {
-                onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
+        final ProcessTreeNode selectedTreeNode = view.getSelectedTreeNode();
+        if (selectedTreeNode != null) {
+            if (selectedTreeNode.getType() == MACHINE_NODE) {
+                onAddTerminal(appContext.getWorkspaceId(), selectedTreeNode.getId());
+            } else {
+                if (selectedTreeNode.getParent() != null &&
+                    selectedTreeNode.getParent().getType() == MACHINE_NODE) {
+                    onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
+                }
             }
-            return;
         }
 
-        if (selectedTreeNode.getType() == MACHINE_NODE) {
-            onAddTerminal(appContext.getWorkspaceId(), selectedTreeNode.getId());
-        } else {
-            if (selectedTreeNode.getParent() != null &&
-                selectedTreeNode.getParent().getType() == MACHINE_NODE) {
-                onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
-            }
+        // no selected node
+        if (appContext.getDevMachine() != null) {
+            onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
         }
     }
 
@@ -342,8 +342,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onTreeNodeSelected(ProcessTreeNode node) {
-        selectedTreeNode = node;
-
         view.showProcessOutput(node.getId());
         refreshStopButtonState(node.getId());
     }
@@ -584,7 +582,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return machineNodes.get(machine.getId());
         }
 
-        ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, new ArrayList<ProcessTreeNode>());
+        final ProcessTreeNode machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, new ArrayList<ProcessTreeNode>());
         machineNode.setRunning(true);
         machineNodes.put(machine.getId(), machineNode);
 
@@ -745,11 +743,11 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      * Prints text to the machine console.
      *
      * @param machineId
-     *          machine Id
+     *         machine Id
      * @param text
-     *          text to be printed
+     *         text to be printed
      * @param color
-     *          color of the text or NULL
+     *         color of the text or NULL
      */
     public void printMachineOutput(String machineId, String text, String color) {
         OutputConsole console = consoles.get(machineId);

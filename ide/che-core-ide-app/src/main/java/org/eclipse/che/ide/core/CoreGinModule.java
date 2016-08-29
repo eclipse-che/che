@@ -56,6 +56,7 @@ import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
 import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
@@ -114,6 +115,11 @@ import org.eclipse.che.ide.client.StartUpActionsProcessor;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.EditorRegistryImpl;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFileNameProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFilePathProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFileRelativePathProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentProjectNameProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentProjectTypeProvider;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizerImpl;
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSychronizationFactory;
@@ -140,6 +146,7 @@ import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseDispatcher;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseTransmitter;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.machine.CommandPropertyValueProviderRegistryImpl;
+import org.eclipse.che.ide.machine.macro.ServerMacroProvider;
 import org.eclipse.che.ide.menu.MainMenuView;
 import org.eclipse.che.ide.menu.MainMenuViewImpl;
 import org.eclipse.che.ide.menu.StatusPanelGroupView;
@@ -167,6 +174,11 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerViewImpl;
 import org.eclipse.che.ide.part.explorer.project.RevealNodesPersistenceComponent;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileNameProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFilePathProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileRelativePathProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectNameProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectTypeProvider;
 import org.eclipse.che.ide.preferences.PreferencesComponent;
 import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 import org.eclipse.che.ide.preferences.PreferencesView;
@@ -468,6 +480,17 @@ public class CoreGinModule extends AbstractGinModule {
 
         // Machine
         bind(CommandPropertyValueProviderRegistry.class).to(CommandPropertyValueProviderRegistryImpl.class).in(Singleton.class);
+        GinMultibinder<CommandPropertyValueProvider> macroProviders = GinMultibinder.newSetBinder(binder(), CommandPropertyValueProvider.class);
+        macroProviders.addBinding().to(EditorCurrentFileNameProvider.class);
+        macroProviders.addBinding().to(EditorCurrentFilePathProvider.class);
+        macroProviders.addBinding().to(EditorCurrentFileRelativePathProvider.class);
+        macroProviders.addBinding().to(EditorCurrentProjectNameProvider.class);
+        macroProviders.addBinding().to(EditorCurrentProjectTypeProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentFileNameProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentFilePathProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentFileRelativePathProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentProjectNameProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentProjectTypeProvider.class);
     }
 
     /** Configure Core UI components, resources and views */

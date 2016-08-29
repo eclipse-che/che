@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ui.multisplitpanel;
 import com.google.gwt.user.client.ui.IsWidget;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelView;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ import java.util.List;
 public interface SubPanel {
 
     /** Returns the panel's view. */
-    IsWidget getView();
+    SubPanelView getView();
 
     /** Split this panel horizontally on two sub-panels. */
     void splitHorizontally();
