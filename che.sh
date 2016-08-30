@@ -57,6 +57,7 @@ init_global_variables() {
   DEFAULT_CHE_VERSION="latest"
   DEFAULT_CHE_CLI_ACTION="help"
   DEFAULT_IS_INTERACTIVE="true"
+  DEFAULT_IS_PSEUDO_TTY="true"
 
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
   CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
@@ -71,6 +72,7 @@ init_global_variables() {
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
   IS_INTERACTIVE=${IS_INTERACTIVE:-${DEFAULT_IS_INTERACTIVE}}
+  IS_PSEUDO_TTY=${IS_PSEUDO_TTY:-${DEFAULT_IS_PSEUDO_TTY}}
 
   GLOBAL_NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
   GLOBAL_HOST_ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
@@ -162,11 +164,19 @@ docker_run_with_env_file() {
   fi
 }
 
+docker_run_with_pseudo_tty() {
+  if has_pseudo_tty; then
+    docker_run_with_env_file -t "$@"
+  else
+    docker_run_with_env_file "$@"
+  fi
+}
+
 docker_run_with_interactive() {
   if has_interactive; then
-    docker_run_with_env_file -it "$@"
+    docker_run_with_pseudo_tty -i "$@"
   else
-    docker_run_with_env_file -t "$@"
+    docker_run_with_pseudo_tty "$@"
   fi
 }
 
@@ -189,6 +199,14 @@ docker_run_with_che_properties() {
 
 has_interactive() {
   if [ "${IS_INTERACTIVE}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+has_pseudo_tty() {
+  if [ "${IS_PSEUDO_TTY}" = "true" ]; then
     return 0
   else
     return 1
@@ -347,6 +365,13 @@ get_list_of_che_system_environment_variables() {
   if has_default_profile; then
     cat ~/.che/profiles/${CHE_PROFILE} >> $DOCKER_ENV
   else
+
+    # Grab these values to send to other utilities - they need to know the values  
+    echo "CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME}" >> $DOCKER_ENV
+    echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> $DOCKER_ENV
+    echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
+    echo "CHE_MINI_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
+
     CHE_VARIABLES=$(env | grep CHE_)
 
     if [ ! -z ${CHE_VARIABLES+x} ]; then
@@ -728,6 +753,7 @@ print_che_cli_debug() {
   debug "HAS_CHE_ENV_VARIABLES     = $(has_che_env_variables && echo "YES" || echo "NO")"
   debug "HAS_TEMP_CHE_PROPERTIES   = $(has_che_properties && echo "YES" || echo "NO")"
   debug "HAS_INTERACTIVE           = $(has_interactive && echo "YES" || echo "NO")"
+  debug "HAS_PSEUDO_TTY            = $(has_pseudo_tty && echo "YES" || echo "NO")"
   debug ""
 }
 
