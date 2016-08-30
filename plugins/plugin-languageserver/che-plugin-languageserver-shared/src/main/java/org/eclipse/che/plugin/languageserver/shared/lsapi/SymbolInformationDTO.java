@@ -7,9 +7,10 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.SymbolInformation;
+import io.typefox.lsapi.SymbolKind;
+
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface SymbolInformationDTO extends SymbolInformation {
@@ -23,7 +24,7 @@ public interface SymbolInformationDTO extends SymbolInformation {
      * The kind of this symbol.
      * 
      */
-    public abstract void setKind(final int kind);
+    public abstract void setKind(final SymbolKind kind);
 
     /**
      * The location of this symbol. Overridden to return the DTO type.
@@ -41,5 +42,5 @@ public interface SymbolInformationDTO extends SymbolInformation {
      * The name of the symbol containing this symbol.
      * 
      */
-    public abstract void setContainer(final String container);
+    public abstract void setContainerName(final String container);
 }

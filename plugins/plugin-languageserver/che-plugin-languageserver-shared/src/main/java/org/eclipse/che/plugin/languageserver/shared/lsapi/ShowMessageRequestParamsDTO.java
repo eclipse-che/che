@@ -7,11 +7,12 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import java.util.List;
+import io.typefox.lsapi.MessageType;
+import io.typefox.lsapi.ShowMessageRequestParams;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import io.typefox.lsapi.ShowMessageRequestParams;
+import java.util.List;
 
 @DTO
 public interface ShowMessageRequestParamsDTO extends ShowMessageRequestParams {
@@ -31,7 +32,7 @@ public interface ShowMessageRequestParamsDTO extends ShowMessageRequestParams {
      * The message type.
      * 
      */
-    public abstract void setType(final int type);
+    public abstract void setType(final MessageType type);
 
     /**
      * The actual message.

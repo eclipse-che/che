@@ -7,24 +7,25 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import java.util.Map;
+import io.typefox.lsapi.WorkspaceEdit;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import io.typefox.lsapi.WorkspaceEdit;
+import java.util.List;
+import java.util.Map;
 
 @DTO
 public interface WorkspaceEditDTO extends WorkspaceEdit {
     /**
      * Holds changes to existing resources.
      * Overridden to return the DTO type.
-     * 
+     *
      */
-    public abstract Map<String, TextEditDTO> getChanges();
+    public abstract Map<String, List<TextEditDTO>> getChanges();
     
     /**
      * Holds changes to existing resources.
      * 
      */
-    public abstract void setChanges(final Map<String, TextEditDTO> changes);
+    public abstract void setChanges(final Map<String, List<TextEditDTO>> changes);
 }

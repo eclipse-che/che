@@ -33,7 +33,7 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
     public LanguageServerEditorConfiguration(final LanguageServerCodeassistProcessorFactory codeAssistProcessor,
                                              final Provider<DocumentPositionMap> docPositionMapProvider,
                                              final LanguageServerAnnotationModelFactory annotationModelFactory,
-                                             final Provider<LanguageServerReconcileStrategy> reconcileStrategyProvider,
+                                             final LanguageServerReconcileStrategyFactory reconcileStrategyProviderFactory,
                                              final LanguageServerFormatterFactory formatterFactory,
                                              @Assisted ServerCapabilities serverCapabilities) {
         codeAssistProcessorFactory = codeAssistProcessor;
@@ -46,7 +46,7 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
         this.annotationModel = annotationModelFactory.get(docPositionMapProvider.get());
 
         this.reconciler = new ReconcilerWithAutoSave(DocumentPartitioner.DEFAULT_CONTENT_TYPE, getPartitioner());
-        reconciler.addReconcilingStrategy(DocumentPartitioner.DEFAULT_CONTENT_TYPE, reconcileStrategyProvider.get());
+        reconciler.addReconcilingStrategy(DocumentPartitioner.DEFAULT_CONTENT_TYPE, reconcileStrategyProviderFactory.build(serverCapabilities));
     }
 
     @Override

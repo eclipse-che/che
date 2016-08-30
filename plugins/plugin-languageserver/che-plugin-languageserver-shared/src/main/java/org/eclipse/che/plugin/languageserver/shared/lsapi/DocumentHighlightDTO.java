@@ -7,9 +7,10 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.DocumentHighlight;
+import io.typefox.lsapi.DocumentHighlightKind;
+
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface DocumentHighlightDTO extends DocumentHighlight {
@@ -29,5 +30,5 @@ public interface DocumentHighlightDTO extends DocumentHighlight {
      * The highlight kind, default is KIND_TEXT.
      * 
      */
-    public abstract void setKind(final Integer kind);
+    public abstract void setKind(final DocumentHighlightKind kind);
 }

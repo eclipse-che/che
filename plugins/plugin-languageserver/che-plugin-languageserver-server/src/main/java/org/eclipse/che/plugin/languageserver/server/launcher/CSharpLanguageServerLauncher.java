@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.languageserver.server.launcher;
 
 import io.typefox.lsapi.LanguageDescription;
-import io.typefox.lsapi.LanguageDescriptionImpl;
+import io.typefox.lsapi.impl.LanguageDescriptionImpl;
 import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
 
 import com.google.inject.Singleton;

@@ -7,9 +7,10 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.MessageParams;
+import io.typefox.lsapi.MessageType;
+
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface MessageParamsDTO extends MessageParams {
@@ -17,7 +18,7 @@ public interface MessageParamsDTO extends MessageParams {
      * The message type.
      * 
      */
-    public abstract void setType(final int type);
+    public abstract void setType(final MessageType type);
 
     /**
      * The actual message.

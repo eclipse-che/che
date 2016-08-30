@@ -7,9 +7,10 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
+import io.typefox.lsapi.FileChangeType;
 import io.typefox.lsapi.FileEvent;
+
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface FileEventDTO extends FileEvent {
@@ -23,5 +24,5 @@ public interface FileEventDTO extends FileEvent {
      * The change type.
      * 
      */
-    public abstract void setType(final int type);
+    public abstract void setType(final FileChangeType type);
 }

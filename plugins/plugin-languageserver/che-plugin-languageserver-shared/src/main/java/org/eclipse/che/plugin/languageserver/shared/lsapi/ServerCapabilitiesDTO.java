@@ -7,9 +7,10 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.ServerCapabilities;
+import io.typefox.lsapi.TextDocumentSyncKind;
+
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ServerCapabilitiesDTO extends ServerCapabilities {
@@ -17,7 +18,7 @@ public interface ServerCapabilitiesDTO extends ServerCapabilities {
      * Defines how text documents are synced.
      * 
      */
-    public abstract void setTextDocumentSync(final Integer textDocumentSync);
+    public abstract void setTextDocumentSync(final TextDocumentSyncKind textDocumentSync);
 
     /**
      * The server provides hover support.

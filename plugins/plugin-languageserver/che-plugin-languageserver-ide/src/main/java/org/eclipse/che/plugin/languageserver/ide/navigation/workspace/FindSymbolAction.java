@@ -28,7 +28,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.filters.FuzzyMatches;
 import org.eclipse.che.plugin.languageserver.ide.filters.Match;
-import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKind;
+import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKindHelper;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.WorkspaceServiceClient;
@@ -56,12 +56,12 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     private static final Set<String> SUPPORTED_OPEN_TYPES = Sets.newHashSet("class", "interface", "enum","function", "method");
    ;
     private final OpenFileInEditorHelper editorHelper;
-    private final QuickOpenPresenter presenter;
+    private final QuickOpenPresenter     presenter;
     private final WorkspaceServiceClient workspaceServiceClient;
-    private final DtoFactory dtoFactory;
-    private final EditorAgent editorAgent;
-    private final SymbolKind symbolKind;
-    private final FuzzyMatches fuzzyMatches;
+    private final DtoFactory             dtoFactory;
+    private final EditorAgent            editorAgent;
+    private final SymbolKindHelper       symbolKindHelper;
+    private final FuzzyMatches           fuzzyMatches;
 
     @Inject
     public FindSymbolAction(LanguageServerLocalization localization,
@@ -70,7 +70,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
                             WorkspaceServiceClient workspaceServiceClient,
                             DtoFactory dtoFactory,
                             EditorAgent editorAgent,
-                            SymbolKind symbolKind,
+                            SymbolKindHelper symbolKindHelper,
                             FuzzyMatches fuzzyMatches) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), localization.findSymbolActionTitle(), localization.findSymbolActionTitle(), null,
               null);
@@ -79,7 +79,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
         this.workspaceServiceClient = workspaceServiceClient;
         this.dtoFactory = dtoFactory;
         this.editorAgent = editorAgent;
-        this.symbolKind = symbolKind;
+        this.symbolKindHelper = symbolKindHelper;
         this.fuzzyMatches = fuzzyMatches;
     }
 
@@ -125,7 +125,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     private List<SymbolEntry> toSymbolEntries(List<SymbolInformationDTO> types, String value) {
         List<SymbolEntry> result = new ArrayList<>();
         for (SymbolInformationDTO element : types) {
-            if(!SUPPORTED_OPEN_TYPES.contains(symbolKind.from(element.getKind()))){
+            if(!SUPPORTED_OPEN_TYPES.contains(symbolKindHelper.from(element.getKind()))){
                 continue;
             }
             List<Match> matches = fuzzyMatches.fuzzyMatch(value, element.getName());
@@ -141,8 +141,8 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
                                               new TextPosition(locationRange.getEnd().getLine(), locationRange.getEnd().getCharacter()));
 
                     }
-                    result.add(new SymbolEntry(element.getName(), "", filePath, filePath, symbolKind.from(element.getKind()), range,
-                                               symbolKind.getIcon(element.getKind()), editorHelper, matches));
+                    result.add(new SymbolEntry(element.getName(), "", filePath, filePath, symbolKindHelper.from(element.getKind()), range,
+                                               symbolKindHelper.getIcon(element.getKind()), editorHelper, matches));
                 }
             }
 

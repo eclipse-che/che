@@ -65,7 +65,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
     private final DtoFactory                 dtoFactory;
     private final NotificationManager        notificationManager;
     private final FuzzyMatches               fuzzyMatches;
-    private final SymbolKind                 symbolKind;
+    private final SymbolKindHelper           symbolKindHelper;
     private       QuickOpenPresenter         presenter;
     private       List<SymbolInformationDTO> cachedItems;
     private       LinearRange                selectedLinearRange;
@@ -80,7 +80,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
                             DtoFactory dtoFactory,
                             NotificationManager notificationManager,
                             FuzzyMatches fuzzyMatches,
-                            SymbolKind symbolKind) {
+                            SymbolKindHelper symbolKindHelper) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), localization.goToSymbolActionDescription(), localization.goToSymbolActionTitle(), null,
               null);
         this.presenter = presenter;
@@ -90,7 +90,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
         this.dtoFactory = dtoFactory;
         this.notificationManager = notificationManager;
         this.fuzzyMatches = fuzzyMatches;
-        this.symbolKind = symbolKind;
+        this.symbolKindHelper = symbolKindHelper;
     }
 
     @Override
@@ -143,8 +143,8 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
             List<Match> highlights = fuzzyMatches.fuzzyMatch(normalValue, label);
             if (highlights != null) {
                 String description = null;
-                if (item.getContainer() != null) {
-                    description = item.getContainer();
+                if (item.getContainerName() != null) {
+                    description = item.getContainerName();
                 }
 
                 RangeDTO range = item.getLocation().getRange();
@@ -152,12 +152,12 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
                                                     new TextPosition(range.getEnd().getLine(), range.getEnd().getCharacter()));
                 //TODO add icons
                 result.add(new SymbolEntry(label,
-                                           symbolKind.from(item.getKind()),
+                                           symbolKindHelper.from(item.getKind()),
                                            description,
                                            textRange,
                                            (TextEditor)editorAgent.getActiveEditor(),
                                            highlights,
-                                           symbolKind.getIcon(item.getKind())));
+                                           symbolKindHelper.getIcon(item.getKind())));
             }
         }
 

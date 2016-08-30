@@ -7,9 +7,10 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.ResponseError;
+import io.typefox.lsapi.ResponseErrorCode;
+
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface ResponseErrorDTO extends ResponseError {
@@ -17,7 +18,7 @@ public interface ResponseErrorDTO extends ResponseError {
      * A number indicating the error type that occured.
      * 
      */
-    public abstract void setCode(final int code);
+    public abstract void setCode(final ResponseErrorCode code);
 
     /**
      * A string providing a short decription of the error.

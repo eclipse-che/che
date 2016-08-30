@@ -7,9 +7,10 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.Diagnostic;
+import io.typefox.lsapi.DiagnosticSeverity;
+
+import org.eclipse.che.dto.shared.DTO;
 
 @DTO
 public interface DiagnosticDTO extends Diagnostic {
@@ -30,7 +31,7 @@ public interface DiagnosticDTO extends Diagnostic {
      * client to interpret diagnostics as error, warning, info or hint.
      * 
      */
-    public abstract void setSeverity(final Integer severity);
+    public abstract void setSeverity(final DiagnosticSeverity severity);
 
     /**
      * The diagnostic's code. Can be omitted.

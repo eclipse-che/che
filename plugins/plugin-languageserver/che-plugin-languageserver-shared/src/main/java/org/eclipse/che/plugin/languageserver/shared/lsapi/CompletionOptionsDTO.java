@@ -7,11 +7,11 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import java.util.List;
+import io.typefox.lsapi.CompletionOptions;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import io.typefox.lsapi.CompletionOptions;
+import java.util.List;
 
 @DTO
 public interface CompletionOptionsDTO extends CompletionOptions {
@@ -20,7 +20,7 @@ public interface CompletionOptionsDTO extends CompletionOptions {
      * completion item.
      * 
      */
-    public abstract void setResolveProvider(final boolean resolveProvider);
+    public abstract void setResolveProvider(final Boolean resolveProvider);
 
     /**
      * The characters that trigger completion automatically.

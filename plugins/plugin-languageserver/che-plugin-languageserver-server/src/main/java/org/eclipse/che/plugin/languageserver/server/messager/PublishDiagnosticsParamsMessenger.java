@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.languageserver.server.messager;
 
 import io.typefox.lsapi.PublishDiagnosticsParams;
-import io.typefox.lsapi.PublishDiagnosticsParamsImpl;
+import io.typefox.lsapi.impl.PublishDiagnosticsParamsImpl;
 
 import com.google.gson.Gson;
 

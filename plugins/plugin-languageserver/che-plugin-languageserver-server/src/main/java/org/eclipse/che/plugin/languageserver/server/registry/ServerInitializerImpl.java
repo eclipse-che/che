@@ -12,12 +12,12 @@
  */
 package org.eclipse.che.plugin.languageserver.server.registry;
 
-import io.typefox.lsapi.InitializeParamsImpl;
 import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.InitializeResultImpl;
 import io.typefox.lsapi.LanguageDescription;
-import io.typefox.lsapi.LanguageDescriptionImpl;
 import io.typefox.lsapi.ServerCapabilities;
+import io.typefox.lsapi.impl.InitializeParamsImpl;
+import io.typefox.lsapi.impl.InitializeResultImpl;
+import io.typefox.lsapi.impl.LanguageDescriptionImpl;
 import io.typefox.lsapi.services.LanguageServer;
 
 import com.google.inject.Inject;
@@ -63,6 +63,21 @@ public class ServerInitializerImpl implements ServerInitializer {
         this.publishDiagnosticsParamsMessenger = publishDiagnosticsParamsMessenger;
     }
 
+    private static int getProcessId() {
+        String name = ManagementFactory.getRuntimeMXBean().getName();
+        int prefixEnd = name.indexOf('@');
+        if (prefixEnd != -1) {
+            String prefix = name.substring(0, prefixEnd);
+            try {
+                return Integer.parseInt(prefix);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        LOG.error("Failed to recognize the pid of the process");
+        return -1;
+    }
+
     @Override
     public void addObserver(ServerInitializerObserver observer) {
         observers.add(observer);
@@ -82,15 +97,16 @@ public class ServerInitializerImpl implements ServerInitializer {
             if (server != null) {
                 InitializeResult initializeResult = serversToInitResult.get(server);
 //                if (!initializeResult.getCapabilities().isMultiplyProjectsProvider()) {
-                    server = doInitialize(launcher, projectPath);
+                server = doInitialize(launcher, projectPath);
 //                }
             } else {
                 server = doInitialize(launcher, projectPath);
                 languageIdToServers.put(languageId, server);
             }
             InitializeResult initializeResult = serversToInitResult.get(server);
-            if(initializeResult instanceof InitializeResultImpl){
-                ((InitializeResultImpl)initializeResult).setSupportedLanguages(Collections.singletonList((LanguageDescriptionImpl)launcher.getLanguageDescription()));
+            if (initializeResult instanceof InitializeResultImpl) {
+                ((InitializeResultImpl)initializeResult)
+                        .setSupportedLanguages(Collections.singletonList((LanguageDescriptionImpl)launcher.getLanguageDescription()));
             }
             onServerInitialized(server, serversToInitResult.get(server).getCapabilities(), launcher.getLanguageDescription(), projectPath);
             return server;
@@ -148,21 +164,6 @@ public class ServerInitializerImpl implements ServerInitializer {
                                        LanguageDescription languageDescription,
                                        String projectPath) {
         observers.forEach(observer -> observer.onServerInitialized(server, capabilities, languageDescription, projectPath));
-    }
-
-    private static int getProcessId() {
-        String name = ManagementFactory.getRuntimeMXBean().getName();
-        int prefixEnd = name.indexOf('@');
-        if (prefixEnd != -1) {
-            String prefix = name.substring(0, prefixEnd);
-            try {
-                return Integer.parseInt(prefix);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-
-        LOG.error("Failed to recognize the pid of the process");
-        return -1;
     }
 
     @PreDestroy

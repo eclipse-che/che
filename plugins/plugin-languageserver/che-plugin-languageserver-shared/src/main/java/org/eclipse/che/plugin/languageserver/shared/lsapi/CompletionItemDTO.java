@@ -8,6 +8,7 @@
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
 import io.typefox.lsapi.CompletionItem;
+import io.typefox.lsapi.CompletionItemKind;
 
 import org.eclipse.che.dto.shared.DTO;
 
@@ -34,7 +35,7 @@ public interface CompletionItemDTO extends CompletionItem {
      * the editor.
      * 
      */
-    public abstract void setKind(final Integer kind);
+    public abstract void setKind(final CompletionItemKind kind);
 
     /**
      * A human-readable string with additional information about this item, like

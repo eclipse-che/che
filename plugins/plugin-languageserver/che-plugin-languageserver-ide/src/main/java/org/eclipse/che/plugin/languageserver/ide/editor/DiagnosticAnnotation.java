@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.languageserver.ide.editor;
 
 import elemental.dom.Element;
 import elemental.js.dom.JsElement;
+import io.typefox.lsapi.DiagnosticSeverity;
 
 import org.eclipse.che.ide.api.editor.text.annotation.Annotation;
 import org.eclipse.che.ide.util.dom.Elements;
@@ -48,25 +49,25 @@ public class DiagnosticAnnotation extends Annotation {
 
         this.diagnostic = diagnostic;
 
-        Integer severity = diagnostic.getSeverity();
+        DiagnosticSeverity severity = diagnostic.getSeverity();
         if (severity == null) {
             layer = ERROR_LAYER;
             setType(ERROR_ANNOTATION_TYPE);
         } else {
             switch (severity) {
-                case DiagnosticDTO.SEVERITY_ERROR:
+                case Error:
                     layer = ERROR_LAYER;
                     setType(ERROR_ANNOTATION_TYPE);
                     break;
-                case DiagnosticDTO.SEVERITY_WARNING:
+                case Warning:
                     layer = WARNING_LAYER;
                     setType(WARNING_ANNOTATION_TYPE);
                     break;
-                case DiagnosticDTO.SEVERITY_INFO:
+                case Information:
                     layer = INFO_LAYER;
                     setType(INFO_ANNOTATION_TYPE);
                     break;
-                case DiagnosticDTO.SEVERITY_HINT:
+                case Hint:
                     layer = HINT_LAYER;
                     setType(HINT_ANNOTATION_TYPE);
                     break;

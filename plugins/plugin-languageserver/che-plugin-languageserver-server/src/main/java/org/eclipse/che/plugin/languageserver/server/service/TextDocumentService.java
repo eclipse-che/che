@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.languageserver.server.service;
 
 import io.typefox.lsapi.CompletionItem;
 import io.typefox.lsapi.Location;
-import io.typefox.lsapi.LocationImpl;
+import io.typefox.lsapi.impl.LocationImpl;
 import io.typefox.lsapi.SymbolInformation;
 import io.typefox.lsapi.TextEdit;
 import io.typefox.lsapi.services.LanguageServer;

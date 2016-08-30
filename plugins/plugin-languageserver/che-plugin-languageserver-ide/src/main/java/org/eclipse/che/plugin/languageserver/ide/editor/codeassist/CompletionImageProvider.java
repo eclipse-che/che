@@ -10,12 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor.codeassist;
 
+import io.typefox.lsapi.CompletionItemKind;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.CompletionItemDTO;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.HashMap;
@@ -29,33 +30,33 @@ public class CompletionImageProvider {
 
     private final LanguageServerResources resources;
 
-    private Map<Integer, SVGResource> imageMap = new HashMap<>();
+    private Map<CompletionItemKind, SVGResource> imageMap = new HashMap<>();
 
     @Inject
     public CompletionImageProvider(LanguageServerResources resources) {
         this.resources = resources;
         //TODO add missed icons
         //no icon for keyword kind
-        imageMap.put(CompletionItemDTO.KIND_TEXT, resources.textItem());
-        imageMap.put(CompletionItemDTO.KIND_METHOD, resources.methodItem());
-//        imageMap.put(CompletionItemDTO.KIND_FUNCTION, );
-//        imageMap.put(CompletionItemDTO.KIND_CONSTRUCTOR, );
-        imageMap.put(CompletionItemDTO.KIND_FIELD, resources.fieldItem());
-        imageMap.put(CompletionItemDTO.KIND_VARIABLE, resources.variableItem());
-        imageMap.put(CompletionItemDTO.KIND_CLASS, resources.classItem());
-        imageMap.put(CompletionItemDTO.KIND_INTERFACE, resources.interfaceItem());
-        imageMap.put(CompletionItemDTO.KIND_MODULE, resources.moduleItem());
-        imageMap.put(CompletionItemDTO.KIND_PROPERTY, resources.propertyItem());
-//        imageMap.put(CompletionItemDTO.KIND_UNIT, );
-        imageMap.put(CompletionItemDTO.KIND_VALUE, resources.valueItem());
-        imageMap.put(CompletionItemDTO.KIND_ENUM, resources.enumItem());
-        imageMap.put(CompletionItemDTO.KIND_SNIPPET, resources.snippetItem());
-//        imageMap.put(CompletionItemDTO.KIND_COLOR, );
-        imageMap.put(CompletionItemDTO.KIND_FILE, resources.fileItem());
-//        imageMap.put(CompletionItemDTO.KIND_REFERENCE, );
+        imageMap.put(CompletionItemKind.Text, resources.textItem());
+        imageMap.put(CompletionItemKind.Method, resources.methodItem());
+//        imageMap.put(CompletionItemKind.KIND_FUNCTION, );
+//        imageMap.put(CompletionItemKind.KIND_CONSTRUCTOR, );
+        imageMap.put(CompletionItemKind.Field, resources.fieldItem());
+        imageMap.put(CompletionItemKind.Variable, resources.variableItem());
+        imageMap.put(CompletionItemKind.Class, resources.classItem());
+        imageMap.put(CompletionItemKind.Interface, resources.interfaceItem());
+        imageMap.put(CompletionItemKind.Module, resources.moduleItem());
+        imageMap.put(CompletionItemKind.Property, resources.propertyItem());
+//        imageMap.put(CompletionItemKind.KIND_UNIT, );
+        imageMap.put(CompletionItemKind.Value, resources.valueItem());
+        imageMap.put(CompletionItemKind.Enum, resources.enumItem());
+        imageMap.put(CompletionItemKind.Snippet, resources.snippetItem());
+//        imageMap.put(CompletionItemKind.KIND_COLOR, );
+        imageMap.put(CompletionItemKind.File, resources.fileItem());
+//        imageMap.put(CompletionItemKind.KIND_REFERENCE, );
     }
 
-    public Icon getIcon(Integer completionKind) {
+    public Icon getIcon(CompletionItemKind completionKind) {
         return new Icon("", imageMap.get(completionKind));
     }
 }
