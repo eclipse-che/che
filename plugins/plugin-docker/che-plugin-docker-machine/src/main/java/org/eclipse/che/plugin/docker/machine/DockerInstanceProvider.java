@@ -74,6 +74,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -185,6 +186,11 @@ public class DockerInstanceProvider implements InstanceProvider {
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
+
+        Set<String> volumes = new HashSet<>();
+        devMachineSystemVolumes.forEach((volume) -> Arrays.asList(volume.split(";")).stream().forEach((entry) -> volumes.add(entry)));
+        devMachineSystemVolumes = volumes;
+
         if (SystemInfo.isWindows()) {
             allMachinesSystemVolumes = escapePaths(allMachinesSystemVolumes);
             devMachineSystemVolumes = escapePaths(devMachineSystemVolumes);
