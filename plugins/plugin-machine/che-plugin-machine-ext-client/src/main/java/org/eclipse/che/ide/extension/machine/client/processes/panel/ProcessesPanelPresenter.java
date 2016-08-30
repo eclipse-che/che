@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -714,8 +715,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     /**
                      * Do not show the process if the command line has prefix #hidden
                      */
-                    if (machineProcessDto.getCommandLine() != null && !machineProcessDto.getCommandLine().isEmpty()
-                            && machineProcessDto.getCommandLine().startsWith("#hidden")) {
+                    if (!Strings.isNullOrEmpty(machineProcessDto.getCommandLine()) && machineProcessDto.getCommandLine().startsWith("#hidden")) {
                         continue;
                     }
 
