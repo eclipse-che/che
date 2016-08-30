@@ -221,7 +221,6 @@ public class ProcessesPanelPresenterTest {
         verify(workspaceAgent).setActivePart(anyObject());
         verify(commandConsoleFactory).create(eq("machine_name"));
         verify(view).addWidget(anyString(), anyString(), anyObject(), anyObject(), anyBoolean());
-        verify(view).selectNode(anyObject());
         verify(view).setProcessesData(eq(presenter.rootNode));
     }
 
@@ -247,13 +246,13 @@ public class ProcessesPanelPresenterTest {
 
         presenter.addCommandOutput(MACHINE_ID, outputConsole);
 
-        verify(view).addProcessNode(anyObject());
         verify(view, never()).hideProcessOutput(anyString());
 
         verify(outputConsole).go(acceptsOneWidgetCaptor.capture());
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
+        verify(view).addProcessNode(anyObject());
         verify(view).addWidget(anyString(), anyString(), anyObject(), eq(widget), anyBoolean());
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
@@ -278,13 +277,13 @@ public class ProcessesPanelPresenterTest {
 
         presenter.addCommandOutput(MACHINE_ID, outputConsole);
 
-        verify(view).addProcessNode(anyObject());
         verify(view, never()).hideProcessOutput(anyString());
 
         verify(outputConsole).go(acceptsOneWidgetCaptor.capture());
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
 
+        verify(view).addProcessNode(anyObject());
         verify(view).addWidget(anyString(), anyString(), anyObject(), eq(widget), anyBoolean());
         verify(view, times(2)).selectNode(anyObject());
         verify(view).setProcessesData(anyObject());
@@ -309,12 +308,12 @@ public class ProcessesPanelPresenterTest {
 
         presenter.addCommandOutput(MACHINE_ID, outputConsole);
 
-        verify(view).addProcessNode(anyObject());
         verify(view, never()).hideProcessOutput(anyString());
 
         verify(outputConsole).go(acceptsOneWidgetCaptor.capture());
         IsWidget widget = mock(IsWidget.class);
         acceptsOneWidgetCaptor.getValue().setWidget(widget);
+        verify(view).addProcessNode(anyObject());
 
         verify(view).addWidget(anyString(), anyString(), anyObject(), eq(widget), anyBoolean());
         verify(view, times(2)).selectNode(anyObject());
@@ -356,7 +355,7 @@ public class ProcessesPanelPresenterTest {
         verify(view, times(2)).setProcessesData(anyObject());
         verify(view, times(2)).selectNode(anyObject());
         verify(view).addWidget(anyString(), anyString(), anyObject(), eq(terminalWidget), anyBoolean());
-        verify(view, times(2)).addProcessNode(anyObject());
+        verify(view, times(1)).addProcessNode(anyObject());
         verify(terminal).setVisible(eq(true));
         verify(terminal).connect();
         verify(terminal).setListener(anyObject());
