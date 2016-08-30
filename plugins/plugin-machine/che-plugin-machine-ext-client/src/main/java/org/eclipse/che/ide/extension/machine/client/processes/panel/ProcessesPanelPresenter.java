@@ -694,6 +694,14 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             @Override
             public void apply(List<MachineProcessDto> arg) throws OperationException {
                 for (MachineProcessDto machineProcessDto : arg) {
+                    /**
+                     * Do not show the process if the command line has prefix #hidden
+                     */
+                    if (machineProcessDto.getCommandLine() != null && !machineProcessDto.getCommandLine().isEmpty()
+                            && machineProcessDto.getCommandLine().startsWith("#hidden")) {
+                        continue;
+                    }
+
                     final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
                                                             .withName(machineProcessDto.getName())
                                                             .withAttributes(machineProcessDto.getAttributes())

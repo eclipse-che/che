@@ -300,9 +300,12 @@
     margin-right: 2px;
     color: categoryHeaderButtonColor;
     cursor: pointer;
+    position: absolute;
+    right: 24px;
+    top: 0px;
 }
 
-.processTree .processButton {
+.processTree .newTerminalButton {
     float: right;
     margin: 3px 6px 0 5px;
     width: 12px;
@@ -313,21 +316,32 @@
     box-sizing: border-box;
     text-align: center;
     cursor: pointer;
+    position: absolute;
+    right: 0px;
+    top: 0px;
 }
 
-.processTree .processButton > svg {
+.processTree .newTerminalButton > svg {
     margin-top: 2px;
 }
 
-.processButton span:hover {
+.newTerminalButton span:hover {
     fill: categoryHeaderButtonHoverColor;
     stroke: categoryHeaderButtonHoverColor;
 }
 
-.processButton:hover,
+.newTerminalButton:hover,
 .sshButton:hover {
     filter: brightness(120%);
     -webkit-filter: brightness(120%);
+}
+
+.processTree .machineMonitors {
+    float: right;
+    cursor: default;
+    position: absolute;
+    right: 24px;
+    top: 0px;
 }
 
 .processTree .processIcon {
@@ -404,6 +418,9 @@
     border-radius: 2px;
     box-sizing: border-box;
     cursor: pointer;
+    position: absolute;
+    right: 24px;
+    top: 0px;
 }
 
 .processesPanelStopButtonForProcess:hover {
@@ -423,6 +440,9 @@
     padding-right: 9px;
     float: right;
     fill: editorTabIconColor;
+    position: absolute;
+    right: 0px;
+    top: 0px;
 }
 
 .processesPanelCloseButtonForProcess svg g,
