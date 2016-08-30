@@ -31,10 +31,9 @@ import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
-import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.socketio.Consumer;
@@ -82,10 +81,6 @@ public class CheFluxLiveEditExtension{
 
     private MessageBus                           messageBus;
 
-    private CommandManager                       commandManager;
-
-    private CommandPropertyValueProviderRegistry commandPropertyValueProviderRegistry;
-
     private EventBus                             eventBus;
 
     private AppContext                           appContext;
@@ -108,18 +103,20 @@ public class CheFluxLiveEditExtension{
     private String userId;
     private CursorModelForPairProgramming cursorModelForPairProgramming;
 
+	private MacroProcessor macroProcessor;
+
     @Inject
     public CheFluxLiveEditExtension(final MessageBusProvider messageBusProvider,
                                     final EventBus eventBus,
                                     final MachineServiceClient machineServiceClient,
                                     final DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                     final AppContext appContext,
-                                    final CommandManager commandManager,
-                                    final CommandPropertyValueProviderRegistry commandPropertyValueProviderRegistry, EditorAgent editorAgent, NotificationManager notificationManager) {
+                                    final MacroProcessor macroProcessor,
+                                    final EditorAgent editorAgent,
+                                    final NotificationManager notificationManager) {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
-        this.commandManager = commandManager;
+        this.macroProcessor = macroProcessor;
         this.messageBus = messageBusProvider.getMessageBus();
-        this.commandPropertyValueProviderRegistry = commandPropertyValueProviderRegistry;
         this.eventBus = eventBus;
         this.appContext = appContext;
         this.machineServiceClient = machineServiceClient;
@@ -197,9 +194,6 @@ public class CheFluxLiveEditExtension{
         }
         if ("flux".equals(descriptor.getName())) {
             String urlToSubstitute = "http://${server.port.3000}";
-            if (commandPropertyValueProviderRegistry == null) {
-                return false;
-            }
             substituteAndConnect(urlToSubstitute);
             return true;
         }
@@ -209,7 +203,7 @@ public class CheFluxLiveEditExtension{
     int trySubstitude = 10;
 
     public void substituteAndConnect(final String previewUrl) {
-            commandManager.substituteProperties(previewUrl).then(new Operation<String>() {
+            macroProcessor.expandMacros(previewUrl).then(new Operation<String>() {
                 @Override
                 public void apply(final String url) throws OperationException {
                     if (url.contains("$")){
