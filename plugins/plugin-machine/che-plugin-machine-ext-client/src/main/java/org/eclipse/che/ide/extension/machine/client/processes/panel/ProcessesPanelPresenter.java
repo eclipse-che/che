@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -711,6 +712,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             @Override
             public void apply(List<MachineProcessDto> arg) throws OperationException {
                 for (MachineProcessDto machineProcessDto : arg) {
+                    /**
+                     * Do not show the process if the command line has prefix #hidden
+                     */
+                    if (!Strings.isNullOrEmpty(machineProcessDto.getCommandLine()) && machineProcessDto.getCommandLine().startsWith("#hidden")) {
+                        continue;
+                    }
+
                     final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
                                                             .withName(machineProcessDto.getName())
                                                             .withAttributes(machineProcessDto.getAttributes())

@@ -133,7 +133,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                        MIDDLE,
                        locale.viewMachineRunningTooltip());
 
-        SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().processButton());
+        SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
         newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
         root.appendChild(newTerminalButton);
 
@@ -195,9 +195,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         newTerminalButton.addEventListener(Event.CLICK, blockMouseListener, true);
         newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
 
-        Element monitorsElement = Elements.createSpanElement();
-        monitorsElement.getStyle().setProperty("float", "right");
-        monitorsElement.getStyle().setProperty("cursor", "default");
+        Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
         root.appendChild(monitorsElement);
 
         Node monitorNode = (Node)machineMonitors.getMonitorWidget(machine.getId(), this).getElement();
@@ -245,6 +243,8 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
     private SpanElement createTerminalElement(ProcessTreeNode node) {
         SpanElement root = Elements.createSpanElement();
 
+        root.appendChild(createCloseElement(node));
+
         SVGResource icon = node.getTitleIcon();
         if (icon != null) {
             SpanElement iconElement = Elements.createSpanElement(resources.getCss().processIcon());
@@ -255,8 +255,6 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
             divElement.appendChild((Node)new SVGImage(icon).getElement());
         }
-
-        root.appendChild(createCloseElement(node));
 
         Element nameElement = Elements.createSpanElement();
         nameElement.setTextContent(node.getName());
