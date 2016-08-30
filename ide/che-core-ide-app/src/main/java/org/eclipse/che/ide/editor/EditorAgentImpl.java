@@ -217,7 +217,7 @@ public class EditorAgentImpl implements EditorAgent,
         doOpen(file, callback, null);
     }
 
-    private void doOpen(final VirtualFile file, final OpenEditorCallback callback, Constraints constraints) {
+    private void doOpen(final VirtualFile file, final OpenEditorCallback callback, final Constraints constraints) {
         PartPresenter activePart = editorMultiPartStack.getActivePart();
         EditorPartStack activePartStack = editorMultiPartStack.getPartStackByPart(activePart);
         if (constraints == null && activePartStack != null) {
@@ -229,7 +229,7 @@ public class EditorAgentImpl implements EditorAgent,
             }
         }
 
-        FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
+        final FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
         EditorProvider editorProvider = editorRegistry.getEditor(fileType);
         if (editorProvider instanceof AsyncEditorProvider) {
             AsyncEditorProvider provider = (AsyncEditorProvider)editorProvider;

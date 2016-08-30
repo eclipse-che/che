@@ -23,7 +23,6 @@ import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -155,7 +154,7 @@ public class LanguageServerExtension {
     protected void registerFileEventHandler(final EventBus eventBus,
                                             final TextDocumentServiceClient serviceClient,
                                             final DtoFactory dtoFactory) {
-        eventBus.addHandler(FileEvent.TYPE, new FileEventHandler() {
+        eventBus.addHandler(FileEvent.TYPE, new FileEvent.FileEventHandler() {
 
             @Override
             public void onFileOperation(final FileEvent event) {
