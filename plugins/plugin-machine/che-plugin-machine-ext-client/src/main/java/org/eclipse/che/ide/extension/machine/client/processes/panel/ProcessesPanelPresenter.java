@@ -59,6 +59,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -210,10 +211,20 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         rootNodes.remove(destroyedMachineNode);
-        onCloseTerminal(destroyedMachineNode);
-        onStopCommandProcess(destroyedMachineNode);
-
         view.setProcessesData(rootNode);
+
+        final Collection<ProcessTreeNode> children = new ArrayList<>();
+        children.addAll(destroyedMachineNode.getChildren());
+        for (ProcessTreeNode child : children) {
+            if (TERMINAL_NODE.equals(child.getType()) && terminals.containsKey(child.getId())) {
+                onCloseTerminal(child);
+            } else if (COMMAND_NODE.equals(child.getType()) && consoles.containsKey(child.getId())) {
+                onStopCommandProcess(child);
+                view.hideProcessOutput(child.getId());
+            }
+        }
+
+        view.hideProcessOutput(destroyedMachineNode.getId());
     }
 
     @Override
@@ -394,10 +405,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                           outputConsole.getTitleIcon(),
                                                           null);
         commandId = commandNode.getId();
-        view.addProcessNode(commandNode);
         addChildToMachineNode(commandNode, machineTreeNode);
 
-        addOutputConsole(commandId, outputConsole, false);
+        addOutputConsole(commandId, commandNode, outputConsole, false);
 
         refreshStopButtonState(commandId);
         workspaceAgent.setActivePart(this);
@@ -417,15 +427,21 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         return consoles.containsKey(commandId) && consoles.get(commandId).isFinished();
     }
 
-    private void addOutputConsole(final String id, final OutputConsole outputConsole, final boolean machineConsole) {
+    private void addOutputConsole(final String id,
+                                  final ProcessTreeNode processNode,
+                                  final OutputConsole outputConsole,
+                                  final boolean machineConsole) {
         consoles.put(id, outputConsole);
         consoleCommands.put(outputConsole, id);
 
         outputConsole.go(new AcceptsOneWidget() {
             @Override
             public void setWidget(final IsWidget widget) {
+                view.addProcessNode(processNode);
                 view.addWidget(id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, machineConsole);
-                view.selectNode(view.getNodeById(id));
+                if (!MACHINE_NODE.equals(processNode.getType())) {
+                    view.selectNode(view.getNodeById(id));
+                }
             }
         });
 
@@ -593,7 +609,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         rootNodes.add(machineNode);
 
         OutputConsole outputConsole = commandConsoleFactory.create(machine.getConfig().getName());
-        addOutputConsole(machine.getId(), outputConsole, true);
+
+        addOutputConsole(machine.getId(), machineNode, outputConsole, true);
 
         view.setProcessesData(rootNode);
 
