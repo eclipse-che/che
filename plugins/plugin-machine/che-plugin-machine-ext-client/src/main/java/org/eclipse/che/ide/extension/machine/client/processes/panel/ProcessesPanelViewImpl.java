@@ -53,6 +53,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.MACHINE_NODE;
+
 /**
  * Implementation of {@link ProcessesPanelView}.
  *
@@ -282,6 +284,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
             public void onWidgetRemoving(SubPanel.RemoveCallback removeCallback) {
                 final ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
 
+                if (treeNode == null) {
+                    return;
+                }
+
                 switch (treeNode.getType()) {
                     case COMMAND_NODE:
                         delegate.onCommandTabClosing(treeNode, removeCallback);
@@ -290,6 +296,10 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
                         delegate.onTerminalTabClosing(treeNode);
                         removeCallback.remove();
                         break;
+                    case MACHINE_NODE:
+                        removeCallback.remove();
+                        break;
+
                 }
             }
         });
@@ -408,7 +418,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         activeProcessId = processId;
 
         final ProcessTreeNode treeNode = processTreeNodes.get(processId);
-        if (treeNode != null) {
+        if (treeNode != null && !MACHINE_NODE.equals(treeNode.getType())) {
             treeNode.setHasUnreadContent(false);
             treeNode.getTreeNodeElement().getClassList().remove(machineResources.getCss().badgeVisible());
         }
