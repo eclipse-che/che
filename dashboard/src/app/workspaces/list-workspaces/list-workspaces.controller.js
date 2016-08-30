@@ -42,36 +42,9 @@ export class ListWorkspacesCtrl {
     this.getUserWorkspaces();
 
     this.workspacesSelectedStatus = {};
-    this.menuOptions = [
-      {
-        title: 'Select all workspaces',
-        onclick: () => {
-          this.selectAllWorkspaces();
-        },
-        disabled: () => {
-          return this.isAllWorkspacesSelected();
-        }
-      },
-      {
-        title: 'Deselect all workspaces',
-        onclick: () => {
-          this.deselectAllWorkspaces();
-        },
-        disabled: () => {
-          return this.isNoWorkspacesSelected();
-        }
-      },
-      {
-        title: 'Delete selected workspaces',
-        onclick: () => {
-          this.deleteSelectedWorkspaces();
-        },
-        disabled: () => {
-          return this.isNoWorkspacesSelected();
-        }
-      }
-    ];
 
+    this.isBulkChecked = false;
+    this.isNoSelected = true;
     $rootScope.showIDE = false;
   }
 
@@ -141,9 +114,7 @@ export class ListWorkspacesCtrl {
       promises.push(promiseWorkspace);
     }
 
-    this.$q.all(promises).then(() => {
-      this.isInfoLoading = false;
-    }, (error) => {
+    this.$q.all(promises).finally(() => {
       this.isInfoLoading = false;
     });
   }
@@ -151,31 +122,17 @@ export class ListWorkspacesCtrl {
   /**
    * return true if all workspaces in list are checked
    * @returns {boolean}
-     */
+   */
   isAllWorkspacesSelected() {
-    let disabled = true;
-    for (let key of this.workspacesById.keys()) {
-      if (!this.workspacesSelectedStatus[key]) {
-        disabled = false;
-        break;
-      }
-    }
-    return disabled;
+    return this.isAllSelected;
   }
 
   /**
    * returns true if all workspaces in list are not checked
    * @returns {boolean}
-     */
+   */
   isNoWorkspacesSelected() {
-    let workspaceIds = Object.keys(this.workspacesSelectedStatus);
-    if (!workspaceIds.length) {
-      return true;
-    }
-
-    return workspaceIds.every((key) => {
-      return !this.workspacesSelectedStatus[key];
-    });
+    return this.isNoSelected;
   }
 
   /**
@@ -194,6 +151,45 @@ export class ListWorkspacesCtrl {
     Object.keys(this.workspacesSelectedStatus).forEach((key) => {
       this.workspacesSelectedStatus[key] = false;
     });
+  }
+
+  /**
+   * Change bulk selection value
+   */
+  changeBulkSelection() {
+    if (this.isBulkChecked) {
+      this.deselectAllWorkspaces();
+      this.isBulkChecked = false;
+    } else {
+      this.selectAllWorkspaces();
+      this.isBulkChecked = true;
+    }
+    this.updateSelectedStatus();
+  }
+
+  /**
+   * Update workspace selected status
+   */
+  updateSelectedStatus() {
+    this.isNoSelected = true;
+    this.isAllSelected = true;
+
+    Object.keys(this.workspacesSelectedStatus).forEach((key) => {
+      if (this.workspacesSelectedStatus[key]) {
+        this.isNoSelected = false;
+      } else {
+        this.isAllSelected = false;
+      }
+    });
+
+    if (this.isNoSelected) {
+      this.isBulkChecked = false;
+      return;
+    }
+
+    if (this.isAllSelected) {
+      this.isBulkChecked = true;
+    }
   }
 
   /**
@@ -255,7 +251,7 @@ export class ListWorkspacesCtrl {
 
       this.$q.all(deleteWorkspacePromises).finally(() => {
         this.getUserWorkspaces();
-
+        this.updateSelectedStatus();
         if (isError) {
           this.cheNotification.showError('Delete failed.');
         }
@@ -275,13 +271,12 @@ export class ListWorkspacesCtrl {
    * Show confirmation popup before workspaces to delete
    * @param numberToDelete
    * @returns {*}
-     */
+   */
   showDeleteWorkspacesConfirmation(numberToDelete) {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
       confirmTitle += 'these ' + numberToDelete + ' workspaces?';
-    }
-    else {
+    } else {
       confirmTitle += 'this selected workspace?';
     }
     let confirm = this.$mdDialog.confirm()
@@ -292,5 +287,6 @@ export class ListWorkspacesCtrl {
       .clickOutsideToClose(true);
 
     return this.$mdDialog.show(confirm);
-  };
+  }
+
 }

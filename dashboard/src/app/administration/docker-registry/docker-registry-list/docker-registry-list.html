@@ -1,43 +1,94 @@
-<che-panel che-title="Docker Registries" che-title-icon="material-design icon-ic_widgets_24px">
-  <div class="docker-registry-list">
-    <md-progress-linear md-mode="indeterminate" ng-show="dockerRegistryListController.isLoading"></md-progress-linear>
-    <div ng-show="!dockerRegistryListController.isLoading">
-      <div>{{dockerRegistryListController.registries.length > 0 ? 'List of registries' : 'No registries found'}}</div>
-      <md-content class="registry-management-content">
-        <div flex layout="row" layout-align="end center">
-          <che-list flex ng-if="dockerRegistryListController.registries && dockerRegistryListController.registries.length > 0">
-            <che-list-item ng-repeat="registry in dockerRegistryListController.registries | orderBy:'registry.username'" flex-gt-sm="100" flex="33"
-                           ng-mouseover="hover=true"
-                           ng-mouseout="hover=false">
-              <div layout-gt-sm="row" flex="100" class="registry-row" layout-align="start center">
-                <span class="registry-url" flex="50" layout="row">{{registry.url}}</span>
-                <span class="registry-user-data" flex="30" layout="row">{{registry.username}}</span>
-              <span class="registry-actions" flex="5" layout="row" ng-show="hover" layout-align="end center">
-                <span class="material-design icon-ic_mode_edit_24px"
-                      tooltip="Edit registry"
-                      ng-click="dockerRegistryListController.showEditRegistryDialog($event, registry);">
-                </span>
-              </span>
-              <span class="registry-actions" flex="5" layout="row" ng-show="hover" layout-align="center center">
-                <span class="material-design icon-ic_remove_circle_outline_24px"
-                      tooltip="Remove registry"
-                      ng-click="dockerRegistryListController.removeRegistry($event, registry);">
-                </span>
-              </span>
-              </div>
-            </che-list-item>
-          </che-list>
-          <div class="add-registry-button-container"
-               layout-gt-sm="column" layout-align="end center">
-            <md-button class="md-fab"
-                       tooltip="Add private registry"
-                       aria-label="add member"
-                       ng-click="dockerRegistryListController.showAddRegistryDialog($event);">
-              <span class="fa fa-plus"></span>
-            </md-button>
+<md-progress-linear md-mode="indeterminate" ng-show="dockerRegistryListController.isLoading"></md-progress-linear>
+<div ng-show="!dockerRegistryListController.isLoading">
+  <md-content class="registry-management-content">
+
+    <che-list-header che-input-placeholder="Search"
+                     che-search-model="dockerRegistryListController.registryFilter.username"
+                     che-hide-search="dockerRegistryListController.registries.length === 0"
+                     che-add-button-title="Add Registry"
+                     che-on-add="dockerRegistryListController.showAddRegistryDialog($event)"
+                     che-delete-button-title="Delete"
+                     che-on-delete="dockerRegistryListController.deleteSelectedRegistries()"
+                     che-hide-delete="dockerRegistryListController.isNoSelected"
+                     che-hide-header="(dockerRegistryListController.registries | filter:dockerRegistryListController.registryFilter).length === 0">
+      <div flex="100"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="column" layout-gt-xs="row"
+             layout-align="start center"
+             class="che-checkbox-area">
+          <div layout="row" layout-align="start center" class="che-list-item-checkbox-main">
+            <md-checkbox class="che-list-item-checkbox md-default-theme"
+                         aria-label="Registry list"
+                         ng-checked="dockerRegistryListController.isBulkChecked"
+                         ng-click="dockerRegistryListController.changeBulkSelection()"></md-checkbox>
           </div>
         </div>
-      </md-content>
+        <div flex hide-xs layout-gt-xs="row"
+             layout-align="start center"
+             class="che-list-item-details">
+          <che-list-header-column flex-gt-xs="50"
+                                  che-sort-value='dockerRegistryListController.registryOrderBy'
+                                  che-sort-item='url'
+                                  che-column-title='Address'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="25"
+                                  che-sort-value='dockerRegistryListController.registryOrderBy'
+                                  che-sort-item='username'
+                                  che-column-title='Username'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="25"
+                                  che-column-title='Actions'></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+    <che-list flex ng-if="dockerRegistryListController.registries && dockerRegistryListController.registries.length > 0">
+      <che-list-item
+              ng-repeat="registry in dockerRegistryListController.registries | orderBy:dockerRegistryListController.registryOrderBy | filter:dockerRegistryListController.registryFilter"
+              flex-gt-sm="100" flex="33"
+              ng-mouseover="hover=true"
+              ng-mouseout="hover=false">
+        <div flex="100"
+             layout="row"
+             layout-align="start stretch"
+             class="che-list-item-row">
+          <div layout="row"
+               layout-align="start center"
+               class="che-checkbox-area">
+            <che-list-item-checked ng-model="dockerRegistryListController.registriesSelectedStatus[registry.url]"
+                                   ng-click="dockerRegistryListController.updateSelectedStatus()"
+                                   che-aria-label-checkbox="Registry {{registry.url}}"></che-list-item-checked>
+          </div>
+          <div flex
+               layout-xs="column" layout-gt-xs="row"
+               layout-align-gt-xs="start center"
+               layout-align-xs="start start"
+               class="che-list-item-details">
+            <div flex-gt-xs="50"
+                 class="che-list-item-name">
+              <span class="che-xs-header noselect" hide-gt-xs>Address</span>
+              <a ng-href="{{registry.url}}" class="che-hover registry-url" target="_blank">{{registry.url}}</a>
+            </div>
+            <div flex-gt-xs="25">
+              <span class="che-xs-header noselect" hide-gt-xs>Username</span>
+              <span class="registry-user-data">{{registry.username}}</span>
+            </div>
+            <div flex-gt-xs="25">
+              <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+                  <span class="che-list-actions">
+                      <div ng-click="dockerRegistryListController.showEditRegistryDialog($event, registry)" tooltip="Edit registry">
+                        <span class="material-design icon-ic_mode_edit_24px"></span>
+                      </div>
+                  </span>
+            </div>
+          </div>
+        </div>
+      </che-list-item>
+    </che-list>
+    <div class="che-list-empty">
+        <span ng-show="dockerRegistryListController.registries.length > 0 && (dockerRegistryListController.registries | filter:dockerRegistryListController.registryFilter).length === 0">
+          No registries found
+        </span>
+      <span ng-show="dockerRegistryListController.registries.length === 0">There are no registries yet</span>
     </div>
-  </div>
-</che-panel>
+  </md-content>
+</div>

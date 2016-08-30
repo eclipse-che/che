@@ -102,9 +102,8 @@ export class CheToolbar {
       + '</a>';
     }
 
-    let alignment = breadcrumbHref ? 'center' : 'left';
     template += '<div layout=\"row\" flex layout-align=\"start center\" class=\"che-toolbar-header\">'
-    + '<div class=\"che-toolbar-title\" id=\"'+ id +'\" flex layout=\"row\" layout-align=\"' + alignment +' center\">'
+    + '<div class=\"che-toolbar-title\" id=\"'+ id +'\" flex layout=\"row\" layout-align=\"center center\">'
     + '<span class=\"che-toolbar-title-label\">'
     + title + '</span><span class=\"che-toolbar-title-icons\">';
 
@@ -131,7 +130,7 @@ export class CheToolbar {
     }
 
     if (buttonName) {
-      template += '<che-button-primary-flat class=\"che-toolbar-open-button\"';
+      template += '<che-button-default class=\"che-toolbar-open-button\"';
       template += ' che-button-title=\"' + buttonName + '\"';
       if (buttonIcon) {
         template += ' che-button-icon=\"' + buttonIcon + '\"';
@@ -140,7 +139,7 @@ export class CheToolbar {
       if (buttonHrefTarget) {
         template = template + ' target=\"' + buttonHrefTarget + '\"';
       }
-      template += '</che-button-primary-flat>';
+      template += '</che-button-default>';
     }
 
     if (addButtonName) {

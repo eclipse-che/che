@@ -10,25 +10,60 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<div class="workspace-projects-title">
-  {{(workspaceDetailsProjectsCtrl.projects && workspaceDetailsProjectsCtrl.projects.length > 0) ? workspaceDetailsProjectsCtrl.projects.length : 'No'}}
-  Project{{(workspaceDetailsProjectsCtrl.projects && workspaceDetailsProjectsCtrl.projects.length === 1) ? '' : 's'}} in the workspace</div>
-<md-content class="workspace-projects-content">
-  <div flex layout="row" layout-align="end center">
-    <che-list flex ng-if="workspaceDetailsProjectsCtrl.projects && workspaceDetailsProjectsCtrl.projects.length > 0"
-               ng-class="{ 'projects-small': !workspaceDetailsProjectsCtrl.widthGtSm() }">
-      <che-project-item ng-repeat="project in workspaceDetailsProjectsCtrl.projects" flex-gt-sm="100" flex="33"
-                         che-project-item-workspace="workspaceDetailsProjectsCtrl.workspace"
-                         che-project-item-project="project"
-                         che-profile-creation-date="workspaceDetailsProjectsCtrl.profileCreationDate"></che-project-item>
-    </che-list>
-    <div class="workspace-projects-list-side" ng-class="{ 'workspace-projects-list-side-big': workspaceDetailsProjectsCtrl.widthGtSm() }"
-          layout-gt-sm="column" layout-align="end center">
-      <a ng-href="#/create-project?workspaceId={{workspaceDetailsProjectsCtrl.workspaceId}}" href="#/create-project?workspaceId={{workspaceDetailsProjectsCtrl.workspace.id}}">
-        <md-button class="md-fab" ng-class="{ 'md-fab-bottom-right': !workspaceDetailsProjectsCtrl.widthGtSm() }"
-                 aria-label="add project">
-        <span class="fa fa-plus"></span>
-      </md-button></a>
+<md-content flex class="workspace-projects-content">
+
+  <che-list-header che-input-placeholder="Search"
+                   che-search-model="workspaceDetailsProjectsCtrl.projectFilter.name"
+                   che-add-button-title="Add Project"
+                   che-add-button-href="#/create-project?workspaceId = {{workspaceDetailsProjectsCtrl.workspaceId}}"
+                   che-delete-button-title="Delete"
+                   che-on-delete="workspaceDetailsProjectsCtrl.deleteSelectedProjects()"
+                   che-hide-delete="workspaceDetailsProjectsCtrl.isNoSelected"
+                   che-hide-header="(workspaceDetailsProjectsCtrl.projects | filter:workspaceDetailsProjectsCtrl.projectFilter).length === 0">
+    <div flex="100"
+         layout="row"
+         layout-align="start stretch"
+         class="che-list-item-row">
+      <div layout="column" layout-gt-xs="row"
+           layout-align="start center"
+           class="che-checkbox-area">
+        <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
+          <md-checkbox class="che-list-item-checkbox md-default-theme"
+                       aria-label="Project list"
+                       ng-checked="workspaceDetailsProjectsCtrl.isBulkChecked"
+                       ng-click="workspaceDetailsProjectsCtrl.changeBulkSelection()"></md-checkbox>
+        </div>
+      </div>
+      <div flex hide-xs layout-gt-xs="row"
+           layout-align="start center"
+           class="che-list-item-details">
+        <che-list-header-column flex-gt-xs="30"
+                                che-sort-value="workspaceDetailsProjectsCtrl.projectOrderBy"
+                                che-sort-item="name"
+                                che-column-title="Name"></che-list-header-column>
+        <che-list-header-column flex-gt-xs="50"
+                                che-sort-value="workspaceDetailsProjectsCtrl.projectOrderBy"
+                                che-sort-item="description"
+                                che-column-title="Description"></che-list-header-column>
+        <che-list-header-column flex-gt-xs="20"
+                                che-column-title="Actions"></che-list-header-column>
+      </div>
     </div>
+  </che-list-header>
+  <che-list flex ng-show="(workspaceDetailsProjectsCtrl.projects | filter:workspaceDetailsProjectsCtrl.projectFilter).length > 0">
+    <che-project-item
+            ng-repeat="project in workspaceDetailsProjectsCtrl.projects | orderBy:workspaceDetailsProjectsCtrl.projectOrderBy | filter:workspaceDetailsProjectsCtrl.projectFilter"
+            che-project-item-workspace="workspaceDetailsProjectsCtrl.workspace"
+            che-on-checkbox-click="workspaceDetailsProjectsCtrl.updateSelectedStatus()"
+            ng-model="workspaceDetailsProjectsCtrl.projectsSelectedStatus[project.name]"
+            che-project-item-project="project"
+            che-profile-creation-date="workspaceDetailsProjectsCtrl.profileCreationDate"
+            flex-gt-sm="100" flex="33"></che-project-item>
+  </che-list>
+  <div class="che-list-empty">
+        <span ng-show="workspaceDetailsProjectsCtrl.projects.length > 0 && (workspaceDetailsProjectsCtrl.projects | filter:workspaceDetailsProjectsCtrl.projectFilter).length === 0">
+          No projects found
+        </span>
+    <span ng-show="workspaceDetailsProjectsCtrl.projects.length === 0">There are no project yet</span>
   </div>
 </md-content>

@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.ide.util.loging.Log;
@@ -75,10 +75,10 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                            SubversionOutputConsoleFactory consoleFactory,
                            SubversionExtensionLocalizationConstants constants,
                            SubversionClientService service,
-                           ConsolesPanelPresenter consolesPanelPresenter,
+                           ProcessesPanelPresenter processesPanelPresenter,
                            DiffViewerPresenter diffViewerPresenter,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
         this.service = service;
         this.view = view;
         this.diffViewerPresenter = diffViewerPresenter;

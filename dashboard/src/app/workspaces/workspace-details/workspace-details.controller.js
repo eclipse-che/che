@@ -14,13 +14,13 @@
  * Controller for a workspace details.
  * @author Ann Shumilova
  */
-export class WorkspaceDetailsCtrl {
+export class WorkspaceDetailsController {
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($rootScope, $route, $location, cheWorkspace, $mdDialog, cheNotification, ideSvc, $log, workspaceDetailsService) {
+  constructor($scope, $rootScope, $route, $location, cheWorkspace, $mdDialog, cheNotification, ideSvc, $log, workspaceDetailsService, lodash, $timeout) {
     this.$rootScope = $rootScope;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
@@ -29,6 +29,8 @@ export class WorkspaceDetailsCtrl {
     this.ideSvc = ideSvc;
     this.$log = $log;
     this.workspaceDetailsService = workspaceDetailsService;
+    this.lodash = lodash;
+    this.$timeout = $timeout;
 
     this.workspaceDetails = {};
     this.namespace = $route.current.params.namespace;
@@ -36,14 +38,22 @@ export class WorkspaceDetailsCtrl {
     this.workspaceKey = this.namespace + ":" + this.workspaceName;
 
     this.loading = true;
+    this.timeoutPromise;
+    $scope.$on('$destroy', () => {
+      if (this.timeoutPromise) {
+        $timeout.cancel(this.timeoutPromise);
+      }
+    });
 
     if (!this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName)) {
       let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey);
       promise.then(() => {
         this.updateWorkspaceData();
+        this.origRam = this.newRam;
       }, (error) => {
         if (error.status === 304) {
           this.updateWorkspaceData();
+          this.origRam = this.newRam;
         } else {
           this.loading = false;
           this.invalidWorkspace = error.statusText;
@@ -51,10 +61,8 @@ export class WorkspaceDetailsCtrl {
       });
     } else {
       this.updateWorkspaceData();
+      this.origRam = this.newRam;
     }
-
-    // show link 'Show more' if true
-    this.showShowMore = false;
 
     this.cheWorkspace.fetchWorkspaces();
 
@@ -96,36 +104,104 @@ export class WorkspaceDetailsCtrl {
     }
     this.workspaceId = this.workspaceDetails.id;
     this.newName = angular.copy(this.workspaceDetails.config.name);
+    this.newRam = this.getRam();
   }
 
-  //Rename the workspace.
-  renameWorkspace() {
-    this.isLoading = true;
-
-    let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId);
-
-    promise.then(() => {
-      this.doRenameWorkspace();
-    }, () => {
-      this.doRenameWorkspace();
+  /**
+   * Returns amount of RAM for dev machine in default environment.
+   * @returns {*}
+   */
+  getRam() {
+    // get default environment
+    let defaultEnv = this.lodash.find(this.workspaceDetails.config.environments, (env) => {
+      return env.name === this.workspaceDetails.config.defaultEnv;
     });
+
+    // get dev machine config
+    let devMachineConfig = this.lodash.find(defaultEnv.machineConfigs, (machine) => {
+      return machine.dev === true;
+    });
+
+    return angular.copy(devMachineConfig.limits.ram);
   }
 
-  doRenameWorkspace() {
+  /**
+   * Returns true if name of workspace is changed.
+   * @returns {boolean}
+   */
+  isNameChanged() {
+    if (this.workspaceDetails) {
+      return this.workspaceDetails.config.name !== this.newName;
+    }
+    return false;
+  }
+
+  /**
+   * Returns true if amount of RAM of workspace is changed
+   * @returns {boolean}
+   */
+  isRamChanged() {
+    if (this.workspaceDetails) {
+      return this.getRam() !== this.newRam;
+    }
+    return false;
+  }
+
+  /**
+   * Calls method to update workspace info after timeout.
+   * @param isFormValid {Boolean} true if form is valid
+   */
+  updateWorkspace(isFormValid) {
+    this.$timeout.cancel(this.timeoutPromise);
+
+    if (isFormValid === false || !(this.isNameChanged() || this.isRamChanged())) {
+      return;
+    }
+
+    this.timeoutPromise = this.$timeout(() => {
+      this.isLoading = true;
+      this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId).then(() => {
+        this.doUpdateWorkspace();
+      }, () => {
+        this.doUpdateWorkspace();
+      });
+    }, 500);
+  }
+
+  /**
+   * Updates workspace info.
+   */
+  doUpdateWorkspace() {
     this.workspaceDetails = this.cheWorkspace.getWorkspacesById().get(this.workspaceId);
     let workspaceNewDetails = angular.copy(this.workspaceDetails);
+
     workspaceNewDetails.config.name = this.newName;
+
+    this.lodash.forEach(workspaceNewDetails.config.environments, (env) => {
+      if (env.name === workspaceNewDetails.config.defaultEnv) {
+        this.lodash.forEach(env.machineConfigs, (machine) => {
+          if (machine.dev === true) {
+            machine.limits.ram = this.newRam;
+
+            if (this.getWorkspaceStatus() === 'STOPPED') {
+              this.origRam = this.newRam;
+            }
+          }
+        });
+      }
+    });
+
     delete workspaceNewDetails.links;
 
     let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, workspaceNewDetails);
     promise.then((data) => {
       this.workspaceName = data.config.name;
       this.updateWorkspaceData();
-      this.cheNotification.showInfo('Workspace name is successfully updated.');
+      this.cheNotification.showInfo('Workspace is successfully updated.');
       this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
     }, (error) => {
       this.isLoading = false;
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Rename workspace failed.');
+      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update workspace failed.');
       this.$log.error(error);
     });
   }
@@ -165,13 +241,10 @@ export class WorkspaceDetailsCtrl {
   }
 
   runWorkspace() {
-    this.showShowMore = true;
     delete this.errorMessage;
 
     let promise = this.ideSvc.startIde(this.workspaceDetails);
-    promise.then(() => {
-      this.showShowMore = false;
-    }, (error) => {
+    promise.then(() => {}, (error) => {
         let errorMessage;
 
         if (!error || !(error.data || error.error)) {
@@ -202,8 +275,20 @@ export class WorkspaceDetailsCtrl {
   stopWorkspace() {
     let promise = this.cheWorkspace.stopWorkspace(this.workspaceId);
 
-    promise.then(() => {}, (error) => {
+    promise.then(() => {
+      this.origRam = this.newRam;
+    }, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');
+      this.$log.error(error);
+    });
+  }
+
+  /**
+   * Creates snapshot of workspace
+   */
+  createSnapshotWorkspace() {
+    this.cheWorkspace.createSnapshot(this.workspaceId).then(() => {}, (error) => {
+      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Creating snapshot failed.');
       this.$log.error(error);
     });
   }

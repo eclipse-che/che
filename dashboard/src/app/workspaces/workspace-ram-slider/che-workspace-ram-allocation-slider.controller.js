@@ -14,22 +14,43 @@
  * Controller for the Workspace Ram slider
  * @author Florent Benoit
  */
-export class CheWorkspaceRamAllocationSliderCtrl {
+export class CheWorkspaceRamAllocationSliderController {
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($scope) {
+  constructor ($timeout, $scope) {
     "ngInject";
+    this.$timeout = $timeout;
 
-    $scope.$watch(() => {return this.inputVal;}, (newVal, oldVal) => {
-      if (!newVal || newVal===oldVal) {
-        // do not change ngModel if input contains incorrect value
-        return;
-      }
-      this.ngModel = newVal * 1000;
+    $scope.$watch(() => {
+      return this.ngModel;
+    }, () => {
+      this.inputVal = this.init(this.ngModel / 1024);
     });
   }
 
+  /**
+   * Rounds value to first decimal
+   * @param value original value
+   * @returns {number} rounded value
+   */
+  init(value) {
+    var factor = Math.pow(10, 1);
+    var tempValue = value * factor;
+    var roundedTempValue = Math.round(tempValue);
+    return roundedTempValue / factor;
+  }
+
+  onChange() {
+    if (!this.inputVal) {
+      return;
+    }
+    this.ngModel = this.inputVal * 1024;
+
+    this.$timeout(() => {
+      this.cheOnChange();
+    });
+  }
 }

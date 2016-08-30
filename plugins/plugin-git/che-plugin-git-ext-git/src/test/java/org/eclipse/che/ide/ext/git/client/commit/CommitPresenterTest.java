@@ -57,7 +57,7 @@ public class CommitPresenterTest extends BaseTest {
                                         appContext,
                                         dateTimeFormatter,
                                         gitOutputConsoleFactory,
-                                        consolesPanelPresenter);
+                                        processesPanelPresenter);
     }
 
     @Test

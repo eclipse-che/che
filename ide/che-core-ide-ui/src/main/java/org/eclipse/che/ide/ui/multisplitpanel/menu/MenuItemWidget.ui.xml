@@ -1,0 +1,124 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:svg="urn:import:org.vectomatic.dom.svg.ui">
+
+    <ui:with field="resources" type="org.eclipse.che.ide.api.parts.PartStackUIResources"/>
+
+    <ui:style>
+
+        @eval openedFilesDropdownListTextColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListTextColor();
+        @eval openedFilesDropdownListCloseButtonColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListCloseButtonColor();
+        @eval openedFilesDropdownListHoverBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListHoverBackgroundColor();
+        @eval openedFilesDropdownListHoverTextColor org.eclipse.che.ide.api.theme.Style.theme.openedFilesDropdownListHoverTextColor();
+
+        .main {
+            height: 20px;
+            line-height: 20px;
+            font-size: 11px;
+            font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
+            color: openedFilesDropdownListTextColor;
+            position: relative;
+        }
+
+        .icon {
+            width: 22px;
+            height: 20px;
+            overflow: hidden;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+        }
+
+        .icon svg {
+            width: 14px;
+            height: 14px;
+            margin-left: 6px;
+            margin-top: 3px;
+        }
+
+        .title {
+            padding-left: 4px;
+            cursor: default;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 145px;
+            position: absolute;
+            left: 22px;
+            top: 0px;
+            height: 20px;
+            line-height: 20px;
+            white-space: nowrap;
+        }
+
+        .closePanel {
+            width: 22px;
+            height: 20px;
+            overflow: hidden;
+            position: absolute;
+            right: 0px;
+            top: 0px;
+        }
+
+        .closeButton {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            position: absolute;
+            left: 4px;
+            top: 3px;
+        }
+
+        .closePanel .closeButton svg {
+            width: 6px;
+            height: 6px;
+            opacity: 0.5;
+            display: none;
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            pointer-events: none;
+        }
+
+        .closePanel .closeButton svg g,
+        .closePanel .closeButton svg path {
+            fill: openedFilesDropdownListCloseButtonColor;
+        }
+
+        .main:HOVER {
+            background-color: openedFilesDropdownListHoverBackgroundColor;
+            color: openedFilesDropdownListHoverTextColor;
+        }
+
+        .main:HOVER .closePanel .closeButton svg {
+            display: block;
+        }
+
+        .main:HOVER .closePanel .closeButton:HOVER svg {
+            opacity: 1;
+        }
+
+    </ui:style>
+
+    <g:FlowPanel styleName="{style.main}">
+        <g:FlowPanel ui:field="iconPanel" addStyleNames="{style.icon}"></g:FlowPanel>
+        <g:Label ui:field="title" styleName="{style.title}" />
+        <g:FlowPanel styleName="{style.closePanel}">
+            <g:FlowPanel ui:field="closeButton" styleName="{style.closeButton}">
+                <svg:SVGImage resource="{resources.closeIcon}" />
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+
+</ui:UiBinder>

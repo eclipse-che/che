@@ -23,8 +23,27 @@ export class DashboardController {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($rootScope) {
+  constructor($rootScope, cheWorkspace, $location) {
     'ngInject';
     $rootScope.showIDE = false;
+    this.cheWorkspace = cheWorkspace;
+    this.$location = $location;
+
+    cheWorkspace.fetchWorkspaces().then(() => {
+        this.checkWorkspaces();
+      },
+      (error) => {
+        if (error.status === 304) {
+          this.checkWorkspaces();
+          return;
+        }
+      });
+  }
+
+  checkWorkspaces() {
+    //If there are any workspaces - redirect to create workspace with project page:
+    if (this.cheWorkspace.getWorkspaces() && this.cheWorkspace.getWorkspaces().length === 0) {
+      this.$location.path('/create-project');
+    }
   }
 }

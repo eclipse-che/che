@@ -25,7 +25,7 @@ export class WorkspaceRecipe {
     this.templateUrl = 'app/workspaces/create-workspace/select-stack/recipe/workspace-recipe.html';
     this.replace = false;
 
-    this.controller = 'WorkspaceRecipeCtrl';
+    this.controller = 'WorkspaceRecipeController';
     this.controllerAs = 'workspaceRecipeCtrl';
 
     this.bindToController = true;

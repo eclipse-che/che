@@ -21,13 +21,14 @@ export class ProjectDetailsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($log, $route, $location, cheAPI, $mdDialog, cheNotification, lodash) {
+  constructor($scope, $log, $route, $location, cheAPI, $mdDialog, cheNotification, lodash, $timeout) {
     this.$log = $log;
     this.cheNotification = cheNotification;
     this.cheAPI = cheAPI;
     this.$mdDialog = $mdDialog;
     this.$location = $location;
     this.lodash = lodash;
+    this.$timeout = $timeout;
 
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
@@ -42,7 +43,7 @@ export class ProjectDetailsController {
 
     if (!this.workspace || !this.workspace.runtime) {
       cheAPI.getWorkspace().fetchWorkspaceDetails(this.namespace + ':' + this.workspaceName).then(() => {
-        this.workspace = cheAPI.getWorkspace().getWorkspaceByName(this.namespace, this.workspsaceName);
+        this.workspace = cheAPI.getWorkspace().getWorkspaceByName(this.namespace, this.workspaceName);
         if (this.workspace && this.workspace.runtime) {
          this.fetchProjectDetails();
         } else {
@@ -55,6 +56,13 @@ export class ProjectDetailsController {
     } else {
       this.fetchProjectDetails();
     }
+
+    this.timeoutPromise;
+    $scope.$on('$destroy', () => {
+      if (this.timeoutPromise) {
+        $timeout.cancel(this.timeoutPromise);
+      }
+    });
   }
 
   fetchProjectDetails() {
@@ -110,6 +118,7 @@ export class ProjectDetailsController {
   }
 
   setProjectDetails(projectDetails) {
+    projectDetails.description = this.projectDescription;
     let promise = this.projectService.updateProjectDetails(projectDetails);
 
     promise.then(() => {
@@ -147,12 +156,20 @@ export class ProjectDetailsController {
   }
 
   updateInfo(isInputFormValid) {
+    this.$timeout.cancel(this.timeoutPromise);
+
     if (!isInputFormValid || !(this.isNameChanged() || this.isDescriptionChanged())) {
       return;
     }
 
+    this.timeoutPromise = this.$timeout(() => {
+      this.doUpdateInfo();
+    }, 500);
+  }
+
+  doUpdateInfo() {
     if (this.isNameChanged()) {
-      let promise = this.projectService.rename(this.projectName, this.projectDetails.name);
+      let promise = this.projectService.rename(this.projectDetails.name, this.projectName);
 
       promise.then(() => {
         this.projectService.removeProjectDetailsByKey(this.projectPath);
