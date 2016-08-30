@@ -157,8 +157,8 @@ docker_run() {
 docker_run_with_env_file() {
   if has_che_env_variables; then
     get_list_of_che_system_environment_variables
-    docker_run --env-file="tmp" "$@"
-    rm -rf "tmp" > /dev/null
+    docker_run --env-file=tmp "$@"
+    rm -rf $PWD/tmp > /dev/null
   else
     docker_run "$@"
   fi
@@ -358,9 +358,8 @@ has_che_env_variables() {
 get_list_of_che_system_environment_variables() {
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
-  DOCKER_ENV="tmp"
-
-  touch "tmp"
+  DOCKER_ENV=$(get_mount_path $PWD)/tmp
+  touch $DOCKER_ENV
   
   if has_default_profile; then
     cat ~/.che/profiles/${CHE_PROFILE} >> $DOCKER_ENV
