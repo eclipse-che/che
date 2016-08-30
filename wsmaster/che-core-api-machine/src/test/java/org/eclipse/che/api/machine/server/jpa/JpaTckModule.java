@@ -13,6 +13,7 @@ package org.eclipse.che.api.machine.server.jpa;
 import com.google.inject.TypeLiteral;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
@@ -31,6 +32,8 @@ public class JpaTckModule extends TckModule {
     protected void configure() {
         install(new JpaPersistModule("main"));
         bind(JpaInitializer.class).asEagerSingleton();
+
+        bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
 
         bind(new TypeLiteral<TckRepository<RecipeImpl>>() {}).toInstance(new JpaTckRepository<>(RecipeImpl.class));
         bind(new TypeLiteral<TckRepository<SnapshotImpl>>() {}).toInstance(new JpaTckRepository<>(SnapshotImpl.class));
