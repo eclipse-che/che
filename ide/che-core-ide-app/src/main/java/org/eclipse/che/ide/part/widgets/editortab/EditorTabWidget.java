@@ -31,9 +31,10 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEventHandler;
+import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.api.parts.PartStackView.TabPosition;
@@ -44,6 +45,7 @@ import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.part.editor.EditorTabContextMenuFactory;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.util.UUID;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -86,16 +88,16 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     private final EventBus                    eventBus;
     private final EditorTabContextMenuFactory editorTabContextMenu;
     private final FileTypeRegistry            fileTypeRegistry;
+    private final String                      id;
 
-    private VirtualFile    file;
-    private ActionDelegate delegate;
-    private boolean        pinned;
-    private SVGResource    icon;
+    private VirtualFile         file;
+    private ActionDelegate      delegate;
+    private boolean             pinned;
+    private SVGResource         icon;
+    private EditorPartPresenter relatedEditorPart;
 
     @Inject
-    public EditorTabWidget(@Assisted VirtualFile file,
-                           @Assisted SVGResource icon,
-                           @Assisted String title,
+    public EditorTabWidget(@Assisted EditorPartPresenter relatedEditorPart,
                            PartStackUIResources resources,
                            EditorTabContextMenuFactory editorTabContextMenu,
                            final EventBus eventBus,
@@ -103,13 +105,15 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         this.resources = resources;
         this.eventBus = eventBus;
         this.fileTypeRegistry = fileTypeRegistry;
+        this.relatedEditorPart = relatedEditorPart;
 
         initWidget(UI_BINDER.createAndBindUi(this));
 
         this.editorTabContextMenu = editorTabContextMenu;
-        this.file = file;
-        this.icon = icon;
-        this.title.setText(title);
+        this.file = relatedEditorPart.getEditorInput().getFile();
+        this.icon = relatedEditorPart.getTitleImage();
+        this.title.setText(relatedEditorPart.getTitle());
+        this.id = title + UUID.uuid(4);
 
         iconPanel.add(getIcon());
 
@@ -123,7 +127,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         closeButton.addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                eventBus.fireEvent(new FileEvent(EditorTabWidget.this.file, CLOSE));
+                eventBus.fireEvent(FileEvent.createCloseFileEvent(EditorTabWidget.this));
             }
         }, ClickEvent.getType());
     }
@@ -201,13 +205,18 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
         }
     }
 
+    @Override
+    public String getId() {
+        return id;
+    }
+
     /** {@inheritDoc} */
     @Override
     public void onClick(@NotNull ClickEvent event) {
         if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
             delegate.onTabClicked(this);
         } else if (NativeEvent.BUTTON_MIDDLE == event.getNativeButton()) {
-            eventBus.fireEvent(new FileEvent(file, FileEvent.FileOperation.CLOSE));
+            eventBus.fireEvent(FileEvent.createCloseFileEvent(this));
         }
     }
 
@@ -255,6 +264,11 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     @Override
     public VirtualFile getFile() {
         return file;
+    }
+
+    @Override
+    public EditorPartPresenter getRelativeEditorPart() {
+        return relatedEditorPart;
     }
 
     /** {@inheritDoc} */
@@ -308,7 +322,7 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
 
     @Override
     public void onFileOperation(FileEvent event) {
-        if (event.getOperationType() == CLOSE && event.getFile().equals(file)) {
+        if (event.getOperationType() == CLOSE && this.equals(event.getEditorTab())) {
             delegate.onTabClose(this);
         }
     }

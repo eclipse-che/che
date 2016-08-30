@@ -78,7 +78,7 @@ public class JavaDebugConfigurationPagePresenterTest {
 
     @Test
     public void testGo() throws Exception {
-        when(machineServiceClient.getMachine(anyString())).thenReturn(mock(Promise.class));
+        when(machineServiceClient.getMachine(anyString(), anyString())).thenReturn(mock(Promise.class));
 
         AcceptsOneWidget container = Mockito.mock(AcceptsOneWidget.class);
 

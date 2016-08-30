@@ -1,0 +1,132 @@
+.che-list-header
+  margin 0
+
+.che-list-header-additional
+  display block
+  width 100%
+  float left
+  padding 0 40px 15px 52px
+
+  .che-list-add-button *,
+  .che-list-delete-button *
+    font-size 12px
+    font-weight bold
+    text-transform none
+    color $list-header-button-color
+
+  .che-list-add-button
+    float left
+    display inline-flex
+
+  .che-list-delete-button
+    float right
+    display inline-flex
+
+  .che-list-search
+    line-height 33px
+    margin-left 20px
+
+.che-list-search,
+.che-list-add-button > *,
+.che-list-delete-button > *
+  display inline-block
+  box-sizing content-box
+  min-width 34px
+  min-height 34px
+  line-height 33px
+  margin-top 15px
+  margin-bottom 0
+  border 1px solid $list-header-blue-color
+  che-border-radius(2px)
+
+.che-list-add-button > *
+  margin-left 0
+  margin-right 20px
+
+.che-list-delete-button > *
+  margin-left 20px
+  margin-right 0
+
+.che-list-add-button > *:hover,
+.che-list-delete-button > *:hover
+  border 1px solid $list-header-button-hover-color
+  background-color $list-header-button-hover-color !important
+
+.che-list-add-button > *,
+.che-list-delete-button > *
+  width auto
+  padding-left 20px
+  padding-right 20px
+  background-color $list-header-blue-color
+  box-shadow none !important
+
+.che-list-search
+  float right
+  width 150px
+  overflow hidden
+  box-shadow none
+
+  i:before
+    font-size 16px
+
+  .header-search-icon i
+    color $list-header-blue-color
+
+  .header-close-icon i
+    color $default-color
+
+  .header-search-input input
+    width 100%
+    border none
+    outline none
+    box-shadow none
+    height inherit
+    font-size 12px
+    text-align left
+    padding 0 5px 0 5px
+    text-overflow ellipsis
+    color $default-dark-color
+
+  .header-search-input input::-webkit-input-placeholder
+    position relative
+    right 8px
+    color $list-header-blue-color
+    text-transform capitalize
+    text-align center
+
+  .header-search-input input::-moz-placeholder
+    position relative
+    right 8px
+    color $list-header-blue-color
+    text-transform capitalize
+    text-align center
+
+  & > *
+    margin 0 5px 0 5px
+    line-height inherit
+
+    *
+      outline none
+      text-align center
+      line-height inherit
+
+.che-list-header md-item
+  border-top 1px solid $list-separator-color
+  display inline-block
+  width 100%
+  float left
+
+.che-list-header-content
+  width 100%
+
+.che-list-header-content > *
+  border-bottom 1px solid $list-separator-color
+  margin 0 40px 0 40px
+
+.che-list-header-content *
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+
+  .che-list-item-checkbox-main
+    display inline-block

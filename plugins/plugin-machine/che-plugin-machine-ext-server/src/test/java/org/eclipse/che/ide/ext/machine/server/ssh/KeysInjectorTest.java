@@ -14,7 +14,7 @@ import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.machine.server.MachineManager;
+import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.ssh.server.SshManager;
@@ -56,6 +56,7 @@ import static org.testng.Assert.assertEquals;
  */
 @Listeners(MockitoTestNGListener.class)
 public class KeysInjectorTest {
+    private static final String WORKSPACE_ID = "workspace123";
     private static final String MACHINE_ID   = "machine123";
     private static final String OWNER_ID     = "user123";
     private static final String CONTAINER_ID = "container123";
@@ -82,7 +83,7 @@ public class KeysInjectorTest {
     @Mock
     DockerConnector docker;
     @Mock
-    MachineManager  machineManager;
+    CheEnvironmentEngine environmentEngine;
     @Mock
     SshManager      sshManager;
 
@@ -97,7 +98,7 @@ public class KeysInjectorTest {
         metadataProperties.put("id", CONTAINER_ID);
         when(machineRuntime.getProperties()).thenReturn(metadataProperties);
 
-        when(machineManager.getInstance(MACHINE_ID)).thenReturn(instance);
+        when(environmentEngine.getMachine(WORKSPACE_ID, MACHINE_ID)).thenReturn(instance);
         when(instance.getOwner()).thenReturn(OWNER_ID);
         when(instance.getRuntime()).thenReturn(machineRuntime);
         when(instance.getLogger()).thenReturn(lineConsumer);
@@ -114,7 +115,7 @@ public class KeysInjectorTest {
     public void shouldNotDoAnythingIfEventTypeDoesNotEqualToRunning() {
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.DESTROYING));
 
-        verifyZeroInteractions(docker, machineManager, sshManager);
+        verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
 
     @Test
@@ -122,11 +123,12 @@ public class KeysInjectorTest {
         when(sshManager.getPairs(anyString(), anyString())).thenReturn(Collections.emptyList());
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
-                                                           .withMachineId(MACHINE_ID));
+                                                           .withMachineId(MACHINE_ID)
+                                                           .withWorkspaceId(WORKSPACE_ID));
 
-        verify(machineManager).getInstance(eq(MACHINE_ID));
+        verify(environmentEngine).getMachine(eq(WORKSPACE_ID), eq(MACHINE_ID));
         verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
-        verifyZeroInteractions(docker, machineManager, sshManager);
+        verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
 
     @Test
@@ -135,11 +137,12 @@ public class KeysInjectorTest {
                 .thenReturn(Collections.singletonList(new SshPairImpl("machine", "myPair", null, null)));
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
-                                                           .withMachineId(MACHINE_ID));
+                                                           .withMachineId(MACHINE_ID)
+                                                           .withWorkspaceId(WORKSPACE_ID));
 
-        verify(machineManager).getInstance(eq(MACHINE_ID));
+        verify(environmentEngine).getMachine(eq(WORKSPACE_ID), eq(MACHINE_ID));
         verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
-        verifyZeroInteractions(docker, machineManager, sshManager);
+        verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
 
     @Test
@@ -149,9 +152,10 @@ public class KeysInjectorTest {
                                           new SshPairImpl("machine", "myPair", "publicKey2", null)));
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
-                                                           .withMachineId(MACHINE_ID));
+                                                           .withMachineId(MACHINE_ID)
+                                                           .withWorkspaceId(WORKSPACE_ID));
 
-        verify(machineManager).getInstance(eq(MACHINE_ID));
+        verify(environmentEngine).getMachine(eq(WORKSPACE_ID), eq(MACHINE_ID));
         verify(sshManager).getPairs(eq(OWNER_ID), eq("machine"));
 
         ArgumentCaptor<CreateExecParams> argumentCaptor = ArgumentCaptor.forClass(CreateExecParams.class);
@@ -160,7 +164,7 @@ public class KeysInjectorTest {
                                                                                           "&& echo 'publicKey1' >> ~/.ssh/authorized_keys" +
                                                                                           "&& echo 'publicKey2' >> ~/.ssh/authorized_keys"});
         verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), anyObject());
-        verifyZeroInteractions(docker, machineManager, sshManager);
+        verifyZeroInteractions(docker, environmentEngine, sshManager);
     }
 
     @Test
@@ -171,7 +175,8 @@ public class KeysInjectorTest {
         when(logMessage.getContent()).thenReturn("FAILED");
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
-                                                           .withMachineId(MACHINE_ID));
+                                                           .withMachineId(MACHINE_ID)
+                                                           .withWorkspaceId(WORKSPACE_ID));
 
         verify(docker).startExec(eq(StartExecParams.create(EXEC_ID)), messageProcessorCaptor.capture());
         final MessageProcessor<LogMessage> value = messageProcessorCaptor.getValue();

@@ -59,6 +59,7 @@ import org.eclipse.che.ide.api.editor.document.DocumentStorage;
 import org.eclipse.che.ide.api.editor.editorconfig.EditorUpdateAction;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.events.CompletionRequestEvent;
+import org.eclipse.che.ide.api.editor.events.DocumentReadyEvent;
 import org.eclipse.che.ide.api.editor.events.GutterClickEvent;
 import org.eclipse.che.ide.api.editor.events.GutterClickHandler;
 import org.eclipse.che.ide.api.editor.filetype.FileTypeIdentifier;
@@ -97,8 +98,6 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.event.FileContentUpdateHandler;
-import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.event.FileEventHandler;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -134,7 +133,6 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
  * This class is only defined to allow the Gin binding to be performed.
  */
 public class OrionEditorPresenter extends AbstractEditorPresenter implements TextEditor,
-                                                                             FileEventHandler,
                                                                              UndoableEditor,
                                                                              HasBreakpointRenderer,
                                                                              HasReadOnlyProperty,
@@ -221,7 +219,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         keyBindingsManager = new TemporaryKeyBindingsManager();
 
         this.editorView.setDelegate(this);
-        eventBus.addHandler(FileEvent.TYPE, this);
     }
 
     @Override
@@ -369,11 +366,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         final Resource resource = delta.getResource();
 
         if (resource.isFile() && document.getFile().getLocation().equals(resource.getLocation())) {
-            if (resourceChangeHandler != null) {
-                resourceChangeHandler.removeHandler();
-                resourceChangeHandler = null;
-            }
-            close(false);
+            handleClose();
         }
     }
 
@@ -536,17 +529,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             setSelection(new Selection<>(input.getFile()));
         } else {
             this.delayedFocus = true;
-        }
-    }
-
-    @Override
-    public void onFileOperation(FileEvent event) {
-        if (event.getOperationType() != FileEvent.FileOperation.CLOSE) {
-            return;
-        }
-
-        if (input.getFile().equals(event.getFile())) {
-            close(false);
         }
     }
 
@@ -1018,6 +1000,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                         return;
                     }
                     editorInit.init(document);
+                    generalEventBus.fireEvent(new DocumentReadyEvent(document));
                     firePropertyChange(PROP_INPUT);
                     setupEventHandlers();
                     setupFileContentUpdateHandler();

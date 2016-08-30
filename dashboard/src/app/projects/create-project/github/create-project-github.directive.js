@@ -33,7 +33,7 @@ export class CreateProjectGithub {
     this.githubPopup = githubPopup;
     this.githubOrganizationNameResolver = githubOrganizationNameResolver;
 
-    this.controller = 'CreateProjectGithubCtrl';
+    this.controller = 'CreateProjectGithubController';
     this.controllerAs = 'createProjectGithubCtrl';
     this.bindToController = true;
 

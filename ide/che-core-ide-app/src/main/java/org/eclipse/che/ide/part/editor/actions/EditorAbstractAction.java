@@ -15,6 +15,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -31,9 +32,10 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public abstract class EditorAbstractAction extends AbstractPerspectiveAction {
 
     public static final String CURRENT_FILE_PROP = "source";
+    public static final String CURRENT_TAB_PROP  = "tab";
 
-    protected EditorAgent          editorAgent;
-    protected EventBus             eventBus;
+    protected final EventBus                      eventBus;
+    protected final EditorAgent                   editorAgent;
 
     public EditorAbstractAction(String tooltip,
                                 String description,
@@ -41,14 +43,14 @@ public abstract class EditorAbstractAction extends AbstractPerspectiveAction {
                                 EditorAgent editorAgent,
                                 EventBus eventBus) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), tooltip, description, null, icon);
-        this.editorAgent = editorAgent;
         this.eventBus = eventBus;
+        this.editorAgent = editorAgent;
     }
 
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        event.getPresentation().setEnabledAndVisible(editorAgent.getOpenedEditors() != null && !editorAgent.getOpenedEditors().isEmpty());
+        event.getPresentation().setEnabledAndVisible(!editorAgent.getOpenedEditors().isEmpty());
     }
 
     /**
@@ -68,5 +70,15 @@ public abstract class EditorAbstractAction extends AbstractPerspectiveAction {
         }
 
         throw new IllegalStateException("File doesn't provided");
+    }
+
+    protected EditorTab getEditorTab(ActionEvent e) {
+        Object o = e.getPresentation().getClientProperty(CURRENT_TAB_PROP);
+
+        if (o instanceof EditorTab) {
+            return (EditorTab)o;
+        }
+
+        throw new IllegalStateException("Tab doesn't provided");
     }
 }

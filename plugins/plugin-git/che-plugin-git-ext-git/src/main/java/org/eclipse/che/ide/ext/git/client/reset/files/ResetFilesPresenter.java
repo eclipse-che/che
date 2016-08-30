@@ -13,21 +13,21 @@ package org.eclipse.che.ide.ext.git.client.reset.files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.IndexFile;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
 import static org.eclipse.che.api.git.shared.ResetRequest.ResetType;
@@ -52,7 +52,7 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
     private final DtoFactory              dtoFactory;
     private final DialogFactory           dialogFactory;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
     private final ResetFilesView          view;
     private final GitServiceClient        service;
     private final AppContext              appContext;
@@ -72,12 +72,12 @@ public class ResetFilesPresenter implements ResetFilesView.ActionDelegate {
                                DtoFactory dtoFactory,
                                DialogFactory dialogFactory,
                                GitOutputConsoleFactory gitOutputConsoleFactory,
-                               ConsolesPanelPresenter consolesPanelPresenter) {
+                               ProcessesPanelPresenter processesPanelPresenter) {
         this.view = view;
         this.dtoFactory = dtoFactory;
         this.dialogFactory = dialogFactory;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.consolesPanelPresenter = processesPanelPresenter;
         this.view.setDelegate(this);
         this.service = service;
         this.appContext = appContext;

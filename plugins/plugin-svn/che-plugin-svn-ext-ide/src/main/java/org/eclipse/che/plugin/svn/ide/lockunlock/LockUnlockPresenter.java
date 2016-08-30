@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
@@ -53,11 +53,11 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                                   ChoiceDialogFactory choiceDialogFactory,
                                   NotificationManager notificationManager,
                                   SubversionOutputConsoleFactory consoleFactory,
-                                  ConsolesPanelPresenter consolesPanelPresenter,
+                                  ProcessesPanelPresenter processesPanelPresenter,
                                   SubversionExtensionLocalizationConstants constants,
                                   SubversionClientService service,
                                   StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
 
         this.service = service;
         this.notificationManager = notificationManager;

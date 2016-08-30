@@ -17,7 +17,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.ext.java.client.command.JavaCommandConfiguration;
 import org.eclipse.che.ide.ext.java.client.command.JavaCommandPagePresenter;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
 
 /**
  * Provides a path to the Main class.

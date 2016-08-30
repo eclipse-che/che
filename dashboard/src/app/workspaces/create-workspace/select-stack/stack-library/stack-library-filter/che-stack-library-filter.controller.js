@@ -14,7 +14,7 @@
  * This class is handling the controller for the stack library filtering
  * @author Oleksii Kurinnyi
  */
-export class CheStackLibraryFilterCtrl {
+export class CheStackLibraryFilterController {
 
   /**
    * Default constructor that is using resource

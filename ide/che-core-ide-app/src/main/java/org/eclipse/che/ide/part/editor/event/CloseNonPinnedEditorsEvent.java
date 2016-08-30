@@ -13,6 +13,8 @@ package org.eclipse.che.ide.part.editor.event;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
+import org.eclipse.che.ide.api.parts.EditorTab;
+
 /**
  * Close non pinned editor tabs event.
  *
@@ -31,6 +33,16 @@ public class CloseNonPinnedEditorsEvent extends GwtEvent<CloseNonPinnedEditorsEv
             TYPE = new Type<>();
         }
         return TYPE;
+    }
+
+    private final EditorTab editorTab;
+
+    public CloseNonPinnedEditorsEvent(EditorTab editorTab) {
+        this.editorTab = editorTab;
+    }
+
+    public EditorTab getEditorTab() {
+        return editorTab;
     }
 
     /** {@inheritDoc} */

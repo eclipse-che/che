@@ -10,81 +10,30 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<div class="project-repositories">
+<div class="project-repositories" ng-if="!projectRepositoryController.isEmptyState">
 
-  <!-- Mobile version -->
-  <che-panel ng-if="projectRepositoryController.localGitRepository || projectRepositoryController.remoteSvnRepository"
-              che-title="Local Clone" hide-gt-md>
-    <div ng-if="projectRepositoryController.localGitRepository" class="repository-mobile" layout="row" flex layout-align="space-around start">
-      <div class="label-name">GIT&nbsp;URL:</div>
-      <div>
-        <label class="url-label"><span>{{projectRepositoryController.localGitRepository}}</span></label>
-
-        <che-clipboard che-value="projectRepositoryController.localGitRepository" class="copy-clipboard"></che-clipboard>
-      </div>
+  <che-label-container che-label-name="Remote SVN Repository"
+                       ng-if="projectRepositoryController.remoteSvnRepository.name"
+                       class="che-label-container-not-last">
+    <div class="repository-desktop" layout="row" flex>
+      <div class="label-name">{{projectRepositoryController.remoteSvnRepository.name}}</div>
+      <che-text-info che-text="projectRepositoryController.remoteSvnRepository.url"
+                     che-href="projectRepositoryController.remoteSvnRepository.url"
+                     che-copy-clipboard="true"></che-text-info>
     </div>
-    <div ng-if="projectRepositoryController.remoteSvnRepository" class="repository-mobile" layout="row" flex layout-align="space-around start">
-      <div class="label-name">SVN&nbsp;URL:</div>
-      <div>
-        <label class="url-label"><span>{{projectRepositoryController.localSvnRepository}}</span></label>
+  </che-label-container>
 
-        <che-clipboard che-value="projectRepositoryController.remoteSvnRepository" class="copy-clipboard"></che-clipboard>
-      </div>
+  <che-label-container che-label-name="Remote GIT {{projectRepositoryController.remoteGitRepositories.length === 1 ? 'Repository' : 'Repositories'}}"
+                       ng-if="projectRepositoryController.remoteGitRepositories.length > 0"
+                       class="che-label-container-not-last">
+    <div class="repository-desktop" ng-repeat="remoteRepository in projectRepositoryController.remoteGitRepositories"
+         layout="row" flex>
+      <div class="label-name">{{remoteRepository.name}}</div>
+      <che-text-info che-text="remoteRepository.url"
+                     che-href="remoteRepository.url"
+                     che-copy-clipboard="true"></che-text-info>
     </div>
-  </che-panel>
-  <!-- Desktop version -->
-  <che-panel ng-if="projectRepositoryController.localGitRepository || projectRepositoryController.remoteSvnRepository"
-              che-title="Local Clone" hide-sm hide-md>
-    <div ng-if="projectRepositoryController.localGitRepository">
-      <div class="repository-desktop" layout="row" flex layout-align="space-around start">
-        <div class="label-name" flex="20">GIT&nbsp;URL:</div>
-        <div layout="column" flex="80">
-          <div>
-            <label class="url-label"><span>{{projectRepositoryController.localGitRepository}}</span></label>
-
-            <che-clipboard che-value="projectRepositoryController.localGitRepository" class="copy-clipboard"></che-clipboard>
-          </div>
-        </div>
-      </div>
-      <label class="prompt">Clone repository with command <span>git clone &lt;url&gt;</span></label>
-    </div>
-    <div ng-if="projectRepositoryController.remoteSvnRepository">
-      <div class="repository-desktop" layout="row" flex layout-align="space-around start">
-        <div class="label-name" flex="20">SVN&nbsp;URL:</div>
-        <div layout="column" flex="80">
-          <div>
-            <label class="url-label"><span>{{projectRepositoryController.remoteSvnRepository}}</span></label>
-
-            <che-clipboard che-value="projectRepositoryController.remoteSvnRepository" class="copy-clipboard"></che-clipboard>
-          </div>
-        </div>
-      </div>
-      <label class="prompt">Checkout repository with command <span>svn checkout &lt;url&gt;</span></label>
-    </div>
-  </che-panel>
-
-  <!-- Mobile version -->
-  <che-panel ng-if="projectRepositoryController.remoteGitRepositories.length" che-title="Remote Repository" hide-gt-md>
-    <div class="repository-mobile" ng-repeat="remoteRepository in projectRepositoryController.remoteGitRepositories" layout="row" flex>
-      <div class="label-name"><span>{{remoteRepository.name}}</span>GIT&nbsp;URL:</div>
-      <div>
-        <label class="url-label"><span>{{remoteRepository.url}}</span></label>
-
-        <che-clipboard che-value="remoteRepository.url" class="copy-clipboard"></che-clipboard>
-      </div>
-    </div>
-  </che-panel>
-  <!-- Desktop version -->
-  <che-panel ng-if="projectRepositoryController.remoteGitRepositories.length" che-title="Remote Repository" hide-sm hide-md>
-    <div class="repository-desktop" ng-repeat="remoteRepository in projectRepositoryController.remoteGitRepositories" layout="row" flex>
-      <div flex="20" class="label-name"><span>{{remoteRepository.name}}</span>GIT&nbsp;URL:</div>
-      <div layout="column" flex="80">
-        <label class="url-label"><span>{{remoteRepository.url}}</span></label>
-
-        <che-clipboard che-value="remoteRepository.url" class="copy-clipboard"></che-clipboard>
-      </div>
-    </div>
-  </che-panel>
+  </che-label-container>
 
   <div layout="row" layout-align="center center" class="empty-repository" ng-if="projectRepositoryController.isEmptyState">
     <che-empty-state che-value="There are no repositories yet."

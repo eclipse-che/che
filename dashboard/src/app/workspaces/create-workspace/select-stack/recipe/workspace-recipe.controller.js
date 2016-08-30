@@ -16,7 +16,7 @@
  * @description This class is handling the controller for the workspace recipe widget
  * @author Oleksii Orel
  */
-export class WorkspaceRecipeCtrl {
+export class WorkspaceRecipeController {
 
   /**
    * Default constructor that is using resource

@@ -25,7 +25,6 @@ import org.eclipse.che.ide.api.notification.NotificationObserver;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
 import org.eclipse.che.ide.api.notification.StatusNotificationListener;
-import org.eclipse.che.ide.api.parts.HasView;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -53,8 +52,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 public class NotificationManagerImpl extends BasePresenter implements NotificationManager,
                                                                       NotificationObserver,
                                                                       StatusNotificationListener,
-                                                                      NotificationManagerView.ActionDelegate,
-                                                                      HasView {
+                                                                      NotificationManagerView.ActionDelegate {
     public static final String TITLE   = "Events";
     public static final String TOOLTIP = "Event Log";
 

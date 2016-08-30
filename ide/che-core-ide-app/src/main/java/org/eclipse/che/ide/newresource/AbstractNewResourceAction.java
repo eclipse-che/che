@@ -39,7 +39,6 @@ import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
@@ -110,7 +109,7 @@ public abstract class AbstractNewResourceAction extends AbstractPerspectiveActio
         ((Container)resource).newFile(name, getDefaultContent()).then(new Operation<File>() {
             @Override
             public void apply(File newFile) throws OperationException {
-                eventBus.fireEvent(new FileEvent(newFile, OPEN));
+                eventBus.fireEvent(FileEvent.createOpenFileEvent(newFile));
                 eventBus.fireEvent(new RevealResourceEvent(newFile));
             }
         }).catchError(new Operation<PromiseError>() {

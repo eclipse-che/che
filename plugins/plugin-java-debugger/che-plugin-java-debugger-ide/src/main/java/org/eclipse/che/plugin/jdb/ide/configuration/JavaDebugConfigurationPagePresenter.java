@@ -84,7 +84,8 @@ public class JavaDebugConfigurationPagePresenter implements JavaDebugConfigurati
     }
 
     private void setPortsList() {
-        machineServiceClient.getMachine(appContext.getDevMachine().getId()).then(new Operation<MachineDto>() {
+        machineServiceClient.getMachine(appContext.getWorkspaceId(),
+                                        appContext.getDevMachine().getId()).then(new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto machineDto) throws OperationException {
                 Machine machine = entityFactory.createMachine(machineDto);

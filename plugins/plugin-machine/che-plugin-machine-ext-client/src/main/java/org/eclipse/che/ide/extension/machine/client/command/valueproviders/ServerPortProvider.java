@@ -15,9 +15,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
-import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -25,6 +22,11 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
+import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 
 import java.util.Map;
 import java.util.Set;
@@ -70,7 +72,7 @@ public class ServerPortProvider implements WsAgentStateHandler {
     private void registerProviders() {
         String devMachineId = appContext.getDevMachine().getId();
         if (devMachineId != null) {
-            machineServiceClient.getMachine(devMachineId).then(registerProviders);
+            machineServiceClient.getMachine(appContext.getWorkspaceId(), devMachineId).then(registerProviders);
         }
     }
 

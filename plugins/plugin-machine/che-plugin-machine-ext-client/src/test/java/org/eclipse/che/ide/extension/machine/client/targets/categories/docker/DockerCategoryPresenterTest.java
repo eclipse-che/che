@@ -111,9 +111,10 @@ public class DockerCategoryPresenterTest {
         when(target.getName()).thenReturn(deletingTargetName);
         when(targetsTreeManager.getMachineByName(deletingTargetName)).thenReturn(machine);
         when(machine.getId()).thenReturn(deletingMachineId);
+        when(machine.getWorkspaceId()).thenReturn("WS_ID");
         when(machine.getStatus()).thenReturn(RUNNING);
         when(machineLocale.targetsViewDeleteConfirm(deletingTargetName)).thenReturn(deleteProposal);
-        when(machineService.destroyMachine(deletingMachineId)).thenReturn(promise);
+        when(machineService.destroyMachine("WS_ID", deletingMachineId)).thenReturn(promise);
 
 
         arbitraryCategoryPresenter.onDeleteClicked(target);
@@ -124,7 +125,7 @@ public class DockerCategoryPresenterTest {
         confirmCaptor.getValue().accepted();
 
         verify(targetsTreeManager).getMachineByName(deletingTargetName);
-        verify(machineService).destroyMachine(deletingMachineId);
+        verify(machineService).destroyMachine("WS_ID", deletingMachineId);
 
         operationSuccessCapture.getValue().apply(null);
 

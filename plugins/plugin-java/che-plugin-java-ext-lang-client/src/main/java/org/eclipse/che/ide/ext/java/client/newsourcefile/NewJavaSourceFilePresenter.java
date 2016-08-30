@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
 import static org.eclipse.che.ide.ext.java.client.JavaUtils.checkCompilationUnitName;
 import static org.eclipse.che.ide.ext.java.client.JavaUtils.checkPackageName;
 import static org.eclipse.che.ide.ext.java.client.JavaUtils.isValidCompilationUnitName;
@@ -195,7 +194,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
                     pkg.newFile(nameWithoutExtension + ".java", content).then(new Operation<File>() {
                         @Override
                         public void apply(File file) throws OperationException {
-                            eventBus.fireEvent(new FileEvent(file, OPEN));
+                            eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
                             eventBus.fireEvent(new RevealResourceEvent(file));
                         }
                     });
@@ -205,7 +204,7 @@ public class NewJavaSourceFilePresenter implements NewJavaSourceFileView.ActionD
             parent.newFile(nameWithoutExtension + ".java", content).then(new Operation<File>() {
                 @Override
                 public void apply(File file) throws OperationException {
-                    eventBus.fireEvent(new FileEvent(file, OPEN));
+                    eventBus.fireEvent(FileEvent.createOpenFileEvent(file));
                     eventBus.fireEvent(new RevealResourceEvent(file));
                 }
             });

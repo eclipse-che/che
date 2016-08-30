@@ -1,17 +1,16 @@
-<che-panel che-title="Recent Workspaces" che-title-icon="material-design icon-ic_widgets_24px">
-  <div class="dashboard-last-workspaces">
-    <md-progress-linear md-mode="indeterminate"
-                        ng-show="dashboardLastWorkspacesController.state == 'loading'"></md-progress-linear>
-
-    <span
-      ng-show="dashboardLastWorkspacesController.state == 'OK' && dashboardLastWorkspacesController.getWorkspaces().length == 0">No workspaces found</span>
-    <che-list ng-show="dashboardLastWorkspacesController.getWorkspaces().length > 0 && dashboardLastWorkspacesController.state =='OK'">
-
-      <che-workspace-item ng-repeat="workspace in dashboardLastWorkspacesController.getWorkspaces() | limitTo:'5'"
-                          che-selectable="false"
-                          che-workspace-item="workspace"></che-workspace-item>
-
-    </che-list>
-
+<dashboard-panel panel-title="Recent Workspaces">
+  <md-progress-linear md-mode="indeterminate"
+                      ng-show="dashboardLastWorkspacesController.state == 'loading'"></md-progress-linear>
+  <div class="dashboard-add-button">
+    <che-button-primary che-button-title="Create Workspace"
+                        ng-href="#/create-project"></che-button-primary>
   </div>
-</che-panel>
+  <span ng-show="dashboardLastWorkspacesController.state == 'OK' && dashboardLastWorkspacesController.getWorkspaces().length == 0"
+    class="last-workspaces-empty-label">No workspaces found</span>
+  <che-list ng-show="dashboardLastWorkspacesController.getWorkspaces().length > 0 && dashboardLastWorkspacesController.state =='OK'">
+    <che-workspace-item layout="row"
+                        ng-repeat="workspace in dashboardLastWorkspacesController.getWorkspaces() | limitTo:'5'"
+                        che-selectable="false"
+                        che-workspace-item="workspace"></che-workspace-item>
+  </che-list>
+</dashboard-panel>

@@ -36,6 +36,7 @@ import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
@@ -43,15 +44,9 @@ import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
 import org.eclipse.che.ide.extension.machine.client.targets.Target;
 import org.eclipse.che.ide.extension.machine.client.targets.TargetManager;
 import org.eclipse.che.ide.extension.machine.client.targets.TargetsTreeManager;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.util.loging.Log;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
-import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -63,46 +58,44 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
  * SSH type page presenter.
  *
  * @author Oleksii Orel
+ * @author Vitaliy Guliy
  */
-public class SshCategoryPresenter implements CategoryPage, TargetManager, SshView.ActionDelegate {
+public class SshCategoryPresenter implements CategoryPage, TargetManager, SshView.ActionDelegate, MachineStatusChangedEvent.Handler {
+
     private final SshView                     sshView;
     private final RecipeServiceClient         recipeServiceClient;
     private final DtoFactory                  dtoFactory;
-    private final DtoUnmarshallerFactory      dtoUnmarshallerFactory;
     private final DialogFactory               dialogFactory;
     private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant machineLocale;
     private final AppContext                  appContext;
     private final MachineServiceClient        machineService;
     private final EventBus                    eventBus;
-    private final MessageBusProvider          messageBusProvider;
     private final WorkspaceServiceClient      workspaceServiceClient;
 
     private TargetsTreeManager targetsTreeManager;
     private SshMachineTarget   selectedTarget;
+
+    /* Notification informing connecting to the target is in progress */
     private StatusNotification connectNotification;
 
-    private Map<String, SubscriptionHandler<MachineStatusEvent>> subscriptions = new HashMap<>();
-
+    /* Name currently connecting target  */
+    private String connectTargetName;
 
     @Inject
     public SshCategoryPresenter(SshView sshView,
                                 RecipeServiceClient recipeServiceClient,
                                 DtoFactory dtoFactory,
-                                DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                 DialogFactory dialogFactory,
                                 NotificationManager notificationManager,
                                 MachineLocalizationConstant machineLocale,
                                 WorkspaceServiceClient workspaceServiceClient,
                                 AppContext appContext,
                                 MachineServiceClient machineService,
-                                EventBus eventBus,
-                                MessageBusProvider messageBusProvider
-                               ) {
+                                EventBus eventBus) {
         this.sshView = sshView;
         this.recipeServiceClient = recipeServiceClient;
         this.dtoFactory = dtoFactory;
-        this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.dialogFactory = dialogFactory;
         this.notificationManager = notificationManager;
         this.workspaceServiceClient = workspaceServiceClient;
@@ -110,9 +103,10 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         this.appContext = appContext;
         this.machineService = machineService;
         this.eventBus = eventBus;
-        this.messageBusProvider = messageBusProvider;
 
         sshView.setDelegate(this);
+
+        eventBus.addHandler(MachineStatusChangedEvent.TYPE, this);
     }
 
     @Override
@@ -172,7 +166,7 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         selectedTarget.setName(value);
         selectedTarget.setDirty(true);
 
-        updateButtons();
+        updateButtons(true);
     }
 
     @Override
@@ -184,7 +178,7 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         selectedTarget.setHost(value);
         selectedTarget.setDirty(true);
 
-        updateButtons();
+        updateButtons(false);
     }
 
     @Override
@@ -196,7 +190,7 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         selectedTarget.setPort(value);
         selectedTarget.setDirty(true);
 
-        updateButtons();
+        updateButtons(false);
     }
 
     @Override
@@ -208,7 +202,7 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         selectedTarget.setUserName(value);
         selectedTarget.setDirty(true);
 
-        updateButtons();
+        updateButtons(false);
     }
 
     @Override
@@ -220,13 +214,13 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         selectedTarget.setPassword(value);
         selectedTarget.setDirty(true);
 
-        updateButtons();
+        updateButtons(false);
     }
 
     /**
      * Updates buttons state.
      */
-    public void updateButtons() {
+    public void updateButtons(boolean verifyTargetName) {
         if (selectedTarget == null) {
             return;
         }
@@ -267,11 +261,13 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
             enableSave = false;
             sshView.markTargetNameInvalid();
         } else {
-            if (isTargetNameExist(sshView.getTargetName())) {
-                enableSave = false;
-                sshView.markTargetNameInvalid();
-            } else {
-                sshView.unmarkTargetName();
+            if (verifyTargetName) {
+                if (isTargetNameExist(sshView.getTargetName())) {
+                    enableSave = false;
+                    sshView.markTargetNameInvalid();
+                } else {
+                    sshView.unmarkTargetName();
+                }
             }
         }
 
@@ -348,11 +344,11 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
                                               .withTags(selectedTarget.getRecipe().getTags())
                                               .withDescription(selectedTarget.getRecipe().getDescription())
                                               .withScript("{" +
-                                                          "\"host\": \"" + selectedTarget.getHost() + "\", " +
-                                                          "\"port\": \"" + selectedTarget.getPort() + "\", " +
-                                                          "\"username\": \"" + selectedTarget.getUserName() + "\", " +
-                                                          "\"password\": \"" + selectedTarget.getPassword() + "\"" +
-                                                          "}");
+                                                      "\"host\": \"" + selectedTarget.getHost() + "\", " +
+                                                      "\"port\": \"" + selectedTarget.getPort() + "\", " +
+                                                      "\"username\": \"" + selectedTarget.getUserName() + "\", " +
+                                                      "\"password\": \"" + selectedTarget.getPassword() + "\"" +
+                                                      "}");
 
         Promise<RecipeDescriptor> updateRecipe = recipeServiceClient.updateRecipe(recipeUpdate);
         updateRecipe.then(new Operation<RecipeDescriptor>() {
@@ -391,7 +387,7 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         selectedTarget.setDirty(false);
         restoreTarget(selectedTarget);
         sshView.updateTargetFields(selectedTarget);
-        updateButtons();
+        updateButtons(false);
     }
 
     @Override
@@ -399,15 +395,18 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         if (selectedTarget == null) {
             return;
         }
+
         if (selectedTarget.isConnected()) {
             final MachineDto machine = this.getMachineByName(selectedTarget.getName());
             disconnect(machine);
             return;
         }
+
         if (selectedTarget.getRecipe() == null) {
             this.sshView.enableConnectButton(false);
             return;
         }
+
         connect();
     }
 
@@ -416,10 +415,9 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
      * Starts a machine based on the selected recipe.
      */
     private void connect() {
-        subscribeToMachineChannel(selectedTarget.getName());
-
         sshView.setConnectButtonText(null);
 
+        connectTargetName = selectedTarget.getName();
         connectNotification =
                 notificationManager.notify(machineLocale.targetsViewConnectProgress(selectedTarget.getName()), PROGRESS, FLOAT_MODE);
 
@@ -440,14 +438,12 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         machinePromise.then(new Operation<MachineDto>() {
             @Override
             public void apply(final MachineDto machineDto) throws OperationException {
-                eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.CREATING));
             }
         });
 
         machinePromise.catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError promiseError) throws OperationException {
-                unsubscribeFromMachineChannel(selectedTarget.getName());
                 onConnectingFailed(null);
             }
         });
@@ -461,17 +457,17 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
      */
     private void disconnect(final MachineDto machine) {
         if (machine == null || machine.getStatus() != RUNNING) {
-            this.updateTargets(null);
+            updateTargets(null);
             return;
         }
         sshView.setConnectButtonText(null);
 
-        unsubscribeFromMachineChannel(machine.getConfig().getName());
-
-        machineService.destroyMachine(machine.getId()).then(new Operation<Void>() {
+        machineService.destroyMachine(machine.getWorkspaceId(),
+                                      machine.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
+
                 notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(selectedTarget.getName()), SUCCESS, FLOAT_MODE);
                 updateTargets(null);
             }
@@ -487,13 +483,13 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
     @Override
     public void onDeleteClicked(final Target target) {
         dialogFactory.createConfirmDialog(machineLocale.targetsViewDeleteConfirmTitle(),
-                                          machineLocale.targetsViewDeleteConfirm(target.getName()),
-                                          new ConfirmCallback() {
-                                              @Override
-                                              public void accepted() {
-                                                  deleteTarget(target);
-                                              }
-                                          }, new CancelCallback() {
+                machineLocale.targetsViewDeleteConfirm(target.getName()),
+                new ConfirmCallback() {
+                    @Override
+                    public void accepted() {
+                        deleteTarget(target);
+                    }
+                }, new CancelCallback() {
                     @Override
                     public void cancelled() {
                         updateTargets(null);
@@ -514,7 +510,8 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
             return;
         }
 
-        machineService.destroyMachine(machine.getId()).then(new Operation<Void>() {
+        machineService.destroyMachine(machine.getWorkspaceId(),
+                                      machine.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
@@ -560,59 +557,19 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
     }
 
     /**
-     * Subscribes to the websocket channel and starts listening machine status events.
-     *
-     * @param machineName
-     *         mane of the machine to subscribe
-     */
-    private void subscribeToMachineChannel(final String machineName) {
-        String channel = "machine:status:" + appContext.getWorkspaceId() + ':' + machineName;
-
-        if (subscriptions.containsKey(channel)) {
-            return;
-        }
-
-        SubscriptionHandler<MachineStatusEvent> statusHandler = new SubscriptionHandler<MachineStatusEvent>(
-                dtoUnmarshallerFactory.newWSUnmarshaller(MachineStatusEvent.class)) {
-            @Override
-            protected void onMessageReceived(MachineStatusEvent event) {
-                if (MachineStatusEvent.EventType.RUNNING == event.getEventType()) {
-                    onConnected(event.getMachineId());
-                } else if (MachineStatusEvent.EventType.ERROR == event.getEventType()) {
-                    unsubscribeFromMachineChannel(event.getMachineName());
-                    onConnectingFailed(event.getError());
-                }
-            }
-
-            @Override
-            protected void onErrorReceived(Throwable exception) {
-                Log.error(SshCategoryPresenter.class, exception.getMessage());
-            }
-        };
-
-        try {
-            messageBusProvider.getMessageBus().subscribe(channel, statusHandler);
-            subscriptions.put(channel, statusHandler);
-        } catch (Exception e) {
-            Log.error(SshCategoryPresenter.class, e.getMessage());
-        }
-    }
-
-    /**
      * Ensures machine is started.
      */
-    private void onConnected(final String machineId) {
+    private void onConnected(final String workspaceId, final String machineId) {
         // There is a little bug in machine service on the server side.
         // The machine info is updated with a little delay after running a machine.
         // Using timer must fix the problem.
         new Timer() {
             @Override
             public void run() {
-                machineService.getMachine(machineId).then(new Operation<MachineDto>() {
+                machineService.getMachine(workspaceId, machineId).then(new Operation<MachineDto>() {
                     @Override
                     public void apply(MachineDto machineDto) throws OperationException {
                         if (machineDto.getStatus() == RUNNING) {
-                            eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.RUNNING));
                             connectNotification.setTitle(machineLocale.targetsViewConnectSuccess(machineDto.getConfig().getName()));
                             connectNotification.setStatus(StatusNotification.Status.SUCCESS);
                             updateTargets(machineDto.getConfig().getName());
@@ -643,32 +600,15 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
         }
 
         connectNotification.setStatus(StatusNotification.Status.FAIL);
-    }
 
-    /**
-     * Removes the subscription from the websocket channel and stops listening machine status events.
-     *
-     * @param machineName
-     *         name of the machine to unsubscribe
-     */
-    private void unsubscribeFromMachineChannel(String machineName) {
-        String channel = "machine:status:" + appContext.getWorkspaceId() + ':' + machineName;
-
-        SubscriptionHandler<MachineStatusEvent> statusHandler = subscriptions.remove(channel);
-        if (statusHandler != null) {
-            try {
-                messageBusProvider.getMessageBus().unsubscribe(channel, statusHandler);
-            } catch (Exception e) {
-                Log.error(getClass(), e.getMessage());
-            }
-        }
+        updateButtons(false);
     }
 
     @Override
     public void setCurrentSelection(Target selectedTarget) {
         this.selectedTarget = (SshMachineTarget)selectedTarget;
         sshView.updateTargetFields(this.selectedTarget);
-        updateButtons();
+        updateButtons(false);
     }
 
     @Override
@@ -698,6 +638,24 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
 
     @Override
     public void restoreTarget(Target target) {
-        this.sshView.restoreTargetFields((SshMachineTarget)target);
+        this.sshView.restoreTargetFields((SshMachineTarget) target);
     }
+
+    @Override
+    public void onMachineStatusChanged(MachineStatusChangedEvent event) {
+        if (MachineStatusEvent.EventType.RUNNING == event.getEventType()
+                && connectNotification != null && connectTargetName != null
+                && connectTargetName.equals(event.getMachineName())) {
+            onConnected(event.getWorkspaceId(), event.getMachineId());
+            return;
+        }
+
+        if (MachineStatusEvent.EventType.ERROR == event.getEventType()
+                && connectNotification != null && connectTargetName != null
+                && connectTargetName.equals(event.getMachineName())) {
+            onConnectingFailed(event.getErrorMessage());
+            return;
+        }
+    }
+
 }

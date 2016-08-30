@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.part.editor.event.CloseNonPinnedEditorsEvent;
 
 /**
- * Performs closing editor tabs with unpinned status.
+ * Performs closing editor tabs with unpinned status for current editor part stack.
  *
  * @author Vlad Zhukovskiy
  */
@@ -37,7 +37,6 @@ public class CloseAllExceptPinnedAction extends EditorAbstractAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        eventBus.fireEvent(new CloseNonPinnedEditorsEvent());
+        eventBus.fireEvent(new CloseNonPinnedEditorsEvent(getEditorTab(e)));
     }
 }

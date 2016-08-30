@@ -12,9 +12,11 @@ package org.eclipse.che.api.project.server;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestReceiver;
 import org.eclipse.che.api.project.server.handlers.CreateBaseProjectTypeHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
@@ -27,12 +29,13 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
-import org.eclipse.che.api.vfs.impl.file.event.GitCheckoutHiEventDetector;
 import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
 import org.eclipse.che.api.vfs.impl.file.event.HiEventService;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventListener;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventService;
-import org.eclipse.che.api.vfs.impl.file.event.PomModifiedHiEventDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.GitCheckoutHiEventDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.OpenedFileContentUpdateEventDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.PomModifiedHiEventDetector;
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -80,6 +83,10 @@ public class ProjectApiModule extends AbstractModule {
 
         bind(FileWatcherNotificationHandler.class).to(DefaultFileWatcherNotificationHandler.class);
 
+        configureVfsEvent();
+    }
+
+    private void configureVfsEvent() {
         bind(LoEventListener.class);
         bind(LoEventService.class);
         bind(HiEventService.class);
@@ -87,7 +94,15 @@ public class ProjectApiModule extends AbstractModule {
         Multibinder<HiEventDetector<?>> highLevelVfsEventDetectorMultibinder =
                 Multibinder.newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
                 });
+
         highLevelVfsEventDetectorMultibinder.addBinding().to(PomModifiedHiEventDetector.class);
         highLevelVfsEventDetectorMultibinder.addBinding().to(GitCheckoutHiEventDetector.class);
+        highLevelVfsEventDetectorMultibinder.addBinding().to(OpenedFileContentUpdateEventDetector.class);
+
+        MapBinder<String, JsonRpcRequestReceiver> requestReceivers =
+                MapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
+
+        requestReceivers.addBinding("event:file-opened").to(OpenedFileContentUpdateEventDetector.class);
+        requestReceivers.addBinding("event:file-closed").to(OpenedFileContentUpdateEventDetector.class);
     }
 }

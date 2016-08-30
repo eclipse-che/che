@@ -10,20 +10,24 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<form name="createProjectGitForm">
+<form name="createProjectGitForm" class="create-project-git">
   <div layout="row" flex ng-init="createProjectCtrl.setForm(createProjectGitForm, 'git')"></div>
-  <che-input che-form="createProjectGitForm"
-              che-name="remoteGitURL"
-              che-label-name="Git URL"
-              che-place-holder="Url of the git repository"
-              ng-focus="$parent.createProjectGitCtrl.setFocus()"
-              ng-blur="$parent.createProjectGitCtrl.lostFocus()"
-              ng-model="createProjectCtrl.importProjectData.source.location"
-              git-url
-              required>
-    <div ng-message="gitUrl">Invalid Git URL</div>
-    <div ng-message="required">A repository URL is required.</div>
-  </che-input>
-
+  <che-label-container che-label-name="Git URL">
+    <div class="create-project-git-input">
+      <che-input che-form="createProjectGitForm"
+                 che-name="remoteGitURL"
+                 che-place-holder="Url of the git repository"
+                 aria-label="Url of the git repository"
+                 che-width="auto"
+                 ng-focus="$parent.createProjectGitCtrl.setFocus()"
+                 ng-blur="$parent.createProjectGitCtrl.lostFocus()"
+                 ng-model="createProjectCtrl.importProjectData.source.location"
+                 git-url
+                 required>
+        <div ng-message="gitUrl">Invalid Git URL</div>
+        <div ng-message="required">A repository URL is required.</div>
+      </che-input>
+    </div>
+  </che-label-container>
 
 </form>

@@ -114,7 +114,7 @@ public class DockerCategoryPresenter implements CategoryPage, TargetManager, Doc
         target.setType(machine.getConfig().getType());
         target.setSourceType(machine.getConfig().getSource().getType());
         target.setSourceContent(machine.getConfig().getSource().getContent());
-        target.setSourceUrl(machine.getConfig().getSource().getLocation());
+        target.setSource(machine.getConfig().getSource().getLocation());
 
         return true;
     }
@@ -143,7 +143,8 @@ public class DockerCategoryPresenter implements CategoryPage, TargetManager, Doc
             return;
         }
 
-        machineService.destroyMachine(machine.getId()).then(new Operation<Void>() {
+        machineService.destroyMachine(machine.getWorkspaceId(),
+                                      machine.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));

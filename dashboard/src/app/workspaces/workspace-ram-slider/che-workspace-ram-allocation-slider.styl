@@ -1,4 +1,6 @@
 .che-ram-allocation-slider
+  .slider-wrapper
+    margin -26px 0
 
   .slider-actual-ram-caption
     color $che-medium-blue-color
@@ -12,6 +14,8 @@
     text-align right
 
   .slider-holder
+    min-width 180px
+    max-width 400px
 
     /* Hide the focus thumb */
     md-slider .md-focus-thumb, md-slider .md-focus-ring
@@ -37,6 +41,7 @@
       transform scale(0.5)
 
   .slider-input
+    margin-left 40px
     margin-right 5px
 
     md-input-container .md-errors-spacer

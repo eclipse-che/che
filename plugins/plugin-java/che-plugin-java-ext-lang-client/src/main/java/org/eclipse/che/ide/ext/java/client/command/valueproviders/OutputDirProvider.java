@@ -19,7 +19,7 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
 
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;

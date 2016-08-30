@@ -21,7 +21,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
-import org.eclipse.che.ide.api.workspace.event.EnvironmentStatusChangedEvent;
+import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.junit.Before;
@@ -54,6 +54,7 @@ import static org.mockito.Mockito.when;
 public class MachineStateNotifierTest {
     private static final String MACHINE_NAME = "machineName";
     private static final String MACHINE_ID   = "machineId";
+    private static final String WORKSPACE_ID = "workspaceId";
 
     //constructor mocks
     @Mock
@@ -73,7 +74,7 @@ public class MachineStateNotifierTest {
     @Mock
     private MachineStateEvent.Handler             handler;
     @Mock
-    private EnvironmentStatusChangedEvent         environmentStatusChangedEvent;
+    private MachineStatusChangedEvent machineStatusChangedEvent;
     @Mock
     private Promise<MachineDto>                   machinePromise;
     @Captor
@@ -89,9 +90,10 @@ public class MachineStateNotifierTest {
 
         when(machine.getConfig()).thenReturn(machineConfig);
         when(machineConfig.getName()).thenReturn(MACHINE_NAME);
-        when(environmentStatusChangedEvent.getMachineId()).thenReturn(MACHINE_ID);
-        when(environmentStatusChangedEvent.getMachineName()).thenReturn(MACHINE_NAME);
-        when(machineServiceClient.getMachine(MACHINE_ID)).thenReturn(machinePromise);
+        when(machineStatusChangedEvent.getMachineId()).thenReturn(MACHINE_ID);
+        when(machineStatusChangedEvent.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(machineStatusChangedEvent.getMachineName()).thenReturn(MACHINE_NAME);
+        when(machineServiceClient.getMachine(WORKSPACE_ID, MACHINE_ID)).thenReturn(machinePromise);
         when(machinePromise.then(Matchers.<Operation<MachineDto>>anyObject())).thenReturn(machinePromise);
         when(machinePromise.catchError(Matchers.<Operation<PromiseError>>anyObject())).thenReturn(machinePromise);
     }
@@ -100,8 +102,8 @@ public class MachineStateNotifierTest {
     public void shouldNotifyWhenDevMachineStateIsCreating() throws Exception {
         when(machineConfig.isDev()).thenReturn(true);
 
-        when(environmentStatusChangedEvent.getEventType()).thenReturn(CREATING);
-        statusNotifier.onEnvironmentStatusChanged(environmentStatusChangedEvent);
+        when(machineStatusChangedEvent.getEventType()).thenReturn(CREATING);
+        statusNotifier.onMachineStatusChanged(machineStatusChangedEvent);
 
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machine);
@@ -116,8 +118,8 @@ public class MachineStateNotifierTest {
     public void shouldNotifyWhenNonDevMachineStateIsCreating() throws Exception {
         when(machineConfig.isDev()).thenReturn(false);
 
-        when(environmentStatusChangedEvent.getEventType()).thenReturn(CREATING);
-        statusNotifier.onEnvironmentStatusChanged(environmentStatusChangedEvent);
+        when(machineStatusChangedEvent.getEventType()).thenReturn(CREATING);
+        statusNotifier.onMachineStatusChanged(machineStatusChangedEvent);
 
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machine);
@@ -132,8 +134,8 @@ public class MachineStateNotifierTest {
     public void shouldNotifyWhenDevMachineStateIsRunning() throws Exception {
         when(machineConfig.isDev()).thenReturn(true);
 
-        when(environmentStatusChangedEvent.getEventType()).thenReturn(RUNNING);
-        statusNotifier.onEnvironmentStatusChanged(environmentStatusChangedEvent);
+        when(machineStatusChangedEvent.getEventType()).thenReturn(RUNNING);
+        statusNotifier.onMachineStatusChanged(machineStatusChangedEvent);
 
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machine);
@@ -150,8 +152,8 @@ public class MachineStateNotifierTest {
     public void shouldNotifyWhenNonDevMachineStateIsRunning() throws Exception {
         when(machineConfig.isDev()).thenReturn(false);
 
-        when(environmentStatusChangedEvent.getEventType()).thenReturn(RUNNING);
-        statusNotifier.onEnvironmentStatusChanged(environmentStatusChangedEvent);
+        when(machineStatusChangedEvent.getEventType()).thenReturn(RUNNING);
+        statusNotifier.onMachineStatusChanged(machineStatusChangedEvent);
 
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machine);
@@ -166,8 +168,8 @@ public class MachineStateNotifierTest {
 
     @Test
     public void shouldNotifyWhenMachineStateIsDestroyed() throws Exception {
-        when(environmentStatusChangedEvent.getEventType()).thenReturn(DESTROYED);
-        statusNotifier.onEnvironmentStatusChanged(environmentStatusChangedEvent);
+        when(machineStatusChangedEvent.getEventType()).thenReturn(DESTROYED);
+        statusNotifier.onMachineStatusChanged(machineStatusChangedEvent);
 
         verify(locale).notificationMachineDestroyed(MACHINE_NAME);
         verify(notificationManager).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
@@ -175,10 +177,10 @@ public class MachineStateNotifierTest {
 
     @Test
     public void shouldNotifyWhenMachineStateIsError() throws Exception {
-        when(environmentStatusChangedEvent.getEventType()).thenReturn(ERROR);
-        statusNotifier.onEnvironmentStatusChanged(environmentStatusChangedEvent);
+        when(machineStatusChangedEvent.getEventType()).thenReturn(ERROR);
+        statusNotifier.onMachineStatusChanged(machineStatusChangedEvent);
 
-        verify(environmentStatusChangedEvent).getError();
+        verify(machineStatusChangedEvent).getErrorMessage();
         verify(notificationManager).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
     }
 }

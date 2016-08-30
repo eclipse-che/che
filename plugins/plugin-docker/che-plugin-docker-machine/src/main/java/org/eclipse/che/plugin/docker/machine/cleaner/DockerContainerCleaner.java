@@ -13,7 +13,8 @@ package org.eclipse.che.plugin.docker.machine.cleaner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.server.MachineRegistry;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
@@ -39,15 +40,16 @@ public class DockerContainerCleaner implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerContainerCleaner.class);
 
-    private final MachineRegistry              machineRegistry;
+    // TODO replace with WorkspaceManager
+    private final CheEnvironmentEngine         environmentEngine;
     private final DockerConnector              dockerConnector;
     private final DockerContainerNameGenerator nameGenerator;
 
     @Inject
-    public DockerContainerCleaner(MachineRegistry machineRegistry,
+    public DockerContainerCleaner(CheEnvironmentEngine environmentEngine,
                                   DockerConnector dockerConnector,
                                   DockerContainerNameGenerator nameGenerator) {
-        this.machineRegistry = machineRegistry;
+        this.environmentEngine = environmentEngine;
         this.dockerConnector = dockerConnector;
         this.nameGenerator = nameGenerator;
     }
@@ -60,8 +62,17 @@ public class DockerContainerCleaner implements Runnable {
         try {
             for (ContainerListEntry container : dockerConnector.listContainers()) {
                 Optional<ContainerNameInfo> optional = nameGenerator.parse(container.getNames()[0]);
-                if (optional.isPresent() && !machineRegistry.isExist(optional.get().getMachineId())) {
-                    cleanUp(container);
+                if (optional.isPresent()) {
+                    try {
+                        // container is orphaned if not found exception is thrown
+                        environmentEngine.getMachine(optional.get().getWorkspaceId(),
+                                                     optional.get().getMachineId());
+
+                    } catch (NotFoundException e) {
+                        cleanUp(container);
+                    } catch (Exception e) {
+                        LOG.error("Failed to clean up inactive container. " + e.getLocalizedMessage(), e);
+                    }
                 }
             }
         } catch (IOException e) {

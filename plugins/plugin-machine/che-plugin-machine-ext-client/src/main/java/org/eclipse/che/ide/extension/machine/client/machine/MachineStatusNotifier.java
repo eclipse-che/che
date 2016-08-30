@@ -22,7 +22,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.workspace.event.EnvironmentStatusChangedEvent;
+import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.ui.loaders.initialization.OperationInfo;
@@ -39,7 +39,7 @@ import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class MachineStatusNotifier implements EnvironmentStatusChangedEvent.Handler {
+public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler {
 
     private final EventBus                    eventBus;
     private final NotificationManager         notificationManager;
@@ -59,32 +59,33 @@ public class MachineStatusNotifier implements EnvironmentStatusChangedEvent.Hand
         this.notificationManager = notificationManager;
         this.locale = locale;
 
-        eventBus.addHandler(EnvironmentStatusChangedEvent.TYPE, this);
+        eventBus.addHandler(MachineStatusChangedEvent.TYPE, this);
     }
 
     @Override
-    public void onEnvironmentStatusChanged(final EnvironmentStatusChangedEvent event) {
+    public void onMachineStatusChanged(final MachineStatusChangedEvent event) {
         final String machineName = event.getMachineName();
         final String machineId = event.getMachineId();
+        final String workspaceId = event.getWorkspaceId();
 
         switch (event.getEventType()) {
             case CREATING:
-                getMachine(machineId).then(notifyMachineCreating());
+                getMachine(workspaceId, machineId).then(notifyMachineCreating());
                 break;
             case RUNNING:
-                getMachine(machineId).then(notifyMachineRunning());
+                getMachine(workspaceId, machineId).then(notifyMachineRunning());
                 break;
             case DESTROYED:
                 notificationManager.notify(locale.notificationMachineDestroyed(machineName), SUCCESS, EMERGE_MODE);
                 break;
             case ERROR:
-                notificationManager.notify(event.getError(), FAIL, EMERGE_MODE);
+                notificationManager.notify(event.getErrorMessage(), FAIL, EMERGE_MODE);
                 break;
         }
     }
 
-    private Promise<MachineDto> getMachine(final String machineId) {
-        return machineServiceClient.getMachine(machineId).catchError(new Operation<PromiseError>() {
+    private Promise<MachineDto> getMachine(final String workspaceId, final String machineId) {
+        return machineServiceClient.getMachine(workspaceId, machineId).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
                 notificationManager.notify(locale.failedToFindMachine(machineId));

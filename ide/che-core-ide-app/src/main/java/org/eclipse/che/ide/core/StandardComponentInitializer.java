@@ -16,7 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.actions.CloseActiveEditor;
+import org.eclipse.che.ide.actions.CloseActiveEditorAction;
 import org.eclipse.che.ide.actions.CollapseAllAction;
 import org.eclipse.che.ide.actions.CompleteAction;
 import org.eclipse.che.ide.actions.ConvertFolderToProjectAction;
@@ -62,8 +62,12 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.connection.WsConnectionListener;
-import org.eclipse.che.ide.editor.SwitchNextEditorAction;
-import org.eclipse.che.ide.editor.SwitchPreviousEditorAction;
+import org.eclipse.che.ide.machine.macro.ServerHostNameMacroProvider;
+import org.eclipse.che.ide.machine.macro.ServerMacroProvider;
+import org.eclipse.che.ide.machine.macro.ServerPortMacroProvider;
+import org.eclipse.che.ide.machine.macro.ServerProtocolMacroProvider;
+import org.eclipse.che.ide.part.editor.actions.SwitchNextEditorAction;
+import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
@@ -73,6 +77,8 @@ import org.eclipse.che.ide.part.editor.actions.CloseAllExceptPinnedAction;
 import org.eclipse.che.ide.part.editor.actions.CloseOtherAction;
 import org.eclipse.che.ide.part.editor.actions.PinEditorTabAction;
 import org.eclipse.che.ide.part.editor.actions.ReopenClosedFileAction;
+import org.eclipse.che.ide.part.editor.actions.SplitHorizontallyAction;
+import org.eclipse.che.ide.part.editor.actions.SplitVerticallyAction;
 import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.resources.action.CopyResourceAction;
@@ -157,6 +163,12 @@ public class StandardComponentInitializer {
 
     @Inject
     private CollapseAllAction collapseAllAction;
+
+    @Inject
+    private SplitVerticallyAction splitVerticallyAction;
+
+    @Inject
+    private SplitHorizontallyAction splitHorizontallyAction;
 
     @Inject
     private CloseAction closeAction;
@@ -258,7 +270,7 @@ public class StandardComponentInitializer {
     private OpenRecentFilesAction openRecentFilesAction;
 
     @Inject
-    private CloseActiveEditor closeActiveEditor;
+    private CloseActiveEditorAction closeActiveEditorAction;
 
     @Inject
     private MessageLoaderResources messageLoaderResources;
@@ -331,6 +343,19 @@ public class StandardComponentInitializer {
 
     @Inject
     private TreeResourceRevealer treeResourceRevealer; //just to work with it
+
+    // do not remove the injections below
+    @Inject
+    private ServerMacroProvider serverMacroProvider;
+
+    @Inject
+    private ServerProtocolMacroProvider serverProtocolMacroProvider;
+
+    @Inject
+    private ServerHostNameMacroProvider serverHostNameMacroProvider;
+
+    @Inject
+    private ServerPortMacroProvider serverPortMacroProvider;
 
 
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
@@ -441,8 +466,8 @@ public class StandardComponentInitializer {
 
         editGroup.addSeparator();
 
-        actionManager.registerAction("closeActiveEditor", closeActiveEditor);
-        editGroup.add(closeActiveEditor);
+        actionManager.registerAction("closeActiveEditor", closeActiveEditorAction);
+        editGroup.add(closeActiveEditorAction);
 
         actionManager.registerAction("format", formatterAction);
         editGroup.add(formatterAction);
@@ -591,6 +616,11 @@ public class StandardComponentInitializer {
         actionManager.registerAction("reopenClosedEditorTab", reopenClosedFileAction);
         editorTabContextMenu.add(pinEditorTabAction);
         actionManager.registerAction("pinEditorTab", pinEditorTabAction);
+        editorTabContextMenu.addSeparator();
+        actionManager.registerAction("splitVertically", splitVerticallyAction);
+        editorTabContextMenu.add(splitVerticallyAction);
+        actionManager.registerAction("splitHorizontally", splitHorizontallyAction);
+        editorTabContextMenu.add(splitHorizontallyAction);
 
         final DefaultActionGroup loaderToolbarGroup = new DefaultActionGroup("loader", false, actionManager);
         actionManager.registerAction("loader", loaderToolbarGroup);
