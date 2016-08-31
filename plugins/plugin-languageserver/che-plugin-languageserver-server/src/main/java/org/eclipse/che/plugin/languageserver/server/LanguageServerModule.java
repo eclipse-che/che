@@ -17,6 +17,7 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.languageserver.server.launcher.CSharpLanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.server.launcher.JsonLanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
+import org.eclipse.che.plugin.languageserver.server.launcher.PhpLanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.server.messager.InitializeEventMessenger;
 import org.eclipse.che.plugin.languageserver.server.messager.PublishDiagnosticsParamsMessenger;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
@@ -33,6 +34,7 @@ public class LanguageServerModule extends AbstractModule {
     @Override
     protected void configure() {
         Multibinder.newSetBinder(binder(), LanguageServerLauncher.class).addBinding().to(JsonLanguageServerLauncher.class);
+        Multibinder.newSetBinder(binder(), LanguageServerLauncher.class).addBinding().to(PhpLanguageServerLauncher.class);
         Multibinder.newSetBinder(binder(), LanguageServerLauncher.class).addBinding().to(CSharpLanguageServerLauncher.class);
 
         bind(LanguageServerRegistry.class).to(LanguageServerRegistryImpl.class);

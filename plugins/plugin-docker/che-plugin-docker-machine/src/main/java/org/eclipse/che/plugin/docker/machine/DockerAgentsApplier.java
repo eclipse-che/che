@@ -62,6 +62,7 @@ public class DockerAgentsApplier {
         }
 
         apply(machine, AgentKeyImpl.of("org.eclipse.che.ls.json"), agentsCompleted, agentsInProgress);
+        apply(machine, AgentKeyImpl.of("org.eclipse.che.ls.php"), agentsCompleted, agentsInProgress);
         apply(machine, AgentKeyImpl.of("org.eclipse.che.ls.csharp"), agentsCompleted, agentsInProgress);
     }
 
