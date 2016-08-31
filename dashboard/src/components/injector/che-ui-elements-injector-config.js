@@ -10,7 +10,7 @@
  */
 'use strict';
 
-import {CheUIElementsInjectorService} from './che-ui-elements-injector.service.js';
+import {CheUIElementsInjectorService} from './che-ui-elements-injector.service';
 
 export class CheUIElementsInjectorConfig {
 

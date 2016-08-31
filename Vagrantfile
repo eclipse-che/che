@@ -167,12 +167,20 @@ Vagrant.configure(2) do |config|
     echo "--------------------------------------------------"
     echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE DOCKER IMAGES"
     echo "--------------------------------------------------"
-    perform $PROVISION_PROGRESS docker pull codenvy/che-launcher:${CHE_VERSION}
-    perform $PROVISION_PROGRESS docker pull codenvy/che-server:${CHE_VERSION}
+#    perform $PROVISION_PROGRESS docker pull codenvy/che-launcher:${CHE_VERSION}
+#    perform $PROVISION_PROGRESS docker pull codenvy/che-server:${CHE_VERSION}
+    docker pull alpine:latest
+    docker pull codenvy/che-launcher:${CHE_VERSION}
+    docker pull codenvy/che-server:${CHE_VERSION}
 
     curl -sL https://raw.githubusercontent.com/eclipse/che/master/che.sh | tr -d '\15\32' > /home/vagrant/che.sh
     chmod +x /home/vagrant/che.sh
     
+    echo "export CHE_PORT=${PORT}" >> /etc/profile.d/vars.sh
+    echo "export CHE_VERSION=${CHE_VERSION}" >> /etc/profile.d/vars.sh
+    echo "export CHE_HOST_IP=172.17.0.1" >> /etc/profile.d/vars.sh
+    echo "export CHE_HOSTNAME=${IP}" >> /etc/profile.d/vars.sh
+
   SHELL
 
   config.vm.provision "shell" do |s|
@@ -185,17 +193,17 @@ Vagrant.configure(2) do |config|
     PORT=$2
     MAPPED_PORT=$3
 
-    export CHE_CONF_FOLDER=/home/user/che/conf/
-    export CHE_PORT=${PORT}
-    export CHE_VERSION=${CHE_VERSION}
-    export CHE_HOST_IP=172.17.0.1
-    export CHE_HOSTNAME=${CHE_IP}
-    export CHE_DATA_FOLDER=${CHE_DATA}
-
     echo "--------------------------------"
     echo "ECLIPSE CHE: BOOTING ECLIPSE CHE"
     echo "--------------------------------"
-    /home/vagrant/che.sh restart &>/dev/null
+
+    docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock \
+               -e "CHE_PORT=${CHE_PORT}" \
+               -e "CHE_RESTART_POLICY=always" \
+               -e "CHE_HOST_IP=${CHE_HOST_IP}" \
+               -e "CHE_HOSTNAME=${CHE_HOSTNAME}" \
+               codenvy/che-launcher:${CHE_VERSION} start
+
 
     if [ "${IP,,}" = "dhcp" ]; then
        DEV=$(grep -l "VAGRANT-BEGIN" /etc/sysconfig/network-scripts/ifcfg-*|xargs grep "DEVICE="|sort|tail -1|cut -d "=" -f 2)
@@ -208,7 +216,7 @@ Vagrant.configure(2) do |config|
 
     echo "${CHE_URL}" > /home/user/che/.che_url
     echo "${MAPPED_PORT}" > /home/user/che/.che_host_port
-    
+    echo ""
     echo "ECLIPSE CHE READY AT: ${CHE_URL}"
 
   SHELL

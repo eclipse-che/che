@@ -1,5 +1,32 @@
 [
   {
+    "name": "che-in-che",
+    "displayName": "eclipse-che",
+    "path": "/che",
+    "description": "The Eclipse Che source code. Build Che-in-Che.",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/eclipse/che",
+      "parameters": {}
+    },
+    "commands": [],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "maven",
+      "java"
+    ]
+  },
+  {
     "name": "blank-project",
     "displayName": "blank-project",
     "path": "/blank-project",

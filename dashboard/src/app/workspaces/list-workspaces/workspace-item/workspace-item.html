@@ -12,47 +12,63 @@
 -->
 <che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
   <div flex="100"
-       layout="column" layout-gt-xs="row"
+       layout="row"
        layout-align="start stretch"
-       class="workspace-item-row">
-
+       class="che-list-item-row">
     <div layout="row"
-         layout-align="center center"
-         class="workspace-list-item-checkbox"
+         layout-align="start center"
+         class="che-checkbox-area"
          ng-if="workspaceItemCtrl.isSelectable === true">
-      <div>
-        <che-list-item-checked ng-model="workspaceItemCtrl.isSelect"
-                               ng-show="('RUNNING' === workspaceItemCtrl.getWorkspaceStatus() || 'STOPPED' === workspaceItemCtrl.getWorkspaceStatus())"
-                               che-aria-label-checkbox="Workspace {{workspaceItemCtrl.workspace.config.name}}"></che-list-item-checked>
-      </div>
+      <che-list-item-checked ng-model="workspaceItemCtrl.isSelect"
+                             ng-show="('RUNNING' === workspaceItemCtrl.getWorkspaceStatus() || 'STOPPED' === workspaceItemCtrl.getWorkspaceStatus())"
+                             che-aria-label-checkbox="Workspace {{workspaceItemCtrl.workspace.config.name}}"
+                             ng-click="workspaceItemCtrl.onCheckboxClick()"></che-list-item-checked>
     </div>
-
     <div flex
          layout-xs="column" layout-gt-xs="row"
-         layout-align="start center"
-         class="workspace-item-details"
-         ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
-      <div flex-gt-xs="33"
-           class="workspace-item-name">
-        <span class="che-hover">{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}</span>
+         layout-align-gt-xs="start center"
+         layout-align-xs="start start"
+         class="che-list-item-details">
+      <div flex-gt-xs="25"
+           class="che-list-item-name"
+           ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Name</span>
+        <workspace-status-indicator che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status-indicator>
+        <span tooltip="{{'RUNNING' === workspaceItemCtrl.getWorkspaceStatus() ? 'Running' : 'Last modified: ' + (workspaceItemCtrl.workspace.attributes.updated | amTimeAgo)}}"
+              class="che-hover">{{workspaceItemCtrl.workspace.config.name}}</span>
         <i class="fa fa-clock-o workspace-item-temp" ng-if="workspaceItemCtrl.workspace.temporary"></i>
       </div>
-      <div flex-gt-xs="33"
-           class="workspace-item-status">
-        <workspace-status che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status>
+      <div flex-gt-xs="15"
+           lass="che-list-item-name"
+           ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>RAM</span>
+        <span class="workspace-consumed-value">{{workspaceItemCtrl.getDefaultEnvironment(workspaceItemCtrl.workspace).machineConfigs[0].limits.ram}} MB</span>
       </div>
-      <div flex-gt-xs="33"
-           class="workspace-consumed-value">
-        {{workspaceItemCtrl.getDefaultEnvironment(workspaceItemCtrl.workspace).machineConfigs[0].limits.ram}} MB
+      <div flex-gt-xs="15"
+           class="che-list-item-name"
+           ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Projects</span>
+        <span class="che-hover">{{workspaceItemCtrl.workspace.config.projects.length}}</span>
       </div>
-    </div>
-
-    <div flex="none" layout="row" layout-align="center center">
-      <a ng-href="#/ide/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}">
-        <che-button-default class="che-hover workspace-list-item-arrow"
-                            che-button-icon="fa fa fa-chevron-circle-right"
-                            che-button-title="Open in IDE"></che-button-default>
-      </a>
+      <div flex-gt-xs="30"
+           class="che-list-item-name"
+           ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Stack</span>
+        <span class="che-hover">{{workspaceItemCtrl.workspace.attributes.stackId}}</span>
+      </div>
+      <div flex-gt-xs="15">
+        <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+        <span class="che-list-actions">
+          <che-workspace-status che-workspace-item="workspaceItemCtrl.workspace"></che-workspace-status>
+          <a ng-href="#/workspace/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}/projects"
+             tooltip="Configure workspace">
+            <span class="fa fa-cog"></span>
+          </a>
+          <a ng-href="#/create-project?workspaceId={{workspaceItemCtrl.workspace.id}}" tooltip="Add project">
+            <span class="fa fa-plus-square-o"></span>
+          </a>
+        </span>
+      </div>
     </div>
   </div>
 </che-list-item>

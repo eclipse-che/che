@@ -22,7 +22,7 @@ export class CreateProjectGit {
    */
   constructor() {
 
-    this.controller = 'CreateProjectGitCtrl';
+    this.controller = 'CreateProjectGitController';
     this.controllerAs = 'createProjectGitCtrl';
     this.bindToController = true;
 

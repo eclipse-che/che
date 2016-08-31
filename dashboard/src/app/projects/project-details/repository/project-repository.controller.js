@@ -63,14 +63,14 @@ export class ProjectRepositoryController {
 
     if (projectDetails.mixins.indexOf(subversionMixinId) !== -1) {
       //update remote svn url
-      if (!this.cheAPI.getSvn().getRemoteUrlByKey(projectDetails.workspaceId, projectDetails.path)) {
-        let promise = this.cheAPI.getSvn().fetchRemoteUrl(projectDetails.workspaceId, projectDetails.path);
+      if (!this.wsagent.getSvn().getRemoteUrlByKey(projectDetails.workspaceId, projectDetails.path)) {
+        let promise = this.wsagent.getSvn().fetchRemoteUrl(projectDetails.workspaceId, projectDetails.path);
 
         promise.then(() => {
-          this.remoteSvnRepository = this.cheAPI.getSvn().getRemoteUrlByKey(projectDetails.workspaceId, projectDetails.path);
+          this.remoteSvnRepository = this.wsagent.getSvn().getRemoteUrlByKey(projectDetails.workspaceId, projectDetails.path);
         });
       } else {
-        this.remoteSvnRepository = this.cheAPI.getSvn().getRemoteUrlByKey(projectDetails.workspaceId, projectDetails.path);
+        this.remoteSvnRepository = this.wsagent.getSvn().getRemoteUrlByKey(projectDetails.workspaceId, projectDetails.path);
       }
     }
 

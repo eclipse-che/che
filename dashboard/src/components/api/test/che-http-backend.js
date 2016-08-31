@@ -326,9 +326,9 @@ export class CheHttpBackend {
    */
   getRemoteSvnUrl(workspaceId, projectPath) {
     var svnInfo = {};
-    svnInfo.repositoryUrl = this.remoteSvnUrlsMap.get(workspaceId + projectPath);
+    svnInfo.items = [{uRL: this.remoteSvnUrlsMap.get(workspaceId + projectPath)}];
 
-    this.httpBackend.when('POST', '/api/svn/' + workspaceId + '/info').respond(svnInfo);
+    this.httpBackend.when('POST', this.workspaceAgentMap.get(workspaceId) + '/svn/info?workspaceId='+workspaceId).respond(svnInfo);
   }
 
 }

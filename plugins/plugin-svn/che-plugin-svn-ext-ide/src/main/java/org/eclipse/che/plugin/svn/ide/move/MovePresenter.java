@@ -22,7 +22,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
@@ -56,13 +56,13 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
     @Inject
     public MovePresenter(AppContext appContext,
                          SubversionOutputConsoleFactory consoleFactory,
-                         ConsolesPanelPresenter consolesPanelPresenter,
+                         ProcessesPanelPresenter processesPanelPresenter,
                          MoveView view,
                          NotificationManager notificationManager,
                          SubversionClientService service,
                          SubversionExtensionLocalizationConstants locale,
                          StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
         this.notificationManager = notificationManager;
         this.service = service;
 

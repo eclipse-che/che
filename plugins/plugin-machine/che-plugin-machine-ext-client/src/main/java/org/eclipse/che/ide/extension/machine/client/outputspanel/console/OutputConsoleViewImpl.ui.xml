@@ -139,7 +139,6 @@
          */
         .consolePanel {
             background-color: outputBackgroundColor;
-            border-top: 1px solid separatorColor;
             position: absolute;
             overflow: hidden;
         }

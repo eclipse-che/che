@@ -23,7 +23,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.RegExpUtils;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
@@ -59,13 +59,13 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
     @Inject
     protected CopyPresenter(AppContext appContext,
                             SubversionOutputConsoleFactory consoleFactory,
-                            ConsolesPanelPresenter consolesPanelPresenter,
+                            ProcessesPanelPresenter processesPanelPresenter,
                             CopyView view,
                             NotificationManager notificationManager,
                             SubversionClientService service,
                             SubversionExtensionLocalizationConstants constants,
                             StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
         this.view = view;
         this.notificationManager = notificationManager;
         this.service = service;

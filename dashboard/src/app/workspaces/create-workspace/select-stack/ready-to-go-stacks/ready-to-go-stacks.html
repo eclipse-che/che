@@ -14,24 +14,20 @@
 
   <div class="stack-label-info">Create a new workspace with a ready-to-go stack.</div>
   <div layout="column" flex>
-    <div layout="row" flex layout-align="space-around start">
-      <label flex="15" hide-sm hide-md>Commonly used stacks: </label>
-
-      <div layout="row" flex="85" layout-wrap>
-        <md-card layout="column" class="che-simple-selector"
-                 ng-repeat="stack in readyToGoStacksCtrl.generalStacks | orderBy:[readyToGoStacksCtrl.getPrivilegedSortPosition, 'name']"
-                 ng-init="readyToGoStacksCtrl.initValue($first, stack)"
-                 ng-click="readyToGoStacksCtrl.select(stack)"
-                 ng-class="{'che-simple-selector-active' : '{{stack.name}}' === readyToGoStacksCtrl.stack.name}">
-          <div layout="row">
-            <div class="selector-icon" ng-class="{'chefont cheico-type-blank' : !stack.iconSrc}">
-              <img ng-if="stack.iconSrc" ng-src="{{stack.iconSrc}}"/>
-            </div>
-            <div flex="70" class="title">{{stack.name}}</div>
+    <div layout="row" layout-wrap>
+      <md-card layout="column" class="che-simple-selector"
+               ng-repeat="stack in readyToGoStacksCtrl.generalStacks | orderBy:[readyToGoStacksCtrl.getPrivilegedSortPosition, 'name']"
+               ng-init="readyToGoStacksCtrl.initValue($first, stack)"
+               ng-click="readyToGoStacksCtrl.select(stack)"
+               ng-class="{'che-simple-selector-active' : '{{stack.name}}' === readyToGoStacksCtrl.stack.name}">
+        <div layout="row">
+          <div class="selector-icon" ng-class="{'chefont cheico-type-blank' : !stack.iconSrc}">
+            <img ng-if="stack.iconSrc" ng-src="{{stack.iconSrc}}"/>
           </div>
-          <div class="description">{{readyToGoStacksCtrl.tagsToString(stack.tags)}}</div>
-        </md-card>
-      </div>
+          <div flex="70" class="title">{{stack.name}}</div>
+        </div>
+        <div class="description">{{readyToGoStacksCtrl.tagsToString(stack.tags)}}</div>
+      </md-card>
     </div>
   </div>
 </ng-form>

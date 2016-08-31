@@ -30,7 +30,8 @@ export class CheWorkspaceItem {
     this.scope = {
       workspace: '=cheWorkspaceItem',
       isSelectable: '=cheSelectable',
-      isSelect: '=?ngModel'
+      isSelect: '=?ngModel',
+      onCheckboxClick: '&?cheOnCheckboxClick'
     };
 
     this.templateUrl = 'app/workspaces/list-workspaces/workspace-item/workspace-item.html';

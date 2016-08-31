@@ -15,7 +15,7 @@
  * @author Stéphane Daviet
  * @author Florent Benoit
  */
-export class CreateProjectGithubCtrl {
+export class CreateProjectGithubController {
 
   /**
    * Default constructor that is using resource

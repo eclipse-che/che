@@ -114,7 +114,7 @@ public class DockerCategoryPresenter implements CategoryPage, TargetManager, Doc
         target.setType(machine.getConfig().getType());
         target.setSourceType(machine.getConfig().getSource().getType());
         target.setSourceContent(machine.getConfig().getSource().getContent());
-        target.setSourceUrl(machine.getConfig().getSource().getLocation());
+        target.setSource(machine.getConfig().getSource().getLocation());
 
         return true;
     }
