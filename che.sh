@@ -413,7 +413,7 @@ generate_temporary_che_properties_file() {
     touch ~/.che/conf/che.properties
 
     # Get list of properties
-    PROPERTIES_ARRAY=($(env | grep CHE_PROPERTY_))
+    PROPERTIES_ARRAY=$(env | grep CHE_PROPERTY_)
     for PROPERTY in "${PROPERTIES_ARRAY[@]}"
     do
       # CHE_PROPERTY_NAME=value ==> NAME=value
