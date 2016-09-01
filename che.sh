@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 2012-2016 Codenvy, S.A.
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
@@ -155,13 +155,9 @@ docker_run() {
 }
 
 docker_run_with_env_file() {
-  if has_che_env_variables; then
-    get_list_of_che_system_environment_variables
-    docker_run --env-file=tmp "$@"
-    rm -rf $PWD/tmp > /dev/null
-  else
-    docker_run "$@"
-  fi
+  get_list_of_che_system_environment_variables
+  docker_run --env-file=tmp "$@"
+  rm -rf $PWD/tmp > /dev/null
 }
 
 docker_run_with_pseudo_tty() {
@@ -428,8 +424,6 @@ generate_temporary_che_properties_file() {
       PROPERTY_VALUE=$(echo $PROPERTY_WITHOUT_PREFIX | cut -f2 -d=)
      
       # Replace "_" in names to periods
-
-      # Replace "_" in names to periods
       CONVERTED_PROPERTY_NAME=$(echo "$PROPERTY_NAME" | tr _ .)
 
       # Replace ".." in names to "_"
@@ -632,7 +626,7 @@ load_profile() {
       return
     fi
 
-    source ~/.che//profiles/"${CHE_PROFILE}"
+    source ~/.che/profiles/"${CHE_PROFILE}"
   fi
 }
 
