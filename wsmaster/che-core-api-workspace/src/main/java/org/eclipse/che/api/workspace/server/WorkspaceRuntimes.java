@@ -13,7 +13,11 @@ package org.eclipse.che.api.workspace.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
+import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.impl.AgentSorter;
+import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
+import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
+import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -29,6 +33,7 @@ import org.eclipse.che.api.core.util.AbstractMessageConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
+import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -88,17 +93,20 @@ public class WorkspaceRuntimes {
     private final EventService                eventService;
     private final StripedLocks                stripedLocks;
     private final CheEnvironmentEngine        environmentEngine;
-    private final WsAgentLauncher             wsAgentLauncher;
+    private final AgentSorter                 agentSorter;
+    private final AgentLauncherFactory        agentLauncherFactory;
 
     private volatile boolean isPreDestroyInvoked;
 
     @Inject
     public WorkspaceRuntimes(EventService eventService,
                              CheEnvironmentEngine environmentEngine,
-                             WsAgentLauncher wsAgentLauncher) {
+                             AgentSorter agentSorter,
+                             AgentLauncherFactory agentLauncherFactory) {
         this.eventService = eventService;
         this.environmentEngine = environmentEngine;
-        this.wsAgentLauncher = wsAgentLauncher;
+        this.agentSorter = agentSorter;
+        this.agentLauncherFactory = agentLauncherFactory;
         this.workspaces = new HashMap<>();
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
@@ -231,9 +239,9 @@ public class WorkspaceRuntimes {
                                                               environmentCopy,
                                                               recover,
                                                               getEnvironmentLogger(workspaceId));
-            Instance devMachine = getDevMachine(machines);
-
-            wsAgentLauncher.startWsAgent(devMachine);
+            for (Instance instance : machines) {
+                launchAgents(instance);
+            }
 
             try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                 WorkspaceState workspaceState = workspaces.get(workspaceId);
@@ -379,6 +387,7 @@ public class WorkspaceRuntimes {
         }
 
         Instance instance = environmentEngine.startMachine(workspaceId, machineConfig);
+        launchAgents(instance);
 
         try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);
@@ -553,21 +562,25 @@ public class WorkspaceRuntimes {
                                      .withError(error));
     }
 
-    private Instance getDevMachine(List<Instance> machines) throws ServerException {
-        Optional<Instance> devMachineOpt = machines.stream()
-                                                   .filter(machine -> machine.getConfig().isDev())
-                                                   .findAny();
-
-        if (devMachineOpt.isPresent()) {
-            return devMachineOpt.get();
-        }
-        throw new ServerException(
-                "Environment has booted but it doesn't contain dev machine. Environment has been stopped.");
-    }
-
     private void ensurePreDestroyIsNotExecuted() throws ServerException {
         if (isPreDestroyInvoked) {
             throw new ServerException("Could not perform operation because application server is stopping");
+        }
+    }
+
+    private void launchAgents(Instance instance) throws MachineException {
+        List<Agent> agents;
+        try {
+            agents = agentSorter.sort(instance.getConfig().getAgents());
+        } catch (AgentException e) {
+            throw new MachineException("Can't build proper order of agents to launch", e);
+        }
+
+        for (Agent agent : agents) {
+            LOG.info("Launching '{}' agent", agent.getName());
+
+            AgentLauncher agentLauncher = agentLauncherFactory.find(agent.getName(), instance.getConfig().getType());
+            agentLauncher.launch(instance, agent);
         }
     }
 

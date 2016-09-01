@@ -83,4 +83,12 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
 
     @Override
     MachineConfigDto withLinks(List<Link> links);
+
+    @Override
+    List<String> getAgents();
+
+    void setAgents(List<String> agents);
+
+    MachineConfigDto withAgents(List<String> agents);
+
 }

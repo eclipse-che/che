@@ -29,6 +29,7 @@ import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
+import org.eclipse.che.plugin.docker.machine.DockerAgentConfigApplier;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceProvider;
 import org.eclipse.che.plugin.docker.machine.DockerMachineFactory;
 import org.eclipse.che.plugin.docker.machine.DockerMachineModule;
@@ -54,9 +55,9 @@ import static org.testng.Assert.assertEquals;
 
 @Listeners(MockitoTestNGListener.class)
 public class EnableOfflineDockerMachineBuildInterceptorTest {
-    private static final String REPO  = "some/image";
-    private static final String TAG   = "tag1";
-    private static final String IMAGE = REPO + ":" + TAG;
+    private static final String REPO               = "some/image";
+    private static final String TAG                = "tag1";
+    private static final String IMAGE              = REPO + ":" + TAG;
     private static final String MACHINE_IMAGE_NAME = "machineImageName";
 
     @Mock
@@ -79,6 +80,8 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
     private Recipe                                        recipe;
     @Mock
     private Supplier<Boolean>                             doForcePullOnBuildFlagProvider;
+    @Mock
+    private DockerAgentConfigApplier                      agentsApplier;
 
 
     private DockerInstanceProvider                     dockerInstanceProvider;
@@ -183,6 +186,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
         @Override
         protected void configure() {
             bind(DockerInstanceProvider.class);
+            bind(DockerAgentConfigApplier.class).toInstance(agentsApplier);
             bind(DockerConnector.class).toInstance(dockerConnector);
             bind(UserSpecificDockerRegistryCredentialsProvider.class).toInstance(dockerCredentials);
             bind(WorkspaceFolderPathProvider.class).to(LocalWorkspaceFolderPathProvider.class);
@@ -196,6 +200,7 @@ public class EnableOfflineDockerMachineBuildInterceptorTest {
                                              org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
             machineImageProviderMultibinder.addBinding()
                                            .to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
+
 
             bindConstant().annotatedWith(Names.named("machine.docker.privilege_mode")).to(false);
             bindConstant().annotatedWith(Names.named("machine.docker.pull_image")).to(true);
