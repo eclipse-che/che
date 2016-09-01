@@ -283,6 +283,7 @@ import org.eclipse.che.ide.workspace.WorkspaceViewImpl;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidget;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidgetImpl;
+import org.eclipse.che.ide.workspace.macro.WorkspaceNameMacroProvider;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
 import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
@@ -491,6 +492,7 @@ public class CoreGinModule extends AbstractGinModule {
         macroProviders.addBinding().to(ExplorerCurrentFileRelativePathProvider.class);
         macroProviders.addBinding().to(ExplorerCurrentProjectNameProvider.class);
         macroProviders.addBinding().to(ExplorerCurrentProjectTypeProvider.class);
+        macroProviders.addBinding().to(WorkspaceNameMacroProvider.class);
     }
 
     /** Configure Core UI components, resources and views */
