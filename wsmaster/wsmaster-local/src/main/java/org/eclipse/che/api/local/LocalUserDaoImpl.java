@@ -162,6 +162,11 @@ public class LocalUserDaoImpl implements UserDao {
                           users.size());
     }
 
+    @Override
+    public long getTotalCount() throws ServerException {
+        return users.size();
+    }
+
     private void checkConflicts(UserImpl user, String operation) throws ConflictException {
         for (UserImpl existingUser : users.values()) {
             if (!existingUser.getId().equals(user.getId())) {
