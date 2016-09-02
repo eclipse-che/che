@@ -329,7 +329,7 @@ has_docker_for_windows_client(){
 get_full_path() {
   debug $FUNCNAME
   # "/some/path" => /some/path
-  OUTPUT_PATH=${1//\"}
+  #OUTPUT_PATH=${1//\"}
 
   # create full directory path
   echo "$(cd "$(dirname "${OUTPUT_PATH}")"; pwd)/$(basename "$1")"
