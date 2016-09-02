@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.symbol;
 
+import io.typefox.lsapi.ServerCapabilities;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -22,6 +24,7 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
@@ -30,6 +33,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
+import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.filters.FuzzyMatches;
 import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
@@ -121,8 +125,17 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        //TODO need to check editor somehow
-        event.getPresentation().setEnabledAndVisible(activeEditor != null && activeEditor instanceof TextEditor);
+        if (activeEditor instanceof TextEditor) {
+            TextEditorConfiguration configuration = ((TextEditor)activeEditor).getConfiguration();
+            if (configuration instanceof LanguageServerEditorConfiguration) {
+                ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
+                event.getPresentation()
+                     .setEnabledAndVisible(capabilities.isDocumentSymbolProvider() != null && capabilities.isDocumentSymbolProvider());
+                return;
+            }
+
+        }
+        event.getPresentation().setEnabledAndVisible(false);
     }
 
     @Override
@@ -279,7 +292,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction implements Quick
 
     @Override
     public void onClose(boolean canceled) {
-        if(canceled){
+        if (canceled) {
             activeEditor.getDocument().setCursorPosition(cursorPosition);
             activeEditor.setFocus();
         }

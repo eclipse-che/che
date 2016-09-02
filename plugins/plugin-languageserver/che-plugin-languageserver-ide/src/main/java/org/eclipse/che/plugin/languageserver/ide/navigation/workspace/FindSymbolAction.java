@@ -19,6 +19,8 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.api.promises.async.Task;
+import org.eclipse.che.api.promises.async.ThrottledDelayer;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -54,7 +56,8 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class FindSymbolAction extends AbstractPerspectiveAction implements QuickOpenPresenter.QuickOpenPresenterOpts {
 
     private static final Set<String> SUPPORTED_OPEN_TYPES = Sets.newHashSet("class", "interface", "enum","function", "method");
-   ;
+    private static final int SEARCH_DELAY = 500;
+
     private final OpenFileInEditorHelper editorHelper;
     private final QuickOpenPresenter     presenter;
     private final WorkspaceServiceClient workspaceServiceClient;
@@ -62,6 +65,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     private final EditorAgent            editorAgent;
     private final SymbolKindHelper       symbolKindHelper;
     private final FuzzyMatches           fuzzyMatches;
+    private final ThrottledDelayer<List<SymbolEntry>> delayer;
 
     @Inject
     public FindSymbolAction(LanguageServerLocalization localization,
@@ -81,6 +85,7 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
         this.editorAgent = editorAgent;
         this.symbolKindHelper = symbolKindHelper;
         this.fuzzyMatches = fuzzyMatches;
+        this.delayer = new ThrottledDelayer<>(SEARCH_DELAY);
     }
 
     @Override
@@ -94,13 +99,18 @@ public class FindSymbolAction extends AbstractPerspectiveAction implements Quick
     }
 
     @Override
-    public Promise<QuickOpenModel> getModel(String value) {
+    public Promise<QuickOpenModel> getModel(final String value) {
         Promise<List<SymbolEntry>> promise;
 
         if (Strings.isNullOrEmpty(value)|| editorAgent.getActiveEditor() == null) {
             promise = Promises.resolve(Collections.<SymbolEntry>emptyList());
         } else {
-            promise = searchSymbols(value);
+            promise = delayer.trigger(new Task<Promise<List<SymbolEntry>>>() {
+                @Override
+                public Promise<List<SymbolEntry>> run() {
+                    return searchSymbols(value);
+                }
+            });
         }
         return promise.then(new Function<List<SymbolEntry>, QuickOpenModel>() {
             @Override

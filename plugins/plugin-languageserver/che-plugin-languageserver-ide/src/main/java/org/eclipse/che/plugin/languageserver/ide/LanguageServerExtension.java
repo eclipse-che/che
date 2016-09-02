@@ -26,6 +26,7 @@ import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
+import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
@@ -33,7 +34,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.editor.orion.client.OrionContentTypeRegistrant;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionContentTypeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionHighlightingConfigurationOverlay;
-import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
@@ -127,7 +127,7 @@ public class LanguageServerExtension {
 
     @Inject
     protected void registerAction(ActionManager actionManager,
-                                  KeyBindingManager keyBindingManager,
+                                  KeyBindingAgent keyBindingManager,
                                   GoToSymbolAction goToSymbolAction,
                                   FindSymbolAction findSymbolAction,
                                   FindDefinitionAction findDefinitionAction,
@@ -143,11 +143,16 @@ public class LanguageServerExtension {
         assistantGroup.add(findDefinitionAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
         assistantGroup.add(findReferencesAction, new Constraints(Anchor.BEFORE, GROUP_ASSISTANT_REFACTORING));
 
+
         if (UserAgent.isMac()) {
             keyBindingManager.getGlobal().addKey(new KeyBuilder().control().charCode(KeyCodeMap.F12).build(), "LSGoToSymbolAction");
         } else {
             keyBindingManager.getGlobal().addKey(new KeyBuilder().action().charCode(KeyCodeMap.F12).build(), "LSGoToSymbolAction");
         }
+        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode('n').build(),"LSFindSymbolAction");
+        keyBindingManager.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F7).build(),"LSFindReferencesAction");
+        keyBindingManager.getGlobal().addKey(new KeyBuilder().charCode(KeyCodeMap.F4).build(),"LSFindDefinitionAction");
+
     }
 
     @Inject

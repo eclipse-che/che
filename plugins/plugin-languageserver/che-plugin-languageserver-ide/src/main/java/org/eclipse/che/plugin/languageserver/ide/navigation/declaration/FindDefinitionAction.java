@@ -10,16 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.declaration;
 
+import io.typefox.lsapi.ServerCapabilities;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -29,7 +36,6 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifier
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -42,10 +48,10 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 public class FindDefinitionAction extends AbstractPerspectiveAction {
 
 
-    private final EditorAgent                   editorAgent;
+    private final EditorAgent               editorAgent;
     private final TextDocumentServiceClient client;
-    private final DtoFactory dtoFactory;
-    private final OpenLocationPresenter presenter;
+    private final DtoFactory                dtoFactory;
+    private final OpenLocationPresenter     presenter;
 
     @Inject
     public FindDefinitionAction(EditorAgent editorAgent, OpenLocationPresenterFactory presenterFactory,
@@ -60,8 +66,17 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        //TODO need to check editor somehow
-        event.getPresentation().setEnabledAndVisible(activeEditor != null && activeEditor instanceof TextEditor);
+        if (activeEditor instanceof TextEditor) {
+            TextEditorConfiguration configuration = ((TextEditor)activeEditor).getConfiguration();
+            if (configuration instanceof LanguageServerEditorConfiguration) {
+                ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
+                event.getPresentation()
+                     .setEnabledAndVisible(capabilities.isDefinitionProvider() != null && capabilities.isDefinitionProvider());
+                return;
+            }
+        }
+        event.getPresentation().setEnabledAndVisible(false);
+
     }
 
     @Override
@@ -86,7 +101,21 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
         paramsDTO.setUri(path);
         paramsDTO.setPosition(positionDTO);
         paramsDTO.setTextDocument(identifierDTO);
-        Promise<List<LocationDTO>> promise = client.definition(paramsDTO);
-        presenter.openLocation(promise);
+        final Promise<List<LocationDTO>> promise = client.definition(paramsDTO);
+        promise.then(new Operation<List<LocationDTO>>() {
+            @Override
+            public void apply(List<LocationDTO> arg) throws OperationException {
+                if (arg.size() == 1) {
+                    presenter.onLocationSelected(arg.get(0));
+                } else {
+                    presenter.openLocation(promise);
+                }
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                presenter.showError(arg);
+            }
+        });
     }
 }

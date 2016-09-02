@@ -23,7 +23,7 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
 import org.eclipse.che.ide.api.editor.text.TextRange;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditorPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
@@ -117,11 +117,11 @@ public class OpenFileInEditorHelper {
     }
 
     private void fileOpened(final EditorPartPresenter editor, final TextRange selectionRange) {
-        if (editor instanceof TextEditorPresenter && selectionRange != null) {
+        if (editor instanceof TextEditor && selectionRange != null) {
             Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                 @Override
                 public void execute() {
-                    ((TextEditorPresenter)editor).getDocument().setSelectedRange(selectionRange, true);
+                    ((TextEditor)editor).getDocument().setSelectedRange(selectionRange, true);
                 }
             });
         }

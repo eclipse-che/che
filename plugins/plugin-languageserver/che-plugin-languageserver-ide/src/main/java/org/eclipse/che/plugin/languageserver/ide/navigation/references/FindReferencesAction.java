@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.navigation.references;
 
+import io.typefox.lsapi.ServerCapabilities;
+
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Promise;
@@ -17,8 +19,10 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -57,8 +61,16 @@ public class FindReferencesAction extends AbstractPerspectiveAction {
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-        //TODO need to check editor somehow
-        event.getPresentation().setEnabledAndVisible(activeEditor != null && activeEditor instanceof TextEditor);
+        if (activeEditor instanceof TextEditor) {
+            TextEditorConfiguration configuration = ((TextEditor)activeEditor).getConfiguration();
+            if (configuration instanceof LanguageServerEditorConfiguration) {
+                ServerCapabilities capabilities = ((LanguageServerEditorConfiguration)configuration).getServerCapabilities();
+                event.getPresentation()
+                     .setEnabledAndVisible(capabilities.isReferencesProvider() != null && capabilities.isReferencesProvider());
+                return;
+            }
+        }
+        event.getPresentation().setEnabledAndVisible(false);
     }
 
     @Override

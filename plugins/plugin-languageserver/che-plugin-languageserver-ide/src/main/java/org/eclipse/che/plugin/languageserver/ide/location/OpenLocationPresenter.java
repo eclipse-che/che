@@ -74,10 +74,14 @@ public class OpenLocationPresenter extends BasePresenter implements OpenLocation
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager
-                        .notify(title, arg.getMessage(), StatusNotification.Status.FAIL, StatusNotification.DisplayMode.FLOAT_MODE);
+                showError(arg);
             }
         });
+    }
+
+    public void showError(PromiseError arg) {
+        notificationManager
+                .notify(title, arg.getMessage(), StatusNotification.Status.FAIL, StatusNotification.DisplayMode.FLOAT_MODE);
     }
 
     private void showLocations(List<LocationDTO> locations) {

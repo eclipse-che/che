@@ -74,4 +74,8 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
     public ContentFormatter getContentFormatter() {
         return formatter;
     }
+
+    public ServerCapabilities getServerCapabilities() {
+        return serverCapabilities;
+    }
 }

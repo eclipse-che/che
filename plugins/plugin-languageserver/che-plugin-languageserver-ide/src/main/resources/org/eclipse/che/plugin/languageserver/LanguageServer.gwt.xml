@@ -12,6 +12,7 @@
     <inherits name="org.eclipse.che.ide.Core"/>
     <inherits name="io.typefox.lsapi.LsApi"/>
     <inherits name="org.eclipse.che.ide.editor.orion.OrionEditor"/>
+    <inherits name="org.eclipse.che.api.promises.Promises"/>
 
     <source path="ide"/>
     <source path="shared"/>
