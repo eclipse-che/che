@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -155,7 +154,7 @@ public class MachineManagerImplTest {
         when(appContext.getDevMachine()).thenReturn(devMachine);
         when(devMachine.getId()).thenReturn(ID);
 
-        Promise<MachineDto> promiseEmpty = mock(Promise.class);
+        Promise<Void> promiseEmpty = mock(Promise.class);
         when(workspaceServiceClient.createMachine(anyString(), any(MachineConfigDto.class))).thenReturn(promiseEmpty);
 
         machineManager.restartMachine(machineState);

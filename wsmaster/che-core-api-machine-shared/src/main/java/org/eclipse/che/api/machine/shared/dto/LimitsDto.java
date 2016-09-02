@@ -16,6 +16,7 @@ import org.eclipse.che.dto.shared.DTO;
 /**
  * @author Alexander Garagatyi
  */
+@Deprecated
 @DTO
 public interface LimitsDto extends Limits {
     LimitsDto withRam(int memorySizeMB);

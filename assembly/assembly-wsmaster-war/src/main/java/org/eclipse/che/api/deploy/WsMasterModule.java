@@ -84,6 +84,9 @@ public class WsMasterModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
         machineImageProviderMultibinder.addBinding().to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
 
+        bind(org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProvider.class)
+                .to(org.eclipse.che.plugin.docker.machine.ComposeMachineProviderImpl.class);
+
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
         install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());

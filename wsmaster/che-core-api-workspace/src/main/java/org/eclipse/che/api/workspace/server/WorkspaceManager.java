@@ -620,8 +620,7 @@ public class WorkspaceManager {
                                     @Nullable String accountId) throws ConflictException, NotFoundException, ServerException {
         if (envName != null && !workspace.getConfig()
                                          .getEnvironments()
-                                         .stream()
-                                         .anyMatch(env -> env.getName().equals(envName))) {
+                                         .containsKey(envName)) {
             throw new NotFoundException(format("Workspace '%s:%s' doesn't contain environment '%s'",
                                                workspace.getNamespace(),
                                                workspace.getConfig().getName(),

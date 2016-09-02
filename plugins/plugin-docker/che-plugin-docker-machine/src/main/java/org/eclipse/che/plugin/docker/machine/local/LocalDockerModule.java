@@ -62,8 +62,6 @@ public class LocalDockerModule extends AbstractModule {
 
         install(new org.eclipse.che.plugin.docker.machine.DockerMachineModule());
 
-        install(new org.eclipse.che.plugin.docker.machine.local.interceptor.AllowOfflineMachineCreationModule());
-
         Multibinder<String> devMachineVolumes = Multibinder.newSetBinder(binder(),
                                                                          String.class,
                                                                          Names.named("machine.docker.dev_machine.machine_volumes"));

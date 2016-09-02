@@ -17,29 +17,30 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.machine.RecipeServiceClient;
-import org.eclipse.che.api.machine.shared.dto.LimitsDto;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.api.machine.RecipeServiceClient;
+import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.create.CreateWorkspaceView.HidePopupCallBack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 
 /**
@@ -227,24 +228,21 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     private WorkspaceConfigDto getWorkspaceConfig() {
         String wsName = view.getWorkspaceName();
 
-        List<MachineConfigDto> machineConfigs = new ArrayList<>();
-        machineConfigs.add(dtoFactory.createDto(MachineConfigDto.class)
-                                     .withName(WS_MACHINE_NAME)
-                                     .withType("docker")
-                                     .withSource(dtoFactory.createDto(MachineSourceDto.class)
-                                                           .withType("dockerfile")
-                                                           .withLocation(view.getRecipeUrl()))
-                                     .withDev(true)
-                                     .withLimits(dtoFactory.createDto(LimitsDto.class).withRam(2048)));
+        EnvironmentRecipeDto recipe = dtoFactory.createDto(EnvironmentRecipeDto.class)
+                                                .withType("compose")
+                                                .withLocation(view.getRecipeUrl())
+                                                .withContentType("application/x-yaml");
 
-        List<EnvironmentDto> environments = new ArrayList<>();
-        environments.add(dtoFactory.createDto(EnvironmentDto.class)
-                                   .withName(wsName)
-                                   .withMachineConfigs(machineConfigs));
+        ExtendedMachineDto machine = dtoFactory.createDto(ExtendedMachineDto.class)
+                                               .withAgents(Collections.singletonList("ws-agent"));
+
+        EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)
+                                               .withRecipe(recipe)
+                                               .withMachines(singletonMap(WS_MACHINE_NAME, machine));
 
         return dtoFactory.createDto(WorkspaceConfigDto.class)
                          .withName(wsName)
                          .withDefaultEnv(wsName)
-                         .withEnvironments(environments);
+                         .withEnvironments(singletonMap(wsName, environment));
     }
 }

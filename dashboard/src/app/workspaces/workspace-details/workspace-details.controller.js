@@ -113,16 +113,15 @@ export class WorkspaceDetailsController {
    */
   getRam() {
     // get default environment
-    let defaultEnv = this.lodash.find(this.workspaceDetails.config.environments, (env) => {
-      return env.name === this.workspaceDetails.config.defaultEnv;
-    });
+    let defaultEnv = this.workspaceDetails.config.environments[this.workspaceDetails.config.defaultEnv];
 
     // get dev machine config
-    let devMachineConfig = this.lodash.find(defaultEnv.machineConfigs, (machine) => {
-      return machine.dev === true;
+    let devMachineConfig = this.lodash.find(defaultEnv.machines, (machine) => {
+      return machine.agents.indexOf('ws-agent') >= 0;
     });
 
-    return angular.copy(devMachineConfig.limits.ram);
+    //TODO not implemented yet return angular.copy(devMachineConfig.limits.ram);
+    return "";
   }
 
   /**
@@ -179,13 +178,13 @@ export class WorkspaceDetailsController {
 
     this.lodash.forEach(workspaceNewDetails.config.environments, (env) => {
       if (env.name === workspaceNewDetails.config.defaultEnv) {
-        this.lodash.forEach(env.machineConfigs, (machine) => {
-          if (machine.dev === true) {
-            machine.limits.ram = this.newRam;
+        this.lodash.forEach(env.machines, (machine) => {
+          if (machine.agents.indexOf('ws-agent') >= 0) {
+           /* TODO not implemented yet machine.limits.ram = this.newRam;
 
             if (this.getWorkspaceStatus() === 'STOPPED') {
               this.origRam = this.newRam;
-            }
+            }*/
           }
         });
       }

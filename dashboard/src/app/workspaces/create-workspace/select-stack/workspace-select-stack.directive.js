@@ -35,7 +35,8 @@ export class WorkspaceSelectStack {
       stack: '=cheStack',
       onStackChange: '&cheStackChange',
       recipeScript: '=cheRecipeScript',
-      recipeUrl: '=cheRecipeUrl'
+      recipeUrl: '=cheRecipeUrl',
+      recipeFormat: '=cheRecipeFormat'
     };
 
   }

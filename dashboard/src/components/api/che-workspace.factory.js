@@ -250,24 +250,36 @@ export class CheWorkspace {
     ram = ram || 2048;
 
     //Check environments were provided in config:
-    config.environments = (config.environments && config.environments.length > 0) ? config.environments : [];
+    config.environments = (config.environments && Object.keys(config.environments).length > 0) ? config.environments : {};
 
-    let defaultEnvironment = this.lodash.find(config.environments, (environment) => {
-      return environment.name === config.defaultEnv;
-    });
+    let defaultEnvironment = config.environments[config.defaultEnv];
 
     //Check default environment is provided and add if there is no:
     if (!defaultEnvironment) {
       defaultEnvironment = {
         'name': config.defaultEnv,
         'recipe': null,
-        'machineConfigs': []
+        'machines': {"devmachine" : {"agents" : ["ws-agent"]}}
       }
 
-      config.environments.push(defaultEnvironment);
+      config.environments[config.defaultEnv] =  defaultEnvironment;
     }
 
-    let devMachine = this.lodash.find(defaultEnvironment.machineConfigs, (config) => {
+    if (source && source.type && source.type === 'environment') {
+      defaultEnvironment.recipe = {
+        'type': 'compose',
+        'contentType': source.format
+      }
+
+      defaultEnvironment.recipe.content = source.content || null;
+      defaultEnvironment.recipe.location = source.location || null;
+    }
+
+    if (defaultEnvironment.recipe && defaultEnvironment.recipe.type === 'compose') {
+      return config;
+    }
+
+    let devMachine = this.lodash.find(defaultEnvironment.machines, (config) => {
       return config.dev;
     });
 
@@ -280,7 +292,7 @@ export class CheWorkspace {
         'source': source,
         'dev': true
       }
-      defaultEnvironment.machineConfigs.push(devMachine);
+      defaultEnvironment.machines[devMachine.name] = devMachine;
     } else {
       devMachine.limits = {'ram': ram};
       devMachine.source = source;

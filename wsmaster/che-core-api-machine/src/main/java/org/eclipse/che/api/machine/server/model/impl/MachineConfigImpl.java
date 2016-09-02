@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
  *
  * @author Eugene Voevodin
  */
+@Deprecated
 public class MachineConfigImpl implements MachineConfig {
 
     public static MachineConfigImplBuilder builder() {

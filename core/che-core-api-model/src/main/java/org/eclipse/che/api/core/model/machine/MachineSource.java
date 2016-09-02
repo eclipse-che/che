@@ -13,6 +13,7 @@ package org.eclipse.che.api.core.model.machine;
 /**
  * @author gazarenkov
  */
+@Deprecated
 public interface MachineSource {
 
     /**

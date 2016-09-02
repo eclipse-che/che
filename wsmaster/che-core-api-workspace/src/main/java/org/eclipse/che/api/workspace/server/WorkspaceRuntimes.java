@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.util.AbstractMessageConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
+import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -183,7 +184,7 @@ public class WorkspaceRuntimes {
      *         when component {@link #isPreDestroyInvoked is stopped}
      * @throws ServerException
      *         other error occurs during environment start
-     * @see CheEnvironmentEngine#start(String, Environment, boolean, MessageConsumer)
+     * @see CheEnvironmentEngine#start(String, String, Environment, boolean, MessageConsumer)
      * @see WorkspaceStatus#STARTING
      * @see WorkspaceStatus#RUNNING
      */
@@ -194,8 +195,8 @@ public class WorkspaceRuntimes {
                                                            NotFoundException {
         String workspaceId = workspace.getId();
 
-        Optional<EnvironmentImpl> environmentOpt = workspace.getConfig().getEnvironment(envName);
-        if (!environmentOpt.isPresent()) {
+        EnvironmentImpl environment = workspace.getConfig().getEnvironments().get(envName);
+        if (environment == null) {
             throw new IllegalArgumentException(format("Workspace '%s' doesn't contain environment '%s'",
                                                       workspaceId,
                                                       envName));
@@ -204,7 +205,7 @@ public class WorkspaceRuntimes {
         // Environment copy constructor makes deep copy of objects graph
         // in this way machine configs also copied from incoming values
         // which means that original values won't affect the values in starting queue
-        EnvironmentImpl environmentCopy = new EnvironmentImpl(environmentOpt.get());
+        EnvironmentImpl environmentCopy = new EnvironmentImpl(environment);
 
         // This check allows to exit with an appropriate exception before blocking on lock.
         // The double check is required as it is still possible to get unlucky timing
@@ -228,6 +229,7 @@ public class WorkspaceRuntimes {
 
         try {
             List<Instance> machines = environmentEngine.start(workspaceId,
+                                                              envName,
                                                               environmentCopy,
                                                               recover,
                                                               getEnvironmentLogger(workspaceId));
@@ -246,6 +248,7 @@ public class WorkspaceRuntimes {
         } catch (ApiException e) {
             try {
                 environmentEngine.stop(workspaceId);
+            } catch (EnvironmentNotRunningException ignore) {
             } catch (Exception ex) {
                 LOG.error(ex.getLocalizedMessage(), ex);
             }
@@ -258,7 +261,7 @@ public class WorkspaceRuntimes {
                                   workspaceId,
                                   environmentStartError);
 
-            throw new ServerException(environmentStartError);
+            throw new ServerException(environmentStartError, e);
         }
     }
 

@@ -12,27 +12,29 @@ package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
@@ -44,12 +46,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
@@ -230,20 +231,10 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl res1 = result.get(0);
         assertEquals(res1.getStatus(), STOPPED, "Workspace status wasn't changed from STARTING to STOPPED");
         assertFalse(res1.isTemporary(), "Workspace must be permanent");
-        assertNotNull(res1.getConfig()
-                          .getEnvironments()
-                          .get(0)
-                          .getMachineConfigs()
-                          .get(0));
 
         final WorkspaceImpl res2 = result.get(1);
         assertEquals(res2.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
         assertFalse(res2.isTemporary(), "Workspace must be permanent");
-        assertNotNull(res2.getConfig()
-                          .getEnvironments()
-                          .get(0)
-                          .getMachineConfigs()
-                          .get(0));
     }
 
     @Test
@@ -251,10 +242,9 @@ public class WorkspaceManagerTest {
         // given
         final WorkspaceConfig config = createConfig();
 
-        final WorkspaceImpl workspace1 = workspaceManager.createWorkspace(config, "user123", null);
         final WorkspaceImpl workspace2 = workspaceManager.createWorkspace(config, "user321", null);
 
-        when(workspaceDao.getByNamespace("user321")).thenReturn(asList(workspace2));
+        when(workspaceDao.getByNamespace("user321")).thenReturn(singletonList(workspace2));
         final RuntimeDescriptor descriptor = createDescriptor(workspace2, RUNNING);
         when(runtimes.get(workspace2.getId())).thenReturn(descriptor);
 
@@ -267,11 +257,6 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl res1 = result.get(0);
         assertEquals(res1.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
         assertFalse(res1.isTemporary(), "Workspace must be permanent");
-        assertNotNull(res1.getConfig()
-                          .getEnvironments()
-                          .get(0)
-                          .getMachineConfigs()
-                          .get(0));
     }
 
     @Test
@@ -498,20 +483,17 @@ public class WorkspaceManagerTest {
     @Test
     public void performAsyncStartShouldUseProvidedEnvInsteadOfDefault() throws Exception {
         final WorkspaceConfigImpl config = createConfig();
-        final EnvironmentImpl nonDefaultEnv = new EnvironmentImpl("non-default-env",
-                                                                  null,
-                                                                  config.getEnvironments().get(0).getMachineConfigs());
-        config.getEnvironments().add(nonDefaultEnv);
+        final EnvironmentImpl nonDefaultEnv = new EnvironmentImpl(null, null);
+        config.getEnvironments().put("non-default-env", nonDefaultEnv);
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(config, "user123", "account");
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(workspace.getId())).thenThrow(new NotFoundException(""));
         final RuntimeDescriptor descriptor = createDescriptor(workspace, STARTING);
         when(runtimes.start(any(), anyString(), anyBoolean())).thenReturn(descriptor);
-
-        workspaceManager.startWorkspace(workspace.getId(), nonDefaultEnv.getName(), "account", null);
+        workspaceManager.startWorkspace(workspace.getId(), "non-default-env", "account", null);
 
         // timeout is needed because this invocation will run in separate thread asynchronously
-        verify(runtimes, timeout(2000)).start(workspace, nonDefaultEnv.getName(), false);
+        verify(runtimes, timeout(2000)).start(workspace, "non-default-env", false);
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -537,11 +519,6 @@ public class WorkspaceManagerTest {
         verify(runtimes, timeout(2000)).start(workspaceCaptor.capture(), anyString(), anyBoolean());
         final WorkspaceImpl captured = workspaceCaptor.getValue();
         assertTrue(captured.isTemporary());
-        assertNotNull(captured.getConfig()
-                              .getEnvironments()
-                              .get(0)
-                              .getMachineConfigs()
-                              .get(0));
         verify(workspaceHooks).beforeCreate(captured, "account");
         verify(workspaceHooks).afterCreate(runtime, "account");
         verify(workspaceHooks).beforeStart(captured, config.getDefaultEnv(), "account");
@@ -773,7 +750,7 @@ public class WorkspaceManagerTest {
         when(workspaceMock.getStatus()).thenReturn(RUNNING);
         when(workspaceMock.getRuntime()).thenReturn(wsRuntimeMock);
         when(wsRuntimeMock.getActiveEnv()).thenReturn(testActiveEnv);
-        MachineConfigImpl machineConfig = createConfig().getEnvironments().get(0).getMachineConfigs().get(0);
+        MachineConfigImpl machineConfig = createMachine().getConfig();
 
         // when
         workspaceManager.startMachine(machineConfig, testWsId);
@@ -789,7 +766,7 @@ public class WorkspaceManagerTest {
         WorkspaceImpl workspaceMock = mock(WorkspaceImpl.class);
         doReturn(workspaceMock).when(workspaceManager).getWorkspace(testWsId);
         when(workspaceMock.getStatus()).thenReturn(STARTING);
-        MachineConfigImpl machineConfig = createConfig().getEnvironments().get(0).getMachineConfigs().get(0);
+        MachineConfigImpl machineConfig = createMachine().getConfig();
 
         // when
         workspaceManager.startMachine(machineConfig, testWsId);
@@ -887,25 +864,15 @@ public class WorkspaceManagerTest {
     }
 
     private RuntimeDescriptor createDescriptor(WorkspaceImpl workspace, WorkspaceStatus status) {
-        Optional<EnvironmentImpl> environmentOpt = workspace.getConfig().getEnvironment(workspace.getConfig().getDefaultEnv());
-        assertTrue(environmentOpt.isPresent());
-        EnvironmentImpl environment = environmentOpt.get();
+        EnvironmentImpl environment = workspace.getConfig().getEnvironments().get(workspace.getConfig().getDefaultEnv());
+        assertNotNull(environment);
 
-        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(environment.getName());
-        for (MachineConfigImpl machineConfig : environment.getMachineConfigs()) {
-            final MachineImpl machine = MachineImpl.builder()
-                                                   .setConfig(machineConfig)
-                                                   .setEnvName(environment.getName())
-                                                   .setId(NameGenerator.generate("machine", 10))
-                                                   .setOwner(workspace.getNamespace())
-                                                   .setRuntime(new MachineRuntimeInfoImpl(emptyMap(), emptyMap(), emptyMap()))
-                                                   .setWorkspaceId(workspace.getId())
-                                                   .build();
-            if (machineConfig.isDev()) {
-                runtime.setDevMachine(machine);
-            }
-            runtime.getMachines().add(machine);
-        }
+        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv());
+        MachineImpl machine = spy(createMachine());
+        runtime.getMachines().add(machine);
+        MachineImpl machine2 = spy(createMachine());
+        runtime.getMachines().add(machine2);
+
         final RuntimeDescriptor descriptor = mock(RuntimeDescriptor.class);
         when(descriptor.getRuntimeStatus()).thenReturn(status);
         when(descriptor.getRuntime()).thenReturn(runtime);
@@ -913,25 +880,36 @@ public class WorkspaceManagerTest {
     }
 
     private static WorkspaceConfigImpl createConfig() {
-        final MachineConfigImpl devMachine = MachineConfigImpl.builder()
-                                                              .setDev(true)
-                                                              .setName("dev-machine")
-                                                              .setType("docker")
-                                                              .setSource(new MachineSourceImpl("location").setLocation("dockerfile"))
-                                                              .setServers(asList(new ServerConfImpl("ref1",
-                                                                                                    "8080",
-                                                                                                    "https",
-                                                                                                    "path1"),
-                                                                                 new ServerConfImpl("ref2",
-                                                                                                    "8081",
-                                                                                                    "https",
-                                                                                                    "path2")))
-                                                              .setEnvVariables(singletonMap("key1", "value1"))
-                                                              .build();
+        EnvironmentImpl environment = new EnvironmentImpl(new EnvironmentRecipeImpl("type",
+                                                                                    "contentType",
+                                                                                    "content",
+                                                                                    null),
+                                                          singletonMap("dev-machine",
+                                                                       new ExtendedMachineImpl(singletonList("ws-agent"), null)));
         return WorkspaceConfigImpl.builder()
                                   .setName("dev-workspace")
                                   .setDefaultEnv("dev-env")
-                                  .setEnvironments(singletonList(new EnvironmentImpl("dev-env", null, singletonList(devMachine))))
+                                  .setEnvironments(singletonMap("dev-env", environment))
                                   .build();
+    }
+
+    private MachineImpl createMachine() {
+        return MachineImpl.builder()
+                          .setConfig(MachineConfigImpl.builder()
+                                                      .setDev(false)
+                                                      .setName("machineName")
+                                                      .setSource(new MachineSourceImpl("type").setContent("content"))
+                                                      .setLimits(new LimitsImpl(1024))
+                                                      .setType("docker")
+                                                      .build())
+                          .setId("id")
+                          .setOwner("userName")
+                          .setStatus(MachineStatus.RUNNING)
+                          .setWorkspaceId("wsId")
+                          .setEnvName("envName")
+                          .setRuntime(new MachineRuntimeInfoImpl(new HashMap<>(),
+                                                                 new HashMap<>(),
+                                                                 new HashMap<>()))
+                          .build();
     }
 }

@@ -15,6 +15,9 @@ import org.eclipse.che.api.environment.server.CheEnvironmentValidator;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerConf2Dto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -223,10 +225,17 @@ public class DefaultWorkspaceValidatorTest {
         final WorkspaceConfigDto workspaceConfigDto = newDto(WorkspaceConfigDto.class).withName("ws-name")
                                                                                       .withDefaultEnv("dev-env");
 
-        EnvironmentDto devEnv = newDto(EnvironmentDto.class).withName("dev-env")
-                                                            .withMachineConfigs(emptyList())
-                                                            .withRecipe(null);
-        workspaceConfigDto.setEnvironments(new ArrayList<>(singletonList(devEnv)));
+        ExtendedMachineDto extendedMachine =
+                newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))
+                                                .withServers(singletonMap("ref1",
+                                                                          newDto(ServerConf2Dto.class).withPort("8080/tcp")
+                                                                                                      .withProtocol("https")
+                                                                                                      .withProperties(singletonMap("some", "prop"))));
+        EnvironmentDto env = newDto(EnvironmentDto.class).withMachines(singletonMap("devmachine1", extendedMachine))
+                                                         .withRecipe(newDto(EnvironmentRecipeDto.class).withType("type")
+                                                                                                       .withContent("content")
+                                                                                                       .withContentType("content type"));
+        workspaceConfigDto.setEnvironments(singletonMap("dev-env", env));
 
         List<CommandDto> commandDtos = new ArrayList<>();
         commandDtos.add(newDto(CommandDto.class).withName("command_name")

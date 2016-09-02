@@ -11,30 +11,32 @@
 package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.dto.shared.DTO;
 
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
+import java.util.List;
+import java.util.Map;
+
+import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
 /**
  * @author Alexander Garagatyi
  */
 @DTO
-public interface RecipeDto extends Recipe {
+public interface ExtendedMachineDto extends ExtendedMachine {
+    @Override
+    @FactoryParameter(obligation = OPTIONAL)
+    List<String> getAgents();
+
+    void setAgents(List<String> agents);
+
+    ExtendedMachineDto withAgents(List<String> agents);
 
     @Override
-    @FactoryParameter(obligation = MANDATORY)
-    String getType();
+    @FactoryParameter(obligation = OPTIONAL)
+    Map<String, ServerConf2Dto> getServers();
 
-    void setType(String type);
+    void setServers(Map<String, ServerConf2Dto> servers);
 
-    RecipeDto withType(String type);
-
-    @Override
-    @FactoryParameter(obligation = MANDATORY)
-    String getScript();
-
-    void setScript(String script);
-
-    RecipeDto withScript(String script);
+    ExtendedMachineDto withServers(Map<String, ServerConf2Dto> servers);
 }

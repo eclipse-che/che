@@ -33,26 +33,22 @@
             "origin": "codenvy/ubuntu_jdk8"
         },
         "workspaceConfig": {
-            "environments": [
-                {
-                    "name": "default",
-                    "recipe": null,
-                    "machineConfigs": [
-                        {
-                            "name": "default",
-                            "limits": {
-                                "ram": 1000
-                            },
-                            "source": {
-                                "location": "stub",
-                                "type": "dockerfile"
-                            },
-                            "type": "docker",
-                            "dev": true
+            "environments": {
+                "default" : {
+                    "machines": {
+                        "devmachine": {
+                            "agents": [
+                                "ws-agent"
+                            ]
                         }
-                    ]
+                    },
+                    "recipe": {
+                        "location": "https://raw.githubusercontent.com/eclipse/che/master/Dockerfile",
+                        "contentType": "application/x-yaml",
+                        "type": "compose"
+                    }
                 }
-            ],
+            },
             "name": "default",
             "defaultEnv": "default",
             "description": null,
@@ -72,7 +68,7 @@
                 ]
             }
         ],
-        "stackIcon" : {
+        "stackIcon": {
             "name": "type-java.svg",
             "mediaType": "image/svg+xml"
         }
@@ -126,26 +122,22 @@
             "origin": "codenvy/node"
         },
         "workspaceConfig": {
-            "environments": [
-                {
-                    "name": "default",
-                    "recipe": null,
-                    "machineConfigs": [
-                        {
-                            "name": "default",
-                            "limits": {
-                                "ram": 1000
-                            },
-                            "source": {
-                                "location": "stub",
-                                "type": "dockerfile"
-                            },
-                            "type": "docker",
-                            "dev": true
+            "environments": {
+                "default" : {
+                    "machines": {
+                        "devmachine": {
+                            "agents": [
+                                "ws-agent"
+                            ]
                         }
-                    ]
+                    },
+                    "recipe": {
+                        "location": "https://raw.githubusercontent.com/eclipse/che/master/Dockerfile",
+                        "contentType": "application/x-yaml",
+                        "type": "compose"
+                    }
                 }
-            ],
+            },
             "name": "default",
             "defaultEnv": "default",
             "description": null,

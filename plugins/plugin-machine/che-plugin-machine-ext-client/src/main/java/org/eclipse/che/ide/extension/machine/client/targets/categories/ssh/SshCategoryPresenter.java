@@ -433,11 +433,11 @@ public class SshCategoryPresenter implements CategoryPage, TargetManager, SshVie
                                                .withLimits(limitsDto)
                                                .withType(getCategory());
 
-        Promise<MachineDto> machinePromise = workspaceServiceClient.createMachine(appContext.getWorkspaceId(), configDto);
+        Promise<Void> machinePromise = workspaceServiceClient.createMachine(appContext.getWorkspaceId(), configDto);
 
-        machinePromise.then(new Operation<MachineDto>() {
+        machinePromise.then(new Operation<Void>() {
             @Override
-            public void apply(final MachineDto machineDto) throws OperationException {
+            public void apply(Void arg) throws OperationException {
             }
         });
 
