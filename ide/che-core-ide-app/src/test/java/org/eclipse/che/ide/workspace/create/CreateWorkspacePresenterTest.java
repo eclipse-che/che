@@ -14,9 +14,9 @@ import com.google.gwt.core.client.Callback;
 import com.google.inject.Provider;
 
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.machine.shared.dto.MachineLimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
@@ -101,7 +101,7 @@ public class CreateWorkspacePresenterTest {
     @Mock
     private DefaultWorkspaceComponent       workspaceComponent;
     @Mock
-    private LimitsDto                       limitsDto;
+    private MachineLimitsDto                limitsDto;
 
     //DTOs
     private MachineConfigDto   machineConfigDto;
@@ -118,8 +118,6 @@ public class CreateWorkspacePresenterTest {
     private CommandDto         commandDto;
     @Mock
     private WorkspaceDto  usersWorkspaceDto;
-
-
 
     @Captor
     private ArgumentCaptor<Operation<List<RecipeDescriptor>>> recipeOperation;
@@ -141,7 +139,7 @@ public class CreateWorkspacePresenterTest {
         when(machineSourceDto.withType(anyString())).thenReturn(machineSourceDto);
         when(machineSourceDto.withLocation(anyString())).thenReturn(machineSourceDto);
 
-        when(dtoFactory.createDto(LimitsDto.class)).thenReturn(limitsDto);
+        when(dtoFactory.createDto(MachineLimitsDto.class)).thenReturn(limitsDto);
         when(limitsDto.withRam(anyInt())).thenReturn(limitsDto);
 
         when(dtoFactory.createDto(MachineConfigDto.class)).thenReturn(machineConfigDto);

@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server;
 
-import org.eclipse.che.api.core.model.machine.Limits;
+import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineProcess;
@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.machine.Snapshot;
-import org.eclipse.che.api.machine.shared.dto.LimitsDto;
+import org.eclipse.che.api.machine.shared.dto.MachineLimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
@@ -65,10 +65,10 @@ public final class DtoConverter {
     }
 
     /**
-     * Converts {@link Limits} to {@link LimitsDto}.
+     * Converts {@link MachineLimits} to {@link MachineLimitsDto}.
      */
-    public static LimitsDto asDto(Limits limits) {
-        return newDto(LimitsDto.class).withRam(limits.getRam());
+    public static MachineLimitsDto asDto(MachineLimits machineLimits) {
+        return newDto(MachineLimitsDto.class).withRam(machineLimits.getRam());
     }
 
     /**

@@ -26,14 +26,14 @@ public class ComposeEnvironmentImpl implements ComposeEnvironment {
 
     public ComposeEnvironmentImpl() {}
 
-    public ComposeEnvironmentImpl(ComposeEnvironment recipeContent) {
-        version = recipeContent.getVersion();
-        if (recipeContent.getServices() != null) {
-            services = recipeContent.getServices()
-                                    .entrySet()
-                                    .stream()
-                                    .collect(Collectors.toMap(Map.Entry::getKey,
-                                                              entry -> new ComposeServiceImpl(entry.getValue())));
+    public ComposeEnvironmentImpl(ComposeEnvironment environment) {
+        version = environment.getVersion();
+        if (environment.getServices() != null) {
+            services = environment.getServices()
+                                  .entrySet()
+                                  .stream()
+                                  .collect(Collectors.toMap(Map.Entry::getKey,
+                                                            entry -> new ComposeServiceImpl(entry.getValue())));
         }
     }
 

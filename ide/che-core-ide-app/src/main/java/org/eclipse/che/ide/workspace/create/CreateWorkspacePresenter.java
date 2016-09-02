@@ -37,9 +37,9 @@ import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.create.CreateWorkspaceView.HidePopupCallBack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 
@@ -51,9 +51,10 @@ import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 @Singleton
 public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDelegate {
 
-    private static final RegExp FILE_NAME   = RegExp.compile("^[A-Za-z0-9_\\s-\\.]+$");
-    private static final String URL_PATTERN = "^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$";
-    private static final RegExp URL         = RegExp.compile(URL_PATTERN);
+    private static final   RegExp FILE_NAME          = RegExp.compile("^[A-Za-z0-9_\\s-\\.]+$");
+    private static final   String URL_PATTERN        = "^((ftp|http|https)://[\\w@.\\-\\_]+(:\\d{1,5})?(/[\\w#!:.?+=&%@!\\_\\-/]+)*){1}$";
+    private static final   RegExp URL                = RegExp.compile(URL_PATTERN);
+    protected static final String MEMORY_LIMIT_BYTES = Long.toString(2000L * 1024L * 1024L);
 
     static final String RECIPE_TYPE     = "docker";
     static final int    SKIP_COUNT      = 0;
@@ -229,12 +230,12 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
         String wsName = view.getWorkspaceName();
 
         EnvironmentRecipeDto recipe = dtoFactory.createDto(EnvironmentRecipeDto.class)
-                                                .withType("compose")
-                                                .withLocation(view.getRecipeUrl())
-                                                .withContentType("application/x-yaml");
+                                                .withType("dockerimage")
+                                                .withLocation(view.getRecipeUrl());
 
         ExtendedMachineDto machine = dtoFactory.createDto(ExtendedMachineDto.class)
-                                               .withAgents(Collections.singletonList("ws-agent"));
+                                               .withAgents(singletonList("ws-agent"))
+                                               .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)
                                                .withRecipe(recipe)

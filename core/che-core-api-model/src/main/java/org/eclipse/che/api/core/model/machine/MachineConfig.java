@@ -45,7 +45,7 @@ public interface MachineConfig {
      * Machine limits such as RAM size.
      */
     @Nullable
-    Limits getLimits();
+    MachineLimits getLimits();
 
     /**
      * Get configuration of servers inside of machine.

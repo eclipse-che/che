@@ -32,7 +32,7 @@ public interface EnvironmentRecipeDto extends EnvironmentRecipe {
     EnvironmentRecipeDto withType(String type);
 
     @Override
-    @FactoryParameter(obligation = MANDATORY)
+    @FactoryParameter(obligation = OPTIONAL)
     String getContentType();
 
     void setContentType(String contentType);

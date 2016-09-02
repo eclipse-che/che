@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.Limits;
+import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.ServerConf;
@@ -38,7 +38,7 @@ public class MachineConfigImpl implements MachineConfig {
     private String               name;
     private String               type;
     private MachineSourceImpl    source;
-    private LimitsImpl           limits;
+    private MachineLimitsImpl    limits;
     private List<ServerConfImpl> servers;
     private Map<String, String>  envVariables;
 
@@ -49,7 +49,7 @@ public class MachineConfigImpl implements MachineConfig {
                              String name,
                              String type,
                              MachineSource source,
-                             Limits limits,
+                             MachineLimits machineLimits,
                              List<? extends ServerConf> servers,
                              Map<String, String> envVariables) {
         this.dev = dev;
@@ -64,7 +64,7 @@ public class MachineConfigImpl implements MachineConfig {
         if (source != null) {
             this.source = new MachineSourceImpl(source);
         }
-        this.limits = new LimitsImpl(limits);
+        this.limits = new MachineLimitsImpl(machineLimits);
 
     }
 
@@ -107,7 +107,7 @@ public class MachineConfigImpl implements MachineConfig {
     }
 
     @Override
-    public LimitsImpl getLimits() {
+    public MachineLimitsImpl getLimits() {
         return limits;
     }
 
@@ -127,8 +127,8 @@ public class MachineConfigImpl implements MachineConfig {
         return envVariables;
     }
 
-    public void setLimits(Limits limits) {
-        this.limits = new LimitsImpl(limits);
+    public void setLimits(MachineLimits machineLimits) {
+        this.limits = new MachineLimitsImpl(machineLimits);
     }
 
     @Override
@@ -165,7 +165,7 @@ public class MachineConfigImpl implements MachineConfig {
                ", name='" + name + '\'' +
                ", type='" + type + '\'' +
                ", source=" + source +
-               ", limits=" + limits +
+               ", machineLimits=" + limits +
                ", servers=" + getServers() +
                ", envVariables=" + getEnvVariables() +
                '}';
@@ -182,7 +182,7 @@ public class MachineConfigImpl implements MachineConfig {
         private String                     name;
         private String                     type;
         private MachineSource              source;
-        private Limits                     limits;
+        private MachineLimits              machineLimits;
         private List<? extends ServerConf> servers;
         private Map<String, String>        envVariables;
 
@@ -191,7 +191,7 @@ public class MachineConfigImpl implements MachineConfig {
                                          name,
                                          type,
                                          source,
-                                         limits,
+                                         machineLimits,
                                          servers,
                                          envVariables);
         }
@@ -201,7 +201,7 @@ public class MachineConfigImpl implements MachineConfig {
             name = machineConfig.getName();
             type = machineConfig.getType();
             source = machineConfig.getSource();
-            limits = machineConfig.getLimits();
+            machineLimits = machineConfig.getLimits();
             servers = machineConfig.getServers();
             envVariables = machineConfig.getEnvVariables();
             return this;
@@ -227,8 +227,8 @@ public class MachineConfigImpl implements MachineConfig {
             return this;
         }
 
-        public MachineConfigImplBuilder setLimits(Limits limits) {
-            this.limits = limits;
+        public MachineConfigImplBuilder setLimits(MachineLimits machineLimits) {
+            this.machineLimits = machineLimits;
             return this;
         }
 

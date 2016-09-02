@@ -31,7 +31,6 @@ import org.eclipse.che.api.core.util.CompositeLineConsumer;
 import org.eclipse.che.api.core.util.FileLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
-import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
 import org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProvider;
 import org.eclipse.che.api.environment.server.compose.ComposeServicesStartStrategy;
 import org.eclipse.che.api.environment.server.compose.model.BuildContextImpl;
@@ -43,9 +42,9 @@ import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLogMessageImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -95,10 +94,10 @@ public class CheEnvironmentEngine {
     private final StripedLocks                   stripedLocks;
     private final File                           machineLogsDir;
     private final MachineInstanceProviders       machineInstanceProviders;
-    private final String                         defaultMachineMemorySizeMB;
+    private final long                           defaultMachineMemorySizeBytes;
     private final SnapshotDao                    snapshotDao;
     private final EventService                   eventService;
-    private final ComposeFileParser              composeFileParser;
+    private final EnvironmentParser              environmentParser;
     private final ComposeServicesStartStrategy   startStrategy;
     private final ComposeMachineInstanceProvider composeProvider;
 
@@ -110,18 +109,18 @@ public class CheEnvironmentEngine {
                                 @Named("machine.logs.location") String machineLogsDir,
                                 @Named("machine.default_mem_size_mb") int defaultMachineMemorySizeMB,
                                 EventService eventService,
-                                ComposeFileParser composeFileParser,
+                                EnvironmentParser environmentParser,
                                 ComposeServicesStartStrategy startStrategy,
                                 ComposeMachineInstanceProvider composeProvider) {
         this.snapshotDao = snapshotDao;
         this.eventService = eventService;
-        this.composeFileParser = composeFileParser;
+        this.environmentParser = environmentParser;
         this.startStrategy = startStrategy;
         this.composeProvider = composeProvider;
         this.environments = new ConcurrentHashMap<>();
         this.machineInstanceProviders = machineInstanceProviders;
         this.machineLogsDir = new File(machineLogsDir);
-        this.defaultMachineMemorySizeMB = defaultMachineMemorySizeMB + "MB";
+        this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
         eventService.subscribe(new MachineCleaner());
@@ -487,7 +486,7 @@ public class CheEnvironmentEngine {
             throws ServerException,
                    ConflictException {
 
-        ComposeEnvironmentImpl composeEnvironment = composeFileParser.parse(env);
+        ComposeEnvironmentImpl composeEnvironment = environmentParser.parse(env);
 
         normalizeEnvironment(composeEnvironment);
 
@@ -510,8 +509,8 @@ public class CheEnvironmentEngine {
     private void normalizeEnvironment(ComposeEnvironmentImpl composeEnvironment) {
         for (Map.Entry<String, ComposeServiceImpl> serviceEntry : composeEnvironment.getServices()
                                                                                     .entrySet()) {
-            if (serviceEntry.getValue().getMemLimit() == 0) {
-                serviceEntry.getValue().setMemLimit(Size.parseSize(defaultMachineMemorySizeMB));
+            if (serviceEntry.getValue().getMemLimit() == null || serviceEntry.getValue().getMemLimit() == 0) {
+                serviceEntry.getValue().setMemLimit(defaultMachineMemorySizeBytes);
             }
         }
     }
@@ -582,7 +581,7 @@ public class CheEnvironmentEngine {
                         MachineImpl.builder()
                                    .setConfig(MachineConfigImpl.builder()
                                                                .setDev(isDev)
-                                                               .setLimits(new LimitsImpl(
+                                                               .setLimits(new MachineLimitsImpl(
                                                                        bytesToMB(composeService.getMemLimit())))
                                                                .setType("docker")
                                                                .setName(machineName)

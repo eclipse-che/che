@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.environment.server.NoOpMachineInstance;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
@@ -553,7 +553,7 @@ public class WorkspaceRuntimesTest {
         return MachineConfigImpl.builder()
                                 .setDev(isDev)
                                 .setType("docker")
-                                .setLimits(new LimitsImpl(1024))
+                                .setLimits(new MachineLimitsImpl(1024))
                                 .setSource(new MachineSourceImpl("git").setLocation("location"))
                                 .setName(UUID.randomUUID().toString())
                                 .build();
