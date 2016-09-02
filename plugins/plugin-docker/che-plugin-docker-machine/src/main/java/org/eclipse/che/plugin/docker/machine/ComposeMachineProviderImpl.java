@@ -71,8 +71,10 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -166,6 +168,19 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
+
+        allMachinesSystemVolumes = allMachinesSystemVolumes.stream()
+                                                           .map(line -> line.split(";"))
+                                                           .flatMap(Arrays::stream)
+                                                           .distinct()
+                                                           .collect(Collectors.toSet());
+
+        devMachineSystemVolumes = devMachineSystemVolumes.stream()
+                                                         .map(line -> line.split(";"))
+                                                         .flatMap(Arrays::stream)
+                                                         .distinct()
+                                                         .collect(Collectors.toSet());
+
         if (SystemInfo.isWindows()) {
             allMachinesSystemVolumes = escapePaths(allMachinesSystemVolumes);
             devMachineSystemVolumes = escapePaths(devMachineSystemVolumes);
