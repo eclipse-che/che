@@ -8,15 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.shared.dto;
+package org.eclipse.che.api.core.model.workspace.compose;
 
-import org.eclipse.che.api.core.model.machine.Limits;
-import org.eclipse.che.dto.shared.DTO;
+import java.util.Map;
 
 /**
+ * Description of docker compose services file.
+ *
  * @author Alexander Garagatyi
  */
-@DTO
-public interface LimitsDto extends Limits {
-    LimitsDto withRam(int memorySizeMB);
+public interface ComposeEnvironment {
+    /**
+     * Version of compose syntax.
+     */
+    String getVersion();
+
+    /**
+     * Mapping of compose services names to services configuration.
+     */
+    Map<String, ? extends ComposeService> getServices();
 }

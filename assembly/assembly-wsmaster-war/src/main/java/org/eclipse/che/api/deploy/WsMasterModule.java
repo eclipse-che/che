@@ -14,8 +14,17 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
+import org.eclipse.che.api.core.rest.CheJsonProvider;
+import org.eclipse.che.api.core.rest.MessageBodyAdapter;
+import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
 import org.eclipse.che.api.machine.shared.Constants;
+import org.eclipse.che.api.workspace.server.stack.StackMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.inject.DynaModule;
+
+import static com.google.inject.matcher.Matchers.subclassesOf;
+import static org.eclipse.che.inject.Matchers.names;
 
 /** @author andrew00x */
 @DynaModule
@@ -84,6 +93,9 @@ public class WsMasterModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
         machineImageProviderMultibinder.addBinding().to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
 
+        bind(org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProvider.class)
+                .to(org.eclipse.che.plugin.docker.machine.ComposeMachineProviderImpl.class);
+
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
         install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
@@ -95,5 +107,14 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
         install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
         install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
+
+        final Multibinder<MessageBodyAdapter> adaptersMultibinder = Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
+        adaptersMultibinder.addBinding().to(WorkspaceConfigMessageBodyAdapter.class);
+        adaptersMultibinder.addBinding().to(WorkspaceMessageBodyAdapter.class);
+        adaptersMultibinder.addBinding().to(StackMessageBodyAdapter.class);
+
+        final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
+        requestInjection(interceptor);
+        bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
     }
 }

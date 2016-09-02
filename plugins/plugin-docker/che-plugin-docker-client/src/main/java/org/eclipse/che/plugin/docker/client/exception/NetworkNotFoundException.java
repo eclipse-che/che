@@ -8,14 +8,15 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.machine;
+package org.eclipse.che.plugin.docker.client.exception;
 
 /**
- * Describes machine limits such as RAM size.
+ * Is thrown when docker network is not found.
  *
  * @author Alexander Garagatyi
  */
-public interface Limits {
-    /** Get memory size (in megabytes) that is allocated for starting machine. */
-    int getRam();
+public class NetworkNotFoundException extends DockerException {
+    public NetworkNotFoundException(String message) {
+        super(message, 404);
+    }
 }

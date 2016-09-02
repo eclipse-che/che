@@ -12,6 +12,7 @@ package org.eclipse.che.ide.workspace;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -25,6 +26,7 @@ import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.ide.CoreLocalizationConstant;
@@ -55,6 +57,7 @@ import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.machine.shared.Constants.LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL;
@@ -167,21 +170,28 @@ public class WorkspaceEventsNotifier {
     }
 
     private void onWorkspaceStarting(final String workspaceId) {
-        workspaceServiceClient.getWorkspace(workspaceId).then(new Operation<WorkspaceDto>() {
+        // TODO timer is a workaround. Is needed because for some reason after receiving of event workspace starting
+        // get workspace event should contain runtime but it doesn't
+        new Timer() {
             @Override
-            public void apply(WorkspaceDto workspace) throws OperationException {
-                String devMachineName = getDevMachineName(workspace);
-                if (devMachineName != null) {
-                    subscribeOnWsAgentOutputChannel(workspace, devMachineName);
-                }
+            public void run() {
+                workspaceServiceClient.getWorkspace(workspaceId).then(new Operation<WorkspaceDto>() {
+                    @Override
+                    public void apply(WorkspaceDto workspace) throws OperationException {
+                        String devMachineName = getDevMachineName(workspace);
+                        if (devMachineName != null) {
+                            subscribeOnWsAgentOutputChannel(workspace, devMachineName);
+                        }
 
-                workspaceComponent.setCurrentWorkspace(workspace);
-                machineManagerProvider.get();
+                        workspaceComponent.setCurrentWorkspace(workspace);
+                        machineManagerProvider.get();
 
-                initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
-                eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+                        initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
+                        eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
+                    }
+                });
             }
-        });
+        }.schedule(1000);
     }
 
     private void onWorkspaceStarted(final String workspaceId) {
@@ -281,11 +291,17 @@ public class WorkspaceEventsNotifier {
         }
 
         String activeEnv = runtime.getActiveEnv();
-        for (EnvironmentDto environment : workspace.getConfig().getEnvironments()) {
-            if (activeEnv.equals(environment.getName())) {
-                return environment.devMachine().getName();
+        EnvironmentDto environment = workspace.getConfig().getEnvironments().get(activeEnv);
+        if (environment != null) {
+            for (Map.Entry<String, ExtendedMachineDto> machineEntry : environment.getMachines()
+                                                                                 .entrySet()) {
+                if (machineEntry.getValue().getAgents().contains("ws-agent")) {
+                    return machineEntry.getKey();
+                }
             }
         }
+
+        // if no machine with ws-agent found
         return null;
     }
 
@@ -298,7 +314,8 @@ public class WorkspaceEventsNotifier {
                                                   new ConfirmCallback() {
                                                       @Override
                                                       public void accepted() {
-                                                          startWorkspacePresenter.show(workspaces, callback);
+                                                          // Disables workspace create/start view in IDE
+                                                          // startWorkspacePresenter.show(workspaces, callback);
                                                       }
                                                   }).show();
             }

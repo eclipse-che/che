@@ -17,6 +17,7 @@ import org.eclipse.che.commons.annotation.Nullable;
  *
  * @author Alexander Garagatyi
  */
+@Deprecated
 public interface ServerConf {
     /**
      * Reference to this server.

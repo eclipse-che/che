@@ -97,7 +97,10 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
  * @author Alexander Garagatyi
  * @author Roman Iuvshyn
  * @author Mykola Morhun
+ *
+ * @deprecated use {@link ComposeMachineProviderImpl} instead
  */
+@Deprecated
 @Singleton
 public class DockerInstanceProvider implements InstanceProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceProvider.class);

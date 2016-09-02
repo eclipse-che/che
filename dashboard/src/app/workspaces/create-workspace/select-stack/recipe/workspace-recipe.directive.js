@@ -33,7 +33,8 @@ export class WorkspaceRecipe {
     // scope values
     this.scope = {
       recipeUrl:'=cheRecipeUrl',
-      recipeScript:'=cheRecipeScript'
+      recipeScript:'=cheRecipeScript',
+      recipeFormat:'=cheRecipeFormat'
     };
 
   }

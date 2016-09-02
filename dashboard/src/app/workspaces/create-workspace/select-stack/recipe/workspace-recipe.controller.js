@@ -22,24 +22,64 @@ export class WorkspaceRecipeController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor() {
+  constructor($timeout) {
+    this.$timeout = $timeout;
     this.recipeUrl = null;
 
     //set default selection
     this.selectSourceOption = 'upload-custom-stack';
 
+    this.setDefaultData();
+
     this.editorOptions = {
       lineWrapping: true,
       lineNumbers: true,
       matchBrackets: true,
-      mode: 'text/x-dockerfile'
+      mode: this.recipeFormat,
+      onLoad: (editor) => {
+        this.setEditor(editor);
+      }
     };
-
-    this.setDefaultData();
   }
 
   setDefaultData() {
     this.recipeUrl = null;
     this.recipeScript = '';
+    this.recipeFormat = 'text/x-yaml';
+  }
+
+  setEditor(editor) {
+    this.editor = editor;
+    editor.on('paste', () => {
+      this.detectFormat(editor, true);
+    });
+    editor.on('change', () => {
+      this.detectFormat(editor, false);
+    });
+  }
+
+  detectFormat(editor, doFormating) {
+    this.$timeout(() => {
+      let content = editor.getValue();
+      try {
+        content = angular.fromJson(content);
+        this.recipeFormat = 'application/json';
+        this.editorOptions.mode = this.recipeFormat;
+        if (doFormating) {
+          this.formatLines(editor);
+        }
+      } catch (e) {
+        this.recipeFormat = 'text/x-yaml';
+        this.editorOptions.mode = this.recipeFormat;
+      }
+    }, 100);
+  }
+
+  formatLines(editor) {
+    this.$timeout(() => {
+      for(var i = 0; i <= editor.lineCount(); i++) {
+        editor.indentLine(i);
+      }
+    }, 100);
   }
 }

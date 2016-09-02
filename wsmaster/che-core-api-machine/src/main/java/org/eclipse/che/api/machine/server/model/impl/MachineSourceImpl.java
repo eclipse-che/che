@@ -23,6 +23,7 @@ import static java.util.Objects.hash;
  *
  * @author Eugene Voevodin
  */
+@Deprecated
 public class MachineSourceImpl implements MachineSource {
 
     private String type;

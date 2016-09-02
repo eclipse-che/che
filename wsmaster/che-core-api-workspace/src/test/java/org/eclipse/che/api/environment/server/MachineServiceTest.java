@@ -44,21 +44,24 @@ import static org.testng.Assert.assertEquals;
 @Listeners(value = {EverrestJetty.class, MockitoTestNGListener.class})
 public class MachineServiceTest {
     @SuppressWarnings("unused")
-    private static final ApiExceptionMapper                     MAPPER = new ApiExceptionMapper();
+    static final ApiExceptionMapper                     MAPPER = new ApiExceptionMapper();
     @SuppressWarnings("unused")
-    private static final WorkspaceServiceTest.EnvironmentFilter FILTER = new WorkspaceServiceTest.EnvironmentFilter();
+    static final WorkspaceServiceTest.EnvironmentFilter FILTER = new WorkspaceServiceTest.EnvironmentFilter();
     @Mock
-    private WorkspaceManager      wsManager;
+    WorkspaceManager      wsManager;
     @Mock
-    private MachineProcessManager machineProcessManager;
+    MachineProcessManager machineProcessManager;
+    @Mock
+    CheEnvironmentValidator environmentValidator;
 
-    private MachineService service;
+    MachineService service;
 
     @BeforeMethod
     public void setup() {
         service = new MachineService(machineProcessManager,
                                      new MachineServiceLinksInjector(),
-                                     wsManager);
+                                     wsManager,
+                                     environmentValidator);
     }
 
     @Test(dataProvider = "illegalMachineConfigProvider")

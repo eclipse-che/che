@@ -108,11 +108,9 @@ export class ExportWorkspaceDialogController {
       // get content of the recipe
       let environments = copyOfConfig.environments;
       let defaultEnvName = copyOfConfig.defaultEnv;
-      let defaultEnvironment = this.lodash.find(environments, (environment) => {
-        return environment.name === defaultEnvName;
-      });
+      let defaultEnvironment = environments[defaultEnvName];
 
-      let machineSource = defaultEnvironment.machineConfigs[0].source;
+      let machineSource = defaultEnvironment.machines[0].source;
       let recipeLocation = machineSource.location;
       if (recipeLocation) {
 
@@ -144,11 +142,9 @@ export class ExportWorkspaceDialogController {
   exportToPrivateCloudRecipeContent(recipeScriptContent, workspaceConfig, authData) {
     let environments = workspaceConfig.environments;
     let defaultEnvName = workspaceConfig.defaultEnv;
-    let defaultEnvironment = this.lodash.find(environments, (environment) => {
-      return environment.name === defaultEnvName;
-    });
+    let defaultEnvironment = environments[defaultEnvName];
 
-    defaultEnvironment.machineConfigs[0].source.content = recipeScriptContent;
+    defaultEnvironment.machines[0].source.content = recipeScriptContent;
     let remoteWorkspaceAPI = this.cheRemote.newWorkspace(authData);
     this.exportInCloudSteps += 'Creating remote workspace...';
     let createWorkspacePromise = remoteWorkspaceAPI.createWorkspaceFromConfig(null, workspaceConfig);

@@ -21,11 +21,9 @@
 
 <md-progress-linear md-mode="indeterminate" class="projects-list-projects-progress"
                     ng-hide="createProjectCtrl.stacksInitialized || createProjectCtrl.workspaces.length"></md-progress-linear>
-
 <md-content id="create-project-content-page"
             md-scroll-y flex
-            class="projects-create-project"
-            ng-show="createProjectCtrl.stacksInitialized || createProjectCtrl.workspaces.length">
+            class="projects-create-project">
   <div ng-show="createProjectCtrl.isCreateProjectInProgress()">
     <div id="create-project-panel" class="create-project-progress-panel">
       <che-loader class="che-loader-panel" layout="column">
@@ -157,6 +155,7 @@
                                   che-stack-change="createProjectCtrl.cheStackLibrarySelecter(stack)"
                                   che-recipe-script="createProjectCtrl.recipeScript"
                                   che-recipe-url="createProjectCtrl.recipeUrl"
+                                  che-recipe-format="createProjectCtrl.recipeFormat"
                                   ng-if="!createProjectCtrl.workspaces.length || createProjectCtrl.workspaceResource === 'from-stack'"/>
     </che-label-container>
 
