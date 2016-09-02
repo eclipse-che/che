@@ -230,7 +230,8 @@ public class DefaultWorkspaceValidatorTest {
                                                 .withServers(singletonMap("ref1",
                                                                           newDto(ServerConf2Dto.class).withPort("8080/tcp")
                                                                                                       .withProtocol("https")
-                                                                                                      .withProperties(singletonMap("some", "prop"))));
+                                                                                                      .withProperties(singletonMap("some", "prop"))))
+                                                .withAttributes(singletonMap("memoryLimitBytes", "1000000"));
         EnvironmentDto env = newDto(EnvironmentDto.class).withMachines(singletonMap("devmachine1", extendedMachine))
                                                          .withRecipe(newDto(EnvironmentRecipeDto.class).withType("type")
                                                                                                        .withContent("content")

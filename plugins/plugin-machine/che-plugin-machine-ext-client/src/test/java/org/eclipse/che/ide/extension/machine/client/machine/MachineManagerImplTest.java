@@ -14,7 +14,7 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.machine.shared.dto.LimitsDto;
+import org.eclipse.che.api.machine.shared.dto.MachineLimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -137,8 +137,8 @@ public class MachineManagerImplTest {
         when(machineSourceDto.withLocation(eq(SOURCE_LOCATION))).thenReturn(machineSourceDto);
         when(machineSourceDto.withContent(eq(SOURCE_CONTENT))).thenReturn(machineSourceDto);
         when(dtoFactory.createDto(MachineSourceDto.class)).thenReturn(machineSourceDto);
-        LimitsDto limitsDto = mock(LimitsDto.class);
-        when(dtoFactory.createDto(LimitsDto.class)).thenReturn(limitsDto);
+        MachineLimitsDto limitsDto = mock(MachineLimitsDto.class);
+        when(dtoFactory.createDto(MachineLimitsDto.class)).thenReturn(limitsDto);
         when(limitsDto.withRam(anyInt())).thenReturn(limitsDto);
 
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);

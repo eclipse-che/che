@@ -19,9 +19,9 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -885,7 +885,9 @@ public class WorkspaceManagerTest {
                                                                                     "content",
                                                                                     null),
                                                           singletonMap("dev-machine",
-                                                                       new ExtendedMachineImpl(singletonList("ws-agent"), null)));
+                                                                       new ExtendedMachineImpl(singletonList("ws-agent"),
+                                                                                               null,
+                                                                                               new HashMap<>(singletonMap("memoryLimitBytes", "10000")))));
         return WorkspaceConfigImpl.builder()
                                   .setName("dev-workspace")
                                   .setDefaultEnv("dev-env")
@@ -899,7 +901,7 @@ public class WorkspaceManagerTest {
                                                       .setDev(false)
                                                       .setName("machineName")
                                                       .setSource(new MachineSourceImpl("type").setContent("content"))
-                                                      .setLimits(new LimitsImpl(1024))
+                                                      .setLimits(new MachineLimitsImpl(1024))
                                                       .setType("docker")
                                                       .build())
                           .setId("id")

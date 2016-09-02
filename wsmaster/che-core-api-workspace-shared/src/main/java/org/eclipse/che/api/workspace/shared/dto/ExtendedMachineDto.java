@@ -39,4 +39,12 @@ public interface ExtendedMachineDto extends ExtendedMachine {
     void setServers(Map<String, ServerConf2Dto> servers);
 
     ExtendedMachineDto withServers(Map<String, ServerConf2Dto> servers);
+
+    @Override
+    @FactoryParameter(obligation = OPTIONAL)
+    Map<String, String> getAttributes();
+
+    void setAttributes(Map<String, String> attributes);
+
+    ExtendedMachineDto withAttributes(Map<String, String> attributes);
 }

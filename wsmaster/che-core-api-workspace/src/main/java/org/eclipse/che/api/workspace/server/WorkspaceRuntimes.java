@@ -245,7 +245,7 @@ public class WorkspaceRuntimes {
             // as it may take some time to notify subscribers
             publishWorkspaceEvent(EventType.RUNNING, workspaceId, null);
             return get(workspaceId);
-        } catch (ApiException e) {
+        } catch (ApiException | RuntimeException e) {
             try {
                 environmentEngine.stop(workspaceId);
             } catch (EnvironmentNotRunningException ignore) {

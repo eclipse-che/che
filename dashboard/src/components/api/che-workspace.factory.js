@@ -259,8 +259,8 @@ export class CheWorkspace {
       defaultEnvironment = {
         'name': config.defaultEnv,
         'recipe': null,
-        'machines': {"devmachine" : {"agents" : ["ws-agent"]}}
-      }
+        'machines': {"dev-machine" : {"agents" : ["ws-agent"]}}
+      };
 
       config.environments[config.defaultEnv] =  defaultEnvironment;
     }
@@ -269,7 +269,7 @@ export class CheWorkspace {
       defaultEnvironment.recipe = {
         'type': 'compose',
         'contentType': source.format
-      }
+      };
 
       defaultEnvironment.recipe.content = source.content || null;
       defaultEnvironment.recipe.location = source.location || null;
@@ -279,8 +279,8 @@ export class CheWorkspace {
       return config;
     }
 
-    let devMachine = this.lodash.find(defaultEnvironment.machines, (config) => {
-      return config.dev;
+    let devMachine = this.lodash.find(defaultEnvironment.machines, (machine) => {
+      return machine.agents.includes('ws-agent');
     });
 
     //Check dev machine is provided and add if there is no:

@@ -168,11 +168,14 @@ public final class DtoConverter {
     public static ExtendedMachineDto asDto(ExtendedMachine machine) {
         ExtendedMachineDto machineDto = newDto(ExtendedMachineDto.class).withAgents(machine.getAgents());
         if (machine.getServers() != null) {
-            machineDto.withServers(machine.getServers()
-                                          .entrySet()
-                                          .stream()
-                                          .collect(toMap(Map.Entry::getKey,
-                                                         entry -> asDto(entry.getValue()))));
+            machineDto.setServers(machine.getServers()
+                                         .entrySet()
+                                         .stream()
+                                         .collect(toMap(Map.Entry::getKey,
+                                                        entry -> asDto(entry.getValue()))));
+        }
+        if (machine.getAttributes() != null) {
+            machineDto.setAttributes(machine.getAttributes());
         }
         return machineDto;
     }

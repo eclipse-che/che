@@ -25,9 +25,9 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.environment.server.MachineProcessManager;
 import org.eclipse.che.api.environment.server.MachineServiceLinksInjector;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
@@ -657,7 +657,7 @@ public class WorkspaceServiceTest {
                                                               .setDev(true)
                                                               .setEnvVariables(emptyMap())
                                                               .setServers(emptyList())
-                                                              .setLimits(new LimitsImpl(1024))
+                                                              .setLimits(new MachineLimitsImpl(1024))
                                                               .setSource(new MachineSourceImpl("type").setContent("content"))
                                                               .setName(environment.getMachines()
                                                                                   .keySet()
@@ -816,7 +816,9 @@ public class WorkspaceServiceTest {
     }
 
     private static EnvironmentDto createEnvDto() {
-        ExtendedMachineImpl devMachine = new ExtendedMachineImpl(singletonList("ws-agent"), null);
+        ExtendedMachineImpl devMachine = new ExtendedMachineImpl(singletonList("ws-agent"),
+                                                                 null,
+                                                                 new HashMap<>(singletonMap("memoryLimitBytes", "10000")));
 
         return DtoConverter.asDto(new EnvironmentImpl(new EnvironmentRecipeImpl("type", "content-type", "content", null),
                                                       singletonMap("dev-machine", devMachine)));

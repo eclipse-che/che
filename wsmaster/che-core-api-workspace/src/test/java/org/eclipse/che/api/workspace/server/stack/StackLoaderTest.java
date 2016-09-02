@@ -72,7 +72,7 @@ public class StackLoaderTest {
         stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
 
         stackLoader.start();
-        verify(stackDao, times(2)).update(any());
+        verify(stackDao, times(5)).update(any());
         verify(stackDao, never()).create(any());
     }
 
@@ -86,8 +86,8 @@ public class StackLoaderTest {
         stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
 
         stackLoader.start();
-        verify(stackDao, times(2)).update(any());
-        verify(stackDao, times(2)).create(any());
+        verify(stackDao, times(5)).update(any());
+        verify(stackDao, times(5)).create(any());
     }
 
     @Test
@@ -100,8 +100,8 @@ public class StackLoaderTest {
         stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
 
         stackLoader.start();
-        verify(stackDao, times(2)).update(any());
-        verify(stackDao, times(2)).create(any());
+        verify(stackDao, times(5)).update(any());
+        verify(stackDao, times(5)).create(any());
     }
 
     @Test
@@ -155,7 +155,8 @@ public class StackLoaderTest {
                                                               .withProperties(singletonMap("key", "value")));
         Map<String, ExtendedMachineDto> machines = new HashMap<>();
         machines.put("someMachineName", newDto(ExtendedMachineDto.class).withAgents(Arrays.asList("agent1", "agent2"))
-                                                                        .withServers(servers));
+                                                                        .withServers(servers)
+                                                                        .withAttributes(singletonMap("memoryLimitBytes", "" + 512L * 1024L * 1024L)));
 
         EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(environmentRecipe)
                                                                     .withMachines(machines);

@@ -101,7 +101,7 @@ public class RecipeService extends Service {
 
     @GET
     @Path("/{id}/script")
-    @Produces(TEXT_PLAIN)
+    @Produces(TEXT_PLAIN + "; charset=utf-8")
     public String getRecipeScript(@PathParam("id") String id) throws ApiException {
         final ManagedRecipe recipe = recipeDao.getById(id);
         return recipe.getScript();

@@ -28,4 +28,9 @@ public interface ExtendedMachine {
      * Returns mapping of references to configurations of servers deployed into machine.
      */
     Map<String, ? extends ServerConf2> getServers();
+
+    /**
+     * Returns attributes of resources of machine.
+     */
+    Map<String, String> getAttributes();
 }

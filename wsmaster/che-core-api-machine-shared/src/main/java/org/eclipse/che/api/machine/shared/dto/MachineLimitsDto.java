@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.shared.dto;
 
-import org.eclipse.che.api.core.model.machine.Limits;
+import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -18,6 +18,6 @@ import org.eclipse.che.dto.shared.DTO;
  */
 @Deprecated
 @DTO
-public interface LimitsDto extends Limits {
-    LimitsDto withRam(int memorySizeMB);
+public interface MachineLimitsDto extends MachineLimits {
+    MachineLimitsDto withRam(int memorySizeMB);
 }

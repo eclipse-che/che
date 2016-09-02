@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,11 +26,13 @@ import java.util.stream.Collectors;
 public class ExtendedMachineImpl implements ExtendedMachine {
     private List<String>                 agents;
     private Map<String, ServerConf2Impl> servers;
+    private Map<String, String>          attributes;
 
     public ExtendedMachineImpl() {}
 
     public ExtendedMachineImpl(List<String> agents,
-                               Map<String, ? extends ServerConf2> servers) {
+                               Map<String, ? extends ServerConf2> servers,
+                               Map<String, String> attributes) {
         if (agents != null) {
             this.agents = new ArrayList<>(agents);
         }
@@ -39,19 +42,13 @@ public class ExtendedMachineImpl implements ExtendedMachine {
                                   .collect(Collectors.toMap(Map.Entry::getKey,
                                                             entry -> new ServerConf2Impl(entry.getValue())));
         }
+        if (attributes != null) {
+            this.attributes = new HashMap<>(attributes);
+        }
     }
 
     public ExtendedMachineImpl(ExtendedMachine machine) {
-        if (machine.getAgents() != null) {
-            this.agents = new ArrayList<>(machine.getAgents());
-        }
-        if (machine.getServers() != null) {
-            this.servers = machine.getServers()
-                                  .entrySet()
-                                  .stream()
-                                  .collect(Collectors.toMap(Map.Entry::getKey,
-                                                            entry -> new ServerConf2Impl(entry.getValue())));
-        }
+        this(machine.getAgents(), machine.getServers(), machine.getAttributes());
     }
 
     @Override
@@ -73,17 +70,27 @@ public class ExtendedMachineImpl implements ExtendedMachine {
     }
 
     @Override
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ExtendedMachineImpl)) return false;
         ExtendedMachineImpl that = (ExtendedMachineImpl)o;
         return Objects.equals(agents, that.agents) &&
-               Objects.equals(servers, that.servers);
+               Objects.equals(servers, that.servers) &&
+               Objects.equals(attributes, that.attributes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agents, servers);
+        return Objects.hash(agents, servers, attributes);
     }
 
     @Override
@@ -91,6 +98,7 @@ public class ExtendedMachineImpl implements ExtendedMachine {
         return "ExtendedMachineImpl{" +
                "agents=" + agents +
                ", servers=" + servers +
+               ", attributes=" + attributes +
                '}';
     }
 }

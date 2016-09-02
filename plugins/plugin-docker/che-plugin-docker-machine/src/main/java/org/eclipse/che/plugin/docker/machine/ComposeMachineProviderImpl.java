@@ -20,13 +20,14 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProvider;
 import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
@@ -64,8 +65,11 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -277,7 +281,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                                                                    .setName(machineName)
                                                                    .setType("docker")
                                                                    // casting considered as safe because more than int of megabytes is a lot!
-                                                                   .setLimits(new LimitsImpl((int)Size
+                                                                   .setLimits(new MachineLimitsImpl((int)Size
                                                                            .parseSizeToMegabytes(
                                                                                    service.getMemLimit() + "b")))
                                                                    .setSource(new MachineSourceImpl(service.getBuild() != null ?
@@ -338,14 +342,17 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
 
         String containerName = generateContainerName(namespace, workspaceId, machineId, machineName);
         String imageName = "eclipse-che/" + containerName;
-        if ((service.getBuild() == null || service.getBuild().getContext() == null)
-            && service.getImage() == null) {
+        // workaround: dockerfile content can be in service.build.dockerfile
+        if ((service.getBuild() == null ||
+             (service.getBuild().getContext() == null && service.getBuild().getDockerfile() == null)) &&
+            service.getImage() == null) {
 
             throw new ServerException(format("Compose service '%s' doesn't have neither build not image fields",
                                              machineName));
         }
 
-        if (service.getBuild() != null && service.getBuild().getContext() != null) {
+        if (service.getBuild() != null && (service.getBuild().getContext() != null ||
+                                           service.getBuild().getDockerfile() != null)) {
             buildImage(service, imageName, doForcePullOnBuild, progressMonitor);
         } else {
             pullImage(service, imageName, progressMonitor);
@@ -360,18 +367,39 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                               ProgressMonitor progressMonitor)
             throws MachineException {
 
+        File workDir = null;
         try {
-            docker.buildImage(BuildImageParams.create(service.getBuild().getContext())
-                                              .withDockerfile(service.getBuild().getDockerfile())
-                                              .withForceRemoveIntermediateContainers(true)
-                                              .withRepository(machineImageName)
-                                              .withAuthConfigs(dockerCredentials.getCredentials())
-                                              .withDoForcePull(doForcePullOnBuild)
-                                              .withMemoryLimit(service.getMemLimit())
-                                              .withMemorySwapLimit(-1),
-                              progressMonitor);
+            BuildImageParams buildImageParams;
+            // workaround: dockerfile content can be in service.build.dockerfile
+            if (service.getBuild() != null &&
+                service.getBuild().getContext() == null &&
+                service.getBuild().getDockerfile() != null) {
+
+                workDir = Files.createTempDirectory(null).toFile();
+                final File dockerfileFile = new File(workDir, "Dockerfile");
+                try (FileWriter output = new FileWriter(dockerfileFile)) {
+                    output.append(service.getBuild().getDockerfile());
+                }
+
+                buildImageParams = BuildImageParams.create(dockerfileFile);
+            } else {
+                buildImageParams = BuildImageParams.create(service.getBuild().getContext())
+                                                   .withDockerfile(service.getBuild().getDockerfile());
+            }
+            buildImageParams.withForceRemoveIntermediateContainers(true)
+                            .withRepository(machineImageName)
+                            .withAuthConfigs(dockerCredentials.getCredentials())
+                            .withDoForcePull(doForcePullOnBuild)
+                            .withMemoryLimit(service.getMemLimit())
+                            .withMemorySwapLimit(-1);
+
+            docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {
             throw new MachineException(e.getLocalizedMessage(), e);
+        } finally {
+            if (workDir != null) {
+                FileCleaner.addFile(workDir);
+            }
         }
     }
 

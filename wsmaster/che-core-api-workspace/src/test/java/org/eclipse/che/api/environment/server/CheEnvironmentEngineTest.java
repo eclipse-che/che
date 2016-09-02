@@ -26,14 +26,15 @@ import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningExc
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
 import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
+import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
@@ -51,7 +52,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -97,6 +97,10 @@ public class CheEnvironmentEngineTest {
     EventService                   eventService;
     @Mock
     SnapshotDao                    snapshotDao;
+    @Mock
+    RecipeDownloader               recipeDownloader;
+
+    EnvironmentParser environmentParser = new EnvironmentParser(new ComposeFileParser(), recipeDownloader);
 
     CheEnvironmentEngine engine;
 
@@ -107,7 +111,7 @@ public class CheEnvironmentEngineTest {
                                               "/tmp",
                                               256,
                                               eventService,
-                                              new ComposeFileParser(URI.create("http://localhost")),
+                                              environmentParser,
                                               new ComposeServicesStartStrategy(),
                                               composeProvider));
 
@@ -216,8 +220,6 @@ public class CheEnvironmentEngineTest {
 
         // then
         assertEquals(machines, expectedMachines);
-//        verify(instanceProvider, times(env.getMachineConfigs().size()))
-//                .createInstance(any(Machine.class), any(LineConsumer.class));
     }
 
     @Test
@@ -590,7 +592,7 @@ public class CheEnvironmentEngineTest {
         return MachineConfigImpl.builder()
                                 .setDev(isDev)
                                 .setType("docker")
-                                .setLimits(new LimitsImpl(1024))
+                                .setLimits(new MachineLimitsImpl(1024))
                                 .setSource(new MachineSourceImpl("dockerfile").setLocation("location"))
                                 .setName(UUID.randomUUID().toString())
                                 .build();
@@ -607,8 +609,12 @@ public class CheEnvironmentEngineTest {
                                                 new HashMap<>(singletonMap("prop1", "propValue"))));
         servers.put("ref2", new ServerConf2Impl("8080/udp", "proto1", null));
         servers.put("ref3", new ServerConf2Impl("9090", "proto1", null));
-        machines.put("dev-machine", new ExtendedMachineImpl(new ArrayList<>(asList("ws-agent", "someAgent")), servers));
-        machines.put("machine2", new ExtendedMachineImpl(new ArrayList<>(asList("someAgent2", "someAgent3")), null));
+        machines.put("dev-machine", new ExtendedMachineImpl(new ArrayList<>(asList("ws-agent", "someAgent")),
+                                                            servers,
+                                                            new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
+        machines.put("machine2", new ExtendedMachineImpl(new ArrayList<>(asList("someAgent2", "someAgent3")),
+                                                         null,
+                                                         new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
         String environmentRecipeContent =
                 "services:\n  " +
                 "dev-machine:\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 4294967296\n  " +
@@ -636,7 +642,7 @@ public class CheEnvironmentEngineTest {
         } else {
             throw new IllegalArgumentException("Build context or image should contain non empty value");
         }
-        LimitsImpl limits = new LimitsImpl((int)Size.parseSizeToMegabytes(service.getMemLimit() + "b"));
+        MachineLimitsImpl limits = new MachineLimitsImpl((int)Size.parseSizeToMegabytes(service.getMemLimit() + "b"));
 
         return MachineImpl.builder()
                           .setConfig(MachineConfigImpl.builder()
