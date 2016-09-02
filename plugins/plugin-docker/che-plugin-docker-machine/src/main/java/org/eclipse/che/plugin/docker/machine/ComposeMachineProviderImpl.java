@@ -165,6 +165,12 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
 
+        allMachinesSystemVolumes = allMachinesSystemVolumes.stream()
+                                                           .map(line -> line.split(";"))
+                                                           .flatMap(Arrays::stream)
+                                                           .distinct()
+                                                           .collect(Collectors.toSet());
+
         devMachineSystemVolumes = devMachineSystemVolumes.stream()
                                                          .map(line -> line.split(";"))
                                                          .flatMap(Arrays::stream)
