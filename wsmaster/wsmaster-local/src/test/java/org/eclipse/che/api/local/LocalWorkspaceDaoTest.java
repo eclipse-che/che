@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
@@ -23,6 +24,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,8 +43,10 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Eugene Voevodin
@@ -61,7 +65,8 @@ public class LocalWorkspaceDaoTest {
         final Path targetDir = Paths.get(url.toURI()).getParent();
         final Path storageRoot = targetDir.resolve("workspaces");
         workspacesPath = storageRoot.resolve("workspaces.json");
-        workspaceDao = new LocalWorkspaceDaoImpl(new LocalStorageFactory(storageRoot.toString()));
+        final WorkspaceConfigJsonAdapter adapter = mock(WorkspaceConfigJsonAdapter.class);
+        workspaceDao = new LocalWorkspaceDaoImpl(new LocalStorageFactory(storageRoot.toString()), adapter);
     }
 
     @Test
@@ -83,6 +88,24 @@ public class LocalWorkspaceDaoTest {
 
         final WorkspaceImpl result = workspaceDao.get(workspace.getId());
         assertEquals(result, workspace);
+    }
+
+    @Test
+    public void testOldFormatIsAdaptedWhenWorkspaceIsLoaded() throws Exception {
+        final URL rootUrl = Thread.currentThread().getContextClassLoader().getResource(".");
+        assertNotNull(rootUrl);
+        final String path = Paths.get(rootUrl.toURI()).toString();
+        final LocalStorageFactory storageFactory = new LocalStorageFactory(path);
+        final WorkspaceConfigJsonAdapter workspaceAdapter = new WorkspaceConfigJsonAdapter();
+        final LocalWorkspaceDaoImpl workspaceDao = new LocalWorkspaceDaoImpl(storageFactory, workspaceAdapter);
+
+        workspaceDao.loadWorkspaces();
+
+        final WorkspaceImpl test = workspaceDao.get("test");
+        final EnvironmentImpl environment = test.getConfig().getEnvironments().get(test.getConfig().getDefaultEnv());
+        assertEquals(environment.getRecipe().getType(), "dockerfile");
+        assertEquals(environment.getRecipe().getLocation(), "host/api/recipe/recipew7j6ebw6or6rqu2t/script");
+        assertEquals(environment.getMachines().size(), 1);
     }
 
     private static WorkspaceImpl createWorkspace() {
