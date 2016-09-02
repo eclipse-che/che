@@ -55,6 +55,7 @@ init_global_variables() {
   DEFAULT_CHE_DEV_IMAGE_NAME="codenvy/che-dev"
   DEFAULT_CHE_SERVER_CONTAINER_NAME="che-server"
   DEFAULT_CHE_VERSION="latest"
+  DEFAULT_CHE_UTILITY_VERSION="nightly"
   DEFAULT_CHE_CLI_ACTION="help"
   DEFAULT_IS_INTERACTIVE="true"
   DEFAULT_IS_PSEUDO_TTY="true"
@@ -70,6 +71,7 @@ init_global_variables() {
   CHE_DEV_IMAGE_NAME=${CHE_DEV_IMAGE_NAME:-${DEFAULT_CHE_DEV_IMAGE_NAME}}
   CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME:-${DEFAULT_CHE_SERVER_CONTAINER_NAME}}
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
+  CHE_UTILITY_VERSION=${CHE_UTILITY_VERSION:-${DEFAULT_CHE_UTILITY_VERSION}}
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
   IS_INTERACTIVE=${IS_INTERACTIVE:-${DEFAULT_IS_INTERACTIVE}}
   IS_PSEUDO_TTY=${IS_PSEUDO_TTY:-${DEFAULT_IS_PSEUDO_TTY}}
@@ -84,7 +86,7 @@ Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
            start                              Starts ${CHE_MINI_PRODUCT_NAME} server
            stop                               Stops ${CHE_MINI_PRODUCT_NAME} server
            restart                            Restart ${CHE_MINI_PRODUCT_NAME} server
-           update                             Pulls specific version, respecting CHE_VERSION
+           update [--force]                   Installs version, respecting CHE_VERSION & CHE_UTILITY_VERSION
            profile add <name>                 Add a profile to ~/.che/ 
            profile set <name>                 Set this profile as the default for ${CHE_MINI_PRODUCT_NAME} CLI
            profile unset                      Removes the default profile - leaves it unset
@@ -366,6 +368,7 @@ get_list_of_che_system_environment_variables() {
     echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> $DOCKER_ENV
     echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
     echo "CHE_MINI_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
+    echo "CHE_VERSION=${CHE_VERSION}" >> $DOCKER_ENV
 
     CHE_VARIABLES=$(env | grep CHE_)
 
@@ -390,10 +393,10 @@ get_list_of_che_system_environment_variables() {
 
 check_current_image_and_update_if_not_found() {
 
-  CURRENT_IMAGE=$(docker images -q "$1":"${CHE_VERSION}")
+  CURRENT_IMAGE=$(docker images -q "$1":"$2")
 
   if [ "${CURRENT_IMAGE}" == "" ]; then
-    update_che_image $1
+    update_che_image $1 $2
   fi
 }
 
@@ -441,8 +444,8 @@ generate_temporary_che_properties_file() {
 ###########################################################################
 
 execute_che_launcher() {
-  check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME}
-  docker_run_with_che_properties "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_VERSION}" "${CHE_CLI_ACTION}" || true
+  check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+  docker_run_with_che_properties "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${CHE_CLI_ACTION}" || true
 }
 
 execute_profile(){
@@ -493,6 +496,7 @@ execute_profile(){
       echo "CHE_MOUNT_IMAGE_NAME=$CHE_MOUNT_IMAGE_NAME" >> ~/.che/profiles/"${3}"
       echo "CHE_TEST_IMAGE_NAME=$CHE_TEST_IMAGE_NAME" >> ~/.che/profiles/"${3}"
       echo "CHE_SERVER_CONTAINER_NAME=$CHE_SERVER_CONTAINER_NAME" >> ~/.che/profiles/"${3}"
+      echo "CHE_VERSION=$CHE_VERSION" >> ~/.che/profiles/"${3}"
 
       # Add all other variables to the profile
       env | grep CHE_ >> ~/.che/profiles/"${3}" || true
@@ -627,27 +631,30 @@ load_profile() {
     fi
 
     source ~/.che/profiles/"${CHE_PROFILE}"
+    info "${CHE_PRODUCT_NAME}: Loaded profile ${CHE_PROFILE}"
   fi
 }
 
 execute_che_dir() {
-  check_current_image_and_update_if_not_found ${CHE_DIR_IMAGE_NAME}
+  check_current_image_and_update_if_not_found ${CHE_DIR_IMAGE_NAME} ${CHE_UTILITY_VERSION}
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
-  docker_run_with_che_properties -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_VERSION}" "${CURRENT_DIRECTORY}" "$@"
+  docker_run_with_che_properties -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${CURRENT_DIRECTORY}" "$@"
 }
 
 execute_che_action() {
-  check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME}
-  docker_run_with_che_properties "${CHE_ACTION_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+  check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+  docker_run_with_che_properties "${CHE_ACTION_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "$@"
 }
 
 update_che_image() {
-  if [ -z "${CHE_VERSION}" ]; then
-    CHE_VERSION=${DEFAULT_CHE_VERSION}
+  if [ "${1}" == "--force" ]; then
+    shift
+    info "${CHE_PRODUCT_NAME}: Removing image $1:$2"
+    docker rmi -f $1:$2 > /dev/null
   fi
 
-  info "${CHE_PRODUCT_NAME}: Pulling image $1:${CHE_VERSION}"
-  docker pull $1:${CHE_VERSION}
+  info "${CHE_PRODUCT_NAME}: Pulling image $1:$2"
+  docker pull $1:$2
   echo ""
 }
 
@@ -672,7 +679,7 @@ execute_che_mount() {
   docker_run_with_che_properties --cap-add SYS_ADMIN \
               --device /dev/fuse \
               -v "${MOUNT_PATH}":/mnthost \
-              "${CHE_MOUNT_IMAGE_NAME}":"${CHE_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
+              "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
 }
 
 execute_che_compile() {
@@ -681,17 +688,17 @@ execute_che_compile() {
     return
   fi
 
-  check_current_image_and_update_if_not_found ${CHE_DEV_IMAGE_NAME}
+  check_current_image_and_update_if_not_found ${CHE_DEV_IMAGE_NAME} ${CHE_UTILITY_VERSION}
   CURRENT_DIRECTORY=$(get_mount_path "${PWD}")
   docker_run_with_che_properties -v "$CURRENT_DIRECTORY":/home/user/che-build \
                                  -v "$(get_mount_path ~/.m2):/home/user/.m2" \
                                  -w /home/user/che-build \
-                                 "${CHE_DEV_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+                                 "${CHE_DEV_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "$@"
 }
 
 execute_che_test() {
-  check_current_image_and_update_if_not_found ${CHE_TEST_IMAGE_NAME}
-  docker_run_with_che_properties "${CHE_TEST_IMAGE_NAME}":"${CHE_VERSION}" "$@"
+  check_current_image_and_update_if_not_found ${CHE_TEST_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+  docker_run_with_che_properties "${CHE_TEST_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "$@"
 }
 
 execute_che_info() {
@@ -734,6 +741,8 @@ print_che_cli_debug() {
   debug ""
   debug "---------  PLATFORM INFO  -------------"
   debug "CLI DEFAULT PROFILE       = $(has_default_profile && echo $(get_default_profile) || echo "not set")"
+  debug "CHE_VERSION               = ${CHE_VERSION}"
+  debug "CHE_UTILITY_VERSION       = ${CHE_UTILITY_VERSION}"
   debug "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
   debug "DOCKER_HOST_IP            = ${GLOBAL_GET_DOCKER_HOST_IP}"
   debug "IS_DOCKER_FOR_WINDOWS     = $(is_docker_for_windows && echo "YES" || echo "NO")"
@@ -789,7 +798,7 @@ run_connectivity_tests() {
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
+                                ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} \ 
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
@@ -803,7 +812,7 @@ run_connectivity_tests() {
   ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                codenvy/che-server:${DEFAULT_CHE_VERSION} \
+                                ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
@@ -852,16 +861,15 @@ case ${CHE_CLI_ACTION} in
     execute_che_action "$@"
   ;;
   update)
+    shift
     load_profile
-    update_che_image ${CHE_LAUNCHER_IMAGE_NAME}
-    update_che_image ${CHE_MOUNT_IMAGE_NAME}
-    update_che_image ${CHE_DIR_IMAGE_NAME}
-    update_che_image ${CHE_ACTION_IMAGE_NAME}
-    update_che_image ${CHE_TEST_IMAGE_NAME}
-    update_che_image ${CHE_DEV_IMAGE_NAME}
-
-    # Delegate updating che-server to the launcher
-    execute_che_launcher
+    update_che_image "$@" ${CHE_SERVER_IMAGE_NAME} ${CHE_VERSION}
+    update_che_image "$@" ${CHE_LAUNCHER_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+    update_che_image "$@" ${CHE_MOUNT_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+    update_che_image "$@" ${CHE_DIR_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+    update_che_image "$@" ${CHE_ACTION_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+    update_che_image "$@" ${CHE_TEST_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+    update_che_image "$@" ${CHE_DEV_IMAGE_NAME} ${CHE_UTILITY_VERSION}
   ;;
   mount)
     load_profile
