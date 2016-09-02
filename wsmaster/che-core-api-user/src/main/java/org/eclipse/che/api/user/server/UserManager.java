@@ -229,6 +229,17 @@ public class UserManager {
     }
 
     /**
+     * Gets total count of all users
+     *
+     * @return user count
+     * @throws ServerException
+     *         when any error occurs
+     */
+    public long getTotalCount() throws ServerException {
+        return userDao.getTotalCount();
+    }
+
+    /**
      * Removes user by given {@code id}.
      *
      * @param id

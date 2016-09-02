@@ -186,6 +186,11 @@ public class UserDaoTest {
     }
 
     @Test
+    public void shouldGetTotalUserCount() throws Exception {
+        assertEquals(userDao.getTotalCount(), 5);
+    }
+
+    @Test
     public void getAllShouldReturnAllUsersWithinSingleResponse() throws Exception {
         List<UserImpl> result = userDao.getAll(6, 0).getItems();
         assertEquals(result.size(), 5);
@@ -221,7 +226,7 @@ public class UserDaoTest {
         userDao.getAll(2, -1);
     }
 
-    @Test
+    @Test(dependsOnMethods = "shouldGetTotalUserCount")
     public void shouldReturnCorrectTotalCountAlongWithRequestedUsers() throws Exception {
         final Page<UserImpl> page = userDao.getAll(2, 0);
 

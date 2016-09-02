@@ -206,6 +206,14 @@ public class UserManagerTest {
     }
 
     @Test
+    public void shouldGetTotalUserCount() throws Exception {
+        when(userDao.getTotalCount()).thenReturn(5L);
+
+        assertEquals(manager.getTotalCount(), 5);
+        verify(userDao).getTotalCount();
+    }
+
+    @Test
     public void shouldGetAllUsers() throws Exception {
         final Page users = new Page(Arrays.asList(
                 new UserImpl("identifier1", "test1@email.com", "testName1", "password", Collections.singletonList("alias1")),
