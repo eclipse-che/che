@@ -41,7 +41,6 @@ import org.everrest.core.impl.uri.UriBuilderImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -136,7 +135,7 @@ public class StackServiceTest {
     @InjectMocks
     StackService service;
 
-    @BeforeClass
+    @BeforeMethod
     public void setUp() throws IOException, ConflictException {
         byte[] fileContent = STACK_ID.getBytes();
         stackIcon = new StackIcon(ICON_MEDIA_TYPE, "image/svg+xml", fileContent);
