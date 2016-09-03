@@ -192,8 +192,8 @@ docker_run() {
 docker_run_with_env_file() {
   debug $FUNCNAME
   get_list_of_che_system_environment_variables
-  docker_run --env-file=tmp "$@"
-  rm -rf $PWD/tmp > /dev/null
+  docker_run --env-file=tmpgibberish "$@"
+  rm -rf $PWD/tmpgibberish > /dev/null
 }
 
 docker_run_with_pseudo_tty() {
@@ -412,7 +412,7 @@ get_list_of_che_system_environment_variables() {
 
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
-  DOCKER_ENV=$(get_mount_path $PWD)/tmp
+  DOCKER_ENV=$(get_mount_path $PWD)/tmpgibberish
   touch $DOCKER_ENV
   
   if has_default_profile; then
