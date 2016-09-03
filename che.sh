@@ -26,7 +26,6 @@ error_exit() {
 }
 
 check_docker() {
-  debug $FUNCNAME
   if ! docker ps > /dev/null 2>&1; then
     output=$(docker ps)
     error_exit "Error - Docker not installed properly: \n${output}"
@@ -332,7 +331,7 @@ get_full_path() {
   #OUTPUT_PATH=${1//\"}
 
   # create full directory path
-  echo "$(cd "$(dirname "${OUTPUT_PATH}")"; pwd)/$(basename "$1")"
+  echo "$(cd "$(dirname "${1}")"; pwd)/$(basename "$1")"
 }
 
 convert_windows_to_posix() {
