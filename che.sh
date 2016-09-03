@@ -40,8 +40,11 @@ check_docker() {
 
 init_global_variables() {
 
-  # Name used in INFO statements
+  # Turns on stack traces
   DEFAULT_CHE_CLI_DEBUG="false"
+
+  # Activates console output
+  DEFAULT_CHE_CLI_INFO="true"
 
   # Name used in INFO statements
   DEFAULT_CHE_PRODUCT_NAME="ECLIPSE CHE"
@@ -64,6 +67,7 @@ init_global_variables() {
   DEFAULT_IS_PSEUDO_TTY="true"
 
   CHE_CLI_DEBUG=${CHE_CLI_DEBUG:-${DEFAULT_CHE_CLI_DEBUG}}
+  CHE_CLI_INFO=${CHE_CLI_INFO:-${DEFAULT_CHE_CLI_INFO}}
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
   CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
   CHE_LAUNCHER_IMAGE_NAME=${CHE_LAUNCHER_IMAGE_NAME:-${DEFAULT_CHE_LAUNCHER_IMAGE_NAME}}
@@ -122,7 +126,9 @@ usage () {
 }
 
 info() {
-  printf  "${GREEN}INFO:${NC} %s\n" "${1}"
+  if is_info; then
+    printf  "${GREEN}INFO:${NC} %s\n" "${1}"
+  fi
 }
 
 debug() {
@@ -133,6 +139,14 @@ debug() {
 
 error() {
   printf  "${RED}ERROR:${NC} %s\n" "${1}"
+}
+
+is_info() {
+  if [ "${CHE_CLI_INFO}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 is_debug() {
@@ -409,8 +423,10 @@ get_list_of_che_system_environment_variables() {
     echo "CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME}" >> $DOCKER_ENV
     echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> $DOCKER_ENV
     echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
-    echo "CHE_MINI_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
+    echo "CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME}" >> $DOCKER_ENV
     echo "CHE_VERSION=${CHE_VERSION}" >> $DOCKER_ENV
+    echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> $DOCKER_ENV
+    echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> $DOCKER_ENV
 
     CHE_VARIABLES=$(env | grep CHE_)
 
