@@ -84,5 +84,4 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
 
     @Override
     MachineConfigDto withLinks(List<Link> links);
-
 }
