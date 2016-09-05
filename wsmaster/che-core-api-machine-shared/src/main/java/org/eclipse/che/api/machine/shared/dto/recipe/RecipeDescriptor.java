@@ -21,6 +21,7 @@ import java.util.List;
  *
  * @author Eugene Voevodin
  */
+@Deprecated
 @DTO
 public interface RecipeDescriptor extends Hyperlinks, ManagedRecipe {
 

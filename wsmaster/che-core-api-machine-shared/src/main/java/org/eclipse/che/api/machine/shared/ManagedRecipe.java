@@ -20,6 +20,7 @@ import java.util.List;
  *
  * @author Eugene Voevodin
  */
+@Deprecated
 public interface ManagedRecipe extends Recipe {
 
     /**

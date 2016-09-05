@@ -18,6 +18,7 @@ import org.eclipse.che.dto.shared.DTO;
  *
  * @author Valeriy Svydenko
  */
+@Deprecated
 @DTO
 public interface MachineRecipe extends Recipe {
 

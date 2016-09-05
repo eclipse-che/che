@@ -66,7 +66,7 @@
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsagent-server</artifactId>
                 <version>${che.version}</version>
-                <type>zip</type>
+                <type>tar.gz</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
@@ -79,6 +79,16 @@
                 <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-agent</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-agent-shared</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -319,7 +329,7 @@
                 <groupId>org.eclipse.che.lib</groupId>
                 <artifactId>che-websocket-terminal</artifactId>
                 <version>${che.lib.version}</version>
-                <type>zip</type>
+                <type>tar.gz</type>
                 <classifier>linux_amd64</classifier>
             </dependency>
             <dependency>
@@ -327,6 +337,13 @@
                 <artifactId>che-websocket-terminal</artifactId>
                 <version>${che.lib.version}</version>
                 <type>zip</type>
+                <classifier>linux_amd64</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.lib</groupId>
+                <artifactId>che-websocket-terminal</artifactId>
+                <version>${che.lib.version}</version>
+                <type>tar.gz</type>
                 <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>

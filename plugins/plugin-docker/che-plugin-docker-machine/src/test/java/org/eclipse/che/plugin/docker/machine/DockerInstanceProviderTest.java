@@ -162,7 +162,8 @@ public class DockerInstanceProviderTest {
         EnvironmentContext.setCurrent(envCont);
 
 
-        when(recipeRetriever.getRecipe(any(MachineConfig.class))).thenReturn(new RecipeImpl().withType(DOCKER_FILE_TYPE).withScript("FROM codenvy"));
+        when(recipeRetriever.getRecipe(any(MachineConfig.class)))
+                .thenReturn(new RecipeImpl().withType(DOCKER_FILE_TYPE).withScript("FROM codenvy"));
 
         when(dockerMachineFactory.createNode(anyString(), anyString())).thenReturn(dockerNode);
         when(dockerConnector.createContainer(any(CreateContainerParams.class)))
