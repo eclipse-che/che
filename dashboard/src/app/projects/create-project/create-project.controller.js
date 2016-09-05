@@ -348,19 +348,6 @@ export class CreateProjectController {
     let statusChannel = statusLink ? statusLink.parameters[0].defaultValue : null;
     let outputChannel = outputLink ? outputLink.parameters[0].defaultValue : null;
 
-    if (outputChannel) {
-      this.listeningChannels.push(outputChannel);
-      bus.subscribe(outputChannel, (message) => {
-        message = this.getDisplayMachineLog(message);
-
-        if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
-          this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
-        } else {
-          this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
-        }
-      });
-    }
-
     this.listeningChannels.push(agentChannel);
     bus.subscribe(agentChannel, (message) => {
       if (this.createProjectSvc.getCurrentProgressStep() < 2) {

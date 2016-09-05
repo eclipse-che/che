@@ -266,10 +266,11 @@ export class CheWorkspace {
     }
 
     if (source && source.type && source.type === 'environment') {
+      let contentType = source.format === 'dockerfile' ? 'text/x-dockerfile' : 'application/x-yaml';
       defaultEnvironment.recipe = {
-        'type': 'compose',
-        'contentType': source.format
-      };
+        'type': source.format,
+        'contentType': contentType
+      }
 
       defaultEnvironment.recipe.content = source.content || null;
       defaultEnvironment.recipe.location = source.location || null;
