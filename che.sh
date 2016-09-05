@@ -580,9 +580,7 @@ execute_profile(){
       mv -f ~/.che/profiles/tmp ~/.che/profiles/"${3}"
 
 
-      info ""
       info "Added new ${CHE_MINI_PRODUCT_NAME} CLI profile ~/.che/profiles/${3}."
-      info ""
     ;;
     update)
       if [ ! -f ~/.che/profiles/"${3}" ]; then
@@ -605,9 +603,7 @@ execute_profile(){
 
       rm ~/.che/profiles/"${3}" > /dev/null
 
-      info ""
       info "Removed ${CHE_MINI_PRODUCT_NAME} CLI profile ~/.che/profiles/${3}."
-      info ""
     ;;
     info)
       if [ ! -f ~/.che/profiles/"${3}" ]; then
