@@ -66,7 +66,7 @@ public class WsMasterModule extends AbstractModule {
                           "sudo sh -c \"chown -R $(id -u -n) /projects || true\" && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
         bindConstant().annotatedWith(Names.named(org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
-                      .to("mkdir -p ~/che " +
+                      .to("sleep 5 && mkdir -p ~/che " +
                           "&& cp /mnt/che/terminal -R ~/che" +
                           "&& ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
         bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
