@@ -13,12 +13,14 @@ package org.eclipse.che.ide.ext.java.client.refactoring.preview;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.event.ng.FileTrackingEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
@@ -26,6 +28,7 @@ import org.eclipse.che.ide.ext.java.client.refactoring.move.wizard.MovePresenter
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenamePresenter;
 import org.eclipse.che.ide.ext.java.client.refactoring.service.RefactoringServiceClient;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeEnabledState;
+import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangeInfo;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangePreview;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringChange;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringPreview;
@@ -33,6 +36,9 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSession;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.OK;
 
 /**
@@ -49,6 +55,7 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
     private final RefactoringUpdater        refactoringUpdater;
     private final RefactoringServiceClient  refactoringService;
     private final Provider<MovePresenter>   movePresenterProvider;
+    private final EventBus eventBus;
 
     private RefactorInfo       refactorInfo;
     private RefactoringSession session;
@@ -60,13 +67,14 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
                             DtoFactory dtoFactory,
                             EditorAgent editorAgent,
                             RefactoringUpdater refactoringUpdater,
-                            RefactoringServiceClient refactoringService) {
+                            RefactoringServiceClient refactoringService, EventBus eventBus) {
         this.view = view;
         this.renamePresenterProvider = renamePresenterProvider;
         this.dtoFactory = dtoFactory;
         this.editorAgent = editorAgent;
         this.refactoringUpdater = refactoringUpdater;
         this.refactoringService = refactoringService;
+        this.eventBus = eventBus;
         this.view.setDelegate(this);
 
         this.movePresenterProvider = movePresenterProvider;
@@ -110,6 +118,8 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void onAcceptButtonClicked() {
+        eventBus.fireEvent(new FileTrackingEvent(null, null, SUSPEND));
+
         refactoringService.applyRefactoring(session).then(new Operation<RefactoringResult>() {
             @Override
             public void apply(RefactoringResult result) throws OperationException {
@@ -119,6 +129,13 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
                 } else {
                     view.showErrorMessage(result);
                 }
+                for (ChangeInfo change : result.getChanges()) {
+                    final String path = change.getPath();
+                    final String oldPath = change.getOldPath();
+
+                    eventBus.fireEvent(new FileTrackingEvent(path, oldPath, MOVE));
+                }
+                eventBus.fireEvent(new FileTrackingEvent(null, null, RESUME));
             }
         });
     }

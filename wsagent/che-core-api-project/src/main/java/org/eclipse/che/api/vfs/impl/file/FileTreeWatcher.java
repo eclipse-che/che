@@ -279,6 +279,8 @@ public class FileTreeWatcher {
             Path eventDirectoryPath = pendingEvent.getPath();
             WatchedDirectory watchedDirectory = watchedDirectories.get(eventDirectoryPath);
             if (Files.exists(eventDirectoryPath)) {
+                boolean isModifiedNotYetReported = true;
+
                 final int hitCounter = watchedDirectory.incrementHitCounter();
                 try (DirectoryStream<Path> entries = Files.newDirectoryStream(eventDirectoryPath)) {
                     for (Path fsItem : entries) {
@@ -288,6 +290,10 @@ public class FileTreeWatcher {
                                 boolean directory = Files.isDirectory(fsItem);
                                 directoryItem = new DirectoryItem(fsItem.getFileName(), directory, getLastModifiedInMillis(fsItem));
                                 watchedDirectory.addItem(directoryItem);
+                                if (isModifiedNotYetReported){
+                                    isModifiedNotYetReported = false;
+                                    fireWatchEvent(MODIFIED, eventDirectoryPath, true);
+                                }
                                 fireWatchEvent(CREATED, fsItem, directoryItem.isDirectory());
                                 if (directory) {
                                     walkTreeAndFireCreatedEvents(fsItem);
@@ -315,6 +321,10 @@ public class FileTreeWatcher {
                     DirectoryItem directoryItem = iterator.next();
                     if (hitCounter != directoryItem.getHitCount()) {
                         iterator.remove();
+                        if (isModifiedNotYetReported){
+                            isModifiedNotYetReported = false;
+                            fireWatchEvent(MODIFIED, eventDirectoryPath, true);
+                        }
                         fireWatchEvent(DELETED, eventDirectoryPath.resolve(directoryItem.getName()), directoryItem.isDirectory());
                     }
                 }

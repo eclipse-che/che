@@ -40,6 +40,14 @@ public interface EditorTab extends View<EditorTab.ActionDelegate>, TabItem, Doub
     VirtualFile getFile();
 
     /**
+     * Sets associated file with editor tab.
+     *
+     * @param file
+     *         associated file
+     */
+    void setFile(VirtualFile file);
+
+    /**
      * Get editor part which associated with given tab
      *
      * @return editor part which associated with given tab

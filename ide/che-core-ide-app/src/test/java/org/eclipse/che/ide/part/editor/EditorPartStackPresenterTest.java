@@ -31,6 +31,7 @@ import org.eclipse.che.ide.part.PartsComparator;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.part.widgets.listtab.ListButton;
 import org.eclipse.che.ide.part.widgets.listtab.ListItem;
+import org.eclipse.che.ide.resource.Path;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -303,5 +304,16 @@ public class EditorPartStackPresenterTest {
 
         assertNotNull(result);
         assertEquals(partPresenter3, result);
+    }
+
+    @Test
+    public void tabShouldBeReturnedByPath() throws Exception {
+        Path path = new Path(SOME_TEXT);
+        when(editorTab1.getFile()).thenReturn(file1);
+        when(file1.getLocation()).thenReturn(path);
+
+        presenter.addPart(partPresenter1);
+
+        assertEquals(editorTab1, presenter.getTabByPath(path));
     }
 }

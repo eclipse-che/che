@@ -267,6 +267,11 @@ public class EditorTabWidget extends Composite implements EditorTab, ContextMenu
     }
 
     @Override
+    public void setFile(VirtualFile file) {
+        this.file = file;
+    }
+
+    @Override
     public EditorPartPresenter getRelativeEditorPart() {
         return relatedEditorPart;
     }
