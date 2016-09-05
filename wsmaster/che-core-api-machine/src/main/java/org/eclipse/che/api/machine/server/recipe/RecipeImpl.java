@@ -24,7 +24,6 @@ import java.util.Objects;
  *
  * @author Eugene Voevodin
  */
-@Deprecated
 public class RecipeImpl implements ManagedRecipe {
 
     private String             id;
