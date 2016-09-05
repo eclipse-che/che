@@ -226,7 +226,7 @@ public class DefaultWorkspaceValidatorTest {
                                                                                       .withDefaultEnv("dev-env");
 
         ExtendedMachineDto extendedMachine =
-                newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))
+                newDto(ExtendedMachineDto.class).withAgents(singletonList("org.eclipse.che.ws-agent"))
                                                 .withServers(singletonMap("ref1",
                                                                           newDto(ServerConf2Dto.class).withPort("8080/tcp")
                                                                                                       .withProtocol("https")

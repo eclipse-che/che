@@ -8,9 +8,8 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.agent.server.wsagent;
+package org.eclipse.che.api.workspace.server.launcher;
 
-import org.eclipse.che.api.workspace.server.launcher.WsAgentLauncherImpl;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -109,7 +108,7 @@ public class WsAgentLauncherImplTest {
         verify(machineProcessManager).exec(eq(WORKSPACE_ID),
                                            eq(MACHINE_ID),
                                            eq(new CommandImpl("org.eclipse.che.ws-agent",
-                                                              "script",
+                                                              "script\n" + WsAgentLauncherImpl.DEFAULT_WS_AGENT_RUN_COMMAND,
                                                               "Arbitrary")),
                                            eq(WsAgentLauncherImpl.getWsAgentProcessOutputChannel(WORKSPACE_ID)));
 

@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
+import org.eclipse.che.api.agent.server.impl.AgentSorter;
+import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -21,9 +22,9 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.environment.server.NoOpMachineInstance;
-import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
@@ -82,13 +83,15 @@ public class WorkspaceRuntimesTest {
     private CheEnvironmentEngine environmentEngine;
 
     @Mock
-    private WsAgentLauncher wsAgentLauncher;
+    private AgentSorter          agentSorter;
+    @Mock
+    private AgentLauncherFactory launcherFactory;
 
     private WorkspaceRuntimes runtimes;
 
     @BeforeMethod
     public void setUp(Method method) throws Exception {
-        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, wsAgentLauncher));
+        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, agentSorter, launcherFactory));
 
         List<Instance> machines = asList(createMachine(true), createMachine(false));
         when(environmentEngine.start(anyString(),

@@ -13,6 +13,7 @@ package org.eclipse.che.api.environment.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 
+import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -100,6 +101,7 @@ public class CheEnvironmentEngine {
     private final EnvironmentParser              environmentParser;
     private final ComposeServicesStartStrategy   startStrategy;
     private final ComposeMachineInstanceProvider composeProvider;
+    private final AgentConfigApplier agentConfigApplier;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -111,12 +113,14 @@ public class CheEnvironmentEngine {
                                 EventService eventService,
                                 EnvironmentParser environmentParser,
                                 ComposeServicesStartStrategy startStrategy,
-                                ComposeMachineInstanceProvider composeProvider) {
+                                ComposeMachineInstanceProvider composeProvider,
+                                AgentConfigApplier agentConfigApplier) {
         this.snapshotDao = snapshotDao;
         this.eventService = eventService;
         this.environmentParser = environmentParser;
         this.startStrategy = startStrategy;
         this.composeProvider = composeProvider;
+        this.agentConfigApplier = agentConfigApplier;
         this.environments = new ConcurrentHashMap<>();
         this.machineInstanceProviders = machineInstanceProviders;
         this.machineLogsDir = new File(machineLogsDir);
@@ -487,6 +491,18 @@ public class CheEnvironmentEngine {
                    ConflictException {
 
         ComposeEnvironmentImpl composeEnvironment = environmentParser.parse(env);
+        for (Map.Entry<String, ComposeServiceImpl> entry : composeEnvironment.getServices().entrySet()) {
+            String machineName = entry.getKey();
+            ComposeServiceImpl composeService = entry.getValue();
+
+            List<String> agents = env.getMachines().get(machineName).getAgents();
+
+            try {
+                agentConfigApplier.modify(composeService, agents);
+            } catch (AgentException e) {
+                throw new MachineException("Can't apply agent config", e);
+            }
+        }
 
         normalizeEnvironment(composeEnvironment);
 
@@ -521,7 +537,7 @@ public class CheEnvironmentEngine {
                   .stream()
                   .filter(entry -> entry.getValue()
                                         .getAgents()
-                                        .contains("ws-agent"))
+                                        .contains("org.eclipse.che.ws-agent"))
                   .findAny()
                   .orElseThrow(
                           () -> new ServerException("Agent 'ws-agent' is not found in any of environment machines"))

@@ -24,7 +24,6 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.mockito.Mockito;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -46,7 +45,6 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * @author Eugene Voevodin
@@ -127,7 +125,7 @@ public class LocalWorkspaceDaoTest {
         properties.put("prop4", "value4");
         servers.put("ref2", new ServerConf2Impl("port2", "proto2", properties));
         machines = new HashMap<>();
-        machines.put("machine1", new ExtendedMachineImpl(asList("ws-agent", "someAgent"),
+        machines.put("machine1", new ExtendedMachineImpl(asList("org.eclipse.che.ws-agent", "someAgent"),
                                                          servers,
                                                          new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
         servers = new HashMap<>();

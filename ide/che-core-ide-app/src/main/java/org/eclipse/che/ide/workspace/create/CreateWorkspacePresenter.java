@@ -234,7 +234,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
                                                 .withLocation(view.getRecipeUrl());
 
         ExtendedMachineDto machine = dtoFactory.createDto(ExtendedMachineDto.class)
-                                               .withAgents(singletonList("ws-agent"))
+                                               .withAgents(singletonList("org.eclipse.che.ws-agent"))
                                                .withAttributes(singletonMap("memoryLimitBytes", MEMORY_LIMIT_BYTES));
 
         EnvironmentDto environment = dtoFactory.createDto(EnvironmentDto.class)

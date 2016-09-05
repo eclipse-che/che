@@ -259,7 +259,7 @@ export class CheWorkspace {
       defaultEnvironment = {
         'name': config.defaultEnv,
         'recipe': null,
-        'machines': {"dev-machine" : {"agents" : ["ws-agent"]}}
+        'machines': {"dev-machine" : {"agents" : ["org.eclipse.che.ws-agent"]}}
       };
 
       config.environments[config.defaultEnv] =  defaultEnvironment;

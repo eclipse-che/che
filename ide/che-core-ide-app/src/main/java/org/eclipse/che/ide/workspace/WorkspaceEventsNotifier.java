@@ -295,7 +295,7 @@ public class WorkspaceEventsNotifier {
         if (environment != null) {
             for (Map.Entry<String, ExtendedMachineDto> machineEntry : environment.getMachines()
                                                                                  .entrySet()) {
-                if (machineEntry.getValue().getAgents().contains("ws-agent")) {
+                if (machineEntry.getValue().getAgents().contains("org.eclipse.che.ws-agent")) {
                     return machineEntry.getKey();
                 }
             }

@@ -138,7 +138,7 @@ public class CheEnvironmentValidator {
                                       .stream()
                                       .filter(entry -> entry.getValue()
                                                             .getAgents()
-                                                            .contains("ws-agent"))
+                                                            .contains("org.eclipse.che.ws-agent"))
                                       .map(Map.Entry::getKey)
                                       .collect(toList());
 

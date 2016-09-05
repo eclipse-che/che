@@ -52,7 +52,8 @@ public class WsAgentLauncherImpl implements AgentLauncher {
 
     private static final String WS_AGENT_PROCESS_OUTPUT_CHANNEL = "workspace:%s:ext-server:output";
     private static final String WS_AGENT_SERVER_NOT_FOUND_ERROR = "Workspace agent server not found in dev machine.";
-    private static final String DEFAULT_WS_AGENT_RUN_COMMAND = "~/che/ws-agent/bin/catalina.sh run";
+
+    protected static final String DEFAULT_WS_AGENT_RUN_COMMAND = "~/che/ws-agent/bin/catalina.sh run";
 
     private final Provider<MachineProcessManager> machineProcessManagerProvider;
     private final HttpJsonRequestFactory          httpJsonRequestFactory;
