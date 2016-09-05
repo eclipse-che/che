@@ -14,6 +14,15 @@ init_logging() {
   GREEN='\033[0;32m'
   RED='\033[0;31m'
   NC='\033[0m'
+
+  # Turns on stack trace
+  DEFAULT_CHE_CLI_DEBUG="false"
+  CHE_CLI_DEBUG=${CHE_CLI_DEBUG:-${DEFAULT_CHE_CLI_DEBUG}}
+
+  # Activates console output
+  DEFAULT_CHE_CLI_INFO="true"
+  CHE_CLI_INFO=${CHE_CLI_INFO:-${DEFAULT_CHE_CLI_INFO}}
+
 }
 
 error_exit() {
@@ -33,19 +42,12 @@ check_docker() {
 
   # Prep script by getting default image
   if [ "$(docker images -q alpine 2> /dev/null)" = "" ]; then
-    info "ECLIPSE CHE: PULLING IMAGE alpine:latest"
+    info "Pulling image alpine:latest"
     docker pull alpine > /dev/null 2>&1
   fi
 }
 
 init_global_variables() {
-
-  # Turns on stack traces
-  DEFAULT_CHE_CLI_DEBUG="false"
-
-  # Activates console output
-  DEFAULT_CHE_CLI_INFO="true"
-
   # Name used in INFO statements
   DEFAULT_CHE_PRODUCT_NAME="ECLIPSE CHE"
 
@@ -65,9 +67,8 @@ init_global_variables() {
   DEFAULT_CHE_CLI_ACTION="help"
   DEFAULT_IS_INTERACTIVE="true"
   DEFAULT_IS_PSEUDO_TTY="true"
+  DEFAULT_CHE_DATA_FOLDER="/home/user/che"
 
-  CHE_CLI_DEBUG=${CHE_CLI_DEBUG:-${DEFAULT_CHE_CLI_DEBUG}}
-  CHE_CLI_INFO=${CHE_CLI_INFO:-${DEFAULT_CHE_CLI_INFO}}
   CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
   CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
   CHE_LAUNCHER_IMAGE_NAME=${CHE_LAUNCHER_IMAGE_NAME:-${DEFAULT_CHE_LAUNCHER_IMAGE_NAME}}
@@ -83,6 +84,16 @@ init_global_variables() {
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
   IS_INTERACTIVE=${IS_INTERACTIVE:-${DEFAULT_IS_INTERACTIVE}}
   IS_PSEUDO_TTY=${IS_PSEUDO_TTY:-${DEFAULT_IS_PSEUDO_TTY}}
+  CHE_DATA_FOLDER=${CHE_DATA_FOLDER:-${DEFAULT_CHE_DATA_FOLDER}}
+
+  # If Windows & boot2docker, then CHE_DATA_FOLDER must be subdirectory of %userprofile%
+#  if [ has_docker_for_windows_client && is_boot2docker ]; then
+
+#    if [[ $CHE_DATA_FOLDER != $USERPROFILE* ]]; then
+ #     echo "nope"
+  #    CHE_DATA_FOLDER="$USERPROFILE"/che
+  #  fi
+ # fi
 
   GLOBAL_NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
   GLOBAL_HOST_ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
@@ -819,11 +830,11 @@ print_che_cli_debug() {
   info "CHE_UTILITY_VERSION       = ${CHE_UTILITY_VERSION}"
   info "DOCKER_INSTALL_TYPE       = $(get_docker_install_type)"
   info "DOCKER_HOST_IP            = ${GLOBAL_GET_DOCKER_HOST_IP}"
+  info "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
+  info "IS_WINDOWS                = $(has_docker_for_windows_client && echo "YES" || echo "NO")"
   info "IS_DOCKER_FOR_WINDOWS     = $(is_docker_for_windows && echo "YES" || echo "NO")"
   info "IS_DOCKER_FOR_MAC         = $(is_docker_for_mac && echo "YES" || echo "NO")"
   info "IS_BOOT2DOCKER            = $(is_boot2docker && echo "YES" || echo "NO")"
-  info "IS_NATIVE                 = $(is_native && echo "YES" || echo "NO")"
-  info "IS_WINDOWS                = $(has_docker_for_windows_client && echo "YES" || echo "NO")"
   info "HAS_DOCKER_FOR_WINDOWS_IP = $(has_docker_for_windows_ip && echo "YES" || echo "NO")"
   info "IS_MOBY_VM                = $(is_moby_vm && echo "YES" || echo "NO")"
   info "HAS_CHE_ENV_VARIABLES     = $(has_che_env_variables && echo "YES" || echo "NO")"
