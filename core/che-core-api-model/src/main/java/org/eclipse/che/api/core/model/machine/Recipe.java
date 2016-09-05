@@ -15,7 +15,6 @@ package org.eclipse.che.api.core.model.machine;
  *
  * @author Eugene Voevodin
  */
-@Deprecated
 public interface Recipe {
 
     /**
