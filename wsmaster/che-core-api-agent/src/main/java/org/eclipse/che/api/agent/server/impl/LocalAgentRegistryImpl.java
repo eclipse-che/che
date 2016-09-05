@@ -19,7 +19,7 @@ import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
 import org.eclipse.che.api.agent.shared.dto.AgentDto;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
-import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,20 +27,25 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.zip.ZipFile;
 
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.Collections.unmodifiableSet;
 import static org.eclipse.che.commons.lang.IoUtil.downloadFile;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
+import static org.eclipse.che.commons.lang.ZipUtils.isZipFile;
 
 /**
  * Local implementation of the {@link AgentRegistry}.
@@ -54,21 +59,12 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
     protected static final Logger  LOG    = LoggerFactory.getLogger(LocalAgentRegistryImpl.class);
     private static final   Pattern AGENTS = Pattern.compile(".*[//]?agents/[^//]+[.]json");
 
-    private final Map<String, Agent>     agents;
+    private final Map<String, Agent> agents;
 
     @Inject
     public LocalAgentRegistryImpl() throws IOException {
         this.agents = new HashMap<>();
-
-        IoUtil.getResources(this.getClass(), AGENTS, inputStream -> {
-            final Agent agent;
-            try {
-                agent = DtoFactory.getInstance().createDtoFromJson(inputStream, AgentDto.class);
-                agents.put(agent.getName(), agent);
-            } catch (IOException e) {
-                LOG.error("Can't create agent.", e);
-            }
-        });
+        createAgents();
     }
 
     @Override
@@ -118,4 +114,36 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
             throw new AgentException("Can't fetch agent configuration", e);
         }
     }
+
+    protected void createAgents() throws IOException {
+        File context = new File(LocalAgentRegistryImpl.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+
+        if (isZipFile(context)) {
+            try (ZipFile zip = new ZipFile(context)) {
+                ZipUtils.getResources(zip, AGENTS, createAgentsConsumer);
+            }
+        } else {
+            Files.walk(context.toPath())
+                 .filter(path -> AGENTS.matcher(path.toString()).matches())
+                 .forEach(path -> {
+                     try (InputStream in = Files.newInputStream(path)) {
+                         createAgentsConsumer.accept(in);
+                     } catch (IOException ignored) {
+                         // ignore
+                     }
+                 });
+        }
+    }
+
+    private Consumer<InputStream> createAgentsConsumer = new Consumer<InputStream>() {
+        @Override
+        public void accept(InputStream inputStream) {
+            try {
+                final Agent agent = DtoFactory.getInstance().createDtoFromJson(inputStream, AgentDto.class);
+                agents.put(agent.getName(), agent);
+            } catch (IOException e) {
+                LOG.error("Can't create agent.", e);
+            }
+        }
+    };
 }

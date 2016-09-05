@@ -22,7 +22,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
@@ -32,21 +31,15 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Consumer;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.regex.Pattern;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.FileVisitResult.TERMINATE;
@@ -139,51 +132,6 @@ public class IoUtil {
             throw new IOException(String.format("Not found resource: %s", resource));
         }
         return is;
-    }
-
-    /**
-     * Provides streams to all resources matching {@code filter} criteria.
-     * Method search inside archive if context represents a jar file.
-     *
-     * @param context
-     *      the current context
-     * @throws IOException
-     */
-    public static void getResources(Class context, Pattern filter, Consumer<InputStream> consumer) throws IOException {
-        final Path jarFile = Paths.get(context.getProtectionDomain().getCodeSource().getLocation().getPath());
-
-        if (Files.isRegularFile(jarFile)) {
-            try (JarFile jar = new JarFile(jarFile.toFile())) {
-                final Enumeration<JarEntry> entries = jar.entries();
-                while (entries.hasMoreElements()) {
-                    JarEntry jarEntry = entries.nextElement();
-                    final String name = jarEntry.getName();
-                    if (filter.matcher(name).matches()) {
-                        try (InputStream in = jar.getInputStream(jarEntry)) {
-                            consumer.accept(in);
-                        }
-                    }
-                }
-            }
-        } else {
-            final URL url = context.getResource("/");
-            if (url != null) {
-                try {
-                    final Path root = Paths.get(url.toURI());
-                    Files.walk(root)
-                         .filter(path -> filter.matcher(path.toString()).matches())
-                         .forEach(path -> {
-                             try (InputStream in = Files.newInputStream(path)) {
-                                 consumer.accept(in);
-                             } catch (IOException ignored) {
-                                 // ignore
-                             }
-                         });
-                } catch (URISyntaxException ignored) {
-                    // should never happen
-                }
-            }
-        }
     }
 
     /** Remove directory and all its sub-resources with specified path */
