@@ -867,28 +867,7 @@ export class CreateProjectController {
           this.stack = null;
           break;
       }
-    }
-    // check workspace is selected
-    if (option === 'create-workspace') {
-      let source = {};
-      source.type = 'dockerfile';
-      if (this.stack) {
-        this.createWorkspace(this.getSourceFromStack(this.stack));
-      } else {
-        source.type = 'environment';
-        source.format = this.recipeFormat;
-        if (this.recipeUrl && this.recipeUrl.length > 0) {
-          source.location = this.recipeUrl;
-          this.createWorkspace(source);
-        } else {
-          source.content = this.recipeScript;
-          this.createWorkspace(source);
-        }
-      }
-    } else {
-      this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
-      this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
-      this.checkExistingWorkspaceState(this.workspaceSelected);
+      this.createWorkspace(source);
     }
   }
 
