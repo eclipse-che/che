@@ -116,7 +116,9 @@ public class CheEnvironmentEngineTest {
                                               environmentParser,
                                               new ComposeServicesStartStrategy(),
                                               composeProvider,
-                                              agentConfigApplier));
+                                              agentConfigApplier,
+                                              "",
+                                              recipeDownloader));
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));

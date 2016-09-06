@@ -50,6 +50,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineLogMessageImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
+import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.StripedLocks;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -73,6 +74,7 @@ import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 import static org.eclipse.che.api.machine.server.event.InstanceStateEvent.Type.DIE;
@@ -102,6 +104,8 @@ public class CheEnvironmentEngine {
     private final ComposeServicesStartStrategy   startStrategy;
     private final ComposeMachineInstanceProvider composeProvider;
     private final AgentConfigApplier             agentConfigApplier;
+    private final RecipeDownloader               recipeDownloader;
+    private final Pattern                        recipeApiPattern;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -114,19 +118,24 @@ public class CheEnvironmentEngine {
                                 EnvironmentParser environmentParser,
                                 ComposeServicesStartStrategy startStrategy,
                                 ComposeMachineInstanceProvider composeProvider,
-                                AgentConfigApplier agentConfigApplier) {
+                                AgentConfigApplier agentConfigApplier,
+                                @Named("api.endpoint") String apiEndpoint,
+                                RecipeDownloader recipeDownloader) {
         this.snapshotDao = snapshotDao;
         this.eventService = eventService;
         this.environmentParser = environmentParser;
         this.startStrategy = startStrategy;
         this.composeProvider = composeProvider;
         this.agentConfigApplier = agentConfigApplier;
+        this.recipeDownloader = recipeDownloader;
         this.environments = new ConcurrentHashMap<>();
         this.machineInstanceProviders = machineInstanceProviders;
         this.machineLogsDir = new File(machineLogsDir);
         this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
+        this.recipeApiPattern = Pattern.compile("^" + apiEndpoint + "recipe/?.*&");
+
         eventService.subscribe(new MachineCleaner());
     }
 
@@ -325,6 +334,8 @@ public class CheEnvironmentEngine {
             // needed to reuse startInstance method and
             // create machine instances by different implementation-specific providers
             ComposeServiceImpl composeService = machineConfigToComposeService(machineConfig);
+            normalize(composeService);
+
             machineStarter = (machineLogger, machineSource) -> {
                 ComposeServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(composeService, machineSource);
                 return composeProvider.startService(namespace,
@@ -491,9 +502,10 @@ public class CheEnvironmentEngine {
                    ConflictException {
 
         ComposeEnvironmentImpl composeEnvironment = environmentParser.parse(env);
+
         applyAgents(env, composeEnvironment);
 
-        normalizeEnvironment(composeEnvironment);
+        normalize(composeEnvironment);
 
         List<String> servicesOrder = startStrategy.order(composeEnvironment);
 
@@ -526,12 +538,24 @@ public class CheEnvironmentEngine {
         }
     }
 
-    private void normalizeEnvironment(ComposeEnvironmentImpl composeEnvironment) {
-        for (Map.Entry<String, ComposeServiceImpl> serviceEntry : composeEnvironment.getServices()
-                                                                                    .entrySet()) {
-            if (serviceEntry.getValue().getMemLimit() == null || serviceEntry.getValue().getMemLimit() == 0) {
-                serviceEntry.getValue().setMemLimit(defaultMachineMemorySizeBytes);
-            }
+    private void normalize(ComposeEnvironmentImpl composeEnvironment) throws ServerException {
+        for (ComposeServiceImpl service : composeEnvironment.getServices().values()) {
+            normalize(service);
+        }
+    }
+
+    private void normalize(ComposeServiceImpl service) throws ServerException {
+        // set default mem limit for service if it is not set
+        if (service.getMemLimit() == null || service.getMemLimit() == 0) {
+            service.setMemLimit(defaultMachineMemorySizeBytes);
+        }
+        // download dockerfile if it is hosted by API to avoid problems with unauthorized requests from docker daemon
+        if (service.getBuild() != null &&
+            service.getBuild().getContext() != null &&
+            recipeApiPattern.matcher(service.getBuild().getContext()).matches()) {
+
+            String recipeContent = recipeDownloader.getRecipe(service.getBuild().getContext());
+            service.getBuild().setDockerfile(recipeContent);
         }
     }
 
