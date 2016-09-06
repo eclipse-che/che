@@ -203,8 +203,11 @@ docker_run() {
 docker_run_with_env_file() {
   debug $FUNCNAME
   get_list_of_che_system_environment_variables
-  docker_run --env-file=tmpgibberish "$@"
-  rm -rf $PWD/tmpgibberish > /dev/null
+  
+  # Silly issue - docker run --env-file does not accept path to file - must be in same dir
+  cd ~/.che
+  docker_run --env-file tmpgibberish "$@"
+  rm -rf ~/.che/tmpgibberish > /dev/null
 }
 
 docker_run_with_pseudo_tty() {
@@ -423,26 +426,27 @@ get_list_of_che_system_environment_variables() {
 
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
-  DOCKER_ENV=$(get_mount_path $PWD)/tmpgibberish
-  touch $DOCKER_ENV
+  DOCKER_ENV=~/.che/tmpgibberish
+  test -d ~/.che || mkdir -p ~/.che
+  touch ~/.che/tmpgibberish
   
   if has_default_profile; then
-    cat ~/.che/profiles/${CHE_PROFILE} >> $DOCKER_ENV
+    cat ~/.che/profiles/${CHE_PROFILE} >> ~/.che/tmpgibberish
   else
 
     # Grab these values to send to other utilities - they need to know the values  
-    echo "CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME}" >> $DOCKER_ENV
-    echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> $DOCKER_ENV
-    echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
-    echo "CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME}" >> $DOCKER_ENV
-    echo "CHE_VERSION=${CHE_VERSION}" >> $DOCKER_ENV
-    echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> $DOCKER_ENV
-    echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> $DOCKER_ENV
+    echo "CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME}" >> ~/.che/tmpgibberish
+    echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> ~/.che/tmpgibberish
+    echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> ~/.che/tmpgibberish
+    echo "CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME}" >> ~/.che/tmpgibberish
+    echo "CHE_VERSION=${CHE_VERSION}" >> ~/.che/tmpgibberish
+    echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> ~/.che/tmpgibberish
+    echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> ~/.che/tmpgibberish
 
     CHE_VARIABLES=$(env | grep CHE_)
 
     if [ ! -z ${CHE_VARIABLES+x} ]; then
-      env | grep CHE_ >> $DOCKER_ENV
+      env | grep CHE_ >> ~/.che/tmpgibberish
     fi
 
     # Add in known proxy variables
