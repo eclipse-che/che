@@ -186,11 +186,11 @@ public class CheEnvironmentValidatorTest {
 
         env = createEnv();
         env.setMachines(null);
-        data.add(asList(env, "Environment 'env' doesn't contain machine with 'ws-agent' agent"));
+        data.add(asList(env, "Environment 'env' doesn't contain machine with 'org.eclipse.che.ws-agent' agent"));
 
         env = createEnv();
         env.setMachines(emptyMap());
-        data.add(asList(env, "Environment 'env' doesn't contain machine with 'ws-agent' agent"));
+        data.add(asList(env, "Environment 'env' doesn't contain machine with 'org.eclipse.che.ws-agent' agent"));
 
         env = createEnv();
         env.getMachines().put("missingInComposeEnvMachine",
@@ -199,7 +199,7 @@ public class CheEnvironmentValidatorTest {
 
         env = createEnv();
         env.getMachines().entrySet().forEach(entry -> entry.getValue().getAgents().add("org.eclipse.che.ws-agent"));
-        data.add(asList(env, "Environment 'env' should contain exactly 1 machine with ws-agent, but contains '" +
+        data.add(asList(env, "Environment 'env' should contain exactly 1 machine with org.eclipse.che.ws-agent, but contains '" +
                              env.getMachines().size() + "'. " + "All machines with this agent: " +
                              Joiner.on(", ").join(env.getMachines().keySet())));
 

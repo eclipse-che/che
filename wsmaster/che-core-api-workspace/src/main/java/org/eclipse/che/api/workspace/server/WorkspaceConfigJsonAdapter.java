@@ -43,7 +43,7 @@ import static java.lang.String.format;
  *                          "type": "dockerfile"
  *                      },
  *                      "type": "docker", <- will be defined by environment recipe type
- *                      "dev": true, <- if agents contain 'ws-agent'
+ *                      "dev": true, <- if agents contain 'org.eclipse.che.ws-agent'
  *                      "envVariables" : {
  *                          "env1" : "value1",
  *                          "env2" : "value2

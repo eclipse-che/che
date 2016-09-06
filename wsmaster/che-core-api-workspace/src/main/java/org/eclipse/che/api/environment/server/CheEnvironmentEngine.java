@@ -540,7 +540,7 @@ public class CheEnvironmentEngine {
                                         .contains("org.eclipse.che.ws-agent"))
                   .findAny()
                   .orElseThrow(
-                          () -> new ServerException("Agent 'ws-agent' is not found in any of environment machines"))
+                          () -> new ServerException("Agent 'org.eclipse.che.ws-agent' is not found in any of environment machines"))
                   .getKey();
     }
 

@@ -281,7 +281,7 @@ export class CheWorkspace {
     }
 
     let devMachine = this.lodash.find(defaultEnvironment.machines, (machine) => {
-      return machine.agents.includes('ws-agent');
+      return machine.agents.includes('org.eclipse.che.ws-agent');
     });
 
     //Check dev machine is provided and add if there is no:

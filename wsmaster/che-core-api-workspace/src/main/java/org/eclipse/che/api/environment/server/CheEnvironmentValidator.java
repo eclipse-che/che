@@ -120,7 +120,7 @@ public class CheEnvironmentValidator {
                       envName);
 
         checkArgument(env.getMachines() != null && !env.getMachines().isEmpty(),
-                      "Environment '%s' doesn't contain machine with 'ws-agent' agent",
+                      "Environment '%s' doesn't contain machine with 'org.eclipse.che.ws-agent' agent",
                       envName);
 
         List<String> missingServices = env.getMachines()
@@ -143,7 +143,7 @@ public class CheEnvironmentValidator {
                                       .collect(toList());
 
         checkArgument(devMachines.size() == 1,
-                      "Environment '%s' should contain exactly 1 machine with ws-agent, but contains '%s'. " +
+                      "Environment '%s' should contain exactly 1 machine with org.eclipse.che.ws-agent, but contains '%s'. " +
                       "All machines with this agent: %s",
                       envName, devMachines.size(), Joiner.on(", ").join(devMachines));
 

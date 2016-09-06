@@ -194,7 +194,7 @@ function set_environment_variables {
   # The machine web app project that will be built with the extension
   PLUGIN_WSAGENT_WAR_DIR="${SDK_DIR}/assembly-wsagent-war"
 
-  # Creates the ws-agent.zip artifact for a Che assembly, which packages Tomcat + machine war into single package
+  # Creates the ws-agent.tar.gz artifact for a Che assembly, which packages Tomcat + machine war into single package
   PLUGIN_WSAGENT_SERVER_DIR="${SDK_DIR}/assembly-wsagent-server"
 
   # Generates a new Che assembly that contains new IDE, ws-master, and ws-agent.
@@ -294,7 +294,7 @@ if [ "${USE_HELP}" == "false" ]; then
     fi
   fi 
 
-  # Re-build the machine web application with custom extension included from workspace/ directories included. This artifact is packaged into ws-agent.zip and deployed into workspace machine.
+  # Re-build the machine web application with custom extension included from workspace/ directories included. This artifact is packaged into ws-agent.tar.gz and deployed into workspace machine.
   if [ "${SKIP_WSAGENT}" == "false" ]; then
 
     echo_stage "CHE SDK: Compiling ws-agent plug-ins into new workspace agent."
@@ -304,7 +304,7 @@ if [ "${USE_HELP}" == "false" ]; then
     mvn sortpom:sort
     mvn -Denforcer.skip=true clean install -Dskip-validate-sources=true
 
-    echo_stage "CHE SDK: Packaging ws-agent web app and Tomcat into ws-agent.zip."
+    echo_stage "CHE SDK: Packaging ws-agent web app and Tomcat into ws-agent.tar.gz."
 
     cd "${PLUGIN_WSAGENT_SERVER_DIR}"
     mvn -Denforcer.skip=true clean install -Dskip-validate-sources=true
@@ -312,7 +312,7 @@ if [ "${USE_HELP}" == "false" ]; then
 
 
     if [ "${SKIP_UPDATE}" == "false" ]; then
-      cp -r "${PLUGIN_WSAGENT_SERVER_DIR}"/target/*.zip lib/ws-agent.zip
+      cp -r "${PLUGIN_WSAGENT_SERVER_DIR}"/target/*.tar.gz lib/ws-agent.tar.gz
     fi
   fi  
 
@@ -347,12 +347,12 @@ if [ "${USE_HELP}" == "false" ]; then
 
   if [ "${SKIP_WSAGENT}" == "false" ] && [ "${SKIP_UPDATE}" == "true" ]; then
     echo "New Workspace Agent: 
-    ${PLUGIN_WSAGENT_SERVER_DIR}/target/*.zip"
+    ${PLUGIN_WSAGENT_SERVER_DIR}/target/*.tar.gz"
   fi
 
   if [ "${SKIP_WSAGENT}" == "false" ] && [ "${SKIP_UPDATE}" == "false" ]; then
     echo "New Workspace Agent: 
-    ${CHE_HOME}/lib/ws-agent.zip"
+    ${CHE_HOME}/lib/ws-agent.tar.gz"
   fi
 
   if [ "${ASSEMBLY}" == "true" ]; then

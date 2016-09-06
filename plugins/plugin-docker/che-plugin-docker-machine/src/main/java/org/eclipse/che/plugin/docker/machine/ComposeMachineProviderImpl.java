@@ -27,9 +27,9 @@ import org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProv
 import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
-import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -74,7 +74,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -500,7 +499,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
 
         ContainerConfig config = new ContainerConfig();
         config.withImage(image)
-              .withExposedPorts(service.getExpose().stream().collect(Collectors.toMap(Function.identity(),
+              .withExposedPorts(service.getExpose().stream().distinct().collect(Collectors.toMap(Function.identity(),
                                                                                       value -> Collections.emptyMap())))
               .withHostConfig(hostConfig)
               .withCmd(toArrayIfNotNull(service.getCommand()))
