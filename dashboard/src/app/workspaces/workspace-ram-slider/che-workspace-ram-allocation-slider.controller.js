@@ -27,7 +27,7 @@ export class CheWorkspaceRamAllocationSliderController {
     $scope.$watch(() => {
       return this.ngModel;
     }, () => {
-      this.inputVal = this.init(this.ngModel / 1024);
+      this.inputVal = this.init(this.ngModel / Math.pow(1024,3));
     });
   }
 
@@ -47,7 +47,7 @@ export class CheWorkspaceRamAllocationSliderController {
     if (!this.inputVal) {
       return;
     }
-    this.ngModel = this.inputVal * 1024;
+    this.ngModel = this.inputVal * Math.pow(1024,3);
 
     this.$timeout(() => {
       this.cheOnChange();

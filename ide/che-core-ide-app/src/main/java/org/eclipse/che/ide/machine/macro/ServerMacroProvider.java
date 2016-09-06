@@ -26,6 +26,8 @@ import org.eclipse.che.ide.machine.CustomCommandPropertyValueProvider;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
  * Provider which is responsible for the retrieving the address of the registered server.
  * <p>
@@ -56,8 +58,12 @@ public class ServerMacroProvider extends AbstractServerMacroProvider {
         final Set<CommandPropertyValueProvider> providers = Sets.newHashSet();
 
         for (Map.Entry<String, ? extends Server> entry : devMachine.getDescriptor().getRuntime().getServers().entrySet()) {
+
+            final String prefix = isNullOrEmpty(entry.getValue().getProtocol()) ? "" : entry.getValue().getProtocol() + "://";
+            final String value = prefix + entry.getValue().getAddress() + (isNullOrEmpty(prefix) ? "" : "/");
+
             CommandPropertyValueProvider macroProvider = new CustomCommandPropertyValueProvider(KEY.replace("%", entry.getKey()),
-                                                                                                entry.getValue().getAddress());
+                                                                                                value);
 
             providers.add(macroProvider);
 
@@ -66,7 +72,7 @@ public class ServerMacroProvider extends AbstractServerMacroProvider {
                 final String port = entry.getKey().substring(0, entry.getKey().length() - 4);
 
                 CommandPropertyValueProvider shortMacroProvider = new CustomCommandPropertyValueProvider(KEY.replace("%", port),
-                                                                                                         entry.getValue().getAddress());
+                                                                                                         value);
 
                 providers.add(shortMacroProvider);
             }

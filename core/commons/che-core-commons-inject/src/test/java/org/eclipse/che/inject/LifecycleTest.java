@@ -81,11 +81,13 @@ public class LifecycleTest {
         }
 
         @PostConstruct
+        @Override
         public void init() {
             super.init();
         }
 
         @PreDestroy
+        @Override
         public void destroy() {
             super.destroy();
         }

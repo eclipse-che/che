@@ -226,6 +226,17 @@ public class CheEnvironmentValidatorTest {
                    .toArray(value -> new Object[data.size()][]);
     }
 
+    @Test
+    public void shouldNotFailIfExtraMachineDoesNotHaveExtendedMachineEntry() throws Exception {
+        // given
+        ComposeEnvironmentImpl composeEnv = createComposeEnv();
+        composeEnv.getServices().put("extra", createComposeService("_extra", 1000000L, null, null, null));
+        when(environmentParser.parse(any(Environment.class))).thenReturn(composeEnv);
+
+        // when
+        environmentValidator.validate("env", environment);
+    }
+
     @Test(dataProvider = "invalidComposeEnvironmentProvider")
     public void shouldFailValidationIfComposeEnvironmentIsBroken(ComposeEnvironmentImpl composeEnv,
                                                                  String expectedExceptionMessage)
@@ -547,39 +558,50 @@ public class CheEnvironmentValidatorTest {
         Map<String, ComposeServiceImpl> services = new HashMap<>();
         composeEnvironment.setServices(services);
 
-        ComposeServiceImpl service = new ComposeServiceImpl();
-        service.setMemLimit(1024L * 1024L * 1024L);
-        service.setImage("codenvy/ubuntu_jdk8");
-        service.setEnvironment(new HashMap<>(singletonMap("env1", "val1")));
-        service.setCommand(new ArrayList<>(asList("this", "is", "command")));
-        service.setContainerName("containerName");
-        service.setDependsOn(new ArrayList<>(singletonList("machine2")));
-        service.setEntrypoint(new ArrayList<>(asList("this", "is", "entrypoint")));
-        service.setExpose(new ArrayList<>(asList("8080", "9090/tcp", "7070/udp")));
-        service.setLabels(new HashMap<>(singletonMap("label1", "value1")));
-        service.setLinks(new ArrayList<>(singletonList("machine2")));
-//        service.setPorts(new ArrayList<>(singletonList("8080:8080"))); Forbidden
-//        service.setVolumes(new ArrayList<>(singletonList("volume"))); Forbidden
-        service.setVolumesFrom(new ArrayList<>(singletonList("machine2")));
+        services.put("dev-machine", createComposeService("_dev",
+                                                         1024L * 1024L * 1024L,
+                                                         singletonList("machine2"),
+                                                         singletonList("machine2"),
+                                                         singletonList("machine2")));
 
-        services.put("dev-machine", service);
-
-        service = new ComposeServiceImpl();
-        service.setMemLimit(100L);
+        ComposeServiceImpl service = createComposeService("_machine2",
+                                                          100L,
+                                                          null,
+                                                          emptyList(),
+                                                          null);
         service.setBuild(new BuildContextImpl("context", "file"));
-        service.setEnvironment(new HashMap<>(singletonMap("env1", "val1")));
-        service.setCommand(new ArrayList<>(asList("this", "is", "command")));
-        service.setContainerName("containerName2");
-        service.setDependsOn(null);
-        service.setEntrypoint(new ArrayList<>(asList("this", "is", "entrypoint")));
-        service.setExpose(new ArrayList<>(asList("8080", "9090/tcp", "7070/udp")));
-        service.setLabels(new HashMap<>(singletonMap("label1", "value1")));
-        service.setLinks(new ArrayList<>(emptyList()));
-//        service.setPorts(new ArrayList<>(singletonList("8080:8080"))); Forbidden
-//        service.setVolumes(new ArrayList<>(singletonList("volume"))); Forbidden
-        service.setVolumesFrom(null);
+
         services.put("machine2", service);
 
         return composeEnvironment;
+    }
+
+    private static ComposeServiceImpl createComposeService(String suffix,
+                                                           long memLimitBytes,
+                                                           List<String> links,
+                                                           List<String> dependsOn,
+                                                           List<String> volumesFrom) {
+        ComposeServiceImpl service = new ComposeServiceImpl();
+        service.setMemLimit(memLimitBytes);
+        service.setImage("image_repo/image" + suffix);
+        service.setEnvironment(new HashMap<>(singletonMap("env" + suffix, "val" + suffix)));
+        service.setCommand(new ArrayList<>(asList("this", "is", "command" + suffix)));
+        service.setContainerName("containerName" + suffix);
+        service.setEntrypoint(new ArrayList<>(asList("this", "is", "entrypoint" + suffix)));
+        service.setExpose(new ArrayList<>(asList("8080", "9090/tcp", "7070/udp")));
+        service.setLabels(new HashMap<>(singletonMap("label" + suffix, "value" + suffix)));
+        if (links != null) {
+            service.setLinks(new ArrayList<>(links));
+        }
+        if (dependsOn != null) {
+            service.setDependsOn(new ArrayList<>(dependsOn));
+        }
+        if (volumesFrom != null) {
+            service.setVolumesFrom(new ArrayList<>(volumesFrom));
+        }
+//        service.setPorts(new ArrayList<>(singletonList("8080:8080"))); Forbidden
+//        service.setVolumes(new ArrayList<>(singletonList("volume"))); Forbidden
+
+        return service;
     }
 }
