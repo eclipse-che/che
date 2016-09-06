@@ -14,10 +14,13 @@ import com.google.gwt.core.client.Callback;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineLogMessageDto;
+import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
@@ -33,6 +36,7 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.machine.MachineManager;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
@@ -41,6 +45,7 @@ import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
@@ -63,7 +68,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.ERROR;
 import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.RUNNING;
@@ -89,7 +96,7 @@ import static org.mockito.Mockito.when;
  * @author Roman Nikitenko
  */
 @RunWith(MockitoJUnitRunner.class)
-public class WorkspaceEventsNotifierTest {
+public class WorkspaceEventsHandlerTest {
     private static final String MACHINE_NAME             = "machineName";
     private static final String WORKSPACE_ID             = "workspaceId";
     private static final String WORKSPACE_STATUS_CHANNEL = "channel";
@@ -120,7 +127,14 @@ public class WorkspaceEventsNotifierTest {
     @Mock
     private WorkspaceServiceClient              workspaceServiceClient;
     @Mock
-    private StartWorkspacePresenter             startWorkspacePresenter;
+    private MachineServiceClient                machineServiceClient;
+    @Mock
+    private Promise<List<MachineProcessDto>>    processPromise;
+    @Captor
+    private ArgumentCaptor<Operation<List<MachineProcessDto>>> processCaptor;
+
+    @Mock
+    private StartWorkspacePresenter startWorkspacePresenter;
 
 
     //additional mocks
@@ -139,7 +153,7 @@ public class WorkspaceEventsNotifierTest {
     @Mock
     private WorkspaceStatusEvent                 workspaceStatusEvent;
     @Mock
-    private MachineStatusEvent    machineStatusEvent;
+    private MachineStatusEvent                   machineStatusEvent;
     @Mock
     private Message                              message;
     @Mock
@@ -155,20 +169,33 @@ public class WorkspaceEventsNotifierTest {
     @Mock
     private Promise<List<WorkspaceDto>>          workspacesPromise;
 
+    @Mock
+    private AsyncRequestFactory asyncRequestFactory;
+
     @Captor
     private ArgumentCaptor<Operation<WorkspaceDto>>       workspaceCaptor;
     @Captor
     private ArgumentCaptor<Operation<List<WorkspaceDto>>> workspacesCaptor;
 
-    private WorkspaceEventsNotifier workspaceEventsNotifier;
+    private WorkspaceEventsHandler workspaceEventsHandler;
 
     @Before
     public void setUp() {
         when(loaderFactory.newLoader(anyString())).thenReturn(snapshotLoader);
-        workspaceEventsNotifier = new WorkspaceEventsNotifier(eventBus, locale, dialogFactory, dtoUnmarshallerFactory, initialLoadingInfo,
-                                                              notificationManager, messageBusProvider, machineManagerProvider,
-                                                              snapshotCreator, loaderFactory, workspaceServiceClient,
-                                                              startWorkspacePresenter, wsComponentProvider);
+        workspaceEventsHandler = new WorkspaceEventsHandler(eventBus,
+                                                            locale,
+                                                            dialogFactory,
+                                                            dtoUnmarshallerFactory,
+                                                            initialLoadingInfo,
+                                                            notificationManager,
+                                                            messageBusProvider,
+                                                            machineManagerProvider,
+                                                            machineServiceClient,
+                                                            snapshotCreator,
+                                                            loaderFactory,
+                                                            workspaceServiceClient,
+                                                            wsComponentProvider,
+                                                            asyncRequestFactory);
         when(wsComponentProvider.get()).thenReturn(workspaceComponent);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(workspaceStatusEvent.getWorkspaceId()).thenReturn(WORKSPACE_ID);
@@ -179,7 +206,7 @@ public class WorkspaceEventsNotifierTest {
         when(linkParameter.getDefaultValue()).thenReturn(WORKSPACE_STATUS_CHANNEL);
     }
 
-    @Test
+    //    @Test disabled because of GWT timer usage
     public void shouldSubscribesOnWsAgentOutputWhenWorkspaceIsStarting() throws Exception {
         WorkspaceRuntimeDto runtime = mock(WorkspaceRuntimeDto.class);
         WorkspaceConfigDto workspaceConfig = mock(WorkspaceConfigDto.class);
@@ -187,17 +214,15 @@ public class WorkspaceEventsNotifierTest {
         when(workspace.getRuntime()).thenReturn(runtime);
         when(runtime.getActiveEnv()).thenReturn(ACTIVE_ENV);
         when(workspace.getConfig()).thenReturn(workspaceConfig);
-        List<EnvironmentDto> environments = new ArrayList<>(1);
+        Map<String, EnvironmentDto> environments = new HashMap<>(3);
         EnvironmentDto environment = mock(EnvironmentDto.class);
-        environments.add(environment);
+        environments.put(ACTIVE_ENV, environment);
         when(workspaceConfig.getEnvironments()).thenReturn(environments);
-        when(environment.getName()).thenReturn(ACTIVE_ENV);
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
-        when(environment.devMachine()).thenReturn(devMachineConfig);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
         verify(workspacePromise).then(workspaceCaptor.capture());
         workspaceCaptor.getValue().apply(workspace);
@@ -210,28 +235,32 @@ public class WorkspaceEventsNotifierTest {
         WorkspaceRuntimeDto runtime = mock(WorkspaceRuntimeDto.class);
         WorkspaceConfigDto workspaceConfig = mock(WorkspaceConfigDto.class);
         when(workspace.getRuntime()).thenReturn(runtime);
+        MachineDto devMachine = mock(MachineDto.class);
+        when(devMachine.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(devMachine.getId()).thenReturn(MACHINE_NAME);
+        when(runtime.getDevMachine()).thenReturn(devMachine);
         when(runtime.getActiveEnv()).thenReturn(ACTIVE_ENV);
         when(workspace.getConfig()).thenReturn(workspaceConfig);
-        List<EnvironmentDto> environments = new ArrayList<>(1);
+        Map<String, EnvironmentDto> environments = new HashMap<>(3);
         EnvironmentDto environment = mock(EnvironmentDto.class);
-        environments.add(environment);
+        environments.put(ACTIVE_ENV, environment);
         when(workspaceConfig.getEnvironments()).thenReturn(environments);
-        when(environment.getName()).thenReturn(ACTIVE_ENV);
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
-        when(environment.devMachine()).thenReturn(devMachineConfig);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
+        when(machineServiceClient.getProcesses(WORKSPACE_ID, MACHINE_NAME)).thenReturn(processPromise);
+
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
 
         verify(messageBus).subscribe(eq(WS_AGENT_LOG_CHANNEL), (MessageHandler)anyObject());
     }
 
-    @Test
+    //    @Test disabled because of GWT timer usage
     public void onWorkspaceStartingTest() throws Exception {
         when(workspaceStatusEvent.getEventType()).thenReturn(STARTING);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
         verify(workspacePromise).then(workspaceCaptor.capture());
         workspaceCaptor.getValue().apply(workspace);
@@ -247,8 +276,8 @@ public class WorkspaceEventsNotifierTest {
     public void onWorkspaceStartedTest() throws Exception {
         when(workspaceStatusEvent.getEventType()).thenReturn(RUNNING);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
         verify(workspacePromise).then(workspaceCaptor.capture());
         workspaceCaptor.getValue().apply(workspace);
@@ -271,8 +300,8 @@ public class WorkspaceEventsNotifierTest {
         when(dialogFactory.createMessageDialog(anyString(), anyString(), (ConfirmCallback)anyObject())).thenReturn(errorDialog);
         when(workspaceStatusEvent.getEventType()).thenReturn(ERROR);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
         verify(workspacesPromise).then(workspacesCaptor.capture());
         workspacesCaptor.getValue().apply(workspaces);
@@ -288,8 +317,8 @@ public class WorkspaceEventsNotifierTest {
     public void onWorkspaceStoppedTest() throws Exception {
         when(workspaceStatusEvent.getEventType()).thenReturn(STOPPED);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
         verify(messageBus, times(4)).unsubscribe(anyString(), (MessageHandler)anyObject());
         verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.SUCCESS), eq(FLOAT_MODE));
@@ -300,8 +329,8 @@ public class WorkspaceEventsNotifierTest {
     public void onSnapshotCreatingEventReceivedTest() throws Exception {
         when(workspaceStatusEvent.getEventType()).thenReturn(SNAPSHOT_CREATING);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
         verify(snapshotLoader).show();
     }
@@ -310,8 +339,8 @@ public class WorkspaceEventsNotifierTest {
     public void onSnapshotCreatedEventReceivedTest() throws Exception {
         when(workspaceStatusEvent.getEventType()).thenReturn(SNAPSHOT_CREATED);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
         verify(snapshotLoader).hide();
         verify(snapshotCreator).successfullyCreated();
@@ -321,8 +350,8 @@ public class WorkspaceEventsNotifierTest {
     public void onSnapshotCreationErrorEventReceivedTest() throws Exception {
         when(workspaceStatusEvent.getEventType()).thenReturn(SNAPSHOT_CREATION_ERROR);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
         verify(snapshotLoader).hide();
         verify(snapshotCreator).creationError(anyString());
@@ -330,8 +359,8 @@ public class WorkspaceEventsNotifierTest {
 
     @Test
     public void onEnvironmentStatusEventReceivedTest() throws Exception {
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.environmentStatusSubscriptionHandler.onMessageReceived(machineStatusEvent);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.environmentStatusSubscriptionHandler.onMessageReceived(machineStatusEvent);
 
         verify(eventBus).fireEvent(Matchers.<MachineStatusChangedEvent>anyObject());
     }
@@ -340,8 +369,8 @@ public class WorkspaceEventsNotifierTest {
     public void onEnvironmentOutputEventReceivedTest() throws Exception {
         MachineLogMessageDto machineLogMessage = mock(MachineLogMessageDto.class);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.environmentOutputSubscriptionHandler.onMessageReceived(machineLogMessage);
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.environmentOutputSubscriptionHandler.onMessageReceived(machineLogMessage);
 
         verify(eventBus).fireEvent(Matchers.<EnvironmentOutputEvent>anyObject());
         verify(machineLogMessage).getContent();
@@ -353,19 +382,24 @@ public class WorkspaceEventsNotifierTest {
         WorkspaceRuntimeDto runtime = mock(WorkspaceRuntimeDto.class);
         WorkspaceConfigDto workspaceConfig = mock(WorkspaceConfigDto.class);
         when(workspace.getRuntime()).thenReturn(runtime);
+        MachineDto devMachine = mock(MachineDto.class);
+        when(devMachine.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+        when(devMachine.getId()).thenReturn(MACHINE_NAME);
+        when(runtime.getDevMachine()).thenReturn(devMachine);
         when(runtime.getActiveEnv()).thenReturn(ACTIVE_ENV);
         when(workspace.getConfig()).thenReturn(workspaceConfig);
-        List<EnvironmentDto> environments = new ArrayList<>(1);
+        Map<String, EnvironmentDto> environments = new HashMap<>(3);
         EnvironmentDto environment = mock(EnvironmentDto.class);
-        environments.add(environment);
+        environments.put(ACTIVE_ENV, environment);
         when(workspaceConfig.getEnvironments()).thenReturn(environments);
-        when(environment.getName()).thenReturn(ACTIVE_ENV);
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
-        when(environment.devMachine()).thenReturn(devMachineConfig);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
 
-        workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
-        workspaceEventsNotifier.wsAgentLogSubscriptionHandler.onMessageReceived("");
+        when(machineServiceClient.getProcesses(WORKSPACE_ID, MACHINE_NAME)).thenReturn(processPromise);
+
+        workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
+        workspaceEventsHandler.wsAgentLogSubscriptionHandler.onMessageReceived("");
+        verify(processPromise).then(processCaptor.capture());
 
         verify(eventBus).fireEvent(Matchers.<EnvironmentOutputEvent> anyObject());
     }
