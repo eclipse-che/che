@@ -16,7 +16,6 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.ApiEndpointAccessibilityChecker;
-import org.eclipse.che.ApiEndpointProvider;
 import org.eclipse.che.EventBusURLProvider;
 import org.eclipse.che.UriApiEndpointProvider;
 import org.eclipse.che.UserTokenProvider;
@@ -39,9 +38,9 @@ import org.eclipse.che.api.core.rest.CoreRestModule;
 import org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule;
 import org.eclipse.che.api.core.websocket.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.WebSocketMessageTransmitter;
+import org.eclipse.che.api.core.websocket.impl.BasicWebSocketMessageTransmitter;
 import org.eclipse.che.api.core.websocket.impl.BasicWebSocketTransmissionValidator;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
-import org.eclipse.che.api.core.websocket.impl.BasicWebSocketMessageTransmitter;
 import org.eclipse.che.api.core.websocket.impl.WebSocketTransmissionValidator;
 import org.eclipse.che.api.git.GitConnectionFactory;
 import org.eclipse.che.api.git.GitUserResolver;
@@ -86,7 +85,6 @@ public class WsAgentModule extends AbstractModule {
         bind(GitUserResolver.class).to(LocalGitUserResolver.class);
         bind(GitConnectionFactory.class).to(JGitConnectionFactory.class);
 
-        bind(String.class).annotatedWith(Names.named("api.endpoint")).toProvider(ApiEndpointProvider.class);
         bind(URI.class).annotatedWith(Names.named("api.endpoint")).toProvider(UriApiEndpointProvider.class);
         bind(String.class).annotatedWith(Names.named("user.token")).toProvider(UserTokenProvider.class);
         bind(WSocketEventBusClient.class).asEagerSingleton();
