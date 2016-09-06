@@ -600,6 +600,8 @@ public class WorkspaceRuntimes {
     protected void launchAgents(Instance instance, List<String> agents) throws MachineException {
         try {
             for (AgentKey agentKey : agentSorter.sort(agents)) {
+                LOG.info("Launching '{}' agent", agentKey.getName());
+                
                 Agent agent = agentRegistry.getAgent(agentKey);
                 AgentLauncher launcher = launcherFactory.find(agentKey.getName(), instance.getConfig().getType());
                 launcher.launch(instance, agent);
