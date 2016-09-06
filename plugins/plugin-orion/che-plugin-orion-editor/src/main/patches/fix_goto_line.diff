@@ -1,9 +1,9 @@
-This patch replaces using browser's prompt dialog by Che dialog.
+This patch replaces using browser's native prompt dialog by Che's dialog.
 ===================================================================
-diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
---- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
-+++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
-@@ -12744,16 +12744,40 @@
+diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
+--- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
++++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
+@@ -13126,16 +13126,40 @@
  					var model = editor.getModel();
  					if (data.parameters && data.parameters.valueFor('line')) { //$NON-NLS-0$
  						line = data.parameters.valueFor('line'); //$NON-NLS-0$
