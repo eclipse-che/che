@@ -19,6 +19,10 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import java.util.Set;
 
 /**
+ * Provides {@link AgentLauncher} for specific agent to be run on instance.
+ * Returning agent depends on machine type. If no agent found then the default one
+ * will be returned.
+ *
  * @author Anatolii Bazko
  */
 @Singleton
@@ -47,8 +51,9 @@ public class AgentLauncherFactory {
      * @return {@link AgentLauncher}
      */
     public AgentLauncher find(String agentName, String machineType) {
-        return launchers.stream().filter(l -> agentName.equals(l.getAgentName())
-                                              && machineType.equals(l.getMachineType()))
+        return launchers.stream()
+                        .filter(l -> l.getAgentName().equals(agentName))
+                        .filter(l -> l.getMachineType().equals(machineType))
                         .findAny()
                         .orElse(defaultLauncher);
     }

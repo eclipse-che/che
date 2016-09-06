@@ -11,7 +11,7 @@
 package org.eclipse.che.api.workspace.server.launcher;
 
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
-import org.eclipse.che.api.agent.server.launcher.AgentIsFinishedChecker;
+import org.eclipse.che.api.agent.server.launcher.ProcessIsLaunchedChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class SshAgentLauncherImpl extends AbstractAgentLauncher {
     @Inject
     public SshAgentLauncherImpl(@Named("machine.agent.max_start_time_ms") long agentMaxStartTimeMs,
                                 @Named("machine.agent.ping_delay_ms") long agentPingDelayMs) {
-        super(agentMaxStartTimeMs, agentPingDelayMs, new AgentIsFinishedChecker("sshd"));
+        super(agentMaxStartTimeMs, agentPingDelayMs, new ProcessIsLaunchedChecker("sshd"));
     }
 
     @Override

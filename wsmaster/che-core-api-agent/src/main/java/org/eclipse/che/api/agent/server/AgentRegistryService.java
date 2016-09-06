@@ -28,13 +28,10 @@ import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -49,48 +46,25 @@ import static org.eclipse.che.api.agent.server.DtoConverter.asDto;
  */
 @Api(value = "/agent", description = "Agent REST API")
 @Path("/agent")
-public class AgentService extends Service {
+public class AgentRegistryService extends Service {
 
     private final AgentRegistry agentRegistry;
 
-    @Context
-    private SecurityContext securityContext;
-
     @Inject
-    public AgentService(AgentRegistry agentRegistry) {
+    public AgentRegistryService(AgentRegistry agentRegistry) {
         this.agentRegistry = agentRegistry;
     }
 
-    @POST
+    @GET
     @Path("{name}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Create a new agent", response = AgentDto.class)
+    @ApiOperation(value = "Gets the latest agent", response = AgentDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "The agent successfully created"),
                    @ApiResponse(code = 404, message = "Agent not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response create(@ApiParam("The agent name") @PathParam("name") String name) throws ServerException, NotFoundException {
         try {
-            Agent agent = agentRegistry.createAgent(name);
-            return Response.status(Response.Status.OK).entity(asDto(agent)).build();
-        } catch (AgentNotFoundException e) {
-            throw new NotFoundException(e.getMessage());
-        } catch (AgentException e) {
-            throw new ServerException(e.getMessage());
-        }
-    }
-
-    @POST
-    @Path("{name}/{version}")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Create a new agent", response = AgentDto.class)
-    @ApiResponses({@ApiResponse(code = 200, message = "The agent successfully created"),
-                   @ApiResponse(code = 404, message = "Agent not found"),
-                   @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public Response create(@ApiParam("The agent name") @PathParam("name") String name,
-                           @ApiParam("The agent version") @PathParam("version") String version) throws ServerException, NotFoundException {
-
-        try {
-            Agent agent = agentRegistry.createAgent(name, version);
+            Agent agent = agentRegistry.getAgent(name);
             return Response.status(Response.Status.OK).entity(asDto(agent)).build();
         } catch (AgentNotFoundException e) {
             throw new NotFoundException(e.getMessage());
@@ -100,7 +74,27 @@ public class AgentService extends Service {
     }
 
     @GET
-    @Path("versions")
+    @Path("{name}/{version}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "Gets the agent of the specific version", response = AgentDto.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "The agent successfully created"),
+                   @ApiResponse(code = 404, message = "Agent not found"),
+                   @ApiResponse(code = 500, message = "Internal server error occurred")})
+    public Response create(@ApiParam("The agent name") @PathParam("name") String name,
+                           @ApiParam("The agent version") @PathParam("version") String version) throws ServerException, NotFoundException {
+
+        try {
+            Agent agent = agentRegistry.getAgent(name, version);
+            return Response.status(Response.Status.OK).entity(asDto(agent)).build();
+        } catch (AgentNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (AgentException e) {
+            throw new ServerException(e.getMessage());
+        }
+    }
+
+    @GET
+    @Path("versions/{name}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get a list of the available versions of the specific agent", response = List.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
@@ -108,8 +102,8 @@ public class AgentService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response getVersions(@ApiParam("The agent name") @PathParam("name") String name) throws ServerException, NotFoundException {
         try {
-            Collection<String> versions = agentRegistry.getVersions(name);
-            return Response.status(Response.Status.OK).entity(new JsonArrayImpl<>(new ArrayList<>(versions))).build();
+            List<String> versions = agentRegistry.getVersions(name);
+            return Response.status(Response.Status.OK).entity(new JsonArrayImpl<>(versions)).build();
         } catch (AgentNotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (AgentException e) {

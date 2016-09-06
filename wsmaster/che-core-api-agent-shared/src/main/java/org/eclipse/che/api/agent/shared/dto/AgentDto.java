@@ -21,23 +21,36 @@ import java.util.Map;
  */
 @DTO
 public interface AgentDto extends Agent {
+
+    @Override
     String getName();
 
     void setName(String name);
 
+    AgentDto withName(String name);
+
+    @Override
     String getVersion();
 
     void setVersion(String version);
+
+    AgentDto withVersion(String version);
 
     List<String> getDependencies();
 
     void setDependencies(List<String> dependencies);
 
+    AgentDto withDependencies(List<String> dependencies);
+
     String getScript();
 
     void setScript(String script);
 
+    AgentDto withScript(String script);
+
     Map<String, String> getProperties();
 
     void setProperties(Map<String, String> properties);
+
+    AgentDto withProperties(Map<String, String> properties);
 }

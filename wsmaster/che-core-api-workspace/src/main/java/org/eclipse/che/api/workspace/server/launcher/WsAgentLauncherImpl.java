@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.launcher;
 
-import com.google.common.base.Strings;
-
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ApiException;
@@ -39,6 +37,8 @@ import javax.ws.rs.HttpMethod;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Map;
+
+import static com.google.common.base.MoreObjects.firstNonNull;
 
 /**
  * Starts ws agent in the machine and waits until ws agent sends notification about its start.
@@ -99,10 +99,7 @@ public class WsAgentLauncherImpl implements AgentLauncher {
             throw new MachineException(e.getServiceError());
         }
 
-        String script = agent.getScript()
-                        + "\n"
-                        + (Strings.isNullOrEmpty(wsAgentRunCommand) ? DEFAULT_WS_AGENT_RUN_COMMAND
-                                                                    : wsAgentRunCommand);
+        String script = agent.getScript() + "\n" + firstNonNull(wsAgentRunCommand, DEFAULT_WS_AGENT_RUN_COMMAND);
 
         final String wsAgentPingUrl = wsAgentPingRequest.getUrl();
         try {

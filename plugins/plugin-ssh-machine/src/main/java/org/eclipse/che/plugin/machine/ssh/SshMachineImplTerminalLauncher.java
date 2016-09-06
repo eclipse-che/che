@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.machine.ssh;
 
 import org.eclipse.che.api.agent.server.launcher.AbstractAgentLauncher;
-import org.eclipse.che.api.agent.server.launcher.AgentIsFinishedChecker;
+import org.eclipse.che.api.agent.server.launcher.ProcessIsLaunchedChecker;
 import org.eclipse.che.api.agent.server.terminal.WebsocketTerminalFilesPathProvider;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ConflictException;
@@ -55,7 +55,7 @@ public class SshMachineImplTerminalLauncher extends AbstractAgentLauncher {
                                           @Named("machine.agent.ping_delay_ms") long agentPingDelayMs,
                                           @Named("machine.ssh.server.terminal.location") String terminalLocation,
                                           WebsocketTerminalFilesPathProvider terminalPathProvider) {
-        super(agentMaxStartTimeMs, agentPingDelayMs, new AgentIsFinishedChecker("che-websocket-terminal"));
+        super(agentMaxStartTimeMs, agentPingDelayMs, new ProcessIsLaunchedChecker("che-websocket-terminal"));
         this.archivePathProvider = terminalPathProvider;
         this.terminalLocation = terminalLocation;
     }

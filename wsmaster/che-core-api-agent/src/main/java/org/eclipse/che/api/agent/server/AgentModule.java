@@ -18,6 +18,7 @@ import com.google.inject.AbstractModule;
 public class AgentModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(AgentService.class);
+        bind(AgentRegistryService.class);
+        bind(AgentExceptionMapper.class);
     }
 }

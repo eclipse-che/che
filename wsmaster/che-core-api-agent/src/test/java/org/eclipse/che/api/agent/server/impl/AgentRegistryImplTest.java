@@ -94,7 +94,7 @@ public class AgentRegistryImplTest {
     @Test
     public void testCreateLatestVersionAgentByUrl(ITestContext context) throws Exception {
         final Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
-        Agent agent = agentRegistry.createAgent("http://localhost:" + port + "/rest/registry/agent/org.eclipse.che.ws-agent");
+        Agent agent = agentRegistry.getAgent("http://localhost:" + port + "/rest/registry/agent/org.eclipse.che.ws-agent");
 
         assertEquals(agent.getName(), "org.eclipse.che.ws-agent");
         assertEquals(agent.getVersion(), "2.0");
@@ -103,7 +103,7 @@ public class AgentRegistryImplTest {
     @Test
     public void testCreateSpecificVersionAgentByUrl(ITestContext context) throws Exception {
         final Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
-        Agent agent = agentRegistry.createAgent("http://localhost:" + port + "/rest/registry/agent/org.eclipse.che.ws-agent/1.0");
+        Agent agent = agentRegistry.getAgent("http://localhost:" + port + "/rest/registry/agent/org.eclipse.che.ws-agent/1.0");
 
         assertEquals(agent.getName(), "org.eclipse.che.ws-agent");
         assertEquals(agent.getVersion(), "1.0");
@@ -111,7 +111,7 @@ public class AgentRegistryImplTest {
 
     @Test
     public void testCreateSpecificVersionAgent() throws Exception {
-        Agent agent = agentRegistry.createAgent("org.eclipse.che.ws-agent", "1.0");
+        Agent agent = agentRegistry.getAgent("org.eclipse.che.ws-agent", "1.0");
 
         assertEquals(agent.getName(), "org.eclipse.che.ws-agent");
         assertEquals(agent.getVersion(), "1.0");
@@ -119,7 +119,7 @@ public class AgentRegistryImplTest {
 
     @Test
     public void testCreateLatestVersionAgent() throws Exception {
-        Agent agent = agentRegistry.createAgent("org.eclipse.che.ws-agent");
+        Agent agent = agentRegistry.getAgent("org.eclipse.che.ws-agent");
 
         assertEquals(agent.getName(), "org.eclipse.che.ws-agent");
         assertEquals(agent.getVersion(), "2.0");
@@ -128,7 +128,7 @@ public class AgentRegistryImplTest {
 
     @Test(expectedExceptions = AgentException.class)
     public void testGetConfigShouldThrowExceptionIfAgentNotFound() throws Exception {
-        agentRegistry.createAgent("terminal", "1.0");
+        agentRegistry.getAgent("terminal", "1.0");
     }
 
     @Test
@@ -179,6 +179,8 @@ public class AgentRegistryImplTest {
 
             String content = format("{ \"name\" : \"%s\", \"version\" : \"%s\"}", artifact, version);
             java.nio.file.Path file = Paths.get(System.getProperty("java.io.tmpdir"), "config.tmp");
+            file.toFile().deleteOnExit();
+
             copy(new ByteArrayInputStream(content.getBytes()), file, StandardCopyOption.REPLACE_EXISTING);
 
             return Response.ok(file.toFile(), MediaType.APPLICATION_OCTET_STREAM)

@@ -13,9 +13,11 @@ package org.eclipse.che.api.environment.server;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.model.workspace.compose.ComposeService;
 import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.slf4j.Logger;
@@ -56,10 +58,12 @@ public class AgentConfigApplier {
     private static final Logger LOG = LoggerFactory.getLogger(AgentConfigApplier.class);
 
     private final AgentSorter sorter;
+    private final AgentRegistry agentRegistry;
 
     @Inject
-    public AgentConfigApplier(AgentSorter sorter) {
+    public AgentConfigApplier(AgentSorter sorter, AgentRegistry agentRegistry) {
         this.sorter = sorter;
+        this.agentRegistry = agentRegistry;
     }
 
     /**
@@ -73,7 +77,8 @@ public class AgentConfigApplier {
      * @throws AgentException
      */
     public void modify(ComposeServiceImpl composeService, List<String> agentKeys) throws AgentException {
-        for (Agent agent : sorter.sort(agentKeys)) {
+        for (AgentKey agentKey : sorter.sort(agentKeys)) {
+            Agent agent = agentRegistry.getAgent(agentKey);
             addEnv(composeService, agent.getProperties());
             addExposedPorts(composeService, agent.getProperties());
         }

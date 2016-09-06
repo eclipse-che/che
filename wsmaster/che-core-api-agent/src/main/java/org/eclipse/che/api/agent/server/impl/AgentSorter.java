@@ -15,21 +15,18 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
-import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import static org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl.parse;
-
 /**
- * Sorts and creates agents.
+ * Sort agents respecting dependencies between them.
  *
  * @author Anatolii Bazko
  */
@@ -39,56 +36,58 @@ public class AgentSorter {
     private final AgentRegistry agentRegistry;
 
     @Inject
-    public AgentSorter(AgentRegistry agentRegistry) {this.agentRegistry = agentRegistry;}
+    public AgentSorter(AgentRegistry agentRegistry) {
+        this.agentRegistry = agentRegistry;
+    }
 
     /**
-     * Sort and created agents respecting dependencies between them.
+     * Sort agents respecting dependencies between them.
      * Handles circular dependencies.
      *
      * @see AgentKey
      * @see Agent#getDependencies()
-     * @see AgentRegistry#createAgent(AgentKey)
+     * @see AgentRegistry#getAgent(AgentKey)
      *
      * @param agentKeys list of agents to sort
      * @return list of created agents in proper order
      *
      * @throws AgentException
-     *      if circular dependency found or agent creation failed
-     * @throws AgentNotFoundException
-     *      if agent not found
+     *      if circular dependency found or agent creation failed or other unexpected error
      */
-    public List<Agent> sort(List<String> agentKeys) throws AgentException {
-        Map<String, Agent> sorted = new HashMap<>();
+    public List<AgentKey> sort(List<String> agentKeys) throws AgentException {
+        List<AgentKey> sorted = new ArrayList<>();
         Set<String> pending = new HashSet<>();
 
         if (agentKeys != null) {
             for (String agentKey : agentKeys) {
-                doSort(agentKeys, parse(agentKey), sorted, pending);
+                doSort(agentKeys, AgentKeyImpl.parse(agentKey), sorted, pending);
             }
         }
 
-        return new ArrayList<>(sorted.values());
+        return sorted;
     }
 
-    private void doSort(List<String> agentKeys, AgentKey agentKey, Map<String, Agent> sorted, Set<String> pending) throws AgentException {
+    private void doSort(List<String> agentKeys, AgentKey agentKey, List<AgentKey> sorted, Set<String> pending) throws AgentException {
         String agentName = agentKey.getName();
 
-        if (sorted.containsKey(agentName)) {
+        Optional<AgentKey> alreadySorted = sorted.stream().filter(k -> k.getName().equals(agentName)).findFirst();
+        if (alreadySorted.isPresent()) {
             return;
         }
+
         if (!pending.add(agentName)) {
             throw new AgentException("Agents circular dependency found.");
         }
 
-        Agent agent = agentRegistry.createAgent(agentKey);
+        Agent agent = agentRegistry.getAgent(agentKey);
 
         for (String dependency : agent.getDependencies()) {
             if (agentKeys.contains(dependency)) {
-                doSort(agentKeys, parse(dependency), sorted, pending);
+                doSort(agentKeys, AgentKeyImpl.parse(dependency), sorted, pending);
             }
         }
 
-        sorted.put(agentName, agent);
+        sorted.add(agentKey);
         pending.remove(agentName);
     }
 }

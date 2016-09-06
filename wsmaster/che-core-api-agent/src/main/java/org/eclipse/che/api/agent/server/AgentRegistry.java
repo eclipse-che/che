@@ -15,7 +15,7 @@ import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -24,7 +24,7 @@ import java.util.Set;
 public interface AgentRegistry {
 
     /**
-     * Creates {@link Agent} of the specific version.
+     * Gets {@link Agent} of the specific version.
      *
      * @param name
      *      the name of the agent
@@ -34,12 +34,12 @@ public interface AgentRegistry {
      * @throws AgentNotFoundException
      *      if agent not found in the registry
      * @throws AgentException
-     *      if agent can't be created or other unexpected error occurred
+     *      if unexpected error occurred
      */
-    Agent createAgent(String name, String version) throws AgentException;
+    Agent getAgent(String name, String version) throws AgentException;
 
     /**
-     * Creates {@link Agent}.
+     * Gets {@link Agent}.
      *
      * @param agentKey
      *      the agent key
@@ -47,12 +47,12 @@ public interface AgentRegistry {
      * @throws AgentNotFoundException
      *      if agent not found in the registry
      * @throws AgentException
-     *      if agent can't be created or other unexpected error occurred
+     *      if unexpected error occurred
      */
-    Agent createAgent(AgentKey agentKey) throws AgentException;
+    Agent getAgent(AgentKey agentKey) throws AgentException;
 
     /**
-     * Creates the {@link Agent} by its name or by url.
+     * Gets the {@link Agent} by its name or by url.
      * In case of name the latest version of the agent will be created.
      * In case of url the agent will be retrieved by specific url.
      *
@@ -62,9 +62,9 @@ public interface AgentRegistry {
      * @throws AgentNotFoundException
      *      if agent not found
      * @throws AgentException
-     *      if agent can't be created or other unexpected error occurred
+     *      if unexpected error occurred
      */
-    Agent createAgent(String name) throws AgentException;
+    Agent getAgent(String name) throws AgentException;
 
     /**
      * Returns a list of the available versions of the specific agent.
@@ -77,7 +77,7 @@ public interface AgentRegistry {
      * @throws AgentException
      *      if unexpected error occurred
      */
-    Collection<String> getVersions(String name) throws AgentException;
+    List<String> getVersions(String name) throws AgentException;
 
 
     /**

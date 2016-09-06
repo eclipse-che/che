@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
 import org.eclipse.che.api.core.ConflictException;
@@ -86,12 +87,14 @@ public class WorkspaceRuntimesTest {
     private AgentSorter          agentSorter;
     @Mock
     private AgentLauncherFactory launcherFactory;
+    @Mock
+    private AgentRegistry        agentRegistry;
 
     private WorkspaceRuntimes runtimes;
 
     @BeforeMethod
     public void setUp(Method method) throws Exception {
-        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, agentSorter, launcherFactory));
+        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, agentSorter, launcherFactory, agentRegistry));
 
         List<Instance> machines = asList(createMachine(true), createMachine(false));
         when(environmentEngine.start(anyString(),

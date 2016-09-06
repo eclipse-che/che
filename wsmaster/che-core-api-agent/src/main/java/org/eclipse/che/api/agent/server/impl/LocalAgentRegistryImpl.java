@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -19,6 +20,7 @@ import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
 import org.eclipse.che.api.agent.shared.dto.AgentDto;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
+import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
@@ -31,8 +33,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -41,8 +43,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
-import static java.util.Collections.unmodifiableSet;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.commons.lang.IoUtil.downloadFile;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 import static org.eclipse.che.commons.lang.ZipUtils.isZipFile;
@@ -60,43 +61,45 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
     private static final   Pattern AGENTS = Pattern.compile(".*[//]?agents/[^//]+[.]json");
 
     private final Map<String, Agent> agents;
+    private final Set<String>        agentNames;
 
     @Inject
     public LocalAgentRegistryImpl() throws IOException {
         this.agents = new HashMap<>();
-        createAgents();
+        findAgents();
+        this.agentNames = ImmutableSet.copyOf(agents.keySet());
     }
 
     @Override
-    public Agent createAgent(String name, String version) throws AgentException {
-        return doCreateAgent(name);
+    public Agent getAgent(String name, String version) throws AgentException {
+        return doGetAgent(name);
     }
 
     @Override
-    public Agent createAgent(AgentKey agentKey) throws AgentException {
-        return doCreateAgent(agentKey.getName());
+    public Agent getAgent(AgentKey agentKey) throws AgentException {
+        return doGetAgent(agentKey.getName());
     }
 
     @Override
-    public Agent createAgent(String name) throws AgentException {
-        return doCreateAgent(name);
+    public Agent getAgent(String name) throws AgentException {
+        return doGetAgent(name);
     }
 
     @Override
-    public Collection<String> getVersions(String name) throws AgentException {
-        Agent agent = doCreateAgent(name);
-        return singleton(agent.getVersion());
+    public List<String> getVersions(String name) throws AgentException {
+        Agent agent = doGetAgent(name);
+        return singletonList(agent.getVersion());
     }
 
     @Override
     public Set<String> getAgents() throws AgentException {
-        return unmodifiableSet(agents.keySet());
+        return agentNames;
     }
 
-    protected Agent doCreateAgent(String name) throws AgentException {
+    protected Agent doGetAgent(String name) throws AgentException {
         try {
             URL url = new URL(name);
-            return doCreateRemoteAgent(url);
+            return doGetRemoteAgent(url);
         } catch (MalformedURLException ignored) {
             // name doesn't represent a url
         }
@@ -105,17 +108,22 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
         return agent.orElseThrow(() -> new AgentNotFoundException(format("Agent %s not found", name)));
     }
 
-    protected Agent doCreateRemoteAgent(URL url) throws AgentException {
+    protected Agent doGetRemoteAgent(URL url) throws AgentException {
+        File agent = null;
         try {
-            File agent = downloadFile(new File(System.getProperty("java.io.tmpdir")), "agent", ".tmp", url);
+            agent = downloadFile(new File(System.getProperty("java.io.tmpdir")), "agent", ".tmp", url);
             String json = readAndCloseQuietly(new FileInputStream(agent));
             return DtoFactory.getInstance().createDtoFromJson(json, AgentDto.class);
         } catch (IOException | IllegalArgumentException e) {
             throw new AgentException("Can't fetch agent configuration", e);
+        } finally {
+            if (agent != null) {
+                FileCleaner.addFile(agent);
+            }
         }
     }
 
-    protected void createAgents() throws IOException {
+    protected void findAgents() throws IOException {
         File context = new File(LocalAgentRegistryImpl.class.getProtectionDomain().getCodeSource().getLocation().getPath());
 
         if (isZipFile(context)) {

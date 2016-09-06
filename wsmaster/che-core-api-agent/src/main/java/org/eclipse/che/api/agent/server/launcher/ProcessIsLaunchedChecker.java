@@ -22,14 +22,17 @@ import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import static java.lang.String.format;
 
 /**
+ * Verifies if agent started a process with specific name.
+ * It is an indicator that process had been finished.
+ *
  * @author Anatoliy Bazko
  */
-public class AgentIsFinishedChecker implements AgentLaunchingChecker {
+public class ProcessIsLaunchedChecker implements AgentLaunchingChecker {
 
     private final String processNameToWait;
-    private long counter;
+    private       long   counter;
 
-    public AgentIsFinishedChecker(String processNameToWait) {
+    public ProcessIsLaunchedChecker(String processNameToWait) {
         this.processNameToWait = processNameToWait;
     }
 

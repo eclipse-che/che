@@ -13,8 +13,13 @@ package org.eclipse.che.api.workspace.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
+import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -32,6 +37,7 @@ import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
+import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -94,6 +100,7 @@ public class WorkspaceRuntimes {
     private final CheEnvironmentEngine        environmentEngine;
     private final AgentSorter          agentSorter;
     private final AgentLauncherFactory launcherFactory;
+    private final AgentRegistry agentRegistry;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -101,11 +108,13 @@ public class WorkspaceRuntimes {
     public WorkspaceRuntimes(EventService eventService,
                              CheEnvironmentEngine environmentEngine,
                              AgentSorter agentSorter,
-                             AgentLauncherFactory launcherFactory) {
+                             AgentLauncherFactory launcherFactory,
+                             AgentRegistry agentRegistry) {
         this.eventService = eventService;
         this.environmentEngine = environmentEngine;
         this.agentSorter = agentSorter;
         this.launcherFactory = launcherFactory;
+        this.agentRegistry = agentRegistry;
         this.workspaces = new HashMap<>();
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
@@ -588,8 +597,16 @@ public class WorkspaceRuntimes {
         }
     }
 
-    protected void launchAgents(Instance instance, List<String> agents) {
-
+    protected void launchAgents(Instance instance, List<String> agents) throws MachineException {
+        try {
+            for (AgentKey agentKey : agentSorter.sort(agents)) {
+                Agent agent = agentRegistry.getAgent(agentKey);
+                AgentLauncher launcher = launcherFactory.find(agentKey.getName(), instance.getConfig().getType());
+                launcher.launch(instance, agent);
+            }
+        } catch (AgentException e) {
+            throw new MachineException(e.getServiceError());
+        }
     }
 
     public static class WorkspaceState {

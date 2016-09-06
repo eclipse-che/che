@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
@@ -51,12 +53,17 @@ public class AgentConfigApplierTest {
     private Agent                agent3;
     @Mock
     private AgentLauncherFactory agentLauncher;
+    @Mock
+    private AgentRegistry        agentRegistry;
 
     private AgentConfigApplier agentConfigApplier;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        agentConfigApplier = new AgentConfigApplier(sorter);
+        agentConfigApplier = new AgentConfigApplier(sorter, agentRegistry);
+        when(agentRegistry.getAgent(AgentKeyImpl.parse("agent1"))).thenReturn(agent1);
+        when(agentRegistry.getAgent(AgentKeyImpl.parse("agent2"))).thenReturn(agent2);
+        when(agentRegistry.getAgent(AgentKeyImpl.parse("agent3"))).thenReturn(agent3);
 
         when(agent1.getScript()).thenReturn("script1");
         when(agent1.getDependencies()).thenReturn(singletonList("fqn3"));
@@ -70,7 +77,8 @@ public class AgentConfigApplierTest {
 
     @Test
     public void shouldAddExposedPorts() throws Exception {
-        when(sorter.sort(any())).thenReturn(Arrays.asList(agent1, agent2, agent3));
+        when(sorter.sort(any()))
+                .thenReturn(Arrays.asList(AgentKeyImpl.parse("agent1"), AgentKeyImpl.parse("agent2"), AgentKeyImpl.parse("agent3")));
         when(agent1.getProperties()).thenReturn(singletonMap("ports", "terminal:1111/udp,terminal:2222/tcp"));
         when(agent2.getProperties()).thenReturn(singletonMap("ports", "3333/udp"));
         ComposeServiceImpl composeService = new ComposeServiceImpl();
@@ -85,7 +93,7 @@ public class AgentConfigApplierTest {
 
     @Test
     public void shouldAddEnvVariables() throws Exception {
-        when(sorter.sort(any())).thenReturn(Arrays.asList(agent1, agent2));
+        when(sorter.sort(any())).thenReturn(Arrays.asList(AgentKeyImpl.parse("agent1"), AgentKeyImpl.parse("agent2")));
         when(agent1.getProperties()).thenReturn(singletonMap("environment", "p1=v1,p2=v2"));
         when(agent2.getProperties()).thenReturn(singletonMap("environment", "p3=v3"));
         ComposeServiceImpl composeService = new ComposeServiceImpl();
@@ -101,7 +109,7 @@ public class AgentConfigApplierTest {
 
     @Test
     public void shouldIgnoreEnvironmentIfIllegalFormat() throws Exception {
-        when(sorter.sort(any())).thenReturn(Arrays.asList(agent1));
+        when(sorter.sort(any())).thenReturn(Arrays.asList(AgentKeyImpl.parse("agent1")));
         when(agent1.getProperties()).thenReturn(singletonMap("environment", "p1"));
         ComposeServiceImpl composeService = new ComposeServiceImpl();
 

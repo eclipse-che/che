@@ -15,7 +15,10 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 
 /**
- * Launches agent.
+ * Launches {@link Agent#getScript()} on the {@link Instance}.
+ *
+ * @see Instance
+ * @see Agent#getScript()
  *
  * @author Anatolii Bazko
  */

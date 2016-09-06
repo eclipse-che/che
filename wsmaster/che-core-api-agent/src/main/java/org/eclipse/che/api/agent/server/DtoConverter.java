@@ -21,13 +21,11 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class DtoConverter {
 
     public static AgentDto asDto(Agent agent) {
-        AgentDto agentDto = newDto(AgentDto.class);
-        agentDto.setName(agent.getName());
-        agentDto.setVersion(agent.getVersion());
-        agentDto.setProperties(agent.getProperties());
-        agentDto.setScript(agent.getScript());
-        agentDto.setDependencies(agent.getDependencies());
-        return agentDto;
+        return newDto(AgentDto.class).withName(agent.getName())
+                                     .withVersion(agent.getVersion())
+                                     .withProperties(agent.getProperties())
+                                     .withScript(agent.getScript())
+                                     .withDependencies(agent.getDependencies());
     }
 
     private DtoConverter() { }

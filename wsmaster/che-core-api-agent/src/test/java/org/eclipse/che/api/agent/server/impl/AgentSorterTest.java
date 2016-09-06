@@ -15,6 +15,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
 import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -51,10 +52,10 @@ public class AgentSorterTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(agentRegistry.createAgent(eq(AgentKeyImpl.parse("fqn1")))).thenReturn(agent1);
-        when(agentRegistry.createAgent(eq(AgentKeyImpl.parse("fqn2")))).thenReturn(agent2);
-        when(agentRegistry.createAgent(eq(AgentKeyImpl.parse("fqn3")))).thenReturn(agent3);
-        when(agentRegistry.createAgent(eq(AgentKeyImpl.parse("fqn4")))).thenThrow(new AgentNotFoundException("Agent not found"));
+        when(agentRegistry.getAgent(eq(AgentKeyImpl.parse("fqn1")))).thenReturn(agent1);
+        when(agentRegistry.getAgent(eq(AgentKeyImpl.parse("fqn2")))).thenReturn(agent2);
+        when(agentRegistry.getAgent(eq(AgentKeyImpl.parse("fqn3")))).thenReturn(agent3);
+        when(agentRegistry.getAgent(eq(AgentKeyImpl.parse("fqn4")))).thenThrow(new AgentNotFoundException("Agent not found"));
 
         when(agent1.getDependencies()).thenReturn(singletonList("fqn3"));
         when(agent1.getName()).thenReturn("fqn1");
@@ -67,7 +68,7 @@ public class AgentSorterTest {
 
     @Test
     public void shouldNotCreateNewAgentsIfDependenciesExist() throws Exception {
-        List<Agent> sorted = agentSorter.sort(Collections.singletonList("fqn1"));
+        List<AgentKey> sorted = agentSorter.sort(Collections.singletonList("fqn1"));
 
         assertEquals(sorted.size(), 1);
         assertEquals(sorted.get(0).getName(), "fqn1");
@@ -75,7 +76,7 @@ public class AgentSorterTest {
 
     @Test
     public void sortAgentsRespectingDependencies() throws Exception {
-        List<Agent> sorted = agentSorter.sort(Arrays.asList("fqn1", "fqn2", "fqn3"));
+        List<AgentKey> sorted = agentSorter.sort(Arrays.asList("fqn1", "fqn2", "fqn3"));
 
         assertEquals(sorted.size(), 3);
         assertEquals(sorted.get(0).getName(), "fqn3");
