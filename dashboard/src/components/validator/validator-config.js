@@ -13,6 +13,7 @@
 import {GitUrlValidator} from './git-url-validator.directive';
 import {UniqueProjectNameValidator} from './unique-project-name-validator.directive';
 import {UniqueWorkspaceNameValidator} from './unique-workspace-name-validator.directive';
+import {UniqueStackNameValidator} from './unique-stack-name-validator.directive';
 
 
 export class ValidatorConfig {
@@ -21,7 +22,7 @@ export class ValidatorConfig {
 
     register.directive('gitUrl', GitUrlValidator)
       .directive('uniqueProjectName', UniqueProjectNameValidator)
-      .directive('uniqueWorkspaceName', UniqueWorkspaceNameValidator);
-
+      .directive('uniqueWorkspaceName', UniqueWorkspaceNameValidator)
+      .directive('uniqueStackName', UniqueStackNameValidator);
   }
 }
