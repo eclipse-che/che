@@ -45,7 +45,7 @@ export class WorkspaceRecipeController {
   setDefaultData() {
     this.recipeUrl = null;
     this.recipeScript = '';
-    this.recipeFormat = 'text/x-yaml';
+    this.recipeFormat = 'compose';
   }
 
   setEditor(editor) {
@@ -54,25 +54,34 @@ export class WorkspaceRecipeController {
       this.detectFormat(editor, true);
     });
     editor.on('change', () => {
-      this.detectFormat(editor, false);
+      this.trackChangesInProgress(editor);
     });
   }
 
+  trackChangesInProgress(editor) {
+    if (this.editingTimeoutPromise) {
+      this.$timeout.cancel(this.editingTimeoutPromise);
+    }
+
+    this.editingTimeoutPromise = this.$timeout(() => {
+      this.detectFormat(editor, false);
+    }, 1000);
+  }
+
   detectFormat(editor, doFormating) {
-    this.$timeout(() => {
-      let content = editor.getValue();
-      try {
-        content = angular.fromJson(content);
-        this.recipeFormat = 'application/json';
-        this.editorOptions.mode = this.recipeFormat;
-        if (doFormating) {
-          this.formatLines(editor);
-        }
-      } catch (e) {
-        this.recipeFormat = 'text/x-yaml';
-        this.editorOptions.mode = this.recipeFormat;
-      }
-    }, 100);
+    let content = editor.getValue();
+
+    //compose format detection:
+    if (content.match(/^services:\n/m)) {
+      this.recipeFormat = 'compose';
+      this.editorOptions.mode = 'text/x-yaml';
+    }
+
+    //docker file format detection
+    if (content.match(/^FROM /m)) {
+      this.recipeFormat = 'dockerfile';
+      this.editorOptions.mode = 'text/x-dockerfile';
+    }
   }
 
   formatLines(editor) {

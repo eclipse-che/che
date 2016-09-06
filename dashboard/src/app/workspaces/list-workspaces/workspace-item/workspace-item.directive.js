@@ -31,7 +31,8 @@ export class CheWorkspaceItem {
       workspace: '=cheWorkspaceItem',
       isSelectable: '=cheSelectable',
       isSelect: '=?ngModel',
-      onCheckboxClick: '&?cheOnCheckboxClick'
+      onCheckboxClick: '&?cheOnCheckboxClick',
+      displayLabels : '=cheDisplayLabels'
     };
 
     this.templateUrl = 'app/workspaces/list-workspaces/workspace-item/workspace-item.html';
