@@ -23,21 +23,24 @@ import javax.inject.Singleton;
 import java.util.Optional;
 
 /**
+ * Tracks and notifies about VFS operations for registered files. List of registered files is
+ * contained within an instance of {@link FileTrackingRegistry}.
+ *
  * @author Dmitry Kuleshov
  */
 @Beta
 @Singleton
-public class EditorFileStatusDetector implements HiEventDetector<EditorFileStatusDetector> {
+public class FileStatusDetector implements HiEventDetector<FileStatusDetector> {
     private final EventService eventService;
 
 
     @Inject
-    public EditorFileStatusDetector(EventService eventService) {
+    public FileStatusDetector(EventService eventService) {
         this.eventService = eventService;
     }
 
     @Override
-    public Optional<HiEvent<EditorFileStatusDetector>> detect(EventTreeNode eventTreeNode) {
+    public Optional<HiEvent<FileStatusDetector>> detect(EventTreeNode eventTreeNode) {
         if (!eventTreeNode.isRoot() || eventTreeNode.getChildren().isEmpty()) {
             return Optional.empty();
         }

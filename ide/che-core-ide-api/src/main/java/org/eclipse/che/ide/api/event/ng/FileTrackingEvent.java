@@ -15,7 +15,16 @@ import com.google.gwt.event.shared.GwtEvent;
 
 import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
 
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.STOP;
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
+
 /**
+ * Consumed by {@link ClientServerEventService} and sent to server side so we could manage
+ * server side VFS file watching from client.
+ *
  * @author Dmitry Kuleshov
  */
 public class FileTrackingEvent extends GwtEvent<FileTrackingEvent.FileTrackingEventHandler> {
@@ -28,10 +37,30 @@ public class FileTrackingEvent extends GwtEvent<FileTrackingEvent.FileTrackingEv
 
     private final FileTrackingOperationDto.Type type;
 
-    public FileTrackingEvent(String path, String oldPath, FileTrackingOperationDto.Type type) {
+    private FileTrackingEvent(String path, String oldPath, FileTrackingOperationDto.Type type) {
         this.path = path;
         this.oldPath = oldPath;
         this.type = type;
+    }
+
+    public static FileTrackingEvent newFileTrackingSuspendEvent() {
+        return new FileTrackingEvent(null, null, SUSPEND);
+    }
+
+    public static FileTrackingEvent newFileTrackingResumeEvent() {
+        return new FileTrackingEvent(null, null, RESUME);
+    }
+
+    public static FileTrackingEvent newFileTrackingStartEvent(String path) {
+        return new FileTrackingEvent(path, null, START);
+    }
+
+    public static FileTrackingEvent newFileTrackingStopEvent(String path) {
+        return new FileTrackingEvent(path, null, STOP);
+    }
+
+    public static FileTrackingEvent newFileTrackingMoveEvent(String path, String oldPath) {
+        return new FileTrackingEvent(path, oldPath, MOVE);
     }
 
     public String getOldPath() {

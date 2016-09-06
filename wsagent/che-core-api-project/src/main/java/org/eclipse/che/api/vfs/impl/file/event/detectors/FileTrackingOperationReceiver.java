@@ -24,6 +24,19 @@ import javax.inject.Singleton;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
+ * Receive a file tracking operation call from client. There are several type of such calls:
+ * <ul>
+ *     <li>
+ *         START/STOP - tells to start/stop tracking specific file
+ *     </li>
+ *     <li>
+ *         SUSPEND/RESUME - tells to start/stop tracking all files registered for specific endpoint
+ *     </li>
+ *     <li>
+ *         MOVE - tells that file that is being tracked should be moved (renamed)
+ *     </li>
+ * </ul>
+ *
  * @author Dmitry Kuleshov
  */
 @Singleton

@@ -33,12 +33,9 @@ import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
 import org.eclipse.che.api.vfs.impl.file.event.HiEventService;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventListener;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventService;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.EditorFileStatusDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.FileStatusDetector;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationReceiver;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationTransmitter;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingRegistry;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.GitCheckoutHiEventDetector;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.PomModifiedHiEventDetector;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
@@ -100,9 +97,7 @@ public class ProjectApiModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
                 });
 
-        highLevelVfsEventDetectorMultibinder.addBinding().to(PomModifiedHiEventDetector.class);
-        highLevelVfsEventDetectorMultibinder.addBinding().to(GitCheckoutHiEventDetector.class);
-        highLevelVfsEventDetectorMultibinder.addBinding().to(EditorFileStatusDetector.class);
+        highLevelVfsEventDetectorMultibinder.addBinding().to(FileStatusDetector.class);
         highLevelVfsEventDetectorMultibinder.addBinding().to(ProjectTreeChangesDetector.class);
 
         bind(FileTrackingOperationTransmitter.class).asEagerSingleton();

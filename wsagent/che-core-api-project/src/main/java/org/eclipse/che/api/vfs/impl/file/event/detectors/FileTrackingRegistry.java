@@ -33,6 +33,10 @@ import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.toSet;
 
 /**
+ * Simple registry to keep the list of file that should be tracked by VFS file watching
+ * system detector - {@link FileStatusDetector}. For each tracked file stores an MD5
+ * hash corresponding to its content.
+ *
  * @author Dmitry Kuleshov
  */
 @Singleton
@@ -59,11 +63,17 @@ public class FileTrackingRegistry {
     }
 
     public void suspend(int endpoint) {
-        registry.values().stream().filter(m -> m.getNotSuspendedEndpoints().contains(endpoint)).forEach(m -> m.suspend(endpoint));
+        registry.values()
+                .stream()
+                .filter(m -> m.getNotSuspendedEndpoints().contains(endpoint))
+                .forEach(m -> m.suspend(endpoint));
     }
 
     public void resume(int endpoint) {
-        registry.values().stream().filter(m -> m.getSuspendedEndpoints().contains(endpoint)).forEach(m -> m.resume(endpoint));
+        registry.values()
+                .stream()
+                .filter(m -> m.getSuspendedEndpoints().contains(endpoint))
+                .forEach(m -> m.resume(endpoint));
     }
 
     public void move(String oldPath, String newPath) {

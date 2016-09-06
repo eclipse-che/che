@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event.detectors;
+package org.eclipse.che.api.git;
 
 import com.google.common.annotations.Beta;
 

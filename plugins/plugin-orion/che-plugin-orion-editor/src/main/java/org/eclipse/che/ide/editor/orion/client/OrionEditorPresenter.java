@@ -125,6 +125,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -352,7 +353,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                     if (file.isPresent()) {
                         final Path location = document.getFile().getLocation();
                         deletedFilesController.add(location.toString());
-                        generalEventBus.fireEvent(new FileTrackingEvent(file.get().getLocation().toString(), null, START));
+                        generalEventBus.fireEvent(newFileTrackingStartEvent(file.get().getLocation().toString()));
 
                         document.setFile(file.get());
                         input.setFile(file.get());

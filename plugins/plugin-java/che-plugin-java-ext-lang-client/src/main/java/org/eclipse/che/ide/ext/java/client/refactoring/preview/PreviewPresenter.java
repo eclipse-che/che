@@ -39,6 +39,9 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingMoveEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.OK;
 
 /**
@@ -118,7 +121,7 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
     /** {@inheritDoc} */
     @Override
     public void onAcceptButtonClicked() {
-        eventBus.fireEvent(new FileTrackingEvent(null, null, SUSPEND));
+        eventBus.fireEvent(newFileTrackingSuspendEvent());
 
         refactoringService.applyRefactoring(session).then(new Operation<RefactoringResult>() {
             @Override
@@ -133,9 +136,9 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
                     final String path = change.getPath();
                     final String oldPath = change.getOldPath();
 
-                    eventBus.fireEvent(new FileTrackingEvent(path, oldPath, MOVE));
+                    eventBus.fireEvent(newFileTrackingMoveEvent(path, oldPath));
                 }
-                eventBus.fireEvent(new FileTrackingEvent(null, null, RESUME));
+                eventBus.fireEvent(newFileTrackingResumeEvent());
             }
         });
     }

@@ -46,7 +46,6 @@ import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
 import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
 import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
-import org.eclipse.che.ide.api.event.ng.GitCheckoutStatusNotificationReceiver;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
 import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationReceiver;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
@@ -65,9 +64,6 @@ import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
-import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
-import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
-import org.eclipse.che.ide.ui.multisplitpanel.tab.Tab;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
@@ -149,7 +145,6 @@ import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseDispatcher;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseTransmitter;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
 import org.eclipse.che.ide.machine.CommandPropertyValueProviderRegistryImpl;
-import org.eclipse.che.ide.machine.macro.ServerMacroProvider;
 import org.eclipse.che.ide.menu.MainMenuView;
 import org.eclipse.che.ide.menu.MainMenuViewImpl;
 import org.eclipse.che.ide.menu.StatusPanelGroupView;
@@ -245,10 +240,13 @@ import org.eclipse.che.ide.ui.dropdown.DropDownWidgetImpl;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderView;
 import org.eclipse.che.ide.ui.loaders.initialization.LoaderViewImpl;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelPresenter;
 import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelView;
 import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelViewFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelViewImpl;
+import org.eclipse.che.ide.ui.multisplitpanel.tab.Tab;
 import org.eclipse.che.ide.ui.multisplitpanel.tab.TabItemFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.tab.TabWidget;
 import org.eclipse.che.ide.ui.toolbar.MainToolbar;
@@ -375,7 +373,6 @@ public class CoreGinModule extends AbstractGinModule {
 
         requestReceivers.addBinding("event:file-in-vfs-status-changed").to(EditorFileStatusNotificationReceiver.class);
         requestReceivers.addBinding("event:project-tree-status-changed").to(ProjectTreeStatusNotificationReceiver.class);
-        requestReceivers.addBinding("event:git-checkout").to(GitCheckoutStatusNotificationReceiver.class);
     }
 
     private void configureJsonRpc() {

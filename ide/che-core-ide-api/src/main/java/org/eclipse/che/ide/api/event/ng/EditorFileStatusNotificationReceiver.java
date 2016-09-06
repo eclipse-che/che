@@ -33,14 +33,19 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 
 /**
+ * Receives file status notifications from sever VFS file watchers for registered files.
+ * The list of registered files contains files opened in an editor. Notifications can be
+ * of only two types: file modified and file deleted. Each kind of notification invokes
+ * specified behaviour.
+ *
  * @author Dmitry Kuleshov
  */
 @Singleton
 public class EditorFileStatusNotificationReceiver implements JsonRpcRequestReceiver {
-    private final DtoFactory dtoFactory;
-    private final EventBus   eventBus;
+    private final DtoFactory             dtoFactory;
+    private final EventBus               eventBus;
     private final DeletedFilesController deletedFilesController;
-    private final AppContext appContext;
+    private final AppContext             appContext;
 
     private NotificationManager notificationManager;
 
@@ -66,23 +71,23 @@ public class EditorFileStatusNotificationReceiver implements JsonRpcRequestRecei
         final VfsFileStatusUpdateDto vfsFileStatusUpdateDto = dtoFactory.createDtoFromJson(params, VfsFileStatusUpdateDto.class);
 
         final FileWatcherEventType status = vfsFileStatusUpdateDto.getType();
-        final String path = vfsFileStatusUpdateDto.getPath();
-        final String name = path.substring(path.lastIndexOf("/") + 1);
+        final String stringPath = vfsFileStatusUpdateDto.getPath();
+        final String name = stringPath.substring(stringPath.lastIndexOf("/") + 1);
 
         switch (status) {
             case MODIFIED: {
-                Log.debug(getClass(), "Received updated file event status: " + path);
+                Log.debug(getClass(), "Received updated file event status: " + stringPath);
 
-                eventBus.fireEvent(new FileContentUpdateEvent(path, vfsFileStatusUpdateDto.getHashCode()));
+                eventBus.fireEvent(new FileContentUpdateEvent(stringPath, vfsFileStatusUpdateDto.getHashCode()));
 
                 break;
             }
             case DELETED: {
+                Log.debug(getClass(), "Received removed file event status: " + stringPath);
 
-                Log.debug(getClass(), "Received removed file event status: " + path);
-
-                appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(Path.valueOf(path), Path.valueOf(path), REMOVED));
-                if (notificationManager != null && !deletedFilesController.remove(path)) {
+                final Path path = Path.valueOf(stringPath);
+                appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(path, path, REMOVED));
+                if (notificationManager != null && !deletedFilesController.remove(stringPath)) {
                     notificationManager.notify("External operation", "File '" + name + "' is removed", SUCCESS, EMERGE_MODE);
                 }
 

@@ -18,7 +18,6 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
-import org.eclipse.che.ide.api.event.ng.GitCheckoutStatusNotificationReceiver;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.notification.Notification;
 import org.eclipse.che.ide.api.notification.NotificationListener;
@@ -99,10 +98,8 @@ public class NotificationManagerImpl extends BasePresenter implements Notificati
 
     @Inject
     @PostConstruct
-    public void inject(EditorFileStatusNotificationReceiver editorFileStatusNotificationReceiver,
-                       GitCheckoutStatusNotificationReceiver gitCheckoutStatusNotificationReceiver) {
+    public void inject(EditorFileStatusNotificationReceiver editorFileStatusNotificationReceiver) {
         editorFileStatusNotificationReceiver.inject(this);
-        gitCheckoutStatusNotificationReceiver.inject(this);
     }
 
     /** {@inheritDoc} */

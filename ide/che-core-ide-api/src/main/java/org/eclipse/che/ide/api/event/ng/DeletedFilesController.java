@@ -16,7 +16,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Contains paths to opened files which are needed to skip for the updating process.
+ * Contains the list of paths that correspond to opened files and should not trigger events
+ * notifications from file system because they are initiated by ourselves (e.g. refactoring,
+ * git checkout etc.)
  *
  * @author Valeriy Svydenko
  */

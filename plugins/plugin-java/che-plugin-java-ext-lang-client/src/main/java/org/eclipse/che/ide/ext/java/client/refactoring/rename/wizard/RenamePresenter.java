@@ -60,6 +60,9 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingMoveEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
@@ -348,7 +351,7 @@ public class RenamePresenter implements ActionDelegate {
     }
 
     private void applyRefactoring(RefactoringSession session) {
-        eventBus.fireEvent(new FileTrackingEvent(null, null, SUSPEND));
+        eventBus.fireEvent(newFileTrackingSuspendEvent());
         refactorService.applyRefactoring(session).then(new Operation<RefactoringResult>() {
             @Override
             public void apply(RefactoringResult arg) throws OperationException {
@@ -388,9 +391,10 @@ public class RenamePresenter implements ActionDelegate {
                     final String path = change.getPath();
                     final String oldPath = change.getOldPath();
 
-                    eventBus.fireEvent(new FileTrackingEvent(path, oldPath, MOVE));
+                    eventBus.fireEvent(newFileTrackingMoveEvent(path, oldPath));
                 }
-                eventBus.fireEvent(new FileTrackingEvent(null, null, RESUME));
+                eventBus.fireEvent(newFileTrackingResumeEvent());
+
             }
         });
     }

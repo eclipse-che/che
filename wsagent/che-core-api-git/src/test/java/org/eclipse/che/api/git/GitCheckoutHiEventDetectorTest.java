@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event.detectors;
+package org.eclipse.che.api.git;
 
 import org.eclipse.che.api.core.jsonrpc.JsonRpcRequestTransmitter;
 import org.eclipse.che.api.vfs.VirtualFileSystemProvider;

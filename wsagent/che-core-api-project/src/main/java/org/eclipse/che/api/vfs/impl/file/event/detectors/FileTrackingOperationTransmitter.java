@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.project.shared.dto.event.VfsFileStatusUpdateDto;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.EditorFileStatusDetector.FileTrackingEvent;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.FileStatusDetector.FileTrackingEvent;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -28,6 +28,11 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
+ * Transmits file status changes for all registered files. Status changes happens if
+ * tracked (registered) files are (re)moved or modified. Each file status notification
+ * is transmitted to all related to current file endpoints (clients) except for the
+ * endpoints that are in 'suspended' state.
+ *
  * @author Dmitry Kuleshov
  */
 @Singleton

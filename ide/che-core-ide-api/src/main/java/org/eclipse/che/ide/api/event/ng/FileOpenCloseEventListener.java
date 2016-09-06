@@ -26,8 +26,14 @@ import java.util.Objects;
 
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.STOP;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStopEvent;
 
 /**
+ * File open/close event listener aimed to wrap {@link FileEvent} into {@link FileTrackingEvent}
+ * which is consumed by {@link ClientServerEventService} and sent to server side for further
+ * processing.
+ *
  * @author Dmitry Kuleshov
  */
 @Singleton
@@ -62,7 +68,7 @@ public class FileOpenCloseEventListener {
             }
 
             private void processFileOpen(Path path) {
-                eventBus.fireEvent(new FileTrackingEvent(path.toString(), null, START));
+                eventBus.fireEvent(newFileTrackingStartEvent(path.toString()));
             }
 
             private void processFileClose(EditorPartPresenter closingEditor, List<EditorPartPresenter> openedEditors, Path path) {
@@ -74,7 +80,8 @@ public class FileOpenCloseEventListener {
                 }
 
                 deletedFilesController.remove(closingEditor.getEditorInput().getFile().getLocation().toString());
-                eventBus.fireEvent(new FileTrackingEvent(path.toString(), null, STOP));
+                eventBus.fireEvent(newFileTrackingStopEvent(path.toString()));
+
             }
         });
     }

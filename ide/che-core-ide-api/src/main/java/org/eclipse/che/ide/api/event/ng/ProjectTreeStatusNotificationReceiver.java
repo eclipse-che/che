@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStatusUpdateDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.ExternalResourceDelta;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestReceiver;
@@ -29,6 +30,10 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
 
 /**
+ * Receives project tree status notifications from server side. There are three type of notifications
+ * for files and directories in a project tree: creation, removal, modification. Each notification is
+ * processed and passed further to an instance of workspace {@link Container}.
+ *
  * @author Dmitry Kuleshov
  */
 @Singleton

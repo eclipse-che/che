@@ -54,6 +54,9 @@ import java.util.List;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
 import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingMoveEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.ERROR;
 import static org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus.FATAL;
@@ -226,7 +229,7 @@ public class MovePresenter implements MoveView.ActionDelegate {
             @Override
             public void apply(ChangeCreationResult arg) throws OperationException {
                 if (arg.isCanShowPreviewPage()) {
-                    eventBus.fireEvent(new FileTrackingEvent(null, null, SUSPEND));
+                    eventBus.fireEvent(newFileTrackingSuspendEvent());
 
                     refactorService.applyRefactoring(session).then(new Operation<RefactoringResult>() {
                         @Override
@@ -249,9 +252,9 @@ public class MovePresenter implements MoveView.ActionDelegate {
                                 final String path = change.getPath();
                                 final String oldPath = change.getOldPath();
 
-                                eventBus.fireEvent(new FileTrackingEvent(path, oldPath, MOVE));
+                                eventBus.fireEvent(newFileTrackingMoveEvent(path, oldPath));
                             }
-                            eventBus.fireEvent(new FileTrackingEvent(null, null, RESUME));
+                            eventBus.fireEvent(newFileTrackingResumeEvent());
                         }
                     });
                 } else {
