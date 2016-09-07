@@ -39,6 +39,7 @@ import java.net.HttpURLConnection;
 import java.util.Map;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static org.eclipse.che.api.workspace.shared.Constants.WS_AGENT_PROCESS_NAME;
 
 /**
  * Starts ws agent in the machine and waits until ws agent sends notification about its start.
@@ -103,9 +104,14 @@ public class WsAgentLauncherImpl implements AgentLauncher {
 
         final String wsAgentPingUrl = wsAgentPingRequest.getUrl();
         try {
+            // for server side type of command mean nothing
+            // but we will use it as marker on
+            // client side for track this command
+            CommandImpl command = new CommandImpl(getAgentName(), script, WS_AGENT_PROCESS_NAME);
+
             machineProcessManagerProvider.get().exec(machine.getWorkspaceId(),
                                                      machine.getId(),
-                                                     new CommandImpl(getAgentName(), script, "Arbitrary"),
+                                                     command,
                                                      getWsAgentProcessOutputChannel(machine.getWorkspaceId()));
 
             final long pingStartTimestamp = System.currentTimeMillis();

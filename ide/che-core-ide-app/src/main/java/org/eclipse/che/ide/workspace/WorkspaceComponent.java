@@ -72,12 +72,12 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     protected final NotificationManager       notificationManager;
     protected final StartWorkspacePresenter   startWorkspacePresenter;
 
-    private final   EventBus                  eventBus;
-    private final   LoaderPresenter           loader;
-    private final   Provider<MachineManager>  machineManagerProvider;
-    private final   MessageBusProvider        messageBusProvider;
-    private final   InitialLoadingInfo        initialLoadingInfo;
-    private final   WorkspaceEventsNotifier   workspaceEventsNotifier;
+    private final EventBus                 eventBus;
+    private final LoaderPresenter          loader;
+    private final Provider<MachineManager> machineManagerProvider;
+    private final MessageBusProvider       messageBusProvider;
+    private final InitialLoadingInfo       initialLoadingInfo;
+    private final WorkspaceEventsHandler   workspaceEventsHandler;
 
     protected Callback<Component, Exception> callback;
     protected boolean                        needToReloadComponents;
@@ -99,7 +99,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               PreferencesManager preferencesManager,
                               DtoFactory dtoFactory,
                               InitialLoadingInfo initialLoadingInfo,
-                              WorkspaceEventsNotifier workspaceEventsNotifier) {
+                              WorkspaceEventsHandler workspaceEventsHandler) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.createWorkspacePresenter = createWorkspacePresenter;
         this.startWorkspacePresenter = startWorkspacePresenter;
@@ -116,7 +116,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         this.preferencesManager = preferencesManager;
         this.dtoFactory = dtoFactory;
         this.initialLoadingInfo = initialLoadingInfo;
-        this.workspaceEventsNotifier = workspaceEventsNotifier;
+        this.workspaceEventsHandler = workspaceEventsHandler;
 
         this.needToReloadComponents = true;
 
@@ -169,7 +169,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                 messageBus.removeOnOpenHandler(this);
 
                 setCurrentWorkspace(workspace);
-                workspaceEventsNotifier.trackWorkspaceEvents(workspace, callback);
+                workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
 
                 final WorkspaceStatus workspaceStatus = workspace.getStatus();
                 switch (workspaceStatus) {

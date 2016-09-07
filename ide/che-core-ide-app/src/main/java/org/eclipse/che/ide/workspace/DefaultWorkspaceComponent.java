@@ -64,7 +64,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
                                      InitialLoadingInfo initialLoadingInfo,
-                                     WorkspaceEventsNotifier workspaceEventsNotifier) {
+                                     WorkspaceEventsHandler workspaceEventsHandler) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -81,7 +81,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
               preferencesManager,
               dtoFactory,
               initialLoadingInfo,
-              workspaceEventsNotifier);
+              workspaceEventsHandler);
     }
 
     /** {@inheritDoc} */

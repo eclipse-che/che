@@ -18,10 +18,13 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
+import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.machine.shared.dto.MachineLogMessageDto;
+import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -35,6 +38,7 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.MachineManager;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
@@ -44,7 +48,9 @@ import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.ui.loaders.initialization.OperationInfo;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
@@ -54,7 +60,6 @@ import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
-import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 
 import java.util.List;
 import java.util.Map;
@@ -82,7 +87,7 @@ import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status
  * @author Roman Nikitenko
  */
 @Singleton
-public class WorkspaceEventsNotifier {
+public class WorkspaceEventsHandler {
     private final static int SKIP_COUNT = 0;
     private final static int MAX_COUNT  = 10;
 
@@ -95,18 +100,18 @@ public class WorkspaceEventsNotifier {
     private final Provider<MachineManager>            machineManagerProvider;
     private final MessageLoader                       snapshotLoader;
     private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
+    private final AsyncRequestFactory                 asyncRequestFactory;
+    private final MachineServiceClient                machineServiceClient;
     private final WorkspaceSnapshotCreator            snapshotCreator;
     private final WorkspaceServiceClient              workspaceServiceClient;
-    private final StartWorkspacePresenter             startWorkspacePresenter;
 
-    private DefaultWorkspaceComponent      workspaceComponent;
-    private Callback<Component, Exception> callback;
-    private MessageBus                     messageBus;
-    private MessageBusProvider             messageBusProvider;
-    private String                         environmentStatusChannel;
-    private String                         environmentOutputChannel;
-    private String                         wsAgentLogChannel;
-    private String                         workspaceStatusChannel;
+    private       DefaultWorkspaceComponent      workspaceComponent;
+    private       MessageBus                     messageBus;
+    private       MessageBusProvider             messageBusProvider;
+    private       String                         environmentStatusChannel;
+    private       String                         environmentOutputChannel;
+    private       String                         wsAgentLogChannel;
+    private       String                         workspaceStatusChannel;
 
     @VisibleForTesting
     WorkspaceStatusSubscriptionHandler   workspaceStatusSubscriptionHandler;
@@ -118,22 +123,24 @@ public class WorkspaceEventsNotifier {
     WsAgentOutputSubscriptionHandler     wsAgentLogSubscriptionHandler;
 
     @Inject
-    WorkspaceEventsNotifier(final EventBus eventBus,
-                            final CoreLocalizationConstant locale,
-                            final DialogFactory dialogFactory,
-                            final DtoUnmarshallerFactory dtoUnmarshallerFactory,
-                            final InitialLoadingInfo initialLoadingInfo,
-                            final NotificationManager notificationManager,
-                            final MessageBusProvider messageBusProvider,
-                            final Provider<MachineManager> machineManagerProvider,
-                            final WorkspaceSnapshotCreator snapshotCreator,
-                            final LoaderFactory loaderFactory,
-                            final WorkspaceServiceClient workspaceServiceClient,
-                            final StartWorkspacePresenter startWorkspacePresenter,
-                            final Provider<DefaultWorkspaceComponent> wsComponentProvider) {
+    WorkspaceEventsHandler(final EventBus eventBus,
+                           final CoreLocalizationConstant locale,
+                           final DialogFactory dialogFactory,
+                           final DtoUnmarshallerFactory dtoUnmarshallerFactory,
+                           final InitialLoadingInfo initialLoadingInfo,
+                           final NotificationManager notificationManager,
+                           final MessageBusProvider messageBusProvider,
+                           final Provider<MachineManager> machineManagerProvider,
+                           final MachineServiceClient machineServiceClient,
+                           final WorkspaceSnapshotCreator snapshotCreator,
+                           final LoaderFactory loaderFactory,
+                           final WorkspaceServiceClient workspaceServiceClient,
+                           final Provider<DefaultWorkspaceComponent> wsComponentProvider,
+                           final AsyncRequestFactory asyncRequestFactory) {
         this.eventBus = eventBus;
         this.locale = locale;
         this.messageBusProvider = messageBusProvider;
+        this.machineServiceClient = machineServiceClient;
         this.snapshotCreator = snapshotCreator;
         this.initialLoadingInfo = initialLoadingInfo;
         this.notificationManager = notificationManager;
@@ -141,8 +148,8 @@ public class WorkspaceEventsNotifier {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.machineManagerProvider = machineManagerProvider;
         this.workspaceServiceClient = workspaceServiceClient;
-        this.startWorkspacePresenter = startWorkspacePresenter;
         this.wsComponentProvider = wsComponentProvider;
+        this.asyncRequestFactory = asyncRequestFactory;
 
         this.snapshotLoader = loaderFactory.newLoader(locale.createSnapshotProgress());
     }
@@ -156,10 +163,8 @@ public class WorkspaceEventsNotifier {
      *         callback which is necessary to notify that workspace component started or failed
      */
     void trackWorkspaceEvents(final WorkspaceDto workspace, final Callback<Component, Exception> callback) {
-        this.callback = callback;
         this.workspaceComponent = wsComponentProvider.get();
         this.messageBus = messageBusProvider.getMessageBus();
-
         subscribeToWorkspaceStatusEvents(workspace);
         subscribeOnEnvironmentStatusChannel(workspace);
         subscribeOnEnvironmentOutputChannel(workspace);
@@ -204,6 +209,46 @@ public class WorkspaceEventsNotifier {
                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
             }
         });
+    }
+
+    /**
+     * Will get logs from the developer devMachine for restore it in the panel if the exist
+     *
+     * @param devMachine
+     */
+    private void restoreDevMachineLogs(final Machine devMachine) {
+        if (devMachine != null) {
+            machineServiceClient.getProcesses(devMachine.getWorkspaceId(), devMachine.getId())
+                                .then(new Operation<List<MachineProcessDto>>() {
+                                    @Override
+                                    public void apply(List<MachineProcessDto> arg) throws OperationException {
+                                        for (MachineProcessDto process : arg) {
+                                            if ("CheWsAgent".equals(process.getName())) { //get start ws agent process
+                                                getLogsOfWsAgent(process, devMachine);
+                                            }
+                                        }
+                                    }
+                                });
+        }
+    }
+
+    /**
+     * Get log of ws-agent launch process and send it to the output panel
+     * @param process
+     * @param devMachine
+     */
+    private void getLogsOfWsAgent(MachineProcessDto process, final Machine devMachine) {
+        final Link link = process.getLink(Constants.LINK_REL_GET_PROCESS_LOGS);
+        if (link != null) {
+            asyncRequestFactory.createGetRequest(link.getHref()).send(new StringUnmarshaller()).then(new Operation<String>() {
+                @Override
+                public void apply(String log) throws OperationException {
+                    final String fixedLog = log.replaceAll("\\[STDOUT\\] ", ""); //logs comes from server side with "[STDOUT] " in start
+                                                                                 //so we will remove it in this brutal way
+                    eventBus.fireEvent(new EnvironmentOutputEvent(fixedLog, devMachine.getConfig().getName()));
+                }
+            });
+        }
     }
 
     private void subscribeToWorkspaceStatusEvents(final WorkspaceDto workspace) {
@@ -256,6 +301,8 @@ public class WorkspaceEventsNotifier {
     }
 
     private void subscribeOnWsAgentOutputChannel(final WorkspaceDto workspace, final String wsMachineName) {
+        restoreDevMachineLogs(workspace.getRuntime().getDevMachine()); //try to restore logs if workspace already started
+                                                                       // and dev machine provide some output
         wsAgentLogChannel = "workspace:" + workspace.getId() + ":ext-server:output";
         wsAgentLogSubscriptionHandler = new WsAgentOutputSubscriptionHandler(wsMachineName);
         subscribeToChannel(wsAgentLogChannel, wsAgentLogSubscriptionHandler);
@@ -395,7 +442,7 @@ public class WorkspaceEventsNotifier {
 
         @Override
         protected void onErrorReceived(Throwable exception) {
-            Log.error(WorkspaceEventsNotifier.class, exception);
+            Log.error(WorkspaceEventsHandler.class, exception);
         }
     }
 
@@ -412,7 +459,7 @@ public class WorkspaceEventsNotifier {
 
         @Override
         protected void onErrorReceived(Throwable exception) {
-            Log.error(WorkspaceEventsNotifier.class, exception);
+            Log.error(WorkspaceEventsHandler.class, exception);
         }
     }
 
@@ -429,7 +476,7 @@ public class WorkspaceEventsNotifier {
 
         @Override
         protected void onErrorReceived(Throwable exception) {
-            Log.error(WorkspaceEventsNotifier.class, exception);
+            Log.error(WorkspaceEventsHandler.class, exception);
         }
     }
 }

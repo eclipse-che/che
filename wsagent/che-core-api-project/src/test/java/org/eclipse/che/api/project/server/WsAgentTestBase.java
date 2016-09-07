@@ -30,6 +30,7 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.commons.lang.IoUtil;
 
@@ -72,6 +73,8 @@ public class WsAgentTestBase {
     protected ProjectHandlerRegistry projectHandlerRegistry;
 
     protected ProjectImporterRegistry importerRegistry;
+
+    protected ProjectTreeChangesDetector projectTreeChangesDetector;
 
     public void setUp() throws Exception {
 
@@ -117,8 +120,11 @@ public class WsAgentTestBase {
 
         TestWorkspaceHolder wsHolder = new  TestWorkspaceHolder();
 
+        projectTreeChangesDetector = new ProjectTreeChangesDetector(null);
+
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, wsHolder);
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, wsHolder,
+                                projectTreeChangesDetector);
         pm.initWatcher();
     }
 

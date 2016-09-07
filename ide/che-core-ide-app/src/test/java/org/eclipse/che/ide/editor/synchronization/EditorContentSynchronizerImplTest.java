@@ -28,16 +28,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -75,7 +71,7 @@ public class EditorContentSynchronizerImplTest {
         when(editorInput.getFile()).thenReturn(virtualFile);
         when(virtualFile.getLocation()).thenReturn(new Path("somePath"));
         when(editorAgent.getActiveEditor()).thenReturn(activeEditor);
-        when(editorGroupSychronizationFactory.create(anyList())).thenReturn(editorGroupSynchronization);
+        when(editorGroupSychronizationFactory.create()).thenReturn(editorGroupSynchronization);
     }
 
     @Test
@@ -93,7 +89,7 @@ public class EditorContentSynchronizerImplTest {
 
         editorContentSynchronizer.trackEditor(activeEditor);
 
-        verify(editorGroupSychronizationFactory).create(anyList());
+        verify(editorGroupSychronizationFactory).create();
     }
 
     @Test
@@ -113,7 +109,7 @@ public class EditorContentSynchronizerImplTest {
 
         editorContentSynchronizer.trackEditor(activeEditor);
 
-        verify(editorGroupSychronizationFactory, never()).create(anyList());
+        verify(editorGroupSychronizationFactory, never()).create();
         verify(editorGroupSynchronization).addEditor(activeEditor);
     }
 
@@ -152,36 +148,5 @@ public class EditorContentSynchronizerImplTest {
 
         verify(editorGroupSynchronization).removeEditor(activeEditor);
         verify(editorGroupSynchronization).unInstall();
-    }
-
-    @Test
-    public void shouldResolveAutoSave() {
-        EditorPartPresenter openedEditor1 = mock(EditorPartPresenter.class, withSettings().extraInterfaces(EditorWithAutoSave.class));
-        EditorPartPresenter openedEditor2 = mock(EditorPartPresenter.class, withSettings().extraInterfaces(EditorWithAutoSave.class));
-        when(openedEditor1.getEditorInput()).thenReturn(editorInput);
-        when(openedEditor2.getEditorInput()).thenReturn(editorInput);
-        when(((EditorWithAutoSave)openedEditor1).isAutoSaveEnabled()).thenReturn(true);
-        when(((EditorWithAutoSave)openedEditor2).isAutoSaveEnabled()).thenReturn(true);
-        List<EditorPartPresenter> openedFiles = new ArrayList<>(1);
-        openedFiles.add(openedEditor1);
-        openedFiles.add(openedEditor2);
-        Set<EditorPartPresenter> setSyncEditors = new HashSet<>(2);
-        setSyncEditors.add(openedEditor1);
-        setSyncEditors.add(openedEditor2);
-        setSyncEditors.add(activeEditor);
-        when(editorAgent.getOpenedEditors()).thenReturn(openedFiles);
-        when(editorGroupSynchronization.getSynchronizedEditors()).thenReturn(setSyncEditors);
-        when(activePartChangedEvent.getActivePart()).thenReturn(activeEditor);
-        editorContentSynchronizer.trackEditor(openedEditor1);
-        editorContentSynchronizer.trackEditor(openedEditor2);
-        editorContentSynchronizer.trackEditor(activeEditor);
-
-        editorContentSynchronizer.onActivePartChanged(activePartChangedEvent);
-
-        // AutoSave for active editor should always be enabled,
-        // but AutoSave for other editors with the same path should be disabled
-        verify(((EditorWithAutoSave)activeEditor), times(2)).enableAutoSave();
-        verify(((EditorWithAutoSave)openedEditor1), times(2)).disableAutoSave();
-        verify(((EditorWithAutoSave)openedEditor2), times(2)).disableAutoSave();
     }
 }

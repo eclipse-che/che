@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Collections;
 
+import static org.eclipse.che.api.workspace.shared.Constants.WS_AGENT_PROCESS_NAME;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -109,7 +110,7 @@ public class WsAgentLauncherImplTest {
                                            eq(MACHINE_ID),
                                            eq(new CommandImpl("org.eclipse.che.ws-agent",
                                                               "script\n" + WsAgentLauncherImpl.DEFAULT_WS_AGENT_RUN_COMMAND,
-                                                              "Arbitrary")),
+                                                              WS_AGENT_PROCESS_NAME)),
                                            eq(WsAgentLauncherImpl.getWsAgentProcessOutputChannel(WORKSPACE_ID)));
 
     }

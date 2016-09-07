@@ -262,6 +262,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     onAddTerminal(appContext.getWorkspaceId(), selectedTreeNode.getParent().getId());
                 }
             }
+        } else {
+            if (appContext.getDevMachine() != null) {
+                onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
+            }
         }
     }
 
@@ -721,7 +725,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                             .withType(machineProcessDto.getType());
 
                     final CommandType type = commandTypeRegistry.getCommandTypeById(commandDto.getType());
-                    if (type != null) {
+                    if (type != null ) {
                         final CommandConfiguration configuration = type.getConfigurationFactory().createFromDto(commandDto);
                         final CommandOutputConsole console = commandConsoleFactory.create(configuration, machine);
                         console.listenToOutput(machineProcessDto.getOutputChannel());
