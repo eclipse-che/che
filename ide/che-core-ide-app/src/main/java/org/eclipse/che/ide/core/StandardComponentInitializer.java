@@ -24,6 +24,7 @@ import org.eclipse.che.ide.actions.CreateProjectAction;
 import org.eclipse.che.ide.actions.DeleteResourceAction;
 import org.eclipse.che.ide.actions.DownloadProjectAction;
 import org.eclipse.che.ide.actions.DownloadResourceAction;
+import org.eclipse.che.ide.actions.DownloadWsAction;
 import org.eclipse.che.ide.actions.EditFileAction;
 import org.eclipse.che.ide.actions.ExpandEditorAction;
 import org.eclipse.che.ide.actions.FormatterAction;
@@ -219,6 +220,9 @@ public class StandardComponentInitializer {
     private DownloadProjectAction downloadProjectAction;
 
     @Inject
+    private DownloadWsAction downloadWsAction;
+
+    @Inject
     private DownloadResourceAction downloadResourceAction;
 
     @Inject
@@ -411,8 +415,8 @@ public class StandardComponentInitializer {
         actionManager.registerAction("createProject", createProjectAction);
         workspaceGroup.add(createProjectAction);
 
-        actionManager.registerAction("downloadAsZipAction", downloadProjectAction);
-        workspaceGroup.add(downloadProjectAction);
+        actionManager.registerAction("downloadWsAsZipAction", downloadWsAction);
+        workspaceGroup.add(downloadWsAction);
 
         workspaceGroup.addSeparator();
 
@@ -448,6 +452,7 @@ public class StandardComponentInitializer {
         actionManager.registerAction("convertFolderToProject", convertFolderToProjectAction);
         projectGroup.add(convertFolderToProjectAction);
 
+        actionManager.registerAction("downloadAsZipAction", downloadProjectAction);
         projectGroup.add(downloadProjectAction);
 
         actionManager.registerAction("showHideHiddenFiles", showHiddenFilesAction);
