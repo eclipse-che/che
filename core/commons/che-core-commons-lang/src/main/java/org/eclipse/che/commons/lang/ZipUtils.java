@@ -201,6 +201,8 @@ public class ZipUtils {
     /**
      * Provides streams to all resources matching {@code filter} criteria inside the archive.
      *
+     * @param zip
+     *      zip file to get resources from
      * @param filter
      *      the search criteria
      * @throws IOException

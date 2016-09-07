@@ -52,7 +52,7 @@ public interface AgentRegistry {
 
     /**
      * Gets the {@link Agent} by its name or by url.
-     * In case of name the latest version of the agent will be created.
+     * In case of name the latest version of the agent will be fetched.
      * In case of url the agent will be retrieved by specific url.
      *
      * @param name

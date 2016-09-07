@@ -19,27 +19,27 @@ import java.util.Map;
 public interface Agent {
 
     /**
-     * @return the name of the agent
+     * Returns the name of the agent.
      */
     String getName();
 
     /**
-     * @return the version of the agent
+     * Returns the version of the agent.
      */
     String getVersion();
 
     /**
-     * @return the depending agents, that must be applied before
+     * Returns the depending agents, that must be applied before.
      */
     List<String> getDependencies();
 
     /**
-     * @return the script to be applied when machine is started
+     * Returns the script to be applied when machine is started.
      */
     String getScript();
 
     /**
-     * @return any machine specific properties
+     * Returns any machine specific properties.
      */
     Map<String, String> getProperties();
 }

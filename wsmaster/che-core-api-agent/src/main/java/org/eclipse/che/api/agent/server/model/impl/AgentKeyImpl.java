@@ -76,6 +76,6 @@ public class AgentKeyImpl implements AgentKey {
     public String toString() {
         return "AgentImpl{" +
                "name='" + name + '\'' +
-               ", version='" + version + '\'';
+               ", version='" + version + "\'}";
     }
 }

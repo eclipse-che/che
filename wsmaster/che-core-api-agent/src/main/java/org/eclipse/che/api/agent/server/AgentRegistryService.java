@@ -27,7 +27,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -50,32 +49,32 @@ public class AgentRegistryService extends Service {
     }
 
     @GET
-    @Path("name/{name}")
+    @Path("/name/{name}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Gets the latest agent", response = AgentDto.class)
+    @ApiOperation(value = "Gets the latest version of the agent", response = AgentDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "The agent successfully created"),
                    @ApiResponse(code = 404, message = "Agent not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public Response create(@ApiParam("The agent name") @PathParam("name") String name) throws ApiException {
+    public Agent getByName(@ApiParam("The agent name") @PathParam("name") String name) throws ApiException {
         Agent agent = agentRegistry.getAgent(name);
-        return Response.status(Response.Status.OK).entity(asDto(agent)).build();
+        return asDto(agent);
     }
 
     @GET
-    @Path("name/{name}/version/{version}")
+    @Path("/name/{name}/version/{version}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Gets the agent of the specific version", response = AgentDto.class)
     @ApiResponses({@ApiResponse(code = 200, message = "The agent successfully created"),
                    @ApiResponse(code = 404, message = "Agent not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public Response create(@ApiParam("The agent name") @PathParam("name") String name,
+    public Agent getByName(@ApiParam("The agent name") @PathParam("name") String name,
                            @ApiParam("The agent version") @PathParam("version") String version) throws ApiException {
         Agent agent = agentRegistry.getAgent(name, version);
-        return Response.status(Response.Status.OK).entity(asDto(agent)).build();
+        return asDto(agent);
     }
 
     @GET
-    @Path("versions/{name}")
+    @Path("/versions/{name}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get a list of the available versions of the specific agent", response = List.class)
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),

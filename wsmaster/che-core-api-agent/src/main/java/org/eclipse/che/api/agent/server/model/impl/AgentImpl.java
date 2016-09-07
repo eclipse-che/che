@@ -108,7 +108,7 @@ public class AgentImpl implements Agent {
                "name='" + name + '\'' +
                ", version='" + version + '\'' +
                ", dependencies='" + dependencies + '\'' +
-               ", properties='" + properties + '\'';
+               ", properties='" + properties + "\'}";
     }
 }
 

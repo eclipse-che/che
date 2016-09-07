@@ -80,7 +80,7 @@ public class AgentRegistryImplTest {
                 return new URL("http://localhost:" + port + "/rest/registry/agent/" + name + "/" + version);
             }
         });
-        when(urlProvider.getAgentVersions(anyString())).thenAnswer(new Answer<URL>() {
+        when(urlProvider.getAgentVersionsUrl(anyString())).thenAnswer(new Answer<URL>() {
             @Override
             public URL answer(InvocationOnMock invocation) throws Throwable {
                 String name = (String)invocation.getArguments()[0];

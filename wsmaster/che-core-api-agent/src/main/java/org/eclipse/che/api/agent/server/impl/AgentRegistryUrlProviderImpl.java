@@ -64,7 +64,7 @@ public class AgentRegistryUrlProviderImpl implements AgentRegistryUrlProvider {
     }
 
     @Override
-    public URL getAgentVersions(String name) throws AgentException {
+    public URL getAgentVersionsUrl(String name) throws AgentException {
         String url = agentVersionsUrl.replace(NAME, name);
         try {
             return new URL(url);

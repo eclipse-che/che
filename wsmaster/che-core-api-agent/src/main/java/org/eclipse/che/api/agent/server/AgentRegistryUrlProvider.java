@@ -51,5 +51,5 @@ public interface AgentRegistryUrlProvider {
      * @throws AgentException
      *      if unexpected error occurred
      */
-    URL getAgentVersions(String name) throws AgentException;
+    URL getAgentVersionsUrl(String name) throws AgentException;
 }

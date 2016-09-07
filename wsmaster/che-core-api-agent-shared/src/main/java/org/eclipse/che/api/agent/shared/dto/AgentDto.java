@@ -36,18 +36,21 @@ public interface AgentDto extends Agent {
 
     AgentDto withVersion(String version);
 
+    @Override
     List<String> getDependencies();
 
     void setDependencies(List<String> dependencies);
 
     AgentDto withDependencies(List<String> dependencies);
 
+    @Override
     String getScript();
 
     void setScript(String script);
 
     AgentDto withScript(String script);
 
+    @Override
     Map<String, String> getProperties();
 
     void setProperties(Map<String, String> properties);

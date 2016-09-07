@@ -90,7 +90,7 @@ public class AgentRegistryImpl implements AgentRegistry {
 
     @Override
     public List<String> getVersions(String name) throws AgentException {
-        URL url = urlProvider.getAgentVersions(name);
+        URL url = urlProvider.getAgentVersionsUrl(name);
         try {
             HttpJsonResponse response = requestFactory.fromUrl(url.toString()).useGetMethod().request();
 
