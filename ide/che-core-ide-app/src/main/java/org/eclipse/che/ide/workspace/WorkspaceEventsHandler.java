@@ -345,7 +345,8 @@ public class WorkspaceEventsHandler {
                                                   new ConfirmCallback() {
                                                       @Override
                                                       public void accepted() {
-                                                          startWorkspacePresenter.show(workspaces, callback);
+                                                          // Disables workspace create/start view in IDE
+                                                          // startWorkspacePresenter.show(workspaces, callback);
                                                       }
                                                   }).show();
             }

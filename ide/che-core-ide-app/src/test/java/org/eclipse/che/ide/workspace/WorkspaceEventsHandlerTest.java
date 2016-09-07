@@ -214,9 +214,9 @@ public class WorkspaceEventsHandlerTest {
         when(workspace.getRuntime()).thenReturn(runtime);
         when(runtime.getActiveEnv()).thenReturn(ACTIVE_ENV);
         when(workspace.getConfig()).thenReturn(workspaceConfig);
-        Map<String, EnvironmentDto> environments = new HashMap<>(3);
+        List<EnvironmentDto> environments = new ArrayList<>(3);
         EnvironmentDto environment = mock(EnvironmentDto.class);
-        environments.put(ACTIVE_ENV, environment);
+        environments.add(environment);
         when(workspaceConfig.getEnvironments()).thenReturn(environments);
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
@@ -241,9 +241,9 @@ public class WorkspaceEventsHandlerTest {
         when(runtime.getDevMachine()).thenReturn(devMachine);
         when(runtime.getActiveEnv()).thenReturn(ACTIVE_ENV);
         when(workspace.getConfig()).thenReturn(workspaceConfig);
-        Map<String, EnvironmentDto> environments = new HashMap<>(3);
+        List<EnvironmentDto> environments = new ArrayList<>(3);
         EnvironmentDto environment = mock(EnvironmentDto.class);
-        environments.put(ACTIVE_ENV, environment);
+        environments.add(environment);
         when(workspaceConfig.getEnvironments()).thenReturn(environments);
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
@@ -388,9 +388,9 @@ public class WorkspaceEventsHandlerTest {
         when(runtime.getDevMachine()).thenReturn(devMachine);
         when(runtime.getActiveEnv()).thenReturn(ACTIVE_ENV);
         when(workspace.getConfig()).thenReturn(workspaceConfig);
-        Map<String, EnvironmentDto> environments = new HashMap<>(3);
+        List<EnvironmentDto> environments = new ArrayList<>(3);
         EnvironmentDto environment = mock(EnvironmentDto.class);
-        environments.put(ACTIVE_ENV, environment);
+        environments.add(environment);
         when(workspaceConfig.getEnvironments()).thenReturn(environments);
         MachineConfigDto devMachineConfig = mock(MachineConfigDto.class);
         when(devMachineConfig.getName()).thenReturn(MACHINE_NAME);
