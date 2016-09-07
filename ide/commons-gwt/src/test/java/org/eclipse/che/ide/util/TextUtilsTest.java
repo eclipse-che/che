@@ -8,13 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.project.shared.dto.event;
+package org.eclipse.che.ide.util;
 
-import org.eclipse.che.dto.shared.DTO;
+import com.google.common.hash.Hashing;
 
-@DTO
-public interface FileClosedDto {
-    String getPath();
+import org.junit.Test;
 
-    FileClosedDto withPath(String path);
+import static java.nio.charset.Charset.defaultCharset;
+import static org.junit.Assert.assertEquals;
+
+/**
+ * @author Valeriy Svydenko
+ */
+public class TextUtilsTest {
+    private static final String TEXT = "to be or not to be";
+
+    @Test
+    public void textShouldBeEncodedInMD5Hash() {
+        assertEquals(TextUtils.md5(TEXT), Hashing.md5().hashString(TEXT, defaultCharset()).toString());
+    }
 }

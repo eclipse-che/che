@@ -51,13 +51,13 @@ public class WebSocketTransmissionDispatcher {
         final String protocol = transmission.getProtocol();
         final String message = transmission.getMessage();
 
-        Log.info(getClass(), "Receiving a web socket transmission. Type: " + protocol + " Message: " + message);
+        Log.debug(getClass(), "Receiving a web socket transmission. Type: " + protocol + " Message: " + message);
 
         for (Entry<String, WebSocketMessageReceiver> entry : receivers.entrySet()) {
             final String protocolCandidate = entry.getKey();
             if (Objects.equals(protocol, protocolCandidate)) {
                 final WebSocketMessageReceiver receiver = entry.getValue();
-                Log.info(getClass(), "Matching web socket transmission receiver: " + receiver.getClass());
+                Log.debug(getClass(), "Matching web socket transmission receiver: " + receiver.getClass());
                 receiver.receive(message);
 
                 return;

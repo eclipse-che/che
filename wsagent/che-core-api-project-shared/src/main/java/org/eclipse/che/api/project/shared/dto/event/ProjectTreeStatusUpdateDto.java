@@ -13,8 +13,12 @@ package org.eclipse.che.api.project.shared.dto.event;
 import org.eclipse.che.dto.shared.DTO;
 
 @DTO
-public interface FileUpdatedDto {
+public interface ProjectTreeStatusUpdateDto {
     String getPath();
 
-    FileUpdatedDto withPath(String path);
+    ProjectTreeStatusUpdateDto withPath(String path);
+
+    FileWatcherEventType getType();
+
+    ProjectTreeStatusUpdateDto withType(FileWatcherEventType type);
 }

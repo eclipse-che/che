@@ -34,7 +34,7 @@ public class SessionWebSocketInitializer implements WebSocketInitializer {
 
     @Override
     public void initialize(Map<String, String> properties) {
-        Log.info(getClass(), "Initializing with properties: " + properties);
+        Log.debug(getClass(), "Initializing with properties: " + properties);
 
         final String url = properties.get("url");
 
@@ -44,7 +44,7 @@ public class SessionWebSocketInitializer implements WebSocketInitializer {
 
     @Override
     public void terminate() {
-        Log.info(getClass(), "Stopping");
+        Log.debug(getClass(), "Stopping");
 
         sustainer.disable();
         connection.close();

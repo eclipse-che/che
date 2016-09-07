@@ -33,9 +33,10 @@ import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
 import org.eclipse.che.api.vfs.impl.file.event.HiEventService;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventListener;
 import org.eclipse.che.api.vfs.impl.file.event.LoEventService;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.GitCheckoutHiEventDetector;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.OpenedFileContentUpdateEventDetector;
-import org.eclipse.che.api.vfs.impl.file.event.detectors.PomModifiedHiEventDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.FileStatusDetector;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationReceiver;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.FileTrackingOperationTransmitter;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.MediaTypeFilter;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
@@ -47,6 +48,7 @@ import java.nio.file.PathMatcher;
  *
  * @author gazarenkov
  * @author Artem Zatsarynnyi
+ * @author Dmitry Kuleshov
  */
 public class ProjectApiModule extends AbstractModule {
 
@@ -95,14 +97,14 @@ public class ProjectApiModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), new TypeLiteral<HiEventDetector<?>>() {
                 });
 
-        highLevelVfsEventDetectorMultibinder.addBinding().to(PomModifiedHiEventDetector.class);
-        highLevelVfsEventDetectorMultibinder.addBinding().to(GitCheckoutHiEventDetector.class);
-        highLevelVfsEventDetectorMultibinder.addBinding().to(OpenedFileContentUpdateEventDetector.class);
+        highLevelVfsEventDetectorMultibinder.addBinding().to(FileStatusDetector.class);
+        highLevelVfsEventDetectorMultibinder.addBinding().to(ProjectTreeChangesDetector.class);
+
+        bind(FileTrackingOperationTransmitter.class).asEagerSingleton();
 
         MapBinder<String, JsonRpcRequestReceiver> requestReceivers =
                 MapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
 
-        requestReceivers.addBinding("event:file-opened").to(OpenedFileContentUpdateEventDetector.class);
-        requestReceivers.addBinding("event:file-closed").to(OpenedFileContentUpdateEventDetector.class);
+        requestReceivers.addBinding("track:editor-file").to(FileTrackingOperationReceiver.class);
     }
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event.detectors;
+package org.eclipse.che.api.git;
 
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.vfs.impl.file.event.EventTreeNode;
@@ -44,5 +44,4 @@ abstract class HiVfsEventDetectorTestHelper {
 
         addEventAndCreatePrecedingNodes(root, loEvent);
     }
-
 }

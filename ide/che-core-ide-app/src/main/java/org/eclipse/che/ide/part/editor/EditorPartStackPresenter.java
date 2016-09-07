@@ -310,6 +310,20 @@ public class EditorPartStackPresenter extends PartStackPresenter implements Edit
     }
 
     @Nullable
+    @Override
+    public EditorTab getTabByPath(@NotNull Path path) {
+        for (TabItem tab : parts.keySet()) {
+            EditorTab editorTab = (EditorTab)tab;
+            Path currentPath = editorTab.getFile().getLocation();
+
+            if (currentPath.equals(path)) {
+                return editorTab;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
     public PartPresenter getPartByPath(Path path) {
         for (TabItem tab : parts.keySet()) {
             EditorTab editorTab = (EditorTab)tab;
