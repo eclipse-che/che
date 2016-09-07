@@ -47,6 +47,8 @@ import org.eclipse.che.ide.workspace.WorkspacePresenter;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Performs initial application startup.
@@ -115,7 +117,9 @@ public class BootstrapController {
 
                         wsAgentStateControllerProvider.get().initialize(devMachine);
                         wsAgentURLModifier.initialize(devMachine);
-                        startWsAgentComponents(components.values().iterator());
+                        SortedMap<String, Provider<WsAgentComponent>> sortedComponents = new TreeMap<>();
+                        sortedComponents.putAll(components);
+                        startWsAgentComponents(sortedComponents.values().iterator());
                     }
                 }).catchError(new Operation<PromiseError>() {
                     @Override
@@ -158,6 +162,7 @@ public class BootstrapController {
             component.start(new Callback<WsAgentComponent, Exception>() {
                 @Override
                 public void onSuccess(WsAgentComponent result) {
+                    Log.error(component.getClass(), result);
                     startWsAgentComponents(componentProviderIterator);
                 }
 
