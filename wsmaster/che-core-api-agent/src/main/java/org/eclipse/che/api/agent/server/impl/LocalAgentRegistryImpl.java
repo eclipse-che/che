@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -33,11 +33,11 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
@@ -61,13 +61,13 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
     private static final   Pattern AGENTS = Pattern.compile(".*[//]?agents/[^//]+[.]json");
 
     private final Map<String, Agent> agents;
-    private final Set<String>        agentNames;
+    private final List<String>       agentNames;
 
     @Inject
     public LocalAgentRegistryImpl() throws IOException {
         this.agents = new HashMap<>();
         findAgents();
-        this.agentNames = ImmutableSet.copyOf(agents.keySet());
+        this.agentNames = ImmutableList.copyOf(agents.keySet());
     }
 
     @Override
@@ -88,11 +88,12 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
     @Override
     public List<String> getVersions(String name) throws AgentException {
         Agent agent = doGetAgent(name);
-        return singletonList(agent.getVersion());
+        String version = agent.getVersion();
+        return version == null ? Collections.emptyList() : singletonList(version);
     }
 
     @Override
-    public Set<String> getAgents() throws AgentException {
+    public List<String> getAgents() throws AgentException {
         return agentNames;
     }
 

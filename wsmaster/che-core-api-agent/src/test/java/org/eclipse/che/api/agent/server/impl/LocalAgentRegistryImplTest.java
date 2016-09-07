@@ -16,7 +16,7 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.Set;
+import java.util.List;
 
 import static org.testng.AssertJUnit.assertFalse;
 
@@ -31,7 +31,7 @@ public class LocalAgentRegistryImplTest {
 
     @Test
     public void testInitializeAgents() throws Exception {
-        Set<String> agents = agentRegistry.getAgents();
+        List<String> agents = agentRegistry.getAgents();
         assertFalse(agents.isEmpty());
     }
 }

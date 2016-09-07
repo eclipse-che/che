@@ -16,7 +16,6 @@ import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Anatoliy Bazko
@@ -86,5 +85,5 @@ public interface AgentRegistry {
      * @return list of agents
      * @throws AgentException
      */
-    Set<String> getAgents() throws AgentException;
+    List<String> getAgents() throws AgentException;
 }

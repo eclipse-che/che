@@ -33,10 +33,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -108,10 +106,10 @@ public class AgentRegistryImpl implements AgentRegistry {
     }
 
     @Override
-    public Set<String> getAgents() throws AgentException {
-        return new HashSet<>(asList("org.eclipse.che.terminal",
-                                    "org.eclipse.che.ws-agent",
-                                    "org.eclipse.che.ssh"));
+    public List<String> getAgents() throws AgentException {
+        return asList("org.eclipse.che.terminal",
+                      "org.eclipse.che.ws-agent",
+                      "org.eclipse.che.ssh");
     }
 
     protected Agent doGetRemoteAgent(URL url) throws AgentException {
