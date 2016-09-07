@@ -26,11 +26,11 @@ init_logging() {
 }
 
 error_exit() {
-  echo  "---------------------------------------"
-  error "!!!"
-  error "!!! ${1}"
-  error "!!!"
-  echo  "---------------------------------------"
+#  echo  "---------------------------------------"
+#  error "!!!"
+  error "${1}"
+#  error "!!!"
+#  echo  "---------------------------------------"
   return
 }
 
@@ -86,19 +86,17 @@ init_global_variables() {
   IS_PSEUDO_TTY=${IS_PSEUDO_TTY:-${DEFAULT_IS_PSEUDO_TTY}}
   CHE_DATA_FOLDER=${CHE_DATA_FOLDER:-${DEFAULT_CHE_DATA_FOLDER}}
 
-  # If Windows & boot2docker, then CHE_DATA_FOLDER must be subdirectory of %userprofile%
-#  if [ has_docker_for_windows_client && is_boot2docker ]; then
-
-#    if [[ $CHE_DATA_FOLDER != $USERPROFILE* ]]; then
- #     echo "nope"
-  #    CHE_DATA_FOLDER="$USERPROFILE"/che
-  #  fi
- # fi
-
   GLOBAL_NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
   GLOBAL_HOST_ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
   GLOBAL_UNAME=$(docker run --rm alpine sh -c "uname -r")
   GLOBAL_GET_DOCKER_HOST_IP=$(get_docker_host_ip)
+
+  if is_boot2docker && has_docker_for_windows_client; then
+  	if [[ ! "${CHE_DATA_FOLDER}" == *"${USERPROFILE}"* ]]; then
+      error_exit "Boot2docker for Windows - set CHE_DATA_FOLDER to subdir of ${USERPROFILE}. Exiting."
+      return 1
+  	fi
+  fi
 
   USAGE="
 Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
@@ -521,6 +519,12 @@ generate_temporary_che_properties_file() {
 
 execute_che_launcher() {
   debug $FUNCNAME
+
+  if [ $# -gt 0 ]; then
+    error "${CHE_MINI_PRODUCT_NAME} start/stop/start: You passed unknown options."
+    return
+  fi
+
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME} ${CHE_UTILITY_VERSION}
   docker_run_with_che_properties "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${CHE_CLI_ACTION}" || true
 }
@@ -813,7 +817,7 @@ execute_che_info() {
       execute_che_test "$@"
     ;;
     *)
-      info "Unknown debug flag passed: $2. Exiting."
+      info "Unknown info flag passed: $2. Exiting."
     ;;
   esac
 }
@@ -884,7 +888,7 @@ run_connectivity_tests() {
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} \ 
+                                ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
@@ -899,7 +903,7 @@ run_connectivity_tests() {
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
                                 ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} \
-                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                                  -I ${AGENT_INTERNAL_IP}:${AGENT_INTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
 
@@ -920,16 +924,11 @@ check_docker
 init_global_variables
 parse_command_line "$@"
 
-if is_boot2docker; then
-  info ""
-  info "!!! Boot2docker detected - save workspaces only in %userprofile% !!!"
-  info ""
-fi
-
 case ${CHE_CLI_ACTION} in
   start|stop|restart)
+    shift 
     load_profile
-    execute_che_launcher
+    execute_che_launcher "$@"
   ;;
   profile)
     execute_profile "$@"
