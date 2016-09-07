@@ -15,6 +15,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.spi.AccountValidator;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -70,6 +72,8 @@ public class UserServiceTest {
     @Mock(answer = Answers.RETURNS_MOCKS)
     private UserManager          userManager;
     @Mock
+    private AccountManager       accountManager;
+    @Mock
     private TokenValidator       tokenValidator;
     @Mock
     private UserLinksInjector    linksInjector;
@@ -82,7 +86,7 @@ public class UserServiceTest {
     public void initService() {
         initMocks(this);
 
-        userValidator = new UserValidator(userManager);
+        userValidator = new UserValidator(new AccountValidator(accountManager));
 
         // Return the incoming instance when injectLinks is called
         when(linksInjector.injectLinks(any(), any())).thenAnswer(inv -> inv.getArguments()[0]);
@@ -90,23 +94,22 @@ public class UserServiceTest {
         userService = new UserService(userManager, tokenValidator, userValidator, linksInjector, true);
     }
 
-    // TODO uncommented this when problem with custom json provider in 'everrest assured' will be fixed.
-//    @Test
-//    public void shouldCreateUserFromToken() throws Exception {
-//        when(tokenValidator.validateToken("token_value")).thenReturn(new UserImpl("id", "test@eclipse.org", "test"));
-//
-//        final Response response = given().auth()
-//                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-//                                         .when()
-//                                         .contentType("application/json")
-//                                         .post(SECURE_PATH + "/user?token=token_value");
-//
-//        assertEquals(response.statusCode(), 201);
-//        verify(userManager).create(userCaptor.capture(), anyBoolean());
-//        final User user = userCaptor.getValue();
-//        assertEquals(user.getEmail(), "test@eclipse.org");
-//        assertEquals(user.getName(), "test");
-//    }
+    @Test
+    public void shouldCreateUserFromToken() throws Exception {
+        when(tokenValidator.validateToken("token_value")).thenReturn(new UserImpl("id", "test@eclipse.org", "test"));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user?token=token_value");
+
+        assertEquals(response.statusCode(), 201);
+        verify(userManager).create(userCaptor.capture(), anyBoolean());
+        final User user = userCaptor.getValue();
+        assertEquals(user.getEmail(), "test@eclipse.org");
+        assertEquals(user.getName(), "test");
+    }
 
     @Test
     public void shouldCreateUserFromEntity() throws Exception {
@@ -144,33 +147,31 @@ public class UserServiceTest {
         assertEquals(unwrapError(response), "Password should contain at least 8 characters");
     }
 
-    // TODO uncommented this when problem with custom json provider in 'everrest assured' will be fixed.
-//    @Test
-//    public void shouldNotCreateUserIfTokenIsNotValid() throws Exception {
-//        when(tokenValidator.validateToken("token_value")).thenThrow(new ConflictException("error"));
-//
-//        final Response response = given().auth()
-//                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-//                                         .when()
-//                                         .contentType("application/json")
-//                                         .post(SECURE_PATH + "/user?token=token_value");
-//
-//        assertEquals(response.statusCode(), 409);
-//        assertEquals(unwrapError(response), "error");
-//    }
+    @Test
+    public void shouldNotCreateUserIfTokenIsNotValid() throws Exception {
+        when(tokenValidator.validateToken("token_value")).thenThrow(new ConflictException("error"));
 
-    // TODO uncommented this when problem with custom json provider in 'everrest assured' will be fixed.
-//    @Test
-//    public void shouldNotCreateUserFromEntityIfEntityIsNull() throws Exception {
-//        final Response response = given().auth()
-//                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-//                                         .when()
-//                                         .contentType("application/json")
-//                                         .post(SECURE_PATH + "/user");
-//
-//        assertEquals(response.statusCode(), 400);
-//        assertEquals(unwrapError(response), "User required");
-//    }
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user?token=token_value");
+
+        assertEquals(response.statusCode(), 409);
+        assertEquals(unwrapError(response), "error");
+    }
+
+    @Test
+    public void shouldNotCreateUserFromEntityIfEntityIsNull() throws Exception {
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .contentType("application/json")
+                                         .post(SECURE_PATH + "/user");
+
+        assertEquals(response.statusCode(), 400);
+        assertEquals(unwrapError(response), "User required");
+    }
 
     @Test
     public void shouldNotCreateUserFromEntityIfEmailIsNull() throws Exception {
