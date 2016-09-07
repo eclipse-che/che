@@ -19,34 +19,29 @@ import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
-import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.download.DownloadContainer;
 
 import javax.validation.constraints.NotNull;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
- * Download selected root project in the application context.
+ * Download all projects from the workspace.
  *
- * @author Roman Nikitenko
- * @author Dmitry Shnurenko
- * @author Vlad Zhukovskyi
- * @see AppContext#getRootProject()
+ * @author Valeriy Svydenko
  */
 @Singleton
-public class DownloadProjectAction extends AbstractPerspectiveAction {
+public class DownloadWsAction extends AbstractPerspectiveAction {
 
-    private final AppContext               appContext;
-    private       DownloadContainer        downloadContainer;
+    private final AppContext        appContext;
+    private final DownloadContainer downloadContainer;
 
     @Inject
-    public DownloadProjectAction(AppContext appContext,
-                                 CoreLocalizationConstant locale,
-                                 Resources resources,
-                                 DownloadContainer downloadContainer) {
+    public DownloadWsAction(AppContext appContext,
+                            CoreLocalizationConstant locale,
+                            Resources resources,
+                            DownloadContainer downloadContainer) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
               locale.downloadProjectAsZipName(),
               locale.downloadProjectAsZipDescription(),
@@ -59,22 +54,14 @@ public class DownloadProjectAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Resource resource = appContext.getResource();
-
-        if (resource == null || resource.getResourceType() != PROJECT) {
-            return;
-        }
-        final Project project = (Project)resource;
-
-        downloadContainer.setUrl(project.getURL());
+        downloadContainer.setUrl(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/export/");
     }
 
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent e) {
-        final Resource[] resources = appContext.getResources();
-
+        final Project[] projects = appContext.getProjects();
         e.getPresentation().setVisible(true);
-        e.getPresentation().setEnabled(resources != null && resources.length == 1 && resources[0].getResourceType() == PROJECT);
+        e.getPresentation().setEnabled(projects != null && projects.length > 0);
     }
 }
