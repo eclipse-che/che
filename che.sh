@@ -92,9 +92,10 @@ init_global_variables() {
   GLOBAL_GET_DOCKER_HOST_IP=$(get_docker_host_ip)
 
   if is_boot2docker && has_docker_for_windows_client; then
-  	if [[ ! "${CHE_DATA_FOLDER}" == *"${USERPROFILE}"* ]]; then
-      error_exit "Boot2docker for Windows - set CHE_DATA_FOLDER to subdir of ${USERPROFILE}. Exiting."
-      return 1
+  	if [[ "${CHE_DATA_FOLDER,,}" != *"${USERPROFILE,,}"* ]]; then
+  	  CHE_DATA_FOLDER=$(get_mount_path "${USERPROFILE}/.che/")
+      info "Boot2docker for Windows - CHE_DATA_FOLDER set to $CHE_DATA_FOLDER"
+      return
   	fi
   fi
 
@@ -440,6 +441,7 @@ get_list_of_che_system_environment_variables() {
     echo "CHE_VERSION=${CHE_VERSION}" >> ~/.che/tmpgibberish
     echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> ~/.che/tmpgibberish
     echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> ~/.che/tmpgibberish
+    echo "CHE_DATA_FOLDER=${CHE_DATA_FOLDER}" >> ~/.che/tmpgibberish
 
     CHE_VARIABLES=$(env | grep CHE_)
 
@@ -449,15 +451,15 @@ get_list_of_che_system_environment_variables() {
 
     # Add in known proxy variables
     if [ ! -z ${http_proxy+x} ]; then
-      echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
+      echo "http_proxy=${http_proxy}" >> ~/.che/tmpgibberish
     fi
 
     if [ ! -z ${https_proxy+x} ]; then
-      echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
+      echo "https_proxy=${https_proxy}" >> ~/.che/tmpgibberish
     fi
 
     if [ ! -z ${no_proxy+x} ]; then
-      echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
+      echo "no_proxy=${no_proxy}" >> ~/.che/tmpgibberish
     fi
   fi
 }
