@@ -26,11 +26,11 @@ init_logging() {
 }
 
 error_exit() {
-  echo  "---------------------------------------"
-  error "!!!"
-  error "!!! ${1}"
-  error "!!!"
-  echo  "---------------------------------------"
+#  echo  "---------------------------------------"
+#  error "!!!"
+  error "${1}"
+#  error "!!!"
+#  echo  "---------------------------------------"
   return
 }
 
@@ -86,19 +86,18 @@ init_global_variables() {
   IS_PSEUDO_TTY=${IS_PSEUDO_TTY:-${DEFAULT_IS_PSEUDO_TTY}}
   CHE_DATA_FOLDER=${CHE_DATA_FOLDER:-${DEFAULT_CHE_DATA_FOLDER}}
 
-  # If Windows & boot2docker, then CHE_DATA_FOLDER must be subdirectory of %userprofile%
-#  if [ has_docker_for_windows_client && is_boot2docker ]; then
-
-#    if [[ $CHE_DATA_FOLDER != $USERPROFILE* ]]; then
- #     echo "nope"
-  #    CHE_DATA_FOLDER="$USERPROFILE"/che
-  #  fi
- # fi
-
   GLOBAL_NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
   GLOBAL_HOST_ARCH=$(docker version --format {{.Client}} | cut -d" " -f5)
   GLOBAL_UNAME=$(docker run --rm alpine sh -c "uname -r")
   GLOBAL_GET_DOCKER_HOST_IP=$(get_docker_host_ip)
+
+  if is_boot2docker && has_docker_for_windows_client; then
+  	if [[ "${CHE_DATA_FOLDER,,}" != *"${USERPROFILE,,}"* ]]; then
+  	  CHE_DATA_FOLDER=$(get_mount_path "${USERPROFILE}/.che/")
+      info "Boot2docker for Windows - CHE_DATA_FOLDER set to $CHE_DATA_FOLDER"
+      return
+  	fi
+  fi
 
   USAGE="
 Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
@@ -203,8 +202,11 @@ docker_run() {
 docker_run_with_env_file() {
   debug $FUNCNAME
   get_list_of_che_system_environment_variables
-  docker_run --env-file=tmpgibberish "$@"
-  rm -rf $PWD/tmpgibberish > /dev/null
+  
+  # Silly issue - docker run --env-file does not accept path to file - must be in same dir
+  cd ~/.che
+  docker_run --env-file tmpgibberish "$@"
+  rm -rf ~/.che/tmpgibberish > /dev/null
 }
 
 docker_run_with_pseudo_tty() {
@@ -423,39 +425,41 @@ get_list_of_che_system_environment_variables() {
 
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
-  DOCKER_ENV=$(get_mount_path $PWD)/tmpgibberish
-  touch $DOCKER_ENV
+  DOCKER_ENV=~/.che/tmpgibberish
+  test -d ~/.che || mkdir -p ~/.che
+  touch ~/.che/tmpgibberish
   
   if has_default_profile; then
-    cat ~/.che/profiles/${CHE_PROFILE} >> $DOCKER_ENV
+    cat ~/.che/profiles/${CHE_PROFILE} >> ~/.che/tmpgibberish
   else
 
     # Grab these values to send to other utilities - they need to know the values  
-    echo "CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME}" >> $DOCKER_ENV
-    echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> $DOCKER_ENV
-    echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> $DOCKER_ENV
-    echo "CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME}" >> $DOCKER_ENV
-    echo "CHE_VERSION=${CHE_VERSION}" >> $DOCKER_ENV
-    echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> $DOCKER_ENV
-    echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> $DOCKER_ENV
+    echo "CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME}" >> ~/.che/tmpgibberish
+    echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> ~/.che/tmpgibberish
+    echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> ~/.che/tmpgibberish
+    echo "CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME}" >> ~/.che/tmpgibberish
+    echo "CHE_VERSION=${CHE_VERSION}" >> ~/.che/tmpgibberish
+    echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> ~/.che/tmpgibberish
+    echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> ~/.che/tmpgibberish
+    echo "CHE_DATA_FOLDER=${CHE_DATA_FOLDER}" >> ~/.che/tmpgibberish
 
     CHE_VARIABLES=$(env | grep CHE_)
 
     if [ ! -z ${CHE_VARIABLES+x} ]; then
-      env | grep CHE_ >> $DOCKER_ENV
+      env | grep CHE_ >> ~/.che/tmpgibberish
     fi
 
     # Add in known proxy variables
     if [ ! -z ${http_proxy+x} ]; then
-      echo "http_proxy=${http_proxy}" >> $DOCKER_ENV
+      echo "http_proxy=${http_proxy}" >> ~/.che/tmpgibberish
     fi
 
     if [ ! -z ${https_proxy+x} ]; then
-      echo "https_proxy=${https_proxy}" >> $DOCKER_ENV
+      echo "https_proxy=${https_proxy}" >> ~/.che/tmpgibberish
     fi
 
     if [ ! -z ${no_proxy+x} ]; then
-      echo "no_proxy=${no_proxy}" >> $DOCKER_ENV
+      echo "no_proxy=${no_proxy}" >> ~/.che/tmpgibberish
     fi
   fi
 }
@@ -517,6 +521,12 @@ generate_temporary_che_properties_file() {
 
 execute_che_launcher() {
   debug $FUNCNAME
+
+  if [ $# -gt 0 ]; then
+    error "${CHE_MINI_PRODUCT_NAME} start/stop/start: You passed unknown options."
+    return
+  fi
+
   check_current_image_and_update_if_not_found ${CHE_LAUNCHER_IMAGE_NAME} ${CHE_UTILITY_VERSION}
   docker_run_with_che_properties "${CHE_LAUNCHER_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${CHE_CLI_ACTION}" || true
 }
@@ -809,7 +819,7 @@ execute_che_info() {
       execute_che_test "$@"
     ;;
     *)
-      info "Unknown debug flag passed: $2. Exiting."
+      info "Unknown info flag passed: $2. Exiting."
     ;;
   esac
 }
@@ -880,7 +890,7 @@ run_connectivity_tests() {
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
-                                ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} \ 
+                                ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} \
                                   -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
@@ -895,7 +905,7 @@ run_connectivity_tests() {
   export HTTP_CODE=$(docker run --rm --name fakeserver \
                                 --entrypoint=curl \
                                 ${CHE_SERVER_IMAGE_NAME}:${CHE_VERSION} \
-                                  -I ${AGENT_EXTERNAL_IP}:${AGENT_EXTERNAL_PORT}/alpine-release \
+                                  -I ${AGENT_INTERNAL_IP}:${AGENT_INTERNAL_PORT}/alpine-release \
                                   -s -o /dev/null \
                                   --write-out "%{http_code}")
 
@@ -916,16 +926,11 @@ check_docker
 init_global_variables
 parse_command_line "$@"
 
-if is_boot2docker; then
-  info ""
-  info "!!! Boot2docker detected - save workspaces only in %userprofile% !!!"
-  info ""
-fi
-
 case ${CHE_CLI_ACTION} in
   start|stop|restart)
+    shift 
     load_profile
-    execute_che_launcher
+    execute_che_launcher "$@"
   ;;
   profile)
     execute_profile "$@"
