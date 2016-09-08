@@ -12,7 +12,7 @@ package org.eclipse.che.api.core.util;
 
 import java.io.IOException;
 
-import static org.eclipse.che.api.core.util.ErrorConsumer.ErrorIndicator.DEFAULT_ERROR_INDICATOR;
+import static org.eclipse.che.api.core.util.ErrorFilteredConsumer.ErrorIndicator.DEFAULT_ERROR_INDICATOR;
 
 /**
  * Consumes all output and redirect to another consumer
@@ -20,17 +20,17 @@ import static org.eclipse.che.api.core.util.ErrorConsumer.ErrorIndicator.DEFAULT
  *
  * @author Anatolii Bazko
  */
-public class ErrorConsumer implements LineConsumer {
+public class ErrorFilteredConsumer implements LineConsumer {
 
     private final ErrorIndicator errorIndicator;
     private final LineConsumer   lineConsumer;
 
-    public ErrorConsumer(ErrorIndicator errorIndicator, LineConsumer lineConsumer) {
+    public ErrorFilteredConsumer(ErrorIndicator errorIndicator, LineConsumer lineConsumer) {
         this.errorIndicator = errorIndicator;
         this.lineConsumer = lineConsumer;
     }
 
-    public ErrorConsumer(LineConsumer lineConsumer) {
+    public ErrorFilteredConsumer(LineConsumer lineConsumer) {
         this(DEFAULT_ERROR_INDICATOR, lineConsumer);
     }
 
@@ -53,6 +53,6 @@ public class ErrorConsumer implements LineConsumer {
     public interface ErrorIndicator {
         boolean isError(String line);
 
-        ErrorIndicator DEFAULT_ERROR_INDICATOR = line -> line.contains("[STDERR]");
+        ErrorIndicator DEFAULT_ERROR_INDICATOR = line -> line.startsWith("[STDERR]");
     }
 }

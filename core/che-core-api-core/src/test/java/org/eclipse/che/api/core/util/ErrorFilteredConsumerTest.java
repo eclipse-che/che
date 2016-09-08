@@ -18,19 +18,19 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Anatolii Bazko
  */
-public class ErrorConsumerTest {
+public class ErrorFilteredConsumerTest {
 
     @Test
     public void testRedirect() throws Exception {
         LineConsumer lineConsumer = mock(LineConsumer.class);
 
-        ErrorConsumer errorConsumer = new ErrorConsumer(lineConsumer);
+        ErrorFilteredConsumer errorFilteredConsumer = new ErrorFilteredConsumer(lineConsumer);
 
-        errorConsumer.writeLine("Line 1");
-        errorConsumer.writeLine("Line 2");
-        errorConsumer.writeLine("[STDERR] Line 3");
-        errorConsumer.writeLine("[STDERR] Line 4");
-        errorConsumer.writeLine("Line 5");
+        errorFilteredConsumer.writeLine("Line 1");
+        errorFilteredConsumer.writeLine("Line 2");
+        errorFilteredConsumer.writeLine("[STDERR] Line 3");
+        errorFilteredConsumer.writeLine("[STDERR] Line 4");
+        errorFilteredConsumer.writeLine("Line 5");
 
         verify(lineConsumer).writeLine("[STDERR] Line 3");
         verify(lineConsumer).writeLine("[STDERR] Line 4");

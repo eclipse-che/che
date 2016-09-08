@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * An entity that might additionally injected into machine and brings functionality.
+ *
  * @author Anatoliy Bazko
  */
 public interface Agent {

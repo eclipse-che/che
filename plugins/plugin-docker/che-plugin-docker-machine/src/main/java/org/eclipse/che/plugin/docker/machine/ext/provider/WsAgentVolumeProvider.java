@@ -35,30 +35,30 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  * @author Alexander Garagatyi
  */
 @Singleton
-public class ExtServerVolumeProvider implements Provider<String> {
+public class WsAgentVolumeProvider implements Provider<String> {
 
     private static final String CONTAINER_TARGET = ":/mnt/che/ws-agent.tar.gz:ro,Z";
     private static final String WS_AGENT         = "ws-agent.tar.gz";
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExtServerVolumeProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WsAgentVolumeProvider.class);
 
     @Inject
     @Named("machine.server.ext.archive")
-    private String extServerArchivePath;
+    private String wsAgentArchivePath;
 
     @Override
     public String get() {
         if (SystemInfo.isWindows()) {
             try {
                 final Path cheHome = WindowsHostUtils.ensureCheHomeExist();
-                final Path path = Files.copy(Paths.get(extServerArchivePath), cheHome.resolve(WS_AGENT), REPLACE_EXISTING);
+                final Path path = Files.copy(Paths.get(wsAgentArchivePath), cheHome.resolve(WS_AGENT), REPLACE_EXISTING);
                 return path.toString() + CONTAINER_TARGET;
             } catch (IOException e) {
                 LOG.warn(e.getMessage());
                 throw new RuntimeException(e);
             }
         } else {
-            return extServerArchivePath + CONTAINER_TARGET;
+            return wsAgentArchivePath + CONTAINER_TARGET;
         }
     }
 }
