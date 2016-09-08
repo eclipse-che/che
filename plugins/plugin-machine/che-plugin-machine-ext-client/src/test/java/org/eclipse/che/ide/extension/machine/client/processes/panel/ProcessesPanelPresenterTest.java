@@ -477,7 +477,7 @@ public class ProcessesPanelPresenterTest {
         when(outputConsole.isFinished()).thenReturn(true);
         presenter.consoles.put(PROCESS_ID, outputConsole);
 
-        presenter.onProcessFinished(new ProcessFinishedEvent(null));
+        presenter.onProcessFinished(new ProcessFinishedEvent(PID));
 
         verify(view).setStopButtonVisibility(PROCESS_ID, false);
     }

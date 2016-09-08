@@ -29,6 +29,24 @@
     width: 100%;
 }
 
+.noborder {
+    border: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: windowContentBackground!important;
+}
+
+.noborder * {
+    border: none!important;
+    overflow: visible!important;
+}
+
+.noborder tr > td:last-child {
+    padding-right: 0px;
+}
+
 .proposalIcon {
     max-width: 16px;
     text-align: center;

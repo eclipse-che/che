@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.vfs.impl.file.event.detectors;
+package org.eclipse.che.plugin.maven.server;
 
 import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
@@ -33,13 +33,12 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * highest (in context of file system location hierarchy) spotted.
  *
  * <p>
- *     Note: this implementation deals only with standard project object model file
- *     names - {@code pom.xml}. So if it is necessary to support custom naming you
- *     can extend this class.
+ * Note: this implementation deals only with standard project object model file
+ * names - {@code pom.xml}. So if it is necessary to support custom naming you
+ * can extend this class.
  * </p>
  *
  * @author Dmitry Kuleshov
- *
  * @since 4.5
  */
 @Beta
@@ -61,13 +60,13 @@ public class PomModifiedHiEventDetector implements HiEventDetector<PomModifiedEv
         }
 
         final Optional<EventTreeNode> highestPom = eventTreeNode.stream()
-                                                          .filter(EventTreeNode::modificationOccurred)
-                                                          .filter(EventTreeNode::isFile)
-                                                          .filter(event -> POM_XML.equals(event.getName()))
-                                                          .filter(event -> MODIFIED.equals(event.getLastEventType()))
-                                                          // note the revers order of o1 and o2
-                                                          .sorted((o1, o2) -> o2.getPath().compareTo(o1.getPath()))
-                                                          .findFirst();
+                                                                .filter(EventTreeNode::modificationOccurred)
+                                                                .filter(EventTreeNode::isFile)
+                                                                .filter(event -> POM_XML.equals(event.getName()))
+                                                                .filter(event -> MODIFIED.equals(event.getLastEventType()))
+                                                                // note the revers order of o1 and o2
+                                                                .sorted((o1, o2) -> o2.getPath().compareTo(o1.getPath()))
+                                                                .findFirst();
 
         if (!highestPom.isPresent()) {
             return empty();

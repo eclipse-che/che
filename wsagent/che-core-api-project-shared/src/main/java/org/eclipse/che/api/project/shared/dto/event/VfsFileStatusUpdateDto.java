@@ -10,21 +10,21 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.shared.dto.event;
 
-import com.google.common.annotations.Beta;
+import com.google.common.hash.HashCode;
 
 import org.eclipse.che.dto.shared.DTO;
 
-/**
- * To transfer branch name after git checkout operation
- *
- * @author Dmitry Kuleshov
- *
- * @since 4.5
- */
-@Beta
 @DTO
-public interface GitBranchCheckoutEventDto {
-    String getBranchName();
+public interface VfsFileStatusUpdateDto {
+    FileWatcherEventType getType();
 
-    GitBranchCheckoutEventDto withBranchName(String branchName);
+    VfsFileStatusUpdateDto withType(FileWatcherEventType type);
+
+    String getPath();
+
+    VfsFileStatusUpdateDto withPath(String path);
+
+    String getHashCode();
+
+    VfsFileStatusUpdateDto withHashCode(String hashCode);
 }

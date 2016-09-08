@@ -30,7 +30,7 @@ import org.eclipse.che.ide.resource.Path;
  * @since 4.4.0
  */
 @Beta
-public interface File extends Resource, VirtualFile {
+public interface File extends Resource, VirtualFile, ModificationTracker {
 
     /** @see VirtualFile#getPath() */
     String getPath();

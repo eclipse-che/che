@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Map;
 
+import static org.eclipse.che.api.workspace.shared.Constants.WS_AGENT_PROCESS_NAME;
+
 /**
  * Starts ws agent in the machine and waits until ws agent sends notification about its start
  *
@@ -42,7 +44,6 @@ import java.util.Map;
 @Singleton
 public class WsAgentLauncherImpl implements WsAgentLauncher {
     public static final String WS_AGENT_PROCESS_START_COMMAND = "machine.ws_agent.run_command";
-    public static final String WS_AGENT_PROCESS_NAME          = "CheWsAgent";
 
     protected static final Logger LOG = LoggerFactory.getLogger(WsAgentLauncherImpl.class);
 
@@ -88,7 +89,9 @@ public class WsAgentLauncherImpl implements WsAgentLauncher {
                                                      devMachine.getId(),
                                                      new CommandImpl(WS_AGENT_PROCESS_NAME,
                                                                      wsAgentStartCommandLine,
-                                                                     "Arbitrary"),
+                                                                     WS_AGENT_PROCESS_NAME), //for server side type of command mean nothing
+                                                                                             //but we will use it as marker on
+                                                                                             //client side for track this command
                                                      getWsAgentProcessOutputChannel(devMachine.getWorkspaceId()));
             final long pingStartTimestamp = System.currentTimeMillis();
             LOG.debug("Starts pinging ws agent. Workspace ID:{}. Url:{}. Timestamp:{}",

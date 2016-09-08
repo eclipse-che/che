@@ -186,4 +186,11 @@ public class EditorTabWidgetTest {
 
         assertEquals(tab.getFile(), newFile);
     }
+
+    @Test
+    public void tabShouldBeReturned() throws Exception {
+        tab.setFile(file);
+
+        assertEquals(file, tab.getFile());
+    }
 }

@@ -10,11 +10,29 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.shared.dto.event;
 
+import com.google.common.annotations.Beta;
+
 import org.eclipse.che.dto.shared.DTO;
 
+/**
+ * To transfer branch name after git checkout operation
+ *
+ * @author Dmitry Kuleshov
+ * @since 4.5
+ */
+@Beta
 @DTO
-public interface FileOpenedDto {
-    String getPath();
+public interface GitCheckoutEventDto {
+    Type getType();
 
-    FileOpenedDto withPath(String path);
+    String getName();
+
+    GitCheckoutEventDto withType(Type type);
+
+    GitCheckoutEventDto withName(String name);
+
+    enum Type {
+        BRANCH,
+        REVISION,
+    }
 }

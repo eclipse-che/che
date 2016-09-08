@@ -55,7 +55,7 @@ public class WebSocketJsonRpcDispatcher implements WebSocketMessageReceiver {
             final String typeCandidate = entry.getKey();
             if (Objects.equals(typeCandidate, type)) {
                 final JsonRpcDispatcher dispatcher = entry.getValue();
-                Log.info(getClass(), "Matching json rpc message dispatcher: " + dispatcher.getClass());
+                Log.debug(getClass(), "Matching json rpc message dispatcher: " + dispatcher.getClass());
                 dispatcher.dispatch(message);
 
                 return;
