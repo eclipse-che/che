@@ -32,6 +32,13 @@ import java.util.concurrent.Executors;
 import static java.lang.String.format;
 
 /**
+ * Launch agent script asynchronously over target instance and wait when it run.
+ * The policy of checking if agent is run might be different for agents.
+ *
+ * @see Agent#getScript()
+ * @see AgentLaunchingChecker
+ * @see AgentLaunchingChecker#DEFAULT
+ *
  * @author Anatolii Bazko
  */
 public abstract class AbstractAgentLauncher implements AgentLauncher {

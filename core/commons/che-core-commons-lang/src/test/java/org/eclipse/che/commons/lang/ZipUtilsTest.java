@@ -52,7 +52,6 @@ public class ZipUtilsTest {
             zos.closeEntry();
             zos.close();
         }
-
     }
 
     @Test
@@ -63,7 +62,7 @@ public class ZipUtilsTest {
 
     @Test
     public void testGetResources() throws Exception {
-        URL testJar = ZipUtilsTest.class.getResource("/codenvy/codenvy.jar");
+        URL testJar = ZipUtilsTest.class.getResource("/che/che.jar");
         @SuppressWarnings("unchecked")
         Consumer<InputStream> consumer = mock(Consumer.class);
 

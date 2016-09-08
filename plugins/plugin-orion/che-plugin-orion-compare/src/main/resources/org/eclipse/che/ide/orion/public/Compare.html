@@ -27,74 +27,74 @@
     <script src="require.js"></script>
     <script>
         var compare, widget, requirePromise = new Promise(function (resolve, reject) {
-            require(["./built-compare-11.0/built-compare-amd.min.js"], function (Compare) {
-                resolve(Compare);
-            });
+        require(["./built-compare-11.0/built-compare-amd.min.js"], function (Compare) {
+        resolve(Compare);
+        });
         });
         window.addEventListener("message", function (e) {
-            var options;
-            requirePromise.then(function (Compare) {
+        var options;
+        requirePromise.then(function (Compare) {
 
-                var event = JSON.parse(e.data);
-                if (event.type == "config") {
-                    var conf = JSON.parse(event.message);
-                    if (options) {
-                        options.newFile = conf.newFile;
-                        options.oldFile = conf.oldFile;
-                        options.showTitle = conf.showTitle;
-                        options.showLineStatus = conf.showLineStatus;
-                    } else {
-                        options = {
-                            parentDivId: "compareParentDiv",
-                            newFile: conf.newFile,
-                            oldFile: conf.oldFile,
-                            showTitle: conf.showTitle,
-                            showLineStatus: conf.showLineStatus
-                        };
-                    }
-                    if (compare) {
-                        widget.options = options;
-                        compare.refresh();
-                    } else {
-                        compare = new Compare(options);
-                        widget = compare.getCompareView().getWidget();
-                    }
+        var event = JSON.parse(e.data);
+        if (event.type == "config") {
+        var conf = JSON.parse(event.message);
+        if (options) {
+        options.newFile = conf.newFile;
+        options.oldFile = conf.oldFile;
+        options.showTitle = conf.showTitle;
+        options.showLineStatus = conf.showLineStatus;
+        } else {
+        options = {
+        parentDivId: "compareParentDiv",
+        newFile: conf.newFile,
+        oldFile: conf.oldFile,
+        showTitle: conf.showTitle,
+        showLineStatus: conf.showLineStatus
+        };
+        }
+        if (compare) {
+        widget.options = options;
+        compare.refresh();
+        } else {
+        compare = new Compare(options);
+        widget = compare.getCompareView().getWidget();
+        }
 
-                }
+        }
 
-                if(event.type == "theme"){
-                    var themeUrl;
-                    if(event.message == "DarkTheme"){
-                        themeUrl = "./built-compare-dark-codenvy.css";
-                    } else {
-                        themeUrl = "./built-compare-codenvy.css";
-                    }
+        if(event.type == "theme"){
+        var themeUrl;
+        if(event.message == "DarkTheme"){
+        themeUrl = "./built-compare-dark-che.css";
+        } else {
+        themeUrl = "./built-compare-che.css";
+        }
 
-                    var style = document.createElement("link");
-                    style.rel = "stylesheet";
-                    style.href = themeUrl;
-                    style.onload = function () {
-                        var loadEvent = new Event('onThemeLoaded');
-                        document.dispatchEvent(loadEvent);
-                    }
-                    document.getElementsByTagName("head")[0].appendChild(style);
-                }
+        var style = document.createElement("link");
+        style.rel = "stylesheet";
+        style.href = themeUrl;
+        style.onload = function () {
+        var loadEvent = new Event('onThemeLoaded');
+        document.dispatchEvent(loadEvent);
+        }
+        document.getElementsByTagName("head")[0].appendChild(style);
+        }
 
-                if(event.type == "refresh"){
-                    var editors = widget.getEditors();
-                    var oldContent= editors[0].getTextView().getText();
-                    var newContent = editors[1].getTextView().getText();
-                    widget.options.oldFile.Content = oldContent;
-                    widget.options.newFile.Content = newContent;
-                    compare.refresh()
-                }
+        if(event.type == "refresh"){
+        var editors = widget.getEditors();
+        var oldContent= editors[0].getTextView().getText();
+        var newContent = editors[1].getTextView().getText();
+        widget.options.oldFile.Content = oldContent;
+        widget.options.newFile.Content = newContent;
+        compare.refresh()
+        }
 
-                if(event.type == "getNewContentRequest"){
-                    var newContentRequestEvent = document.createEvent('CustomEvent');
-                    newContentRequestEvent.initCustomEvent("getNewContentResponse", true, true, widget.getEditors()[1].getTextView().getText());
-                    window.dispatchEvent(newContentRequestEvent);
-                }
-            });
+        if(event.type == "getNewContentRequest"){
+        var newContentRequestEvent = document.createEvent('CustomEvent');
+        newContentRequestEvent.initCustomEvent("getNewContentResponse", true, true, widget.getEditors()[1].getTextView().getText());
+        window.dispatchEvent(newContentRequestEvent);
+        }
+        });
         }, false);
     </script>
 </head>

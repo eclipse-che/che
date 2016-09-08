@@ -14,7 +14,7 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.codenvy.examples</groupId>
+    <groupId>com.che.examples</groupId>
     <artifactId>desktop-console-java</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>hello-app</name>
@@ -37,7 +37,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.codenvy.example.java.App</mainClass>
+                            <mainClass>com.che.example.java.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

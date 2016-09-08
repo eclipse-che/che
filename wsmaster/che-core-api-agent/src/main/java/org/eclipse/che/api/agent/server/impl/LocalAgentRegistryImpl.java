@@ -119,7 +119,11 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
             throw new AgentException("Can't fetch agent configuration", e);
         } finally {
             if (agent != null) {
-                FileCleaner.addFile(agent);
+                try {
+                    Files.delete(agent.toPath());
+                } catch (IOException e) {
+                    FileCleaner.addFile(agent);
+                }
             }
         }
     }

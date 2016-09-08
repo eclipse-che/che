@@ -33,6 +33,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 
@@ -122,7 +123,11 @@ public class AgentRegistryImpl implements AgentRegistry {
             throw new AgentException("Can't fetch agent configuration", e);
         } finally {
             if (agent != null) {
-                FileCleaner.addFile(agent);
+                try {
+                    Files.delete(agent.toPath());
+                } catch (IOException e) {
+                    FileCleaner.addFile(agent);
+                }
             }
         }
     }
