@@ -200,6 +200,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onMachineRunning(MachineStateEvent event) {
+        updateMachineNode(event.getMachine());
     }
 
     @Override
@@ -597,6 +598,26 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         view.setProcessesData(rootNode);
 
         return machineNode;
+    }
+
+    /**
+     * Going to update machine state after changing it status to RUNNING
+     * TODO: need to review this fix in case done like fast fix for release 4.7.1 https://github.com/eclipse/che/issues/2278
+     * TODO: need fine better solution
+     * @param machine
+     */
+    private void updateMachineNode(Machine machine) {
+        ProcessTreeNode machineNode = machineNodes.get(machine.getId());
+        if (machineNode == null) {
+            return;
+        }
+        rootNodes.remove(machineNode);
+
+        machineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, new ArrayList<ProcessTreeNode>());
+        machineNode.setRunning(true);
+        machineNodes.put(machine.getId(), machineNode);
+        rootNodes.add(machineNode);
+        view.setProcessesData(rootNode);
     }
 
     /** Get the list of all available machines. */

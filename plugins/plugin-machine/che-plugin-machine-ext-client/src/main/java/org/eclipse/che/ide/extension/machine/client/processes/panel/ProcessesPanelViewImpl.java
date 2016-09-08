@@ -46,6 +46,7 @@ import org.eclipse.che.ide.ui.tree.SelectionModel;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.HashMap;
@@ -280,18 +281,23 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
         focusedSubPanel.addWidget(widgetToShow, !machineConsole, new SubPanel.WidgetRemovingListener() {
             @Override
             public void onWidgetRemoving(SubPanel.RemoveCallback removeCallback) {
-                final ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
+                try {
+                    final ProcessTreeNode treeNode = widget2TreeNodes.get(widgetToShow.getWidget());
 
-                switch (treeNode.getType()) {
-                    case COMMAND_NODE:
-                        delegate.onCommandTabClosing(treeNode, removeCallback);
-                        break;
-                    case TERMINAL_NODE:
-                        delegate.onTerminalTabClosing(treeNode);
-                        removeCallback.remove();
-                        break;
+                    switch (treeNode.getType()) {
+                        case COMMAND_NODE:
+                            delegate.onCommandTabClosing(treeNode, removeCallback);
+                            break;
+                        case TERMINAL_NODE:
+                            delegate.onTerminalTabClosing(treeNode);
+                            removeCallback.remove();
+                            break;
+                    }
+                } catch (Exception e) {
+                    Log.error(getClass(), e);
                 }
             }
+
         });
 
         processWidgets.put(processId, widgetToShow);
