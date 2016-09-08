@@ -13,7 +13,9 @@ package org.eclipse.che.api.agent.server.impl;
 import org.eclipse.che.api.agent.server.AgentRegistryUrlProvider;
 import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.rest.DefaultHttpJsonRequestFactory;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.everrest.assured.EverrestJetty;
@@ -43,6 +45,7 @@ import java.util.Collection;
 import static java.lang.String.format;
 import static java.nio.file.Files.copy;
 import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -65,19 +68,15 @@ public class AgentRegistryImplTest {
         agentRegistry = new AgentRegistryImpl(urlProvider, new DefaultHttpJsonRequestFactory());
 
         final Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
-        when(urlProvider.getAgentUrl(anyString())).thenAnswer(new Answer<URL>() {
+        when(urlProvider.getAgentUrl(any(AgentKey.class))).thenAnswer(new Answer<URL>() {
             @Override
             public URL answer(InvocationOnMock invocation) throws Throwable {
-                String name = (String)invocation.getArguments()[0];
-                return new URL("http://localhost:" + port + "/rest/registry/agent/" + name);
-            }
-        });
-        when(urlProvider.getAgentUrl(anyString(), anyString())).thenAnswer(new Answer<URL>() {
-            @Override
-            public URL answer(InvocationOnMock invocation) throws Throwable {
-                String name = (String)invocation.getArguments()[0];
-                String version = (String)invocation.getArguments()[1];
-                return new URL("http://localhost:" + port + "/rest/registry/agent/" + name + "/" + version);
+                AgentKey agentKey = (AgentKey)invocation.getArguments()[0];
+                if (agentKey.getVersion() == null) {
+                    return new URL("http://localhost:" + port + "/rest/registry/agent/" + agentKey.getName());
+                } else {
+                    return new URL("http://localhost:" + port + "/rest/registry/agent/" + agentKey.getName() + "/" + agentKey.getVersion());
+                }
             }
         });
         when(urlProvider.getAgentVersionsUrl(anyString())).thenAnswer(new Answer<URL>() {
@@ -92,26 +91,8 @@ public class AgentRegistryImplTest {
     }
 
     @Test
-    public void testCreateLatestVersionAgentByUrl(ITestContext context) throws Exception {
-        final Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
-        Agent agent = agentRegistry.getAgent("http://localhost:" + port + "/rest/registry/agent/org.eclipse.che.ws-agent");
-
-        assertEquals(agent.getName(), "org.eclipse.che.ws-agent");
-        assertEquals(agent.getVersion(), "2.0");
-    }
-
-    @Test
-    public void testCreateSpecificVersionAgentByUrl(ITestContext context) throws Exception {
-        final Object port = context.getAttribute(EverrestJetty.JETTY_PORT);
-        Agent agent = agentRegistry.getAgent("http://localhost:" + port + "/rest/registry/agent/org.eclipse.che.ws-agent/1.0");
-
-        assertEquals(agent.getName(), "org.eclipse.che.ws-agent");
-        assertEquals(agent.getVersion(), "1.0");
-    }
-
-    @Test
     public void testCreateSpecificVersionAgent() throws Exception {
-        Agent agent = agentRegistry.getAgent("org.eclipse.che.ws-agent", "1.0");
+        Agent agent = agentRegistry.getAgent(new AgentKeyImpl("org.eclipse.che.ws-agent", "1.0"));
 
         assertEquals(agent.getName(), "org.eclipse.che.ws-agent");
         assertEquals(agent.getVersion(), "1.0");
@@ -119,7 +100,7 @@ public class AgentRegistryImplTest {
 
     @Test
     public void testCreateLatestVersionAgent() throws Exception {
-        Agent agent = agentRegistry.getAgent("org.eclipse.che.ws-agent");
+        Agent agent = agentRegistry.getAgent(new AgentKeyImpl("org.eclipse.che.ws-agent"));
 
         assertEquals(agent.getName(), "org.eclipse.che.ws-agent");
         assertEquals(agent.getVersion(), "2.0");
@@ -128,7 +109,7 @@ public class AgentRegistryImplTest {
 
     @Test(expectedExceptions = AgentException.class)
     public void testGetConfigShouldThrowExceptionIfAgentNotFound() throws Exception {
-        agentRegistry.getAgent("terminal", "1.0");
+        agentRegistry.getAgent(new AgentKeyImpl("terminal", "1.0"));
     }
 
     @Test

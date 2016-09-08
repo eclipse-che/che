@@ -27,6 +27,10 @@ public class AgentKeyImpl implements AgentKey {
         this.version = version;
     }
 
+    public AgentKeyImpl(String name) {
+        this(name, null);
+    }
+
     public String getName() {
         return name;
     }

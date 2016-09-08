@@ -71,18 +71,8 @@ public class LocalAgentRegistryImpl implements AgentRegistry {
     }
 
     @Override
-    public Agent getAgent(String name, String version) throws AgentException {
-        return doGetAgent(name);
-    }
-
-    @Override
     public Agent getAgent(AgentKey agentKey) throws AgentException {
         return doGetAgent(agentKey.getName());
-    }
-
-    @Override
-    public Agent getAgent(String name) throws AgentException {
-        return doGetAgent(name);
     }
 
     @Override

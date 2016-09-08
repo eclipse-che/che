@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.agent.server.AgentRegistryUrlProvider;
 import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 
 import javax.inject.Named;
 import java.net.MalformedURLException;
@@ -44,8 +45,13 @@ public class AgentRegistryUrlProviderImpl implements AgentRegistryUrlProvider {
     }
 
     @Override
-    public URL getAgentUrl(String name, String version) throws AgentException {
-        String url = agentSpecificVersionUrl.replace(NAME, name).replace(VERSION, version);
+    public URL getAgentUrl(AgentKey agentKey) throws AgentException {
+        String url;
+        if (agentKey.getVersion() == null) {
+            url = agentLatestVersionUrl.replace(NAME, agentKey.getName());
+        } else {
+            url = agentSpecificVersionUrl.replace(NAME, agentKey.getName()).replace(VERSION, agentKey.getVersion());
+        }
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
@@ -53,15 +59,6 @@ public class AgentRegistryUrlProviderImpl implements AgentRegistryUrlProvider {
         }
     }
 
-    @Override
-    public URL getAgentUrl(String name) throws AgentException {
-        String url = agentLatestVersionUrl.replace(NAME, name);
-        try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
-            throw new AgentException("Malformed url " + url, e);
-        }
-    }
 
     @Override
     public URL getAgentVersionsUrl(String name) throws AgentException {

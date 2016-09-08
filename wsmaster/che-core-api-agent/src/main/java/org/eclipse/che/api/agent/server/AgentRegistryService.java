@@ -18,9 +18,14 @@ import io.swagger.annotations.ApiResponses;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.exception.AgentNotFoundException;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.dto.AgentDto;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
 
 import javax.ws.rs.GET;
@@ -59,7 +64,13 @@ public class AgentRegistryService extends Service {
                    @ApiResponse(code = 404, message = "Agent not found in the registry"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Agent getByName(@ApiParam("The agent name") @PathParam("name") String name) throws ApiException {
-        return asDto(agentRegistry.getAgent(name));
+        try {
+            return asDto(agentRegistry.getAgent(new AgentKeyImpl(name)));
+        } catch (AgentNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (AgentException e) {
+            throw new ServerException(e.getMessage(), e);
+        }
     }
 
     @GET
@@ -71,7 +82,14 @@ public class AgentRegistryService extends Service {
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Agent getByName(@ApiParam("The agent name") @PathParam("name") String name,
                            @ApiParam("The agent version") @PathParam("version") String version) throws ApiException {
-        return asDto(agentRegistry.getAgent(name, version));
+        try {
+            return asDto(agentRegistry.getAgent(new AgentKeyImpl(name, version)));
+        } catch (AgentNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (AgentException e) {
+            throw new ServerException(e.getMessage(), e);
+        }
+
     }
 
     @GET
@@ -82,7 +100,13 @@ public class AgentRegistryService extends Service {
                    @ApiResponse(code = 404, message = "Agent not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public List<String> getVersions(@ApiParam("The agent name") @PathParam("name") String name) throws ApiException {
-        return agentRegistry.getVersions(name);
+        try {
+            return agentRegistry.getVersions(name);
+        } catch (AgentNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (AgentException e) {
+            throw new ServerException(e.getMessage(), e);
+        }
     }
 
     @GET
@@ -91,6 +115,12 @@ public class AgentRegistryService extends Service {
     @ApiResponses({@ApiResponse(code = 200, message = "The response contains list of available agents"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public List<String> getAgents() throws ApiException {
-        return agentRegistry.getAgents();
+        try {
+            return agentRegistry.getAgents();
+        } catch (AgentNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (AgentException e) {
+            throw new ServerException(e.getMessage(), e);
+        }
     }
 }

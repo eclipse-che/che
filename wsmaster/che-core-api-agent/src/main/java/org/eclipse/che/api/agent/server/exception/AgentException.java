@@ -10,12 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.exception;
 
-import org.eclipse.che.api.core.ServerException;
-
 /**
  * @author Anatoliy Bazko
  */
-public class AgentException extends ServerException {
+public class AgentException extends Exception {
     public AgentException(String message) {
         super(message);
     }

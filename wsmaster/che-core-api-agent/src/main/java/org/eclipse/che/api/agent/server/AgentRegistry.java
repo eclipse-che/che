@@ -18,24 +18,14 @@ import org.eclipse.che.api.agent.shared.model.AgentKey;
 import java.util.List;
 
 /**
+ * The registry for agents that might be injected into machine.
+ *
+ * @see  Agent
+ * @see  AgentKey
+ *
  * @author Anatoliy Bazko
  */
 public interface AgentRegistry {
-
-    /**
-     * Gets {@link Agent} of the specific version.
-     *
-     * @param name
-     *      the name of the agent
-     * @param version
-     *      the version of the agent
-     * @return {@link Agent}
-     * @throws AgentNotFoundException
-     *      if agent not found in the registry
-     * @throws AgentException
-     *      if unexpected error occurred
-     */
-    Agent getAgent(String name, String version) throws AgentException;
 
     /**
      * Gets {@link Agent}.
@@ -49,21 +39,6 @@ public interface AgentRegistry {
      *      if unexpected error occurred
      */
     Agent getAgent(AgentKey agentKey) throws AgentException;
-
-    /**
-     * Gets the {@link Agent} by its name or by url.
-     * In case of name the latest version of the agent will be fetched.
-     * In case of url the agent will be retrieved by specific url.
-     *
-     * @param name
-     *      the name of the agent or url
-     * @return {@link Agent}
-     * @throws AgentNotFoundException
-     *      if agent not found
-     * @throws AgentException
-     *      if unexpected error occurred
-     */
-    Agent getAgent(String name) throws AgentException;
 
     /**
      * Returns a list of the available versions of the specific agent.
@@ -84,6 +59,7 @@ public interface AgentRegistry {
      *
      * @return list of agents
      * @throws AgentException
+     *      if unexpected error occurred
      */
     List<String> getAgents() throws AgentException;
 }

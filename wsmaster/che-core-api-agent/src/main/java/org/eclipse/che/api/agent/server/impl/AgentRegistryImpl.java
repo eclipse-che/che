@@ -31,11 +31,9 @@ import org.eclipse.che.dto.server.DtoFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -58,35 +56,8 @@ public class AgentRegistryImpl implements AgentRegistry {
     }
 
     @Override
-    public Agent getAgent(String name, String version) throws AgentException {
-        URL url = getAgentUrl(name, Optional.ofNullable(version));
-        return doGetRemoteAgent(url);
-    }
-
-    @Override
     public Agent getAgent(AgentKey agentKey) throws AgentException {
-        URL url = getAgentUrl(agentKey.getName(), Optional.ofNullable(agentKey.getVersion()));
-        return doGetRemoteAgent(url);
-    }
-
-    @Override
-    public Agent getAgent(String name) throws AgentException {
-        URL url = getAgentUrl(name, Optional.empty());
-        return doGetRemoteAgent(url);
-    }
-
-    protected URL getAgentUrl(String name, Optional<String> version) throws AgentException {
-        try {
-            return new URL(name);
-        } catch (MalformedURLException ignored) {
-            // name doesn't represent a url
-        }
-
-        if (version.isPresent()) {
-            return urlProvider.getAgentUrl(name, version.get());
-        } else {
-            return urlProvider.getAgentUrl(name);
-        }
+        return doGetRemoteAgent(urlProvider.getAgentUrl(agentKey));
     }
 
     @Override

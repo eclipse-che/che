@@ -19,6 +19,5 @@ public class AgentModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(AgentRegistryService.class);
-        bind(AgentExceptionMapper.class);
     }
 }

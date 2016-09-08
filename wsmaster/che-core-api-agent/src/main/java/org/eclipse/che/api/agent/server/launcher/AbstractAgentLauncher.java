@@ -45,7 +45,7 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
     private static final Logger          LOG      = LoggerFactory.getLogger(AbstractAgentLauncher.class);
     private static final ExecutorService executor =
             Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("AgentLauncher-%d")
-                                                                    .setDaemon(false)
+                                                                    .setDaemon(true)
                                                                     .build());
 
     private final AgentLaunchingChecker agentLaunchingChecker;

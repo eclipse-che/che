@@ -607,7 +607,7 @@ public class WorkspaceRuntimes {
                 launcher.launch(instance, agent);
             }
         } catch (AgentException e) {
-            throw new MachineException(e.getServiceError());
+            throw new MachineException(e.getMessage(), e);
         }
     }
 
