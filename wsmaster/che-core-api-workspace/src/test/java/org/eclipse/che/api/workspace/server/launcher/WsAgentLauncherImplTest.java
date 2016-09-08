@@ -170,7 +170,7 @@ public class WsAgentLauncherImplTest {
         verify(pingResponse).getResponseCode();
     }
 
-    @Test(expectedExceptions = MachineException.class, expectedExceptionsMessageRegExp = "Test exception")
+    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "Test exception")
     public void shouldThrowMachineExceptionIfMachineManagerExecInDevMachineThrowsNotFoundException() throws Exception {
         when(machineProcessManager.exec(anyString(),
                                         anyString(),
@@ -186,7 +186,7 @@ public class WsAgentLauncherImplTest {
                                            anyString());
     }
 
-    @Test(expectedExceptions = MachineException.class, expectedExceptionsMessageRegExp = "Test exception")
+    @Test(expectedExceptions = ServerException.class, expectedExceptionsMessageRegExp = "Test exception")
     public void shouldThrowMachineExceptionIfMachineManagerExecInDevMachineThrowsMachineException() throws Exception {
         when(machineProcessManager.exec(anyString(),
                                         anyString(),

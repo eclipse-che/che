@@ -92,7 +92,7 @@ public class WsAgentLauncherImpl implements AgentLauncher {
     }
 
     @Override
-    public void launch(Instance machine, Agent agent) throws MachineException {
+    public void launch(Instance machine, Agent agent) throws ServerException {
         final HttpJsonRequest wsAgentPingRequest;
         try {
             wsAgentPingRequest = createPingRequest(machine);
@@ -127,14 +127,14 @@ public class WsAgentLauncherImpl implements AgentLauncher {
                     Thread.sleep(wsAgentPingDelayMs);
                 }
             }
-        } catch (BadRequestException | ServerException | NotFoundException wsAgentLaunchingExc) {
-            throw new MachineException(wsAgentLaunchingExc.getLocalizedMessage(), wsAgentLaunchingExc);
+        } catch (BadRequestException | ServerException | NotFoundException e) {
+            throw new ServerException(e.getServiceError());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MachineException("Ws agent pinging is interrupted");
+            throw new ServerException("Ws agent pinging is interrupted");
         }
         LOG.error("Fail pinging ws agent. Workspace ID:{}. Url:{}. Timestamp:{}", machine.getWorkspaceId(), wsAgentPingUrl);
-        throw new MachineException(pingTimedOutErrorMessage);
+        throw new ServerException(pingTimedOutErrorMessage);
     }
 
     public static String getWsAgentProcessOutputChannel(String workspaceId) {

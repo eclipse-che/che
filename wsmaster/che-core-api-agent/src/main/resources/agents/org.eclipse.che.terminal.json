@@ -1,6 +1,6 @@
 {
 "name": "org.eclipse.che.terminal",
-"dependencies": ["org.eclipse.che.ws-agent"],
+"dependencies": [],
 "properties": {
 "ports": "terminal:4411/tcp"
 },

@@ -278,7 +278,7 @@ public class WorkspaceRuntimes {
         }
     }
 
-    private void launchAgents(EnvironmentImpl environment, List<Instance> machines) throws MachineException {
+    private void launchAgents(EnvironmentImpl environment, List<Instance> machines) throws ServerException {
         for (Instance instance : machines) {
             Map<String, ExtendedMachineImpl> envMachines = environment.getMachines();
             if (envMachines != null) {
@@ -601,7 +601,7 @@ public class WorkspaceRuntimes {
         }
     }
 
-    protected void launchAgents(Instance instance, List<String> agents) throws MachineException {
+    protected void launchAgents(Instance instance, List<String> agents) throws ServerException {
         try {
             for (AgentKey agentKey : agentSorter.sort(agents)) {
                 LOG.info("Launching '{}' agent", agentKey.getName());

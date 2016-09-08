@@ -546,8 +546,7 @@ public class CheEnvironmentEngine {
                                         .findAny()
                                         .isPresent())
                   .findAny()
-                  .orElseThrow(
-                          () -> new ServerException("Agent 'org.eclipse.che.ws-agent' is not found in any of environment machines"))
+                  .orElseThrow(() -> new ServerException("Agent 'org.eclipse.che.ws-agent' is not found in any of environment machines"))
                   .getKey();
     }
 

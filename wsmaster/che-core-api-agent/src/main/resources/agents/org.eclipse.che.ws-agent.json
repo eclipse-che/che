@@ -1,6 +1,6 @@
 {
 "name": "org.eclipse.che.ws-agent",
-"dependencies": [],
+"dependencies": ["org.eclipse.che.terminal"],
 "properties": {
 "ports": "ws-agent.debug:4403/tcp,ws-agent:4401/tcp"
 },

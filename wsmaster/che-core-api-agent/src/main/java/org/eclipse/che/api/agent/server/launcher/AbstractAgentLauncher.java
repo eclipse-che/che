@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
@@ -61,7 +62,7 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
     }
 
     @Override
-    public void launch(Instance machine, Agent agent) throws MachineException {
+    public void launch(Instance machine, Agent agent) throws ServerException {
         try {
             final InstanceProcess process = start(machine, agent);
             LOG.debug("Waiting for agent {} is launched. Workspace ID:{}", agent.getName(), machine.getWorkspaceId());
@@ -77,19 +78,19 @@ public abstract class AbstractAgentLauncher implements AgentLauncher {
 
             process.kill();
         } catch (MachineException e) {
-            throw new MachineException(e.getServiceError());
+            throw new ServerException(e.getServiceError());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MachineException(format("Launching agent %s is interrupted", agent.getName()));
+            throw new ServerException(format("Launching agent %s is interrupted", agent.getName()));
         }
 
         final String errMsg = format("Fail launching agent %s. Workspace ID:%s", agent.getName(), machine.getWorkspaceId());
         LOG.error(errMsg);
-        throw new MachineException(errMsg);
+        throw new ServerException(errMsg);
     }
 
 
-    protected InstanceProcess start(final Instance machine, final Agent agent) throws MachineException {
+    protected InstanceProcess start(final Instance machine, final Agent agent) throws ServerException {
         final Command command = new CommandImpl(agent.getName(), agent.getScript(), "agent");
         final InstanceProcess process = machine.createProcess(command, null);
         final LineConsumer lineConsumer = new AbstractLineConsumer() {

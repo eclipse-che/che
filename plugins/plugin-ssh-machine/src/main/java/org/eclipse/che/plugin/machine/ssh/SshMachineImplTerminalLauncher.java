@@ -15,6 +15,7 @@ import org.eclipse.che.api.agent.server.launcher.ProcessIsLaunchedChecker;
 import org.eclipse.che.api.agent.server.terminal.WebsocketTerminalFilesPathProvider;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.ListLineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
@@ -70,7 +71,7 @@ public class SshMachineImplTerminalLauncher extends AbstractAgentLauncher {
     }
 
     @Override
-    public void launch(Instance machine, Agent agent) throws MachineException {
+    public void launch(Instance machine, Agent agent) throws ServerException {
         try {
             String architecture = detectArchitecture(machine);
             machine.copy(archivePathProvider.getPath(architecture), terminalLocation);
@@ -78,7 +79,7 @@ public class SshMachineImplTerminalLauncher extends AbstractAgentLauncher {
             super.launch(machine, agent);
         } catch (ConflictException e) {
             // should never happen
-            throw new MachineException("Internal server error occurs on terminal launching.");
+            throw new ServerException("Internal server error occurs on terminal launching.");
         }
     }
 

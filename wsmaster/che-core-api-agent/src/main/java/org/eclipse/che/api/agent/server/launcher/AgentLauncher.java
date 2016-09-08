@@ -11,7 +11,7 @@
 package org.eclipse.che.api.agent.server.launcher;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.machine.server.exception.MachineException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 
 /**
@@ -44,8 +44,8 @@ public interface AgentLauncher {
      *      the machine instance
      * @param agent
      *      the agent
-     * @throws MachineException
+     * @throws ServerException
      *      if script execution failed
      */
-    void launch(Instance machine, Agent agent) throws MachineException;
+    void launch(Instance machine, Agent agent) throws ServerException;
 }
