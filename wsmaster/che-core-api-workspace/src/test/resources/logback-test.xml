@@ -20,7 +20,7 @@
     </appender>
 
     <appender name="file" class="ch.qos.logback.core.FileAppender">
-        <File>target/log/che.log</File>
+        <File>target/log/codenvy.log</File>
         <encoder>
             <pattern>%-41(%date[%.15thread]) %-45([%-5level] [%.30logger{30} %L]) - %msg%n</pattern>
         </encoder>

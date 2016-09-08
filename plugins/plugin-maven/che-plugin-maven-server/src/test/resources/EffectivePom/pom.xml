@@ -60,7 +60,7 @@
             <url>${maven.snapshots.repo.url}</url>
         </snapshotRepository>
         <site>
-            <id>repo.che.private</id>
+            <id>repo.codenvy.private</id>
             <url>${site.deploy.url}</url>
         </site>
     </distributionManagement>
@@ -148,7 +148,7 @@
         <!-- **************************************** -->
         <!-- Site URL                                 -->
         <!-- **************************************** -->
-        <site.url>https://che.com</site.url>
+        <site.url>https://codenvy.com</site.url>
         <!-- The Sonar Jacoco Listener for JUnit to extract coverage details per test -->
         <sonar-jacoco-listeners.version>2.5</sonar-jacoco-listeners.version>
         <!-- **************************************** -->
