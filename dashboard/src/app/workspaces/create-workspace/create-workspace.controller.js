@@ -32,11 +32,8 @@ export class CreateWorkspaceController {
 
     this.selectSourceOption = 'select-source-recipe';
 
-    this.stack = {};
-    this.workspace = {};
-
-    // default RAM value for workspaces
-    this.workspaceRam = 1000;
+    // default RAM value
+    this.workspaceRam = 2 * Math.pow(1024,3);
 
     this.editorOptions = {
       lineWrapping: true,
@@ -68,9 +65,20 @@ export class CreateWorkspaceController {
    */
   setStackTab(tabName) {
     if (tabName === 'custom-stack') {
+      this.cheStackLibrarySelecter(null);
       this.isCustomStack = true;
       this.generateWorkspaceName();
     }
+  }
+
+  /**
+   * Gets object keys from target object.
+   *
+   * @param targetObject
+   * @returns [*]
+   */
+  getObjectKeys(targetObject) {
+    return Object.keys(targetObject);
   }
 
   /**

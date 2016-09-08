@@ -34,13 +34,13 @@
                          che-label-name="Select Stack"
                          che-label-description="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
       <che-workspace-select-stack
-                                  che-tab-name="tabName"
-                                  che-on-tab-change="createWorkspaceCtrl.setStackTab(tabName)"
-                                  che-stack="stack"
-                                  che-stack-change="createWorkspaceCtrl.cheStackLibrarySelecter(stack)"
-                                  che-recipe-script="createWorkspaceCtrl.recipeScript"
-                                  che-recipe-url="createWorkspaceCtrl.recipeUrl"
-                                  che-recipe-format="createWorkspaceCtrl.recipeFormat"/>
+              che-tab-name="tabName"
+              che-on-tab-change="createWorkspaceCtrl.setStackTab(tabName)"
+              che-stack="stack"
+              che-stack-change="createWorkspaceCtrl.cheStackLibrarySelecter(stack)"
+              che-recipe-script="createWorkspaceCtrl.recipeScript"
+              che-recipe-url="createWorkspaceCtrl.recipeUrl"
+              che-recipe-format="createWorkspaceCtrl.recipeFormat"/>
     </che-label-container>
     <che-label-container che-label-name="Name">
       <div class="create-workspace-input">
@@ -64,9 +64,24 @@
         </che-input>
       </div>
     </che-label-container>
-    <che-label-container che-label-name="RAM">
-      <che-workspace-ram-allocation-slider
-        ng-model="createWorkspaceCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
+    <che-label-container che-label-name="RAM" ng-init="createWorkspaceCtrl.isStackMemoryLimit = false">
+      <div ng-hide="createWorkspaceCtrl.isCustomStack"
+           data-ng-repeat="(environmentKey, environmentValue) in createWorkspaceCtrl.stack.workspaceConfig.environments">
+          <span ng-if="createWorkspaceCtrl.getObjectKeys(createWorkspaceCtrl.stack.workspaceConfig.environments).length > 1"
+                class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
+        <div>
+          <div data-ng-repeat="(machineKey, machineValue) in environmentValue.machines">
+            <div class="workspace-machine" ng-if="machineValue.attributes && machineValue.attributes.memoryLimitBytes">
+              <span ng-if="createWorkspaceCtrl.getObjectKeys(environmentValue.machines).length > 1">MACHINE: {{machineKey}}</span>
+              <che-workspace-ram-allocation-slider
+                      ng-init="createWorkspaceCtrl.isStackMemoryLimit = true"
+                      ng-model="machineValue.attributes.memoryLimitBytes"></che-workspace-ram-allocation-slider>
+            </div>
+          </div>
+        </div>
+      </div>
+      <che-workspace-ram-allocation-slider ng-show="createWorkspaceCtrl.isCustomStack"
+                                           ng-model="createWorkspaceCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
     </che-label-container>
   </ng-form>
   <che-button-primary id="create-project-button-import"
