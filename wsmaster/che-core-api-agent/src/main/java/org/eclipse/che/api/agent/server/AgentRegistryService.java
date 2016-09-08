@@ -35,6 +35,9 @@ import static org.eclipse.che.api.agent.server.DtoConverter.asDto;
 /**
  * Defines Agent REST API.
  *
+ * @see AgentRegistry
+ * @see Agent
+ *
  * @author Anatoliy Bazko
  */
 @Api(value = "/agent", description = "Agent REST API")
@@ -52,32 +55,30 @@ public class AgentRegistryService extends Service {
     @Path("/name/{name}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Gets the latest version of the agent", response = AgentDto.class)
-    @ApiResponses({@ApiResponse(code = 200, message = "The agent successfully created"),
-                   @ApiResponse(code = 404, message = "Agent not found"),
+    @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested agent entity"),
+                   @ApiResponse(code = 404, message = "Agent not found in the registry"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Agent getByName(@ApiParam("The agent name") @PathParam("name") String name) throws ApiException {
-        Agent agent = agentRegistry.getAgent(name);
-        return asDto(agent);
+        return asDto(agentRegistry.getAgent(name));
     }
 
     @GET
     @Path("/name/{name}/version/{version}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Gets the agent of the specific version", response = AgentDto.class)
-    @ApiResponses({@ApiResponse(code = 200, message = "The agent successfully created"),
-                   @ApiResponse(code = 404, message = "Agent not found"),
+    @ApiOperation(value = "Gets the specific version of the agent", response = AgentDto.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "The response contains requested agent entity"),
+                   @ApiResponse(code = 404, message = "Agent not found in the registry"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Agent getByName(@ApiParam("The agent name") @PathParam("name") String name,
                            @ApiParam("The agent version") @PathParam("version") String version) throws ApiException {
-        Agent agent = agentRegistry.getAgent(name, version);
-        return asDto(agent);
+        return asDto(agentRegistry.getAgent(name, version));
     }
 
     @GET
     @Path("/versions/{name}")
     @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "Get a list of the available versions of the specific agent", response = List.class)
-    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
+    @ApiOperation(value = "Get a list of available versions of the giving agent", response = List.class)
+    @ApiResponses({@ApiResponse(code = 200, message = "The response contains available versions of the giving agent"),
                    @ApiResponse(code = 404, message = "Agent not found"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public List<String> getVersions(@ApiParam("The agent name") @PathParam("name") String name) throws ApiException {
@@ -87,7 +88,7 @@ public class AgentRegistryService extends Service {
     @GET
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "Get a list of the available agents", response = List.class)
-    @ApiResponses({@ApiResponse(code = 200, message = "OK"),
+    @ApiResponses({@ApiResponse(code = 200, message = "The response contains list of available agents"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public List<String> getAgents() throws ApiException {
         return agentRegistry.getAgents();
