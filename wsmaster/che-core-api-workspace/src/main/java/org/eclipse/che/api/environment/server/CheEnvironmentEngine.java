@@ -101,7 +101,7 @@ public class CheEnvironmentEngine {
     private final EnvironmentParser              environmentParser;
     private final ComposeServicesStartStrategy   startStrategy;
     private final ComposeMachineInstanceProvider composeProvider;
-    private final AgentConfigApplier agentConfigApplier;
+    private final AgentConfigApplier             agentConfigApplier;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -491,18 +491,7 @@ public class CheEnvironmentEngine {
                    ConflictException {
 
         ComposeEnvironmentImpl composeEnvironment = environmentParser.parse(env);
-        for (Map.Entry<String, ComposeServiceImpl> entry : composeEnvironment.getServices().entrySet()) {
-            String machineName = entry.getKey();
-            ComposeServiceImpl composeService = entry.getValue();
-
-            List<String> agents = env.getMachines().get(machineName).getAgents();
-
-            try {
-                agentConfigApplier.modify(composeService, agents);
-            } catch (AgentException e) {
-                throw new MachineException("Can't apply agent config", e);
-            }
-        }
+        applyAgents(env, composeEnvironment);
 
         normalizeEnvironment(composeEnvironment);
 
@@ -522,6 +511,21 @@ public class CheEnvironmentEngine {
         }
     }
 
+    private void applyAgents(Environment env, ComposeEnvironmentImpl composeEnvironment) throws ServerException {
+        for (Map.Entry<String, ComposeServiceImpl> entry : composeEnvironment.getServices().entrySet()) {
+            String machineName = entry.getKey();
+            ComposeServiceImpl composeService = entry.getValue();
+
+            List<String> agents = env.getMachines().get(machineName).getAgents();
+
+            try {
+                agentConfigApplier.modify(composeService, agents);
+            } catch (AgentException e) {
+                throw new ServerException("Can't apply agent config", e);
+            }
+        }
+    }
+
     private void normalizeEnvironment(ComposeEnvironmentImpl composeEnvironment) {
         for (Map.Entry<String, ComposeServiceImpl> serviceEntry : composeEnvironment.getServices()
                                                                                     .entrySet()) {
@@ -537,7 +541,10 @@ public class CheEnvironmentEngine {
                   .stream()
                   .filter(entry -> entry.getValue()
                                         .getAgents()
-                                        .contains("org.eclipse.che.ws-agent"))
+                                        .stream()
+                                        .filter(agent -> agent.contains("org.eclipse.che.ws-agent"))
+                                        .findAny()
+                                        .isPresent())
                   .findAny()
                   .orElseThrow(
                           () -> new ServerException("Agent 'org.eclipse.che.ws-agent' is not found in any of environment machines"))

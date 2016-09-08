@@ -42,7 +42,7 @@ public class ProcessIsLaunchedChecker implements AgentLaunchingChecker {
                                           format("ps -fC %s 1>/dev/null && echo 0 || echo 1", processNameToWait),
                                           "test");
 
-        try (ListLineConsumer lineConsumer = new ListLineConsumer();) {
+        try (ListLineConsumer lineConsumer = new ListLineConsumer()) {
             InstanceProcess waitProcess = machine.createProcess(command, null);
             waitProcess.start(lineConsumer);
             return lineConsumer.getText().endsWith("[STDOUT] 0");

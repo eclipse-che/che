@@ -98,9 +98,9 @@ public class WorkspaceRuntimes {
     private final EventService                eventService;
     private final StripedLocks                stripedLocks;
     private final CheEnvironmentEngine        environmentEngine;
-    private final AgentSorter          agentSorter;
-    private final AgentLauncherFactory launcherFactory;
-    private final AgentRegistry agentRegistry;
+    private final AgentSorter                 agentSorter;
+    private final AgentLauncherFactory        launcherFactory;
+    private final AgentRegistry               agentRegistry;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -248,16 +248,7 @@ public class WorkspaceRuntimes {
                                                               environmentCopy,
                                                               recover,
                                                               getEnvironmentLogger(workspaceId));
-            for (Instance instance : machines) {
-                Map<String, ExtendedMachineImpl> envMachines = environment.getMachines();
-                if (envMachines != null) {
-                    ExtendedMachine extendedMachine = envMachines.get(instance.getConfig().getName());
-                    if (extendedMachine != null) {
-                        List<String> agents = extendedMachine.getAgents();
-                        launchAgents(instance, agents);
-                    }
-                }
-            }
+            launchAgents(environment, machines);
 
             try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                 WorkspaceState workspaceState = workspaces.get(workspaceId);
@@ -284,6 +275,19 @@ public class WorkspaceRuntimes {
                                   environmentStartError);
 
             throw new ServerException(environmentStartError, e);
+        }
+    }
+
+    private void launchAgents(EnvironmentImpl environment, List<Instance> machines) throws MachineException {
+        for (Instance instance : machines) {
+            Map<String, ExtendedMachineImpl> envMachines = environment.getMachines();
+            if (envMachines != null) {
+                ExtendedMachine extendedMachine = envMachines.get(instance.getConfig().getName());
+                if (extendedMachine != null) {
+                    List<String> agents = extendedMachine.getAgents();
+                    launchAgents(instance, agents);
+                }
+            }
         }
     }
 
