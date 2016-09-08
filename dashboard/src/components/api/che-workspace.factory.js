@@ -247,7 +247,7 @@ export class CheWorkspace {
     config.projects = [];
     config.defaultEnv = config.defaultEnv || workspaceName;
     config.description = null;
-    ram = ram || 2048;
+    ram = ram || 2 * Math.pow(1024, 3);
 
     //Check environments were provided in config:
     config.environments = (config.environments && Object.keys(config.environments).length > 0) ? config.environments : {};
@@ -259,10 +259,10 @@ export class CheWorkspace {
       defaultEnvironment = {
         'name': config.defaultEnv,
         'recipe': null,
-        'machines': {"dev-machine" : {"agents" : ["ws-agent"]}}
+        'machines': {'dev-machine': {'attributes': {'memoryLimitBytes': ram}, 'agents': ['ws-agent']}}
       };
 
-      config.environments[config.defaultEnv] =  defaultEnvironment;
+      config.environments[config.defaultEnv] = defaultEnvironment;
     }
 
     if (source && source.type && source.type === 'environment') {
@@ -270,7 +270,7 @@ export class CheWorkspace {
       defaultEnvironment.recipe = {
         'type': source.format,
         'contentType': contentType
-      }
+      };
 
       defaultEnvironment.recipe.content = source.content || null;
       defaultEnvironment.recipe.location = source.location || null;
@@ -288,14 +288,20 @@ export class CheWorkspace {
     if (!devMachine) {
       devMachine = {
         'name': 'ws-machine',
-        'limits': {'ram': ram},
+        'attributes': {'memoryLimitBytes': ram},
         'type': 'docker',
         'source': source,
-        'dev': true
-      }
+        'agents': ['ws-agent']
+      };
       defaultEnvironment.machines[devMachine.name] = devMachine;
     } else {
-      devMachine.limits = {'ram': ram};
+      if (devMachine.attributes) {
+        if (!devMachine.attributes.memoryLimitBytes) {
+          devMachine.attributes.memoryLimitBytes = ram;
+        }
+      } else {
+        devMachine.attributes = {'memoryLimitBytes': ram};
+      }
       devMachine.source = source;
     }
 
