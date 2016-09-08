@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server.launcher;
 
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.services.LanguageServer;
 import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
 
 import com.google.inject.Singleton;
 
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

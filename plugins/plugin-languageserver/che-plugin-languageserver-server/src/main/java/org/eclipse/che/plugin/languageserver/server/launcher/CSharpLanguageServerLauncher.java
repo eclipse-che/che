@@ -10,14 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server.launcher;
 
-import io.typefox.lsapi.LanguageDescription;
-import io.typefox.lsapi.impl.LanguageDescriptionImpl;
 import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
 
 import com.google.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.plugin.languageserver.shared.model.impl.LanguageDescriptionImpl;
 
 import java.io.File;
 import java.io.IOException;

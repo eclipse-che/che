@@ -13,9 +13,10 @@
 
 package org.eclipse.che.plugin.languageserver.server.registry;
 
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
+
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 
 /**
  * @author Anatoliy Bazko

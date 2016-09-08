@@ -13,7 +13,6 @@
 
 package org.eclipse.che.plugin.languageserver.server.registry;
 
-import io.typefox.lsapi.InitializeResult;
 import io.typefox.lsapi.services.LanguageServer;
 
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
@@ -35,5 +34,5 @@ public interface ServerInitializer extends ServerInitializerObservable {
     /**
      * Returns initialized servers.
      */
-    Map<LanguageServer, InitializeResult> getInitializedServers();
+    Map<LanguageServer, LanguageServerDescription> getInitializedServers();
 }

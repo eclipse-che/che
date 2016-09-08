@@ -5,34 +5,29 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.che.plugin.languageserver.shared.lsapi;
-
-import org.eclipse.che.dto.shared.DTO;
-import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
+package org.eclipse.che.plugin.languageserver.shared.model;
 
 import java.util.List;
 
-
-@DTO
-public interface LanguageDescriptionDTO extends LanguageDescription {
-	/**
+public interface LanguageDescription {
+    /**
      * The language id.
      */
-    void setLanguageId(String id);
-    
+    String getLanguageId();
+
     /**
      * The optional content types this language is associated with.
      */
-   void setMimeTypes(List<String> mimeTypes);
-    
+    List<String> getMimeTypes();
+
     /**
      * The fileExtension this language is associated with. At least one extension must be provided.
      */
-    void setFileExtensions(List<String> fileExtension);
-    
+    List<String> getFileExtensions();
+
     /**
      * The optional highlighting configuration to support client side syntax highlighting.
      * The format is client (editor) dependent.
      */
-    void setHighlightingConfiguration(String grammar);
+    String getHighlightingConfiguration();
 }

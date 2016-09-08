@@ -14,12 +14,12 @@ package org.eclipse.che.plugin.languageserver.server.registry;
 
 import io.typefox.lsapi.InitializeParams;
 import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
 
 import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.server.messager.PublishDiagnosticsParamsMessenger;
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;

@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server.service;
 
-import io.typefox.lsapi.InitializeResult;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.plugin.languageserver.server.DtoConverter;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
+import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerDescription;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegistryImpl;
 import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
@@ -29,6 +28,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -65,18 +65,15 @@ public class LanguageRegistryService {
 					   .stream()
 					   .map(entry -> {
 						   ProjectExtensionKey projectExtensionKey = entry.getKey();
-						   InitializeResult initializeResult = entry.getValue();
+						   LanguageServerDescription serverDescription = entry.getValue();
 
 						   List<LanguageDescriptionDTO> languageDescriptionDTOs
-								   = initializeResult.getSupportedLanguages()
-													 .stream()
-													 .map(DtoConverter::asDto)
-													 .collect(toList());
+								   = Collections.singletonList(asDto(serverDescription.getLanguageDescription()));
 
 						   InitializeResultDTO dto = newDto(InitializeResultDTO.class);
 						   dto.setProject(projectExtensionKey.getProject().substring(LanguageServerRegistryImpl.PROJECT_FOLDER_PATH.length()));
 						   dto.setSupportedLanguages(languageDescriptionDTOs);
-						   dto.setCapabilities(asDto(initializeResult.getCapabilities()));
+						   dto.setCapabilities(asDto(serverDescription.getInitializeResult().getCapabilities()));
 						   return dto;
 					   })
 					   .collect(toList());

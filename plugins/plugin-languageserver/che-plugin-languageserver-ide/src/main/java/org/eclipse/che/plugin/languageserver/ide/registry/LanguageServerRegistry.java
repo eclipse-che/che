@@ -13,7 +13,6 @@
 package org.eclipse.che.plugin.languageserver.ide.registry;
 
 import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 
 import com.google.gwt.core.client.Callback;
@@ -41,6 +40,7 @@ import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryS
 import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
 import org.eclipse.che.plugin.languageserver.shared.event.LanguageServerInitializeEventDto;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.InitializeResultDTO;
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.plugin.languageserver.shared.model.impl.InitializeResultImpl;
 
 import java.util.HashMap;

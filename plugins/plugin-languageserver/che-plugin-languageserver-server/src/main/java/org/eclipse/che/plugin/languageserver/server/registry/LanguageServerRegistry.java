@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server.registry;
 
-import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.services.LanguageServer;
 
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 
 import java.util.List;
 import java.util.Map;
@@ -36,5 +35,5 @@ public interface LanguageServerRegistry {
      */
     List<LanguageDescription> getSupportedLanguages();
 
-    Map<ProjectExtensionKey, InitializeResult> getInitializedLanguages();
+    Map<ProjectExtensionKey, LanguageServerDescription> getInitializedLanguages();
 }

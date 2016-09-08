@@ -13,11 +13,8 @@
 package org.eclipse.che.plugin.languageserver.server.registry;
 
 import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.impl.InitializeParamsImpl;
-import io.typefox.lsapi.impl.InitializeResultImpl;
-import io.typefox.lsapi.impl.LanguageDescriptionImpl;
 import io.typefox.lsapi.services.LanguageServer;
 
 import com.google.inject.Inject;
@@ -26,6 +23,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.server.messager.PublishDiagnosticsParamsMessenger;
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +51,7 @@ public class ServerInitializerImpl implements ServerInitializer {
     private final PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger;
 
     private final ConcurrentHashMap<String, LanguageServer>           languageIdToServers;
-    private final ConcurrentHashMap<LanguageServer, InitializeResult> serversToInitResult;
+    private final ConcurrentHashMap<LanguageServer, LanguageServerDescription> serversToInitResult;
 
     @Inject
     public ServerInitializerImpl(PublishDiagnosticsParamsMessenger publishDiagnosticsParamsMessenger) {
@@ -95,7 +93,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         synchronized (launcher) {
             LanguageServer server = languageIdToServers.get(languageId);
             if (server != null) {
-                InitializeResult initializeResult = serversToInitResult.get(server);
+//                LanguageServerDescription initializeResult = serversToInitResult.get(server);
 //                if (!initializeResult.getCapabilities().isMultiplyProjectsProvider()) {
                 server = doInitialize(launcher, projectPath);
 //                }
@@ -103,18 +101,18 @@ public class ServerInitializerImpl implements ServerInitializer {
                 server = doInitialize(launcher, projectPath);
                 languageIdToServers.put(languageId, server);
             }
-            InitializeResult initializeResult = serversToInitResult.get(server);
-            if (initializeResult instanceof InitializeResultImpl) {
-                ((InitializeResultImpl)initializeResult)
-                        .setSupportedLanguages(Collections.singletonList((LanguageDescriptionImpl)launcher.getLanguageDescription()));
-            }
-            onServerInitialized(server, serversToInitResult.get(server).getCapabilities(), launcher.getLanguageDescription(), projectPath);
+//            InitializeResult initializeResult = serversToInitResult.get(server);
+//            if (initializeResult instanceof InitializeResultImpl) {
+//                ((InitializeResultImpl)initializeResult)
+//                        .setSupportedLanguages(Collections.singletonList((LanguageDescriptionImpl)launcher.getLanguageDescription()));
+//            }
+            onServerInitialized(server, serversToInitResult.get(server).getInitializeResult().getCapabilities(), launcher.getLanguageDescription(), projectPath);
             return server;
         }
     }
 
     @Override
-    public Map<LanguageServer, InitializeResult> getInitializedServers() {
+    public Map<LanguageServer, LanguageServerDescription> getInitializedServers() {
         return Collections.unmodifiableMap(serversToInitResult);
     }
 
@@ -134,7 +132,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         CompletableFuture<InitializeResult> completableFuture = server.initialize(initializeParams);
         try {
             InitializeResult initializeResult = completableFuture.get();
-            serversToInitResult.put(server, initializeResult);
+            serversToInitResult.put(server, new LanguageServerDescription(initializeResult, launcher.getLanguageDescription()));
         } catch (InterruptedException | ExecutionException e) {
             server.shutdown();
             server.exit();

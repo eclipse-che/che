@@ -16,7 +16,6 @@ import io.typefox.lsapi.CodeLensOptions;
 import io.typefox.lsapi.CompletionOptions;
 import io.typefox.lsapi.DocumentOnTypeFormattingOptions;
 import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.SignatureHelpOptions;
 
@@ -27,9 +26,7 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.InitializeResultDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.ServerCapabilitiesDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.SignatureHelpOptionsDTO;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -39,14 +36,14 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class DtoConverter {
 
     public static InitializeResultDTO asDto(InitializeResult initializeResult) {
-        List<LanguageDescriptionDTO> languageDescriptionDTOs = initializeResult.getSupportedLanguages()
-                                                                               .stream()
-                                                                               .map(DtoConverter::asDto)
-                                                                               .collect(Collectors.toList());
+//        List<LanguageDescriptionDTO> languageDescriptionDTOs = initializeResult.getSupportedLanguages()
+//                                                                               .stream()
+//                                                                               .map(DtoConverter::asDto)
+//                                                                               .collect(Collectors.toList());
 
         InitializeResultDTO initializeResultDTO = newDto(InitializeResultDTO.class);
         initializeResultDTO.setCapabilities(asDto(initializeResult.getCapabilities()));
-        initializeResultDTO.setSupportedLanguages(languageDescriptionDTOs);
+//        initializeResultDTO.setSupportedLanguages(languageDescriptionDTOs);
         return initializeResultDTO;
     }
 

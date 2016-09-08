@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server.registry;
 
-import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
 
@@ -26,6 +24,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.languageserver.server.exception.LanguageServerException;
 import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -114,8 +113,8 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     }
 
     @Override
-    public Map<ProjectExtensionKey, InitializeResult> getInitializedLanguages() {
-        Map<LanguageServer, InitializeResult> initializedServers = initializer.getInitializedServers();
+    public Map<ProjectExtensionKey, LanguageServerDescription> getInitializedLanguages() {
+        Map<LanguageServer, LanguageServerDescription> initializedServers = initializer.getInitializedServers();
         return projectToServer.entrySet()
                               .stream()
                               .collect(Collectors.toMap(Map.Entry::getKey, e -> initializedServers.get(e.getValue())));

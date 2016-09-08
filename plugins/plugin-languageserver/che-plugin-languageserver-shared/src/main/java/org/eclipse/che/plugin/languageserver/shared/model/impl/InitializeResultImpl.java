@@ -13,8 +13,9 @@
 package org.eclipse.che.plugin.languageserver.shared.model.impl;
 
 import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
+
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 
 import java.util.List;
 
@@ -38,7 +39,6 @@ public class InitializeResultImpl implements InitializeResult {
         return serverCapabilities;
     }
 
-    @Override
     public List<? extends LanguageDescription> getSupportedLanguages() {
         return singletonList(languageDescription);
     }

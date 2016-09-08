@@ -33,7 +33,6 @@ public interface InitializeResultDTO extends InitializeResult {
 
     void setCapabilities(ServerCapabilitiesDTO capabilities);
 
-    @Override
     List<LanguageDescriptionDTO> getSupportedLanguages();
 
     void setSupportedLanguages(List<LanguageDescriptionDTO> supportedLanguages);

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server.messager;
 
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
 
@@ -20,6 +19,7 @@ import org.eclipse.che.plugin.languageserver.server.registry.LanguageServerRegis
 import org.eclipse.che.plugin.languageserver.server.registry.ServerInitializer;
 import org.eclipse.che.plugin.languageserver.server.registry.ServerInitializerObserver;
 import org.eclipse.che.plugin.languageserver.shared.event.LanguageServerInitializeEventDto;
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 import org.everrest.websockets.WSConnectionContext;
 import org.everrest.websockets.message.ChannelBroadcastMessage;
 import org.slf4j.Logger;

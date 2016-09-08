@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.languageserver.server.registry;
 
 import io.typefox.lsapi.InitializeParams;
 import io.typefox.lsapi.InitializeResult;
-import io.typefox.lsapi.LanguageDescription;
 import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
 import io.typefox.lsapi.services.TextDocumentService;
@@ -20,6 +19,7 @@ import io.typefox.lsapi.services.WindowService;
 
 import org.eclipse.che.plugin.languageserver.server.launcher.JsonLanguageServerLauncher;
 import org.eclipse.che.plugin.languageserver.server.launcher.LanguageServerLauncher;
+import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
