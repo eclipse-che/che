@@ -74,7 +74,7 @@ compile and runtime.
        $ mvn -Denforcer.skip=true clean package install -Dskip-validate-sources=true
 
   5. If your plug-ins are added into the workspace agent, Che packages the agent web app with 
-     Tomcat to create a new ws-agent.zip package:
+     Tomcat to create a new ws-agent.tar.gz package:
 
        /sdk/assembly-wsagent-server
        $ mvn -Denforcer.skip=true clean package install 
@@ -84,7 +84,7 @@ compile and runtime.
      overriding existing applications. 
 
        /sdk/assembly-ide-war/temp/target/*.war  --> /tomcat/webapps
-       /sdk/assembly-wsagent-server/target/*.zip --> /lib/ws-agent.zip
+       /sdk/assembly-wsagent-server/target/*.tar.gz --> /lib/ws-agent.tar.gz
      
   7. If `--assembly` flag, then Che also creates a new distributable package of Che:
 

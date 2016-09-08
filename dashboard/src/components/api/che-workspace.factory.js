@@ -259,7 +259,7 @@ export class CheWorkspace {
       defaultEnvironment = {
         'name': config.defaultEnv,
         'recipe': null,
-        'machines': {'dev-machine': {'attributes': {'memoryLimitBytes': ram}, 'agents': ['ws-agent']}}
+        'machines': {'dev-machine': {'attributes': {'memoryLimitBytes': ram}, 'agents': ['org.eclipse.che.ws-agent']}}
       };
 
       config.environments[config.defaultEnv] = defaultEnvironment;
@@ -281,7 +281,7 @@ export class CheWorkspace {
     }
 
     let devMachine = this.lodash.find(defaultEnvironment.machines, (machine) => {
-      return machine.agents.includes('ws-agent');
+      return machine.agents.includes('org.eclipse.che.ws-agent');
     });
 
     //Check dev machine is provided and add if there is no:
@@ -291,7 +291,7 @@ export class CheWorkspace {
         'attributes': {'memoryLimitBytes': ram},
         'type': 'docker',
         'source': source,
-        'agents': ['ws-agent']
+        'agents': ['org.eclipse.che.ws-agent']
       };
       defaultEnvironment.machines[devMachine.name] = devMachine;
     } else {

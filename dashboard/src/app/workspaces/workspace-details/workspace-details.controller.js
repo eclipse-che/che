@@ -117,7 +117,7 @@ export class WorkspaceDetailsController {
 
     // get dev machine config
     let devMachineConfig = this.lodash.find(defaultEnv.machines, (machine) => {
-      return machine.agents.indexOf('ws-agent') >= 0;
+      return machine.agents.indexOf('org.eclipse.che.ws-agent') >= 0;
     });
 
     //TODO not implemented yet return angular.copy(devMachineConfig.limits.ram);
@@ -179,7 +179,7 @@ export class WorkspaceDetailsController {
     this.lodash.forEach(workspaceNewDetails.config.environments, (env) => {
       if (env.name === workspaceNewDetails.config.defaultEnv) {
         this.lodash.forEach(env.machines, (machine) => {
-          if (machine.agents.indexOf('ws-agent') >= 0) {
+          if (machine.agents.indexOf('org.eclipse.che.ws-agent') >= 0) {
            /* TODO not implemented yet machine.limits.ram = this.newRam;
 
             if (this.getWorkspaceStatus() === 'STOPPED') {
