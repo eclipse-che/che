@@ -259,7 +259,7 @@ export class CheWorkspace {
       defaultEnvironment = {
         'name': config.defaultEnv,
         'recipe': null,
-        'machines': {'dev-machine': {'attributes': {'memoryLimitBytes': ram}, 'agents': ['org.eclipse.che.ws-agent']}}
+        'machines': {'dev-machine': {'attributes': {'memoryLimitBytes': ram}, 'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']}}
       };
 
       config.environments[config.defaultEnv] = defaultEnvironment;
@@ -291,7 +291,7 @@ export class CheWorkspace {
         'attributes': {'memoryLimitBytes': ram},
         'type': 'docker',
         'source': source,
-        'agents': ['org.eclipse.che.ws-agent']
+        'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
       };
       defaultEnvironment.machines[devMachine.name] = devMachine;
     } else {
