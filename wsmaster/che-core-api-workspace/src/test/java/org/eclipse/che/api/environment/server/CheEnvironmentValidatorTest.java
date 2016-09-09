@@ -307,6 +307,25 @@ public class CheEnvironmentValidatorTest {
         service.setBuild(new BuildContextImpl());
         data.add(asList(env, format("Field 'image' or 'build.context' is required in machine '%s' in environment 'env'", serviceEntry.getKey())));
 
+        env = createComposeEnv();
+        serviceEntry = getAnyService(env);
+        service = serviceEntry.getValue();
+        service.setPorts(new ArrayList<>(singletonList("8080:8080")));
+        data.add(asList(env, format("Ports binding is forbidden but found in machine '%s' of environment 'env'", serviceEntry.getKey())));
+
+        env = createComposeEnv();
+        serviceEntry = getAnyService(env);
+        service = serviceEntry.getValue();
+        service.setVolumes(new ArrayList<>(singletonList("volume")));
+        data.add(asList(env, format("Volumes binding is forbidden but found in machine '%s' of environment 'env'", serviceEntry.getKey())));
+
+        env = createComposeEnv();
+        serviceEntry = getAnyService(env);
+        service = serviceEntry.getValue();
+        service.setNetworks(new ArrayList<>(singletonList("network1")));
+        data.add(asList(env, format("Networks configuration is forbidden but found in machine '%s' of environment 'env'", serviceEntry.getKey())));
+
+        // TODO uncomment when internal representation of env will be separated from compose representation
 //        env = createComposeEnv();
 //        serviceEntry = getAnyService(env);
 //        service = serviceEntry.getValue();

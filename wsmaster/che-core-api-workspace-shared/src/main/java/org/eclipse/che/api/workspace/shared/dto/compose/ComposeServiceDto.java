@@ -79,4 +79,8 @@ public interface ComposeServiceDto extends ComposeService {
     void setMemLimit(Long memLimit);
 
     ComposeServiceDto withMemLimit(Long memLimit);
+
+    void setNetworks(List<String> networks);
+
+    ComposeServiceDto withNetworks(List<String> networks);
 }

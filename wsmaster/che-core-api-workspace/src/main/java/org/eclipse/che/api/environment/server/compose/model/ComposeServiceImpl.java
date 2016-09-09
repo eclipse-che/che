@@ -42,6 +42,7 @@ public class ComposeServiceImpl implements ComposeService {
     @JsonProperty("mem_limit")
     private Long                memLimit;
     private BuildContextImpl    build;
+    private List<String>        networks;
 
     public ComposeServiceImpl() {}
 
@@ -82,6 +83,9 @@ public class ComposeServiceImpl implements ComposeService {
             volumes = new ArrayList<>(service.getVolumes());
         }
         memLimit = service.getMemLimit();
+        if (service.getNetworks() != null) {
+            networks = new ArrayList<>(service.getNetworks());
+        }
     }
 
     @Override
@@ -312,12 +316,28 @@ public class ComposeServiceImpl implements ComposeService {
     }
 
     @Override
+    public List<String> getNetworks() {
+        if (networks == null) {
+            networks = new ArrayList<>();
+        }
+        return networks;
+    }
+
+    public void setNetworks(List<String> networks) {
+        this.networks = networks;
+    }
+
+    public ComposeServiceImpl withNetworks(List<String> networks) {
+        this.networks = networks;
+        return this;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ComposeServiceImpl)) return false;
         ComposeServiceImpl service = (ComposeServiceImpl)o;
         return Objects.equals(containerName, service.containerName) &&
-               Objects.equals(build, service.build) &&
                Objects.equals(command, service.command) &&
                Objects.equals(entrypoint, service.entrypoint) &&
                Objects.equals(image, service.image) &&
@@ -329,7 +349,9 @@ public class ComposeServiceImpl implements ComposeService {
                Objects.equals(links, service.links) &&
                Objects.equals(volumes, service.volumes) &&
                Objects.equals(volumesFrom, service.volumesFrom) &&
-               Objects.equals(memLimit, service.memLimit);
+               Objects.equals(memLimit, service.memLimit) &&
+               Objects.equals(build, service.build) &&
+               Objects.equals(networks, service.networks);
     }
 
     @Override
@@ -347,14 +369,14 @@ public class ComposeServiceImpl implements ComposeService {
                             links,
                             volumes,
                             volumesFrom,
-                            memLimit);
+                            memLimit,
+                            networks);
     }
 
     @Override
     public String toString() {
         return "ComposeServiceImpl{" +
                "containerName='" + containerName + '\'' +
-               ", build='" + build + '\'' +
                ", command=" + command +
                ", entrypoint=" + entrypoint +
                ", image='" + image + '\'' +
@@ -367,6 +389,8 @@ public class ComposeServiceImpl implements ComposeService {
                ", volumes=" + volumes +
                ", volumesFrom=" + volumesFrom +
                ", memLimit=" + memLimit +
+               ", build=" + build +
+               ", networks=" + networks +
                '}';
     }
 }
