@@ -126,6 +126,7 @@
                                 <patch>fix_linked_mode.diff</patch>
                                 <patch>fix_goto_line.diff</patch>
                                 <patch>fix_scrolling.diff</patch>
+                                <patch>fix_focus.diff</patch>
                             </patches>
                             <optimizations>false</optimizations>
                             <strictPatching>true</strictPatching>
