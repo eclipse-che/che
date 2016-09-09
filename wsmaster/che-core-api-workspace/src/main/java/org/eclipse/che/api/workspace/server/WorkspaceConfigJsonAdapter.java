@@ -78,7 +78,7 @@ import static java.lang.String.format;
  *              },
  *              "machines" : {
  *                  "dev-machine" : {
- *                      "agents" : [ "exec-agent", "org.eclipse.che.ws-agent" ],
+ *                      "agents" : [ "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh" ],
  *                      "servers" : {
  *                          "some_reference" : {
  *                              "port" : "9090/udp",
@@ -151,7 +151,9 @@ public class WorkspaceConfigJsonAdapter {
 
         // dev-machine agents
         final JsonArray agents = new JsonArray();
+        agents.add(new JsonPrimitive("org.eclipse.che.terminal"));
         agents.add(new JsonPrimitive("org.eclipse.che.ws-agent"));
+        agents.add(new JsonPrimitive("org.eclipse.che.ssh"));
         newMachine.add("agents", agents);
 
         // dev-machine ram
