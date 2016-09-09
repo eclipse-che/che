@@ -10,31 +10,37 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.account.spi.AccountDao;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.local.storage.LocalStorage;
+import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.local.storage.stack.StackLocalStorage;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.machine.server.recipe.adapters.RecipeTypeAdapter;
 import org.eclipse.che.api.machine.server.spi.RecipeDao;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
-import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
-import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.local.storage.LocalStorage;
-import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.server.spi.StackDao;
+import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.server.stack.StackJsonAdapter;
+import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +58,7 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static java.lang.System.currentTimeMillis;
+import static java.util.Collections.singletonMap;
 
 /**
  * The component which migrates all the local data to different storage.
@@ -85,19 +92,26 @@ public class LocalDataMigrator {
                                  WorkspaceDao workspaceDao,
                                  SnapshotDao snapshotDao,
                                  RecipeDao recipeDao,
-                                 StackDao stackDao) throws Exception {
+                                 StackDao stackDao,
+                                 StackJsonAdapter stackJsonAdapter,
+                                 WorkspaceConfigJsonAdapter cfgAdapter) throws Exception {
         final LocalStorageFactory factory = new LocalStorageFactory(baseDir);
 
         // Create all the objects needed for migration, the order is important
         final List<Migration<?>> migrations = new ArrayList<>();
+        final Map<Class<?>, Object> adapters = ImmutableMap.of(Recipe.class, new RecipeTypeAdapter(),
+                                                               ProjectConfig.class, new ProjectConfigAdapter(),
+                                                               WorkspaceConfigImpl.class, new WorkspaceConfigDeserializer(cfgAdapter));
         migrations.add(new UserMigration(factory.create(LocalUserDaoImpl.FILENAME), userDao));
         migrations.add(new ProfileMigration(factory.create(LocalProfileDaoImpl.FILENAME), profileDao));
         migrations.add(new PreferencesMigration(factory.create(LocalPreferenceDaoImpl.FILENAME), preferenceDao));
         migrations.add(new SshKeyMigration(factory.create(LocalSshDaoImpl.FILENAME), sshDao));
-        migrations.add(new WorkspaceMigration(factory.create(LocalWorkspaceDaoImpl.FILENAME), workspaceDao, userDao));
+        migrations.add(new WorkspaceMigration(factory.create(LocalWorkspaceDaoImpl.FILENAME, adapters), workspaceDao, userDao));
         migrations.add(new SnapshotMigration(factory.create(LocalSnapshotDaoImpl.FILENAME), snapshotDao));
         migrations.add(new RecipeMigration(factory.create(LocalRecipeDaoImpl.FILENAME), recipeDao));
-        migrations.add(new StackMigration(factory.create(StackLocalStorage.STACK_STORAGE_FILE), stackDao));
+        migrations.add(new StackMigration(factory.create(StackLocalStorage.STACK_STORAGE_FILE,
+                                                         singletonMap(StackImpl.class,
+                                                                      new StackDeserializer(stackJsonAdapter))), stackDao));
 
         long globalMigrationStart = -1;
 

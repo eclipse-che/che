@@ -259,7 +259,7 @@ public interface WorkspaceServiceClient {
      * @return a promise that resolves to the {@link MachineDto}, or rejects with an error
      * @see WorkspaceService#createMachine(String, MachineConfigDto)
      */
-    Promise<MachineDto> createMachine(String wsId, MachineConfigDto machineConfig);
+    Promise<Void> createMachine(String wsId, MachineConfigDto machineConfig);
 
     /**
      * Returns workspace's snapshot.

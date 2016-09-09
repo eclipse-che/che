@@ -25,11 +25,13 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.server.stack.StackJsonAdapter;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -91,6 +93,12 @@ public class LocalDataMigratorTest {
     @Mock
     private StackDao stackDao;
 
+    @Mock
+    private StackJsonAdapter stackJsonAdapter;
+
+    @Mock
+    private WorkspaceConfigJsonAdapter workspaceCfgJsonAdapter;
+
     private LocalDataMigrator dataMigrator;
 
     @BeforeMethod
@@ -126,7 +134,9 @@ public class LocalDataMigratorTest {
                                       workspaceDao,
                                       snapshotDao,
                                       recipeDao,
-                                      stackDao);
+                                      stackDao,
+                                      stackJsonAdapter,
+                                      workspaceCfgJsonAdapter);
         verification.perform();
 
         assertFalse(Files.exists(baseDir.resolve(fileName)));
@@ -145,7 +155,9 @@ public class LocalDataMigratorTest {
                                       workspaceDao,
                                       snapshotDao,
                                       recipeDao,
-                                      stackDao);
+                                      stackDao,
+                                      stackJsonAdapter,
+                                      workspaceCfgJsonAdapter);
     }
 
     @DataProvider(name = "successfulMigrationAttempts")

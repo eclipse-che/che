@@ -23,6 +23,8 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.recipe.adapters.RecipeTypeAdapter;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 
@@ -46,11 +48,9 @@ import static java.util.stream.Collectors.toList;
  * <p>{@link #loadWorkspaces() Loads} & {@link #saveWorkspaces() stores} in memory workspaces
  * to/from filesystem, when component starts/stops.
  *
- * @implNote it is thread-safe, guarded by <i>this</i> instance
- *
  * @author Eugene Voevodin
  * @author Dmitry Shnurenko
- *
+ * @implNote it is thread-safe, guarded by <i>this</i> instance
  */
 @Singleton
 public class LocalWorkspaceDaoImpl implements WorkspaceDao {
@@ -62,9 +62,11 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
     private final LocalStorage               localStorage;
 
     @Inject
-    public LocalWorkspaceDaoImpl(LocalStorageFactory factory) throws IOException {
-        final Map<Class<?>, Object> adapters = ImmutableMap.of(Recipe.class, new RecipeTypeAdapter(),
-                                                               ProjectConfig.class, new ProjectConfigAdapter());
+    public LocalWorkspaceDaoImpl(LocalStorageFactory factory, WorkspaceConfigJsonAdapter cfgAdapter) throws IOException {
+        final Map<Class<?>, Object> adapters =
+                ImmutableMap.of(Recipe.class, new RecipeTypeAdapter(),
+                                ProjectConfig.class, new ProjectConfigAdapter(),
+                                WorkspaceConfigImpl.class, new WorkspaceConfigDeserializer(cfgAdapter));
         this.localStorage = factory.create(FILENAME, adapters);
         this.workspaces = new HashMap<>();
     }

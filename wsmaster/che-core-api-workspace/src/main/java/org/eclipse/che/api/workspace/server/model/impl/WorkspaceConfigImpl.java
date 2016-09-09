@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -24,15 +25,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.PostPersist;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Data object for {@link WorkspaceConfig}.
@@ -51,7 +54,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     @GeneratedValue
     private Long id;
 
-    @Basic
+    @Column(nullable = false)
     private String name;
 
     @Basic
@@ -70,7 +73,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn
-    private List<EnvironmentImpl> environments;
+    private Map<String, EnvironmentImpl> environments;
 
     public WorkspaceConfigImpl() {}
 
@@ -79,14 +82,15 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
                                String defaultEnv,
                                List<? extends Command> commands,
                                List<? extends ProjectConfig> projects,
-                               List<? extends Environment> environments) {
+                               Map<String, ? extends Environment> environments) {
         this.name = name;
         this.defaultEnv = defaultEnv;
         this.description = description;
         if (environments != null) {
-            this.environments = environments.stream()
-                                            .map(EnvironmentImpl::new)
-                                            .collect(toList());
+            this.environments = environments.entrySet()
+                                            .stream()
+                                            .collect(toMap(Map.Entry::getKey,
+                                                           entry -> new EnvironmentImpl(entry.getValue())));
         }
         if (commands != null) {
             this.commands = commands.stream()
@@ -115,10 +119,11 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = requireNonNull(name, "Non-null name required");
     }
 
     @Override
+    @Nullable
     public String getDescription() {
         return description;
     }
@@ -161,21 +166,15 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     }
 
     @Override
-    public List<EnvironmentImpl> getEnvironments() {
+    public Map<String, EnvironmentImpl> getEnvironments() {
         if (environments == null) {
-            environments = new ArrayList<>();
+            return new HashMap<>();
         }
         return environments;
     }
 
-    public void setEnvironments(List<EnvironmentImpl> environments) {
+    public void setEnvironments(Map<String, EnvironmentImpl> environments) {
         this.environments = environments;
-    }
-
-    public Optional<EnvironmentImpl> getEnvironment(String name) {
-        return getEnvironments().stream()
-                                .filter(env -> env.getName().equals(name))
-                                .findFirst();
     }
 
     @Override
@@ -205,7 +204,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public String toString() {
-        return "WorkspaceConfigImpl{" +
+        return "UsersWorkspaceImpl{" +
                ", name='" + name + '\'' +
                ", defaultEnv='" + defaultEnv + '\'' +
                ", commands=" + commands +
@@ -228,12 +227,12 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
      */
     public static class WorkspaceConfigImplBuilder {
 
-        private String                        name;
-        private String                        defaultEnvName;
-        private List<? extends Command>       commands;
-        private List<? extends ProjectConfig> projects;
-        private List<? extends Environment>   environments;
-        private String                        description;
+        private String                             name;
+        private String                             defaultEnvName;
+        private List<? extends Command>            commands;
+        private List<? extends ProjectConfig>      projects;
+        private Map<String, ? extends Environment> environments;
+        private String                             description;
 
         private WorkspaceConfigImplBuilder() {}
 
@@ -276,7 +275,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
             return this;
         }
 
-        public WorkspaceConfigImplBuilder setEnvironments(List<? extends Environment> environments) {
+        public WorkspaceConfigImplBuilder setEnvironments(Map<String, ? extends Environment> environments) {
             this.environments = environments;
             return this;
         }

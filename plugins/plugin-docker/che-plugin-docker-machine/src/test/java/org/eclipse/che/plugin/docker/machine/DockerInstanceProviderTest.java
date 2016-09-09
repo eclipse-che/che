@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
@@ -452,7 +452,7 @@ public class DockerInstanceProviderTest {
                                                       MACHINE_NAME,
                                                       "machineType",
                                                       machineSource,
-                                                      new LimitsImpl(MEMORY_LIMIT_MB),
+                                                      new MachineLimitsImpl(MEMORY_LIMIT_MB),
                                                       asList(new ServerConfImpl("ref1", "8080", "https", null),
                                                              new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
                                                       Collections.singletonMap("key1", "value1")),
@@ -490,7 +490,7 @@ public class DockerInstanceProviderTest {
                                                       MACHINE_NAME,
                                                       "machineType",
                                                       machineSource,
-                                                      new LimitsImpl(MEMORY_LIMIT_MB),
+                                                      new MachineLimitsImpl(MEMORY_LIMIT_MB),
                                                       asList(new ServerConfImpl("ref1", "8080", "https", null),
                                                              new ServerConfImpl("ref2", "9090/udp", "someprotocol", null)),
                                                       Collections.singletonMap("key1", "value1")),
@@ -2013,7 +2013,7 @@ public class DockerInstanceProviderTest {
     }
 
     private void createInstanceFromRecipe(int memorySizeInMB) throws Exception {
-        createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setLimits(new LimitsImpl(memorySizeInMB))
+        createInstanceFromRecipe(getMachineBuilder().setConfig(getMachineConfigBuilder().setLimits(new MachineLimitsImpl(memorySizeInMB))
                                                                                         .build())
                                                     .build());
     }
@@ -2032,7 +2032,7 @@ public class DockerInstanceProviderTest {
     }
 
     private void createInstanceFromSnapshot(int memorySizeInMB) throws NotFoundException, MachineException {
-        createInstanceFromSnapshot(getMachineBuilder().setConfig(getMachineConfigBuilder().setLimits(new LimitsImpl(memorySizeInMB))
+        createInstanceFromSnapshot(getMachineBuilder().setConfig(getMachineConfigBuilder().setLimits(new MachineLimitsImpl(memorySizeInMB))
                                                                                           .build())
                                                       .build());
     }
@@ -2103,7 +2103,7 @@ public class DockerInstanceProviderTest {
                                                                             MACHINE_NAME,
                                                                             "machineType",
                                                                             new MachineSourceImpl(DOCKER_FILE_TYPE).setContent("FROM codenvy"),
-                                                                            new LimitsImpl(MEMORY_LIMIT_MB),
+                                                                            new MachineLimitsImpl(MEMORY_LIMIT_MB),
                                                                             asList(new ServerConfImpl("ref1",
                                                                                                       "8080",
                                                                                                       "https",

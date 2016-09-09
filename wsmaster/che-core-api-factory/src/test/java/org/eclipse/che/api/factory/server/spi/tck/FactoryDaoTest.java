@@ -30,13 +30,12 @@ import org.eclipse.che.api.factory.server.model.impl.OnProjectsLoadedImpl;
 import org.eclipse.che.api.factory.server.model.impl.PoliciesImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.lang.Pair;
@@ -52,13 +51,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -248,7 +247,7 @@ public class FactoryDaoTest {
         final long timeMs = System.currentTimeMillis();
         final ButtonImpl factoryButton = new ButtonImpl(new ButtonAttributesImpl("red", "logo", "style", true),
                                                         Button.Type.LOGO);
-        final AuthorImpl creator = new AuthorImpl(userId , timeMs);
+        final AuthorImpl creator = new AuthorImpl(userId, timeMs);
         final PoliciesImpl policies = new PoliciesImpl("referrer", "match", "perClick", timeMs, timeMs + 1000);
         final Set<FactoryImage> images = new HashSet<>();
         final List<ActionImpl> a1 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key1", "value1"))));
@@ -311,42 +310,54 @@ public class FactoryDaoTest {
         final List<CommandImpl> commands = new ArrayList<>(asList(cmd1, cmd2));
 
         // Machine configs
-        final MachineConfigImpl mCfg1 = new MachineConfigImpl();
-        mCfg1.setName("name1");
-        mCfg1.setDev(true);
-        mCfg1.setType("type1");
-        mCfg1.setLimits(new LimitsImpl(2048));
-        mCfg1.getEnvVariables().putAll(ImmutableMap.of("env", "XTERM"));
-        mCfg1.getServers().addAll(singleton(new ServerConfImpl("ref1", "port1", "protocol1", "path1")));
-        mCfg1.setSource(new MachineSourceImpl("type1", "location1", "content1"));
+        final ExtendedMachineImpl exMachine1 = new ExtendedMachineImpl();
+        final ServerConf2Impl serverConf1 = new ServerConf2Impl("2265", "http", singletonMap("prop1", "val"));
+        final ServerConf2Impl serverConf2 = new ServerConf2Impl("2266", "ftp", singletonMap("prop1", "val"));
+        exMachine1.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
+        exMachine1.setAgents(ImmutableList.of("agent5", "agent4"));
+        exMachine1.setAttributes(singletonMap("att1", "val"));
 
-        final MachineConfigImpl mCfg2 = new MachineConfigImpl();
-        mCfg2.setName("name2");
-        mCfg2.setDev(false);
-        mCfg2.setType("type2");
-        mCfg2.setLimits(new LimitsImpl(512));
-        mCfg2.getEnvVariables().putAll(ImmutableMap.of("env1", "value"));
-        mCfg2.getServers().add(new ServerConfImpl("ref2", "port2", "protocol2", "path2"));
-        mCfg2.setSource(new MachineSourceImpl("type2", "location2", "content2"));
+        final ExtendedMachineImpl exMachine2 = new ExtendedMachineImpl();
+        final ServerConf2Impl serverConf3 = new ServerConf2Impl("2333", "https", singletonMap("prop2", "val"));
+        final ServerConf2Impl serverConf4 = new ServerConf2Impl("2334", "wss", singletonMap("prop2", "val"));
+        exMachine2.setServers(ImmutableMap.of("ref1", serverConf3, "ref2", serverConf4));
+        exMachine2.setAgents(ImmutableList.of("agent2", "agent1"));
+        exMachine2.setAttributes(singletonMap("att1", "val"));
 
-        final List<MachineConfigImpl> machineConfigs = new ArrayList<>(asList(mCfg1, mCfg2));
+        final ExtendedMachineImpl exMachine3 = new ExtendedMachineImpl();
+        final ServerConf2Impl serverConf5 = new ServerConf2Impl("2333", "https", singletonMap("prop2", "val"));
+        exMachine3.setServers(singletonMap("ref1", serverConf5));
+        exMachine3.setAgents(ImmutableList.of("agent6", "agent2"));
+        exMachine3.setAttributes(singletonMap("att1", "val"));
+
 
         // Environments
+        final EnvironmentRecipeImpl recipe1 = new EnvironmentRecipeImpl();
+        recipe1.setLocation("https://eclipse.che/Dockerfile");
+        recipe1.setType("dockerfile");
+        recipe1.setContentType("text/x-dockerfile");
+        recipe1.setContent("content");
         final EnvironmentImpl env1 = new EnvironmentImpl();
-        env1.setName("env1");
-        env1.setMachineConfigs(machineConfigs);
+        env1.setMachines(new HashMap<>(ImmutableMap.of("machine1", exMachine1,
+                                                       "machine2", exMachine2,
+                                                       "machine3", exMachine3)));
+        env1.setRecipe(recipe1);
 
+        final EnvironmentRecipeImpl recipe2 = new EnvironmentRecipeImpl();
+        recipe2.setLocation("https://eclipse.che/Dockerfile");
+        recipe2.setType("dockerfile");
+        recipe2.setContentType("text/x-dockerfile");
+        recipe2.setContent("content");
         final EnvironmentImpl env2 = new EnvironmentImpl();
-        env2.setName("env2");
-        env2.setMachineConfigs(machineConfigs.stream()
-                                             .map(MachineConfigImpl::new)
-                                             .collect(Collectors.toList()));
+        env2.setMachines(new HashMap<>(ImmutableMap.of("machine1", exMachine1,
+                                                       "machine3", exMachine3)));
+        env2.setRecipe(recipe2);
 
-        final List<EnvironmentImpl> environments = new ArrayList<>(asList(env1, env2));
+        final Map<String, EnvironmentImpl> environments = ImmutableMap.of("env1", env1, "env2", env2);
 
         // Workspace configuration
         final WorkspaceConfigImpl wCfg = new WorkspaceConfigImpl();
-        wCfg.setDefaultEnv(env1.getName());
+        wCfg.setDefaultEnv("env1");
         wCfg.setName("cfgName_" + index);
         wCfg.setDescription("description");
         wCfg.setCommands(commands);

@@ -28,6 +28,7 @@ import org.eclipse.che.plugin.docker.client.dto.AuthConfig;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.DockerException;
+import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommitted;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
@@ -1706,7 +1707,8 @@ public class DockerConnectorTest {
         verify(dockerResponse).getStatus();
     }
 
-    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = "Error response from docker API, status: 404, message: exc_message")
+    @Test(expectedExceptions = NetworkNotFoundException.class,
+          expectedExceptionsMessageRegExp = "exc_message")
     public void shouldThrowExceptionOnRemoveNetworkIfResponseCodeIsNot20x() throws Exception {
         // given
         doReturn(404).when(dockerResponse).getStatus();

@@ -253,10 +253,9 @@ public class FactoryManager {
      */
     public String getFactorySnippet(String factoryId,
                                     String snippetType,
-                                    UriInfo uriInfo) throws NotFoundException,
+                                    URI baseUri) throws NotFoundException,
                                                             ServerException {
         requireNonNull(factoryId);
-        final URI baseUri = uriInfo.getBaseUri();
         final String baseUrl = UriBuilder.fromUri(baseUri)
                                          .replacePath("")
                                          .build()

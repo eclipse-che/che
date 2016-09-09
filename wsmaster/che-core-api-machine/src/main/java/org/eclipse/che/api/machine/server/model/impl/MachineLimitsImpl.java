@@ -10,32 +10,28 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.Limits;
-
-import javax.persistence.Basic;
-import javax.persistence.Embeddable;
+import org.eclipse.che.api.core.model.machine.MachineLimits;
 
 /**
  * @author Alexander Garagatyi
  * @author Yevhenii Voevodin
  */
-@Embeddable
-public class LimitsImpl implements Limits {
+@Deprecated
+public class MachineLimitsImpl implements MachineLimits {
 
-    @Basic
     private int memory;
 
-    public LimitsImpl() {}
-
-    public LimitsImpl(Limits limits) {
-        if (limits != null) {
-            memory = limits.getRam();
+    public MachineLimitsImpl(MachineLimits machineLimits) {
+        if (machineLimits != null) {
+            memory = machineLimits.getRam();
         } else {
             memory = 0;
         }
     }
 
-    public LimitsImpl(int memory) {
+    public MachineLimitsImpl() {}
+
+    public MachineLimitsImpl(int memory) {
         this.memory = memory;
     }
 
@@ -51,9 +47,9 @@ public class LimitsImpl implements Limits {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof LimitsImpl)) return false;
+        if (!(o instanceof MachineLimitsImpl)) return false;
 
-        LimitsImpl limits = (LimitsImpl)o;
+        MachineLimitsImpl limits = (MachineLimitsImpl)o;
 
         return memory == limits.memory;
 
@@ -66,7 +62,7 @@ public class LimitsImpl implements Limits {
 
     @Override
     public String toString() {
-        return "LimitsImpl{" +
+        return "MachineLimitsImpl{" +
                "memory=" + memory +
                '}';
     }

@@ -15,11 +15,17 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.api.core.rest.CheJsonProvider;
+import org.eclipse.che.api.core.rest.MessageBodyAdapter;
+import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
 import org.eclipse.che.account.api.AccountModule;
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.shared.Constants;
+import org.eclipse.che.api.workspace.server.stack.StackMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
+import org.eclipse.che.api.workspace.server.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.user.server.CheUserCreator;
 import org.eclipse.che.api.user.server.TokenValidator;
@@ -27,6 +33,9 @@ import org.eclipse.che.api.user.server.TokenValidator;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.inject.DynaModule;
+
+import static com.google.inject.matcher.Matchers.subclassesOf;
+import static org.eclipse.che.inject.Matchers.names;
 
 /** @author andrew00x */
 @DynaModule
@@ -90,7 +99,7 @@ public class WsMasterModule extends AbstractModule {
                           "sudo sh -c \"chown -R $(id -u -n) /projects || true\" && " +
                           "export JPDA_ADDRESS=\"4403\" && ~/che/ws-agent/bin/catalina.sh jpda run");
         bindConstant().annotatedWith(Names.named(org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
-                      .to("mkdir -p ~/che " +
+                      .to("sleep 5 && mkdir -p ~/che " +
                           "&& cp /mnt/che/terminal -R ~/che" +
                           "&& ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
         bind(org.eclipse.che.api.workspace.server.WorkspaceValidator.class)
@@ -108,6 +117,9 @@ public class WsMasterModule extends AbstractModule {
                 Multibinder.newSetBinder(binder(), org.eclipse.che.api.machine.server.spi.InstanceProvider.class);
         machineImageProviderMultibinder.addBinding().to(org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.class);
 
+        bind(org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProvider.class)
+                .to(org.eclipse.che.plugin.docker.machine.ComposeMachineProviderImpl.class);
+
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
         install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
@@ -118,5 +130,14 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.plugin.machine.ssh.SshMachineModule());
         install(new org.eclipse.che.plugin.docker.machine.proxy.DockerProxyModule());
         install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
+
+        final Multibinder<MessageBodyAdapter> adaptersMultibinder = Multibinder.newSetBinder(binder(), MessageBodyAdapter.class);
+        adaptersMultibinder.addBinding().to(WorkspaceConfigMessageBodyAdapter.class);
+        adaptersMultibinder.addBinding().to(WorkspaceMessageBodyAdapter.class);
+        adaptersMultibinder.addBinding().to(StackMessageBodyAdapter.class);
+
+        final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
+        requestInjection(interceptor);
+        bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
     }
 }
