@@ -150,7 +150,7 @@ public class WsAgentLauncherImpl implements AgentLauncher {
                       WS_AGENT_SERVER_NOT_FOUND_ERROR, machine.getWorkspaceId(), machine.getId(), servers);
             throw new ServerException(WS_AGENT_SERVER_NOT_FOUND_ERROR);
         }
-        String wsAgentPingUrl = wsAgentServer.getUrl();
+        String wsAgentPingUrl = wsAgentServer.getProperties().getInternalUrl();
         // since everrest mapped on the slash in case of it absence
         // we will always obtain not found response
         if (!wsAgentPingUrl.endsWith("/")) {
