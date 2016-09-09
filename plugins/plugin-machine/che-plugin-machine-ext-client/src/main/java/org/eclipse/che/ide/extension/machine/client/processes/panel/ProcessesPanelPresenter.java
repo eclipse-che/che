@@ -259,14 +259,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             } else {
                 if (selectedTreeNode.getParent() != null &&
                     selectedTreeNode.getParent().getType() == MACHINE_NODE) {
-                    onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
+                    onAddTerminal(appContext.getWorkspaceId(), selectedTreeNode.getParent().getId());
                 }
             }
-        }
-
-        // no selected node
-        if (appContext.getDevMachine() != null) {
-            onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
         }
     }
 

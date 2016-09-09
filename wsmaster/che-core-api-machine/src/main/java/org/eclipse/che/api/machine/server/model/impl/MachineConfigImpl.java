@@ -10,17 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.Limits;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 
-import javax.persistence.Basic;
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,37 +27,20 @@ import java.util.stream.Collectors;
  *
  * @author Eugene Voevodin
  */
-@Entity(name = "MachineConfig")
+@Deprecated
 public class MachineConfigImpl implements MachineConfig {
 
     public static MachineConfigImplBuilder builder() {
         return new MachineConfigImplBuilder();
     }
 
-    @Id
-    @GeneratedValue
-    private Long id;
-
-    @Basic
-    private boolean dev;
-
-    @Basic
-    private String name;
-
-    @Basic
-    private String type;
-
-    @Embedded
-    private MachineSourceImpl source;
-
-    @Embedded
-    private LimitsImpl limits;
-
-    @ElementCollection
+    private boolean              dev;
+    private String               name;
+    private String               type;
+    private MachineSourceImpl    source;
+    private MachineLimitsImpl    limits;
     private List<ServerConfImpl> servers;
-
-    @ElementCollection
-    private Map<String, String> envVariables;
+    private Map<String, String>  envVariables;
 
     public MachineConfigImpl() {
     }
@@ -72,7 +49,7 @@ public class MachineConfigImpl implements MachineConfig {
                              String name,
                              String type,
                              MachineSource source,
-                             Limits limits,
+                             MachineLimits machineLimits,
                              List<? extends ServerConf> servers,
                              Map<String, String> envVariables) {
         this.dev = dev;
@@ -87,7 +64,7 @@ public class MachineConfigImpl implements MachineConfig {
         if (source != null) {
             this.source = new MachineSourceImpl(source);
         }
-        this.limits = new LimitsImpl(limits);
+        this.limits = new MachineLimitsImpl(machineLimits);
 
     }
 
@@ -138,12 +115,12 @@ public class MachineConfigImpl implements MachineConfig {
     }
 
     @Override
-    public LimitsImpl getLimits() {
+    public MachineLimitsImpl getLimits() {
         return limits;
     }
 
-    public void setLimits(LimitsImpl limits) {
-        this.limits = limits;
+    public void setLimits(MachineLimits machineLimits) {
+        this.limits = new MachineLimitsImpl(machineLimits);
     }
 
     @Override
@@ -204,7 +181,7 @@ public class MachineConfigImpl implements MachineConfig {
                ", name='" + name + '\'' +
                ", type='" + type + '\'' +
                ", source=" + source +
-               ", limits=" + limits +
+               ", machineLimits=" + limits +
                ", servers=" + getServers() +
                ", envVariables=" + getEnvVariables() +
                '}';
@@ -221,7 +198,7 @@ public class MachineConfigImpl implements MachineConfig {
         private String                     name;
         private String                     type;
         private MachineSource              source;
-        private Limits                     limits;
+        private MachineLimits              machineLimits;
         private List<? extends ServerConf> servers;
         private Map<String, String>        envVariables;
 
@@ -230,7 +207,7 @@ public class MachineConfigImpl implements MachineConfig {
                                          name,
                                          type,
                                          source,
-                                         limits,
+                                         machineLimits,
                                          servers,
                                          envVariables);
         }
@@ -240,7 +217,7 @@ public class MachineConfigImpl implements MachineConfig {
             name = machineConfig.getName();
             type = machineConfig.getType();
             source = machineConfig.getSource();
-            limits = machineConfig.getLimits();
+            machineLimits = machineConfig.getLimits();
             servers = machineConfig.getServers();
             envVariables = machineConfig.getEnvVariables();
             return this;
@@ -266,8 +243,8 @@ public class MachineConfigImpl implements MachineConfig {
             return this;
         }
 
-        public MachineConfigImplBuilder setLimits(Limits limits) {
-            this.limits = limits;
+        public MachineConfigImplBuilder setLimits(MachineLimits machineLimits) {
+            this.machineLimits = machineLimits;
             return this;
         }
 

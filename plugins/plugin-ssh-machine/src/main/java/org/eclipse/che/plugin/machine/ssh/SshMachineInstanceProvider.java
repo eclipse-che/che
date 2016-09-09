@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
@@ -103,9 +104,12 @@ public class SshMachineInstanceProvider implements InstanceProvider {
                                                                 machine.getConfig().getEnvVariables());
         sshClient.start();
 
-        return sshMachineFactory.createInstance(machine,
-                                                sshClient,
-                                                lineConsumer);
+        SshMachineInstance instance = sshMachineFactory.createInstance(machine,
+                                                                       sshClient,
+                                                                       lineConsumer);
+
+        instance.setStatus(MachineStatus.RUNNING);
+        return instance;
     }
 
     /**

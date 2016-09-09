@@ -376,12 +376,10 @@ public class FactoryService extends Service {
                                               defaultValue = "url")
                                     @DefaultValue("url")
                                     @QueryParam("type")
-                                    String type,
-                                    @Context
-                                    UriInfo uriInfo) throws NotFoundException,
-                                                            BadRequestException,
-                                                            ServerException {
-        final String factorySnippet = factoryManager.getFactorySnippet(factoryId, type, uriInfo);
+                                    String type) throws NotFoundException,
+                                                        BadRequestException,
+                                                        ServerException {
+        final String factorySnippet = factoryManager.getFactorySnippet(factoryId, type, uriInfo.getBaseUri());
         checkArgument(factorySnippet != null, "Snippet type \"" + type + "\" is unsupported.");
         return factorySnippet;
     }

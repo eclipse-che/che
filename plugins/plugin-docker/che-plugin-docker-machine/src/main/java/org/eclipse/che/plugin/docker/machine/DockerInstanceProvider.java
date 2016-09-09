@@ -74,6 +74,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,7 +97,10 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
  * @author Alexander Garagatyi
  * @author Roman Iuvshyn
  * @author Mykola Morhun
+ *
+ * @deprecated use {@link ComposeMachineProviderImpl} instead
  */
+@Deprecated
 @Singleton
 public class DockerInstanceProvider implements InstanceProvider {
     private static final Logger LOG = LoggerFactory.getLogger(DockerInstanceProvider.class);
@@ -185,6 +189,11 @@ public class DockerInstanceProvider implements InstanceProvider {
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
         devMachineSystemVolumes = removeEmptyAndNullValues(devMachineSystemVolumes);
+
+        Set<String> volumes = new HashSet<>();
+        devMachineSystemVolumes.forEach((volume) -> Arrays.asList(volume.split(";")).stream().forEach((entry) -> volumes.add(entry)));
+        devMachineSystemVolumes = volumes;
+
         if (SystemInfo.isWindows()) {
             allMachinesSystemVolumes = escapePaths(allMachinesSystemVolumes);
             devMachineSystemVolumes = escapePaths(devMachineSystemVolumes);

@@ -16,7 +16,7 @@ import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
@@ -250,7 +250,7 @@ public class DockerInstanceTest {
                                 .setName(name)
                                 .setType(type)
                                 .setSource(new MachineSourceImpl("docker").setLocation("location"))
-                                .setLimits(new LimitsImpl(64))
+                                .setLimits(new MachineLimitsImpl(64))
                                 .build();
     }
 }

@@ -27,13 +27,13 @@ import org.eclipse.che.api.factory.shared.dto.OnAppLoadedDto;
 import org.eclipse.che.api.factory.shared.dto.OnProjectsLoadedDto;
 import org.eclipse.che.api.factory.shared.dto.PoliciesDto;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -47,11 +47,11 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
-import java.util.Collections;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -94,31 +94,29 @@ public class FactoryBuilderTest {
     }
 
     @Test(expectedExceptions = ApiException.class)
-    public void shouldNotValidateUnparseableFactory() throws ApiException, URISyntaxException {
+    public void shouldNotValidateUnparseableFactory() throws Exception {
         factoryBuilder.checkValid(null);
     }
 
     @Test(expectedExceptions = ApiException.class, dataProvider = "setByServerParamsProvider",
           expectedExceptionsMessageRegExp = "You have provided an invalid parameter .* for this version of Factory parameters.*")
-    public void shouldNotAllowUsingParamsThatCanBeSetOnlyByServer(FactoryDto factory)
-            throws InvocationTargetException, IllegalAccessException, ApiException, NoSuchMethodException {
+    public void shouldNotAllowUsingParamsThatCanBeSetOnlyByServer(FactoryDto factory) throws Exception {
         factoryBuilder.checkValid(factory);
     }
 
     @Test(dataProvider = "setByServerParamsProvider")
-    public void shouldAllowUsingParamsThatCanBeSetOnlyByServerDuringUpdate(FactoryDto factory)
-            throws InvocationTargetException, IllegalAccessException, ApiException, NoSuchMethodException {
+    public void shouldAllowUsingParamsThatCanBeSetOnlyByServerDuringUpdate(FactoryDto factory) throws Exception {
         factoryBuilder.checkValid(factory, true);
     }
 
     @DataProvider(name = "setByServerParamsProvider")
-    public static Object[][] setByServerParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
+    public static Object[][] setByServerParamsProvider() throws Exception {
         FactoryDto factory = prepareFactory();
         return new Object[][] {
-                {dto.clone(factory).withId("id")},
-                {dto.clone(factory).withCreator(dto.createDto(AuthorDto.class)
+                {requireNonNull(dto.clone(factory)).withId("id")},
+                {requireNonNull(dto.clone(factory)).withCreator(dto.createDto(AuthorDto.class)
                                                    .withUserId("id"))},
-                {dto.clone(factory).withCreator(dto.createDto(AuthorDto.class)
+                {requireNonNull(dto.clone(factory)).withCreator(dto.createDto(AuthorDto.class)
                                                    .withCreated(123L))}
         };
     }
@@ -132,31 +130,15 @@ public class FactoryBuilderTest {
     @DataProvider(name = "notValidParamsProvider")
     public static Object[][] notValidParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
         FactoryDto factory = prepareFactory();
-        EnvironmentDto environmentDto = factory.getWorkspace().getEnvironments().get(0);
-        environmentDto.getMachineConfigs().add(dto.createDto(MachineConfigDto.class).withType(null));
+        EnvironmentDto environmentDto = factory.getWorkspace().getEnvironments().values().iterator().next();
+        environmentDto.getRecipe().withType(null);
         return new Object[][] {
-                {dto.clone(factory).withWorkspace(factory.getWorkspace().withDefaultEnv(null)) },
-                {dto.clone(factory).withWorkspace(factory.getWorkspace().withEnvironments(Collections.singletonList(environmentDto))) }
+                {requireNonNull(dto.clone(factory)).withWorkspace(factory.getWorkspace()
+                                                                         .withDefaultEnv(null)) },
+                {requireNonNull(dto.clone(factory)).withWorkspace(factory.getWorkspace()
+                                                                         .withEnvironments(singletonMap("test", environmentDto)))}
         };
     }
-
-    @Test(dataProvider = "sameAsDefaultParamsProvider")
-    public void shouldAllowUsingParamsWIthValueLikeDefaultForType(FactoryDto factory)
-            throws InvocationTargetException, IllegalAccessException, ApiException, NoSuchMethodException {
-        factoryBuilder.checkValid(factory);
-    }
-
-    @DataProvider(name = "sameAsDefaultParamsProvider")
-    public static Object[][] sameAsDefaultParamsProvider() throws URISyntaxException, IOException, NoSuchMethodException {
-        FactoryDto factory = prepareFactory();
-        EnvironmentDto environmentDto = factory.getWorkspace().getEnvironments().get(0);
-        environmentDto.getMachineConfigs().get(0).withDev(false)
-                                                .withLimits(dto.newDto(LimitsDto.class).withRam(0));
-        return new Object[][] {
-                {dto.clone(factory).withWorkspace(factory.getWorkspace().withEnvironments(Collections.singletonList(environmentDto))) }
-        };
-    }
-
 
     @Test
     public void shouldBeAbleToValidateV4_0WithTrackedParamsWithoutAccountIdIfOnPremisesIsEnabled() throws Exception {
@@ -181,20 +163,14 @@ public class FactoryBuilderTest {
                                       .withDescription("description")
                                       .withName("name")
                                       .withPath("/path");
-        MachineConfigDto machineConfig = dto.createDto(MachineConfigDto.class)
-                                            .withName("name")
-                                            .withType("docker")
-                                            .withDev(true)
-                                            .withSource(dto.createDto(MachineSourceDto.class)
-                                                           .withType("git")
-                                                           .withLocation("https://github.com/123/test.git"))
-                                            .withServers(asList(newDto(ServerConfDto.class).withRef("ref1")
-                                                                                           .withPort("8080")
-                                                                                           .withProtocol("https"),
-                                                                newDto(ServerConfDto.class).withRef("ref2")
-                                                                                           .withPort("9090/udp")
-                                                                                           .withProtocol("someprotocol")))
-                                            .withEnvVariables(singletonMap("key1", "value1"));
+        EnvironmentDto environment = dto.createDto(EnvironmentDto.class)
+                                        .withRecipe(newDto(EnvironmentRecipeDto.class).withType("compose")
+                                                                                      .withContentType("application/x-yaml")
+                                                                                      .withContent("some content"))
+                                        .withMachines(singletonMap("devmachine",
+                                                                   newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))
+                                                                                                   .withAttributes(singletonMap("memoryLimitBytes", "" + 512L * 1024L * 1024L))));
+
         WorkspaceConfigDto workspaceConfig = dto.createDto(WorkspaceConfigDto.class)
                                                 .withProjects(singletonList(project))
                                                 .withCommands(singletonList(dto.createDto(CommandDto.class)
@@ -202,20 +178,15 @@ public class FactoryBuilderTest {
                                                                                .withType("maven")
                                                                                .withCommandLine("mvn test")))
                                                 .withDefaultEnv("env1")
-                                                .withEnvironments(singletonList(dto.createDto(EnvironmentDto.class)
-                                                                                   .withName("test")
-                                                                                   .withMachineConfigs(singletonList(machineConfig))
-                                                                                   .withRecipe(dto.createDto(RecipeDto.class)
-                                                                                                  .withType("sometype")
-                                                                                                  .withScript("some script"))));
+                                                .withEnvironments(singletonMap("test", environment));
         IdeDto ide = dto.createDto(IdeDto.class)
-                     .withOnAppClosed(dto.createDto(OnAppClosedDto.class)
-                                         .withActions(singletonList(dto.createDto(IdeActionDto.class).withId("warnOnClose"))))
-                     .withOnAppLoaded(dto.createDto(OnAppLoadedDto.class)
-                                         .withActions(asList(dto.createDto(IdeActionDto.class)
-                                                                .withId("newProject"),
-                                                             dto.createDto(IdeActionDto.class)
-                                                                .withId("openWelcomePage")
+                        .withOnAppClosed(dto.createDto(OnAppClosedDto.class)
+                                            .withActions(singletonList(dto.createDto(IdeActionDto.class).withId("warnOnClose"))))
+                        .withOnAppLoaded(dto.createDto(OnAppLoadedDto.class)
+                                            .withActions(asList(dto.createDto(IdeActionDto.class)
+                                                                   .withId("newProject"),
+                                                                dto.createDto(IdeActionDto.class)
+                                                                   .withId("openWelcomePage")
                                                                 .withProperties(ImmutableMap.of(
                                                                         "authenticatedTitle",
                                                                         "Greeting title for authenticated users",

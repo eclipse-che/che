@@ -8,23 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che;
+package org.eclipse.che.api.machine.shared.dto;
 
-import com.google.common.base.Strings;
-
-import javax.inject.Provider;
+import org.eclipse.che.api.core.model.machine.MachineLimits;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
- * Provides value of Che API endpoint URL for usage inside machine to be able to connect to host machine using docker host IP.
- *
- * @author Artem Zatsarynnyi
+ * @author Alexander Garagatyi
  */
-public class ApiEndpointProvider implements Provider<String> {
-
-    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API_ENDPOINT";
-
-    @Override
-    public String get() {
-        return Strings.nullToEmpty(System.getenv(API_ENDPOINT_URL_VARIABLE));
-    }
+@Deprecated
+@DTO
+public interface MachineLimitsDto extends MachineLimits {
+    MachineLimitsDto withRam(int memorySizeMB);
 }

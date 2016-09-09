@@ -20,6 +20,7 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
 /**
  * @author Alexander Garagatyi
  */
+@Deprecated
 @DTO
 public interface MachineSourceDto extends MachineSource {
     @Override

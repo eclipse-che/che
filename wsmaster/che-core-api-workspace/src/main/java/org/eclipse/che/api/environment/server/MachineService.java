@@ -63,14 +63,17 @@ public class MachineService extends Service {
     private final MachineProcessManager       machineProcessManager;
     private final MachineServiceLinksInjector linksInjector;
     private final WorkspaceManager            workspaceManager;
+    private final CheEnvironmentValidator     environmentValidator;
 
     @Inject
     public MachineService(MachineProcessManager machineProcessManager,
                           MachineServiceLinksInjector linksInjector,
-                          WorkspaceManager workspaceManager) {
+                          WorkspaceManager workspaceManager,
+                          CheEnvironmentValidator environmentValidator) {
         this.machineProcessManager = machineProcessManager;
         this.linksInjector = linksInjector;
         this.workspaceManager = workspaceManager;
+        this.environmentValidator = environmentValidator;
     }
 
     @GET
@@ -154,6 +157,12 @@ public class MachineService extends Service {
         // definition of source should come either with a content or with location
         requiredOnlyOneNotNull(machineConfig.getSource().getLocation(), machineConfig.getSource().getContent(),
                                "Machine source should provide either location or content");
+
+        try {
+            environmentValidator.validateMachine(machineConfig);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e.getLocalizedMessage());
+        }
 
         workspaceManager.startMachine(machineConfig, workspaceId);
     }

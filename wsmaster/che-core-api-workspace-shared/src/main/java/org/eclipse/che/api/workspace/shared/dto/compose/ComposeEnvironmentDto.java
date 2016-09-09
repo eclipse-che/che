@@ -8,33 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.shared.dto;
+package org.eclipse.che.api.workspace.shared.dto.compose;
 
-import org.eclipse.che.api.core.factory.FactoryParameter;
-import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.core.model.workspace.compose.ComposeEnvironment;
 import org.eclipse.che.dto.shared.DTO;
 
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
+import java.util.Map;
 
 /**
  * @author Alexander Garagatyi
  */
 @DTO
-public interface RecipeDto extends Recipe {
+public interface ComposeEnvironmentDto extends ComposeEnvironment {
+    void setVersion(String version);
+
+    ComposeEnvironmentDto withVersion(String version);
 
     @Override
-    @FactoryParameter(obligation = MANDATORY)
-    String getType();
+    Map<String, ComposeServiceDto> getServices();
 
-    void setType(String type);
+    void setServices(Map<String, ComposeServiceDto> services);
 
-    RecipeDto withType(String type);
-
-    @Override
-    @FactoryParameter(obligation = MANDATORY)
-    String getScript();
-
-    void setScript(String script);
-
-    RecipeDto withScript(String script);
+    ComposeEnvironmentDto withServices(Map<String, ComposeServiceDto> services);
 }

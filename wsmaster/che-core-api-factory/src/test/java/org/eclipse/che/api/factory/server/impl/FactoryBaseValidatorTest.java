@@ -51,8 +51,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Collections.singletonList;
+import static java.util.Objects.*;
+import static org.eclipse.che.dto.server.DtoFactory.*;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Mockito.when;
 
@@ -166,9 +169,9 @@ public class FactoryBaseValidatorTest {
                                             "digits or these following special characters -._.")
     public void shouldThrowFactoryUrlExceptionIfProjectNameInvalid(String projectName) throws Exception {
         // given
-        factory.withWorkspace(newDto(WorkspaceConfigDto.class).withProjects(Collections.singletonList(newDto(ProjectConfigDto.class)
-                                                                                                              .withType("type")
-                                                                                                              .withName(projectName))));
+        factory.withWorkspace(newDto(WorkspaceConfigDto.class).withProjects(singletonList(newDto(ProjectConfigDto.class)
+                                                                                                  .withType("type")
+                                                                                                  .withName(projectName))));
         // when, then
         validator.validateProjects(factory);
     }
@@ -178,12 +181,12 @@ public class FactoryBaseValidatorTest {
         // given
         prepareFactoryWithGivenStorage("git", VALID_REPOSITORY_URL, VALID_PROJECT_PATH);
         factory.withWorkspace(newDto(WorkspaceConfigDto.class).withProjects(
-                Collections.singletonList(newDto(ProjectConfigDto.class).withType("type")
-                                                                        .withName(projectName)
-                                                                        .withSource(newDto(SourceStorageDto.class)
-                                                                                            .withType("git")
-                                                                                            .withLocation(VALID_REPOSITORY_URL))
-                                                                        .withPath(VALID_PROJECT_PATH))));
+                singletonList(newDto(ProjectConfigDto.class).withType("type")
+                                                            .withName(projectName)
+                                                            .withSource(newDto(SourceStorageDto.class)
+                                                                                .withType("git")
+                                                                                .withLocation(VALID_REPOSITORY_URL))
+                                                            .withPath(VALID_PROJECT_PATH))));
         // when, then
         validator.validateProjects(factory);
     }
@@ -287,7 +290,7 @@ public class FactoryBaseValidatorTest {
 
     @Test
     public void shouldValidateTrackedParamsIfOrgIdIsMissingButOnPremisesTrue() throws Exception {
-        final DtoFactory dtoFactory = DtoFactory.getInstance();
+        final DtoFactory dtoFactory = getInstance();
         FactoryDto factory = dtoFactory.createDto(FactoryDto.class);
         factory.withV("4.0")
                .withPolicies(dtoFactory.createDto(PoliciesDto.class)
@@ -302,12 +305,12 @@ public class FactoryBaseValidatorTest {
     public void shouldNotValidateOpenfileActionIfInWrongSectionOnAppClosed() throws Exception {
         //given
         validator = new TesterFactoryBaseValidator();
-        List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
-                                                     .withId("openFile"));
+        List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class)
+                                                           .withId("openFile"));
         IdeDto ide = newDto(IdeDto.class)
                 .withOnAppClosed(newDto(OnAppClosedDto.class)
                                          .withActions(actions));
-        FactoryDto factoryWithAccountId = DtoFactory.getInstance().clone(factory).withIde(ide);
+        FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
         //when
         validator.validateProjectActions(factoryWithAccountId);
     }
@@ -316,12 +319,12 @@ public class FactoryBaseValidatorTest {
     public void shouldNotValidateFindReplaceActionIfInWrongSectionOnAppLoaded() throws Exception {
         //given
         validator = new TesterFactoryBaseValidator();
-        List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
-                                                     .withId("findReplace"));
+        List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class)
+                                                           .withId("findReplace"));
         IdeDto ide = newDto(IdeDto.class)
                 .withOnAppLoaded(newDto(OnAppLoadedDto.class)
                                          .withActions(actions));
-        FactoryDto factoryWithAccountId = DtoFactory.getInstance().clone(factory).withIde(ide);
+        FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
         //when
         validator.validateProjectActions(factoryWithAccountId);
     }
@@ -330,12 +333,12 @@ public class FactoryBaseValidatorTest {
     public void shouldNotValidateIfOpenfileActionInsufficientParams() throws Exception {
         //given
         validator = new TesterFactoryBaseValidator();
-        List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
-                                                     .withId("openFile"));
+        List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class)
+                                                           .withId("openFile"));
         IdeDto ide = newDto(IdeDto.class)
                 .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class)
                                               .withActions(actions));
-        FactoryDto factoryWithAccountId = DtoFactory.getInstance().clone(factory).withIde(ide);
+        FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
         //when
         validator.validateProjectActions(factoryWithAccountId);
     }
@@ -344,12 +347,12 @@ public class FactoryBaseValidatorTest {
     public void shouldNotValidateIfrunCommandActionInsufficientParams() throws Exception {
         //given
         validator = new TesterFactoryBaseValidator();
-        List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
-                                                     .withId("openFile"));
+        List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class)
+                                                           .withId("openFile"));
         IdeDto ide = newDto(IdeDto.class)
                 .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class)
                                               .withActions(actions));
-        FactoryDto factoryWithAccountId = DtoFactory.getInstance().clone(factory).withIde(ide);
+        FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
         //when
         validator.validateProjectActions(factoryWithAccountId);
     }
@@ -358,12 +361,12 @@ public class FactoryBaseValidatorTest {
     public void shouldNotValidateIfOpenWelcomePageActionInsufficientParams() throws Exception {
         //given
         validator = new TesterFactoryBaseValidator();
-        List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
-                                                     .withId("openWelcomePage"));
+        List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class)
+                                                           .withId("openWelcomePage"));
         IdeDto ide = newDto(IdeDto.class)
                 .withOnAppLoaded((newDto(OnAppLoadedDto.class)
                                           .withActions(actions)));
-        FactoryDto factoryWithAccountId = DtoFactory.getInstance().clone(factory).withIde(ide);
+        FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
         //when
         validator.validateProjectActions(factoryWithAccountId);
     }
@@ -376,13 +379,13 @@ public class FactoryBaseValidatorTest {
         params.put("in", "pom.xml");
         // find is missing!
         params.put("replace", "123");
-        List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
-                                                     .withId("findReplace")
-                                                     .withProperties(params));
+        List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class)
+                                                           .withId("findReplace")
+                                                           .withProperties(params));
         IdeDto ide = newDto(IdeDto.class)
                 .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class)
                                               .withActions(actions));
-        FactoryDto factoryWithAccountId = DtoFactory.getInstance().clone(factory).withIde(ide);
+        FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
         //when
         validator.validateProjectActions(factoryWithAccountId);
     }
@@ -395,13 +398,13 @@ public class FactoryBaseValidatorTest {
         params.put("in", "pom.xml");
         params.put("find", "123");
         params.put("replace", "456");
-        List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
-                                                     .withId("findReplace")
-                                                     .withProperties(params));
+        List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class)
+                                                           .withId("findReplace")
+                                                           .withProperties(params));
         IdeDto ide = newDto(IdeDto.class)
                 .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class)
                                               .withActions(actions));
-        FactoryDto factoryWithAccountId = DtoFactory.getInstance().clone(factory).withIde(ide);
+        FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
         //when
         validator.validateProjectActions(factoryWithAccountId);
     }
@@ -412,13 +415,13 @@ public class FactoryBaseValidatorTest {
         validator = new TesterFactoryBaseValidator();
         Map<String, String> params = new HashMap<>();
         params.put("file", "pom.xml");
-        List<IdeActionDto> actions = Arrays.asList(newDto(IdeActionDto.class)
-                                                     .withId("openFile")
-                                                     .withProperties(params));
+        List<IdeActionDto> actions = singletonList(newDto(IdeActionDto.class)
+                                                           .withId("openFile")
+                                                           .withProperties(params));
         IdeDto ide = newDto(IdeDto.class)
                 .withOnProjectsLoaded(newDto(OnProjectsLoadedDto.class)
                                               .withActions(actions));
-        FactoryDto factoryWithAccountId = DtoFactory.getInstance().clone(factory).withIde(ide);
+        FactoryDto factoryWithAccountId = requireNonNull(getInstance().clone(factory)).withIde(ide);
         //when
         validator.validateProjectActions(factoryWithAccountId);
     }
@@ -470,11 +473,11 @@ public class FactoryBaseValidatorTest {
 
     private FactoryDto prepareFactoryWithGivenStorage(String type, String location, String path) {
         return factory.withWorkspace(newDto(WorkspaceConfigDto.class)
-                                             .withProjects(Collections.singletonList(newDto(ProjectConfigDto.class)
-                                                                                             .withSource(newDto(SourceStorageDto.class)
-                                                                                                                 .withType(type)
-                                                                                                                 .withLocation(
-                                                                                                                         location))
-                                                                                             .withPath(path))));
+                                             .withProjects(singletonList(newDto(ProjectConfigDto.class)
+                                                                                 .withSource(newDto(SourceStorageDto.class)
+                                                                                                     .withType(type)
+                                                                                                     .withLocation(
+                                                                                                             location))
+                                                                                 .withPath(path))));
     }
 }

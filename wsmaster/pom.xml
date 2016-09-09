@@ -19,7 +19,6 @@
         <version>4.8.0-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
-    <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-master-parent</artifactId>
     <version>4.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>

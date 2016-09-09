@@ -17,9 +17,7 @@ import com.google.inject.Stage;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
-import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
@@ -34,20 +32,20 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.server.stack.StackJsonAdapter;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.persistence.internal.jpa.ExceptionFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.persistence.EntityManagerFactory;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -91,6 +89,9 @@ public class LocalToJpaDataMigratorTest {
     private LocalRecipeDaoImpl     localRecipeDao;
     private LocalStackDaoImpl      localStackDao;
 
+    private StackJsonAdapter           stackJsonAdapter;
+    private WorkspaceConfigJsonAdapter workspaceCfgJsonAdapter;
+
     @BeforeMethod
     private void setUp() throws Exception {
         workingDir = Files.createTempDirectory(Paths.get("/tmp"), "test");
@@ -105,6 +106,7 @@ public class LocalToJpaDataMigratorTest {
                 install(new SshJpaModule());
                 install(new WorkspaceJpaModule());
                 install(new MachineJpaModule());
+                bind(StackJsonAdapter.class);
             }
         });
 
@@ -124,6 +126,9 @@ public class LocalToJpaDataMigratorTest {
         localSshDao = injector.getInstance(LocalSshDaoImpl.class);
         localRecipeDao = injector.getInstance(LocalRecipeDaoImpl.class);
         localStackDao = injector.getInstance(LocalStackDaoImpl.class);
+
+        stackJsonAdapter = injector.getInstance(StackJsonAdapter.class);
+        workspaceCfgJsonAdapter = injector.getInstance(WorkspaceConfigJsonAdapter.class);
 
         migrator = new LocalDataMigrator();
         storeTestData();
@@ -145,7 +150,9 @@ public class LocalToJpaDataMigratorTest {
                                   workspaceDao,
                                   snapshotDao,
                                   recipeDao,
-                                  stackDao);
+                                  stackDao,
+                                  stackJsonAdapter,
+                                  workspaceCfgJsonAdapter);
     }
 
     @Test(expectedExceptions = Exception.class, dataProvider = "failFilenames")
@@ -159,7 +166,9 @@ public class LocalToJpaDataMigratorTest {
                                   workspaceDao,
                                   snapshotDao,
                                   recipeDao,
-                                  stackDao);
+                                  stackDao,
+                                  stackJsonAdapter,
+                                  workspaceCfgJsonAdapter);
     }
 
     @DataProvider(name = "failFilenames")

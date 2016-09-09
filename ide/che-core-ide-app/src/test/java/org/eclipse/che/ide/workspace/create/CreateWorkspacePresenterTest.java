@@ -13,27 +13,29 @@ package org.eclipse.che.ide.workspace.create;
 import com.google.gwt.core.client.Callback;
 import com.google.inject.Provider;
 
-import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.LimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.machine.shared.dto.MachineLimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.recipe.RecipeDescriptor;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
 import org.eclipse.che.ide.CoreLocalizationConstant;
+import org.eclipse.che.ide.api.component.Component;
+import org.eclipse.che.ide.api.machine.RecipeServiceClient;
+import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
+import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.WorkspaceComponent;
-import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.workspace.create.CreateWorkspaceView.HidePopupCallBack;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,9 +49,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static org.eclipse.che.api.machine.shared.Constants.WS_MACHINE_NAME;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.MAX_COUNT;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.RECIPE_TYPE;
 import static org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter.SKIP_COUNT;
@@ -98,7 +101,7 @@ public class CreateWorkspacePresenterTest {
     @Mock
     private DefaultWorkspaceComponent       workspaceComponent;
     @Mock
-    private LimitsDto                       limitsDto;
+    private MachineLimitsDto                limitsDto;
 
     //DTOs
     private MachineConfigDto   machineConfigDto;
@@ -107,8 +110,10 @@ public class CreateWorkspacePresenterTest {
     private MachineDto         machineDto;
     @Mock
     private MachineSourceDto   machineSourceDto;
-    @Mock
-    private EnvironmentDto     environmentDto;
+    // Mocks too
+    private EnvironmentDto       environmentDto;
+    private EnvironmentRecipeDto environmentRecipeDto;
+    private ExtendedMachineDto   extendedMachineDto;
     @Mock
     private CommandDto         commandDto;
     @Mock
@@ -134,18 +139,22 @@ public class CreateWorkspacePresenterTest {
         when(machineSourceDto.withType(anyString())).thenReturn(machineSourceDto);
         when(machineSourceDto.withLocation(anyString())).thenReturn(machineSourceDto);
 
-        when(dtoFactory.createDto(LimitsDto.class)).thenReturn(limitsDto);
+        when(dtoFactory.createDto(MachineLimitsDto.class)).thenReturn(limitsDto);
         when(limitsDto.withRam(anyInt())).thenReturn(limitsDto);
 
         when(dtoFactory.createDto(MachineConfigDto.class)).thenReturn(machineConfigDto);
 
         when(dtoFactory.createDto(EnvironmentDto.class)).thenReturn(environmentDto);
-        when(environmentDto.withName(anyString())).thenReturn(environmentDto);
-        when(environmentDto.withMachineConfigs(Matchers.<List<MachineConfigDto>>anyObject())).thenReturn(environmentDto);
 
         when(dtoFactory.createDto(WorkspaceConfigDto.class)).thenReturn(workspaceConfigDto);
 
         when(dtoFactory.createDto(WorkspaceDto.class)).thenReturn(usersWorkspaceDto);
+        environmentDto = mock(EnvironmentDto.class, new SelfReturningAnswer());
+        when(dtoFactory.createDto(EnvironmentDto.class)).thenReturn(environmentDto);
+        environmentRecipeDto = mock(EnvironmentRecipeDto.class, new SelfReturningAnswer());
+        when(dtoFactory.createDto(EnvironmentRecipeDto.class)).thenReturn(environmentRecipeDto);
+        extendedMachineDto = mock(ExtendedMachineDto.class, new SelfReturningAnswer());
+        when(dtoFactory.createDto(ExtendedMachineDto.class)).thenReturn(extendedMachineDto);
 
         when(wsComponentProvider.get()).thenReturn(workspaceComponent);
 
@@ -316,19 +325,8 @@ public class CreateWorkspacePresenterTest {
         clickOnCreateButton();
 
         verify(view, times(2)).getWorkspaceName();
-        verify(dtoFactory).createDto(MachineConfigDto.class);
-        verify(machineConfigDto).withName(WS_MACHINE_NAME);
-        verify(machineConfigDto).withType("docker");
-        verify(machineConfigDto).withSource(machineSourceDto);
-        verify(machineConfigDto).withDev(true);
-
-        verify(dtoFactory).createDto(MachineSourceDto.class);
-        verify(machineSourceDto).withType("dockerfile");
-        verify(machineSourceDto).withLocation("test");
 
         verify(dtoFactory).createDto(EnvironmentDto.class);
-        verify(environmentDto).withName("name");
-        verify(environmentDto).withMachineConfigs(Matchers.<List<MachineConfigDto>>anyObject());
     }
 
     @Test
@@ -342,13 +340,11 @@ public class CreateWorkspacePresenterTest {
     }
 
     private void callApplyCreateWorkspaceMethod() throws Exception {
-        List<EnvironmentDto> environments = new ArrayList<>();
-        environments.add(environmentDto);
+        Map<String, EnvironmentDto> environments = new HashMap<>();
+        environments.put("name", environmentDto);
 
         when(workspaceConfigDto.getDefaultEnv()).thenReturn("name");
         when(workspaceConfigDto.getEnvironments()).thenReturn(environments);
-
-        when(environmentDto.getMachineConfigs()).thenReturn(Collections.singletonList(machineConfigDto));
 
         clickOnCreateButton();
 

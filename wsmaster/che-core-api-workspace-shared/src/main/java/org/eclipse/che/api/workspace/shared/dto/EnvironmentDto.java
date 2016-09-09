@@ -12,15 +12,11 @@ package org.eclipse.che.api.workspace.shared.dto;
 
 import org.eclipse.che.api.core.factory.FactoryParameter;
 import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.dto.shared.DTO;
-import org.eclipse.che.dto.shared.DelegateRule;
-import org.eclipse.che.dto.shared.DelegateTo;
 
-import java.util.List;
+import java.util.Map;
 
 import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.MANDATORY;
-import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIONAL;
 
 /**
  * @author Alexander Garagatyi
@@ -28,38 +24,19 @@ import static org.eclipse.che.api.core.factory.FactoryParameter.Obligation.OPTIO
 @DTO
 public interface EnvironmentDto extends Environment {
 
-    EnvironmentDto withName(String name);
-
-    void setName(String name);
-
     @Override
-    @FactoryParameter(obligation = OPTIONAL)
-    RecipeDto getRecipe();
+    @FactoryParameter(obligation = MANDATORY)
+    EnvironmentRecipeDto getRecipe();
 
-    void setRecipe(RecipeDto recipe);
+    void setRecipe(EnvironmentRecipeDto recipe);
 
-    EnvironmentDto withRecipe(RecipeDto recipe);
+    EnvironmentDto withRecipe(EnvironmentRecipeDto recipe);
 
     @Override
     @FactoryParameter(obligation = MANDATORY)
-    List<MachineConfigDto> getMachineConfigs();
+    Map<String, ExtendedMachineDto> getMachines();
 
-    @DelegateTo(client = @DelegateRule(type = DevMachineResolver.class, method = "getDevMachine"),
-                server = @DelegateRule(type = DevMachineResolver.class, method = "getDevMachine"))
-    MachineConfigDto devMachine();
+    void setMachines(Map<String, ExtendedMachineDto> machines);
 
-    EnvironmentDto withMachineConfigs(List<MachineConfigDto> machineConfigs);
-
-    void setMachineConfigs(List<MachineConfigDto> machineConfigs);
-
-    class DevMachineResolver {
-        public static MachineConfigDto getDevMachine(EnvironmentDto environmentDto) {
-            for (MachineConfigDto machineConfigDto : environmentDto.getMachineConfigs()) {
-                if (machineConfigDto.isDev()) {
-                    return machineConfigDto;
-                }
-            }
-            return null;
-        }
-    }
+    EnvironmentDto withMachines(Map<String, ExtendedMachineDto> machines);
 }
