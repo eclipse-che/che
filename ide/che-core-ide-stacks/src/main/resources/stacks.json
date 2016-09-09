@@ -1783,9 +1783,7 @@
     "tags": [
       "Ubuntu",
       "Node.JS",
-      "Laravel",
-      "PHP",
-      "MariaDB"
+      "Laravel"
     ],
     "components": [
       {
@@ -1860,9 +1858,7 @@
     "scope": "advanced",
     "tags": [
       "Ubuntu",
-      "BitnamiRails",
-      "MariaDB",
-      "Ruby"
+      "BitnamiRails"
     ],
     "components": [
       {
@@ -1937,9 +1933,7 @@
     "scope": "advanced",
     "tags": [
       "Ubuntu",
-      "CodeIgniter",
-      "MariaDB",
-      "PHP"
+      "CodeIgniter"
     ],
     "components": [
       {
@@ -2014,9 +2008,7 @@
     "scope": "advanced",
     "tags": [
       "Ubuntu",
-      "Symfony",
-      "PHP",
-      "MariaDB"
+      "Symfony"
     ],
     "components": [
       {
@@ -2092,8 +2084,7 @@
     "tags": [
       "Ubuntu",
       "Activator",
-      "Play",
-      "Java"
+      "Play"
     ],
     "components": [
       {
