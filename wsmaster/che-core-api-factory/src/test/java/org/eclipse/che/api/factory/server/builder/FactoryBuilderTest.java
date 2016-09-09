@@ -181,7 +181,7 @@ public class FactoryBuilderTest {
                                                                                       .withContentType("application/x-yaml")
                                                                                       .withContent("some content"))
                                         .withMachines(singletonMap("devmachine",
-                                                                   newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent"))
+                                                                   newDto(ExtendedMachineDto.class).withAgents(singletonList("org.eclipse.che.ws-agent"))
                                                                                                    .withAttributes(singletonMap("memoryLimitBytes", "" + 512L * 1024L * 1024L))));
 
         WorkspaceConfigDto workspaceConfig = dto.createDto(WorkspaceConfigDto.class)

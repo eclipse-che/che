@@ -186,20 +186,20 @@ public class CheEnvironmentValidatorTest {
 
         env = createEnv();
         env.setMachines(null);
-        data.add(asList(env, "Environment 'env' doesn't contain machine with 'ws-agent' agent"));
+        data.add(asList(env, "Environment 'env' doesn't contain machine with 'org.eclipse.che.ws-agent' agent"));
 
         env = createEnv();
         env.setMachines(emptyMap());
-        data.add(asList(env, "Environment 'env' doesn't contain machine with 'ws-agent' agent"));
+        data.add(asList(env, "Environment 'env' doesn't contain machine with 'org.eclipse.che.ws-agent' agent"));
 
         env = createEnv();
         env.getMachines().put("missingInComposeEnvMachine",
-                              newDto(ExtendedMachineDto.class).withAgents(singletonList("ws-agent")));
+                              newDto(ExtendedMachineDto.class).withAgents(singletonList("org.eclipse.che.ws-agent")));
         data.add(asList(env, "Environment 'env' contains machines that are missing in environment recipe: missingInComposeEnvMachine"));
 
         env = createEnv();
-        env.getMachines().entrySet().forEach(entry -> entry.getValue().getAgents().add("ws-agent"));
-        data.add(asList(env, "Environment 'env' should contain exactly 1 machine with ws-agent, but contains '" +
+        env.getMachines().entrySet().forEach(entry -> entry.getValue().getAgents().add("org.eclipse.che.ws-agent"));
+        data.add(asList(env, "Environment 'env' should contain exactly 1 machine with org.eclipse.che.ws-agent, but contains '" +
                              env.getMachines().size() + "'. " + "All machines with this agent: " +
                              Joiner.on(", ").join(env.getMachines().keySet())));
 
@@ -537,7 +537,7 @@ public class CheEnvironmentValidatorTest {
                                                 new HashMap<>(singletonMap("prop1", "propValue"))));
         servers.put("ref2", new ServerConf2Impl("8080/udp", "proto1", null));
         servers.put("ref3", new ServerConf2Impl("9090", "proto1", null));
-        machines.put("dev-machine", new ExtendedMachineImpl(new ArrayList<>(asList("ws-agent", "someAgent")),
+        machines.put("dev-machine", new ExtendedMachineImpl(new ArrayList<>(asList("org.eclipse.che.ws-agent", "someAgent")),
                                                             servers,
                                                             new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
         machines.put("machine2", new ExtendedMachineImpl(new ArrayList<>(asList("someAgent2", "someAgent3")),

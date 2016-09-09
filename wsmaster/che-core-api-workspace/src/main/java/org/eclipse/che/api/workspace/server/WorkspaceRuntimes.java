@@ -13,7 +13,13 @@ package org.eclipse.che.api.workspace.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
+import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.impl.AgentSorter;
+import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
+import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -22,6 +28,7 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
@@ -30,9 +37,11 @@ import org.eclipse.che.api.core.util.MessageConsumer;
 import org.eclipse.che.api.core.util.WebsocketMessageConsumer;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
+import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
@@ -89,17 +98,23 @@ public class WorkspaceRuntimes {
     private final EventService                eventService;
     private final StripedLocks                stripedLocks;
     private final CheEnvironmentEngine        environmentEngine;
-    private final WsAgentLauncher             wsAgentLauncher;
+    private final AgentSorter                 agentSorter;
+    private final AgentLauncherFactory        launcherFactory;
+    private final AgentRegistry               agentRegistry;
 
     private volatile boolean isPreDestroyInvoked;
 
     @Inject
     public WorkspaceRuntimes(EventService eventService,
                              CheEnvironmentEngine environmentEngine,
-                             WsAgentLauncher wsAgentLauncher) {
+                             AgentSorter agentSorter,
+                             AgentLauncherFactory launcherFactory,
+                             AgentRegistry agentRegistry) {
         this.eventService = eventService;
         this.environmentEngine = environmentEngine;
-        this.wsAgentLauncher = wsAgentLauncher;
+        this.agentSorter = agentSorter;
+        this.launcherFactory = launcherFactory;
+        this.agentRegistry = agentRegistry;
         this.workspaces = new HashMap<>();
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
@@ -233,9 +248,7 @@ public class WorkspaceRuntimes {
                                                               environmentCopy,
                                                               recover,
                                                               getEnvironmentLogger(workspaceId));
-            Instance devMachine = getDevMachine(machines);
-
-            wsAgentLauncher.startWsAgent(devMachine);
+            launchAgents(environment, machines);
 
             try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                 WorkspaceState workspaceState = workspaces.get(workspaceId);
@@ -262,6 +275,19 @@ public class WorkspaceRuntimes {
                                   environmentStartError);
 
             throw new ServerException(environmentStartError, e);
+        }
+    }
+
+    private void launchAgents(EnvironmentImpl environment, List<Instance> machines) throws ServerException {
+        for (Instance instance : machines) {
+            Map<String, ExtendedMachineImpl> envMachines = environment.getMachines();
+            if (envMachines != null) {
+                ExtendedMachine extendedMachine = envMachines.get(instance.getConfig().getName());
+                if (extendedMachine != null) {
+                    List<String> agents = extendedMachine.getAgents();
+                    launchAgents(instance, agents);
+                }
+            }
         }
     }
 
@@ -382,6 +408,7 @@ public class WorkspaceRuntimes {
         }
 
         Instance instance = environmentEngine.startMachine(workspaceId, machineConfig);
+        launchAgents(instance, Collections.singletonList("org.eclipse.che.terminal"));
 
         try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);
@@ -571,6 +598,20 @@ public class WorkspaceRuntimes {
     private void ensurePreDestroyIsNotExecuted() throws ServerException {
         if (isPreDestroyInvoked) {
             throw new ServerException("Could not perform operation because application server is stopping");
+        }
+    }
+
+    protected void launchAgents(Instance instance, List<String> agents) throws ServerException {
+        try {
+            for (AgentKey agentKey : agentSorter.sort(agents)) {
+                LOG.info("Launching '{}' agent", agentKey.getName());
+                
+                Agent agent = agentRegistry.getAgent(agentKey);
+                AgentLauncher launcher = launcherFactory.find(agentKey.getName(), instance.getConfig().getType());
+                launcher.launch(instance, agent);
+            }
+        } catch (AgentException e) {
+            throw new MachineException(e.getMessage(), e);
         }
     }
 
