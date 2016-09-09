@@ -238,6 +238,10 @@ public class CheEnvironmentValidator {
         checkArgument(service.getVolumes() == null || service.getVolumes().isEmpty(),
                       "Volumes binding is forbidden but found in machine '%s' of environment '%s'",
                       machineName, envName);
+
+        checkArgument(service.getNetworks() == null || service.getNetworks().isEmpty(),
+                      "Networks configuration is forbidden but found in machine '%s' of environment '%s'",
+                      machineName, envName);
     }
 
     private void validateExtendedMachine(ExtendedMachine extendedMachine, String envName, String machineName) {

@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_FILE_TYPE;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.MACHINE_SNAPSHOT_PREFIX;
@@ -83,7 +84,6 @@ public class ComposeMachineProviderImplTest {
     private static final String  MACHINE_NAME           = "machineName";
     private static final String  USER_TOKEN             = "userToken";
     private static final String  USER_NAME              = "user";
-    private static final int     MEMORY_LIMIT_MB        = 64;
     private static final boolean SNAPSHOT_USE_REGISTRY  = true;
     private static final int     MEMORY_SWAP_MULTIPLIER = 0;
     private static final String  ENV_NAME               = "env";
@@ -146,7 +146,8 @@ public class ComposeMachineProviderImplTest {
                                                       Collections.emptySet(),
                                                       Collections.emptySet(),
                                                       SNAPSHOT_USE_REGISTRY,
-                                                      MEMORY_SWAP_MULTIPLIER));
+                                                      MEMORY_SWAP_MULTIPLIER,
+                                                      emptySet()));
 
         EnvironmentContext envCont = new EnvironmentContext();
         envCont.setSubject(new SubjectImpl(USER_NAME, "userId", USER_TOKEN, false));
@@ -335,7 +336,8 @@ public class ComposeMachineProviderImplTest {
                                                       Collections.emptySet(),
                                                       Collections.emptySet(),
                                                       SNAPSHOT_USE_REGISTRY,
-                                                      MEMORY_SWAP_MULTIPLIER));
+                                                      MEMORY_SWAP_MULTIPLIER,
+                                                      emptySet()));
 
         createInstanceFromRecipe();
 
@@ -515,7 +517,8 @@ public class ComposeMachineProviderImplTest {
                                                       Collections.emptySet(),
                                                       Collections.emptySet(),
                                                       SNAPSHOT_USE_REGISTRY,
-                                                      swapMultiplier));
+                                                      swapMultiplier,
+                                                      emptySet()));
 
         // when
         createInstanceFromRecipe(memoryMB);
@@ -573,7 +576,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = true;
 
@@ -619,7 +623,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = false;
 
@@ -672,7 +677,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = true;
 
@@ -718,7 +724,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = false;
 
@@ -758,7 +765,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = false;
         ComposeServiceImpl machine = createService();
@@ -801,7 +809,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = true;
         ComposeServiceImpl machine = createService();
@@ -844,7 +853,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
 
@@ -884,7 +894,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         when(dockerNode.getProjectsFolder()).thenReturn("/tmp/projects");
 
@@ -933,7 +944,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         when(workspaceFolderPathProvider.getPath(anyString())).thenReturn(expectedHostPathOfProjects);
         final boolean isDev = true;
@@ -980,7 +992,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
 
@@ -1027,7 +1040,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
 
@@ -1072,7 +1086,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
         final boolean isDev = true;
@@ -1117,7 +1132,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
 
@@ -1162,7 +1178,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         when(dockerNode.getProjectsFolder()).thenReturn(expectedHostPathOfProjects);
         final boolean isDev = false;
@@ -1268,7 +1285,8 @@ public class ComposeMachineProviderImplTest {
                                                   devEnv,
                                                   commonEnv,
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = true;
 
@@ -1305,7 +1323,8 @@ public class ComposeMachineProviderImplTest {
                                                   devEnv,
                                                   commonEnv,
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = false;
 
@@ -1347,7 +1366,8 @@ public class ComposeMachineProviderImplTest {
                                                   devEnv,
                                                   commonEnv,
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = true;
 
@@ -1385,7 +1405,8 @@ public class ComposeMachineProviderImplTest {
                                                   devEnv,
                                                   commonEnv,
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = false;
 
@@ -1424,7 +1445,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = false;
         ComposeServiceImpl machine = createService();
@@ -1472,7 +1494,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = true;
         ComposeServiceImpl machine = createService();
@@ -1520,7 +1543,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = false;
         ComposeServiceImpl service = createService();
@@ -1568,7 +1592,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   SNAPSHOT_USE_REGISTRY,
-                                                  MEMORY_SWAP_MULTIPLIER);
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet());
 
         final boolean isDev = true;
         ComposeServiceImpl machine = createService();
@@ -1700,7 +1725,8 @@ public class ComposeMachineProviderImplTest {
                                                   Collections.emptySet(),
                                                   Collections.emptySet(),
                                                   snapshotUseRegistry,
-                                                  MEMORY_SWAP_MULTIPLIER));
+                                                  MEMORY_SWAP_MULTIPLIER,
+                                                  emptySet()));
     }
 
     public ComposeServiceImpl createService() {

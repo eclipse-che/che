@@ -11,10 +11,13 @@
 package org.eclipse.che.plugin.docker.machine;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.core.model.machine.ServerConf;
+
+import java.util.Set;
 
 /**
  * Module for components that are needed for {@link DockerInstanceProvider}
@@ -50,5 +53,13 @@ public class DockerMachineModule extends AbstractModule {
         Multibinder<String> machineVolumes = Multibinder.newSetBinder(binder(),
                                                                       String.class,
                                                                       Names.named("machine.docker.machine_volumes"));
+
+        // Provides set of sets of strings instead of set of strings.
+        // This allows providers to return empty set as a value if no value should be added by provider.
+        // .permitDuplicates() is needed to allow different providers add empty sets.
+        Multibinder<Set<String>> networks = Multibinder.newSetBinder(binder(),
+                                                                     new TypeLiteral<Set<String>>() {},
+                                                                     Names.named("machine.docker.networks"))
+                                                       .permitDuplicates();
     }
 }
