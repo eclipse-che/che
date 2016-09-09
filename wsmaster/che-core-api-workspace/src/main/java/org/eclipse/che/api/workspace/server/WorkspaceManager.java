@@ -49,6 +49,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -732,16 +733,9 @@ public class WorkspaceManager {
                                      .withWorkspaceId(workspaceId));
         String devMachineSnapshotFailMessage = null;
         for (MachineImpl machine : runtime.getMachines()) {
-            try {
-                SnapshotImpl snapshot = runtimes.saveMachine(namespace,
-                                                             workspaceId,
-                                                             machine.getId());
-                snapshotDao.saveSnapshot(snapshot);
-            } catch (ApiException apiEx) {
-                if (machine.getConfig().isDev()) {
-                    devMachineSnapshotFailMessage = apiEx.getLocalizedMessage();
-                }
-                LOG.error(apiEx.getLocalizedMessage(), apiEx);
+            Optional<String> error = createSnapshot(machine, namespace);
+            if (error.isPresent() && machine.getConfig().isDev()) {
+                devMachineSnapshotFailMessage = error.get();
             }
         }
         if (devMachineSnapshotFailMessage != null) {
@@ -755,6 +749,31 @@ public class WorkspaceManager {
                                          .withWorkspaceId(workspaceId));
         }
         return devMachineSnapshotFailMessage == null;
+    }
+
+    private Optional<String> createSnapshot(MachineImpl machine, String namespace) {
+        try {
+            try {
+                SnapshotImpl oldSnapshot = snapshotDao.getSnapshot(machine.getWorkspaceId(),
+                                                                   machine.getEnvName(),
+                                                                   machine.getConfig().getName());
+                snapshotDao.removeSnapshot(oldSnapshot.getId());
+
+                runtimes.removeSnapshot(oldSnapshot);
+            } catch (NotFoundException ignored) {
+                // Do nothing if no snapshot found
+            }
+
+            SnapshotImpl snapshot = runtimes.saveMachine(namespace,
+                                                         machine.getWorkspaceId(),
+                                                         machine.getId());
+            snapshotDao.saveSnapshot(snapshot);
+
+            return Optional.empty();
+        } catch (ApiException apiEx) {
+            LOG.error(apiEx.getLocalizedMessage(), apiEx);
+            return Optional.of(apiEx.getLocalizedMessage());
+        }
     }
 
     @VisibleForTesting

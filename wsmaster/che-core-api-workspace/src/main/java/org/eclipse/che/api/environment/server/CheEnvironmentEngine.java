@@ -469,17 +469,15 @@ public class CheEnvironmentEngine {
      *
      * @param snapshot
      *         description of snapshot that should be removed
+     * @throws NotFoundException
+     *         if snapshot is not found
      * @throws ServerException
      *         if error occurs on snapshot removal
      */
-    public void removeSnapshot(SnapshotImpl snapshot) throws ServerException {
+    public void removeSnapshot(SnapshotImpl snapshot) throws ServerException, NotFoundException {
         final String instanceType = snapshot.getType();
-        try {
-            final InstanceProvider instanceProvider = machineInstanceProviders.getProvider(instanceType);
-            instanceProvider.removeInstanceSnapshot(snapshot.getMachineSource());
-        } catch (NotFoundException e) {
-            throw new ServerException(e.getLocalizedMessage(), e);
-        }
+        final InstanceProvider instanceProvider = machineInstanceProviders.getProvider(instanceType);
+        instanceProvider.removeInstanceSnapshot(snapshot.getMachineSource());
     }
 
     private void initializeEnvironment(String workspaceId,

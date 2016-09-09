@@ -787,6 +787,8 @@ public class WorkspaceManagerTest {
         verify(workspaceManager, timeout(1_000)).createSnapshotSync(any(WorkspaceRuntimeImpl.class),
                                                     eq(workspace.getNamespace()),
                                                     eq(workspace.getId()));
+
+        // TODO add check for event
     }
 
     @Test(expectedExceptions = ConflictException.class,
@@ -800,6 +802,32 @@ public class WorkspaceManagerTest {
 
         // when
         workspaceManager.createSnapshot(workspace.getId());
+    }
+
+    @Test
+    public void shouldSnapshotAllMachinesInWs() throws Exception {
+    }
+
+    @Test
+    public void shouldIgnoreNotFoundExceptionOnOldSnapshotRemoval1() throws Exception {
+    }
+
+    @Test
+    public void shouldIgnoreNotFoundExceptionOnOldSnapshotRemoval2() throws Exception {
+    }
+
+    @Test
+    public void shouldIgnoreNotFoundExceptionOnOldSnapshotRemoval3() throws Exception {
+    }
+
+    @Test
+    public void shouldSendSnapshotSavingFailedEventIfDevMachineSnapshotingFailed() throws Exception {
+        // TODO also check boolean return
+    }
+
+    @Test
+    public void shouldNotSendSnapshotSavingFailedEventIfNonDevMachineSnapshotingFailed() throws Exception {
+        // TODO also check boolean return
     }
 
     @Test
