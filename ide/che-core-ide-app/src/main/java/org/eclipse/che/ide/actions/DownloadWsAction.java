@@ -18,6 +18,7 @@ import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.download.DownloadContainer;
 
@@ -34,11 +35,13 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
 @Singleton
 public class DownloadWsAction extends AbstractPerspectiveAction {
 
-    private final AppContext        appContext;
-    private final DownloadContainer downloadContainer;
+    private final AppContext         appContext;
+    private final WsAgentURLModifier wsAgentURLModifier;
+    private final DownloadContainer  downloadContainer;
 
     @Inject
     public DownloadWsAction(AppContext appContext,
+                            WsAgentURLModifier wsAgentURLModifier,
                             CoreLocalizationConstant locale,
                             Resources resources,
                             DownloadContainer downloadContainer) {
@@ -48,13 +51,14 @@ public class DownloadWsAction extends AbstractPerspectiveAction {
               null,
               resources.downloadZip());
         this.appContext = appContext;
+        this.wsAgentURLModifier = wsAgentURLModifier;
         this.downloadContainer = downloadContainer;
     }
 
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        downloadContainer.setUrl(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/export/");
+        downloadContainer.setUrl(wsAgentURLModifier.modify(appContext.getDevMachine().getWsAgentBaseUrl() + "/project/export/"));
     }
 
     /** {@inheritDoc} */

@@ -18,6 +18,7 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.download.DownloadContainer;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,6 +39,8 @@ import static org.mockito.Mockito.when;
 public class DownloadWsActionTest {
     @Mock
     private AppContext               appContext;
+    @Mock
+    private WsAgentURLModifier       wsAgentURLModifier;
     @Mock
     private DownloadContainer        downloadContainer;
     @Mock
@@ -65,10 +69,11 @@ public class DownloadWsActionTest {
         DevMachine devMachine = mock(DevMachine.class);
         when(appContext.getDevMachine()).thenReturn(devMachine);
         when(devMachine.getWsAgentBaseUrl()).thenReturn(baseUrl);
+        when(wsAgentURLModifier.modify(anyString())).thenReturn(baseUrl);
 
         action.actionPerformed(actionEvent);
 
-        verify(downloadContainer).setUrl(eq("baseUrl/project/export/"));
+        verify(downloadContainer).setUrl(eq(baseUrl));
     }
 
     @Test
