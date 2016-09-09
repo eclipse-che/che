@@ -190,8 +190,23 @@
             </div>
           </che-label-container>
           <che-label-container che-label-name="RAM">
-            <che-workspace-ram-allocation-slider
-              ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
+            <div ng-hide="createProjectCtrl.isCustomStack"
+                 data-ng-repeat="(environmentKey, environmentValue) in createProjectCtrl.stack.workspaceConfig.environments">
+              <span ng-if="createProjectCtrl.getObjectKeys(createProjectCtrl.stack.workspaceConfig.environments).length > 1"
+                    class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
+
+              <div>
+                <div data-ng-repeat="(machineKey, machineValue) in environmentValue.machines">
+                  <div class="workspace-machine" ng-if="machineValue.attributes && machineValue.attributes.memoryLimitBytes">
+                    <span ng-if="createProjectCtrl.getObjectKeys(environmentValue.machines).length > 1">MACHINE: {{machineKey}}</span>
+                    <che-workspace-ram-allocation-slider
+                            ng-model="machineValue.attributes.memoryLimitBytes"></che-workspace-ram-allocation-slider>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <che-workspace-ram-allocation-slider ng-show="createProjectCtrl.isCustomStack"
+                                                 ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
           </che-label-container>
         </div>
       </ng-form>
