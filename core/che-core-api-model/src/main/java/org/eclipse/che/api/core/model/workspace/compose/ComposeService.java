@@ -131,4 +131,9 @@ public interface ComposeService {
      * Memory limit for the container of service, specified in bytes.
      */
     Long getMemLimit();
+
+    /**
+     * List of networks that should be connected to service.
+     */
+    List<String> getNetworks();
 }
