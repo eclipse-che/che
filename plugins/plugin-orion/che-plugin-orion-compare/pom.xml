@@ -67,7 +67,7 @@
                 <configuration>
                     <excludes>
                         <!-- Orion - EPL License -->
-                        <exclude>**/orion/public/built-compare-12.0/*</exclude>
+                        <exclude>**/orion/public/built-compare-11.0/*</exclude>
                     </excludes>
                 </configuration>
             </plugin>

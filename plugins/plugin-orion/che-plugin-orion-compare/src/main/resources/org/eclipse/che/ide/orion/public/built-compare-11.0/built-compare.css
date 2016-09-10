@@ -1,9 +1,9 @@
 
 .headerLayout {
-	height: 35px;
+	height: 50px;
 }
 .toolbarLayout {
-	height: 35px;
+	height: 50px;
 	
 	display: -webkit-box;
 	display: -moz-box;
@@ -91,7 +91,7 @@
     top: 0;
 	    
     bottom: 0;
-    left: 35px;
+    left: 50px;
     right: 0;
     background: #3b4b54;
 	
@@ -252,7 +252,7 @@
 }
 .toolbarTarget {
 	position: absolute;
-	top: 35px;  
+	top: 50px;  
  	width: 100%;
  	overflow-y: auto;
 }
@@ -261,11 +261,11 @@
 }
 .pageLayoutTarget {
 	position: absolute;
- 	width: calc( 100% - 15px );
+ 	width: calc( 100% - 60px );
  	bottom: 0;
  	overflow-y: auto;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33); 
-	margin: 5px;
+	margin: 20px;
 	margin-right: 0;
 	padding-top: 10px;
 	padding-bottom: 5px;
@@ -438,7 +438,7 @@ and (max-device-width : 1024px)  {
 	margin-right: 0 !important;
 }
 .sideMenu{
-    width: 35px;
+    width: 50px;
     background: #26343F;
 	float: left;
     position: absolute;
@@ -471,7 +471,7 @@ and (max-device-width : 1024px)  {
 }
 .sideMenuHome{
 	width: 100%;
-	height: 35px;
+	height: 50px;
 }
 .sideMenuList{
 	display:inline-block !important;
@@ -523,7 +523,7 @@ and (max-device-width : 1024px)  {
 	text-decoration:none !important;
 	width: 100%;
 	display: inline-block;
-	padding: 4px 0 4px 0;
+	padding: 9px 0px 12px 0px;
 }
 .sideMenuItem>.submenu-trigger:hover, .sideMenuItem.expanded>.submenu-trigger{
 	text-decoration:none;
@@ -635,12 +635,12 @@ and (max-device-width : 1024px)  {
 }
 .mainContent{
 	position:absolute;
-	left:35px;
+	left:50px;
 }
 .innerPanels{
 	position:absolute;
 	width:100%;
-	top:35px;
+	top:50px;
 	bottom:0;
 }
 .userMenu {
@@ -715,16 +715,13 @@ and (max-device-width : 1024px)  {
 	padding-bottom:10px;
 	height:24px;
 }
-.splashMessages {
-}
 .splashMessage {
 	color: white;
 	font-size: 14px;
 }
 .splashDetailedMessage {
 	color: white;
-	font-size: 12px;
-	padding-left: 20px;
+	font-size: 14px;
 }
 .splashVisual {
 	width: 24px;
@@ -1336,6 +1333,7 @@ textarea.parameterInput {
 }
 .mainNavColumn {
 	display: inline-block;
+	padding: 2px;
 	vertical-align: baseline;
 	white-space: nowrap;
 }
@@ -2068,7 +2066,7 @@ html[dir="rtl"] .modifiedFileMarker{
 	border-collapse: collapse;
 	border-spacing: 0;
 	padding: 0;
-	margin-top: 5px;
+	margin-top: 40px;
 	overflow-y: hidden; 
 }
 html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{ 
@@ -2085,8 +2083,8 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{
 }
 .sectionTable {
 	margin-top: 0;
-	margin-left: 5px;
-	margin-right: 5px;
+	margin-left: 8%;
+	margin-right: 8%;
 	border: 1px solid #f1f3f4;
 	-webkit-transition: all 0.1s ease, left 0;
 	transition: all 0.1s ease, left 0;
@@ -2098,7 +2096,7 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{
 	border-top: none;
 }
 .sectionTable:last-child {
-	margin-bottom: 5px;
+	margin-bottom: 20px;
 }
 .sectionTable.sectionClosed {
 	height: 0;
@@ -2108,8 +2106,8 @@ html[dir="rtl"] .sectionWrapper, html[dir="rtl"] .sectionTable{
 }
 .sectionWrapper{
 	border: 1px solid;
-	margin-left: 5px;
-	margin-right: 5px;
+	margin-left: 8%;
+	margin-right: 8%;
 	background: none repeat scroll 0 0 #f4f4f4;
 	vertical-align: middle;
 	font-weight: bold;
@@ -2504,7 +2502,7 @@ html[dir="rtl"] .fileExplorerProgressDiv {
 	-moz-osx-font-smoothing: grayscale;
 }
 .core-sprite-questionmark {
-	padding-bottom: 3px;
+	font-weight: bold;
 }
 .core-sprite-hamburger {
 	margin-top: -3px;
@@ -2575,6 +2573,7 @@ html[dir="rtl"] .fileExplorerProgressDiv {
 }
 .core-sprite-git-logo {
 	font-size: 20px;
+	padding-bottom: 10px !important;
 }
 .core-sprite-page,
 .core-sprite-horizontal,
@@ -2641,7 +2640,7 @@ html[dir="rtl"] .fileExplorerProgressDiv {
 .core-sprite-horizontal:before{ content:'\E042'; }
 .core-sprite-vertical:before{ content:'\E041'; }
 .core-sprite-pip:before{ content:'\E067'; }
-.core-sprite-questionmark:before{ content:'\E043'; }
+.core-sprite-questionmark:before{ content:'?'; }
  
 .file-sprite-javascript:before{ content:'\E00D'; }
 .file-sprite-css:before{ content:'\E00C'; }
@@ -2716,7 +2715,7 @@ html[dir="rtl"] .fileExplorerProgressDiv {
 	height: 100%;
 }
 .rulerLines {
-	color: #767676; 
+	color: silver;
 }
 .rulerLines.even
 .rulerLines.odd {
@@ -2808,16 +2807,13 @@ html[dir="rtl"] .fileExplorerProgressDiv {
 .textviewTooltip .hoverTooltipTitle {
 	font-weight: normal;
 }
-.textviewTooltip .quickFixList { 
-	margin-top: 5px;
-}
 .textviewTooltip .commandButton { 
 	border: 1px solid #325C80;
 	background-color: inherit;
 	color: white;
 }
 .textviewTooltip .commandButton:not(.dropdownTrigger){ 
-	text-transform: initial; 
+  text-transform: initial; 
 }
 .textviewTooltip .commandList > li {
 	margin: 0;
@@ -2929,11 +2925,11 @@ html[dir="rtl"] .fileExplorerProgressDiv {
 }
 .contentassist .proposal-noemphasis-title-keywords {
 	background-color: aliceblue;
-	color: #717171;  
+	color: gray;
 }
 .contentassist .proposal-noemphasis-title {
 	background-color: aliceblue;
-	color: #717171;  
+	color: gray;
 	padding-top: 5px;
 }
 .contentassist .proposal-default {
@@ -3791,7 +3787,7 @@ a.breadcrumb.currentLocation {
 .mainpane {
 	border: 0;
 	background: #3B4B54 !important;
-	padding-right:5px;
+	padding-right:20px;
 }
 .mainToolbar {
 	color: white;
@@ -4430,7 +4426,6 @@ a.breadcrumb.currentLocation {
 	visibility: hidden;
 	z-index: 175;  
 	position: absolute;
-	color: #222;
 	background-color: #fbfbfb;
 	border-radius: 2px;
 	border: 1px solid #BBB;

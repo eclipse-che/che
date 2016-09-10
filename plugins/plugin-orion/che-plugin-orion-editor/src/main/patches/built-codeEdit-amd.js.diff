@@ -1,34 +1,42 @@
-This patch fixes bug related to linked mode.
+This patch fixes bug with linked mode and reduces amount of scrolling lines.
 ===================================================================
-diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
---- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
-+++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
-@@ -32269,8 +32269,9 @@
- 	'orion/editor/keyModes',
- 	'orion/editor/annotations',
- 	'orion/objects',
+diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
+--- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
++++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
+@@ -21325,6 +21325,7 @@
+ 		},
+ 		_handleMouseWheel: function (e) {
+ 			if (this._noScroll) return;
++			if(e.defaultPrevented) return;
+ 			var lineHeight = this._getLineHeight();
+ 			var pixelX = 0, pixelY = 0;
+ 			// Note: On the Mac the correct behaviour is to scroll by pixel.
+@@ -31473,8 +31474,9 @@
+ 	'orion/editor/keyModes', //$NON-NLS-0$
+ 	'orion/editor/annotations', //$NON-NLS-0$
+ 	'orion/objects', //$NON-NLS-0$
 +	'orion/editor/eventTarget',
- 	'orion/util'
+ 	'orion/util' //$NON-NLS-0$
 -], function(messages, mKeyBinding, mKeyModes, mAnnotations, objects) {
 +], function(messages, mKeyBinding, mKeyModes, mAnnotations, objects, mEventTarget) {
- 
+
  	var exports = {};
- 
-@@ -32354,11 +32355,11 @@
+
+@@ -31543,11 +31545,11 @@
  		this.linkedModeModel = null;
- 		
+
  		textView.setAction("linkedModeEnter", function() { //$NON-NLS-0$
 -			this.exitLinkedMode(true);
 +			this.exitLinkedMode(true, true);
  			return true;
  		}.bind(this));
  		textView.setAction("linkedModeCancel", function() { //$NON-NLS-0$
--			this.exitLinkedMode(true);
+-			this.exitLinkedMode(false);
 +			this.exitLinkedMode(false, false);
  			return true;
  		}.bind(this));
  		textView.setAction("linkedModeNextGroup", function() { //$NON-NLS-0$
-@@ -32396,7 +32397,7 @@
+@@ -31585,7 +31587,7 @@
  					changed = positionChanged.position;
  					if (changed === undefined || changed.model !== model) {
  						// The change has been done outside of the positions, exit the Linked Mode
@@ -37,7 +45,7 @@ diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_ed
  						model = this.linkedModeModel;
  					} else {
  						break;
-@@ -32441,7 +32442,7 @@
+@@ -31631,7 +31633,7 @@
  					changed = positionChanged.position;
  					if (changed === undefined || changed.model !== model) {
  						// The change has been done outside of the positions, exit the Linked Mode
@@ -46,8 +54,8 @@ diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_ed
  						model = this.linkedModeModel;
  					} else {
  						break;
-@@ -32573,10 +32574,11 @@
- 		 * Exits Linked Mode. Optionally places the caret at linkedMode escapePosition. 
+@@ -31758,10 +31760,11 @@
+ 		 * Exits Linked Mode. Optionally places the caret at linkedMode escapePosition.
  		 * @param {Boolean} [escapePosition=false] if true, place the caret at the  escape position.
  		 */
 -		exitLinkedMode: function(escapePosition) {
@@ -59,12 +67,11 @@ diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_ed
  			if (this._compoundChange) {
  				this.endUndo();
  				this._compoundChange = null;
-@@ -32822,6 +32824,7 @@
+@@ -31950,6 +31953,7 @@
  			annotationModel.replaceAnnotations(remove, add);
  		}
  	});
 +	mEventTarget.EventTarget.addMixin(LinkedMode.prototype);
  	exports.LinkedMode = LinkedMode;
- 
+
  	return exports;
-\ No newline at end of file
