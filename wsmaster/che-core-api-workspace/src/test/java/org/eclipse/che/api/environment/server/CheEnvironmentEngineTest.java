@@ -99,6 +99,8 @@ public class CheEnvironmentEngineTest {
     SnapshotDao                    snapshotDao;
     @Mock
     RecipeDownloader               recipeDownloader;
+    @Mock
+    AgentConfigApplier             agentConfigApplier;
 
     EnvironmentParser environmentParser = new EnvironmentParser(new ComposeFileParser(), recipeDownloader);
 
@@ -113,7 +115,8 @@ public class CheEnvironmentEngineTest {
                                               eventService,
                                               environmentParser,
                                               new ComposeServicesStartStrategy(),
-                                              composeProvider));
+                                              composeProvider,
+                                              agentConfigApplier));
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
@@ -609,7 +612,7 @@ public class CheEnvironmentEngineTest {
                                                 new HashMap<>(singletonMap("prop1", "propValue"))));
         servers.put("ref2", new ServerConf2Impl("8080/udp", "proto1", null));
         servers.put("ref3", new ServerConf2Impl("9090", "proto1", null));
-        machines.put("dev-machine", new ExtendedMachineImpl(new ArrayList<>(asList("ws-agent", "someAgent")),
+        machines.put("dev-machine", new ExtendedMachineImpl(new ArrayList<>(asList("org.eclipse.che.ws-agent", "someAgent")),
                                                             servers,
                                                             new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
         machines.put("machine2", new ExtendedMachineImpl(new ArrayList<>(asList("someAgent2", "someAgent3")),

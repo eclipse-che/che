@@ -43,32 +43,32 @@ public class WebSocketConnectionSustainer {
     }
 
     public void reset() {
-        Log.info(getClass(), "Resetting number of reconnection attempt number. Previous was: " + attempt);
+        Log.debug(getClass(), "Resetting number of reconnection attempt number. Previous was: " + attempt);
         attempt = 0;
     }
 
     public void sustain() {
         if (++attempt > RECONNECTION_LIMIT) {
-            Log.info(getClass(), "Exceeding reconnection limit.");
+            Log.debug(getClass(), "Exceeding reconnection limit.");
             disable();
         }
 
         if (active) {
-            Log.info(getClass(), "Sustaining connection. Current attempt number: " + attempt);
+            Log.debug(getClass(), "Sustaining connection. Current attempt number: " + attempt);
             connection.open(RECONNECTION_DELAY);
         }
     }
 
     public void enable() {
         if (!active) {
-            Log.info(getClass(), "Sustainer enabled.");
+            Log.debug(getClass(), "Sustainer enabled.");
             active = true;
         }
     }
 
     public void disable() {
         if (active) {
-            Log.info(getClass(), "Sustainer disabled");
+            Log.debug(getClass(), "Sustainer disabled");
             active = false;
         }
     }

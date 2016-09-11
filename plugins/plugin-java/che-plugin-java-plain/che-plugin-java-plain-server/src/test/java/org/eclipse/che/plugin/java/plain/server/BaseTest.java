@@ -28,6 +28,7 @@ import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
+import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -57,10 +58,11 @@ public abstract class BaseTest {
     private final static String wsPath     = BaseTest.class.getResource("/projects").getFile();
     private final static String INDEX_PATH = "target/fs_index";
 
-    protected File            root;
-    protected ProjectRegistry projectRegistry;
-    protected ProjectManager  projectManager;
+    protected File                           root;
+    protected ProjectRegistry                projectRegistry;
+    protected ProjectManager                 projectManager;
     protected LocalVirtualFileSystemProvider vfsProvider;
+    protected ProjectTreeChangesDetector     projectTreeChangesDetector;
 
     @BeforeClass
     protected void initProjectApi() throws Exception {
@@ -103,6 +105,8 @@ public abstract class BaseTest {
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
+        projectTreeChangesDetector = new ProjectTreeChangesDetector(null);
+
         projectManager = new ProjectManager(vfsProvider,
                                             eventService,
                                             projectTypeRegistry,
@@ -111,7 +115,7 @@ public abstract class BaseTest {
                                             importerRegistry,
                                             fileWatcherNotificationHandler,
                                             fileTreeWatcher,
-                                            new TestWorkspaceHolder(new ArrayList<>()));
+                                            new TestWorkspaceHolder(new ArrayList<>()), projectTreeChangesDetector);
 
         ResourcesPlugin plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> projectManager);
 

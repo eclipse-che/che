@@ -27,9 +27,9 @@ import org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProv
 import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
-import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -47,6 +47,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.HostConfig;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
 import org.eclipse.che.plugin.docker.client.json.container.NetworkingConfig;
+import org.eclipse.che.plugin.docker.client.json.network.ConnectContainer;
 import org.eclipse.che.plugin.docker.client.json.network.EndpointConfig;
 import org.eclipse.che.plugin.docker.client.json.network.NewNetwork;
 import org.eclipse.che.plugin.docker.client.params.BuildImageParams;
@@ -58,6 +59,7 @@ import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
+import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
 import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
@@ -74,7 +76,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -124,6 +125,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
     private final String                                        projectFolderPath;
     private final boolean                                       snapshotUseRegistry;
     private final double                                        memorySwapMultiplier;
+    private final Set<String>                                   additionalNetworks;
 
     @Inject
     public ComposeMachineProviderImpl(DockerConnector docker,
@@ -144,7 +146,8 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                                       @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                       @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
                                       @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
-                                      @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier)
+                                      @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier,
+                                      @Named("machine.docker.networks") Set<Set<String>> additionalNetworks)
             throws IOException {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
@@ -156,7 +159,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
         this.privilegeMode = privilegeMode;
         this.projectFolderPath = projectFolderPath;
         this.snapshotUseRegistry = snapshotUseRegistry;
-        // usecases:
+        // use-cases:
         //  -1  enable unlimited swap
         //  0   disable swap
         //  0.5 enable swap with size equal to half of current memory size
@@ -225,6 +228,10 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
             this.allMachinesExtraHosts = ObjectArrays.concat(allMachinesExtraHosts.split(","), cheHostAlias);
         }
 
+        this.additionalNetworks = additionalNetworks.stream()
+                                                    .flatMap(Set::stream)
+                                                    .collect(Collectors.toSet());
+
         // TODO single point of failure in case of highly loaded system
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("MachineLogsStreamer-%d")
                                                                            .setDaemon(true)
@@ -272,6 +279,9 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                                         image,
                                         networkName,
                                         service);
+
+            connectContainerToAdditionalNetworks(container,
+                                                 service);
 
             docker.startContainer(StartContainerParams.create(container));
 
@@ -500,8 +510,10 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
 
         ContainerConfig config = new ContainerConfig();
         config.withImage(image)
-              .withExposedPorts(service.getExpose().stream().collect(Collectors.toMap(Function.identity(),
-                                                                                      value -> Collections.emptyMap())))
+              .withExposedPorts(service.getExpose()
+                                       .stream()
+                                       .distinct()
+                                       .collect(Collectors.toMap(Function.identity(), value -> Collections.emptyMap())))
               .withHostConfig(hostConfig)
               .withCmd(toArrayIfNotNull(service.getCommand()))
               .withEntrypoint(toArrayIfNotNull(service.getEntrypoint()))
@@ -546,6 +558,16 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
         composeService.getExpose().addAll(portsToExpose);
         composeService.getEnvironment().putAll(env);
         composeService.getVolumes().addAll(volumes);
+        composeService.getNetworks().addAll(additionalNetworks);
+    }
+
+    private void connectContainerToAdditionalNetworks(String container,
+                                                      ComposeServiceImpl service) throws IOException {
+
+        for (String network : service.getNetworks()) {
+            docker.connectContainerToNetwork(
+                    ConnectContainerToNetworkParams.create(network, new ConnectContainer().withContainer(container)));
+        }
     }
 
     private void readContainerLogsInSeparateThread(String container,

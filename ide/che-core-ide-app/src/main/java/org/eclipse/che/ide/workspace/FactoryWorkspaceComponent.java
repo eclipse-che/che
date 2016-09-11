@@ -83,7 +83,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
                                      InitialLoadingInfo initialLoadingInfo,
-                                     WorkspaceEventsNotifier workspaceEventsNotifier) {
+                                     WorkspaceEventsHandler workspaceEventsHandler) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
@@ -100,7 +100,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
               preferencesManager,
               dtoFactory,
               initialLoadingInfo,
-              workspaceEventsNotifier);
+              workspaceEventsHandler);
         this.factoryServiceClient = factoryServiceClient;
     }
 

@@ -870,7 +870,7 @@ public class WorkspaceManagerTest {
                                                                                     "content",
                                                                                     null),
                                                           singletonMap("dev-machine",
-                                                                       new ExtendedMachineImpl(singletonList("ws-agent"),
+                                                                       new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
                                                                                                null,
                                                                                                new HashMap<>(
                                                                                                        singletonMap("memoryLimitBytes",

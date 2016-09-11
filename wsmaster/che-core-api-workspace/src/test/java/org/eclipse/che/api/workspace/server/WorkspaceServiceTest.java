@@ -890,7 +890,7 @@ public class WorkspaceServiceTest {
     }
 
     private static EnvironmentDto createEnvDto() {
-        ExtendedMachineImpl devMachine = new ExtendedMachineImpl(singletonList("ws-agent"),
+        ExtendedMachineImpl devMachine = new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
                                                                  null,
                                                                  new HashMap<>(singletonMap("memoryLimitBytes", "10000")));
 

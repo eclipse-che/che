@@ -38,7 +38,7 @@
                     "machines": {
                         "devmachine": {
                             "agents": [
-                                "ws-agent"
+                                "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
                                 "memoryLimitBytes": "2147483648"
@@ -121,7 +121,7 @@
                     "machines": {
                         "devmachine": {
                             "agents": [
-                                "ws-agent"
+                                "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
                                 "memoryLimitBytes": "2147483648"
@@ -201,7 +201,7 @@
                     "machines": {
                         "devmachine": {
                             "agents": [
-                                "ws-agent"
+                                "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
                                 "memoryLimitBytes": "2147483648"
@@ -281,7 +281,7 @@
                     "machines": {
                         "devmachine": {
                             "agents": [
-                                "ws-agent"
+                                "org.eclipse.che.ws-agent"
                             ],
                             "attributes" : {
                                 "memoryLimitBytes": "2147483648"
@@ -361,7 +361,7 @@
                     "machines": {
                         "devmachine": {
                             "agents": [
-                                "ws-agent"
+                                "org.eclipse.che.ws-agent"
                             ]
                         }
                     },

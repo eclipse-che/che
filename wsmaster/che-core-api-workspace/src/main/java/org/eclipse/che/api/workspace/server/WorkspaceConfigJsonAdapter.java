@@ -43,7 +43,7 @@ import static java.lang.String.format;
  *                          "type": "dockerfile"
  *                      },
  *                      "type": "docker", <- will be defined by environment recipe type
- *                      "dev": true, <- if agents contain 'ws-agent'
+ *                      "dev": true, <- if agents contain 'org.eclipse.che.ws-agent'
  *                      "envVariables" : {
  *                          "env1" : "value1",
  *                          "env2" : "value2
@@ -78,7 +78,7 @@ import static java.lang.String.format;
  *              },
  *              "machines" : {
  *                  "dev-machine" : {
- *                      "agents" : [ "exec-agent", "ws-agent" ],
+ *                      "agents" : [ "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh" ],
  *                      "servers" : {
  *                          "some_reference" : {
  *                              "port" : "9090/udp",
@@ -151,7 +151,9 @@ public class WorkspaceConfigJsonAdapter {
 
         // dev-machine agents
         final JsonArray agents = new JsonArray();
-        agents.add(new JsonPrimitive("ws-agent"));
+        agents.add(new JsonPrimitive("org.eclipse.che.terminal"));
+        agents.add(new JsonPrimitive("org.eclipse.che.ws-agent"));
+        agents.add(new JsonPrimitive("org.eclipse.che.ssh"));
         newMachine.add("agents", agents);
 
         // dev-machine ram

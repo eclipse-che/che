@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 
 import javax.websocket.RemoteEndpoint;
 import javax.websocket.Session;
+import java.io.IOException;
 import java.util.Optional;
 
 import static java.util.Collections.emptySet;
@@ -53,14 +54,14 @@ public class BasicWebSocketTransmissionTransmitterTest {
     @Mock
     private Session              session;
     @Mock
-    private RemoteEndpoint.Async remote;
+    private RemoteEndpoint.Basic remote;
 
     private WebSocketTransmission transmission;
 
 
     @BeforeMethod
     public void setUp() throws Exception {
-        when(session.getAsyncRemote()).thenReturn(remote);
+        when(session.getBasicRemote()).thenReturn(remote);
         when(session.isOpen()).thenReturn(true);
 
         when(registry.get(eq(ENDPOINT_ID))).thenReturn(Optional.of(session));
@@ -84,19 +85,19 @@ public class BasicWebSocketTransmissionTransmitterTest {
     }
 
     @Test
-    public void shouldSendDirectMessageIfSessionIsOpenAndEndpointIsSet() {
+    public void shouldSendDirectMessageIfSessionIsOpenAndEndpointIsSet() throws IOException {
         transmitter.transmit(PROTOCOL, MESSAGE, ENDPOINT_ID);
 
-        verify(session).getAsyncRemote();
+        verify(session).getBasicRemote();
         verify(remote).sendText(transmission.toString());
         verify(reSender, never()).add(eq(ENDPOINT_ID), any(WebSocketTransmission.class));
     }
 
     @Test
-    public void shouldSendBroadcastingMessageIfSessionIsOpen() {
+    public void shouldSendBroadcastingMessageIfSessionIsOpen() throws IOException {
         transmitter.transmit(PROTOCOL, MESSAGE);
 
-        verify(session, never()).getAsyncRemote();
+        verify(session, never()).getBasicRemote();
         verify(remote, never()).sendText(transmission.toString());
         verify(reSender, never()).add(any(), any(WebSocketTransmission.class));
 
@@ -104,12 +105,12 @@ public class BasicWebSocketTransmissionTransmitterTest {
     }
 
     @Test
-    public void shouldAddMessageToPendingIfSessionIsNotOpenedAndEndpointIsSet() {
+    public void shouldAddMessageToPendingIfSessionIsNotOpenedAndEndpointIsSet() throws IOException {
         when(session.isOpen()).thenReturn(false);
 
         transmitter.transmit(PROTOCOL, MESSAGE, ENDPOINT_ID);
 
-        verify(session, never()).getAsyncRemote();
+        verify(session, never()).getBasicRemote();
         verify(remote, never()).sendText(transmission.toString());
         verify(reSender).add(eq(ENDPOINT_ID), any(WebSocketTransmission.class));
     }

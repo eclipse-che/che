@@ -24,7 +24,6 @@ import org.eclipse.che.ide.download.DownloadContainer;
 
 import javax.validation.constraints.NotNull;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.resources.Resource.PROJECT;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
@@ -60,9 +59,12 @@ public class DownloadProjectAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Project project = appContext.getRootProject();
+        final Resource resource = appContext.getResource();
 
-        checkState(project != null, "Null project occurred");
+        if (resource == null || resource.getResourceType() != PROJECT) {
+            return;
+        }
+        final Project project = (Project)resource;
 
         downloadContainer.setUrl(project.getURL());
     }
