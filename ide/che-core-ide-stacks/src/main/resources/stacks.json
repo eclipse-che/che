@@ -1,5 +1,75 @@
 [
   {
+    "id": "java-mysql",
+    "creator": "ide",
+    "name": "Java-MySQL",
+    "description": "Multi-machine environment with Default Java Stack and MySQL database",
+    "scope": "general",
+    "tags": [
+      "Java 1.8, Tomcat 8, MySQL 5.7"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "ws-agent"
+              ],
+              "servers": {},
+              "attributes" : {}
+            }
+          },
+          "recipe": {
+            "content": "services:\n db:\n  image: codenvy/mysql\n  environment:\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 2147483648\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n  mem_limit: 2147483648\n  links:\n    - db",
+            "contentType": "application/x-yaml",
+            "type": "compose"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mysql -u $MYSQL_USER -p$MYSQL_PASSWORD -e 'show databases;'",
+          "name": "show databases",
+          "type": "custom"
+        }
+      ]
+    },
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "search"
+        ]
+      }
+    ],
+    "stackIcon": {
+      "name": "type-java-mysql.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "che-in-che",
     "creator": "ide",
     "name": "Eclipse Che",
@@ -1467,13 +1537,7 @@
     "description": "Default Java Stack with JDK 8, Maven and Apache TomEE 1.7.3.",
     "scope": "advanced",
     "tags": [
-      "Ubuntu",
-      "Java",
-      "JDK",
-      "Maven",
-      "TomEE",
-      "Subversion",
-      "Git"
+      "TomEE"
     ],
     "components": [
       {

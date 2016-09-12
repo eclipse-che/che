@@ -1,5 +1,66 @@
 [
   {
+    "name": "web-java-petclinic",
+    "displayName": "web-java-petclinic",
+    "path": "/web-java-petclinic",
+    "description": "Petclinic app using MySQL as persistent storage",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/web-java-spring-petclinic.git",
+      "parameters": {
+        "branch":"mysql"
+      }
+    },
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "stop tomcat",
+        "type": "custom",
+        "commandLine": "$TOMCAT_HOME/bin/catalina.sh stop",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "build and deploy",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      },
+      {
+        "name": "debug",
+        "type": "mvn",
+        "commandLine": "mvn -f ${current.project.path} clean install -DskipTests && cp ${current.project.path}/target/*.war $TOMCAT_HOME/webapps/ROOT.war && $TOMCAT_HOME/bin/catalina.sh jpda run",
+        "attributes": {
+          "previewUrl": "http://${server.port.8080}"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Java 1.8, Tomcat 8, MySQL 5.7"
+    ]
+  },
+  {
     "name": "che-in-che",
     "displayName": "eclipse-che",
     "path": "/che",
@@ -456,7 +517,7 @@
     "mixins": [],
     "attributes": {
       "language": [
-        "ruby"
+        "javascript"
       ]
     },
     "modules": [],
@@ -479,8 +540,7 @@
     "links": [],
     "category": "Samples",
     "tags": [
-      "nodejs",
-      "javascript"
+      "Node.JS"
     ]
   },
   {
@@ -593,7 +653,7 @@
     "displayName": "web-nodejs-simple",
     "path": "/web-nodejs-simple",
     "description": "Yeoman Starter project.",
-    "projectType": "blank",
+    "projectType": "node-js",
     "mixins": [],
     "attributes": {
       "language": [
@@ -628,9 +688,7 @@
     "links": [],
     "category": "Samples",
     "tags": [
-      "nodejs",
-      "yeoman",
-      "javascript"
+      "Node.JS"
     ]
   },
   {
@@ -871,10 +929,7 @@
     "links": [],
     "category": "Samples",
     "tags": [
-      "maven",
-      "java",
-	  "javaee",
-	  "jaxrs"
+      "TomEE"
     ]
   }
 ]
