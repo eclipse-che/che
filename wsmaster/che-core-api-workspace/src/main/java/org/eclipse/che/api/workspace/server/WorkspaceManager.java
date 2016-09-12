@@ -49,7 +49,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -733,9 +732,9 @@ public class WorkspaceManager {
                                      .withWorkspaceId(workspaceId));
         String devMachineSnapshotFailMessage = null;
         for (MachineImpl machine : runtime.getMachines()) {
-            Optional<String> error = createSnapshot(machine, namespace);
-            if (error.isPresent() && machine.getConfig().isDev()) {
-                devMachineSnapshotFailMessage = error.get();
+            String error = replaceSnapshot(machine, namespace);
+            if (error != null && machine.getConfig().isDev()) {
+                devMachineSnapshotFailMessage = error;
             }
         }
         if (devMachineSnapshotFailMessage != null) {
@@ -751,7 +750,7 @@ public class WorkspaceManager {
         return devMachineSnapshotFailMessage == null;
     }
 
-    private Optional<String> createSnapshot(MachineImpl machine, String namespace) {
+    private String replaceSnapshot(MachineImpl machine, String namespace) {
         try {
             try {
                 SnapshotImpl oldSnapshot = snapshotDao.getSnapshot(machine.getWorkspaceId(),
@@ -776,16 +775,19 @@ public class WorkspaceManager {
                     try {
                         runtimes.removeSnapshot(snapshot);
                     } catch (ApiException e1) {
-                        LOG.error(e1.getLocalizedMessage(), e1);
+                        LOG.error(format("Snapshot removal failed. Snapshot: %s. Error: %s",
+                                         snapshot,
+                                         e1.getLocalizedMessage()),
+                                  e1);
                     }
                 }
                 throw e;
             }
 
-            return Optional.empty();
+            return null;
         } catch (ApiException apiEx) {
-            LOG.error(apiEx.getLocalizedMessage(), apiEx);
-            return Optional.of(apiEx.getLocalizedMessage());
+            LOG.error("Snapshot creation failed. Error: " + apiEx.getLocalizedMessage(), apiEx);
+            return apiEx.getLocalizedMessage();
         }
     }
 
