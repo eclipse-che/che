@@ -1032,6 +1032,27 @@ public class WorkspaceManagerTest {
     }
 
     @Test
+    public void shouldRemoveRuntimeSnapshotIfSavingSnapshotInDaoFails() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+        doThrow(new SnapshotException("test error")).when(snapshotDao).saveSnapshot(any(SnapshotImpl.class));
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(runtimes, timeout(1_000).times(2)).removeSnapshot(any(SnapshotImpl.class));
+    }
+
+    @Test
     public void shouldIgnoreNotFoundExceptionOnOldSnapshotRemoval1() throws Exception {
         // given
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");

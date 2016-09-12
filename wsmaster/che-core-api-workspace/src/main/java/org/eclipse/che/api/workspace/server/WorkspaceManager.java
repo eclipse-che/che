@@ -764,10 +764,23 @@ public class WorkspaceManager {
                 // Do nothing if no snapshot found
             }
 
-            SnapshotImpl snapshot = runtimes.saveMachine(namespace,
-                                                         machine.getWorkspaceId(),
-                                                         machine.getId());
-            snapshotDao.saveSnapshot(snapshot);
+            SnapshotImpl snapshot = null;
+            try {
+                snapshot = runtimes.saveMachine(namespace,
+                                                machine.getWorkspaceId(),
+                                                machine.getId());
+
+                snapshotDao.saveSnapshot(snapshot);
+            } catch (ApiException e) {
+                if (snapshot != null) {
+                    try {
+                        runtimes.removeSnapshot(snapshot);
+                    } catch (ApiException e1) {
+                        LOG.error(e1.getLocalizedMessage(), e1);
+                    }
+                }
+                throw e;
+            }
 
             return Optional.empty();
         } catch (ApiException apiEx) {
