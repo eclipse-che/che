@@ -1,7 +1,6 @@
 package org.eclipse.che.plugin.languageserver.ide.service;
 
 import io.typefox.lsapi.CompletionItem;
-import io.typefox.lsapi.Location;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -31,6 +30,7 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentFormattingPara
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentSymbolParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.HoverDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.ReferenceParamsDTO;
@@ -55,7 +55,7 @@ public class TextDocumentServiceClient {
 
     @Inject
     public TextDocumentServiceClient(
-            final DtoUnmarshallerFactory unmarshallerFactory, 
+            final DtoUnmarshallerFactory unmarshallerFactory,
             final NotificationManager notificationManager,
             final AppContext appContext,
             final AsyncRequestFactory asyncRequestFactory,
@@ -76,7 +76,7 @@ public class TextDocumentServiceClient {
 
     /**
      * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#completion(io.typefox.lsapi.TextDocumentPositionParams)}
-     * 
+     *
      * @param position
      * @return
      */
@@ -85,7 +85,7 @@ public class TextDocumentServiceClient {
         Unmarshallable<List<CompletionItemDTO>> unmarshaller = unmarshallerFactory
                 .newListUnmarshaller(CompletionItemDTO.class);
         return asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
-                .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) position).toJson()).send(unmarshaller);
+                                  .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)position).toJson()).send(unmarshaller);
     }
 
     /**
@@ -94,7 +94,7 @@ public class TextDocumentServiceClient {
      * @param completionItem
      * @return
      */
-    public Promise<CompletionItemDTO> resolveCompletionItem (CompletionItemDTO completionItem){
+    public Promise<CompletionItemDTO> resolveCompletionItem(CompletionItemDTO completionItem) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/completionItem/resolve";
         Unmarshallable<CompletionItemDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(CompletionItemDTO.class);
         return asyncRequestFactory.createPostRequest(requestUrl, completionItem)
@@ -148,6 +148,21 @@ public class TextDocumentServiceClient {
     }
 
     /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#hover(io.typefox.lsapi.TextDocumentPositionParams)}
+     *
+     * @param params
+     * @return
+     */
+    public Promise<HoverDTO> hover(TextDocumentPositionParamsDTO params) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/hover";
+        Unmarshallable<HoverDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(HoverDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, params)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .send(unmarshaller);
+    }
+
+    /**
      * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#formatting(io.typefox.lsapi.DocumentFormattingParams)}
      *
      * @param params
@@ -194,71 +209,72 @@ public class TextDocumentServiceClient {
 
     /**
      * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#didChange(io.typefox.lsapi.DidChangeTextDocumentParams)}
-     * 
+     *
      * @param change
      * @return
      */
     public void didChange(DidChangeTextDocumentParamsDTO change) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didChange";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
-                .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) change).toJson()).send();
+                           .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)change).toJson()).send();
     }
-    
+
     /**
      * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#didOpen(io.typefox.lsapi.DidOpenTextDocumentParams)}
-     * 
+     *
      * @param openEvent
      * @return
      */
     public void didOpen(DidOpenTextDocumentParamsDTO openEvent) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didOpen";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
-        .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) openEvent).toJson()).send();
+                           .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)openEvent).toJson()).send();
     }
-    
+
     /**
      * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#didClose(io.typefox.lsapi.DidCloseTextDocumentParams)}
-     * 
+     *
      * @param closeEvent
      * @return
      */
     public void didClose(DidCloseTextDocumentParamsDTO closeEvent) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didClose";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
-        .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) closeEvent).toJson()).send();
+                           .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)closeEvent).toJson()).send();
     }
-    
+
     /**
      * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#didSave(io.typefox.lsapi.DidSaveTextDocumentParams)}
-     * 
+     *
      * @param saveEvent
      * @return
      */
     public void didSave(DidSaveTextDocumentParamsDTO saveEvent) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/didSave";
         asyncRequestFactory.createPostRequest(requestUrl, null).header(ACCEPT, APPLICATION_JSON)
-        .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable) saveEvent).toJson()).send();
+                           .header(CONTENT_TYPE, APPLICATION_JSON).data(((JsonSerializable)saveEvent).toJson()).send();
     }
-    
+
     /**
      * Subscribes to websocket for 'textDocument/publishDiagnostics' notifications. 
      */
     private void subscribeToPublishDiagnostics(final MessageBus messageBus) {
-        org.eclipse.che.ide.websocket.rest.Unmarshallable<PublishDiagnosticsParamsDTO> unmarshaller = unmarshallerFactory.newWSUnmarshaller(PublishDiagnosticsParamsDTO.class);
+        org.eclipse.che.ide.websocket.rest.Unmarshallable<PublishDiagnosticsParamsDTO> unmarshaller =
+                unmarshallerFactory.newWSUnmarshaller(PublishDiagnosticsParamsDTO.class);
         try {
             messageBus.subscribe("languageserver/textDocument/publishDiagnostics",
-                    new SubscriptionHandler<PublishDiagnosticsParamsDTO>(unmarshaller) {
-                        @Override
-                        protected void onMessageReceived(PublishDiagnosticsParamsDTO statusEvent) {
-                            publishDiagnosticsProcessor.processDiagnostics(statusEvent);
-                        }
+                                 new SubscriptionHandler<PublishDiagnosticsParamsDTO>(unmarshaller) {
+                                     @Override
+                                     protected void onMessageReceived(PublishDiagnosticsParamsDTO statusEvent) {
+                                         publishDiagnosticsProcessor.processDiagnostics(statusEvent);
+                                     }
 
-                        @Override
-                        protected void onErrorReceived(Throwable exception) {
-                            notificationManager.notify(exception.getMessage(), StatusNotification.Status.FAIL,
-                                    StatusNotification.DisplayMode.NOT_EMERGE_MODE);
-                        }
-                    });
+                                     @Override
+                                     protected void onErrorReceived(Throwable exception) {
+                                         notificationManager.notify(exception.getMessage(), StatusNotification.Status.FAIL,
+                                                                    StatusNotification.DisplayMode.NOT_EMERGE_MODE);
+                                     }
+                                 });
         } catch (WebSocketException exception) {
             Log.error(getClass(), exception);
         }

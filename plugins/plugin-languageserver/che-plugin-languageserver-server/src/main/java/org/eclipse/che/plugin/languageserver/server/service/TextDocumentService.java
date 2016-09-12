@@ -11,10 +11,11 @@
 package org.eclipse.che.plugin.languageserver.server.service;
 
 import io.typefox.lsapi.CompletionItem;
+import io.typefox.lsapi.Hover;
 import io.typefox.lsapi.Location;
-import io.typefox.lsapi.impl.LocationImpl;
 import io.typefox.lsapi.SymbolInformation;
 import io.typefox.lsapi.TextEdit;
+import io.typefox.lsapi.impl.LocationImpl;
 import io.typefox.lsapi.services.LanguageServer;
 
 import com.google.inject.Inject;
@@ -86,9 +87,8 @@ public class TextDocumentService {
         if (server == null) {
             return emptyList();
         }
-        List<? extends CompletionItem> completion = server.getTextDocumentService()
-                                                          .completion(textDocumentPositionParams).get().getItems();
-        return completion;
+        return server.getTextDocumentService()
+                     .completion(textDocumentPositionParams).get().getItems();
     }
 
     @POST
@@ -161,10 +161,27 @@ public class TextDocumentService {
                                                                                      ExecutionException,
                                                                                      LanguageServerException {
         LanguageServer server = getServer(unresolved.getTextDocumentIdentifier().getUri());
-        if (server != null)
+        if (server != null) {
             return server.getTextDocumentService().resolveCompletionItem(unresolved).get();
-        else
+        } else {
             return unresolved;
+        }
+    }
+
+    @POST
+    @Path("hover")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Hover hover(TextDocumentPositionParamsDTO positionParams)
+            throws LanguageServerException, ExecutionException, InterruptedException {
+        positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
+        positionParams.setUri(prefixURI(positionParams.getUri()));
+        LanguageServer server = getServer(positionParams.getTextDocument().getUri());
+        if (server != null) {
+            return server.getTextDocumentService().hover(positionParams).get();
+        } else {
+            return null;
+        }
     }
 
     @POST
@@ -219,8 +236,9 @@ public class TextDocumentService {
         change.getTextDocument().setUri(prefixURI(change.getTextDocument().getUri()));
         change.setUri(prefixURI(change.getUri()));
         LanguageServer server = getServer(change.getTextDocument().getUri());
-        if (server != null)
+        if (server != null) {
             server.getTextDocumentService().didChange(change);
+        }
     }
 
     @POST
@@ -241,8 +259,9 @@ public class TextDocumentService {
     public void didClose(DidCloseTextDocumentParamsDTO closeEvent) throws LanguageServerException {
         closeEvent.getTextDocument().setUri(prefixURI(closeEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(closeEvent.getTextDocument().getUri());
-        if (server != null)
+        if (server != null) {
             server.getTextDocumentService().didClose(closeEvent);
+        }
     }
 
     @POST
@@ -251,8 +270,9 @@ public class TextDocumentService {
     public void didSave(DidSaveTextDocumentParamsDTO saveEvent) throws LanguageServerException {
         saveEvent.getTextDocument().setUri(prefixURI(saveEvent.getTextDocument().getUri()));
         LanguageServer server = getServer(saveEvent.getTextDocument().getUri());
-        if (server != null)
+        if (server != null) {
             server.getTextDocumentService().didSave(saveEvent);
+        }
     }
 
     private LanguageServer getServer(String uri) throws LanguageServerException {

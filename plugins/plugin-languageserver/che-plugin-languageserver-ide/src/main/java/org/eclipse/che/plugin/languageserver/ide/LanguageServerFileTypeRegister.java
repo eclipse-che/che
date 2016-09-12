@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.languageserver.ide;
 
 import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -23,9 +24,11 @@ import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.editor.orion.client.OrionContentTypeRegistrant;
+import org.eclipse.che.ide.editor.orion.client.OrionHoverRegistrant;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionContentTypeOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionHighlightingConfigurationOverlay;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
+import org.eclipse.che.plugin.languageserver.ide.hover.HoverProvider;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
 
@@ -45,7 +48,9 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
     private final LanguageServerResources             resources;
     private final EditorRegistry                      editorRegistry;
     private final OrionContentTypeRegistrant          contentTypeRegistrant;
-    private final LanguageServerEditorProvider        editorProvider;
+    private final OrionHoverRegistrant                orionHoverRegistrant;
+    private final LanguageServerEditorProvider editorProvider;
+    private final HoverProvider hoverProvider;
 
     @Inject
     public LanguageServerFileTypeRegister(LanguageServerRegistryServiceClient serverLanguageRegistry,
@@ -53,13 +58,17 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                                           LanguageServerResources resources,
                                           EditorRegistry editorRegistry,
                                           OrionContentTypeRegistrant contentTypeRegistrant,
-                                          LanguageServerEditorProvider editorProvider) {
+                                          OrionHoverRegistrant orionHoverRegistrant,
+                                          LanguageServerEditorProvider editorProvider,
+                                          HoverProvider hoverProvider) {
         this.serverLanguageRegistry = serverLanguageRegistry;
         this.fileTypeRegistry = fileTypeRegistry;
         this.resources = resources;
         this.editorRegistry = editorRegistry;
         this.contentTypeRegistrant = contentTypeRegistrant;
+        this.orionHoverRegistrant = orionHoverRegistrant;
         this.editorProvider = editorProvider;
+        this.hoverProvider = hoverProvider;
     }
 
     @Override
@@ -69,6 +78,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
             @Override
             public void apply(List<LanguageDescriptionDTO> langs) throws OperationException {
                 if (!langs.isEmpty()) {
+                    JsArrayString contentTypes = JsArrayString.createArray().cast();
                     for (LanguageDescriptionDTO lang : langs) {
                         String primaryExtension = lang.getFileExtensions().get(0);
                         for (String ext : lang.getFileExtensions()) {
@@ -81,7 +91,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                             mimeTypes = newArrayList("text/x-" + lang.getLanguageId());
                         }
                         for (String contentTypeId : mimeTypes) {
-
+                            contentTypes.push(contentTypeId);
                             OrionContentTypeOverlay contentType = OrionContentTypeOverlay.create();
                             contentType.setId(contentTypeId);
                             contentType.setName(lang.getLanguageId());
@@ -98,6 +108,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                             contentTypeRegistrant.registerFileType(contentType, config);
                         }
                     }
+                    orionHoverRegistrant.registerHover(contentTypes, hoverProvider);
                 }
                 callback.onSuccess(LanguageServerFileTypeRegister.this);
             }
