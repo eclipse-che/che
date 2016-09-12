@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.workspace.Environment;
+import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
@@ -53,6 +54,8 @@ import org.eclipse.che.api.machine.server.spi.InstanceProvider;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.StripedLocks;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -134,7 +137,7 @@ public class CheEnvironmentEngine {
         this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
-        this.recipeApiPattern = Pattern.compile("^" + apiEndpoint + "recipe/?.*&");
+        this.recipeApiPattern = Pattern.compile("^" + apiEndpoint + "/recipe/.*$");
 
         eventService.subscribe(new MachineCleaner());
     }
@@ -298,9 +301,11 @@ public class CheEnvironmentEngine {
      *         if any other error occurs
      */
     public Instance startMachine(String workspaceId,
-                                 MachineConfig machineConfig) throws ServerException,
-                                                                     NotFoundException,
-                                                                     ConflictException {
+                                 MachineConfig machineConfig,
+                                 List<String> agents) throws ServerException,
+                                                             NotFoundException,
+                                                             ConflictException {
+
         MachineConfig machineConfigCopy = new MachineConfigImpl(machineConfig);
         EnvironmentHolder environmentHolder;
         try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
@@ -338,6 +343,12 @@ public class CheEnvironmentEngine {
 
             machineStarter = (machineLogger, machineSource) -> {
                 ComposeServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(composeService, machineSource);
+
+                normalize(serviceWithCorrectSource);
+                ExtendedMachineImpl extendedMachine = new ExtendedMachineImpl();
+                extendedMachine.setAgents(agents);
+                applyAgents(extendedMachine, serviceWithCorrectSource);
+
                 return composeProvider.startService(namespace,
                                                     workspaceId,
                                                     environmentHolder.name,
@@ -524,16 +535,25 @@ public class CheEnvironmentEngine {
     }
 
     private void applyAgents(Environment env, ComposeEnvironmentImpl composeEnvironment) throws ServerException {
-        for (Map.Entry<String, ComposeServiceImpl> entry : composeEnvironment.getServices().entrySet()) {
-            String machineName = entry.getKey();
-            ComposeServiceImpl composeService = entry.getValue();
+        for (Map.Entry<String, ? extends ExtendedMachine> machineEntry : env.getMachines().entrySet()) {
+            String machineName = machineEntry.getKey();
+            ExtendedMachine extendedMachine = machineEntry.getValue();
+            ComposeServiceImpl service = composeEnvironment.getServices().get(machineName);
 
-            List<String> agents = env.getMachines().get(machineName).getAgents();
+            applyAgents(extendedMachine, service);
+        }
+    }
 
-            try {
-                agentConfigApplier.modify(composeService, agents);
-            } catch (AgentException e) {
-                throw new ServerException("Can't apply agent config", e);
+    private void applyAgents(@Nullable ExtendedMachine extendedMachine,
+                             ComposeServiceImpl composeService) throws ServerException {
+        if (extendedMachine != null) {
+            List<String> agents = extendedMachine.getAgents();
+            if (agents != null) {
+                try {
+                    agentConfigApplier.modify(composeService, agents);
+                } catch (AgentException e) {
+                    throw new ServerException("Can't apply agent config", e);
+                }
             }
         }
     }
@@ -556,6 +576,7 @@ public class CheEnvironmentEngine {
 
             String recipeContent = recipeDownloader.getRecipe(service.getBuild().getContext());
             service.getBuild().setDockerfile(recipeContent);
+            service.getBuild().setContext(null);
         }
     }
 
@@ -818,7 +839,8 @@ public class CheEnvironmentEngine {
                                                                   NotFoundException;
     }
 
-    private ComposeServiceImpl getServiceWithCorrectSource(ComposeServiceImpl composeService, MachineSource machineSource)
+    private ComposeServiceImpl getServiceWithCorrectSource(ComposeServiceImpl composeService,
+                                                           MachineSource machineSource)
             throws ServerException {
         ComposeServiceImpl serviceWithCorrectSource = composeService;
         if (machineSource != null) {
