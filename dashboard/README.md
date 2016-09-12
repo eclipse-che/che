@@ -29,9 +29,9 @@ In order to run the project, the serve command is used
 ```sh
 $ gulp serve
 ```
-It will launch the server and then the project can be tested on http://localhost:5000
+It will launch the server and then the project can be tested on http://localhost:3000
 
-By default it will use https://www.codenvy.com as remote server.
+By default it will use http://localhost:8080 as remote server.
 
 The argument --server <url> may allow to use another server. (url is for example http://my-server.com)
 
