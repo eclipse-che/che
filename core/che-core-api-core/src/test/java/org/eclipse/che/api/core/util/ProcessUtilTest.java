@@ -71,6 +71,8 @@ public class ProcessUtilTest {
         latch.await(15, TimeUnit.SECONDS); // should not stop here if process killed
         final long end = System.currentTimeMillis();
 
+        Thread.sleep(200);
+
         // System process sleeps 10 seconds. It is safety to check we done in less then 3 sec.
         Assert.assertFalse(ProcessUtil.isAlive(p));
         Assert.assertTrue((end - start) < 3000, "Fail kill process");
