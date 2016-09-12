@@ -48,10 +48,10 @@ public class RecipeImpl implements ManagedRecipe {
     @Basic
     private String type;
 
-    @Basic
+    @Column(columnDefinition = "TEXT")
     private String script;
 
-    @Basic
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ElementCollection

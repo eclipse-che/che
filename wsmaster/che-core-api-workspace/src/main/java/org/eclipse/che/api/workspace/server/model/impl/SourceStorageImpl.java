@@ -13,10 +13,12 @@ package org.eclipse.che.api.workspace.server.model.impl;
 import org.eclipse.che.api.core.model.project.SourceStorage;
 
 import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -36,7 +38,7 @@ public class SourceStorageImpl implements SourceStorage {
     @Basic
     private String type;
 
-    @Basic
+    @Column(columnDefinition = "TEXT")
     private String location;
 
     @ElementCollection
