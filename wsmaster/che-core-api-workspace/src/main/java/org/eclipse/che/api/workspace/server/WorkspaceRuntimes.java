@@ -490,10 +490,12 @@ public class WorkspaceRuntimes {
      *
      * @param snapshot
      *         description of snapshot that should be removed
+     * @throws NotFoundException
+     *         if snapshot is not found
      * @throws ServerException
      *         if error occurs
      */
-    public void removeSnapshot(SnapshotImpl snapshot) throws ServerException {
+    public void removeSnapshot(SnapshotImpl snapshot) throws ServerException, NotFoundException {
         environmentEngine.removeSnapshot(snapshot);
     }
 
