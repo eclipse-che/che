@@ -408,7 +408,7 @@ public class WorkspaceRuntimesTest {
 
         // then
         assertEquals(actual, instance);
-        verify(environmentEngine).startMachine(workspace.getId(), config, any());
+        verify(environmentEngine).startMachine(eq(workspace.getId()), eq(config), any());
     }
 
     @Test
