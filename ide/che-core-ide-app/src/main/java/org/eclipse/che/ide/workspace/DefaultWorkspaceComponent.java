@@ -31,8 +31,7 @@ import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
-import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
+import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
@@ -54,7 +53,6 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
                                      CoreLocalizationConstant locale,
                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      EventBus eventBus,
-                                     LoaderPresenter loader,
                                      AppContext appContext,
                                      Provider<MachineManager> machineManagerProvider,
                                      NotificationManager notificationManager,
@@ -63,15 +61,14 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
                                      DialogFactory dialogFactory,
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
-                                     InitialLoadingInfo initialLoadingInfo,
-                                     WorkspaceEventsHandler workspaceEventsHandler) {
+                                     WorkspaceEventsHandler workspaceEventsHandler,
+                                     LoaderPresenter loader) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
               locale,
               dtoUnmarshallerFactory,
               eventBus,
-              loader,
               appContext,
               machineManagerProvider,
               notificationManager,
@@ -80,8 +77,8 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
               dialogFactory,
               preferencesManager,
               dtoFactory,
-              initialLoadingInfo,
-              workspaceEventsHandler);
+              workspaceEventsHandler,
+              loader);
     }
 
     /** {@inheritDoc} */
@@ -105,8 +102,8 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
         });
     }
 
-
     @Override
     public void tryStartWorkspace() {
     }
+
 }

@@ -32,7 +32,6 @@ import org.eclipse.che.ide.actions.FullTextSearchAction;
 import org.eclipse.che.ide.actions.GoIntoAction;
 import org.eclipse.che.ide.actions.HotKeysListAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
-import org.eclipse.che.ide.actions.LoaderAction;
 import org.eclipse.che.ide.actions.NavigateToFileAction;
 import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
@@ -263,9 +262,6 @@ public class StandardComponentInitializer {
 
     @Inject
     private SwitchNextEditorAction switchNextEditorAction;
-
-    @Inject
-    private LoaderAction loaderAction;
 
     @Inject
     private HotKeysListAction hotKeysListAction;
@@ -626,12 +622,6 @@ public class StandardComponentInitializer {
         editorTabContextMenu.add(splitVerticallyAction);
         actionManager.registerAction("splitHorizontally", splitHorizontallyAction);
         editorTabContextMenu.add(splitHorizontallyAction);
-
-        final DefaultActionGroup loaderToolbarGroup = new DefaultActionGroup("loader", false, actionManager);
-        actionManager.registerAction("loader", loaderToolbarGroup);
-        actionManager.registerAction("loaderAction", loaderAction);
-        centerToolbarGroup.add(loaderToolbarGroup);
-        loaderToolbarGroup.add(loaderAction);
 
         actionManager.registerAction("noOpAction", new NoOpAction());
 
