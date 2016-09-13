@@ -1533,8 +1533,8 @@ public class DarkTheme implements Theme {
     }
 
     @Override
-    public String popupLoaderShadowColor() {
-        return "#000";
+    public String popupLoaderShadow() {
+        return "0 0 10px rgba(0,0,0,0.6)";
     }
 
     @Override

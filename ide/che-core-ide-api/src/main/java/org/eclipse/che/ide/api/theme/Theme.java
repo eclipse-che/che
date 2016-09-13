@@ -1533,7 +1533,7 @@ public interface Theme {
      ********************************************************************************************/
     String popupLoaderBackgroundColor();
     String popupLoaderBorderColor();
-    String popupLoaderShadowColor();
+    String popupLoaderShadow();
     String popupLoaderTitleColor();
 
 }

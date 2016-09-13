@@ -18,7 +18,7 @@
 
         @eval popupLoaderBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.popupLoaderBackgroundColor();
         @eval popupLoaderBorderColor org.eclipse.che.ide.api.theme.Style.theme.popupLoaderBorderColor();
-        @eval popupLoaderShadowColor org.eclipse.che.ide.api.theme.Style.theme.popupLoaderShadowColor();
+        @eval popupLoaderShadow org.eclipse.che.ide.api.theme.Style.theme.popupLoaderShadow();
         @eval popupLoaderTitleColor org.eclipse.che.ide.api.theme.Style.theme.popupLoaderTitleColor();
 
         .main {
@@ -31,9 +31,9 @@
             z-index: 99999;
             background-color: popupLoaderBackgroundColor;
             border: 1px solid popupLoaderBorderColor;
-            -moz-box-shadow: 0px 0px 10px popupLoaderShadowColor;
-            box-shadow: 0px 0px 10px popupLoaderShadowColor;
             box-sizing: border-box;
+            -moz-box-shadow: popupLoaderShadow;
+            box-shadow: popupLoaderShadow;
         }
 
         .title {

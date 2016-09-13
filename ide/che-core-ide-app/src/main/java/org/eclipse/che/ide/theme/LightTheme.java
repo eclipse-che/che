@@ -1510,8 +1510,8 @@ public class LightTheme implements Theme {
     }
 
     @Override
-    public String popupLoaderShadowColor() {
-        return "#000";
+    public String popupLoaderShadow() {
+        return "0 0 7px rgba(0,0,0,0.2)";
     }
 
     @Override
