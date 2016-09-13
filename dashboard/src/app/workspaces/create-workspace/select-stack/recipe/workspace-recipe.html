@@ -1,4 +1,4 @@
-<div layout="column" flex class="recipe-widget">
+<div layout="column" flex class="recipe-widget" md-theme="default">
   <div class="stack-label-info">Bring your own stack.</div>
   <ng-form name="workspaceInformationForm">
     <md-radio-group ng-model="workspaceRecipeCtrl.selectSourceOption" ng-change="workspaceRecipeCtrl.setDefaultData()">
@@ -23,6 +23,14 @@
                 </div>
               </che-label-container>
             </div>
+            <che-label-container che-label-name="Recipe Type">
+              <div layout="column">
+                <che-toggle ng-model="workspaceRecipeCtrl.recipeFormat" class="recipe-format">
+                  <che-toggle-button che-title="compose"></che-toggle-button>
+                  <che-toggle-button che-title="dockerfile"></che-toggle-button>
+                </che-toggle>
+              </div>
+            </che-label-container>
           </div>
         </div>
         <div layout="column">
@@ -42,4 +50,5 @@
       </div>
     </md-radio-group>
   </ng-form>
+
 </div>

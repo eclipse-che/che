@@ -19,11 +19,12 @@ import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Data object for {@link WorkspaceConfig}.
@@ -37,26 +38,27 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         return new WorkspaceConfigImplBuilder();
     }
 
-    private String                  name;
-    private String                  description;
-    private String                  defaultEnv;
-    private List<CommandImpl>       commands;
-    private List<ProjectConfigImpl> projects;
-    private List<EnvironmentImpl>   environments;
+    private String                       name;
+    private String                       description;
+    private String                       defaultEnv;
+    private List<CommandImpl>            commands;
+    private List<ProjectConfigImpl>      projects;
+    private Map<String, EnvironmentImpl> environments;
 
     public WorkspaceConfigImpl(String name,
                                String description,
                                String defaultEnv,
                                List<? extends Command> commands,
                                List<? extends ProjectConfig> projects,
-                               List<? extends Environment> environments) {
+                               Map<String, ? extends Environment> environments) {
         this.name = name;
         this.defaultEnv = defaultEnv;
         this.description = description;
         if (environments != null) {
-            this.environments = environments.stream()
-                                            .map(EnvironmentImpl::new)
-                                            .collect(toList());
+            this.environments = environments.entrySet()
+                                            .stream()
+                                            .collect(toMap(Map.Entry::getKey,
+                                                           entry -> new EnvironmentImpl(entry.getValue())));
         }
         if (commands != null) {
             this.commands = commands.stream()
@@ -128,14 +130,8 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     }
 
     @Override
-    public List<EnvironmentImpl> getEnvironments() {
+    public Map<String, EnvironmentImpl> getEnvironments() {
         return environments;
-    }
-
-    public Optional<EnvironmentImpl> getEnvironment(String name) {
-        return getEnvironments().stream()
-                                .filter(env -> env.getName().equals(name))
-                                .findFirst();
     }
 
     @Override
@@ -182,12 +178,12 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
      */
     public static class WorkspaceConfigImplBuilder {
 
-        private String                        name;
-        private String                        defaultEnvName;
-        private List<? extends Command>       commands;
-        private List<? extends ProjectConfig> projects;
-        private List<? extends Environment>   environments;
-        private String                        description;
+        private String                             name;
+        private String                             defaultEnvName;
+        private List<? extends Command>            commands;
+        private List<? extends ProjectConfig>      projects;
+        private Map<String, ? extends Environment> environments;
+        private String                             description;
 
         private WorkspaceConfigImplBuilder() {}
 
@@ -230,7 +226,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
             return this;
         }
 
-        public WorkspaceConfigImplBuilder setEnvironments(List<? extends Environment> environments) {
+        public WorkspaceConfigImplBuilder setEnvironments(Map<String, ? extends Environment> environments) {
             this.environments = environments;
             return this;
         }

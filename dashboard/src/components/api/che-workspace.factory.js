@@ -247,42 +247,61 @@ export class CheWorkspace {
     config.projects = [];
     config.defaultEnv = config.defaultEnv || workspaceName;
     config.description = null;
-    ram = ram || 2048;
+    ram = ram || 2 * Math.pow(1024, 3);
 
     //Check environments were provided in config:
-    config.environments = (config.environments && config.environments.length > 0) ? config.environments : [];
+    config.environments = (config.environments && Object.keys(config.environments).length > 0) ? config.environments : {};
 
-    let defaultEnvironment = this.lodash.find(config.environments, (environment) => {
-      return environment.name === config.defaultEnv;
-    });
+    let defaultEnvironment = config.environments[config.defaultEnv];
 
     //Check default environment is provided and add if there is no:
     if (!defaultEnvironment) {
       defaultEnvironment = {
         'name': config.defaultEnv,
         'recipe': null,
-        'machineConfigs': []
-      }
+        'machines': {'dev-machine': {'attributes': {'memoryLimitBytes': ram}, 'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']}}
+      };
 
-      config.environments.push(defaultEnvironment);
+      config.environments[config.defaultEnv] = defaultEnvironment;
     }
 
-    let devMachine = this.lodash.find(defaultEnvironment.machineConfigs, (config) => {
-      return config.dev;
+    if (source && source.type && source.type === 'environment') {
+      let contentType = source.format === 'dockerfile' ? 'text/x-dockerfile' : 'application/x-yaml';
+      defaultEnvironment.recipe = {
+        'type': source.format,
+        'contentType': contentType
+      };
+
+      defaultEnvironment.recipe.content = source.content || null;
+      defaultEnvironment.recipe.location = source.location || null;
+    }
+
+    if (defaultEnvironment.recipe && defaultEnvironment.recipe.type === 'compose') {
+      return config;
+    }
+
+    let devMachine = this.lodash.find(defaultEnvironment.machines, (machine) => {
+      return machine.agents.includes('org.eclipse.che.ws-agent');
     });
 
     //Check dev machine is provided and add if there is no:
     if (!devMachine) {
       devMachine = {
         'name': 'ws-machine',
-        'limits': {'ram': ram},
+        'attributes': {'memoryLimitBytes': ram},
         'type': 'docker',
         'source': source,
-        'dev': true
-      }
-      defaultEnvironment.machineConfigs.push(devMachine);
+        'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']
+      };
+      defaultEnvironment.machines[devMachine.name] = devMachine;
     } else {
-      devMachine.limits = {'ram': ram};
+      if (devMachine.attributes) {
+        if (!devMachine.attributes.memoryLimitBytes) {
+          devMachine.attributes.memoryLimitBytes = ram;
+        }
+      } else {
+        devMachine.attributes = {'memoryLimitBytes': ram};
+      }
       devMachine.source = source;
     }
 

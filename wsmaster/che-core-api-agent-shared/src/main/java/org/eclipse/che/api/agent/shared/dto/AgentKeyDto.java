@@ -23,7 +23,11 @@ public interface AgentKeyDto extends AgentKey {
 
     void setName(String name);
 
+    AgentKeyDto withName(String name);
+
     String getVersion();
 
     void setVersion(String version);
+
+    AgentKeyDto withVersion(String version);
 }

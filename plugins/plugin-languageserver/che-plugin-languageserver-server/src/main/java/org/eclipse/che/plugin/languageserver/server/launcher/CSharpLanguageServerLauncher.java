@@ -49,7 +49,7 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     @Override
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
         restoreDependencies(projectPath);
-        Path launchFile = Paths.get(System.getenv("HOME"), "che-agents/ls-csharp/launch.sh");
+        Path launchFile = Paths.get(System.getenv("HOME"), "che/ls-csharp/launch.sh");
 
         ProcessBuilder processBuilder = new ProcessBuilder(launchFile.toString());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);

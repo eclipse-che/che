@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
-import org.eclipse.che.api.agent.server.wsagent.WsAgentLauncher;
+import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.server.impl.AgentSorter;
+import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -21,13 +23,12 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.environment.server.CheEnvironmentEngine;
 import org.eclipse.che.api.environment.server.NoOpMachineInstance;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -51,6 +52,7 @@ import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -82,16 +84,21 @@ public class WorkspaceRuntimesTest {
     private CheEnvironmentEngine environmentEngine;
 
     @Mock
-    private WsAgentLauncher wsAgentLauncher;
+    private AgentSorter          agentSorter;
+    @Mock
+    private AgentLauncherFactory launcherFactory;
+    @Mock
+    private AgentRegistry        agentRegistry;
 
     private WorkspaceRuntimes runtimes;
 
     @BeforeMethod
     public void setUp(Method method) throws Exception {
-        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, wsAgentLauncher));
+        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, agentSorter, launcherFactory, agentRegistry));
 
         List<Instance> machines = asList(createMachine(true), createMachine(false));
         when(environmentEngine.start(anyString(),
+                                     anyString(),
                                      any(Environment.class),
                                      anyBoolean(),
                                      any()))
@@ -128,6 +135,7 @@ public class WorkspaceRuntimesTest {
         Instance devMachine = createMachine(true);
         List<Instance> machines = asList(devMachine, createMachine(false));
         when(environmentEngine.start(anyString(),
+                                     anyString(),
                                      any(Environment.class),
                                      anyBoolean(),
                                      any()))
@@ -168,6 +176,7 @@ public class WorkspaceRuntimesTest {
     public void workspaceShouldNotHaveRuntimeIfEnvStartFails() throws Exception {
         // given
         when(environmentEngine.start(anyString(),
+                                     anyString(),
                                      any(Environment.class),
                                      anyBoolean(),
                                      any()))
@@ -304,6 +313,7 @@ public class WorkspaceRuntimesTest {
         // given
         WorkspaceImpl workspace = createWorkspace();
         when(environmentEngine.start(anyString(),
+                                     anyString(),
                                      any(Environment.class),
                                      anyBoolean(),
                                      any()))
@@ -549,26 +559,19 @@ public class WorkspaceRuntimesTest {
         return MachineConfigImpl.builder()
                                 .setDev(isDev)
                                 .setType("docker")
-                                .setLimits(new LimitsImpl(1024))
+                                .setLimits(new MachineLimitsImpl(1024))
                                 .setSource(new MachineSourceImpl("git").setLocation("location"))
                                 .setName(UUID.randomUUID().toString())
                                 .build();
     }
 
     private static WorkspaceImpl createWorkspace() {
-        MachineConfigImpl devCfg = createConfig(true);
-        MachineConfigImpl nonDevCfg = MachineConfigImpl.builder()
-                                                             .fromConfig(devCfg)
-                                                             .setName("non-dev")
-                                                             .setDev(false)
-                                                             .build();
-        EnvironmentImpl environment = new EnvironmentImpl(ENV_NAME,
-                                                          new RecipeImpl(),
-                                                          asList(nonDevCfg, devCfg));
+        EnvironmentImpl environment = new EnvironmentImpl(null,
+                                                          null);
         WorkspaceConfigImpl wsConfig = WorkspaceConfigImpl.builder()
                                                           .setName("test workspace")
-                                                          .setEnvironments(singletonList(environment))
-                                                          .setDefaultEnv(environment.getName())
+                                                          .setEnvironments(singletonMap(ENV_NAME, environment))
+                                                          .setDefaultEnv(ENV_NAME)
                                                           .build();
         return new WorkspaceImpl(WORKSPACE_ID, "user123", wsConfig);
     }

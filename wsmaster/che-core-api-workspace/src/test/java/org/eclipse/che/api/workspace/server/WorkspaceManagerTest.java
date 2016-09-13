@@ -12,6 +12,8 @@ package org.eclipse.che.api.workspace.server;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
@@ -20,19 +22,21 @@ import org.eclipse.che.api.machine.server.dao.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
@@ -44,12 +48,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.UUID;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
@@ -58,6 +62,10 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.workspace.server.WorkspaceManager.CREATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.server.WorkspaceManager.UPDATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.AUTO_RESTORE_FROM_SNAPSHOT;
+import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATED;
+import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATING;
+import static org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType.SNAPSHOT_CREATION_ERROR;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
@@ -230,20 +238,10 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl res1 = result.get(0);
         assertEquals(res1.getStatus(), STOPPED, "Workspace status wasn't changed from STARTING to STOPPED");
         assertFalse(res1.isTemporary(), "Workspace must be permanent");
-        assertNotNull(res1.getConfig()
-                          .getEnvironments()
-                          .get(0)
-                          .getMachineConfigs()
-                          .get(0));
 
         final WorkspaceImpl res2 = result.get(1);
         assertEquals(res2.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
         assertFalse(res2.isTemporary(), "Workspace must be permanent");
-        assertNotNull(res2.getConfig()
-                          .getEnvironments()
-                          .get(0)
-                          .getMachineConfigs()
-                          .get(0));
     }
 
     @Test
@@ -251,10 +249,9 @@ public class WorkspaceManagerTest {
         // given
         final WorkspaceConfig config = createConfig();
 
-        final WorkspaceImpl workspace1 = workspaceManager.createWorkspace(config, "user123", null);
         final WorkspaceImpl workspace2 = workspaceManager.createWorkspace(config, "user321", null);
 
-        when(workspaceDao.getByNamespace("user321")).thenReturn(asList(workspace2));
+        when(workspaceDao.getByNamespace("user321")).thenReturn(singletonList(workspace2));
         final RuntimeDescriptor descriptor = createDescriptor(workspace2, RUNNING);
         when(runtimes.get(workspace2.getId())).thenReturn(descriptor);
 
@@ -267,11 +264,6 @@ public class WorkspaceManagerTest {
         final WorkspaceImpl res1 = result.get(0);
         assertEquals(res1.getStatus(), RUNNING, "Workspace status wasn't changed to the runtime instance status");
         assertFalse(res1.isTemporary(), "Workspace must be permanent");
-        assertNotNull(res1.getConfig()
-                          .getEnvironments()
-                          .get(0)
-                          .getMachineConfigs()
-                          .get(0));
     }
 
     @Test
@@ -498,20 +490,17 @@ public class WorkspaceManagerTest {
     @Test
     public void performAsyncStartShouldUseProvidedEnvInsteadOfDefault() throws Exception {
         final WorkspaceConfigImpl config = createConfig();
-        final EnvironmentImpl nonDefaultEnv = new EnvironmentImpl("non-default-env",
-                                                                  null,
-                                                                  config.getEnvironments().get(0).getMachineConfigs());
-        config.getEnvironments().add(nonDefaultEnv);
+        final EnvironmentImpl nonDefaultEnv = new EnvironmentImpl(null, null);
+        config.getEnvironments().put("non-default-env", nonDefaultEnv);
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(config, "user123", "account");
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(workspace.getId())).thenThrow(new NotFoundException(""));
         final RuntimeDescriptor descriptor = createDescriptor(workspace, STARTING);
         when(runtimes.start(any(), anyString(), anyBoolean())).thenReturn(descriptor);
-
-        workspaceManager.startWorkspace(workspace.getId(), nonDefaultEnv.getName(), "account", null);
+        workspaceManager.startWorkspace(workspace.getId(), "non-default-env", "account", null);
 
         // timeout is needed because this invocation will run in separate thread asynchronously
-        verify(runtimes, timeout(2000)).start(workspace, nonDefaultEnv.getName(), false);
+        verify(runtimes, timeout(2000)).start(workspace, "non-default-env", false);
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -537,11 +526,6 @@ public class WorkspaceManagerTest {
         verify(runtimes, timeout(2000)).start(workspaceCaptor.capture(), anyString(), anyBoolean());
         final WorkspaceImpl captured = workspaceCaptor.getValue();
         assertTrue(captured.isTemporary());
-        assertNotNull(captured.getConfig()
-                              .getEnvironments()
-                              .get(0)
-                              .getMachineConfigs()
-                              .get(0));
         verify(workspaceHooks).beforeCreate(captured, "account");
         verify(workspaceHooks).afterCreate(runtime, "account");
         verify(workspaceHooks).beforeStart(captured, config.getDefaultEnv(), "account");
@@ -550,13 +534,16 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToStopWorkspace() throws Exception {
+        // given
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
         final RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
         when(runtimes.get(any())).thenReturn(descriptor);
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
 
+        // when
         workspaceManager.stopWorkspace(workspace.getId());
 
+        // then
         verify(runtimes, timeout(2000)).stop(workspace.getId());
         assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
     }
@@ -568,6 +555,11 @@ public class WorkspaceManagerTest {
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         final RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
         when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
 
         workspaceManager.stopWorkspace(workspace.getId());
 
@@ -641,6 +633,7 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldCreateWorkspaceSnapshotUsingDefaultValueForAutoRestore() throws Exception {
+        // given
         workspaceManager = spy(new WorkspaceManager(workspaceDao,
                                                     runtimes,
                                                     eventService,
@@ -651,9 +644,16 @@ public class WorkspaceManagerTest {
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         final RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
         when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
 
+        // then
         workspaceManager.stopWorkspace(workspace.getId());
 
+        // then
         verify(workspaceManager, timeout(2000)).createSnapshotSync(workspace.getRuntime(), workspace.getNamespace(), workspace.getId());
         verify(runtimes, timeout(2000)).stop(any());
     }
@@ -773,7 +773,7 @@ public class WorkspaceManagerTest {
         when(workspaceMock.getStatus()).thenReturn(RUNNING);
         when(workspaceMock.getRuntime()).thenReturn(wsRuntimeMock);
         when(wsRuntimeMock.getActiveEnv()).thenReturn(testActiveEnv);
-        MachineConfigImpl machineConfig = createConfig().getEnvironments().get(0).getMachineConfigs().get(0);
+        MachineConfigImpl machineConfig = createMachine(testWsId, testActiveEnv, false).getConfig();
 
         // when
         workspaceManager.startMachine(machineConfig, testWsId);
@@ -789,7 +789,7 @@ public class WorkspaceManagerTest {
         WorkspaceImpl workspaceMock = mock(WorkspaceImpl.class);
         doReturn(workspaceMock).when(workspaceManager).getWorkspace(testWsId);
         when(workspaceMock.getStatus()).thenReturn(STARTING);
-        MachineConfigImpl machineConfig = createConfig().getEnvironments().get(0).getMachineConfigs().get(0);
+        MachineConfigImpl machineConfig = createMachine(testWsId, "env1", false).getConfig();
 
         // when
         workspaceManager.startMachine(machineConfig, testWsId);
@@ -797,11 +797,16 @@ public class WorkspaceManagerTest {
 
     @Test
     public void shouldBeAbleToCreateSnapshot() throws Exception {
-        // then
+        // given
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
         when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
 
         // when
         workspaceManager.createSnapshot(workspace.getId());
@@ -815,7 +820,7 @@ public class WorkspaceManagerTest {
     @Test(expectedExceptions = ConflictException.class,
           expectedExceptionsMessageRegExp = "Could not .* the workspace '.*' because its status is '.*'.")
     public void shouldNotCreateSnapshotIfWorkspaceIsNotRunning() throws Exception {
-        // then
+        // given
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         RuntimeDescriptor descriptor = createDescriptor(workspace, STARTING);
@@ -823,6 +828,295 @@ public class WorkspaceManagerTest {
 
         // when
         workspaceManager.createSnapshot(workspace.getId());
+    }
+
+    @Test
+    public void shouldSnapshotAllMachinesInWs() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(runtimes, timeout(1_000).times(2)).saveMachine(eq(workspace.getNamespace()),
+                                                              eq(workspace.getId()),
+                                                              anyString());
+        verify(snapshotDao, timeout(1_000).times(2)).saveSnapshot(any(SnapshotImpl.class));
+    }
+
+    @Test
+    public void shouldSendEventOnStartSnapshotSaving() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(eventService, timeout(1_000)).publish(eq(newDto(WorkspaceStatusEvent.class)
+                                                                .withEventType(SNAPSHOT_CREATING)
+                                                                .withWorkspaceId(workspace.getId())));
+    }
+
+    @Test
+    public void shouldSendEventOnSuccessfulSnapshotSaving() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(eventService, timeout(1_000)).publish(eq(newDto(WorkspaceStatusEvent.class)
+                                                                .withEventType(SNAPSHOT_CREATED)
+                                                                .withWorkspaceId(workspace.getId())));
+    }
+
+    @Test
+    public void shouldSendSnapshotSavingFailedEventIfDevMachineSnapshotSavingFailed() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+        for (MachineImpl machine : descriptor.getRuntime().getMachines()) {
+            if (machine.getConfig().isDev()) {
+                when(runtimes.saveMachine(workspace.getNamespace(), workspace.getId(), machine.getId()))
+                        .thenThrow(new ServerException("test error"));
+            }
+        }
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(eventService, timeout(1_000)).publish(eq(newDto(WorkspaceStatusEvent.class)
+                                                                .withEventType(SNAPSHOT_CREATION_ERROR)
+                                                                .withWorkspaceId(workspace.getId())
+                                                                .withError("test error")));
+    }
+
+    @Test
+    public void shouldNotSendSnapshotSavingFailedEventIfNonDevMachineSnapshotSavingFailed() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+        for (MachineImpl machine : descriptor.getRuntime().getMachines()) {
+            if (!machine.getConfig().isDev()) {
+                when(runtimes.saveMachine(workspace.getNamespace(), workspace.getId(), machine.getId()))
+                        .thenThrow(new ServerException("test error"));
+            }
+        }
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(eventService, timeout(1_000)).publish(eq(newDto(WorkspaceStatusEvent.class)
+                                                                .withEventType(SNAPSHOT_CREATED)
+                                                                .withWorkspaceId(workspace.getId())));
+    }
+
+    @Test
+    public void shouldReturnFalseOnFailureSnapshotSavingIfDevMachineSavingFailed() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+        for (MachineImpl machine : descriptor.getRuntime().getMachines()) {
+            if (machine.getConfig().isDev()) {
+                when(runtimes.saveMachine(workspace.getNamespace(), workspace.getId(), machine.getId()))
+                        .thenThrow(new ServerException("test error"));
+            }
+        }
+
+        // when
+        boolean snapshotSavingStatus = workspaceManager.createSnapshotSync(
+                new WorkspaceRuntimeImpl(descriptor.getRuntime()), workspace.getNamespace(), workspace.getId());
+
+        // then
+        assertFalse(snapshotSavingStatus);
+    }
+
+    @Test
+    public void shouldReturnTrueOnSuccessfulSavingSnapshotsForSeveralMachines() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+
+        // when
+        boolean snapshotSavingStatus = workspaceManager.createSnapshotSync(
+                new WorkspaceRuntimeImpl(descriptor.getRuntime()), workspace.getNamespace(), workspace.getId());
+
+        // then
+        assertTrue(snapshotSavingStatus);
+        // ensure that multiple machines were saved
+        verify(snapshotDao, timeout(1_000).atLeast(2)).saveSnapshot(any(SnapshotImpl.class));
+    }
+
+    @Test
+    public void shouldReturnTrueOnSavingSnapshotsForSeveralMachinesWhenNonDevMachineSavingFailed() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+        for (MachineImpl machine : descriptor.getRuntime().getMachines()) {
+            if (!machine.getConfig().isDev()) {
+                when(runtimes.saveMachine(workspace.getNamespace(), workspace.getId(), machine.getId()))
+                        .thenThrow(new ServerException("test error"));
+            }
+        }
+
+        // when
+        boolean snapshotSavingStatus = workspaceManager.createSnapshotSync(
+                new WorkspaceRuntimeImpl(descriptor.getRuntime()), workspace.getNamespace(), workspace.getId());
+
+        // then
+        assertTrue(snapshotSavingStatus);
+    }
+
+    @Test
+    public void shouldRemoveRuntimeSnapshotIfSavingSnapshotInDaoFails() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+        doThrow(new SnapshotException("test error")).when(snapshotDao).saveSnapshot(any(SnapshotImpl.class));
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(runtimes, timeout(1_000).times(2)).removeSnapshot(any(SnapshotImpl.class));
+    }
+
+    @Test
+    public void shouldIgnoreNotFoundExceptionOnOldSnapshotRemoval1() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+        doThrow(new NotFoundException("test error")).when(snapshotDao).removeSnapshot(anyString());
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(workspaceManager, timeout(1_000)).createSnapshotSync(any(WorkspaceRuntimeImpl.class),
+                                                                    eq(workspace.getNamespace()),
+                                                                    eq(workspace.getId()));
+    }
+
+    @Test
+    public void shouldIgnoreNotFoundExceptionOnOldSnapshotRemoval2() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        SnapshotImpl oldSnapshot = mock(SnapshotImpl.class);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenReturn(oldSnapshot);
+        doThrow(new NotFoundException("test error")).when(runtimes).removeSnapshot(any(SnapshotImpl.class));
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(workspaceManager, timeout(1_000)).createSnapshotSync(any(WorkspaceRuntimeImpl.class),
+                                                                    eq(workspace.getNamespace()),
+                                                                    eq(workspace.getId()));
+    }
+
+    @Test
+    public void shouldIgnoreNotFoundExceptionOnOldSnapshotRemoval3() throws Exception {
+        // given
+        final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), "user123", "account");
+        when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+        RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
+        when(runtimes.get(any())).thenReturn(descriptor);
+        when(snapshotDao.getSnapshot(eq(workspace.getId()),
+                                     eq(workspace.getConfig().getDefaultEnv()),
+                                     anyString()))
+                .thenThrow(new NotFoundException("test error"));
+
+        // when
+        workspaceManager.createSnapshot(workspace.getId());
+
+        // then
+        verify(workspaceManager, timeout(1_000)).createSnapshotSync(any(WorkspaceRuntimeImpl.class),
+                                                                    eq(workspace.getNamespace()),
+                                                                    eq(workspace.getId()));
     }
 
     @Test
@@ -887,25 +1181,15 @@ public class WorkspaceManagerTest {
     }
 
     private RuntimeDescriptor createDescriptor(WorkspaceImpl workspace, WorkspaceStatus status) {
-        Optional<EnvironmentImpl> environmentOpt = workspace.getConfig().getEnvironment(workspace.getConfig().getDefaultEnv());
-        assertTrue(environmentOpt.isPresent());
-        EnvironmentImpl environment = environmentOpt.get();
+        EnvironmentImpl environment = workspace.getConfig().getEnvironments().get(workspace.getConfig().getDefaultEnv());
+        assertNotNull(environment);
 
-        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(environment.getName());
-        for (MachineConfigImpl machineConfig : environment.getMachineConfigs()) {
-            final MachineImpl machine = MachineImpl.builder()
-                                                   .setConfig(machineConfig)
-                                                   .setEnvName(environment.getName())
-                                                   .setId(NameGenerator.generate("machine", 10))
-                                                   .setOwner(workspace.getNamespace())
-                                                   .setRuntime(new MachineRuntimeInfoImpl(emptyMap(), emptyMap(), emptyMap()))
-                                                   .setWorkspaceId(workspace.getId())
-                                                   .build();
-            if (machineConfig.isDev()) {
-                runtime.setDevMachine(machine);
-            }
-            runtime.getMachines().add(machine);
-        }
+        final WorkspaceRuntimeImpl runtime = new WorkspaceRuntimeImpl(workspace.getConfig().getDefaultEnv());
+        MachineImpl machine = spy(createMachine(workspace.getId(), workspace.getConfig().getDefaultEnv(), true));
+        runtime.getMachines().add(machine);
+        MachineImpl machine2 = spy(createMachine(workspace.getId(), workspace.getConfig().getDefaultEnv(), false));
+        runtime.getMachines().add(machine2);
+
         final RuntimeDescriptor descriptor = mock(RuntimeDescriptor.class);
         when(descriptor.getRuntimeStatus()).thenReturn(status);
         when(descriptor.getRuntime()).thenReturn(runtime);
@@ -913,25 +1197,38 @@ public class WorkspaceManagerTest {
     }
 
     private static WorkspaceConfigImpl createConfig() {
-        final MachineConfigImpl devMachine = MachineConfigImpl.builder()
-                                                              .setDev(true)
-                                                              .setName("dev-machine")
-                                                              .setType("docker")
-                                                              .setSource(new MachineSourceImpl("location").setLocation("dockerfile"))
-                                                              .setServers(asList(new ServerConfImpl("ref1",
-                                                                                                    "8080",
-                                                                                                    "https",
-                                                                                                    "path1"),
-                                                                                 new ServerConfImpl("ref2",
-                                                                                                    "8081",
-                                                                                                    "https",
-                                                                                                    "path2")))
-                                                              .setEnvVariables(singletonMap("key1", "value1"))
-                                                              .build();
+        EnvironmentImpl environment = new EnvironmentImpl(new EnvironmentRecipeImpl("type",
+                                                                                    "contentType",
+                                                                                    "content",
+                                                                                    null),
+                                                          singletonMap("dev-machine",
+                                                                       new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
+                                                                                               null,
+                                                                                               new HashMap<>(singletonMap("memoryLimitBytes", "10000")))));
         return WorkspaceConfigImpl.builder()
                                   .setName("dev-workspace")
                                   .setDefaultEnv("dev-env")
-                                  .setEnvironments(singletonList(new EnvironmentImpl("dev-env", null, singletonList(devMachine))))
+                                  .setEnvironments(singletonMap("dev-env", environment))
                                   .build();
+    }
+
+    private MachineImpl createMachine(String workspaceId, String envName, boolean isDev) {
+        return MachineImpl.builder()
+                          .setConfig(MachineConfigImpl.builder()
+                                                      .setDev(isDev)
+                                                      .setName("machineName" + UUID.randomUUID())
+                                                      .setSource(new MachineSourceImpl("type").setContent("content"))
+                                                      .setLimits(new MachineLimitsImpl(1024))
+                                                      .setType("docker")
+                                                      .build())
+                          .setId("id" + UUID.randomUUID())
+                          .setOwner("userName")
+                          .setStatus(MachineStatus.RUNNING)
+                          .setWorkspaceId(workspaceId)
+                          .setEnvName(envName)
+                          .setRuntime(new MachineRuntimeInfoImpl(new HashMap<>(),
+                                                                 new HashMap<>(),
+                                                                 new HashMap<>()))
+                          .build();
     }
 }

@@ -60,13 +60,14 @@ export class CreateProjectController {
     this.templatesChoice = 'templates-samples';
 
     // default RAM value for workspaces
-    this.workspaceRam = 1000;
+    this.workspaceRam = 2 * Math.pow(1024,3);
     this.websocketReconnect = 50;
 
     this.generateWorkspaceName();
 
     this.messageBus = null;
     this.recipeUrl = null;
+    this.recipeFormat = null;
 
     //search the selected tab
     let routeParams = $routeParams.tabName;
@@ -155,6 +156,16 @@ export class CreateProjectController {
     cheAPI.cheWorkspace.getWorkspaces();
 
     $rootScope.showIDE = false;
+  }
+
+  /**
+   * Gets object keys from target object.
+   *
+   * @param targetObject
+   * @returns [*]
+   */
+  getObjectKeys(targetObject) {
+    return Object.keys(targetObject);
   }
 
   /**
@@ -836,19 +847,18 @@ export class CreateProjectController {
       switch (this.stackTab) {
         case 'ready-to-go':
           source = this.getSourceFromStack(this.readyToGoStack);
-          this.stack = this.readyToGoStack;
           break;
         case 'stack-library':
           source = this.getSourceFromStack(this.stackLibraryUser);
-          this.stack = this.stackLibraryUser;
           break;
         case 'custom-stack':
+          source.type = 'environment';
+          source.format = this.recipeFormat;
           if (this.recipeUrl && this.recipeUrl.length > 0) {
             source.location = this.recipeUrl;
           } else {
             source.content = this.recipeScript;
           }
-          this.stack = null;
           break;
       }
       this.createWorkspace(source);
@@ -1015,10 +1025,9 @@ export class CreateProjectController {
   }
 
   isReadyToCreate() {
-    let isCustomStack = this.stackTab === 'custom-stack';
     let isCreateProjectInProgress = this.isCreateProjectInProgress();
-    
-    if (!isCustomStack) {
+
+    if (!this.isCustomStack) {
       return !isCreateProjectInProgress && this.isReady
     }
 
@@ -1079,6 +1088,7 @@ export class CreateProjectController {
   }
 
   setStackTab(stackTab) {
+    this.isCustomStack = stackTab === 'custom-stack';
     this.stackTab = stackTab;
   }
 
@@ -1095,12 +1105,11 @@ export class CreateProjectController {
       stack = this.cheStack.getStackById(this.workspaceSelected.attributes.stackId);
     }
     this.updateCurrentStack(stack);
-    let findEnvironment = this.lodash.find(this.workspaceSelected.config.environments, (environment) => {
-      return environment.name === this.workspaceSelected.config.defaultEnv;
-    });
-    if (findEnvironment) {
-      this.workspaceRam = findEnvironment.machineConfigs[0].limits.ram;
-    }
+    let defaultEnvironment = this.workspaceSelected.config.defaultEnv;
+    let environment = this.workspaceSelected.config.environments[defaultEnvironment];
+   /* TODO not implemented yet if (environment) {
+      this.workspaceRam = environment.machines[0].limits.ram;
+    }*/
     this.updateWorkspaceStatus(true);
   }
 
@@ -1146,8 +1155,8 @@ export class CreateProjectController {
    * @param stack the stack to use
    */
   updateCurrentStack(stack) {
+    this.stack = stack;
     this.currentStackTags = stack && stack.tags ? angular.copy(stack.tags) : null;
-
     if (!stack) {
       return;
     }

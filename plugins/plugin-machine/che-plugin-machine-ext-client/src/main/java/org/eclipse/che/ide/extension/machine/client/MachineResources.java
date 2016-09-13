@@ -173,13 +173,15 @@ public interface MachineResources extends ClientBundle {
 
         String badgeVisible();
 
-        String processButton();
+        String newTerminalButton();
 
         String sshButton();
 
         String processNavigation();
 
         String processOutputPanel();
+
+        String machineMonitors();
 
         /** Returns the CSS class name for close button of process in 'Consoles' panel. */
         String processesPanelCloseButtonForProcess();

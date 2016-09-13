@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.model.impl;
 
+import com.google.common.base.MoreObjects;
+
 import org.eclipse.che.api.agent.shared.model.Agent;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,12 +62,12 @@ public class AgentImpl implements Agent {
 
     @Override
     public List<String> getDependencies() {
-        return dependencies;
+        return MoreObjects.firstNonNull(dependencies, new ArrayList<String>());
     }
 
     @Override
     public Map<String, String> getProperties() {
-        return properties;
+        return MoreObjects.firstNonNull(properties, new HashMap<String, String>());
     }
 
     @Override
@@ -72,20 +76,39 @@ public class AgentImpl implements Agent {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AgentImpl)) return false;
-        AgentImpl that = (AgentImpl)o;
-        return Objects.equals(name, that.name) &&
-               Objects.equals(version, that.version) &&
-               Objects.equals(dependencies, that.dependencies) &&
-               Objects.equals(properties, that.properties) &&
-               Objects.equals(script, that.script);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof AgentImpl)) {
+            return false;
+        }
+        final AgentImpl that = (AgentImpl)obj;
+        return Objects.equals(name, that.name)
+               && Objects.equals(version, that.version)
+               && getDependencies().equals(that.getDependencies())
+               && getProperties().equals(that.getProperties())
+               && Objects.equals(script, that.script);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, version, dependencies, properties, script);
+        int hash = 7;
+        hash = 31 * hash + Objects.hashCode(name);
+        hash = 31 * hash + Objects.hashCode(version);
+        hash = 31 * hash + getDependencies().hashCode();
+        hash = 31 * hash + getProperties().hashCode();
+        hash = 31 * hash + Objects.hashCode(script);
+        return hash;
+    }
+
+    @Override
+    public String toString() {
+        return "AgentImpl{" +
+               "name='" + name + '\'' +
+               ", version='" + version + '\'' +
+               ", dependencies='" + dependencies + '\'' +
+               ", properties='" + properties + "\'}";
     }
 }
 

@@ -57,7 +57,7 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
     }
 
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-        Path launchFile = Paths.get(System.getenv("HOME"), "che-agents/ls-php/launch.sh");
+        Path launchFile = Paths.get(System.getenv("HOME"), "che/ls-php/launch.sh");
 
         ProcessBuilder processBuilder = new ProcessBuilder(launchFile.toString());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);

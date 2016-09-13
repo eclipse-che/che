@@ -1,0 +1,36 @@
+{
+  "name": "default",
+  "defaultEnv": "dev-env",
+  "description": "This is workspace description",
+  "environments": [
+    {
+      "name" : "dev-env",
+      "machineConfigs": [
+        {
+          "name": "dev",
+          "type": "docker",
+          "dev": true,
+          "limits": {
+            "ram": -2048
+          },
+          "source": {
+            "location": "https://somewhere/Dockerfile",
+            "type": "dockerfile"
+          },
+          "envVariables": {
+            "env1": "value1",
+            "env2": "value2"
+          },
+          "servers": [
+            {
+              "ref": "ref",
+              "port": "9090/udp",
+              "protocol": "protocol",
+              "path": "/any/path"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

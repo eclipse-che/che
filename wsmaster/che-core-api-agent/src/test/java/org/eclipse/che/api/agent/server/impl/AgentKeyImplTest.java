@@ -23,7 +23,7 @@ public class AgentKeyImplTest {
 
     @Test
     public void testAgentKeyWithNameAndVersion() {
-        AgentKeyImpl agentKey = AgentKeyImpl.of("name:1");
+        AgentKeyImpl agentKey = AgentKeyImpl.parse("name:1");
 
         assertEquals(agentKey.getName(), "name");
         assertEquals(agentKey.getVersion(), "1");
@@ -31,7 +31,7 @@ public class AgentKeyImplTest {
 
     @Test
     public void testParseAgentKeyWithName() {
-        AgentKeyImpl agentKey = AgentKeyImpl.of("name");
+        AgentKeyImpl agentKey = AgentKeyImpl.parse("name");
 
         assertEquals(agentKey.getName(), "name");
         assertNull(agentKey.getVersion());
@@ -39,6 +39,6 @@ public class AgentKeyImplTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseAgentKeyFails() {
-        AgentKeyImpl.of("name:1:2");
+        AgentKeyImpl.parse("name:1:2");
     }
 }

@@ -11,6 +11,7 @@
 package org.eclipse.che.api.agent.server;
 
 import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 
 import java.net.URL;
 
@@ -21,35 +22,22 @@ public interface AgentRegistryUrlProvider {
     /**
      * Returns url to download agent of the specific version.
      *
-     * @param fqn
-     *      the agent fqn
-     * @param version
-     *      the agent version
+     * @param agentKey
+     *      the agent name and version
      * @return {@link URL}
      * @throws AgentException
      *      if unexpected error occurred
      */
-    URL getAgentUrl(String fqn, String version) throws AgentException;
-
-    /**
-     * Returns url to download agent of the latest version.
-     *
-     * @param fqn
-     *      the agent fqn
-     * @return {@link URL}
-     * @throws AgentException
-     *      if unexpected error occurred
-     */
-    URL getAgentUrl(String fqn) throws AgentException;
+    URL getAgentUrl(AgentKey agentKey) throws AgentException;
 
     /**
      * Returns url to fetch available versions of the agent.
 
-     * @param fqn
-     *      the agent fqn
+     * @param name
+     *      the agent name
      * @return {@link URL}
      * @throws AgentException
      *      if unexpected error occurred
      */
-    URL getAgentVersions(String fqn) throws AgentException;
+    URL getAgentVersionsUrl(String name) throws AgentException;
 }

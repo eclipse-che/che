@@ -21,11 +21,9 @@
 
 <md-progress-linear md-mode="indeterminate" class="projects-list-projects-progress"
                     ng-hide="createProjectCtrl.stacksInitialized || createProjectCtrl.workspaces.length"></md-progress-linear>
-
 <md-content id="create-project-content-page"
             md-scroll-y flex
-            class="projects-create-project"
-            ng-show="createProjectCtrl.stacksInitialized || createProjectCtrl.workspaces.length">
+            class="projects-create-project">
   <div ng-show="createProjectCtrl.isCreateProjectInProgress()">
     <div id="create-project-panel" class="create-project-progress-panel">
       <che-loader class="che-loader-panel" layout="column">
@@ -157,6 +155,7 @@
                                   che-stack-change="createProjectCtrl.cheStackLibrarySelecter(stack)"
                                   che-recipe-script="createProjectCtrl.recipeScript"
                                   che-recipe-url="createProjectCtrl.recipeUrl"
+                                  che-recipe-format="createProjectCtrl.recipeFormat"
                                   ng-if="!createProjectCtrl.workspaces.length || createProjectCtrl.workspaceResource === 'from-stack'"/>
     </che-label-container>
 
@@ -191,8 +190,23 @@
             </div>
           </che-label-container>
           <che-label-container che-label-name="RAM">
-            <che-workspace-ram-allocation-slider
-              ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
+            <div ng-hide="createProjectCtrl.isCustomStack"
+                 data-ng-repeat="(environmentKey, environmentValue) in createProjectCtrl.stack.workspaceConfig.environments">
+              <span ng-if="createProjectCtrl.getObjectKeys(createProjectCtrl.stack.workspaceConfig.environments).length > 1"
+                    class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
+
+              <div>
+                <div data-ng-repeat="(machineKey, machineValue) in environmentValue.machines">
+                  <div class="workspace-machine" ng-if="machineValue.attributes && machineValue.attributes.memoryLimitBytes">
+                    <span ng-if="createProjectCtrl.getObjectKeys(environmentValue.machines).length > 1">MACHINE: {{machineKey}}</span>
+                    <che-workspace-ram-allocation-slider
+                            ng-model="machineValue.attributes.memoryLimitBytes"></che-workspace-ram-allocation-slider>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <che-workspace-ram-allocation-slider ng-show="createProjectCtrl.isCustomStack"
+                                                 ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
           </che-label-container>
         </div>
       </ng-form>

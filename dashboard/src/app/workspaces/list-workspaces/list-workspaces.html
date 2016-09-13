@@ -68,6 +68,7 @@
               ng-repeat="workspace in listWorkspacesCtrl.userWorkspaces | orderBy:[listWorkspacesCtrl.workspaceOrderBy, 'config.name'] | filter:listWorkspacesCtrl.workspaceFilter"
               ng-model="listWorkspacesCtrl.workspacesSelectedStatus[workspace.id]"
               che-selectable="true"
+              che-display-labels="false"
               che-on-checkbox-click="listWorkspacesCtrl.updateSelectedStatus()"
               che-workspace-item="workspace"></che-workspace-item>
     </che-list>

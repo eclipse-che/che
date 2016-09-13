@@ -201,7 +201,7 @@ public class EditorAgentImpl implements EditorAgent,
 
         openedEditors.remove(editor);
 
-        editor.close(false);
+        editor.close(true);
 
         if (editor instanceof TextEditor) {
             editorContentSynchronizerProvider.get().unTrackEditor(editor);

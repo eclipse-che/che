@@ -32,11 +32,8 @@ export class CreateWorkspaceController {
 
     this.selectSourceOption = 'select-source-recipe';
 
-    this.stack = {};
-    this.workspace = {};
-
-    // default RAM value for workspaces
-    this.workspaceRam = 1000;
+    // default RAM value
+    this.workspaceRam = 2 * Math.pow(1024,3);
 
     this.editorOptions = {
       lineWrapping: true,
@@ -53,6 +50,7 @@ export class CreateWorkspaceController {
     this.stack = null;
     this.recipeUrl = null;
     this.recipeScript = null;
+    this.recipeFormat = null;
     this.importWorkspace = '';
     this.defaultWorkspaceName = null;
 
@@ -67,9 +65,20 @@ export class CreateWorkspaceController {
    */
   setStackTab(tabName) {
     if (tabName === 'custom-stack') {
+      this.cheStackLibrarySelecter(null);
       this.isCustomStack = true;
       this.generateWorkspaceName();
     }
+  }
+
+  /**
+   * Gets object keys from target object.
+   *
+   * @param targetObject
+   * @returns [*]
+   */
+  getObjectKeys(targetObject) {
+    return Object.keys(targetObject);
   }
 
   /**
@@ -122,6 +131,8 @@ export class CreateWorkspaceController {
     //User provides recipe URL or recipe's content:
     if (this.isCustomStack) {
       this.stack = null;
+      source.type = 'environment';
+      source.format = this.recipeFormat;
       if (this.recipeUrl && this.recipeUrl.length > 0) {
         source.location = this.recipeUrl;
         this.submitWorkspace(source);

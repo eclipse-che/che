@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -59,6 +60,7 @@ import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -210,10 +212,20 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         rootNodes.remove(destroyedMachineNode);
-        onCloseTerminal(destroyedMachineNode);
-        onStopCommandProcess(destroyedMachineNode);
-
         view.setProcessesData(rootNode);
+
+        final Collection<ProcessTreeNode> children = new ArrayList<>();
+        children.addAll(destroyedMachineNode.getChildren());
+        for (ProcessTreeNode child : children) {
+            if (TERMINAL_NODE.equals(child.getType()) && terminals.containsKey(child.getId())) {
+                onCloseTerminal(child);
+            } else if (COMMAND_NODE.equals(child.getType()) && consoles.containsKey(child.getId())) {
+                onStopCommandProcess(child);
+                view.hideProcessOutput(child.getId());
+            }
+        }
+
+        view.hideProcessOutput(destroyedMachineNode.getId());
     }
 
     @Override
@@ -247,14 +259,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             } else {
                 if (selectedTreeNode.getParent() != null &&
                     selectedTreeNode.getParent().getType() == MACHINE_NODE) {
-                    onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
+                    onAddTerminal(appContext.getWorkspaceId(), selectedTreeNode.getParent().getId());
                 }
             }
-        }
-
-        // no selected node
-        if (appContext.getDevMachine() != null) {
-            onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
+        } else {
+            if (appContext.getDevMachine() != null) {
+                onAddTerminal(appContext.getWorkspaceId(), appContext.getDevMachine().getId());
+            }
         }
     }
 
@@ -394,10 +405,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                           outputConsole.getTitleIcon(),
                                                           null);
         commandId = commandNode.getId();
-        view.addProcessNode(commandNode);
         addChildToMachineNode(commandNode, machineTreeNode);
 
-        addOutputConsole(commandId, outputConsole, false);
+        addOutputConsole(commandId, commandNode, outputConsole, false);
 
         refreshStopButtonState(commandId);
         workspaceAgent.setActivePart(this);
@@ -417,15 +427,21 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         return consoles.containsKey(commandId) && consoles.get(commandId).isFinished();
     }
 
-    private void addOutputConsole(final String id, final OutputConsole outputConsole, final boolean machineConsole) {
+    private void addOutputConsole(final String id,
+                                  final ProcessTreeNode processNode,
+                                  final OutputConsole outputConsole,
+                                  final boolean machineConsole) {
         consoles.put(id, outputConsole);
         consoleCommands.put(outputConsole, id);
 
         outputConsole.go(new AcceptsOneWidget() {
             @Override
             public void setWidget(final IsWidget widget) {
+                view.addProcessNode(processNode);
                 view.addWidget(id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, machineConsole);
-                view.selectNode(view.getNodeById(id));
+                if (!MACHINE_NODE.equals(processNode.getType())) {
+                    view.selectNode(view.getNodeById(id));
+                }
             }
         });
 
@@ -593,7 +609,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         rootNodes.add(machineNode);
 
         OutputConsole outputConsole = commandConsoleFactory.create(machine.getConfig().getName());
-        addOutputConsole(machine.getId(), outputConsole, true);
+
+        addOutputConsole(machine.getId(), machineNode, outputConsole, true);
 
         view.setProcessesData(rootNode);
 
@@ -694,6 +711,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             @Override
             public void apply(List<MachineProcessDto> arg) throws OperationException {
                 for (MachineProcessDto machineProcessDto : arg) {
+                    /**
+                     * Do not show the process if the command line has prefix #hidden
+                     */
+                    if (!Strings.isNullOrEmpty(machineProcessDto.getCommandLine()) && machineProcessDto.getCommandLine().startsWith("#hidden")) {
+                        continue;
+                    }
+
                     final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
                                                             .withName(machineProcessDto.getName())
                                                             .withAttributes(machineProcessDto.getAttributes())
@@ -701,7 +725,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                             .withType(machineProcessDto.getType());
 
                     final CommandType type = commandTypeRegistry.getCommandTypeById(commandDto.getType());
-                    if (type != null) {
+                    if (type != null ) {
                         final CommandConfiguration configuration = type.getConfigurationFactory().createFromDto(commandDto);
                         final CommandOutputConsole console = commandConsoleFactory.create(configuration, machine);
                         console.listenToOutput(machineProcessDto.getOutputChannel());

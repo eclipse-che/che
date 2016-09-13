@@ -44,8 +44,10 @@ import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.FileUpdateEventRequestReceiver;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
+import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationReceiver;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.extension.ExtensionRegistry;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
@@ -283,6 +285,7 @@ import org.eclipse.che.ide.workspace.WorkspaceViewImpl;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidget;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidgetImpl;
+import org.eclipse.che.ide.workspace.macro.WorkspaceNameMacroProvider;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
 import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
@@ -363,12 +366,14 @@ public class CoreGinModule extends AbstractGinModule {
     }
 
     private void configureClientServerEventService() {
+        bind(FileOpenCloseEventListener.class).asEagerSingleton();
         bind(ClientServerEventService.class).asEagerSingleton();
 
         GinMapBinder<String, JsonRpcRequestReceiver> requestReceivers =
                 GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
 
-        requestReceivers.addBinding("event:file-updated").to(FileUpdateEventRequestReceiver.class);
+        requestReceivers.addBinding("event:file-in-vfs-status-changed").to(EditorFileStatusNotificationReceiver.class);
+        requestReceivers.addBinding("event:project-tree-status-changed").to(ProjectTreeStatusNotificationReceiver.class);
     }
 
     private void configureJsonRpc() {
@@ -492,6 +497,7 @@ public class CoreGinModule extends AbstractGinModule {
         macroProviders.addBinding().to(ExplorerCurrentFileRelativePathProvider.class);
         macroProviders.addBinding().to(ExplorerCurrentProjectNameProvider.class);
         macroProviders.addBinding().to(ExplorerCurrentProjectTypeProvider.class);
+        macroProviders.addBinding().to(WorkspaceNameMacroProvider.class);
     }
 
     /** Configure Core UI components, resources and views */

@@ -11,12 +11,11 @@
 package org.eclipse.che.plugin.maven.server.core.project;
 
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.plugin.maven.server.MavenServerManager;
-import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
 import org.eclipse.che.ide.maven.tools.Build;
 import org.eclipse.che.ide.maven.tools.Model;
 import org.eclipse.che.ide.maven.tools.Parent;
 import org.eclipse.che.ide.maven.tools.Resource;
+import org.eclipse.che.maven.data.MavenBuild;
 import org.eclipse.che.maven.data.MavenKey;
 import org.eclipse.che.maven.data.MavenModel;
 import org.eclipse.che.maven.data.MavenParent;
@@ -25,7 +24,8 @@ import org.eclipse.che.maven.data.MavenProjectProblem;
 import org.eclipse.che.maven.data.MavenResource;
 import org.eclipse.che.maven.server.MavenProjectInfo;
 import org.eclipse.che.maven.server.MavenServerResult;
-import org.eclipse.che.plugin.maven.shared.MavenAttributes;
+import org.eclipse.che.plugin.maven.server.MavenServerManager;
+import org.eclipse.che.plugin.maven.server.MavenServerWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +40,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_RESOURCES_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_SOURCE_FOLDER;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER;
@@ -107,6 +109,8 @@ public class MavenModelReader {
         Set<String> enabledProfiles = new HashSet<>();
         MavenModel result = new MavenModel();
 
+        fillModelByDefaults(result);
+
         Model model = null;
         try {
             model = Model.readFrom(pom);
@@ -115,32 +119,34 @@ public class MavenModelReader {
         }
 
         if (model == null) {
-            result.setMavenKey(new MavenKey("unknown", "unknown", "unknown"));
-            result.setPackaging("jar");
             return new ModelReadingResult(result, problems, enabledProfiles);
         }
 
-        MavenKey parentKey;
+        final MavenKey parentKey;
 
         if (model.getParent() == null) {
-            parentKey = new MavenKey("unknown", "unknown", "unknown");
-            result.setParent(new MavenParent(parentKey, "../pom.xml"));
+            parentKey = result.getParent().getMavenKey();
         } else {
             Parent modelParent = model.getParent();
             parentKey = new MavenKey(modelParent.getGroupId(), modelParent.getArtifactId(), modelParent.getVersion());
-            MavenParent parent =
-                    new MavenParent(parentKey, modelParent.getRelativePath());
+            MavenParent parent = new MavenParent(parentKey, modelParent.getRelativePath());
             result.setParent(parent);
         }
 
-        MavenKey mavenKey =
-                new MavenKey(getNotNull(model.getGroupId(), parentKey.getGroupId()), model.getArtifactId(),
-                             getNotNull(model.getVersion(), parentKey.getVersion()));
+        final MavenKey mavenKey = new MavenKey(getNotNull(model.getGroupId(), parentKey.getGroupId()),
+                                               model.getArtifactId(),
+                                               getNotNull(model.getVersion(), parentKey.getVersion()));
         result.setMavenKey(mavenKey);
 
-        result.setPackaging(model.getPackaging() == null ? "jar" : model.getPackaging());
+        if (model.getPackaging() != null) {
+            result.setPackaging(model.getPackaging());
+        }
         result.setName(model.getName());
-        result.setModules(model.getModules() == null ? Collections.emptyList() : new ArrayList<>(model.getModules()));
+
+        final List<String> modules = model.getModules();
+        if (modules != null) {
+            result.setModules(new ArrayList<>(model.getModules()));
+        }
 
         Map<String, String> properties = model.getProperties();
         Properties prop = new Properties();
@@ -149,29 +155,46 @@ public class MavenModelReader {
         }
         result.setProperties(prop);
 
-        Build build = model.getBuild();
-        if (build == null) {
-            result.getBuild().setSources(Collections.singletonList(DEFAULT_SOURCE_FOLDER));
-            result.getBuild().setTestSources(Collections.singletonList(DEFAULT_TEST_SOURCE_FOLDER));
-            result.getBuild().setResources(Collections.singletonList(
-                    new MavenResource(DEFAULT_RESOURCES_FOLDER, false, null, Collections.emptyList(), Collections.emptyList())));
-            result.getBuild().setTestResources(Collections.singletonList(
-                    new MavenResource(DEFAULT_TEST_RESOURCES_FOLDER, false, null, Collections.emptyList(), Collections.emptyList())));
-        } else {
-            String sourceDirectory = build.getSourceDirectory();
-            if (sourceDirectory == null) {
-                sourceDirectory = DEFAULT_SOURCE_FOLDER;
+        final Build build = model.getBuild();
+        if (build != null) {
+            final String sourceDirectory = build.getSourceDirectory();
+            if (sourceDirectory != null) {
+                result.getBuild().setSources(singletonList(sourceDirectory));
             }
-            String testSourceDirectory = build.getTestSourceDirectory();
-            if (testSourceDirectory == null) {
-                testSourceDirectory = DEFAULT_TEST_SOURCE_FOLDER;
+            final String testSourceDirectory = build.getTestSourceDirectory();
+            if (testSourceDirectory != null) {
+                result.getBuild().setTestSources(singletonList(testSourceDirectory));
             }
-            result.getBuild().setSources(Collections.singletonList(sourceDirectory));
-            result.getBuild().setTestSources(Collections.singletonList(testSourceDirectory));
             result.getBuild().setResources(convertResources(build.getResources()));
         }
+
         //TODO add profiles
         return new ModelReadingResult(result, problems, enabledProfiles);
+    }
+
+    private void fillModelByDefaults(MavenModel model) {
+        model.setMavenKey(new MavenKey("unknown", "unknown", "unknown"));
+
+        final MavenKey parentKey = new MavenKey("unknown", "unknown", "unknown");
+        model.setParent(new MavenParent(parentKey, "../pom.xml"));
+
+        model.setPackaging("jar");
+
+        model.setModules(emptyList());
+
+        final MavenBuild build = model.getBuild();
+        build.setSources(singletonList(DEFAULT_SOURCE_FOLDER));
+        build.setTestSources(singletonList(DEFAULT_TEST_SOURCE_FOLDER));
+        build.setResources(singletonList(new MavenResource(DEFAULT_RESOURCES_FOLDER,
+                                                           false,
+                                                           null,
+                                                           Collections.emptyList(),
+                                                           Collections.emptyList())));
+        build.setTestResources(singletonList(new MavenResource(DEFAULT_TEST_RESOURCES_FOLDER,
+                                                               false,
+                                                               null,
+                                                               Collections.emptyList(),
+                                                               Collections.emptyList())));
     }
 
     private String getNotNull(String value, String defaultValue) {

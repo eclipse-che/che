@@ -61,11 +61,11 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
 
     @Override
     @FactoryParameter(obligation = OPTIONAL)
-    LimitsDto getLimits();
+    MachineLimitsDto getLimits();
 
-    void setLimits(LimitsDto limits);
+    void setLimits(MachineLimitsDto limits);
 
-    MachineConfigDto withLimits(LimitsDto limits);
+    MachineConfigDto withLimits(MachineLimitsDto limits);
 
     @Override
     List<ServerConfDto> getServers();
@@ -83,12 +83,4 @@ public interface MachineConfigDto extends MachineConfig, Hyperlinks {
 
     @Override
     MachineConfigDto withLinks(List<Link> links);
-
-    @Override
-    List<String> getAgents();
-
-    void setAgents(List<String> agents);
-
-    MachineConfigDto withAgents(List<String> agents);
-
 }

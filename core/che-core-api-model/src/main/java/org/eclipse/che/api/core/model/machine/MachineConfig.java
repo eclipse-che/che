@@ -44,7 +44,7 @@ public interface MachineConfig {
      * Machine limits such as RAM size.
      */
     @Nullable
-    Limits getLimits();
+    MachineLimits getLimits();
 
     /**
      * Get configuration of servers inside of machine.
@@ -57,10 +57,4 @@ public interface MachineConfig {
      * Get predefined environment variables of machine.
      */
     Map<String, String> getEnvVariables();
-
-    /**
-     * List of injected agents respecting format {@code name:version}.
-     * The version part can be omitted.
-     */
-    List<String> getAgents();
 }

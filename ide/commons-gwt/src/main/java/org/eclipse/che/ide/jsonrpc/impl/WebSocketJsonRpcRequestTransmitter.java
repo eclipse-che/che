@@ -44,7 +44,7 @@ public class WebSocketJsonRpcRequestTransmitter implements JsonRpcRequestTransmi
             requestRegistry.add(id, method);
         }
 
-        Log.info(getClass(), "Transmitting a request " + request.toString());
+        Log.debug(getClass(), "Transmitting a request " + request.toString());
         transmitter.transmit("request", request.toString());
     }
 }

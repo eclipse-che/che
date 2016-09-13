@@ -56,7 +56,7 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
     }
 
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-        Path launchFile = Paths.get(System.getenv("HOME"), "che-agents/ls-json/launch.sh");
+        Path launchFile = Paths.get(System.getenv("HOME"), "che/ls-json/launch.sh");
 
         ProcessBuilder processBuilder = new ProcessBuilder(launchFile.toString());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);

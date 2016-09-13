@@ -27,6 +27,10 @@ public class AgentKeyImpl implements AgentKey {
         this.version = version;
     }
 
+    public AgentKeyImpl(String name) {
+        this(name, null);
+    }
+
     public String getName() {
         return name;
     }
@@ -42,7 +46,7 @@ public class AgentKeyImpl implements AgentKey {
      * @throws IllegalArgumentException
      *      in case of wrong format
      */
-    public static AgentKeyImpl of(String agentKey) throws IllegalArgumentException {
+    public static AgentKeyImpl parse(String agentKey) throws IllegalArgumentException {
         String[] parts = agentKey.split(":");
 
         if (parts.length == 1) {
@@ -50,7 +54,7 @@ public class AgentKeyImpl implements AgentKey {
         } else if (parts.length == 2) {
             return new AgentKeyImpl(parts[0], parts[1]);
         } else {
-            throw new IllegalArgumentException("" + agentKey);
+            throw new IllegalArgumentException("Illegal format: " + agentKey);
         }
     }
 
@@ -68,8 +72,14 @@ public class AgentKeyImpl implements AgentKey {
         return Objects.hash(name, version);
     }
 
+    public String asString() {
+        return name + (version != null ? ":" + version : "");
+    }
+
     @Override
     public String toString() {
-        return name + (version != null ? ":" + version : "");
+        return "AgentImpl{" +
+               "name='" + name + '\'' +
+               ", version='" + version + "\'}";
     }
 }
