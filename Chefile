@@ -1,12 +1,5 @@
 # Runtime image to use for booting and compiling Eclipse Che
-#workspace.runtime.docker.image="codenvy/alpine_jdk8"
-
-workspace.runtime.docker.content=`
-FROM codenvy/alpine_jdk8
-ENV FLORENT_TEST HELLO
-RUN echo hello world
-`
-
+workspace.runtime.docker.image="florentbenoit/che-in-che"
 
 # Commands that will appear on the IDE commands widget
 workspace.commands[0].name="1. Build Che in Che"
@@ -29,8 +22,8 @@ workspace.name="che"
 # Memory for this workspace
 workspace.ram=3092
 
-# Optional properties to propagate to che server
-#che.server.properties['CHE_HOST_IP']='ec2-52-210-31-187.eu-west-1.compute.amazonaws.com'
+# Optional properties to propagate to che server (or export CHE_HOST_IP variable)
+#che.server.properties['CHE_HOST_IP']='123.123.123.123'
 
 # Configure project properties
 workspace.projects[0].type = "maven"
