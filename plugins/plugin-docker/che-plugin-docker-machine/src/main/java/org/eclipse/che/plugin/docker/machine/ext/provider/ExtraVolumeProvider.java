@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.docker.machine.local.provider;
+package org.eclipse.che.plugin.docker.machine.ext.provider;
 
 import com.google.inject.Inject;
 
@@ -18,11 +18,15 @@ import javax.inject.Singleton;
 
 /**
  * Provides volume configuration of machine for any local directories
- * that a user may want to mount into a dev machine.
- * <br/>machine.server.extra.volume property is optional and provided as
- * /path/on/host:/path/in/container
+ * that a user may want to mount into any docker machine.
+ *
+ * {@code machine.server.extra.volume} property is optional
+ * and contains semicolon separated extra volumes to mount, for instance:
+ *
+ * /path/on/host1:/path/in/container1;/path/on/host2:/path/in/container2
  *
  * @author Alexander Garagatyi
+ * @author Anatolii Bazko
  */
 @Singleton
 public class ExtraVolumeProvider implements Provider<String> {
