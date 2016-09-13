@@ -15,7 +15,7 @@ import org.eclipse.che.api.ssh.shared.model.SshPair;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -46,13 +46,17 @@ import java.util.Objects;
 public class SshPairImpl implements SshPair {
     @Id
     private String owner;
+
     @Id
     private String service;
+
     @Id
     private String name;
-    @Basic
+
+    @Column(columnDefinition = "TEXT")
     private String publicKey;
-    @Basic
+
+    @Column(columnDefinition = "TEXT")
     private String privateKey;
 
     @ManyToOne
