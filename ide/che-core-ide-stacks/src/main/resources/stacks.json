@@ -36,6 +36,13 @@
               ],
               "servers": {},
               "attributes" : {}
+            },
+            "db": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {}
             }
           },
           "recipe": {
