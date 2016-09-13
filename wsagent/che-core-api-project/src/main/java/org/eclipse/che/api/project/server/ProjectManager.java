@@ -516,8 +516,18 @@ public final class ProjectManager {
         }
 
         if (move.isProject()) {
-            projectRegistry.getProject(move.getProject()).getTypes();
-            // fire event
+            final RegisteredProject project = projectRegistry.getProject(itemPath);
+            NewProjectConfig projectConfig = new NewProjectConfig(newItem.getPath().toString(),
+                                                                  project.getType(),
+                                                                  project.getMixins(),
+                                                                  newName,
+                                                                  project.getDescription(),
+                                                                  project.getAttributes(),
+                                                                  project.getSource());
+
+            if (move instanceof  FolderEntry) {
+                projectRegistry.updateProject(project.getPath(), (FolderEntry)move, projectConfig, true, true);
+            }
         }
 
         return move;
