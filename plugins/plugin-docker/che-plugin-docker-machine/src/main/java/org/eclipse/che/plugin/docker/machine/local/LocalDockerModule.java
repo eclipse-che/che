@@ -68,7 +68,7 @@ public class LocalDockerModule extends AbstractModule {
         Multibinder<String> devMachineVolumes = Multibinder.newSetBinder(binder(),
                                                                          String.class,
                                                                          Names.named("machine.docker.dev_machine.machine_volumes"));
-        devMachineVolumes.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.local.provider.ExtraVolumeProvider.class);
+        devMachineVolumes.addBinding().toProvider(org.eclipse.che.plugin.docker.machine.ext.provider.ExtraVolumeProvider.class);
 
         Multibinder<Set<String>> networks = Multibinder.newSetBinder(binder(),
                                                                      new TypeLiteral<Set<String>>() {},
