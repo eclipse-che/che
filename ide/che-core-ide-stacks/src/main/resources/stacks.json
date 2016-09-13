@@ -32,7 +32,7 @@
           "machines": {
             "dev-machine": {
               "agents": [
-                "ws-agent"
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
               ],
               "servers": {},
               "attributes" : {}
@@ -116,7 +116,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/alpine-jdk8",
+            "location": "codenvy/alpine_jdk8",
             "type": "dockerimage"
           }
         }
