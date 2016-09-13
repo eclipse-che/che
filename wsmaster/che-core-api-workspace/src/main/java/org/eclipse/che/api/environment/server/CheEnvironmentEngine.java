@@ -547,13 +547,10 @@ public class CheEnvironmentEngine {
     private void applyAgents(@Nullable ExtendedMachine extendedMachine,
                              ComposeServiceImpl composeService) throws ServerException {
         if (extendedMachine != null) {
-            List<String> agents = extendedMachine.getAgents();
-            if (agents != null) {
-                try {
-                    agentConfigApplier.modify(composeService, agents);
-                } catch (AgentException e) {
-                    throw new ServerException("Can't apply agent config", e);
-                }
+            try {
+                agentConfigApplier.modify(composeService, extendedMachine.getAgents());
+            } catch (AgentException e) {
+                throw new ServerException("Can't apply agent config", e);
             }
         }
     }

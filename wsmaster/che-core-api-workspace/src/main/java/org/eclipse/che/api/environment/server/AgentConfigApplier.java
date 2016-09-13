@@ -20,6 +20,7 @@ import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.model.workspace.compose.ComposeService;
 import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +77,7 @@ public class AgentConfigApplier {
      *
      * @throws AgentException
      */
-    public void modify(ComposeServiceImpl composeService, List<String> agentKeys) throws AgentException {
+    public void modify(ComposeServiceImpl composeService, @Nullable List<String> agentKeys) throws AgentException {
         for (AgentKey agentKey : sorter.sort(agentKeys)) {
             Agent agent = agentRegistry.getAgent(agentKey);
             addEnv(composeService, agent.getProperties());
