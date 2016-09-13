@@ -23,7 +23,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
+import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,13 +37,8 @@ import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.Ev
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.DESTROYED;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.ERROR;
 import static org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent.EventType.RUNNING;
-import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.MACHINE_BOOTING;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.SUCCESS;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,13 +53,13 @@ public class MachineStateNotifierTest {
 
     //constructor mocks
     @Mock
-    private InitialLoadingInfo          initialLoadingInfo;
+    private LoaderPresenter                       loader;
     @Mock
-    private NotificationManager         notificationManager;
+    private NotificationManager                   notificationManager;
     @Mock
-    private MachineLocalizationConstant locale;
+    private MachineLocalizationConstant           locale;
     @Mock
-    private MachineServiceClient        machineServiceClient;
+    private MachineServiceClient                  machineServiceClient;
 
     //additional mocks
     @Mock
@@ -74,7 +69,7 @@ public class MachineStateNotifierTest {
     @Mock
     private MachineStateEvent.Handler             handler;
     @Mock
-    private MachineStatusChangedEvent machineStatusChangedEvent;
+    private MachineStatusChangedEvent             machineStatusChangedEvent;
     @Mock
     private Promise<MachineDto>                   machinePromise;
     @Captor
@@ -85,7 +80,7 @@ public class MachineStateNotifierTest {
 
     @Before
     public void setUp() {
-        statusNotifier = new MachineStatusNotifier(eventBus, initialLoadingInfo, machineServiceClient, notificationManager, locale);
+        statusNotifier = new MachineStatusNotifier(eventBus, machineServiceClient, notificationManager, locale, loader);
         eventBus.addHandler(MachineStateEvent.TYPE, handler);
 
         when(machine.getConfig()).thenReturn(machineConfig);
@@ -108,10 +103,7 @@ public class MachineStateNotifierTest {
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machine);
 
-        verify(machine).getConfig();
-        verify(machineConfig).isDev();
         verify(handler).onMachineCreating(Matchers.<MachineStateEvent>anyObject());
-        verify(initialLoadingInfo).setOperationStatus(eq(MACHINE_BOOTING.getValue()), eq(IN_PROGRESS));
     }
 
     @Test
@@ -124,10 +116,7 @@ public class MachineStateNotifierTest {
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machine);
 
-        verify(machine).getConfig();
-        verify(machineConfig).isDev();
         verify(handler).onMachineCreating(Matchers.<MachineStateEvent>anyObject());
-        verify(initialLoadingInfo, never()).setOperationStatus(eq(MACHINE_BOOTING.getValue()), eq(IN_PROGRESS));
     }
 
     @Test
@@ -140,10 +129,7 @@ public class MachineStateNotifierTest {
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machine);
 
-        verify(machine).getConfig();
-        verify(machineConfig).isDev();
         verify(handler).onMachineRunning(Matchers.<MachineStateEvent>anyObject());
-        verify(initialLoadingInfo).setOperationStatus(eq(MACHINE_BOOTING.getValue()), eq(SUCCESS));
         verify(locale).notificationMachineIsRunning(MACHINE_NAME);
         verify(notificationManager).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
     }
@@ -158,10 +144,7 @@ public class MachineStateNotifierTest {
         verify(machinePromise).then(machineCaptor.capture());
         machineCaptor.getValue().apply(machine);
 
-        verify(machine).getConfig();
-        verify(machineConfig).isDev();
         verify(handler).onMachineRunning(Matchers.<MachineStateEvent>anyObject());
-        verify(initialLoadingInfo, never()).setOperationStatus(eq(MACHINE_BOOTING.getValue()), eq(SUCCESS));
         verify(locale).notificationMachineIsRunning(MACHINE_NAME);
         verify(notificationManager).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
     }
@@ -183,4 +166,5 @@ public class MachineStateNotifierTest {
         verify(machineStatusChangedEvent).getErrorMessage();
         verify(notificationManager).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
     }
+
 }

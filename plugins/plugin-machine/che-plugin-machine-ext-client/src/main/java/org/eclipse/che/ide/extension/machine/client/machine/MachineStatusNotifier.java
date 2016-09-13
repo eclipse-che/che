@@ -24,14 +24,11 @@ import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
-import org.eclipse.che.ide.ui.loaders.initialization.OperationInfo;
+import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.MACHINE_BOOTING;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
 
 /**
  * Notifies about changing machine state.
@@ -45,19 +42,19 @@ public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler 
     private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant locale;
     private final MachineServiceClient        machineServiceClient;
-    private final InitialLoadingInfo          initialLoadingInfo;
+    private final LoaderPresenter             loader;
 
     @Inject
     MachineStatusNotifier(final EventBus eventBus,
-                          final InitialLoadingInfo initialLoadingInfo,
                           final MachineServiceClient machineServiceClient,
                           final NotificationManager notificationManager,
-                          final MachineLocalizationConstant locale) {
+                          final MachineLocalizationConstant locale,
+                          final LoaderPresenter loader) {
         this.eventBus = eventBus;
-        this.initialLoadingInfo = initialLoadingInfo;
         this.machineServiceClient = machineServiceClient;
         this.notificationManager = notificationManager;
         this.locale = locale;
+        this.loader = loader;
 
         eventBus.addHandler(MachineStatusChangedEvent.TYPE, this);
     }
@@ -98,8 +95,10 @@ public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler 
             @Override
             public void apply(MachineDto machine) throws OperationException {
                 if (machine.getConfig().isDev()) {
-                    initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), IN_PROGRESS);
+                    // Will be used later
+                    // loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.LOADING);
                 }
+
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.CREATING));
             }
         };
@@ -111,7 +110,8 @@ public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler 
             public void apply(MachineDto machine) throws OperationException {
                 final MachineConfigDto machineConfig = machine.getConfig();
                 if (machineConfig.isDev()) {
-                    initialLoadingInfo.setOperationStatus(MACHINE_BOOTING.getValue(), OperationInfo.Status.SUCCESS);
+                    // Will be used later
+                    // loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.SUCCESS);
                 }
 
                 final String message = locale.notificationMachineIsRunning(machineConfig.getName());
@@ -120,4 +120,5 @@ public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler 
             }
         };
     }
+
 }

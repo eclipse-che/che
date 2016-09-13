@@ -8,17 +8,23 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.editor.orion.client.inject;
+package org.eclipse.che.ide.ui.loaders;
 
 /**
- * Plugin that fixes some Orion's highlighting issues for Java files.
+ * Loader interface
  *
- * @author Artem Zatsarynnyi
+ * @author Vitaliy Guliy
  */
-public class JavaHighlightingOrionPlugin implements OrionPlugin {
+public interface PopupLoader {
 
-    @Override
-    public String getRelPath() {
-        return "cheJavaHighlightingPlugin/plugin.html";
-    }
+    /**
+     * Marks operation successful.
+     */
+    void setSuccess();
+
+    /**
+     * Marks operation failed.
+     */
+    void setError();
+
 }

@@ -25,7 +25,6 @@ import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKE
  *
  * @author Florent Benoit
  */
-@Deprecated
 public class DockerMachineSource extends MachineSourceImpl {
 
     /**

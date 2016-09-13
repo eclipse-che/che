@@ -219,6 +219,12 @@ public class EditorPartStackView extends ResizeComposite implements PartStackVie
     public void selectTab(@NotNull PartPresenter partPresenter) {
         IsWidget view = partPresenter.getView();
 
+        // set/remove attribute 'active' for Selenium tests
+        for (int i = 0; i < contentPanel.getWidgetCount(); i++) {
+            contentPanel.getWidget(i).getElement().removeAttribute("active");
+        }
+        view.asWidget().getElement().setAttribute("active", "");
+
         int viewIndex = contentPanel.getWidgetIndex(view);
         if (viewIndex < 0) {
             partPresenter.go(partViewContainer);

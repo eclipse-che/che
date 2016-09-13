@@ -24,7 +24,6 @@ import static java.util.Objects.hash;
  *
  * @author Eugene Voevodin
  */
-@Deprecated
 @Embeddable
 public class MachineSourceImpl implements MachineSource {
 

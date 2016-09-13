@@ -701,16 +701,9 @@ public class WorkspaceManager {
                                      .withWorkspaceId(workspaceId));
         String devMachineSnapshotFailMessage = null;
         for (MachineImpl machine : runtime.getMachines()) {
-            try {
-                SnapshotImpl snapshot = runtimes.saveMachine(namespace,
-                                                             workspaceId,
-                                                             machine.getId());
-                snapshotDao.saveSnapshot(snapshot);
-            } catch (ApiException apiEx) {
-                if (machine.getConfig().isDev()) {
-                    devMachineSnapshotFailMessage = apiEx.getLocalizedMessage();
-                }
-                LOG.error(apiEx.getLocalizedMessage(), apiEx);
+            String error = replaceSnapshot(machine, namespace);
+            if (error != null && machine.getConfig().isDev()) {
+                devMachineSnapshotFailMessage = error;
             }
         }
         if (devMachineSnapshotFailMessage != null) {
@@ -724,6 +717,47 @@ public class WorkspaceManager {
                                          .withWorkspaceId(workspaceId));
         }
         return devMachineSnapshotFailMessage == null;
+    }
+
+    private String replaceSnapshot(MachineImpl machine, String namespace) {
+        try {
+            try {
+                SnapshotImpl oldSnapshot = snapshotDao.getSnapshot(machine.getWorkspaceId(),
+                                                                   machine.getEnvName(),
+                                                                   machine.getConfig().getName());
+                snapshotDao.removeSnapshot(oldSnapshot.getId());
+
+                runtimes.removeSnapshot(oldSnapshot);
+            } catch (NotFoundException ignored) {
+                // Do nothing if no snapshot found
+            }
+
+            SnapshotImpl snapshot = null;
+            try {
+                snapshot = runtimes.saveMachine(namespace,
+                                                machine.getWorkspaceId(),
+                                                machine.getId());
+
+                snapshotDao.saveSnapshot(snapshot);
+            } catch (ApiException e) {
+                if (snapshot != null) {
+                    try {
+                        runtimes.removeSnapshot(snapshot);
+                    } catch (ApiException e1) {
+                        LOG.error(format("Snapshot removal failed. Snapshot: %s. Error: %s",
+                                         snapshot,
+                                         e1.getLocalizedMessage()),
+                                  e1);
+                    }
+                }
+                throw e;
+            }
+
+            return null;
+        } catch (ApiException apiEx) {
+            LOG.error("Snapshot creation failed. Error: " + apiEx.getLocalizedMessage(), apiEx);
+            return apiEx.getLocalizedMessage();
+        }
     }
 
     @VisibleForTesting

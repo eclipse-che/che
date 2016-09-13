@@ -18,7 +18,6 @@ import java.util.Map;
 /**
  * @author gazarenkov
  */
-@Deprecated
 public interface MachineConfig {
 
     /**

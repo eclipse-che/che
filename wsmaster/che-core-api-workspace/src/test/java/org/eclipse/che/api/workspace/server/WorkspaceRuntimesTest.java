@@ -58,6 +58,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -96,7 +97,11 @@ public class WorkspaceRuntimesTest {
 
     @BeforeMethod
     public void setUp(Method method) throws Exception {
-        runtimes = spy(new WorkspaceRuntimes(eventService, environmentEngine, agentSorter, launcherFactory, agentRegistry));
+        runtimes = spy(new WorkspaceRuntimes(eventService,
+                                             environmentEngine,
+                                             agentSorter,
+                                             launcherFactory,
+                                             agentRegistry));
 
         List<Instance> machines = asList(createMachine(true), createMachine(false));
         when(environmentEngine.start(anyString(),
@@ -397,7 +402,7 @@ public class WorkspaceRuntimesTest {
                        false);
         MachineConfigImpl config = createConfig(false);
         Instance instance = mock(Instance.class);
-        when(environmentEngine.startMachine(anyString(), any(MachineConfig.class))).thenReturn(instance);
+        when(environmentEngine.startMachine(anyString(), any(MachineConfig.class), any())).thenReturn(instance);
         when(instance.getConfig()).thenReturn(config);
 
         // when
@@ -405,7 +410,30 @@ public class WorkspaceRuntimesTest {
 
         // then
         assertEquals(actual, instance);
-        verify(environmentEngine).startMachine(workspace.getId(), config);
+        verify(environmentEngine).startMachine(eq(workspace.getId()), eq(config), any());
+    }
+
+    @Test
+    public void shouldAddTerminalAgentOnMachineStart() throws Exception {
+        // when
+        WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace,
+                       workspace.getConfig().getDefaultEnv(),
+                       false);
+        MachineConfigImpl config = createConfig(false);
+        Instance instance = mock(Instance.class);
+        when(environmentEngine.startMachine(anyString(), any(MachineConfig.class), any())).thenReturn(instance);
+        when(instance.getConfig()).thenReturn(config);
+
+        // when
+        Instance actual = runtimes.startMachine(workspace.getId(), config);
+
+        // then
+        assertEquals(actual, instance);
+        verify(environmentEngine).startMachine(eq(workspace.getId()),
+                                               eq(config),
+                                               eq(singletonList("org.eclipse.che.terminal")));
+        verify(runtimes).launchAgents(instance, singletonList("org.eclipse.che.terminal"));
     }
 
     @Test(expectedExceptions = ConflictException.class,
@@ -418,7 +446,7 @@ public class WorkspaceRuntimesTest {
         runtimes.startMachine("someWsID", config);
 
         // then
-        verify(environmentEngine, never()).startMachine(anyString(), any(MachineConfig.class));
+        verify(environmentEngine, never()).startMachine(anyString(), any(MachineConfig.class), any());
     }
 
     @Test

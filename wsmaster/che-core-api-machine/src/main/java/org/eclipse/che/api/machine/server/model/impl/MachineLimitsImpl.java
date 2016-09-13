@@ -16,7 +16,6 @@ import org.eclipse.che.api.core.model.machine.MachineLimits;
  * @author Alexander Garagatyi
  * @author Yevhenii Voevodin
  */
-@Deprecated
 public class MachineLimitsImpl implements MachineLimits {
 
     private int memory;

@@ -36,6 +36,11 @@ public interface WorkBenchPartController {
     void setSize(double size);
 
     /**
+     * Maximizes part stack.
+     */
+    void maximize();
+
+    /**
      * Sets the minimum allowable size for the part.
      * <p/>
      * The splitter cannot be dragged to a position that would make the part

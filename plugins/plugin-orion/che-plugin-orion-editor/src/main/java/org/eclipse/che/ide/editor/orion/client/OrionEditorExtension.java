@@ -81,7 +81,7 @@ public class OrionEditorExtension {
     private void injectOrion(final AsyncCallback<Void> callback) {
         loader.setMessage(waitEditorMessage);
         final String[] scripts = new String[]{
-                "built-codeEdit-12.0/code_edit/built-codeEdit-amd",
+                "built-codeEdit-11.0/code_edit/built-codeEdit-amd",
                 "orion/CheContentAssistMode"
         };
 
@@ -111,7 +111,7 @@ public class OrionEditorExtension {
             }
         }, scripts, new String[0]);
 
-        injectCssLink(GWT.getModuleBaseForStaticFiles() + "built-codeEdit-12.0/code_edit/built-codeEdit.css");
+        injectCssLink(GWT.getModuleBaseForStaticFiles() + "built-codeEdit-11.0/code_edit/built-codeEdit.css");
     }
 
     private static void injectCssLink(final String url) {

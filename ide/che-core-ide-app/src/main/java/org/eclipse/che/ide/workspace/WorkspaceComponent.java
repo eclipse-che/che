@@ -38,8 +38,7 @@ import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
-import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
+import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
@@ -49,9 +48,6 @@ import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.WORKSPACE_BOOTING;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.SUCCESS;
 
 /**
  * @author Evgen Vidolob
@@ -72,12 +68,11 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     protected final NotificationManager       notificationManager;
     protected final StartWorkspacePresenter   startWorkspacePresenter;
 
-    private final EventBus                 eventBus;
-    private final LoaderPresenter          loader;
-    private final Provider<MachineManager> machineManagerProvider;
-    private final MessageBusProvider       messageBusProvider;
-    private final InitialLoadingInfo       initialLoadingInfo;
-    private final WorkspaceEventsHandler   workspaceEventsHandler;
+    private final   EventBus                  eventBus;
+    private final   Provider<MachineManager>  machineManagerProvider;
+    private final   MessageBusProvider        messageBusProvider;
+    private final   WorkspaceEventsHandler    workspaceEventsHandler;
+    private final   LoaderPresenter           loader;
 
     protected Callback<Component, Exception> callback;
     protected boolean                        needToReloadComponents;
@@ -89,7 +84,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               CoreLocalizationConstant locale,
                               DtoUnmarshallerFactory dtoUnmarshallerFactory,
                               EventBus eventBus,
-                              LoaderPresenter loader,
                               AppContext appContext,
                               Provider<MachineManager> machineManagerProvider,
                               NotificationManager notificationManager,
@@ -98,15 +92,14 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                               DialogFactory dialogFactory,
                               PreferencesManager preferencesManager,
                               DtoFactory dtoFactory,
-                              InitialLoadingInfo initialLoadingInfo,
-                              WorkspaceEventsHandler workspaceEventsHandler) {
+                              WorkspaceEventsHandler workspaceEventsHandler,
+                              LoaderPresenter loader) {
         this.workspaceServiceClient = workspaceServiceClient;
         this.createWorkspacePresenter = createWorkspacePresenter;
         this.startWorkspacePresenter = startWorkspacePresenter;
         this.locale = locale;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.eventBus = eventBus;
-        this.loader = loader;
         this.appContext = appContext;
         this.machineManagerProvider = machineManagerProvider;
         this.notificationManager = notificationManager;
@@ -115,8 +108,8 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         this.dialogFactory = dialogFactory;
         this.preferencesManager = preferencesManager;
         this.dtoFactory = dtoFactory;
-        this.initialLoadingInfo = initialLoadingInfo;
         this.workspaceEventsHandler = workspaceEventsHandler;
+        this.loader = loader;
 
         this.needToReloadComponents = true;
 
@@ -163,8 +156,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         messageBus.addOnOpenHandler(new ConnectionOpenedHandler() {
             @Override
             public void onOpen() {
-                loader.show(initialLoadingInfo);
-                initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
+                loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.LOADING);
 
                 messageBus.removeOnOpenHandler(this);
 
@@ -180,7 +172,8 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                             @Override
                             public void execute() {
-                                initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), SUCCESS);
+                                loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.SUCCESS);
+
                                 notificationManager.notify(locale.startedWs(), StatusNotification.Status.SUCCESS, FLOAT_MODE);
                                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
                                 machineManagerProvider.get();//start instance of machine manager
@@ -211,7 +204,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
         });
     }
 
-
     /**
      * Checks workspace for snapshots and asks the uses for an action.
      *
@@ -223,7 +215,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
             @Override
             public void apply(List<SnapshotDto> snapshots) throws OperationException {
                 if (snapshots.isEmpty()) {
-                    initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
+                    loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.LOADING);
                     workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), false);
                 } else {
                     showRecoverWorkspaceConfirmDialog(workspace);
@@ -250,14 +242,14 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                                           new ConfirmCallback() {
                                               @Override
                                               public void accepted() {
-                                                  initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
+                                                  loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.LOADING);
                                                   workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), true);
                                               }
                                           },
                                           new CancelCallback() {
                                               @Override
                                               public void cancelled() {
-                                                  initialLoadingInfo.setOperationStatus(WORKSPACE_BOOTING.getValue(), IN_PROGRESS);
+                                                  loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.LOADING);
                                                   workspaceServiceClient.startById(workspace.getId(), workspace.getConfig().getDefaultEnv(), false);
                                               }
                                           }).show();
@@ -276,4 +268,5 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
             }
         };
     }
+
 }
