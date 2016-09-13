@@ -136,14 +136,13 @@ public class CheEnvironmentValidator {
         List<String> devMachines = env.getMachines()
                                       .entrySet()
                                       .stream()
-                                      .filter(entry -> entry.getValue()
-                                                            .getAgents()
-                                                            .contains("org.eclipse.che.ws-agent"))
+                                      .filter(entry -> entry.getValue().getAgents() != null &&
+                                                       entry.getValue().getAgents().contains("org.eclipse.che.ws-agent"))
                                       .map(Map.Entry::getKey)
                                       .collect(toList());
 
         checkArgument(devMachines.size() == 1,
-                      "Environment '%s' should contain exactly 1 machine with org.eclipse.che.ws-agent, but contains '%s'. " +
+                      "Environment '%s' should contain exactly 1 machine with agent 'org.eclipse.che.ws-agent', but contains '%s'. " +
                       "All machines with this agent: %s",
                       envName, devMachines.size(), Joiner.on(", ").join(devMachines));
 
@@ -274,6 +273,14 @@ public class CheEnvironmentValidator {
                                              "Machine '%s' in environment '%s' contains server conf '%s' with invalid protocol '%s'",
                                              machineName, envName, serverName, server.getProtocol());
                            });
+        }
+
+        if (extendedMachine.getAgents() != null) {
+            for (String agent : extendedMachine.getAgents()) {
+                checkArgument(!isNullOrEmpty(agent),
+                              "Machine '%s' in environment '%s' contains invalid agent '%s'",
+                              machineName, envName, agent);
+            }
         }
 
     }

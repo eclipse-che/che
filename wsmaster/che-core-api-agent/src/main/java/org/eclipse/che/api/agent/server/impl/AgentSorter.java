@@ -18,6 +18,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -54,13 +55,15 @@ public class AgentSorter {
      * @throws AgentException
      *      if circular dependency found or agent creation failed or other unexpected error
      */
-    public List<AgentKey> sort(List<String> agentKeys) throws AgentException {
+    public List<AgentKey> sort(@Nullable List<String> agentKeys) throws AgentException {
         List<AgentKey> sorted = new ArrayList<>();
         Set<String> pending = new HashSet<>();
 
         if (agentKeys != null) {
             for (String agentKey : agentKeys) {
-                doSort(agentKeys, AgentKeyImpl.parse(agentKey), sorted, pending);
+                if (agentKey != null) {
+                    doSort(agentKeys, AgentKeyImpl.parse(agentKey), sorted, pending);
+                }
             }
         }
 
