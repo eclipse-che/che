@@ -28,8 +28,7 @@ import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.RestServiceInfo;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
-import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
-import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
+import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
@@ -39,16 +38,11 @@ import org.eclipse.che.ide.websocket.events.ConnectionOpenedHandler;
 import org.eclipse.che.ide.websocket.events.WebSocketClosedEvent;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.emptyList;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STARTED;
 import static org.eclipse.che.ide.api.machine.WsAgentState.STOPPED;
-import static org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo.Operations.WS_AGENT_BOOTING;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.IN_PROGRESS;
-import static org.eclipse.che.ide.ui.loaders.initialization.OperationInfo.Status.SUCCESS;
 
 /**
  * @author Roman Nikitenko
@@ -59,10 +53,9 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     private final EventBus            eventBus;
     private final MessageBusProvider  messageBusProvider;
-    private final InitialLoadingInfo  initialLoadingInfo;
-    private final LoaderPresenter     loader;
     private final AsyncRequestFactory asyncRequestFactory;
     private       DevMachine          devMachine;
+    private final LoaderPresenter     loader;
 
     //not used now added it for future if it we will have possibility check that service available for client call
     private final List<RestServiceInfo> availableServices;
@@ -74,22 +67,20 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     @Inject
     public WsAgentStateController(EventBus eventBus,
-                                  LoaderPresenter loader,
                                   MessageBusProvider messageBusProvider,
                                   AsyncRequestFactory asyncRequestFactory,
-                                  InitialLoadingInfo initialLoadingInfo) {
-        this.loader = loader;
+                                  LoaderPresenter loader) {
         this.eventBus = eventBus;
         this.messageBusProvider = messageBusProvider;
         this.asyncRequestFactory = asyncRequestFactory;
-        this.initialLoadingInfo = initialLoadingInfo;
         this.availableServices = new ArrayList<>();
+        this.loader = loader;
     }
 
     public void initialize(DevMachine devMachine) {
         this.devMachine = devMachine;
         this.state = STOPPED;
-        initialLoadingInfo.setOperationStatus(WS_AGENT_BOOTING.getValue(), IN_PROGRESS);
+        loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT, LoaderPresenter.Status.LOADING);
         checkHttpConnection();
     }
 
@@ -128,8 +119,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     private void started() {
         state = STARTED;
-        initialLoadingInfo.setOperationStatus(WS_AGENT_BOOTING.getValue(), SUCCESS);
-        loader.hide();
+        loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT, LoaderPresenter.Status.SUCCESS);
 
         for (AsyncCallback<MessageBus> callback : messageBusCallbacks) {
         	callback.onSuccess(messageBus);
@@ -161,7 +151,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         });
     }
 
-
     public Promise<DevMachine> getDevMachine() {
         return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<DevMachine>() {
             @Override
@@ -174,7 +163,6 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
             }
         });
     }
-
 
     /**
      * Goto checking HTTP connection via getting all registered REST Services
@@ -234,4 +222,5 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         messageBus.addOnErrorHandler(this);
         messageBus.addOnOpenHandler(this);
     }
+
 }

@@ -40,8 +40,7 @@ import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
-import org.eclipse.che.ide.ui.loaders.initialization.LoaderPresenter;
+import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
@@ -62,6 +61,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class FactoryWorkspaceComponent extends WorkspaceComponent {
+
     private final FactoryServiceClient           factoryServiceClient;
     private       String                         workspaceId;
 
@@ -73,7 +73,6 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      CoreLocalizationConstant locale,
                                      DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                      EventBus eventBus,
-                                     LoaderPresenter loader,
                                      AppContext appContext,
                                      Provider<MachineManager> machineManagerProvider,
                                      NotificationManager notificationManager,
@@ -82,15 +81,14 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
                                      DialogFactory dialogFactory,
                                      PreferencesManager preferencesManager,
                                      DtoFactory dtoFactory,
-                                     InitialLoadingInfo initialLoadingInfo,
-                                     WorkspaceEventsHandler workspaceEventsHandler) {
+                                     WorkspaceEventsHandler workspaceEventsHandler,
+                                     LoaderPresenter loader) {
         super(workspaceServiceClient,
               createWorkspacePresenter,
               startWorkspacePresenter,
               locale,
               dtoUnmarshallerFactory,
               eventBus,
-              loader,
               appContext,
               machineManagerProvider,
               notificationManager,
@@ -99,8 +97,8 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
               dialogFactory,
               preferencesManager,
               dtoFactory,
-              initialLoadingInfo,
-              workspaceEventsHandler);
+              workspaceEventsHandler,
+              loader);
         this.factoryServiceClient = factoryServiceClient;
     }
 
@@ -132,14 +130,12 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
         factoryPromise.then(new Function<Factory, Void>() {
             @Override
             public Void apply(final Factory factory) throws FunctionException {
-
                 if (appContext instanceof AppContextImpl) {
                     ((AppContextImpl)appContext).setFactory(factory);
                 }
 
                 // get workspace
                 tryStartWorkspace();
-
                 return null;
             }
         }).catchError(new Operation<PromiseError>() {
@@ -168,7 +164,6 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
         });
     }
 
-
     /**
      * Checks if specified workspace has {@link WorkspaceStatus} which is {@code RUNNING}
      */
@@ -186,7 +181,6 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
         };
     }
 
-
     /**
      * Gets {@link Promise} of workspace according to workspace ID specified in parameter.
      */
@@ -196,4 +190,3 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
     }
 
 }
-
