@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-maven-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M1-SNAPSHOT</version>
+        <version>5.0.0-M1</version>
     </parent>
     <artifactId>che-plugin-maven-generator-archetype</artifactId>
     <packaging>jar</packaging>
