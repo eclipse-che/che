@@ -72,7 +72,9 @@ public class JpaUserDao implements UserDao {
     public void create(UserImpl user) throws ConflictException, ServerException {
         requireNonNull(user, "Required non-null user");
         try {
-            user.setPassword(encryptor.encrypt(user.getPassword()));
+            if (user.getPassword() != null) {
+                user.setPassword(encryptor.encrypt(user.getPassword()));
+            }
             doCreate(user);
         } catch (DuplicateKeyException x) {
             // TODO make more concrete
