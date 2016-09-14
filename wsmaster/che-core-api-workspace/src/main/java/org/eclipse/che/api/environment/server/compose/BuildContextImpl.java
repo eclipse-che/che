@@ -8,16 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.environment.server.compose.model;
-
-import org.eclipse.che.api.core.model.workspace.compose.BuildContext;
+package org.eclipse.che.api.environment.server.compose;
 
 import java.util.Objects;
 
 /**
+ * Describes how to build image for container creation.
+ *
  * @author Alexander Garagatyi
  */
-public class BuildContextImpl implements BuildContext {
+public class BuildContextImpl {
     private String context;
     private String dockerfile;
 
@@ -28,12 +28,16 @@ public class BuildContextImpl implements BuildContext {
         this.dockerfile = dockerfile;
     }
 
-    public BuildContextImpl(BuildContext buildContext) {
+    public BuildContextImpl(BuildContextImpl buildContext) {
         this.context = buildContext.getContext();
         this.dockerfile = buildContext.getDockerfile();
     }
 
-    @Override
+    /**
+     * Build context.
+     *
+     * <p/>Can be git repository, url to Dockerfile.
+     */
     public String getContext() {
         return context;
     }
@@ -47,7 +51,11 @@ public class BuildContextImpl implements BuildContext {
         return this;
     }
 
-    @Override
+    /**
+     * Alternate Dockerfile.
+     *
+     * <p/> Needed if dockerfile has non-default name or is not placed in the root of build context.
+     */
     public String getDockerfile() {
         return dockerfile;
     }

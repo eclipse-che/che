@@ -8,11 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.environment.server.compose.model;
+package org.eclipse.che.api.environment.server.compose;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.eclipse.che.api.core.model.workspace.compose.ComposeService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +19,11 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * Description of docker compose service.
+ *
  * @author Alexander Garagatyi
  */
-public class ComposeServiceImpl implements ComposeService {
+public class ComposeServiceImpl {
     @JsonProperty("container_name")
     private String              containerName;
     private List<String>        command;
@@ -46,7 +46,7 @@ public class ComposeServiceImpl implements ComposeService {
 
     public ComposeServiceImpl() {}
 
-    public ComposeServiceImpl(ComposeService service) {
+    public ComposeServiceImpl(ComposeServiceImpl service) {
         image = service.getImage();
         if (service.getBuild() != null) {
             build = new BuildContextImpl(service.getBuild());
@@ -88,7 +88,9 @@ public class ComposeServiceImpl implements ComposeService {
         }
     }
 
-    @Override
+    /**
+     * Image for container creation.
+     */
     public String getImage() {
         return image;
     }
@@ -102,7 +104,9 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Build context for container image creation.
+     */
     public BuildContextImpl getBuild() {
         return build;
     }
@@ -116,7 +120,9 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Override the default entrypoint.
+     */
     public List<String> getEntrypoint() {
         if (entrypoint == null) {
             entrypoint = new ArrayList<>();
@@ -133,7 +139,9 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Override the default command.
+     */
     public List<String> getCommand() {
         if (command == null) {
             command = new ArrayList<>();
@@ -150,7 +158,9 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Environment variables that should be added into container.
+     */
     public Map<String, String> getEnvironment() {
         if (environment == null) {
             environment = new HashMap<>();
@@ -167,7 +177,11 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Express dependency between services.
+     *
+     * <p/> Compose engine implementation should start services in dependency order.
+     */
     public List<String> getDependsOn() {
         if (dependsOn == null) {
             dependsOn = new ArrayList<>();
@@ -185,7 +199,9 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Specify a custom container name, rather than a generated default name.
+     */
     public String getContainerName() {
         return containerName;
     }
@@ -199,7 +215,16 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Link to containers in another service.
+     *
+     * <p/> Either specify both the service name and a link alias (SERVICE:ALIAS), or just the service name.
+     * <br/> Examples:
+     * <ul>
+     *     <li>db</li>
+     *     <li>db:database</li>
+     * </ul>
+     */
     public List<String> getLinks() {
         if (links == null) {
             links = new ArrayList<>();
@@ -216,7 +241,9 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Add metadata to containers using Docker labels.
+     */
     public Map<String, String> getLabels() {
         if (labels == null) {
             labels = new HashMap<>();
@@ -233,7 +260,16 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Expose ports without publishing them to the host machine - they’ll only be accessible to linked services.
+     *
+     * <p/> Only the internal port can be specified.
+     * <br/> Examples:
+     * <ul>
+     *     <li>3000</li>
+     *     <li>8000</li>
+     * </ul>
+     */
     public List<String> getExpose() {
         if (expose == null) {
             expose = new ArrayList<>();
@@ -250,7 +286,20 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Expose ports. Either specify both ports (HOST:CONTAINER), or just the container port (a random host port will be chosen).
+     *
+     * <p/> Examples:
+     * <ul>
+     *     <li>80</li>
+     *     <li>3000</li>
+     *     <li>8080:80</li>
+     *     <li>80:8000</li>
+     *     <li>9090-9091:8080-8081</li>
+     *     <li>127.0.0.1:8001:8001</li>
+     *     <li>127.0.0.1:5000-5010:5000-5010</li>
+     * </ul>
+     */
     public List<String> getPorts() {
         if (ports == null) {
             ports = new ArrayList<>();
@@ -267,7 +316,16 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Mount paths or named volumes.
+     *
+     * <p/> Examples:
+     * <ul>
+     *     <li>/var/lib/mysql</li>
+     *     <li>/opt/data:/var/lib/mysql</li>
+     *     <li>data-volume:/var/lib/mysql</li>
+     * </ul>
+     */
     public List<String> getVolumes() {
         if (volumes == null) {
             volumes = new ArrayList<>();
@@ -284,7 +342,18 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Mount all of the volumes from another service.
+     *
+     * <p/> Optionally access level can be specified: read-only access (ro) or read-write (rw).
+     * If no access level is specified, then read-write will be used.
+     * <p/> Examples:
+     * <ul>
+     *     <li>service_name</li>
+     *     <li>service_name:ro</li>
+     *     <li>service_name:rw</li>
+     * </ul>
+     */
     public List<String> getVolumesFrom() {
         if (volumesFrom == null) {
             volumesFrom = new ArrayList<>();
@@ -301,7 +370,9 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * Memory limit for the container of service, specified in bytes.
+     */
     public Long getMemLimit() {
         return memLimit;
     }
@@ -315,7 +386,9 @@ public class ComposeServiceImpl implements ComposeService {
         return this;
     }
 
-    @Override
+    /**
+     * List of networks that should be connected to service.
+     */
     public List<String> getNetworks() {
         if (networks == null) {
             networks = new ArrayList<>();

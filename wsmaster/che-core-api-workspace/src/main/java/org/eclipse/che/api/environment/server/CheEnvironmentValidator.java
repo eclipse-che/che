@@ -18,9 +18,8 @@ import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
-import org.eclipse.che.api.core.model.workspace.compose.ComposeService;
-import org.eclipse.che.api.environment.server.compose.ComposeServicesStartStrategy;
-import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -50,7 +49,7 @@ public class CheEnvironmentValidator {
     private static final Pattern SERVER_PORT          = Pattern.compile("^[1-9]+[0-9]*(/(tcp|udp))?$");
     private static final Pattern SERVER_PROTOCOL      = Pattern.compile("^[a-z][a-z0-9-+.]*$");
 
-    // Compose syntax patterns
+    // CheService syntax patterns
     /**
      * Examples:
      * <ul>
@@ -77,17 +76,18 @@ public class CheEnvironmentValidator {
 
     private final MachineInstanceProviders     machineInstanceProviders;
     private final EnvironmentParser            environmentParser;
-    private final ComposeServicesStartStrategy startStrategy;
+    private final DefaultServicesStartStrategy startStrategy;
 
     @Inject
     public CheEnvironmentValidator(MachineInstanceProviders machineInstanceProviders,
                                    EnvironmentParser environmentParser,
-                                   ComposeServicesStartStrategy startStrategy) {
+                                   DefaultServicesStartStrategy startStrategy) {
         this.machineInstanceProviders = machineInstanceProviders;
         this.environmentParser = environmentParser;
         this.startStrategy = startStrategy;
     }
 
+    // TODO fix error messages: fields mentioning, usage of service term
     public void validate(String envName, Environment env) throws IllegalArgumentException,
                                                                  ServerException {
         checkArgument(!isNullOrEmpty(envName),
@@ -104,9 +104,9 @@ public class CheEnvironmentValidator {
                       "Recipe of environment '%s' contains mutually exclusive fields location and content",
                       envName);
 
-        ComposeEnvironmentImpl composeEnvironment;
+        CheServicesEnvironmentImpl cheServicesEnvironment;
         try {
-            composeEnvironment = environmentParser.parse(env);
+            cheServicesEnvironment = environmentParser.parse(env);
         } catch (ServerException e) {
             throw new ServerException(format("Parsing of recipe of environment '%s' failed. Error: %s",
                                              envName, e.getLocalizedMessage()));
@@ -115,7 +115,7 @@ public class CheEnvironmentValidator {
                                                       envName, e.getLocalizedMessage()));
         }
 
-        checkArgument(composeEnvironment.getServices() != null && !composeEnvironment.getServices().isEmpty(),
+        checkArgument(cheServicesEnvironment.getServices() != null && !cheServicesEnvironment.getServices().isEmpty(),
                       "Environment '%s' should contain at least 1 machine",
                       envName);
 
@@ -126,8 +126,8 @@ public class CheEnvironmentValidator {
         List<String> missingServices = env.getMachines()
                                           .keySet()
                                           .stream()
-                                          .filter(machineName -> !composeEnvironment.getServices()
-                                                                                    .containsKey(machineName))
+                                          .filter(machineName -> !cheServicesEnvironment.getServices()
+                                                                                        .containsKey(machineName))
                                           .collect(toList());
         checkArgument(missingServices.isEmpty(),
                       "Environment '%s' contains machines that are missing in environment recipe: %s",
@@ -147,10 +147,10 @@ public class CheEnvironmentValidator {
                       envName, devMachines.size(), Joiner.on(", ").join(devMachines));
 
         // needed to validate different kinds of dependencies in services to other services
-        Set<String> servicesNames = composeEnvironment.getServices().keySet();
+        Set<String> servicesNames = cheServicesEnvironment.getServices().keySet();
 
-        composeEnvironment.getServices()
-                          .forEach((serviceName, service) -> validateMachine(serviceName,
+        cheServicesEnvironment.getServices()
+                              .forEach((serviceName, service) -> validateMachine(serviceName,
                                                                              env.getMachines().get(serviceName),
                                                                              service,
                                                                              envName,
@@ -158,7 +158,7 @@ public class CheEnvironmentValidator {
 
         // check that order can be resolved
         try {
-            startStrategy.order(composeEnvironment);
+            startStrategy.order(cheServicesEnvironment);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(
                     format("Start order of machine in environment '%s' is not resolvable. Error: %s",
@@ -168,18 +168,22 @@ public class CheEnvironmentValidator {
 
     protected void validateMachine(String machineName,
                                    @Nullable ExtendedMachine extendedMachine,
-                                   ComposeService service,
+                                   CheServiceImpl service,
                                    String envName,
                                    Set<String> servicesNames) throws IllegalArgumentException {
         checkArgument(MACHINE_NAME_PATTERN.matcher(machineName).matches(),
                       "Name of machine '%s' in environment '%s' is invalid",
                       machineName, envName);
 
-        // TODO remove workaround with dockerfile content in context.dockerfile
         checkArgument(!isNullOrEmpty(service.getImage()) ||
                       (service.getBuild() != null && (!isNullOrEmpty(service.getBuild().getContext()) ||
-                                                      !isNullOrEmpty(service.getBuild().getDockerfile()))),
+                                                      !isNullOrEmpty(service.getBuild().getDockerfileContent()))),
                       "Field 'image' or 'build.context' is required in machine '%s' in environment '%s'",
+                      machineName, envName);
+
+        checkArgument(service.getBuild() == null || (isNullOrEmpty(service.getBuild().getContext()) !=
+                                                     isNullOrEmpty(service.getBuild().getDockerfileContent())),
+                      "Machine '%s' in environment '%s' contains mutually exclusive dockerfile content and build context.",
                       machineName, envName);
 
         if (extendedMachine != null) {

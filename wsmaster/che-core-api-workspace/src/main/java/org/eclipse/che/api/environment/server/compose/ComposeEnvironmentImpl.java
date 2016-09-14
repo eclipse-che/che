@@ -8,9 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.environment.server.compose.model;
-
-import org.eclipse.che.api.core.model.workspace.compose.ComposeEnvironment;
+package org.eclipse.che.api.environment.server.compose;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,15 +16,17 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
+ * Description of docker compose services file.
+ *
  * @author Alexander Garagatyi
  */
-public class ComposeEnvironmentImpl implements ComposeEnvironment {
+public class ComposeEnvironmentImpl {
     private String                          version;
     private Map<String, ComposeServiceImpl> services;
 
     public ComposeEnvironmentImpl() {}
 
-    public ComposeEnvironmentImpl(ComposeEnvironment environment) {
+    public ComposeEnvironmentImpl(ComposeEnvironmentImpl environment) {
         version = environment.getVersion();
         if (environment.getServices() != null) {
             services = environment.getServices()
@@ -37,7 +37,9 @@ public class ComposeEnvironmentImpl implements ComposeEnvironment {
         }
     }
 
-    @Override
+    /**
+     * Version of compose syntax.
+     */
     public String getVersion() {
         return version;
     }
@@ -51,7 +53,9 @@ public class ComposeEnvironmentImpl implements ComposeEnvironment {
         return this;
     }
 
-    @Override
+    /**
+     * Mapping of compose services names to services configuration.
+     */
     public Map<String, ComposeServiceImpl> getServices() {
         if (services == null) {
             services = new HashMap<>();
