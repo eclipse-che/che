@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.autocomplete;
 
+import com.google.gwt.resources.client.CssResource;
+
 import org.eclipse.che.ide.ui.Popup;
 import org.eclipse.che.ide.ui.list.SimpleList;
-import com.google.gwt.resources.client.CssResource;
 
 /**
  * Resource that defines the appearance of autocomplete popups.
@@ -33,5 +34,7 @@ public interface AutoCompleteResources extends SimpleList.Resources, Popup.Resou
         String container();
 
         String items();
+
+        String noborder();
     }
 }

@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>4.7.0-RC2-SNAPSHOT</version>
+        <version>5.0.0-M2-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>4.7.0-RC2-SNAPSHOT</version>
+    <version>5.0.0-M2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -28,6 +28,7 @@
         <module>wsmaster</module>
         <module>wsagent</module>
         <module>ide</module>
+        <module>exec-agent</module>
         <module>plugins</module>
         <module>samples</module>
         <module>dashboard</module>
@@ -40,8 +41,8 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.lib.version>4.7.0-RC2-SNAPSHOT</che.lib.version>
-        <che.version>4.7.0-RC2-SNAPSHOT</che.version>
+        <che.lib.version>5.0.0-M2-SNAPSHOT</che.lib.version>
+        <che.version>5.0.0-M2-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -66,7 +67,7 @@
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-wsagent-server</artifactId>
                 <version>${che.version}</version>
-                <type>zip</type>
+                <type>tar.gz</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
@@ -79,6 +80,30 @@
                 <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>org.eclipse.che.exec-agent</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>linux_amd64</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
+                <artifactId>org.eclipse.che.exec-agent</artifactId>
+                <version>${project.version}</version>
+                <type>tar.gz</type>
+                <classifier>linux_arm7</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-agent</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-agent-shared</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -314,20 +339,6 @@
                 <artifactId>che-tomcat8-slf4j-logback</artifactId>
                 <version>${che.lib.version}</version>
                 <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>org.eclipse.che.exec-agent</artifactId>
-                <version>${che.lib.version}</version>
-                <type>zip</type>
-                <classifier>linux_amd64</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>org.eclipse.che.exec-agent</artifactId>
-                <version>${che.lib.version}</version>
-                <type>zip</type>
-                <classifier>linux_arm7</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.lib</groupId>
@@ -678,6 +689,21 @@
             <dependency>
                 <groupId>org.eclipse.che.sample</groupId>
                 <artifactId>che-sample-plugin-json-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-wizard-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-wizard-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-wizard-shared</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

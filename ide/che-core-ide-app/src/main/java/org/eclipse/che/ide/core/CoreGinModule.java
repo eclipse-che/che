@@ -44,8 +44,10 @@ import org.eclipse.che.ide.api.dialogs.MessageDialog;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.event.ng.ClientServerEventService;
-import org.eclipse.che.ide.api.event.ng.FileUpdateEventRequestReceiver;
+import org.eclipse.che.ide.api.event.ng.EditorFileStatusNotificationReceiver;
+import org.eclipse.che.ide.api.event.ng.FileOpenCloseEventListener;
 import org.eclipse.che.ide.api.event.ng.JsonRpcWebSocketAgentEventListener;
+import org.eclipse.che.ide.api.event.ng.ProjectTreeStatusNotificationReceiver;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.extension.ExtensionRegistry;
 import org.eclipse.che.ide.api.factory.FactoryServiceClient;
@@ -56,10 +58,13 @@ import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
@@ -110,6 +115,11 @@ import org.eclipse.che.ide.client.StartUpActionsProcessor;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.EditorRegistryImpl;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFileNameProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFilePathProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFileRelativePathProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentProjectNameProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentProjectTypeProvider;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizerImpl;
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSychronizationFactory;
@@ -135,6 +145,7 @@ import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestTransmitter;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseDispatcher;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseTransmitter;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
+import org.eclipse.che.ide.machine.CommandPropertyValueProviderRegistryImpl;
 import org.eclipse.che.ide.menu.MainMenuView;
 import org.eclipse.che.ide.menu.MainMenuViewImpl;
 import org.eclipse.che.ide.menu.StatusPanelGroupView;
@@ -162,6 +173,11 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerViewImpl;
 import org.eclipse.che.ide.part.explorer.project.RevealNodesPersistenceComponent;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileNameProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFilePathProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileRelativePathProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectNameProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectTypeProvider;
 import org.eclipse.che.ide.preferences.PreferencesComponent;
 import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 import org.eclipse.che.ide.preferences.PreferencesView;
@@ -222,9 +238,16 @@ import org.eclipse.che.ide.ui.dialogs.message.MessageDialogViewImpl;
 import org.eclipse.che.ide.ui.dropdown.DropDownListFactory;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidgetImpl;
-import org.eclipse.che.ide.ui.loaders.initialization.LoaderView;
-import org.eclipse.che.ide.ui.loaders.initialization.LoaderViewImpl;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
+import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelPresenter;
+import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelView;
+import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelViewFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelViewImpl;
+import org.eclipse.che.ide.ui.multisplitpanel.tab.Tab;
+import org.eclipse.che.ide.ui.multisplitpanel.tab.TabItemFactory;
+import org.eclipse.che.ide.ui.multisplitpanel.tab.TabWidget;
 import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.ui.toolbar.ToolbarView;
@@ -238,9 +261,9 @@ import org.eclipse.che.ide.upload.folder.UploadFolderFromZipViewImpl;
 import org.eclipse.che.ide.util.executor.UserActivityManager;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageReceiver;
 import org.eclipse.che.ide.websocket.ng.WebSocketMessageTransmitter;
+import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketMessageTransmitter;
 import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketTransmissionValidator;
-import org.eclipse.che.ide.websocket.ng.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.ide.websocket.ng.impl.DelayableWebSocket;
 import org.eclipse.che.ide.websocket.ng.impl.SessionWebSocketInitializer;
 import org.eclipse.che.ide.websocket.ng.impl.WebSocket;
@@ -260,6 +283,7 @@ import org.eclipse.che.ide.workspace.WorkspaceViewImpl;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidget;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidgetImpl;
+import org.eclipse.che.ide.workspace.macro.WorkspaceNameMacroProvider;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
 import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
@@ -296,6 +320,8 @@ public class CoreGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(ResourceNode.NodeFactory.class));
 
         bind(AppContext.class).to(AppContextImpl.class);
+
+        install(new GinFactoryModuleBuilder().build(PopupLoaderFactory.class));
 
         install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
         install(new GinFactoryModuleBuilder().implement(PartStackView.class, PartStackViewImpl.class).build(PartStackViewFactory.class));
@@ -340,12 +366,14 @@ public class CoreGinModule extends AbstractGinModule {
     }
 
     private void configureClientServerEventService() {
+        bind(FileOpenCloseEventListener.class).asEagerSingleton();
         bind(ClientServerEventService.class).asEagerSingleton();
 
         GinMapBinder<String, JsonRpcRequestReceiver> requestReceivers =
                 GinMapBinder.newMapBinder(binder(), String.class, JsonRpcRequestReceiver.class);
 
-        requestReceivers.addBinding("event:file-updated").to(FileUpdateEventRequestReceiver.class);
+        requestReceivers.addBinding("event:file-in-vfs-status-changed").to(EditorFileStatusNotificationReceiver.class);
+        requestReceivers.addBinding("event:project-tree-status-changed").to(ProjectTreeStatusNotificationReceiver.class);
     }
 
     private void configureJsonRpc() {
@@ -454,6 +482,21 @@ public class CoreGinModule extends AbstractGinModule {
 
         GinMultibinder<NodeInterceptor> nodeInterceptors = GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
         nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
+
+        // Machine
+        bind(CommandPropertyValueProviderRegistry.class).to(CommandPropertyValueProviderRegistryImpl.class).in(Singleton.class);
+        GinMultibinder<CommandPropertyValueProvider> macroProviders = GinMultibinder.newSetBinder(binder(), CommandPropertyValueProvider.class);
+        macroProviders.addBinding().to(EditorCurrentFileNameProvider.class);
+        macroProviders.addBinding().to(EditorCurrentFilePathProvider.class);
+        macroProviders.addBinding().to(EditorCurrentFileRelativePathProvider.class);
+        macroProviders.addBinding().to(EditorCurrentProjectNameProvider.class);
+        macroProviders.addBinding().to(EditorCurrentProjectTypeProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentFileNameProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentFilePathProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentFileRelativePathProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentProjectNameProvider.class);
+        macroProviders.addBinding().to(ExplorerCurrentProjectTypeProvider.class);
+        macroProviders.addBinding().to(WorkspaceNameMacroProvider.class);
     }
 
     /** Configure Core UI components, resources and views */
@@ -502,6 +545,14 @@ public class CoreGinModule extends AbstractGinModule {
                                              .implement(InputDialog.class, InputDialogPresenter.class)
                                              .implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
                                              .build(DialogFactory.class));
+
+        install(new GinFactoryModuleBuilder().implement(SubPanelView.class, SubPanelViewImpl.class)
+                                             .build(SubPanelViewFactory.class));
+        install(new GinFactoryModuleBuilder().implement(SubPanel.class, SubPanelPresenter.class)
+                                             .build(SubPanelFactory.class));
+        install(new GinFactoryModuleBuilder().implement(Tab.class, TabWidget.class)
+                                             .build(TabItemFactory.class));
+
         install(new GinFactoryModuleBuilder().implement(ConsoleButton.class, ConsoleButtonImpl.class)
                                              .build(ConsoleButtonFactory.class));
         install(new GinFactoryModuleBuilder().implement(ProjectNotificationSubscriber.class,
@@ -518,8 +569,6 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ExtensionManagerView.class).to(ExtensionManagerViewImpl.class).in(Singleton.class);
         bind(AppearanceView.class).to(AppearanceViewImpl.class).in(Singleton.class);
         bind(FindActionView.class).to(FindActionViewImpl.class).in(Singleton.class);
-
-        bind(LoaderView.class).to(LoaderViewImpl.class).in(Singleton.class);
 
         bind(HotKeysDialogView.class).to(HotKeysDialogViewImpl.class).in(Singleton.class);
 

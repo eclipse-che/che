@@ -11,24 +11,25 @@
 package org.eclipse.che.ide.editor.synchronization;
 
 import com.google.web.bindery.event.shared.Event;
+import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.EditorWithAutoSave;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.document.DocumentEventBus;
 import org.eclipse.che.ide.api.editor.document.DocumentHandle;
+import org.eclipse.che.ide.api.editor.document.DocumentStorage;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -47,6 +48,8 @@ import static org.mockito.Mockito.withSettings;
 public class EditorGroupSynchronizationImplTest {
 
     @Mock
+    private EventBus            eventBus;
+    @Mock
     private EditorAgent         editorAgent;
     @Mock
     private Document            document;
@@ -55,21 +58,27 @@ public class EditorGroupSynchronizationImplTest {
     @Mock
     private DocumentEventBus    documentEventBus;
     @Mock
+    private DocumentStorage     documentStorage;
+    @Mock
+    private NotificationManager notificationManager;
+    @Mock
     private HandlerRegistration handlerRegistration;
     @Mock
     private DocumentChangeEvent documentChangeEvent;
 
     private EditorPartPresenter            activeEditor;
+    private EditorPartPresenter            openedEditor1;
+    private EditorPartPresenter            openedEditor2;
     private EditorGroupSynchronizationImpl editorGroupSynchronization;
 
     @Before
     public void init() {
-        activeEditor = mock(EditorPartPresenter.class, withSettings().extraInterfaces(TextEditor.class));
-        EditorPartPresenter openedEditor1 = mock(EditorPartPresenter.class, withSettings().extraInterfaces(TextEditor.class));
-        EditorPartPresenter openedEditor2 = mock(EditorPartPresenter.class, withSettings().extraInterfaces(TextEditor.class));
-        List<EditorPartPresenter> openedEditors = new ArrayList<>(2);
-        openedEditors.add(openedEditor1);
-        openedEditors.add(openedEditor2);
+        activeEditor = mock(EditorPartPresenter.class, withSettings().extraInterfaces(TextEditor.class, EditorWithAutoSave.class));
+        openedEditor1 = mock(EditorPartPresenter.class, withSettings().extraInterfaces(TextEditor.class, EditorWithAutoSave.class));
+        openedEditor2 = mock(EditorPartPresenter.class, withSettings().extraInterfaces(TextEditor.class, EditorWithAutoSave.class));
+
+        when(((EditorWithAutoSave)openedEditor1).isAutoSaveEnabled()).thenReturn(true);
+        when(((EditorWithAutoSave)openedEditor2).isAutoSaveEnabled()).thenReturn(true);
 
         when(editorAgent.getActiveEditor()).thenReturn(activeEditor);
         when(document.getDocumentHandle()).thenReturn(documentHandle);
@@ -82,7 +91,12 @@ public class EditorGroupSynchronizationImplTest {
 
         when(documentEventBus.addHandler((Event.Type<Object>)anyObject(), anyObject())).thenReturn(handlerRegistration);
 
-        editorGroupSynchronization = new EditorGroupSynchronizationImpl(editorAgent, openedEditors);
+        editorGroupSynchronization = new EditorGroupSynchronizationImpl(eventBus, documentStorage, notificationManager);
+
+        editorGroupSynchronization.addEditor(activeEditor);
+        editorGroupSynchronization.addEditor(openedEditor1);
+        editorGroupSynchronization.addEditor(openedEditor2);
+        editorGroupSynchronization.onActiveEditorChanged(activeEditor);
     }
 
     @Test
@@ -109,7 +123,7 @@ public class EditorGroupSynchronizationImplTest {
     public void shouldRemoveAllEditorsFromGroup() {
         editorGroupSynchronization.unInstall();
 
-        verify(handlerRegistration, times(2)).removeHandler();
+        verify(handlerRegistration, times(3)).removeHandler();
     }
 
     @Test
@@ -138,5 +152,14 @@ public class EditorGroupSynchronizationImplTest {
         editorGroupSynchronization.onDocumentChange(documentChangeEvent);
 
         verify(document, times(2)).replace(eq(offset), eq(removeCharCount), eq(text));
+    }
+
+    @Test
+    public void shouldResolveAutoSave() {
+        // AutoSave for active editor should always be enabled,
+        // but AutoSave for other editors with the same path should be disabled
+        verify(((EditorWithAutoSave)activeEditor)).enableAutoSave();
+        verify(((EditorWithAutoSave)openedEditor1)).disableAutoSave();
+        verify(((EditorWithAutoSave)openedEditor2)).disableAutoSave();
     }
 }

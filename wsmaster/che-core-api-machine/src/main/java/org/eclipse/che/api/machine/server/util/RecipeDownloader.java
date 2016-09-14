@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.util;
 
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.machine.server.exception.MachineException;
@@ -79,6 +80,44 @@ public class RecipeDownloader {
         } catch (IOException | IllegalArgumentException e) {
             throw new MachineException(format("Failed to download recipe for machine %s. Recipe url %s. Error: %s",
                                               machineConfig.getName(),
+                                              location,
+                                              e.getLocalizedMessage()));
+        } finally {
+            if (file != null && !file.delete()) {
+                LOG.error(String.format("Removal of recipe file %s failed.", file.getAbsolutePath()));
+            }
+        }
+    }
+
+    /**
+     * Downloads recipe by location.
+     *
+     * @param location
+     *         location of recipe
+     * @return recipe with set content and type
+     * @throws ServerException
+     *         if any error occurs
+     */
+    public String getRecipe(String location) throws ServerException {
+        URL recipeUrl;
+        File file = null;
+        try {
+            UriBuilder targetUriBuilder = UriBuilder.fromUri(location);
+            // add user token to be able to download user's private recipe
+            final String apiEndPointHost = apiEndpoint.getHost();
+            final String host = targetUriBuilder.build().getHost();
+            if (apiEndPointHost.equals(host)) {
+                if (EnvironmentContext.getCurrent().getSubject() != null
+                    && EnvironmentContext.getCurrent().getSubject().getToken() != null) {
+                    targetUriBuilder.queryParam("token", EnvironmentContext.getCurrent().getSubject().getToken());
+                }
+            }
+            recipeUrl = targetUriBuilder.build().toURL();
+            file = IoUtil.downloadFileWithRedirect(null, "recipe", null, recipeUrl);
+
+            return IoUtil.readAndCloseQuietly(new FileInputStream(file));
+        } catch (IOException | IllegalArgumentException e) {
+            throw new MachineException(format("Failed to download recipe %s. Error: %s",
                                               location,
                                               e.getLocalizedMessage()));
         } finally {

@@ -84,7 +84,7 @@ public class DevelopmentCategoryPresenter implements CategoryPage, TargetManager
         target.setType(machine.getConfig().getType());
         target.setSourceType(machine.getConfig().getSource().getType());
         target.setSourceContent(machine.getConfig().getSource().getContent());
-        target.setSourceUrl(machine.getConfig().getSource().getLocation());
+        target.setSource(machine.getConfig().getSource().getLocation());
 
         return true;
     }

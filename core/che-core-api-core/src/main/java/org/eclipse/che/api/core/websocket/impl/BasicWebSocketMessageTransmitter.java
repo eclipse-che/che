@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.websocket.Session;
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -47,7 +48,7 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
     }
 
     @Override
-    public void transmit(String protocol, String message, Integer endpointId) {
+    public synchronized void transmit(String protocol, String message, Integer endpointId) {
         final WebSocketTransmission transmission = newDto(WebSocketTransmission.class).withProtocol(protocol).withMessage(message);
         validator.validate(transmission);
 
@@ -60,12 +61,16 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
         } else {
             LOG.debug("Session registered and open, sending message");
 
-            sessionOptional.get().getAsyncRemote().sendText(transmission.toString());
+            try {
+                sessionOptional.get().getBasicRemote().sendText(transmission.toString());
+            } catch (IOException e) {
+                LOG.error("Error while trying to send a message to a basic websocket remote endpoint", e);
+            }
         }
     }
 
     @Override
-    public void transmit(String protocol, String message) {
+    public synchronized void transmit(String protocol, String message) {
         final WebSocketTransmission transmission = newDto(WebSocketTransmission.class).withProtocol(protocol).withMessage(message);
         validator.validate(transmission);
 
@@ -74,8 +79,14 @@ public class BasicWebSocketMessageTransmitter implements WebSocketMessageTransmi
         registry.getSessions()
                 .stream()
                 .filter(Session::isOpen)
-                .map(Session::getAsyncRemote)
-                .forEach(it -> it.sendText(transmission.toString()));
+                .map(Session::getBasicRemote)
+                .forEach(it -> {
+                    try {
+                        it.sendText(transmission.toString());
+                    } catch (IOException e) {
+                        LOG.error("Error while trying to send a message to a basic websocket remote endpoint", e);
+                    }
+                });
     }
 
 }

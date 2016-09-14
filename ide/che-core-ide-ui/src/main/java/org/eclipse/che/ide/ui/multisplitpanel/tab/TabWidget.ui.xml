@@ -1,0 +1,207 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:svg="urn:import:org.vectomatic.dom.svg.ui">
+
+    <ui:with field="resources" type="org.eclipse.che.ide.api.parts.PartStackUIResources"/>
+
+    <ui:style>
+
+        @eval editorPanelBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.editorPanelBackgroundColor();
+        @eval tabBorderColor org.eclipse.che.ide.api.theme.Style.theme.tabBorderColor();
+        @eval tabTextColor org.eclipse.che.ide.api.theme.Style.theme.tabTextColor();
+        @eval hoveredTabTextColor org.eclipse.che.ide.api.theme.Style.theme.hoveredTabTextColor();
+        @eval activeTabTextColor org.eclipse.che.ide.api.theme.Style.theme.activeTabTextColor();
+        @eval editorTabIconColor org.eclipse.che.ide.api.theme.Style.getEditorTabIconColor();
+        @eval activeEditorTabBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.activeEditorTabBackgroundColor();
+        @eval focusedEditorTabBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.focusedEditorTabBackgroundColor();
+        @eval focusedEditorTabBorderBottomColor org.eclipse.che.ide.api.theme.Style.theme.focusedEditorTabBorderBottomColor();
+        @eval editorReadonlyTabBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.editorReadonlyTabBackgroundColor();
+        @eval activeEditorReadonlyTabBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.activeEditorReadonlyTabBackgroundColor();
+        @eval editorTabPinBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.editorTabPinBackgroundColor();
+        @eval editorTabPinDropShadow org.eclipse.che.ide.api.theme.Style.theme.editorTabPinDropShadow();
+
+        .mainPanel {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            float: left;
+            border-bottom: 1px solid transparent;
+            height: 22px;
+            background: transparent;
+            color: tabTextColor;
+            cursor: default;
+            margin-bottom: 1px;
+
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+
+            -webkit-transition: all 0.3s ease-in-out,
+            fill 0.3s ease-in-out,
+            stroke 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out,
+            fill 0.3s ease-in-out,
+            stroke 0.3s ease-in-out;
+        }
+
+        .iconPanel {
+            float: left;
+            width: 26px;
+            height: 22px;
+            overflow: hidden;
+        }
+
+        .iconPanel svg {
+            transform-origin: 0px 0px 0px;
+            position: absolute;
+            margin-left: 8px;
+            margin-top: 4px;
+            width: 14px;
+            height: 14px;
+        }
+
+        .titlePanel {
+            float: left;
+            height: 22px;
+            font-size: 11px;
+            font-family: "Helvetica Neue", "Myriad Pro", arial, Verdana, Verdana, sans-serif;
+            line-height: 22px;
+            max-width: 250px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .closeTabPanel {
+            float: left;
+            width: 22px;
+            height: 22px;
+            overflow: hidden;
+            border-right: 1px solid tabBorderColor;
+            position: relative;
+        }
+
+        .closeTabPanel .closeTabButton {
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        .closeTabPanel svg {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            left: 4px;
+            top: 4px;
+            transform-origin: 0px 0px 0px;
+            pointer-events: none;
+            display: none;
+            opacity: 0.8;
+            -webkit-transition: opacity 0.1s ease-in-out;
+            transition: opacity 0.1s ease-in-out;
+        }
+
+        .closeTabPanel .closeTabButton:HOVER svg {
+            opacity: 1;
+        }
+
+        .closeTabPanel svg g,
+        .closeTabPanel svg path {
+            fill: editorTabIconColor;
+        }
+
+        .mainPanel:HOVER {
+            background-color: editorPanelBackgroundColor;
+            color: hoveredTabTextColor;
+        }
+
+        .mainPanel:HOVER .closeTabPanel svg {
+            display: block;
+        }
+
+        .mainPanel[active] {
+            background-color: activeEditorTabBackgroundColor;
+        }
+
+        .mainPanel[active] .closeTabPanel svg {
+            display: block;
+        }
+
+        .mainPanel[pinned] .iconPanel::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            -moz-border-radius: 1px;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+            background-color: editorTabPinBackgroundColor;
+            position: absolute;
+            top: 4px;
+            margin-left: 7px;
+            z-index: 1;
+            -webkit-filter: editorTabPinDropShadow;
+            filter: editorTabPinDropShadow;
+            -webkit-animation: pin 0.3s;
+            animation: pin 0.3s;
+            -webkit-transition: all 0.3s ease-in-out,
+            fill 0.3s ease-in-out,
+            stroke 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out,
+            fill 0.3s ease-in-out,
+            stroke 0.3s ease-in-out;
+        }
+
+        @-webkit-keyframes pin {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes pin {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .mainPanel[focused] {
+            background-color: focusedEditorTabBackgroundColor;
+            border-bottom-color: focusedEditorTabBorderBottomColor;
+            color: activeTabTextColor;
+        }
+
+        .mainPanel[focused] .closeTabPanel svg {
+            display: block;
+        }
+    </ui:style>
+
+    <g:FlowPanel addStyleNames="{style.mainPanel}">
+        <g:SimplePanel ui:field="iconPanel" styleName="{style.iconPanel}"/>
+        <g:Label ui:field="titleLabel" styleName="{style.titlePanel}"/>
+        <g:FlowPanel styleName="{style.closeTabPanel}">
+            <g:FlowPanel ui:field="closeButton" styleName="{style.closeTabButton}">
+                <svg:SVGImage resource="{resources.closeIcon}"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+
+</ui:UiBinder>

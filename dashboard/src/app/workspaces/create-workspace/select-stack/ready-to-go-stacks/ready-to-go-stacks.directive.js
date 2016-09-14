@@ -34,7 +34,7 @@ export class ReadyToGoStacks {
     this.restrict='E';
     this.templateUrl = 'app/workspaces/create-workspace/select-stack/ready-to-go-stacks/ready-to-go-stacks.html';
 
-    this.controller = 'ReadyToGoStacksCtrl';
+    this.controller = 'ReadyToGoStacksController';
     this.controllerAs = 'readyToGoStacksCtrl';
     this.bindToController = true;
 

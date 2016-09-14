@@ -15,7 +15,7 @@
  * @author Florent Benoit
  * @author Oleksii Orel
  */
-export class ReadyToGoStacksCtrl {
+export class ReadyToGoStacksController {
 
   /**
    * Default constructor that is using resource
@@ -70,7 +70,7 @@ export class ReadyToGoStacksCtrl {
    * Gets privileged stack position
    */
   getPrivilegedSortPosition(item) {
-    let privilegedNames = ['Java', 'Blank'];
+    let privilegedNames = ['Java', 'Java-MySQL', 'Blank'];
 
     let sortPos = privilegedNames.indexOf(item.name);
     if (sortPos > -1) {

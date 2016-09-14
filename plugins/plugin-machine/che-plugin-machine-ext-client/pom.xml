@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-machine-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.7.0-RC2-SNAPSHOT</version>
+        <version>5.0.0-M2-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-machine-ext-client</artifactId>
     <packaging>jar</packaging>
@@ -48,6 +48,12 @@
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
+            <artifactId>org.eclipse.che.exec-agent</artifactId>
+            <type>tar.gz</type>
+            <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -92,12 +98,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>che-websocket-terminal</artifactId>
-            <type>zip</type>
-            <classifier>linux_amd64</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -178,7 +178,7 @@
                         <id>analyze</id>
                         <configuration>
                             <ignoredDependencies>
-                                <ignoredDependency>org.eclipse.che:org.eclipse.che.exec-agent:zip</ignoredDependency>
+                                <ignoredDependency>org.eclipse.che:org.eclipse.che.exec-agent:tar.gz</ignoredDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>
@@ -191,11 +191,11 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.eclipse.che.lib</groupId>
-                                    <artifactId>che-websocket-terminal</artifactId>
-                                    <version>${che.websocket.terminal.version}</version>
+                                    <groupId>org.eclipse.che</groupId>
+                                    <artifactId>org.eclipse.che.exec-agent</artifactId>
+                                    <version>${project.version}</version>
                                     <classifier>linux_amd64</classifier>
-                                    <type>zip</type>
+                                    <type>tar.gz</type>
                                     <overWrite>false</overWrite>
                                 </artifactItem>
                             </artifactItems>

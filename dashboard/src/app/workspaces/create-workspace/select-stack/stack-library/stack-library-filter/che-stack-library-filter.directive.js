@@ -31,7 +31,7 @@ export class CheStackLibraryFilter {
     this.restrict = 'E';
     this.templateUrl = 'app/workspaces/create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.html';
 
-    this.controller = 'CheStackLibraryFilterCtrl';
+    this.controller = 'CheStackLibraryFilterController';
     this.controllerAs = 'cheStackLibraryFilterCtrl';
 
     // we require ngModel as we want to use it inside our directive

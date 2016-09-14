@@ -25,7 +25,7 @@ export class WorkspaceSelectStack {
     this.templateUrl = 'app/workspaces/create-workspace/select-stack/workspace-select-stack.html';
     this.replace = true;
     this.bindToController = true;
-    this.controller = 'WorkspaceSelectStackCtrl';
+    this.controller = 'WorkspaceSelectStackController';
     this.controllerAs = 'workspaceSelectStackCtrl';
 
     // scope values
@@ -35,7 +35,8 @@ export class WorkspaceSelectStack {
       stack: '=cheStack',
       onStackChange: '&cheStackChange',
       recipeScript: '=cheRecipeScript',
-      recipeUrl: '=cheRecipeUrl'
+      recipeUrl: '=cheRecipeUrl',
+      recipeFormat: '=cheRecipeFormat'
     };
 
   }

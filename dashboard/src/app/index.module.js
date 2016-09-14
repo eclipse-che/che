@@ -41,17 +41,16 @@ initModule.config(['$routeProvider', ($routeProvider) => {
   $routeProvider.accessWhen = (path, route) => {
     route.resolve || (route.resolve = {});
     route.resolve.app = ['cheBranding', '$q', 'chePreferences', (cheBranding, $q, chePreferences) => {
-      var deferred = $q.defer();
-        let preferences = chePreferences.getPreferences();
-        if (preferences && preferences.$resolved) {
+      let deferred = $q.defer();
+      if (chePreferences.getPreferences()) {
+        deferred.resolve();
+      } else {
+        chePreferences.fetchPreferences().then(() => {
           deferred.resolve();
-        } else {
-          preferences.$promise.then(() => {
-            deferred.resolve();
-          }, (error) => {
-            deferred.reject(error);
-          });
-        }
+        }, (error) => {
+          deferred.reject(error);
+        });
+      }
 
       return deferred.promise;
     }];
@@ -62,17 +61,16 @@ initModule.config(['$routeProvider', ($routeProvider) => {
   $routeProvider.accessOtherWise = (route) => {
     route.resolve || (route.resolve = {});
     route.resolve.app = ['$q', 'chePreferences', ($q, chePreferences) => {
-      var deferred = $q.defer();
-        let preferences = chePreferences.getPreferences();
-        if (preferences && preferences.$resolved) {
+      let deferred = $q.defer();
+      if (chePreferences.getPreferences()) {
+        deferred.resolve();
+      } else {
+        chePreferences.fetchPreferences().then(() => {
           deferred.resolve();
-        } else {
-          preferences.$promise.then(() => {
-            deferred.resolve();
-          }, (error) => {
-            deferred.reject(error);
-          });
-        }
+        }, (error) => {
+          deferred.reject(error);
+        });
+      }
 
       return deferred.promise;
     }];
@@ -333,10 +331,7 @@ initModule.config(($mdThemingProvider, jsonColors) => {
 
   $mdThemingProvider.theme('maincontent-theme')
     .primaryPalette('che')
-    .accentPalette('cheAccent')
-    .backgroundPalette('cheGrey');
-
-
+    .accentPalette('cheAccent');
 });
 
 initModule.constant('userDashboardConfig', {

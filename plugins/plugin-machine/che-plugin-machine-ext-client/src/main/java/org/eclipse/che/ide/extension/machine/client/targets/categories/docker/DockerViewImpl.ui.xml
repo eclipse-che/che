@@ -76,8 +76,8 @@
         <g:TextBox readOnly="true" height="14px" ui:field="sourceType" tabIndex="0"/>
 
         <g:FlowPanel width="100%" visible="false">
-            <g:Label width="100%" text="Source URL" addStyleNames="{style.label} {style.delimiter}"/>
-            <g:TextBox addStyleNames=" {style.withCopyButton}" readOnly="true" height="14px" ui:field="sourceUrl" tabIndex="0"/>
+            <g:Label width="100%" text="Source" addStyleNames="{style.label} {style.delimiter}"/>
+            <g:TextBox addStyleNames=" {style.withCopyButton}" readOnly="true" height="14px" ui:field="source" tabIndex="0"/>
         </g:FlowPanel>
 
         <g:FlowPanel width="100%" visible="false">

@@ -97,10 +97,14 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorOperations;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
-import org.eclipse.che.ide.api.event.FileContentUpdateHandler;
+import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
+import org.eclipse.che.ide.api.event.ng.FileTrackingEvent;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.api.parts.EditorTab;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Resource;
@@ -111,6 +115,7 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
+import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -119,6 +124,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
+import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
@@ -151,10 +158,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private static final String TOGGLE_LINE_BREAKPOINT = "Toggle line breakpoint";
 
     private final CodeAssistantFactory                   codeAssistantFactory;
+    private final DeletedFilesController                 deletedFilesController;
     private final BreakpointManager                      breakpointManager;
     private final BreakpointRendererFactory              breakpointRendererFactory;
     private final DialogFactory                          dialogFactory;
     private final DocumentStorage                        documentStorage;
+    private final EditorMultiPartStackPresenter          editorMultiPartStackPresenter;
     private final EditorLocalizationConstants            constant;
     private final EditorWidgetFactory<OrionEditorWidget> editorWidgetFactory;
     private final EditorInitializePromiseHolder          editorModule;
@@ -186,10 +195,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     @Inject
     public OrionEditorPresenter(final CodeAssistantFactory codeAssistantFactory,
+                                final DeletedFilesController deletedFilesController,
                                 final BreakpointManager breakpointManager,
                                 final BreakpointRendererFactory breakpointRendererFactory,
                                 final DialogFactory dialogFactory,
                                 final DocumentStorage documentStorage,
+                                final EditorMultiPartStackPresenter editorMultiPartStackPresenter,
                                 final EditorLocalizationConstants constant,
                                 final EditorWidgetFactory<OrionEditorWidget> editorWigetFactory,
                                 final EditorInitializePromiseHolder editorModule,
@@ -201,10 +212,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                 final NotificationManager notificationManager,
                                 final AppContext appContext) {
         this.codeAssistantFactory = codeAssistantFactory;
+        this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
         this.breakpointRendererFactory = breakpointRendererFactory;
         this.dialogFactory = dialogFactory;
         this.documentStorage = documentStorage;
+        this.editorMultiPartStackPresenter = editorMultiPartStackPresenter;
         this.constant = constant;
         this.editorWidgetFactory = editorWigetFactory;
         this.editorModule = editorModule;
@@ -311,15 +324,6 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                         }
                     }
                 });
-
-        this.generalEventBus.addHandler(FileContentUpdateEvent.TYPE, new FileContentUpdateHandler() {
-            @Override
-            public void onFileContentUpdate(final FileContentUpdateEvent event) {
-                if (event.getFilePath() != null && Path.valueOf(event.getFilePath()).equals(document.getFile().getLocation())) {
-                    updateContent();
-                }
-            }
-        });
     }
 
     private void onResourceCreated(ResourceDelta delta) {
@@ -333,6 +337,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             final Path movedFrom = delta.getFromPath();
 
             if (document.getFile().getLocation().equals(movedFrom)) {
+                deletedFilesController.add(movedFrom.toString());
                 document.setFile((File)resource);
                 input.setFile((File)resource);
             }
@@ -346,8 +351,13 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                 @Override
                 public void apply(Optional<File> file) throws OperationException {
                     if (file.isPresent()) {
+                        final Path location = document.getFile().getLocation();
+                        deletedFilesController.add(location.toString());
+                        generalEventBus.fireEvent(newFileTrackingStartEvent(file.get().getLocation().toString()));
+
                         document.setFile(file.get());
                         input.setFile(file.get());
+                        updateTabReference(file.get(), location);
 
                         updateContent();
                     }
@@ -355,7 +365,18 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             });
         }
 
+    }
 
+    private void updateTabReference(File file, Path oldPath) {
+        final PartPresenter activePart = editorMultiPartStackPresenter.getActivePart();
+        final EditorPartStack activePartStack = editorMultiPartStackPresenter.getPartStackByPart(activePart);
+        if (activePartStack == null) {
+            return;
+        }
+        final EditorTab editorTab = activePartStack.getTabByPath(oldPath);
+        if (editorTab != null) {
+            editorTab.setFile(file);
+        }
     }
 
     private void onResourceRemoved(ResourceDelta delta) {
@@ -381,30 +402,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     private void updateContent() {
-        /* -save current cursor and (ideally) viewport
-         * -set editor content which is also expected to
-         *     -reset dirty flag
-         *     -clear history
-         * -restore current cursor position
-         */
-        final TextPosition currentCursor = getCursorPosition();
-        this.documentStorage.getDocument(document.getFile(), new DocumentStorage.DocumentCallback() {
-
-            @Override
-            public void onDocumentReceived(final String content) {
-                editorWidget.setValue(content, new ContentInitializedHandler() {
-                    @Override
-                    public void onContentInitialized() {
-                        document.setCursorPosition(currentCursor);
-                    }
-                });
-            }
-
-            @Override
-            public void onDocumentLoadFailure(final Throwable caught) {
-                displayErrorPanel(constant.editorFileErrorMessage());
-            }
-        });
+        generalEventBus.fireEvent(new FileContentUpdateEvent(document.getFile().getLocation().toString()));
     }
 
     private void displayErrorPanel(final String message) {
@@ -763,6 +761,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     public void editorLostFocus() {
         this.editorView.updateInfoPanelUnfocused(this.document.getLineCount());
         this.isFocused = false;
+        doSave();
     }
 
     @Override

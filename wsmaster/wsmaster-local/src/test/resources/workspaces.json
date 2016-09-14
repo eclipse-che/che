@@ -1,0 +1,35 @@
+{
+  "test": {
+    "namespace": "test",
+    "id": "test",
+    "config": {
+      "defaultEnv": "demo-workspace",
+      "environments": [
+        {
+          "name": "demo-workspace",
+          "machineConfigs": [
+            {
+              "limits": {
+                "ram": 1000
+              },
+              "name": "ws-machine",
+              "type": "docker",
+              "source": {
+                "location": "host/api/recipe/recipew7j6ebw6or6rqu2t/script",
+                "type": "dockerfile"
+              },
+              "dev": true,
+              "servers": [
+              ],
+              "envVariables": {
+              },
+              "links": [
+              ]
+            }
+          ]
+        }
+      ],
+      "name": "demo-workspace_1"
+    }
+  }
+}

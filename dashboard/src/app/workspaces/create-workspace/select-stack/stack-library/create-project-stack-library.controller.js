@@ -15,7 +15,7 @@
  * @author Florent Benoit
  * @author Oleksii Orel
  */
-export class CreateProjectStackLibraryCtrl {
+export class CreateProjectStackLibraryController {
 
   /**
    * Default constructor that is using resource

@@ -22,7 +22,7 @@ export class ExportWorkspaceDialogController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($q, $filter, lodash, cheRemote, cheNotification, $http, cheRecipeTemplate, $mdDialog, $log, $window) {
+  constructor($q, $filter, lodash, cheRemote, cheNotification, $http, cheRecipeTemplate, $mdDialog, $log, $window, $scope) {
     this.$q = $q;
     this.$filter = $filter;
     this.$http = $http;
@@ -47,6 +47,8 @@ export class ExportWorkspaceDialogController {
 
     this.copyOfConfig = this.getCopyOfConfig();
     this.exportConfigContent = this.$filter('json')(angular.fromJson(this.copyOfConfig), 2);
+
+    $scope.selectedIndex = this.destination === 'file' ? 0 : 1;
   }
 
   /**
@@ -106,11 +108,9 @@ export class ExportWorkspaceDialogController {
       // get content of the recipe
       let environments = copyOfConfig.environments;
       let defaultEnvName = copyOfConfig.defaultEnv;
-      let defaultEnvironment = this.lodash.find(environments, (environment) => {
-        return environment.name === defaultEnvName;
-      });
+      let defaultEnvironment = environments[defaultEnvName];
 
-      let machineSource = defaultEnvironment.machineConfigs[0].source;
+      let machineSource = defaultEnvironment.machines[0].source;
       let recipeLocation = machineSource.location;
       if (recipeLocation) {
 
@@ -142,11 +142,9 @@ export class ExportWorkspaceDialogController {
   exportToPrivateCloudRecipeContent(recipeScriptContent, workspaceConfig, authData) {
     let environments = workspaceConfig.environments;
     let defaultEnvName = workspaceConfig.defaultEnv;
-    let defaultEnvironment = this.lodash.find(environments, (environment) => {
-      return environment.name === defaultEnvName;
-    });
+    let defaultEnvironment = environments[defaultEnvName];
 
-    defaultEnvironment.machineConfigs[0].source.content = recipeScriptContent;
+    defaultEnvironment.machines[0].source.content = recipeScriptContent;
     let remoteWorkspaceAPI = this.cheRemote.newWorkspace(authData);
     this.exportInCloudSteps += 'Creating remote workspace...';
     let createWorkspacePromise = remoteWorkspaceAPI.createWorkspaceFromConfig(null, workspaceConfig);

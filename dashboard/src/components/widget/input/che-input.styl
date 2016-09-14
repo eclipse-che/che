@@ -1,15 +1,11 @@
-.che-input:not(.desktop-pristine) .che-input-desktop [ng-message],
-.che-input:not(.desktop-pristine) .che-input-desktop [ng-show]
-  color $error-color
-
 .che-input .che-input-desktop [ng-message],
 .che-input .che-input-desktop [ng-show]
-  color $label-primary-color
+  color $error-color
 
 .che-input-desktop input
   border none
   box-shadow none
-  border-bottom 1px solid $default-border-color
+  box-shadow inset 0px -1px 0px 0px $default-border-color
 
 .che-input-desktop input:focus
   border-color $primary-color
@@ -36,5 +32,46 @@
   padding-left 0
   margin-bottom 0
 
+.che-input md-input-container.che-input-mobile-no-label
+  margin-top 0
+
 label.che-input-desktop-label
   margin-bottom 0
+
+.che-input
+  .che-input-desktop-value-column
+    position relative
+    max-width 100%
+
+    input
+      min-width 200px
+      padding-right 30px
+      overflow hidden
+      text-overflow ellipsis
+      white-space nowrap
+
+    .che-input-desktop-hidden-text
+      min-width 170px
+      overflow hidden
+      margin-right 30px
+      height 0
+
+  .che-input-icon, .che-input-icon-xs
+    position absolute
+    top 2px
+    right -7px
+    bottom initial
+    left initial
+    color $primary-color
+  .che-input-icon-xs
+    top 13px
+
+  input[disabled], input[disabled] + .che-input-icon
+    background-color inherit
+    color $disabled-color
+
+  input[readonly]
+    box-shadow none
+
+    & + .che-input-icon
+      display none

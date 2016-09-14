@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event.ng;
 
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
-import org.eclipse.che.api.project.shared.dto.event.FileClosedDto;
-import org.eclipse.che.api.project.shared.dto.event.FileOpenedDto;
-import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto;
+import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestTransmitter;
 import org.eclipse.che.ide.util.loging.Log;
@@ -38,53 +38,31 @@ public class ClientServerEventService {
         this.transmitter = transmitter;
         this.dtoFactory = dtoFactory;
 
-        Log.info(getClass(), "Adding file event listener");
-        eventBus.addHandler(FileEvent.TYPE, new FileEvent.FileEventHandler() {
+        Log.debug(getClass(), "Adding file event listener");
+        eventBus.addHandler(FileTrackingEvent.TYPE, new FileTrackingEvent.FileTrackingEventHandler() {
             @Override
-            public void onFileOperation(FileEvent event) {
-                final String path = event.getFile().getLocation().toString();
+            public void onEvent(FileTrackingEvent event) {
+                final FileTrackingOperationDto.Type type = event.getType();
+                final String path = event.getPath();
+                final String oldPath = event.getOldPath();
 
-                switch (event.getOperationType()) {
-                    case OPEN: {
-                        transmitOpenFileNotification(path);
-
-                        break;
-                    }
-                    case CLOSE: {
-                        transmitCloseFileNotification(path);
-
-                        break;
-                    }
-                }
+                transmit(path, oldPath, type);
             }
         });
-
-
     }
 
-    private void transmitCloseFileNotification(String path) {
-        Log.info(ClientServerEventService.class, "Sending file closed event: " + path);
-
-        final FileClosedDto dto = dtoFactory.createDto(FileClosedDto.class).withPath(path);
+    private void transmit(String path, String oldPath, FileTrackingOperationDto.Type type) {
+        final String params = dtoFactory.createDto(FileTrackingOperationDto.class)
+                                        .withPath(path)
+                                        .withType(type)
+                                        .withOldPath(oldPath)
+                                        .toString();
 
         final JsonRpcRequest request = dtoFactory.createDto(JsonRpcRequest.class)
                                                  .withJsonrpc("2.0")
-                                                 .withMethod("event:file-closed")
-                                                 .withParams(dto.toString());
+                                                 .withMethod("track:editor-file")
+                                                 .withParams(params);
 
         transmitter.transmit(request);
-    }
-
-    private void transmitOpenFileNotification(String path) {
-        Log.info(ClientServerEventService.class, "Sending file opened event: " + path);
-
-        final FileOpenedDto dto = dtoFactory.createDto(FileOpenedDto.class).withPath(path);
-
-        final JsonRpcRequest notification = dtoFactory.createDto(JsonRpcRequest.class)
-                                                      .withJsonrpc("2.0")
-                                                      .withMethod("event:file-opened")
-                                                      .withParams(dto.toString());
-
-        transmitter.transmit(notification);
     }
 }

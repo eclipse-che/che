@@ -337,7 +337,7 @@ public class SignalEventImpl implements SignalEvent {
     }-*/;
 
     public static native String getKeyIdentifier(Event event) /*-{
-        return event.keyIdentifier
+        return event.key
     }-*/;
 
     /** @return Event type as a string, e.g. "keypress" */

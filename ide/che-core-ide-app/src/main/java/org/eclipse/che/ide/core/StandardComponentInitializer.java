@@ -24,6 +24,7 @@ import org.eclipse.che.ide.actions.CreateProjectAction;
 import org.eclipse.che.ide.actions.DeleteResourceAction;
 import org.eclipse.che.ide.actions.DownloadProjectAction;
 import org.eclipse.che.ide.actions.DownloadResourceAction;
+import org.eclipse.che.ide.actions.DownloadWsAction;
 import org.eclipse.che.ide.actions.EditFileAction;
 import org.eclipse.che.ide.actions.ExpandEditorAction;
 import org.eclipse.che.ide.actions.FormatterAction;
@@ -31,7 +32,6 @@ import org.eclipse.che.ide.actions.FullTextSearchAction;
 import org.eclipse.che.ide.actions.GoIntoAction;
 import org.eclipse.che.ide.actions.HotKeysListAction;
 import org.eclipse.che.ide.actions.ImportProjectAction;
-import org.eclipse.che.ide.actions.LoaderAction;
 import org.eclipse.che.ide.actions.NavigateToFileAction;
 import org.eclipse.che.ide.actions.OpenFileAction;
 import org.eclipse.che.ide.actions.ProjectConfigurationAction;
@@ -62,6 +62,10 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.connection.WsConnectionListener;
+import org.eclipse.che.ide.machine.macro.ServerHostNameMacroProvider;
+import org.eclipse.che.ide.machine.macro.ServerMacroProvider;
+import org.eclipse.che.ide.machine.macro.ServerPortMacroProvider;
+import org.eclipse.che.ide.machine.macro.ServerProtocolMacroProvider;
 import org.eclipse.che.ide.part.editor.actions.SwitchNextEditorAction;
 import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
 import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
@@ -215,6 +219,9 @@ public class StandardComponentInitializer {
     private DownloadProjectAction downloadProjectAction;
 
     @Inject
+    private DownloadWsAction downloadWsAction;
+
+    @Inject
     private DownloadResourceAction downloadResourceAction;
 
     @Inject
@@ -255,9 +262,6 @@ public class StandardComponentInitializer {
 
     @Inject
     private SwitchNextEditorAction switchNextEditorAction;
-
-    @Inject
-    private LoaderAction loaderAction;
 
     @Inject
     private HotKeysListAction hotKeysListAction;
@@ -340,6 +344,19 @@ public class StandardComponentInitializer {
     @Inject
     private TreeResourceRevealer treeResourceRevealer; //just to work with it
 
+    // do not remove the injections below
+    @Inject
+    private ServerMacroProvider serverMacroProvider;
+
+    @Inject
+    private ServerProtocolMacroProvider serverProtocolMacroProvider;
+
+    @Inject
+    private ServerHostNameMacroProvider serverHostNameMacroProvider;
+
+    @Inject
+    private ServerPortMacroProvider serverPortMacroProvider;
+
 
     /** Instantiates {@link StandardComponentInitializer} an creates standard content. */
     @Inject
@@ -394,8 +411,8 @@ public class StandardComponentInitializer {
         actionManager.registerAction("createProject", createProjectAction);
         workspaceGroup.add(createProjectAction);
 
-        actionManager.registerAction("downloadAsZipAction", downloadProjectAction);
-        workspaceGroup.add(downloadProjectAction);
+        actionManager.registerAction("downloadWsAsZipAction", downloadWsAction);
+        workspaceGroup.add(downloadWsAction);
 
         workspaceGroup.addSeparator();
 
@@ -431,6 +448,7 @@ public class StandardComponentInitializer {
         actionManager.registerAction("convertFolderToProject", convertFolderToProjectAction);
         projectGroup.add(convertFolderToProjectAction);
 
+        actionManager.registerAction("downloadAsZipAction", downloadProjectAction);
         projectGroup.add(downloadProjectAction);
 
         actionManager.registerAction("showHideHiddenFiles", showHiddenFilesAction);
@@ -604,12 +622,6 @@ public class StandardComponentInitializer {
         editorTabContextMenu.add(splitVerticallyAction);
         actionManager.registerAction("splitHorizontally", splitHorizontallyAction);
         editorTabContextMenu.add(splitHorizontallyAction);
-
-        final DefaultActionGroup loaderToolbarGroup = new DefaultActionGroup("loader", false, actionManager);
-        actionManager.registerAction("loader", loaderToolbarGroup);
-        actionManager.registerAction("loaderAction", loaderAction);
-        centerToolbarGroup.add(loaderToolbarGroup);
-        loaderToolbarGroup.add(loaderAction);
 
         actionManager.registerAction("noOpAction", new NoOpAction());
 

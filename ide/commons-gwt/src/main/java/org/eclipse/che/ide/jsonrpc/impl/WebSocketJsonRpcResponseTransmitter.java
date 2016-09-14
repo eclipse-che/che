@@ -34,7 +34,7 @@ public class WebSocketJsonRpcResponseTransmitter implements JsonRpcResponseTrans
 
     @Override
     public void transmit(JsonRpcResponse response) {
-        Log.info(getClass(), "Transmitting a response " + response.toString());
+        Log.debug(getClass(), "Transmitting a response " + response.toString());
         transmitter.transmit("response", response.toString());
     }
 

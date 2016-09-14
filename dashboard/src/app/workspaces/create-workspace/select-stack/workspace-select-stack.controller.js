@@ -12,11 +12,11 @@
 
 /**
  * @ngdoc controller
- * @name workspaces.select-stack.controller:WorkspaceSelectStackCtrl
+ * @name workspaces.select-stack.controller:WorkspaceSelectStackController
  * @description This class is handling the controller for the 'select stack' widget.
  * @author Oleksii Orel
  */
-export class WorkspaceSelectStackCtrl {
+export class WorkspaceSelectStackController {
 
   /**
    * Default constructor that is using resource

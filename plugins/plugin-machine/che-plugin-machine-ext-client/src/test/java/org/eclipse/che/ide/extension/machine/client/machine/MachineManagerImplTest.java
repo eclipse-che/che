@@ -14,9 +14,8 @@ import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.MachineSource;
-import org.eclipse.che.api.machine.shared.dto.LimitsDto;
+import org.eclipse.che.api.machine.shared.dto.MachineLimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -28,7 +27,6 @@ import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,9 +68,6 @@ public class MachineManagerImplTest {
 
     @Mock
     private MessageBusProvider messageBusProvider;
-
-    @Mock
-    private InitialLoadingInfo initialLoadingInfo;
 
     @Mock
     private PerspectiveManager perspectiveManager;
@@ -138,8 +133,8 @@ public class MachineManagerImplTest {
         when(machineSourceDto.withLocation(eq(SOURCE_LOCATION))).thenReturn(machineSourceDto);
         when(machineSourceDto.withContent(eq(SOURCE_CONTENT))).thenReturn(machineSourceDto);
         when(dtoFactory.createDto(MachineSourceDto.class)).thenReturn(machineSourceDto);
-        LimitsDto limitsDto = mock(LimitsDto.class);
-        when(dtoFactory.createDto(LimitsDto.class)).thenReturn(limitsDto);
+        MachineLimitsDto limitsDto = mock(MachineLimitsDto.class);
+        when(dtoFactory.createDto(MachineLimitsDto.class)).thenReturn(limitsDto);
         when(limitsDto.withRam(anyInt())).thenReturn(limitsDto);
 
         MachineConfigDto machineConfigDto = mock(MachineConfigDto.class);
@@ -155,7 +150,7 @@ public class MachineManagerImplTest {
         when(appContext.getDevMachine()).thenReturn(devMachine);
         when(devMachine.getId()).thenReturn(ID);
 
-        Promise<MachineDto> promiseEmpty = mock(Promise.class);
+        Promise<Void> promiseEmpty = mock(Promise.class);
         when(workspaceServiceClient.createMachine(anyString(), any(MachineConfigDto.class))).thenReturn(promiseEmpty);
 
         machineManager.restartMachine(machineState);

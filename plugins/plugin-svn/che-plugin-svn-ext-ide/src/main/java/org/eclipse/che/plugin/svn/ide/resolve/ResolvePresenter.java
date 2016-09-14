@@ -20,7 +20,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
@@ -50,7 +50,7 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
     private List<String> conflictsList;
 
     @Inject
-    protected ResolvePresenter(ConsolesPanelPresenter consolesPanelPresenter,
+    protected ResolvePresenter(ProcessesPanelPresenter processesPanelPresenter,
                                SubversionOutputConsoleFactory consoleFactory,
                                AppContext appContext,
                                SubversionExtensionLocalizationConstants constants,
@@ -59,7 +59,7 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
                                SubversionClientService service,
                                ResolveView view,
                                StatusColors statusColors) {
-        super(appContext, consoleFactory, consolesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
 
         this.service = service;
         this.notificationManager = notificationManager;

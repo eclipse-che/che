@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ErrorCodes;
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.git.shared.LogResponse;
 import org.eclipse.che.api.git.shared.Revision;
 import org.eclipse.che.api.promises.client.Operation;
@@ -25,6 +24,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PartStackType;
@@ -37,7 +37,7 @@ import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.GitResources;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -73,7 +73,7 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
     private final WorkspaceAgent          workspaceAgent;
     private final DateTimeFormatter       dateTimeFormatter;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
     /** If <code>true</code> then show all changes in project, if <code>false</code> then show changes of the selected resource. */
     private       boolean                 showChangesInProject;
     private       DiffWith                diffType;
@@ -95,12 +95,12 @@ public class HistoryPresenter extends BasePresenter implements HistoryView.Actio
                             DialogFactory dialogFactory,
                             DateTimeFormatter dateTimeFormatter,
                             GitOutputConsoleFactory gitOutputConsoleFactory,
-                            ConsolesPanelPresenter consolesPanelPresenter) {
+                            ProcessesPanelPresenter processesPanelPresenter) {
         this.view = view;
         this.dialogFactory = dialogFactory;
         this.dateTimeFormatter = dateTimeFormatter;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.consolesPanelPresenter = processesPanelPresenter;
         this.view.setDelegate(this);
         this.view.setTitle(constant.historyTitle());
         this.resources = resources;

@@ -25,6 +25,8 @@ describe('CheSvn', function () {
    */
   var apiBuilder;
 
+  var workspace;
+
   /**
    * Backend for handling http operations
    */
@@ -43,8 +45,8 @@ describe('CheSvn', function () {
   /**
    * Inject factory and http backend
    */
-  beforeEach(inject(function (cheSvn, cheAPIBuilder, cheHttpBackend) {
-    factory = cheSvn;
+  beforeEach(inject(function (cheWorkspace, cheAPIBuilder, cheHttpBackend) {
+    workspace = cheWorkspace;
     apiBuilder = cheAPIBuilder;
     cheBackend = cheHttpBackend;
     httpBackend = cheHttpBackend.getHttpBackend();
@@ -64,9 +66,14 @@ describe('CheSvn', function () {
    */
   it('Fetch remote svn url', function () {
       // setup tests objects
+      var agentUrl = 'localhost:3232/wsagent/ext';
       var workspaceId = 'workspace456test';
       var projectPath = '/testSvnProject';
       var remoteSvnUrl = 'https://svn.apache.org' + projectPath;
+      var runtime =  {'links': [{'href': agentUrl, 'rel': 'wsagent'}]};
+      var workspace1 = apiBuilder.getWorkspaceBuilder().withId(workspaceId).withRuntime(runtime).build();
+
+      cheBackend.addWorkspaces([workspace1]);
 
       // providing request
       // add test remote svn url on http backend
@@ -74,22 +81,31 @@ describe('CheSvn', function () {
 
       // setup backend
       cheBackend.setup();
+
+      workspace.fetchWorkspaceDetails(workspaceId);
+      httpBackend.expectGET('/api/workspace/' + workspaceId);
+
+      // flush command
+      httpBackend.flush();
+
+      var factory = workspace.getWorkspaceAgent(workspaceId).getSvn();
+
       cheBackend.getRemoteSvnUrl(workspaceId, encodeURIComponent(projectPath));
 
       // fetch remote url
       factory.fetchRemoteUrl(workspaceId, projectPath);
 
       // expecting POST
-      httpBackend.expectPOST('/api/svn/' + workspaceId + '/info');
+      httpBackend.expectPOST(agentUrl + '/svn/info?workspaceId='+workspaceId);
 
       // flush command
       httpBackend.flush();
 
       // now, check
-      var url = factory.getRemoteUrlByKey(workspaceId, projectPath);
+      var repo = factory.getRemoteUrlByKey(workspaceId, projectPath);
 
       // check local url
-      expect(remoteSvnUrl).toEqual(url);
+      expect(remoteSvnUrl).toEqual(repo.url);
     }
   );
 

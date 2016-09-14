@@ -46,11 +46,11 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        Log.info(JsonRpcWebSocketAgentEventListener.class, "Web socket agent started event caught.");
+        Log.debug(JsonRpcWebSocketAgentEventListener.class, "Web socket agent started event caught.");
         try {
             internalInitialize();
         } catch (Exception e) {
-            Log.info(JsonRpcWebSocketAgentEventListener.class, "Failed, will try one more time.");
+            Log.debug(JsonRpcWebSocketAgentEventListener.class, "Failed, will try one more time.");
             new Timer() {
                 @Override
                 public void run() {
@@ -63,15 +63,14 @@ public class JsonRpcWebSocketAgentEventListener implements WsAgentStateHandler {
     private void internalInitialize() {
         final DevMachine devMachine = appContext.getDevMachine();
         final String wsAgentWebSocketUrl = devMachine.getWsAgentWebSocketUrl();
-        // Ugly temporary shi^wmeasure
-        final String url = wsAgentWebSocketUrl.split("wsagent")[0] + "wsagent/websocket/" + ENDPOINT_ID;
+        final String url = wsAgentWebSocketUrl.replaceFirst("(ext)(/)(ws)", "websocket" + "$2" + ENDPOINT_ID);
 
         initializer.initialize(singletonMap("url", url));
     }
 
     @Override
     public void onWsAgentStopped(WsAgentStateEvent event) {
-        Log.info(JsonRpcWebSocketAgentEventListener.class, "Web socket agent stopped event caught.");
+        Log.debug(JsonRpcWebSocketAgentEventListener.class, "Web socket agent stopped event caught.");
 
         initializer.terminate();
     }

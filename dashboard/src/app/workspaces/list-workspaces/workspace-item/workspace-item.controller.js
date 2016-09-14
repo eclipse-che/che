@@ -35,10 +35,33 @@ export class WorkspaceItemCtrl {
   getDefaultEnvironment(workspace) {
     let environments = workspace.config.environments;
     let envName = workspace.config.defaultEnv;
-    let defaultEnvironment = this.lodash.find(environments, (environment) => {
-        return environment.name === envName;
-    });
+    let defaultEnvironment = environments[envName];
     return defaultEnvironment;
+  }
+
+  getMemoryLimit(workspace) {
+    if (workspace.runtime && workspace.runtime.machines && workspace.runtime.machines.length > 0) {
+      let limits = this.lodash.pluck(workspace.runtime.machines, 'config.limits.ram');
+      let total = 0;
+      limits.forEach((limit) => {
+        total += limit;
+      });
+      return total + ' MB';
+    }
+
+    let environment = this.getDefaultEnvironment(workspace);
+    if (environment) {
+      let limits = this.lodash.pluck(environment.machines, 'attributes.memoryLimitBytes');
+      let total = 0;
+      limits.forEach((limit) => {
+        if (limit) {
+          total += limit / (1024*1024);
+        }
+      });
+      return (total > 0) ? total + ' MB' : '-';
+    }
+
+    return '-';
   }
 
   /**

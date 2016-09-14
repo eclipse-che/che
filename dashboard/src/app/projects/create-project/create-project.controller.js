@@ -9,13 +9,12 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
-/*global $:false, window:false */
 
 /**
  * This class is handling the controller for the projects
  * @author Florent Benoit
  */
-export class CreateProjectCtrl {
+export class CreateProjectController {
 
   /**
    * Default constructor that is using resource
@@ -61,13 +60,14 @@ export class CreateProjectCtrl {
     this.templatesChoice = 'templates-samples';
 
     // default RAM value for workspaces
-    this.workspaceRam = 1000;
+    this.workspaceRam = 2 * Math.pow(1024,3);
     this.websocketReconnect = 50;
 
     this.generateWorkspaceName();
 
     this.messageBus = null;
     this.recipeUrl = null;
+    this.recipeFormat = null;
 
     //search the selected tab
     let routeParams = $routeParams.tabName;
@@ -125,20 +125,25 @@ export class CreateProjectCtrl {
       // ignore the error
     }
 
-    $rootScope.$on('create-project-stacks:initialized', () => {
+    let deregFunc1 = $rootScope.$on('create-project-stacks:initialized', () => {
       this.stacksInitialized = true;
     });
 
     // sets isReady status after selection
-    $rootScope.$on('create-project-github:selected', () => {
+    let deregFunc2 = $rootScope.$on('create-project-github:selected', () => {
       if (!this.isReady && this.currentTab === 'github') {
         this.isReady = true;
       }
     });
-    $rootScope.$on('create-project-samples:selected', () => {
+    let deregFunc3 = $rootScope.$on('create-project-samples:selected', () => {
       if (!this.isReady && this.currentTab === 'samples') {
         this.isReady = true;
       }
+    });
+    $rootScope.$on('$destroy', () => {
+      deregFunc1();
+      deregFunc2();
+      deregFunc3();
     });
 
     // channels on which we will subscribe on the workspace bus websocket
@@ -151,6 +156,16 @@ export class CreateProjectCtrl {
     cheAPI.cheWorkspace.getWorkspaces();
 
     $rootScope.showIDE = false;
+  }
+
+  /**
+   * Gets object keys from target object.
+   *
+   * @param targetObject
+   * @returns [*]
+   */
+  getObjectKeys(targetObject) {
+    return Object.keys(targetObject);
   }
 
   /**
@@ -513,11 +528,7 @@ export class CreateProjectCtrl {
       // redirect to IDE from crane loader page
       let currentPath = this.$location.path();
       if (/create-project/.test(currentPath)) {
-        let link = this.getIDELink();
-        if (link.indexOf('#') === 0) {
-          link = link.substring(1, link.length);
-        }
-        this.$location.path(link);
+        this.createProjectSvc.redirectToIDE();
       }
     }, (error) => {
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
@@ -821,48 +832,36 @@ export class CreateProjectCtrl {
     this.resetCreateProgress();
     this.setCreateProjectInProgress();
 
+    let source = {};
+    source.type = 'dockerfile';
     // logic to decide if we create workspace based on a stack or reuse existing workspace
-    let option;
-
     if (this.workspaceResource === 'existing-workspace') {
-      option = 'reuse-workspace';
+      // reuse existing workspace
       this.recipeUrl = null;
       this.stack = null;
-    } else {
-      switch (this.stackTab) {
-        case 'ready-to-go':
-          option = 'create-workspace';
-          this.stack = this.readyToGoStack;
-          break;
-        case 'stack-library':
-          option = 'create-workspace';
-          this.stack = this.stackLibraryUser;
-          break;
-        case 'custom-stack':
-          option = 'create-workspace';
-          this.stack = null;
-          break;
-      }
-    }
-    // check workspace is selected
-    if (option === 'create-workspace') {
-      if (this.stack) {
-        this.createWorkspace(this.getSourceFromStack(this.stack));
-      } else {
-        let source = {};
-        source.type = 'dockerfile';
-        if (this.recipeUrl && this.recipeUrl.length > 0) {
-          source.location = this.recipeUrl;
-          this.createWorkspace(source);
-        } else {
-          source.content = this.recipeScript;
-          this.createWorkspace(source);
-        }
-      }
-    } else {
       this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
       this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
+    } else {
+      // create workspace based on a stack
+      switch (this.stackTab) {
+        case 'ready-to-go':
+          source = this.getSourceFromStack(this.readyToGoStack);
+          break;
+        case 'stack-library':
+          source = this.getSourceFromStack(this.stackLibraryUser);
+          break;
+        case 'custom-stack':
+          source.type = 'environment';
+          source.format = this.recipeFormat;
+          if (this.recipeUrl && this.recipeUrl.length > 0) {
+            source.location = this.recipeUrl;
+          } else {
+            source.content = this.recipeScript;
+          }
+          break;
+      }
+      this.createWorkspace(source);
     }
   }
 
@@ -1026,7 +1025,16 @@ export class CreateProjectCtrl {
   }
 
   isReadyToCreate() {
-    return !this.isCreateProjectInProgress() && this.isReady;
+    let isCreateProjectInProgress = this.isCreateProjectInProgress();
+
+    if (!this.isCustomStack) {
+      return !isCreateProjectInProgress && this.isReady
+    }
+
+    let isRecipeUrl = this.recipeUrl && this.recipeUrl.length > 0;
+    let isRecipeScript = this.recipeScript && this.recipeScript.length > 0;
+
+    return !isCreateProjectInProgress && this.isReady && (isRecipeUrl || isRecipeScript);
   }
 
   resetCreateProgress() {
@@ -1080,6 +1088,7 @@ export class CreateProjectCtrl {
   }
 
   setStackTab(stackTab) {
+    this.isCustomStack = stackTab === 'custom-stack';
     this.stackTab = stackTab;
   }
 
@@ -1096,12 +1105,11 @@ export class CreateProjectCtrl {
       stack = this.cheStack.getStackById(this.workspaceSelected.attributes.stackId);
     }
     this.updateCurrentStack(stack);
-    let findEnvironment = this.lodash.find(this.workspaceSelected.config.environments, (environment) => {
-      return environment.name === this.workspaceSelected.config.defaultEnv;
-    });
-    if (findEnvironment) {
-      this.workspaceRam = findEnvironment.machineConfigs[0].limits.ram;
-    }
+    let defaultEnvironment = this.workspaceSelected.config.defaultEnv;
+    let environment = this.workspaceSelected.config.environments[defaultEnvironment];
+   /* TODO not implemented yet if (environment) {
+      this.workspaceRam = environment.machines[0].limits.ram;
+    }*/
     this.updateWorkspaceStatus(true);
   }
 
@@ -1147,8 +1155,8 @@ export class CreateProjectCtrl {
    * @param stack the stack to use
    */
   updateCurrentStack(stack) {
+    this.stack = stack;
     this.currentStackTags = stack && stack.tags ? angular.copy(stack.tags) : null;
-
     if (!stack) {
       return;
     }
@@ -1219,14 +1227,6 @@ export class CreateProjectCtrl {
       logs += step.logs + '\n';
     });
     this.$window.open('data:text/csv,' + encodeURIComponent(logs));
-  }
-
-  getCreateButtonTitle() {
-    if (this.workspaceResource === 'from-stack') {
-      return "Create Workspace and Project";
-    } else {
-      return "Load Workspace and Create Project";
-    }
   }
 
   /**

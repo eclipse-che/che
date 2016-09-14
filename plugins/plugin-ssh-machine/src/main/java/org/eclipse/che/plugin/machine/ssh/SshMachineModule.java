@@ -15,8 +15,6 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
-import org.eclipse.che.api.agent.server.terminal.MachineImplSpecificTerminalLauncher;
-
 /**
  * Provides bindings needed for ssh machine implementation usage.
  *
@@ -40,16 +38,10 @@ public class SshMachineModule extends AbstractModule {
                                    org.eclipse.che.plugin.machine.ssh.jsch.JschSshClient.class)
                         .build(SshMachineFactory.class));
 
-        Multibinder<MachineImplSpecificTerminalLauncher> terminalLaunchers =
-                Multibinder.newSetBinder(binder(),
-                                         MachineImplSpecificTerminalLauncher.class);
-        terminalLaunchers.addBinding().to(SshMachineImplTerminalLauncher.class);
+        bindConstant().annotatedWith(Names.named("machine.ssh.server.terminal.location")).to("~/che");
 
-        bindConstant().annotatedWith(Names.named(SshMachineImplTerminalLauncher.TERMINAL_LAUNCH_COMMAND_PROPERTY))
-                      .to("~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
-
-        bindConstant().annotatedWith(Names.named(SshMachineImplTerminalLauncher.TERMINAL_LOCATION_PROPERTY))
-                      .to("~/che/terminal/");
+        Multibinder.newSetBinder(binder(), org.eclipse.che.api.agent.server.launcher.AgentLauncher.class)
+                   .addBinding().to(org.eclipse.che.plugin.machine.ssh.SshMachineImplTerminalLauncher.class);
 
         Multibinder<org.eclipse.che.api.core.model.machine.ServerConf> machineServers =
                 Multibinder.newSetBinder(binder(),

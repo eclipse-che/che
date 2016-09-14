@@ -48,11 +48,11 @@ public interface DevelopmentView extends View<DevelopmentView.ActionDelegate> {
     void setSourceType(String sourceType);
 
     /**
-     * Sets machine sourceUrl value.
+     * Sets machine source value.
      *
-     * @param sourceUrl
+     * @param source
      */
-    void setSourceUrl(String sourceUrl);
+    void setSource(String source);
 
     /**
      * Sets machine sourceContent value.

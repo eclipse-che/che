@@ -26,5 +26,6 @@ export class DashboardController {
   constructor($rootScope) {
     'ngInject';
     $rootScope.showIDE = false;
+
   }
 }

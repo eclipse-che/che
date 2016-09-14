@@ -12,12 +12,12 @@
 
 /**
  * @ngdoc controller
- * @name workspaces.create.workspace.controller:CreateWorkspaceCtrl
+ * @name workspaces.create.workspace.controller:CreateWorkspaceController
  * @description This class is handling the controller for workspace creation
  * @author Ann Shumilova
  * @author Oleksii Orel
  */
-export class CreateWorkspaceCtrl {
+export class CreateWorkspaceController {
 
   /**
    * Default constructor that is using resource
@@ -32,11 +32,8 @@ export class CreateWorkspaceCtrl {
 
     this.selectSourceOption = 'select-source-recipe';
 
-    this.stack = {};
-    this.workspace = {};
-
-    // default RAM value for workspaces
-    this.workspaceRam = 1000;
+    // default RAM value
+    this.workspaceRam = 2 * Math.pow(1024,3);
 
     this.editorOptions = {
       lineWrapping: true,
@@ -53,6 +50,7 @@ export class CreateWorkspaceCtrl {
     this.stack = null;
     this.recipeUrl = null;
     this.recipeScript = null;
+    this.recipeFormat = null;
     this.importWorkspace = '';
     this.defaultWorkspaceName = null;
 
@@ -67,9 +65,20 @@ export class CreateWorkspaceCtrl {
    */
   setStackTab(tabName) {
     if (tabName === 'custom-stack') {
+      this.cheStackLibrarySelecter(null);
       this.isCustomStack = true;
       this.generateWorkspaceName();
     }
+  }
+
+  /**
+   * Gets object keys from target object.
+   *
+   * @param targetObject
+   * @returns [*]
+   */
+  getObjectKeys(targetObject) {
+    return Object.keys(targetObject);
   }
 
   /**
@@ -122,6 +131,8 @@ export class CreateWorkspaceCtrl {
     //User provides recipe URL or recipe's content:
     if (this.isCustomStack) {
       this.stack = null;
+      source.type = 'environment';
+      source.format = this.recipeFormat;
       if (this.recipeUrl && this.recipeUrl.length > 0) {
         source.location = this.recipeUrl;
         this.submitWorkspace(source);
@@ -195,11 +206,12 @@ export class CreateWorkspaceCtrl {
       // update list of workspaces
       // for new workspace to show in recent workspaces
       this.updateRecentWorkspace(workspaceData.id);
-      this.cheAPI.cheWorkspace.fetchWorkspaces();
 
       let infoMessage = 'Workspace ' + workspaceData.config.name + ' successfully created.';
       this.cheNotification.showInfo(infoMessage);
-      this.$location.path('/workspace/' + workspaceData.namespace + '/' +  workspaceData.config.name);
+      this.cheAPI.cheWorkspace.fetchWorkspaces().then(() => {
+        this.$location.path('/workspace/' + workspaceData.namespace + '/' +  workspaceData.config.name);
+      });
     }, (error) => {
       let errorMessage = error.data.message ? error.data.message : 'Error during workspace creation.';
       this.cheNotification.showError(errorMessage);

@@ -27,11 +27,11 @@ import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProviderRegistry;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
+import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.util.UUID;
 
 import javax.validation.constraints.NotNull;
@@ -51,7 +51,7 @@ public class CommandManager {
 
     private final DtoFactory                           dtoFactory;
     private final MachineServiceClient                 machineServiceClient;
-    private final ConsolesPanelPresenter               consolesPanelPresenter;
+    private final ProcessesPanelPresenter              processesPanelPresenter;
     private final CommandConsoleFactory                commandConsoleFactory;
     private final NotificationManager                  notificationManager;
     private final MachineLocalizationConstant          localizationConstant;
@@ -61,7 +61,7 @@ public class CommandManager {
     @Inject
     public CommandManager(DtoFactory dtoFactory,
                           MachineServiceClient machineServiceClient,
-                          ConsolesPanelPresenter consolesPanelPresenter,
+                          ProcessesPanelPresenter processesPanelPresenter,
                           CommandConsoleFactory commandConsoleFactory,
                           NotificationManager notificationManager,
                           MachineLocalizationConstant localizationConstant,
@@ -69,7 +69,7 @@ public class CommandManager {
                           CommandPropertyValueProviderRegistry commandPropertyValueProviderRegistry) {
         this.dtoFactory = dtoFactory;
         this.machineServiceClient = machineServiceClient;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.processesPanelPresenter = processesPanelPresenter;
         this.commandConsoleFactory = commandConsoleFactory;
         this.notificationManager = notificationManager;
         this.localizationConstant = localizationConstant;
@@ -108,7 +108,7 @@ public class CommandManager {
 
         final CommandOutputConsole console = commandConsoleFactory.create(configuration, machine);
         console.listenToOutput(outputChannel);
-        consolesPanelPresenter.addCommandOutput(machine.getId(), console);
+        processesPanelPresenter.addCommandOutput(machine.getId(), console);
 
         substituteProperties(configuration.toCommandLine()).then(new Operation<String>() {
             @Override

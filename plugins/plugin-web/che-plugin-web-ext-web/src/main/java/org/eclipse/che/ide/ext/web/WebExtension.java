@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.web;
 
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
@@ -22,14 +24,15 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.ext.web.css.NewCssFileAction;
 import org.eclipse.che.ide.ext.web.css.NewLessFileAction;
-import org.eclipse.che.ide.ext.web.js.editor.JsEditorProvider;
 import org.eclipse.che.ide.ext.web.html.NewHtmlFileAction;
+import org.eclipse.che.ide.ext.web.html.PreviewAction;
 import org.eclipse.che.ide.ext.web.html.editor.HtmlEditorProvider;
 import org.eclipse.che.ide.ext.web.js.NewJavaScriptFileAction;
+import org.eclipse.che.ide.ext.web.js.editor.JsEditorProvider;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.inject.name.Named;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
 
 /**
  * Extension add editing JavaScript, HTML, CSS css type support to the IDE Application.
@@ -86,18 +89,19 @@ public class WebExtension {
     }
 
     @Inject
-    private void prepareActions(WebLocalizationConstant constant,
-                                WebExtensionResource resources,
+    private void prepareActions(WebExtensionResource resources,
                                 ActionManager actionManager,
                                 NewCssFileAction newCssFileAction,
                                 NewLessFileAction newLessFileAction,
                                 NewHtmlFileAction newHtmlFileAction,
-                                NewJavaScriptFileAction newJavaScriptFileAction) {
+                                NewJavaScriptFileAction newJavaScriptFileAction,
+                                PreviewAction previewAction) {
         // register actions
-        actionManager.registerAction(constant.newCssFileActionId(), newCssFileAction);
-        actionManager.registerAction(constant.newLessFileActionId(), newLessFileAction);
-        actionManager.registerAction(constant.newHtmlFileActionId(), newHtmlFileAction);
-        actionManager.registerAction(constant.newJavaScriptFileActionId(), newJavaScriptFileAction);
+        actionManager.registerAction("newCssFile", newCssFileAction);
+        actionManager.registerAction("newLessFile", newLessFileAction);
+        actionManager.registerAction("newHtmlFile", newHtmlFileAction);
+        actionManager.registerAction("newJavaScriptFile", newJavaScriptFileAction);
+        actionManager.registerAction("previewHTML", previewAction);
 
         // set icons
         newCssFileAction.getTemplatePresentation().setSVGResource(resources.cssFile());
@@ -111,5 +115,13 @@ public class WebExtension {
         newGroup.add(newLessFileAction);
         newGroup.add(newHtmlFileAction);
         newGroup.add(newJavaScriptFileAction);
+
+        // add actions in context menu
+        DefaultActionGroup mainContextMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
+        mainContextMenuGroup.add(previewAction);
+
+        // add actions in Assistant main menu
+        DefaultActionGroup assistantMainMenuGroup = (DefaultActionGroup)actionManager.getAction(GROUP_ASSISTANT);
+        assistantMainMenuGroup.add(previewAction);
     }
 }

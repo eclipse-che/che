@@ -1,10 +1,6 @@
-<che-panel che-title="Export Workspace" class="workspace-details-content">
-  <div layout="row" flex layout-align="space-around start">
-    <label flex flex-gt-xs="15" class="workspace-details-description">
-      Export your workspace.
-    </label>
-    <div layout="row" flex-xs="none" flex-gt-xs="85">
-      <che-button-default che-button-title="export" ng-click="exportWorkspaceCtrl.showExport($event)"></che-button-default>
-    </div>
-  </div>
-</che-panel>
+<div layout="row">
+  <che-button-primary-flat che-button-title="Export as a file"
+                           ng-click="exportWorkspaceCtrl.showExport($event, 'file')"></che-button-primary-flat>
+  <che-button-primary-flat che-button-title="Export to private cloud"
+                           ng-click="exportWorkspaceCtrl.showExport($event, 'cloud')"></che-button-primary-flat>
+</div>
