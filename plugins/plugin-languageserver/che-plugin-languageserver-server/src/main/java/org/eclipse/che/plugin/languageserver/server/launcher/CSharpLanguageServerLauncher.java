@@ -58,7 +58,7 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
         try {
             return processBuilder.start();
         } catch (IOException e) {
-            throw new LanguageServerException("Can't start JSON language server", e);
+            throw new LanguageServerException("Can't start CSharp language server", e);
         }
     }
 
@@ -74,7 +74,7 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
                 throw new LanguageServerException("Can't restore dependencies. Error: " + err + ". Output: " + in);
             }
         } catch (IOException | InterruptedException e) {
-            throw new LanguageServerException("Can't start JSON language server", e);
+            throw new LanguageServerException("Can't start CSharp language server", e);
         }
     }
 
