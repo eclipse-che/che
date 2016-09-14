@@ -44,6 +44,12 @@ if echo ${LINUX_TYPE} | grep -qi "rhel"; then
         ${SUDO} scl enable rh-dotnetcore10 bash;
     }
 
+    command -v nodejs >/dev/null 2>&1 || {
+        curl --silent --location https://rpm.nodesource.com/setup_6.x | ${SUDO} bash -;
+        ${SUDO} yum -y install nodejs;
+    }
+
+
 
 # Ubuntu 14.04 16.04 / Linux Mint 17
 ####################################
@@ -99,6 +105,7 @@ elif echo ${LINUX_TYPE} | grep -qi "debian"; then
         ${SUDO} apt-get -y install libunwind8 gettext;
         ${SUDO} mkdir -p /opt/dotnet;
         ${SUDO} tar zxf dotnet.tar.gz -C /opt/dotnet;
+        rm dotnet.tar.gz;
         ${SUDO} ln -s /opt/dotnet/dotnet /usr/local/bin;
     }
 
@@ -128,8 +135,15 @@ elif echo ${LINUX_TYPE} | grep -qi "fedora"; then
         ${SUDO} dnf -y install libunwind libicu;
         ${SUDO} mkdir -p /opt/dotnet;
         ${SUDO} tar zxf dotnet.tar.gz -C /opt/dotnet;
+        rm dotnet.tar.gz;
         ${SUDO} ln -s /opt/dotnet/dotnet /usr/local/bin;
     }
+
+    command -v nodejs >/dev/null 2>&1 || {
+        curl --silent --location https://rpm.nodesource.com/setup_6.x | ${SUDO} bash -;
+        ${SUDO} dnf -y install nodejs;
+    }
+
 
 
 # CentOS 7.1 & Oracle Linux 7.1
@@ -144,7 +158,13 @@ elif echo ${LINUX_TYPE} | grep -qi "centos"; then
         ${SUDO} yum -y install libunwind libicu;
         ${SUDO} mkdir -p /opt/dotnet;
         ${SUDO} tar zxf dotnet.tar.gz -C /opt/dotnet;
+        rm dotnet.tar.gz;
         ${SUDO} ln -s /opt/dotnet/dotnet /usr/local/bin;
+    }
+
+    command -v nodejs >/dev/null 2>&1 || {
+        curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -;
+        ${SUDO} yum -y install nodejs;
     }
 
 
@@ -160,7 +180,13 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
         ${SUDO} zypper install -y libunwind libicu;
         ${SUDO} mkdir -p /opt/dotnet;
         ${SUDO} tar zxf dotnet.tar.gz -C /opt/dotnet;
+        rm dotnet.tar.gz;
         ${SUDO} ln -s /opt/dotnet/dotnet /usr/local/bin;
+     }
+
+     command -v nodejs >/dev/null 2>&1 || {
+        ${SUDO} zypper ar http://download.opensuse.org/repositories/devel:/languages:/nodejs/openSUSE_13.1/ Node.js
+        ${SUDO} zypper in nodejs
      }
 
 else
@@ -175,21 +201,6 @@ fi
 #####################
 
 curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}
-
-######################
-### Install NodeJS ###
-######################
-
-#if echo ${MACHINE_TYPE} | grep -qi "x86_64"; then
-#    NODEJS_VER=node-v5.0.0-linux-x64
-#else
-#    NODEJS_VER=node-v5.0.0-linux-x86
-#fi
-#NODEJS_DIR=${CHE_DIR}/${NODEJS_VER}
-#
-#if [ ! -f "${NODEJS_DIR}/bin/node" ];  then
-#    curl -s -L https://nodejs.org/dist/v5.0.0/${NODEJS_VER}.tar.gz | tar xzf - -C ${CHE_DIR}
-#fi
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}

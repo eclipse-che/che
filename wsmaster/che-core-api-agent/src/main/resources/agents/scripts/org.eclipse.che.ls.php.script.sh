@@ -15,9 +15,9 @@ command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 test "$(id -u)" = 0 || SUDO="sudo"
 
-AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.json.binaries
+AGENT_BINARIES_URI=https://codenvy.com/update/repository/public/download/org.eclipse.che.ls.php.binaries
 CHE_DIR=$HOME/che
-LS_DIR=${CHE_DIR}/ls-json
+LS_DIR=${CHE_DIR}/ls-php
 LS_LAUNCHER=${LS_DIR}/launch.sh
 
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
@@ -140,4 +140,4 @@ curl -s ${AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "nodejs ${LS_DIR}/vscode-json-server/server.js" > ${LS_LAUNCHER}
+echo "nodejs ${LS_DIR}/vscode-crane-server/server.js" > ${LS_LAUNCHER}

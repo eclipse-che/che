@@ -60,31 +60,30 @@ public class AgentSorter {
 
         if (agentKeys != null) {
             for (String agentKey : agentKeys) {
-                doSort(agentKeys, AgentKeyImpl.parse(agentKey), sorted, pending);
+                doSort(AgentKeyImpl.parse(agentKey), sorted, pending);
             }
         }
 
         return sorted;
     }
 
-    private void doSort(List<String> agentKeys, AgentKey agentKey, List<AgentKey> sorted, Set<String> pending) throws AgentException {
+    private void doSort(AgentKey agentKey, List<AgentKey> sorted, Set<String> pending) throws AgentException {
         String agentName = agentKey.getName();
 
         Optional<AgentKey> alreadySorted = sorted.stream().filter(k -> k.getName().equals(agentName)).findFirst();
         if (alreadySorted.isPresent()) {
             return;
         }
-
-        if (!pending.add(agentName)) {
-            throw new AgentException(String.format("Agents circular dependency found between '%s' and '%s'", agentKey.getName(), agentName));
-        }
+        pending.add(agentName);
 
         Agent agent = agentRegistry.getAgent(agentKey);
 
         for (String dependency : agent.getDependencies()) {
-            if (agentKeys.contains(dependency)) {
-                doSort(agentKeys, AgentKeyImpl.parse(dependency), sorted, pending);
+            if (pending.contains(dependency)) {
+                throw new AgentException(
+                        String.format("Agents circular dependency found between '%s' and '%s'", dependency, agentName));
             }
+            doSort(AgentKeyImpl.parse(dependency), sorted, pending);
         }
 
         sorted.add(agentKey);

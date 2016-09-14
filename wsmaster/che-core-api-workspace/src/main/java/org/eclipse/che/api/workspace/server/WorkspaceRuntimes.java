@@ -288,6 +288,7 @@ public class WorkspaceRuntimes {
                     launchAgents(instance, agents);
                     launchAgents(instance, Collections.singletonList("org.eclipse.che.ls.json"));
                     launchAgents(instance, Collections.singletonList("org.eclipse.che.ls.csharp"));
+                    launchAgents(instance, Collections.singletonList("org.eclipse.che.ls.php"));
                 }
             }
         }

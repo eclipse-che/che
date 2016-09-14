@@ -47,7 +47,7 @@ public class DefaultAgentLauncherTest {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        agentLauncher = new DefaultAgentLauncher(120000, 10);
+        agentLauncher = new DefaultAgentLauncher();
 
         when(machine.createProcess(any(), any())).thenReturn(instanceProcess);
         when(machine.getLogger()).thenReturn(lineConsumer);
