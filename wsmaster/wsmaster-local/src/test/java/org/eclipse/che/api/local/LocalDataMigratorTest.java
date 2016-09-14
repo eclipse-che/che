@@ -10,6 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
@@ -41,6 +48,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -230,8 +238,10 @@ public class LocalDataMigratorTest {
         factory.create(LocalUserDaoImpl.FILENAME).store(singletonMap(user.getId(), user));
         factory.create(LocalProfileDaoImpl.FILENAME).store(singletonMap(profile.getUserId(), profile));
         factory.create(LocalPreferenceDaoImpl.FILENAME).store(singletonMap(user.getId(), prefs));
-        factory.create(LocalSshDaoImpl.FILENAME).store(singletonList(sshPair));
-        factory.create(LocalWorkspaceDaoImpl.FILENAME).store(singletonMap(workspace.getId(), workspace));
+        factory.create(LocalSshDaoImpl.FILENAME, singletonMap(SshPairImpl.class, new SshSerializer()))
+               .store(singletonMap(sshPair.getOwner(), singletonList(sshPair)));
+        factory.create(LocalWorkspaceDaoImpl.FILENAME, singletonMap(WorkspaceImpl.class, new WorkspaceSerializer()))
+               .store(singletonMap(workspace.getId(), workspace));
         factory.create(LocalSnapshotDaoImpl.FILENAME).store(singletonMap(snapshot.getId(), snapshot));
         factory.create(LocalRecipeDaoImpl.FILENAME).store(singletonMap(recipe.getId(), recipe));
         factory.create(StackLocalStorage.STACK_STORAGE_FILE).store(singletonMap(stack.getId(), stack));
@@ -240,5 +250,29 @@ public class LocalDataMigratorTest {
     @FunctionalInterface
     private interface TestAction {
         void perform() throws Exception;
+    }
+
+    public static class WorkspaceSerializer implements JsonSerializer<WorkspaceImpl> {
+
+        @Override
+        public JsonElement serialize(WorkspaceImpl src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonElement result = new Gson().toJsonTree(src, WorkspaceImpl.class);
+            result.getAsJsonObject().addProperty("namespace", src.getNamespace());
+            result.getAsJsonObject().remove("account");
+            return result;
+        }
+    }
+
+    public static class SshSerializer implements JsonSerializer<SshPairImpl> {
+
+        @Override
+        public JsonElement serialize(SshPairImpl sshPair, Type type, JsonSerializationContext jsonSerializationContext) {
+            JsonObject result = new JsonObject();
+            result.add("service", new JsonPrimitive(sshPair.getService()));
+            result.add("name", new JsonPrimitive(sshPair.getName()));
+            result.add("privateKey", new JsonPrimitive(sshPair.getPublicKey()));
+            result.add("publicKey", new JsonPrimitive(sshPair.getPrivateKey()));
+            return result;
+        }
     }
 }

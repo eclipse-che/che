@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -99,7 +100,8 @@ public class LocalDataMigrator {
 
         // Create all the objects needed for migration, the order is important
         final List<Migration<?>> migrations = new ArrayList<>();
-        final Map<Class<?>, Object> adapters = ImmutableMap.of(Recipe.class, new RecipeTypeAdapter(),
+        final Map<Class<?>, Object> adapters = ImmutableMap.of(WorkspaceImpl.class, new WorkspaceDeserializer(),
+                                                               Recipe.class, new RecipeTypeAdapter(),
                                                                ProjectConfig.class, new ProjectConfigAdapter(),
                                                                WorkspaceConfigImpl.class, new WorkspaceConfigDeserializer(cfgAdapter));
         migrations.add(new UserMigration(factory.create(LocalUserDaoImpl.FILENAME), userDao));
@@ -319,7 +321,16 @@ public class LocalDataMigrator {
 
         @Override
         public List<SshPairImpl> getAllEntities() throws Exception {
-            return storage.loadList(new TypeToken<List<SshPairImpl>>() {});
+            Set<Map.Entry<String, List<SshPairImpl>>> entries = storage.loadMap(new TypeToken<Map<String, List<SshPairImpl>>>() {})
+                                                                       .entrySet();
+
+            final List<SshPairImpl> result = new ArrayList<>();
+            for (Map.Entry<String, List<SshPairImpl>> entry : entries) {
+                result.addAll(entry.getValue()
+                                   .stream()
+                                   .map(v -> new SshPairImpl(entry.getKey(), v)).collect(Collectors.toList()));
+            }
+            return result;
         }
 
         @Override
