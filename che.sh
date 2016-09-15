@@ -827,7 +827,7 @@ execute_che_info() {
 print_che_cli_debug() {
   debug $FUNCNAME
   info "---------------------------------------"
-  info "---------    CLI DEBUG INFO    --------"
+  info "-------------   CLI INFO   ------------"
   info "---------------------------------------"
   info ""
   info "---------  PLATFORM INFO  -------------"
