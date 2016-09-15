@@ -7,48 +7,45 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.CodeActionParams;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface CodeActionParamsDTO extends CodeActionParams {
     /**
      * The document in which the command was invoked. Overridden to return the
      * DTO type.
-     * 
      */
-    public abstract TextDocumentIdentifierDTO getTextDocument();
+    TextDocumentIdentifierDTO getTextDocument();
 
     /**
      * The document in which the command was invoked.
-     * 
      */
-    public abstract void setTextDocument(final TextDocumentIdentifierDTO textDocument);
+    void setTextDocument(final TextDocumentIdentifierDTO textDocument);
 
     /**
      * The range for which the command was invoked. Overridden to return the DTO
      * type.
-     * 
      */
-    public abstract RangeDTO getRange();
+    RangeDTO getRange();
 
     /**
      * The range for which the command was invoked.
-     * 
      */
-    public abstract void setRange(final RangeDTO range);
+    void setRange(final RangeDTO range);
 
     /**
      * Context carrying additional information. Overridden to return the DTO
      * type.
-     * 
      */
-    public abstract CodeActionContextDTO getContext();
+    CodeActionContextDTO getContext();
 
     /**
      * Context carrying additional information.
-     * 
      */
-    public abstract void setContext(final CodeActionContextDTO context);
+    void setContext(final CodeActionContextDTO context);
 }

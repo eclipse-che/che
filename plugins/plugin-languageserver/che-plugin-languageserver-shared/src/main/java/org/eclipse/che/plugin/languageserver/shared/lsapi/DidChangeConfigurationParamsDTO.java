@@ -7,11 +7,14 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.DidChangeConfigurationParams;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface DidChangeConfigurationParamsDTO extends DidChangeConfigurationParams {
-    public abstract void setSettings(final Object settings);
+    void setSettings(final Object settings);
 }

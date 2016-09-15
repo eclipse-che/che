@@ -7,10 +7,13 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.ClientCapabilities;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface ClientCapabilitiesDTO extends ClientCapabilities {
 }

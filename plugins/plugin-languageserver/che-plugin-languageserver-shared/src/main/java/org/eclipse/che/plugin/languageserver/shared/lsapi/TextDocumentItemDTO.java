@@ -7,34 +7,33 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.TextDocumentItem;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface TextDocumentItemDTO extends TextDocumentItem {
     /**
      * The text document's uri.
-     * 
      */
-    public abstract void setUri(final String uri);
+    void setUri(final String uri);
 
     /**
      * The text document's language identifier
-     * 
      */
-    public abstract void setLanguageId(final String languageId);
+    void setLanguageId(final String languageId);
 
     /**
      * The version number of this document (it will strictly increase after each
      * change, including undo/redo).
-     * 
      */
-    public abstract void setVersion(final int version);
+    void setVersion(final int version);
 
     /**
      * The content of the opened text document.
-     * 
      */
-    public abstract void setText(final String text);
+    void setText(final String text);
 }

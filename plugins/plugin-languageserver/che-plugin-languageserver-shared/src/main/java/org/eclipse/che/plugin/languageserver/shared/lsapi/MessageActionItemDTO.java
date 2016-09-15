@@ -7,15 +7,17 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.MessageActionItem;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface MessageActionItemDTO extends MessageActionItem {
     /**
      * A short title like 'Retry', 'Open Log' etc.
-     * 
      */
-    public abstract void setTitle(final String title);
+    void setTitle(final String title);
 }

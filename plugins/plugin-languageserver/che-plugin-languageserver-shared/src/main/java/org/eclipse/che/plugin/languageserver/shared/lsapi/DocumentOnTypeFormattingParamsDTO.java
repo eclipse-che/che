@@ -7,52 +7,48 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.DocumentOnTypeFormattingParams;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface DocumentOnTypeFormattingParamsDTO extends DocumentOnTypeFormattingParams {
     /**
      * The position at which this request was send. Overridden to return the DTO
      * type.
-     * 
      */
-    public abstract PositionDTO getPosition();
+    PositionDTO getPosition();
 
     /**
      * The position at which this request was send.
-     * 
      */
-    public abstract void setPosition(final PositionDTO position);
+    void setPosition(final PositionDTO position);
 
     /**
      * The character that has been typed.
-     * 
      */
-    public abstract void setCh(final String ch);
+    void setCh(final String ch);
 
     /**
      * The document to format. Overridden to return the DTO type.
-     * 
      */
-    public abstract TextDocumentIdentifierDTO getTextDocument();
+    TextDocumentIdentifierDTO getTextDocument();
 
     /**
      * The document to format.
-     * 
      */
-    public abstract void setTextDocument(final TextDocumentIdentifierDTO textDocument);
+    void setTextDocument(final TextDocumentIdentifierDTO textDocument);
 
     /**
      * The format options Overridden to return the DTO type.
-     * 
      */
-    public abstract FormattingOptionsDTO getOptions();
+    FormattingOptionsDTO getOptions();
 
     /**
      * The format options
-     * 
      */
-    public abstract void setOptions(final FormattingOptionsDTO options);
+    void setOptions(final FormattingOptionsDTO options);
 }

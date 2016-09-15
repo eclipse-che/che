@@ -11,15 +11,16 @@ import io.typefox.lsapi.WorkspaceSymbolParams;
 
 import org.eclipse.che.dto.shared.DTO;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface WorkspaceSymbolParamsDTO extends WorkspaceSymbolParams {
     /**
      * A non-empty query string
-     * 
      */
-    public abstract void setQuery(final String query);
+    void setQuery(final String query);
 
-    //TODO this is temporary, until we don't have binding LS to project not a file
     String getFileUri();
 
     void setFileUri(String fileUri);

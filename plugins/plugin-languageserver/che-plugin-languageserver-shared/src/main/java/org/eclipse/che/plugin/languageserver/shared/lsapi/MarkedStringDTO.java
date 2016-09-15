@@ -7,13 +7,16 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.MarkedString;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface MarkedStringDTO extends MarkedString {
-    public abstract void setLanguage(final String language);
+    void setLanguage(final String language);
 
-    public abstract void setValue(final String value);
+    void setValue(final String value);
 }

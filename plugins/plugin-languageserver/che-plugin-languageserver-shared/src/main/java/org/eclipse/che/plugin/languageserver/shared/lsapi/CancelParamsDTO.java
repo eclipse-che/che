@@ -7,15 +7,17 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.CancelParams;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface CancelParamsDTO extends CancelParams {
     /**
      * The request id to cancel.
-     * 
      */
-    public abstract void setId(final String id);
+    void setId(final String id);
 }

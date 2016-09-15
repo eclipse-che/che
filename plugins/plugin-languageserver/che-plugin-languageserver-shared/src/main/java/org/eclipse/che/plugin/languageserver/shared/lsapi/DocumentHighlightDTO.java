@@ -12,23 +12,23 @@ import io.typefox.lsapi.DocumentHighlightKind;
 
 import org.eclipse.che.dto.shared.DTO;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface DocumentHighlightDTO extends DocumentHighlight {
     /**
      * The range this highlight applies to. Overridden to return the DTO type.
-     * 
      */
-    public abstract RangeDTO getRange();
+    RangeDTO getRange();
 
     /**
      * The range this highlight applies to.
-     * 
      */
-    public abstract void setRange(final RangeDTO range);
+    void setRange(final RangeDTO range);
 
     /**
      * The highlight kind, default is KIND_TEXT.
-     * 
      */
-    public abstract void setKind(final DocumentHighlightKind kind);
+    void setKind(final DocumentHighlightKind kind);
 }

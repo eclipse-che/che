@@ -14,29 +14,28 @@ import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface ShowMessageRequestParamsDTO extends ShowMessageRequestParams {
     /**
      * The message action items to present. Overridden to return the DTO type.
-     * 
      */
-    public abstract List<MessageActionItemDTO> getActions();
+    List<MessageActionItemDTO> getActions();
 
     /**
      * The message action items to present.
-     * 
      */
-    public abstract void setActions(final List<MessageActionItemDTO> actions);
+    void setActions(final List<MessageActionItemDTO> actions);
 
     /**
      * The message type.
-     * 
      */
-    public abstract void setType(final MessageType type);
+    void setType(final MessageType type);
 
     /**
      * The actual message.
-     * 
      */
-    public abstract void setMessage(final String message);
+    void setMessage(final String message);
 }

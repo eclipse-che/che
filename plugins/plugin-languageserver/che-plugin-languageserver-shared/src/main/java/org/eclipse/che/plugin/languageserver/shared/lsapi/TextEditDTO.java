@@ -7,30 +7,30 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.TextEdit;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface TextEditDTO extends TextEdit {
     /**
      * The range of the text document to be manipulated. To insert text into a
      * document create a range where start === end. Overridden to return the DTO
      * type.
-     * 
      */
-    public abstract RangeDTO getRange();
+    RangeDTO getRange();
 
     /**
      * The range of the text document to be manipulated. To insert text into a
      * document create a range where start === end.
-     * 
      */
-    public abstract void setRange(final RangeDTO range);
+    void setRange(final RangeDTO range);
 
     /**
      * The string to be inserted. For delete operations use an empty string.
-     * 
      */
-    public abstract void setNewText(final String newText);
+    void setNewText(final String newText);
 }

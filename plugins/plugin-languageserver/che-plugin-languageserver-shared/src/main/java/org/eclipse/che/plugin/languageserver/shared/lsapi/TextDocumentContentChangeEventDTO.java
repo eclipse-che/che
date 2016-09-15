@@ -7,34 +7,33 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.TextDocumentContentChangeEvent;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface TextDocumentContentChangeEventDTO extends TextDocumentContentChangeEvent {
     /**
      * The range of the document that changed. Overridden to return the DTO
      * type.
-     * 
      */
-    public abstract RangeDTO getRange();
+    RangeDTO getRange();
 
     /**
      * The range of the document that changed.
-     * 
      */
-    public abstract void setRange(final RangeDTO range);
+    void setRange(final RangeDTO range);
 
     /**
      * The length of the range that got replaced.
-     * 
      */
-    public abstract void setRangeLength(final Integer rangeLength);
+    void setRangeLength(final Integer rangeLength);
 
     /**
      * The new text of the document.
-     * 
      */
-    public abstract void setText(final String text);
+    void setText(final String text);
 }

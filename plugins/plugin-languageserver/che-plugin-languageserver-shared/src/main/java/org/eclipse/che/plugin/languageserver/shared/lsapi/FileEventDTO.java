@@ -12,17 +12,18 @@ import io.typefox.lsapi.FileEvent;
 
 import org.eclipse.che.dto.shared.DTO;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface FileEventDTO extends FileEvent {
     /**
      * The file's uri.
-     * 
      */
-    public abstract void setUri(final String uri);
+    void setUri(final String uri);
 
     /**
      * The change type.
-     * 
      */
-    public abstract void setType(final FileChangeType type);
+    void setType(final FileChangeType type);
 }

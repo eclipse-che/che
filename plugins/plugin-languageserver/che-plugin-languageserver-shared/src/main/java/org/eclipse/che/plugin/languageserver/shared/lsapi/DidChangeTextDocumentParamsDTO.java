@@ -7,44 +7,42 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import java.util.List;
+import io.typefox.lsapi.DidChangeTextDocumentParams;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import io.typefox.lsapi.DidChangeTextDocumentParams;
+import java.util.List;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface DidChangeTextDocumentParamsDTO extends DidChangeTextDocumentParams {
     /**
      * The document that did change. The version number points to the version
      * after all provided content changes have been applied. Overridden to
      * return the DTO type.
-     * 
      */
-    public abstract VersionedTextDocumentIdentifierDTO getTextDocument();
+    VersionedTextDocumentIdentifierDTO getTextDocument();
 
     /**
      * The document that did change. The version number points to the version
      * after all provided content changes have been applied.
-     * 
      */
-    public abstract void setTextDocument(final VersionedTextDocumentIdentifierDTO textDocument);
+    void setTextDocument(final VersionedTextDocumentIdentifierDTO textDocument);
 
     /**
      * Legacy property to support protocol version 1.0 requests.
-     * 
      */
-    public abstract void setUri(final String uri);
+    void setUri(final String uri);
 
     /**
      * The actual content changes. Overridden to return the DTO type.
-     * 
      */
-    public abstract List<TextDocumentContentChangeEventDTO> getContentChanges();
+    List<TextDocumentContentChangeEventDTO> getContentChanges();
 
     /**
      * The actual content changes.
-     * 
      */
-    public abstract void setContentChanges(final List<TextDocumentContentChangeEventDTO> contentChanges);
+    void setContentChanges(final List<TextDocumentContentChangeEventDTO> contentChanges);
 }

@@ -7,15 +7,17 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.TextDocumentIdentifier;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface TextDocumentIdentifierDTO extends TextDocumentIdentifier {
     /**
      * The text document's uri.
-     * 
      */
-    public abstract void setUri(final String uri);
+    void setUri(final String uri);
 }

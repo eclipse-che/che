@@ -12,7 +12,9 @@ import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
 
 import java.util.List;
 
-
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface LanguageDescriptionDTO extends LanguageDescription {
 	/**

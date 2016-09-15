@@ -7,21 +7,22 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.DidSaveTextDocumentParams;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface DidSaveTextDocumentParamsDTO extends DidSaveTextDocumentParams {
     /**
      * The document that was closed. Overridden to return the DTO type.
-     * 
      */
-    public abstract TextDocumentIdentifierDTO getTextDocument();
+    TextDocumentIdentifierDTO getTextDocument();
 
     /**
      * The document that was closed.
-     * 
      */
-    public abstract void setTextDocument(final TextDocumentIdentifierDTO textDocument);
+    void setTextDocument(final TextDocumentIdentifierDTO textDocument);
 }

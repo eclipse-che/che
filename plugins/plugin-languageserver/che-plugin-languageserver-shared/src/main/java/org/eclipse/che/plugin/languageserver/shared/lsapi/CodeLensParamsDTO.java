@@ -7,21 +7,22 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.CodeLensParams;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface CodeLensParamsDTO extends CodeLensParams {
     /**
      * The document to request code lens for. Overridden to return the DTO type.
-     * 
      */
-    public abstract TextDocumentIdentifierDTO getTextDocument();
+    TextDocumentIdentifierDTO getTextDocument();
 
     /**
      * The document to request code lens for.
-     * 
      */
-    public abstract void setTextDocument(final TextDocumentIdentifierDTO textDocument);
+    void setTextDocument(final TextDocumentIdentifierDTO textDocument);
 }

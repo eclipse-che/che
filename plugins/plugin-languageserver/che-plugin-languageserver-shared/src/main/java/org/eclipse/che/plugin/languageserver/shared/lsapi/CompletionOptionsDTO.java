@@ -13,18 +13,19 @@ import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface CompletionOptionsDTO extends CompletionOptions {
     /**
      * The server provides support to resolve additional information for a
      * completion item.
-     * 
      */
-    public abstract void setResolveProvider(final Boolean resolveProvider);
+    void setResolveProvider(final Boolean resolveProvider);
 
     /**
      * The characters that trigger completion automatically.
-     * 
      */
-    public abstract void setTriggerCharacters(final List<String> triggerCharacters);
+    void setTriggerCharacters(final List<String> triggerCharacters);
 }

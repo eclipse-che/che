@@ -12,35 +12,33 @@ import io.typefox.lsapi.SymbolKind;
 
 import org.eclipse.che.dto.shared.DTO;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface SymbolInformationDTO extends SymbolInformation {
     /**
      * The name of this symbol.
-     * 
      */
-    public abstract void setName(final String name);
+    void setName(final String name);
 
     /**
      * The kind of this symbol.
-     * 
      */
-    public abstract void setKind(final SymbolKind kind);
+    void setKind(final SymbolKind kind);
 
     /**
      * The location of this symbol. Overridden to return the DTO type.
-     * 
      */
-    public abstract LocationDTO getLocation();
+    LocationDTO getLocation();
 
     /**
      * The location of this symbol.
-     * 
      */
-    public abstract void setLocation(final LocationDTO location);
+    void setLocation(final LocationDTO location);
 
     /**
      * The name of the symbol containing this symbol.
-     * 
      */
-    public abstract void setContainerName(final String container);
+    void setContainerName(final String container);
 }

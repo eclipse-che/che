@@ -7,15 +7,17 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.CodeLensOptions;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface CodeLensOptionsDTO extends CodeLensOptions {
     /**
      * Code lens has a resolve provider as well.
-     * 
      */
-    public abstract void setResolveProvider(final boolean resolveProvider);
+    void setResolveProvider(final boolean resolveProvider);
 }

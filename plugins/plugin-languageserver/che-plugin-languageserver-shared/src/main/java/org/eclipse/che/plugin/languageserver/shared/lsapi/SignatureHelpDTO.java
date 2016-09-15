@@ -7,35 +7,34 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import java.util.List;
+import io.typefox.lsapi.SignatureHelp;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import io.typefox.lsapi.SignatureHelp;
+import java.util.List;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface SignatureHelpDTO extends SignatureHelp {
     /**
      * One or more signatures. Overridden to return the DTO type.
-     * 
      */
-    public abstract List<SignatureInformationDTO> getSignatures();
+    List<SignatureInformationDTO> getSignatures();
 
     /**
      * One or more signatures.
-     * 
      */
-    public abstract void setSignatures(final List<SignatureInformationDTO> signatures);
+    void setSignatures(final List<SignatureInformationDTO> signatures);
 
     /**
      * The active signature.
-     * 
      */
-    public abstract void setActiveSignature(final Integer activeSignature);
+    void setActiveSignature(final Integer activeSignature);
 
     /**
      * The active parameter of the active signature.
-     * 
      */
-    public abstract void setActiveParameter(final Integer activeParameter);
+    void setActiveParameter(final Integer activeParameter);
 }

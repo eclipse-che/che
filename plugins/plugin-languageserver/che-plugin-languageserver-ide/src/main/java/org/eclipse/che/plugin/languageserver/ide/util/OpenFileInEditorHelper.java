@@ -63,22 +63,6 @@ public class OpenFileInEditorHelper {
         }
 
         appContext.getWorkspaceRoot().getFile(filePath).then(openNode(selectionRange));
-
-//                  .then(new Operation<Optional<File>>() {
-//            @Override
-//            public void apply(Optional<File> file) throws OperationException {
-//                if (file.isPresent()) {
-//                    selectNode();
-//                }
-//            }
-//        }).then(new Operation<Optional<File>>() {
-//            @Override
-//            public void apply(Optional<File> file) throws OperationException {
-//                if (file.isPresent()) {
-//                    openNode(selectionRange);
-//                }
-//            }
-//        });
     }
 
     public void openFile(String filePath) {

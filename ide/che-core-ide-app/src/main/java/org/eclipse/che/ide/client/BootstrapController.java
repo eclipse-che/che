@@ -163,7 +163,6 @@ public class BootstrapController {
             component.start(new Callback<WsAgentComponent, Exception>() {
                 @Override
                 public void onSuccess(WsAgentComponent result) {
-                    Log.error(component.getClass(), result);
                     startWsAgentComponents(componentProviderIterator);
                 }
 

@@ -1,15 +1,13 @@
-/*
- * *****************************************************************************
- *  Copyright (c) 2012-2016 Codenvy, S.A.
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  which accompanies this distribution, and is available at
- *  http://www.eclipse.org/legal/epl-v10.html
+/*******************************************************************************
+ * Copyright (c) 2012-2016 Codenvy, S.A.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- *  Contributors:
- *    Codenvy, S.A. - initial API and implementation
- * *****************************************************************************
- */
+ * Contributors:
+ *   Codenvy, S.A. - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.server;
 
 import io.typefox.lsapi.CodeLensOptions;
@@ -36,14 +34,8 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class DtoConverter {
 
     public static InitializeResultDTO asDto(InitializeResult initializeResult) {
-//        List<LanguageDescriptionDTO> languageDescriptionDTOs = initializeResult.getSupportedLanguages()
-//                                                                               .stream()
-//                                                                               .map(DtoConverter::asDto)
-//                                                                               .collect(Collectors.toList());
-
         InitializeResultDTO initializeResultDTO = newDto(InitializeResultDTO.class);
         initializeResultDTO.setCapabilities(asDto(initializeResult.getCapabilities()));
-//        initializeResultDTO.setSupportedLanguages(languageDescriptionDTOs);
         return initializeResultDTO;
     }
 

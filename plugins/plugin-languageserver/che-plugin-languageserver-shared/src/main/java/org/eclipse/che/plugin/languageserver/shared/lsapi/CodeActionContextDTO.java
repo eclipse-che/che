@@ -7,23 +7,24 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import java.util.List;
+import io.typefox.lsapi.CodeActionContext;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import io.typefox.lsapi.CodeActionContext;
+import java.util.List;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface CodeActionContextDTO extends CodeActionContext {
     /**
      * An array of diagnostics. Overridden to return the DTO type.
-     * 
      */
-    public abstract List<DiagnosticDTO> getDiagnostics();
+    List<DiagnosticDTO> getDiagnostics();
 
     /**
      * An array of diagnostics.
-     * 
      */
-    public abstract void setDiagnostics(final List<DiagnosticDTO> diagnostics);
+    void setDiagnostics(final List<DiagnosticDTO> diagnostics);
 }

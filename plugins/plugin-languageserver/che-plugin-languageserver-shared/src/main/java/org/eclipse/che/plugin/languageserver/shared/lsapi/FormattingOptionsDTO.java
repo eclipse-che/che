@@ -7,29 +7,29 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import java.util.Map;
+import io.typefox.lsapi.FormattingOptions;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import io.typefox.lsapi.FormattingOptions;
+import java.util.Map;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface FormattingOptionsDTO extends FormattingOptions {
     /**
      * Size of a tab in spaces.
-     * 
      */
-    public abstract void setTabSize(final int tabSize);
+    void setTabSize(final int tabSize);
 
     /**
      * Prefer spaces over tabs.
-     * 
      */
-    public abstract void setInsertSpaces(final boolean insertSpaces);
+    void setInsertSpaces(final boolean insertSpaces);
 
     /**
      * Signature for further properties.
-     * 
      */
-    public abstract void setProperties(final Map<String, String> properties);
+    void setProperties(final Map<String, String> properties);
 }

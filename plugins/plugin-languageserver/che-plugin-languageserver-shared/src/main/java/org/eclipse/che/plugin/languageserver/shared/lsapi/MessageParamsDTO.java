@@ -12,17 +12,18 @@ import io.typefox.lsapi.MessageType;
 
 import org.eclipse.che.dto.shared.DTO;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface MessageParamsDTO extends MessageParams {
     /**
      * The message type.
-     * 
      */
-    public abstract void setType(final MessageType type);
+    void setType(final MessageType type);
 
     /**
      * The actual message.
-     * 
      */
-    public abstract void setMessage(final String message);
+    void setMessage(final String message);
 }

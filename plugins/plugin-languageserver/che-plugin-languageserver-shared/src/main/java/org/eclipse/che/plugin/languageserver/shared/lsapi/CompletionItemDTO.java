@@ -12,6 +12,9 @@ import io.typefox.lsapi.CompletionItemKind;
 
 import org.eclipse.che.dto.shared.DTO;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface CompletionItemDTO extends CompletionItem {
 
@@ -19,77 +22,67 @@ public interface CompletionItemDTO extends CompletionItem {
      * The TextDocumentIdentifier for which this completion item was generated.
      * Used to select proper language server
      */
-    public abstract TextDocumentIdentifierDTO getTextDocumentIdentifier();
+    TextDocumentIdentifierDTO getTextDocumentIdentifier();
 
-    public abstract void setTextDocumentIdentifier(TextDocumentIdentifierDTO identifier);
+    void setTextDocumentIdentifier(TextDocumentIdentifierDTO identifier);
 
     /**
      * The label of this completion item. By default also the text that is
      * inserted when selecting this completion.
-     * 
      */
-    public abstract void setLabel(final String label);
+    void setLabel(final String label);
 
     /**
      * The kind of this completion item. Based of the kind an icon is chosen by
      * the editor.
-     * 
      */
-    public abstract void setKind(final CompletionItemKind kind);
+    void setKind(final CompletionItemKind kind);
 
     /**
      * A human-readable string with additional information about this item, like
      * type or symbol information.
-     * 
      */
-    public abstract void setDetail(final String detail);
+    void setDetail(final String detail);
 
     /**
      * A human-readable string that represents a doc-comment.
-     * 
      */
-    public abstract void setDocumentation(final String documentation);
+    void setDocumentation(final String documentation);
 
     /**
      * A string that shoud be used when comparing this item with other items.
      * When `falsy` the label is used.
-     * 
      */
-    public abstract void setSortText(final String sortText);
+    void setSortText(final String sortText);
 
     /**
      * A string that should be used when filtering a set of completion items.
      * When `falsy` the label is used.
-     * 
      */
-    public abstract void setFilterText(final String filterText);
+    void setFilterText(final String filterText);
 
     /**
      * A string that should be inserted a document when selecting this
      * completion. When `falsy` the label is used.
-     * 
      */
-    public abstract void setInsertText(final String insertText);
+    void setInsertText(final String insertText);
 
     /**
      * An edit which is applied to a document when selecting this completion.
      * When an edit is provided the value of insertText is ignored. Overridden
      * to return the DTO type.
-     * 
      */
-    public abstract TextEditDTO getTextEdit();
+    TextEditDTO getTextEdit();
 
     /**
      * An edit which is applied to a document when selecting this completion.
      * When an edit is provided the value of insertText is ignored.
-     * 
      */
-    public abstract void setTextEdit(final TextEditDTO textEdit);
+    void setTextEdit(final TextEditDTO textEdit);
 
     /**
      * An data entry field that is preserved on a completion item between a
      * completion and a completion resolve request.
-     * 
      */
-    public abstract void setData(final Object data);
+    void setData(final Object data);
 }

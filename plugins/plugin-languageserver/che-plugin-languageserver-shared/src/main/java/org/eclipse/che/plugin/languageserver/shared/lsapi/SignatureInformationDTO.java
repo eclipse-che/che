@@ -7,36 +7,35 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import java.util.List;
+import io.typefox.lsapi.SignatureInformation;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import io.typefox.lsapi.SignatureInformation;
+import java.util.List;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface SignatureInformationDTO extends SignatureInformation {
     /**
      * The label of this signature. Will be shown in the UI.
-     * 
      */
-    public abstract void setLabel(final String label);
+    void setLabel(final String label);
 
     /**
      * The human-readable doc-comment of this signature. Will be shown in the UI
      * but can be omitted.
-     * 
      */
-    public abstract void setDocumentation(final String documentation);
+    void setDocumentation(final String documentation);
 
     /**
      * The parameters of this signature. Overridden to return the DTO type.
-     * 
      */
-    public abstract List<ParameterInformationDTO> getParameters();
+    List<ParameterInformationDTO> getParameters();
 
     /**
      * The parameters of this signature.
-     * 
      */
-    public abstract void setParameters(final List<ParameterInformationDTO> parameters);
+    void setParameters(final List<ParameterInformationDTO> parameters);
 }

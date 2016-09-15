@@ -14,18 +14,19 @@ import org.eclipse.che.dto.shared.DTO;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface WorkspaceEditDTO extends WorkspaceEdit {
     /**
      * Holds changes to existing resources.
      * Overridden to return the DTO type.
-     *
      */
-    public abstract Map<String, List<TextEditDTO>> getChanges();
+    Map<String, List<TextEditDTO>> getChanges();
     
     /**
      * Holds changes to existing resources.
-     * 
      */
-    public abstract void setChanges(final Map<String, List<TextEditDTO>> changes);
+    void setChanges(final Map<String, List<TextEditDTO>> changes);
 }

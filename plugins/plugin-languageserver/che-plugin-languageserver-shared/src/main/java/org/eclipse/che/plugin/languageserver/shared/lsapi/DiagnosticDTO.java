@@ -16,39 +16,33 @@ import org.eclipse.che.dto.shared.DTO;
 public interface DiagnosticDTO extends Diagnostic {
     /**
      * The range at which the message applies Overridden to return the DTO type.
-     * 
      */
-    public abstract RangeDTO getRange();
+    RangeDTO getRange();
 
     /**
      * The range at which the message applies
-     * 
      */
-    public abstract void setRange(final RangeDTO range);
+    void setRange(final RangeDTO range);
 
     /**
      * The diagnostic's severity. Can be omitted. If omitted it is up to the
      * client to interpret diagnostics as error, warning, info or hint.
-     * 
      */
-    public abstract void setSeverity(final DiagnosticSeverity severity);
+    void setSeverity(final DiagnosticSeverity severity);
 
     /**
      * The diagnostic's code. Can be omitted.
-     * 
      */
-    public abstract void setCode(final String code);
+    void setCode(final String code);
 
     /**
      * A human-readable string describing the source of this diagnostic, e.g.
      * 'typescript' or 'super lint'.
-     * 
      */
-    public abstract void setSource(final String source);
+    void setSource(final String source);
 
     /**
      * The diagnostic's message.
-     * 
      */
-    public abstract void setMessage(final String message);
+    void setMessage(final String message);
 }

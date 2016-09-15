@@ -7,29 +7,29 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import java.util.List;
+import io.typefox.lsapi.Command;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import io.typefox.lsapi.Command;
+import java.util.List;
 
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface CommandDTO extends Command {
     /**
      * Title of the command, like `save`.
-     * 
      */
-    public abstract void setTitle(final String title);
+    void setTitle(final String title);
 
     /**
      * The identifier of the actual command handler.
-     * 
      */
-    public abstract void setCommand(final String command);
+    void setCommand(final String command);
 
     /**
      * Arguments that the command handler should be invoked with.
-     * 
      */
-    public abstract void setArguments(final List<Object> arguments);
+    void setArguments(final List<Object> arguments);
 }

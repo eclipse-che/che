@@ -7,45 +7,42 @@
  */
 package org.eclipse.che.plugin.languageserver.shared.lsapi;
 
-import org.eclipse.che.dto.shared.DTO;
-
 import io.typefox.lsapi.DocumentRangeFormattingParams;
 
+import org.eclipse.che.dto.shared.DTO;
+
+/**
+ * @author Sven Efftinge
+ */
 @DTO
 public interface DocumentRangeFormattingParamsDTO extends DocumentRangeFormattingParams {
     /**
      * The range to format Overridden to return the DTO type.
-     * 
      */
-    public abstract RangeDTO getRange();
+    RangeDTO getRange();
 
     /**
      * The range to format
-     * 
      */
-    public abstract void setRange(final RangeDTO range);
+    void setRange(final RangeDTO range);
 
     /**
      * The document to format. Overridden to return the DTO type.
-     * 
      */
-    public abstract TextDocumentIdentifierDTO getTextDocument();
+    TextDocumentIdentifierDTO getTextDocument();
 
     /**
      * The document to format.
-     * 
      */
-    public abstract void setTextDocument(final TextDocumentIdentifierDTO textDocument);
+    void setTextDocument(final TextDocumentIdentifierDTO textDocument);
 
     /**
      * The format options Overridden to return the DTO type.
-     * 
      */
-    public abstract FormattingOptionsDTO getOptions();
+    FormattingOptionsDTO getOptions();
 
     /**
      * The format options
-     * 
      */
-    public abstract void setOptions(final FormattingOptionsDTO options);
+    void setOptions(final FormattingOptionsDTO options);
 }
