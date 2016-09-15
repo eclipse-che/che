@@ -189,20 +189,22 @@ func subscribeCallHF(body interface{}, t op.Transmitter) error {
 
 	// Check whether subscriber should see previous logs or not
 	if subscribeBody.After == "" {
-		return p.AddSubscriber(subscriber)
-	}
-
-	after, err := time.Parse(DateTimeFormat, subscribeBody.After)
-	if err != nil {
-		return op.NewArgsError(errors.New("Bad format of 'after', " + err.Error()))
-	}
-	if err := p.RestoreSubscriber(subscriber, after); err != nil {
-		return err
+		if err := p.AddSubscriber(subscriber); err != nil {
+			return err
+		}
+	} else {
+		after, err := time.Parse(DateTimeFormat, subscribeBody.After)
+		if err != nil {
+			return op.NewArgsError(errors.New("Bad format of 'after', " + err.Error()))
+		}
+		if err := p.RestoreSubscriber(subscriber, after); err != nil {
+			return err
+		}
 	}
 	t.Send(&subscribeResult{
 		Pid:        p.Pid,
 		EventTypes: subscribeBody.EventTypes,
-		Text:       "Successfully unsubscribed",
+		Text:       "Successfully subscribed",
 	})
 	return nil
 }

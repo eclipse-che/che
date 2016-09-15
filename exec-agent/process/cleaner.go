@@ -35,6 +35,7 @@ func (c *Cleaner) CleanupDeadUnusedProcesses() {
 			deadPoint := time.Now().Add(-c.threshold)
 			processes.Lock()
 			for _, v := range processes.items {
+				// TODO v.lastUsed should de done in read lock
 				if !v.Alive && v.lastUsed.Before(deadPoint) {
 					delete(processes.items, v.Pid)
 					if err := os.Remove(v.logfileName); err != nil {

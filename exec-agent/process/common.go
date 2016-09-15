@@ -26,6 +26,20 @@ func maskFromTypes(types string) uint64 {
 	return mask
 }
 
+func typesFromMask(mask uint64) string {
+	var types = make([]string, 0)
+	if (mask&ProcessStatusBit == ProcessStatusBit) {
+		types = append(types, "process_status")
+	}
+	if (mask&StdoutBit == StdoutBit) {
+		types = append(types, "stdout")
+	}
+	if (mask&StderrBit == StderrBit) {
+		types = append(types, "stderr")
+	}
+	return strings.Join(types, ",")
+}
+
 func parseTypes(types string) uint64 {
 	var mask uint64 = DefaultMask
 	if types != "" {

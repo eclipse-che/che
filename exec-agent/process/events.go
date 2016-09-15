@@ -1,4 +1,3 @@
-// TODO add subscribed event types
 package process
 
 const (
@@ -6,6 +5,7 @@ const (
 	ProcessDiedEventType    = "process_died"
 	StdoutEventType         = "stdout"
 	StderrEventType         = "stderr"
+	SubscribedEventType     = "subscribed"
 )
 
 type ProcessEventBody struct {
@@ -22,4 +22,9 @@ type ProcessStatusEventBody struct {
 type ProcessOutputEventBody struct {
 	ProcessEventBody
 	Text string `json:"text"`
+}
+
+type ProcessSubscribedEventBody struct {
+	ProcessEventBody
+	EventTypes string `json:"text"`
 }
