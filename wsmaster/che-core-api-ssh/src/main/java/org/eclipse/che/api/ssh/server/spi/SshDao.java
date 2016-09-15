@@ -28,16 +28,16 @@ public interface SshDao {
     /**
      * Creates new ssh pair for specified user.
      *
-     * @param owner
-     *         the id of the user who will be the owner of the ssh pair
      * @param sshPair
      *         ssh pair to create
      * @throws ConflictException
      *         when specified user already has ssh pair with given service and name
+     * @throws NullPointerException
+     *         when {@code sshPair} is null
      * @throws ServerException
      *         when any other error occurs during ssh pair creating
      */
-    void create(String owner, SshPairImpl sshPair) throws ServerException, ConflictException;
+    void create(SshPairImpl sshPair) throws ServerException, ConflictException;
 
     /**
      * Returns ssh pairs by owner and service.
@@ -47,6 +47,8 @@ public interface SshDao {
      * @param service
      *         service name of ssh pair
      * @return list of ssh pair with given service and owned by given service.
+     * @throws NullPointerException
+     *         when {@code owner} or {@code service} is null
      * @throws ServerException
      *         when any other error occurs during ssh pair fetching
      */
@@ -62,6 +64,8 @@ public interface SshDao {
      * @param name
      *         name of ssh pair
      * @return ssh pair instance
+     * @throws NullPointerException
+     *         when {@code owner} or {@code service} or {@code name} is null
      * @throws NotFoundException
      *         when ssh pair is not found
      * @throws ServerException
@@ -78,10 +82,26 @@ public interface SshDao {
      *         service name of ssh pair
      * @param name
      *         of ssh pair
+     * @throws NullPointerException
+     *         when {@code owner} or {@code service} or {@code name} is null
      * @throws NotFoundException
      *         when ssh pair is not found
      * @throws ServerException
      *         when any other error occurs during ssh pair removing
      */
     void remove(String owner, String service, String name) throws ServerException, NotFoundException;
+
+    /**
+     * Gets ssh pairs by owner.
+     *
+     * @param owner
+     *         the owner of the ssh key
+     * @return the list of the ssh key  pairs owned by the {@code owner}, or empty list if
+     * there are no ssh key pairs by the given {@code owner}
+     * @throws NullPointerException
+     *         when {@code owner} is null
+     * @throws ServerException
+     *         when any error occurs(e.g. database connection error)
+     */
+    List<SshPairImpl> get(String owner) throws ServerException;
 }

@@ -15,7 +15,7 @@ import com.google.gwt.http.client.RequestBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.MimeType;
@@ -68,13 +68,13 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
      * @return Factory through a Promise
      */
     @Override
-    public Promise<Factory> getFactory(@NotNull String factoryId, boolean validate) {
+    public Promise<FactoryDto> getFactory(@NotNull String factoryId, boolean validate) {
         StringBuilder url = new StringBuilder(API_FACTORY_BASE_URL).append(factoryId);
         if (validate) {
             url.append("?").append("validate=true");
         }
         return asyncRequestFactory.createGetRequest(url.toString()).header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
-                                  .send(unmarshallerFactory.newUnmarshaller(Factory.class));
+                                  .send(unmarshallerFactory.newUnmarshaller(FactoryDto.class));
     }
 
     /**
@@ -90,7 +90,7 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
      * {@inheritDoc}
      */
     @Override
-    public void getFactoryJson(String workspaceId, String path, AsyncRequestCallback<Factory> callback) {
+    public void getFactoryJson(String workspaceId, String path, AsyncRequestCallback<FactoryDto> callback) {
         final StringBuilder url = new StringBuilder(API_FACTORY_BASE_URL + "workspace/").append(workspaceId);
         if (path != null) {
             url.append("?path=").append(path);
@@ -102,7 +102,7 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
     }
 
     @Override
-    public Promise<Factory> getFactoryJson(String workspaceId, String path) {
+    public Promise<FactoryDto> getFactoryJson(String workspaceId, String path) {
         String url = API_FACTORY_BASE_URL + "workspace/" + workspaceId;
         if (path != null) {
             url += path;
@@ -111,20 +111,20 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
         return asyncRequestFactory.createGetRequest(url)
                                   .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Getting info about factory..."))
-                                  .send(unmarshallerFactory.newUnmarshaller(Factory.class));
+                                  .send(unmarshallerFactory.newUnmarshaller(FactoryDto.class));
     }
 
     @Override
-    public Promise<Factory> saveFactory(@NotNull Factory factory) {
+    public Promise<FactoryDto> saveFactory(@NotNull FactoryDto factory) {
         return asyncRequestFactory.createPostRequest(API_FACTORY_BASE_URL, factory)
                                   .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                                   .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Creating factory..."))
-                                  .send(unmarshallerFactory.newUnmarshaller(Factory.class));
+                                  .send(unmarshallerFactory.newUnmarshaller(FactoryDto.class));
     }
 
     @Override
-    public Promise<List<Factory>> findFactory(@Nullable Integer skipCount,
+    public Promise<List<FactoryDto>> findFactory(@Nullable Integer skipCount,
                                               @Nullable Integer maxItems,
                                               @Nullable List<Pair<String, String>> params) {
         final List<Pair<String, String>> allParams = new LinkedList<>();
@@ -141,15 +141,15 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
                                   .header(HTTPHeader.ACCEPT, MimeType.APPLICATION_JSON)
                                   .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Searching factory..."))
-                                  .send(unmarshallerFactory.newListUnmarshaller(Factory.class));
+                                  .send(unmarshallerFactory.newListUnmarshaller(FactoryDto.class));
     }
 
     @Override
-    public Promise<Factory> updateFactory(String id, Factory factory) {
+    public Promise<FactoryDto> updateFactory(String id, FactoryDto factory) {
         return asyncRequestFactory.createRequest(RequestBuilder.PUT, API_FACTORY_BASE_URL + id, factory, false)
                                   .header(HTTPHeader.CONTENT_TYPE, MimeType.APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Updating factory..."))
-                                  .send(unmarshallerFactory.newUnmarshaller(Factory.class));
+                                  .send(unmarshallerFactory.newUnmarshaller(FactoryDto.class));
     }
 
 
@@ -163,7 +163,7 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
      * @return Factory through a Promise
      */
     @Override
-    public Promise<Factory> resolveFactory(@NotNull final Map<String, String> factoryParameters, boolean validate) {
+    public Promise<FactoryDto> resolveFactory(@NotNull final Map<String, String> factoryParameters, boolean validate) {
 
         // Init string with JAX-RS path
         StringBuilder url = new StringBuilder(API_FACTORY_BASE_URL + "resolver");
@@ -173,7 +173,7 @@ public class FactoryServiceClientImpl implements FactoryServiceClient {
             url.append("?validate=true");
         }
         return asyncRequestFactory.createPostRequest(url.toString(), toJson(factoryParameters)).header(ACCEPT, APPLICATION_JSON)
-                           .send(unmarshallerFactory.newUnmarshaller(Factory.class));
+                           .send(unmarshallerFactory.newUnmarshaller(FactoryDto.class));
     }
 
     /**

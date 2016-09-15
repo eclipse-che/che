@@ -63,14 +63,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-java-mysql.svg",
       "mediaType": "image/svg+xml"
@@ -163,14 +155,6 @@
 
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-che.svg",
       "mediaType": "image/svg+xml"
@@ -240,14 +224,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
@@ -294,14 +270,6 @@
       "defaultEnv": "default",
       "description": null
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-blank.svg",
       "mediaType": "image/svg+xml"
@@ -367,14 +335,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-android.svg",
       "mediaType": "image/svg+xml"
@@ -442,14 +402,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-cpp.svg",
       "mediaType": "image/svg+xml"
@@ -522,14 +474,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-dotnet.svg",
       "mediaType": "image/svg+xml"
@@ -593,14 +537,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-go.svg",
       "mediaType": "image/svg+xml"
@@ -660,14 +596,6 @@
       "defaultEnv": "default",
       "description": null
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-hadoop.svg",
       "mediaType": "image/svg+xml"
@@ -745,14 +673,6 @@
       "defaultEnv": "default",
       "description": null
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-node.svg",
       "mediaType": "image/svg+xml"
@@ -849,14 +769,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-php.svg",
       "mediaType": "image/svg+xml"
@@ -922,14 +834,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-python.svg",
       "mediaType": "image/svg+xml"
@@ -1008,14 +912,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-ruby.svg",
       "mediaType": "image/svg+xml"
@@ -1063,15 +959,7 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null
-    },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ]
+    }
   },
   {
     "id": "java-centos",
@@ -1140,14 +1028,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
@@ -1220,14 +1100,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
@@ -1306,14 +1178,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-php.svg",
       "mediaType": "image/svg+xml"
@@ -1379,14 +1243,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-python.svg",
       "mediaType": "image/svg+xml"
@@ -1449,14 +1305,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-python.svg",
       "mediaType": "image/svg+xml"
@@ -1527,15 +1375,7 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null
-    },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ]
+    }
   },
   {
     "id": "tomee-default",
@@ -1595,14 +1435,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
@@ -1650,15 +1482,7 @@
     "source": {
       "type": "image",
       "origin": "codenvy/ubuntu_jre"
-    },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ]
+    }    
   },
   {
     "id": "bitnami-express",
@@ -1723,14 +1547,6 @@
       "description": null,
       "commands": []
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-bitnami.svg",
       "mediaType": "image/svg+xml"
@@ -1809,14 +1625,6 @@
       "description": null,
       "commands": []
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-bitnami.svg",
       "mediaType": "image/svg+xml"
@@ -1886,14 +1694,6 @@
       "description": null,
       "commands": []
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-bitnami.svg",
       "mediaType": "image/svg+xml"
@@ -1962,14 +1762,6 @@
       "description": null,
       "commands": []
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-bitnami.svg",
       "mediaType": "image/svg+xml"
@@ -2038,14 +1830,6 @@
       "description": null,
       "commands": []
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-bitnami.svg",
       "mediaType": "image/svg+xml"
@@ -2114,14 +1898,6 @@
       "description": null,
       "commands": []
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-bitnami.svg",
       "mediaType": "image/svg+xml"
@@ -2190,14 +1966,6 @@
       "description": null,
       "commands": []
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-bitnami.svg",
       "mediaType": "image/svg+xml"

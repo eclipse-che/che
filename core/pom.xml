@@ -30,5 +30,7 @@
         <module>che-core-api-dto-maven-plugin</module>
         <module>che-core-api-core</module>
         <module>che-core-api-model</module>
+        <module>che-core-api-jdbc</module>
+        <module>che-core-api-jdbc-vendor-h2</module>
     </modules>
 </project>

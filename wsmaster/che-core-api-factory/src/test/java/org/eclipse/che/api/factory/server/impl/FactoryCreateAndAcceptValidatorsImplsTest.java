@@ -12,7 +12,7 @@ package org.eclipse.che.api.factory.server.impl;
 
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
@@ -41,7 +41,7 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
     private PreferenceDao preferenceDao;
 
     @Mock
-    private Factory factory;
+    private FactoryDto factory;
 
     @Mock
     private WorkspaceValidator workspaceConfigValidator;
@@ -54,49 +54,45 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
     @BeforeMethod
     public void setUp() throws Exception {
 
-        acceptValidator = new FactoryAcceptValidatorImpl(preferenceDao);
-        createValidator = new FactoryCreateValidatorImpl(preferenceDao, workspaceConfigValidator);
+        acceptValidator = new FactoryAcceptValidatorImpl();
+        createValidator = new FactoryCreateValidatorImpl(workspaceConfigValidator);
     }
 
     @Test
     public void testValidateOnCreate() throws ApiException {
         FactoryCreateValidatorImpl spy = spy(createValidator);
         doNothing().when(spy)
-                   .validateProjects(any(Factory.class));
+                   .validateProjects(any(FactoryDto.class));
         doNothing().when(spy)
-                   .validateAccountId(any(Factory.class));
+                   .validateCurrentTimeAfterSinceUntil(any(FactoryDto.class));
         doNothing().when(spy)
-                   .validateCurrentTimeAfterSinceUntil(any(Factory.class));
-        doNothing().when(spy)
-                   .validateProjectActions(any(Factory.class));
+                   .validateProjectActions(any(FactoryDto.class));
         doNothing().when(workspaceConfigValidator)
                    .validateConfig(any(WorkspaceConfig.class));
 
         //main invoke
         spy.validateOnCreate(factory);
 
-        verify(spy).validateProjects(any(Factory.class));
-        verify(spy).validateAccountId(any(Factory.class));
-        verify(spy).validateCurrentTimeAfterSinceUntil(any(Factory.class));
-        verify(spy).validateOnCreate(any(Factory.class));
-        verify(spy).validateProjectActions(any(Factory.class));
+        verify(spy).validateProjects(any(FactoryDto.class));
+        verify(spy).validateCurrentTimeAfterSinceUntil(any(FactoryDto.class));
+        verify(spy).validateOnCreate(any(FactoryDto.class));
+        verify(spy).validateProjectActions(any(FactoryDto.class));
         verifyNoMoreInteractions(spy);
     }
-
 
 
     @Test
     public void testOnAcceptEncoded() throws ApiException {
         FactoryAcceptValidatorImpl spy = spy(acceptValidator);
-        doNothing().when(spy).validateCurrentTimeBetweenSinceUntil(any(Factory.class));
-        doNothing().when(spy).validateProjectActions(any(Factory.class));
+        doNothing().when(spy).validateCurrentTimeBetweenSinceUntil(any(FactoryDto.class));
+        doNothing().when(spy).validateProjectActions(any(FactoryDto.class));
 
         //main invoke
         spy.validateOnAccept(factory);
 
-        verify(spy).validateCurrentTimeBetweenSinceUntil(any(Factory.class));
-        verify(spy).validateOnAccept(any(Factory.class));
-        verify(spy).validateProjectActions(any(Factory.class));
+        verify(spy).validateCurrentTimeBetweenSinceUntil(any(FactoryDto.class));
+        verify(spy).validateOnAccept(any(FactoryDto.class));
+        verify(spy).validateProjectActions(any(FactoryDto.class));
         verifyNoMoreInteractions(spy);
     }
 

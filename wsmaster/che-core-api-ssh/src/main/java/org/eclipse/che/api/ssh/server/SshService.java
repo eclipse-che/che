@@ -131,7 +131,7 @@ public class SshService extends Service {
             throw new BadRequestException("Key content was not provided.");
         }
 
-        sshManager.createPair(getCurrentUserId(), new SshPairImpl(service, name, publicKey, privateKey));
+        sshManager.createPair(new SshPairImpl(getCurrentUserId(), service, name, publicKey, privateKey));
 
         // We should send 200 response code and body with empty line
         // through specific of html form that doesn't invoke complete submit handler
@@ -158,7 +158,7 @@ public class SshService extends Service {
             throw new BadRequestException("Key content was not provided.");
         }
 
-        sshManager.createPair(getCurrentUserId(), new SshPairImpl(sshPair));
+        sshManager.createPair(new SshPairImpl(getCurrentUserId(), sshPair));
     }
 
     @GET
