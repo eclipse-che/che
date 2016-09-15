@@ -28,4 +28,4 @@
 - [ ] Tests passed
 
 
-Please review [Che's Contributing Guide](https://github.com/eclipse/che/CONTRIBUTING.MD) for best practices.
+Please review [Che's Contributing Guide](https://github.com/eclipse/che/blob/master/CONTRIBUTING.md) for best practices.
