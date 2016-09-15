@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.local;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 
@@ -18,8 +19,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Recipe;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.local.storage.LocalStorage;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
@@ -30,7 +29,6 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -41,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -56,7 +55,10 @@ import static java.util.stream.Collectors.toList;
 @Singleton
 public class LocalWorkspaceDaoImpl implements WorkspaceDao {
 
-    private final Map<String, WorkspaceImpl> workspaces;
+    public static final String FILENAME = "workspaces.json";
+
+    @VisibleForTesting
+    final         Map<String, WorkspaceImpl> workspaces;
     private final LocalStorage               localStorage;
 
     @Inject
@@ -65,7 +67,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
                 ImmutableMap.of(Recipe.class, new RecipeTypeAdapter(),
                                 ProjectConfig.class, new ProjectConfigAdapter(),
                                 WorkspaceConfigImpl.class, new WorkspaceConfigDeserializer(cfgAdapter));
-        this.localStorage = factory.create("workspaces.json", adapters);
+        this.localStorage = factory.create(FILENAME, adapters);
         this.workspaces = new HashMap<>();
     }
 
@@ -77,68 +79,82 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         }
     }
 
-    @PreDestroy
     public synchronized void saveWorkspaces() throws IOException {
         localStorage.store(workspaces);
     }
 
     @Override
     public synchronized WorkspaceImpl create(WorkspaceImpl workspace) throws ConflictException, ServerException {
+        requireNonNull(workspace, "Required non-null workspace");
         if (workspaces.containsKey(workspace.getId())) {
             throw new ConflictException("Workspace with id " + workspace.getId() + " already exists");
         }
-        if (find(workspace.getConfig().getName(), workspace.getNamespace()).isPresent()) {
+        if (find(workspace.getName(), workspace.getNamespace()).isPresent()) {
             throw new ConflictException(format("Workspace with name %s and owner %s already exists",
                                                workspace.getConfig().getName(),
                                                workspace.getNamespace()));
         }
+
         workspace.setRuntime(null);
         workspace.setStatus(WorkspaceStatus.STOPPED);
-        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace));
+        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace, workspace.getAccount()));
         return workspace;
     }
 
     @Override
-    public synchronized WorkspaceImpl update(WorkspaceImpl workspace)
-            throws NotFoundException, ConflictException, ServerException {
+    public synchronized WorkspaceImpl update(WorkspaceImpl workspace) throws NotFoundException,
+                                                                             ConflictException,
+                                                                             ServerException {
+        requireNonNull(workspace, "Required non-null workspace");
         if (!workspaces.containsKey(workspace.getId())) {
             throw new NotFoundException("Workspace with id " + workspace.getId() + " was not found");
         }
+        if (find(workspace.getName(), workspace.getNamespace()).isPresent()) {
+            throw new ConflictException(format("Workspace with name %s and owner %s already exists",
+                                               workspace.getConfig().getName(),
+                                               workspace.getNamespace()));
+        }
         workspace.setStatus(null);
         workspace.setRuntime(null);
-        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace));
+        workspaces.put(workspace.getId(), new WorkspaceImpl(workspace, workspace.getAccount()));
         return workspace;
     }
 
     @Override
     public synchronized void remove(String id) throws ConflictException, ServerException {
+        requireNonNull(id, "Required non-null id");
         workspaces.remove(id);
     }
 
     @Override
     public synchronized WorkspaceImpl get(String id) throws NotFoundException, ServerException {
+        requireNonNull(id, "Required non-null id");
         final WorkspaceImpl workspace = workspaces.get(id);
         if (workspace == null) {
             throw new NotFoundException("Workspace with id " + id + " was not found");
         }
-        return new WorkspaceImpl(workspace);
+        return new WorkspaceImpl(workspace, workspace.getAccount());
     }
 
     @Override
     public synchronized WorkspaceImpl get(String name, String namespace) throws NotFoundException, ServerException {
+        requireNonNull(name, "Required non-null name");
+        requireNonNull(namespace, "Required non-null namespace");
         final Optional<WorkspaceImpl> wsOpt = find(name, namespace);
         if (!wsOpt.isPresent()) {
             throw new NotFoundException(format("Workspace with name %s and owner %s was not found", name, namespace));
         }
-        return new WorkspaceImpl(wsOpt.get());
+        WorkspaceImpl workspace = wsOpt.get();
+        return new WorkspaceImpl(workspace, workspace.getAccount());
     }
 
     @Override
     public synchronized List<WorkspaceImpl> getByNamespace(String namespace) throws ServerException {
+        requireNonNull(namespace, "Required non-null namespace");
         return workspaces.values()
                          .stream()
                          .filter(ws -> ws.getNamespace().equals(namespace))
-                         .map(WorkspaceImpl::new)
+                         .map(ws -> new WorkspaceImpl(ws, ws.getAccount()))
                          .collect(toList());
     }
 

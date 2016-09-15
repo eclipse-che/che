@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
@@ -75,8 +76,9 @@ import static org.testng.Assert.assertNotNull;
 @Listeners(MockitoTestNGListener.class)
 public class WorkspaceRuntimesTest {
 
-    private static String WORKSPACE_ID = "workspace123";
-    private static String ENV_NAME     = "default-env";
+    private static final String WORKSPACE_ID = "workspace123";
+    private static final String ENV_NAME     = "default-env";
+    private static final String NAMESPACE    = "wsNamespace";
 
     @Mock
     private EventService eventService;
@@ -601,7 +603,7 @@ public class WorkspaceRuntimesTest {
                                                           .setEnvironments(singletonMap(ENV_NAME, environment))
                                                           .setDefaultEnv(ENV_NAME)
                                                           .build();
-        return new WorkspaceImpl(WORKSPACE_ID, "user123", wsConfig);
+        return new WorkspaceImpl(WORKSPACE_ID, new AccountImpl("accountId", "user123", "test"), wsConfig);
     }
 
     private static class TestMachineInstance extends NoOpMachineInstance {

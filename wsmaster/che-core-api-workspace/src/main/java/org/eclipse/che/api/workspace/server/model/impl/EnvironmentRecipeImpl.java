@@ -12,16 +12,30 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.EnvironmentRecipe;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import java.util.Objects;
 
 /**
  * @author Alexander Garagatyi
  */
+@Embeddable
 public class EnvironmentRecipeImpl implements EnvironmentRecipe {
+
+    @Basic
     private String type;
+
+    @Basic
     private String contentType;
+
+    @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Basic
     private String location;
+
+    public EnvironmentRecipeImpl() {}
 
     public EnvironmentRecipeImpl(String type,
                                  String contentType,

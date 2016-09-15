@@ -13,8 +13,8 @@ package org.eclipse.che.api.factory.server;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
 
-import org.eclipse.che.api.factory.shared.dto.Factory;
-import org.eclipse.che.api.factory.shared.dto.FactoryV4_0;
+import org.eclipse.che.api.core.model.factory.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
 
 import javax.inject.Singleton;
@@ -30,7 +30,7 @@ public class FactoryMessageBodyAdapter extends WorkspaceConfigMessageBodyAdapter
 
     @Override
     public Set<Class<?>> getTriggers() {
-        return ImmutableSet.of(Factory.class, FactoryV4_0.class);
+        return ImmutableSet.of(Factory.class, FactoryDto.class);
     }
 
     @Override
