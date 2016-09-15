@@ -410,8 +410,9 @@ public class WorkspaceRuntimes {
             }
         }
 
-        Instance instance = environmentEngine.startMachine(workspaceId, machineConfig);
-        launchAgents(instance, Collections.singletonList("org.eclipse.che.terminal"));
+        List<String> agents = Collections.singletonList("org.eclipse.che.terminal");
+        Instance instance = environmentEngine.startMachine(workspaceId, machineConfig, agents);
+        launchAgents(instance, agents);
 
         try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);

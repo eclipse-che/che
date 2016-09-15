@@ -176,12 +176,11 @@ public class MachineAppliancePresenterTest {
 
     @Test
     public void constructorShouldBeVerified() {
-        verify(widgetsFactory, times(4)).createTabHeader(SOME_TEXT);
+        verify(widgetsFactory, times(3)).createTabHeader(SOME_TEXT);
 
         verify(entityFactory).createTab(eq(tabHeader), eq(terminalContainer), Matchers.<TabSelectHandler>anyObject());
         verify(entityFactory).createTab(eq(tabHeader), eq(infoPresenter), Matchers.<TabSelectHandler>anyObject());
         verify(entityFactory).createTab(eq(tabHeader), eq(serverPresenter), Matchers.<TabSelectHandler>anyObject());
-        verify(entityFactory).createTab(eq(tabHeader), eq(recipeTabPresenter), Matchers.<TabSelectHandler>anyObject());
 
         verify(locale).tabTerminal();
         verify(locale).tabInfo();
@@ -190,7 +189,6 @@ public class MachineAppliancePresenterTest {
         verify(tabContainer).addTab(terminalTab);
         verify(tabContainer).addTab(infoTab);
         verify(tabContainer).addTab(serverTab);
-        verify(tabContainer).addTab(recipeTab);
 
         verify(tabContainer).getView();
 

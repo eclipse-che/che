@@ -95,7 +95,6 @@ public class MachineAppliancePresenter extends PartStackPresenter implements Act
         final String terminalTabName = locale.tabTerminal();
         final String infoTabName = locale.tabInfo();
         final String serverTabName = locale.tabServer();
-        final String recipeTabName = locale.tabRecipe();
 
         TabSelectHandler terminalHandler = new TabSelectHandler() {
             @Override
@@ -122,14 +121,6 @@ public class MachineAppliancePresenter extends PartStackPresenter implements Act
             }
         };
         createAndAddTab(serverTabName, serverPresenter, serverHandler);
-
-        TabSelectHandler recipeHandler = new TabSelectHandler() {
-            @Override
-            public void onTabSelected() {
-                selectedMachine.setActiveTabName(recipeTabName);
-            }
-        };
-        createAndAddTab(recipeTabName, recipeTabPresenter, recipeHandler);
 
         this.view.addContainer(tabContainer.getView());
         this.view.addContainer(recipesContainer.getView());
