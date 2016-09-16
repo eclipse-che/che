@@ -26,5 +26,5 @@ type ProcessOutputEventBody struct {
 
 type ProcessSubscribedEventBody struct {
 	ProcessEventBody
-	EventTypes string `json:"text"`
+	EventTypes string `json:"eventTypes"`
 }
