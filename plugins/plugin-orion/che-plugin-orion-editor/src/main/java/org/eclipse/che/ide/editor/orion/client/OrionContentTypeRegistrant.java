@@ -27,7 +27,7 @@ import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * Component to register new content types and corresponding highlighting configuration.
- * 
+ *
  * @author Sven Efftinge (typefox.io)
  */
 public class OrionContentTypeRegistrant {

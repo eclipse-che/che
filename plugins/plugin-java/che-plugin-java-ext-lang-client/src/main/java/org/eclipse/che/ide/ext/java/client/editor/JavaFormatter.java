@@ -19,6 +19,7 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.ext.java.shared.dto.Change;
 import org.eclipse.che.ide.api.editor.document.Document;
@@ -66,6 +67,11 @@ public class JavaFormatter implements ContentFormatter {
                 Log.error(getClass(), arg.getCause());
             }
         });
+    }
+
+    @Override
+    public void install(TextEditor editor) {
+        // does nothing by default
     }
 
     private void applyChanges(List<Change> changes, Document document) {

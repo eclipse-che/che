@@ -123,6 +123,7 @@ public class WsMasterModule extends AbstractModule {
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
         install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
         install(new org.eclipse.che.api.machine.server.MachineModule());
+        install(new org.eclipse.che.api.agent.server.AgentModule());
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerExtServerModule());
         install(new org.eclipse.che.plugin.docker.machine.ext.DockerTerminalModule());
         install(new org.eclipse.che.swagger.deploy.DocsModule());
