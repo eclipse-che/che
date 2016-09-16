@@ -14,17 +14,21 @@ import org.eclipse.che.api.core.model.machine.MachineLimits;
 
 /**
  * @author Alexander Garagatyi
+ * @author Yevhenii Voevodin
  */
 public class MachineLimitsImpl implements MachineLimits {
-    private final int memory;
+
+    private int memory;
 
     public MachineLimitsImpl(MachineLimits machineLimits) {
-        if(machineLimits != null) {
+        if (machineLimits != null) {
             memory = machineLimits.getRam();
         } else {
             memory = 0;
         }
     }
+
+    public MachineLimitsImpl() {}
 
     public MachineLimitsImpl(int memory) {
         this.memory = memory;
@@ -33,6 +37,10 @@ public class MachineLimitsImpl implements MachineLimits {
     @Override
     public int getRam() {
         return memory;
+    }
+
+    public void setRam(int memory) {
+        this.memory = memory;
     }
 
     @Override
@@ -49,5 +57,12 @@ public class MachineLimitsImpl implements MachineLimits {
     @Override
     public int hashCode() {
         return memory;
+    }
+
+    @Override
+    public String toString() {
+        return "MachineLimitsImpl{" +
+               "memory=" + memory +
+               '}';
     }
 }

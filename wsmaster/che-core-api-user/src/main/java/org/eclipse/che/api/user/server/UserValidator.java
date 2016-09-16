@@ -10,37 +10,33 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server;
 
+import com.google.common.annotations.VisibleForTesting;
+
+import org.eclipse.che.account.spi.AccountValidator;
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
-import org.eclipse.che.commons.lang.NameGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-// TODO extract normalization code from the validator as it is not related to the validation at all
 /**
  * Utils for username validation and normalization.
  *
  * @author Mihail Kuznyetsov
  * @author Yevhenii Voevodin
+ * @author Sergii Leschenko
  */
 public class UserValidator {
-    private static final Logger LOG = LoggerFactory.getLogger(UserValidator.class);
+    @VisibleForTesting
+    final static String GENERATED_NAME_PREFIX = "username";
 
-    private static final Pattern ILLEGAL_USERNAME_CHARACTERS = Pattern.compile("[^a-zA-Z0-9]");
-    private static final Pattern VALID_USERNAME              = Pattern.compile("^[a-zA-Z0-9]*");
-
-    private final UserManager userManager;
+    private final AccountValidator accountValidator;
 
     @Inject
-    public UserValidator(UserManager userManager) {
-        this.userManager = userManager;
+    public UserValidator(AccountValidator accountValidator) {
+        this.accountValidator = accountValidator;
     }
 
     /**
@@ -106,7 +102,7 @@ public class UserValidator {
      * @return true if valid name, false otherwise
      */
     public boolean isValidName(String name) {
-        return name != null && VALID_USERNAME.matcher(name).matches();
+        return accountValidator.isValidName(name);
     }
 
     /**
@@ -119,27 +115,6 @@ public class UserValidator {
      * @return username without illegal characters
      */
     public String normalizeUserName(String name) throws ServerException {
-        String normalized = ILLEGAL_USERNAME_CHARACTERS.matcher(name).replaceAll("");
-        String candidate = normalized.isEmpty() ? NameGenerator.generate("username", 4) : normalized;
-
-        int i = 1;
-        try {
-            while (userExists(candidate)) {
-                candidate = normalized.isEmpty() ? NameGenerator.generate("username", 4) : normalized + String.valueOf(i++);
-            }
-        } catch (ServerException e) {
-            LOG.warn("Error occurred during username normalization", e);
-            throw e;
-        }
-        return candidate;
-    }
-
-    private boolean userExists(String username) throws ServerException {
-        try {
-            userManager.getByName(username);
-        } catch (NotFoundException e) {
-            return false;
-        }
-        return true;
+        return accountValidator.normalizeAccountName(name, GENERATED_NAME_PREFIX);
     }
 }

@@ -12,6 +12,12 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
+import javax.persistence.Basic;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,10 +25,23 @@ import java.util.Objects;
 /**
  * @author Alexander Garagatyi
  */
+@Entity(name = "ServerConf")
 public class ServerConf2Impl implements ServerConf2 {
-    private String              port;
-    private String              protocol;
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Basic
+    private String port;
+
+    @Basic
+    private String protocol;
+
+    @ElementCollection
     private Map<String, String> properties;
+
+    public ServerConf2Impl() {}
 
     public ServerConf2Impl(String port,
                            String protocol,

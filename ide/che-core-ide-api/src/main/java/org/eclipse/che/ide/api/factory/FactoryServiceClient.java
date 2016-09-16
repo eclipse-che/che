@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.factory;
 
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
@@ -36,7 +36,7 @@ public interface FactoryServiceClient {
      *         indicates whether or not factory should be validated by accept validator
      * @return Factory through a Promise
      */
-    Promise<Factory> getFactory(@NotNull String factoryId, boolean validate);
+    Promise<FactoryDto> getFactory(@NotNull String factoryId, boolean validate);
 
     /**
      * @param factoryId
@@ -58,7 +58,7 @@ public interface FactoryServiceClient {
      * @param callback
      *         callback which returns snippet of the factory or exception if occurred
      */
-    void getFactoryJson(@NotNull String workspaceId, @NotNull String path, @NotNull AsyncRequestCallback<Factory> callback);
+    void getFactoryJson(@NotNull String workspaceId, @NotNull String path, @NotNull AsyncRequestCallback<FactoryDto> callback);
 
     /**
      * Get factory as JSON.
@@ -67,18 +67,18 @@ public interface FactoryServiceClient {
      *         workspace id
      * @param path
      *         project path
-     * @return a promise that resolves to the {@link Factory}, or rejects with an error
+     * @return a promise that resolves to the {@link FactoryDto}, or rejects with an error
      */
-    Promise<Factory> getFactoryJson(@NotNull String workspaceId, @Nullable String path);
+    Promise<FactoryDto> getFactoryJson(@NotNull String workspaceId, @Nullable String path);
 
     /**
      * Save factory to storage.
      *
      * @param factory
      *         factory to save
-     * @return a promise that resolves to the {@link Factory}, or rejects with an error
+     * @return a promise that resolves to the {@link FactoryDto}, or rejects with an error
      */
-    Promise<Factory> saveFactory(@NotNull Factory factory);
+    Promise<FactoryDto> saveFactory(@NotNull FactoryDto factory);
 
     /**
      * Save factory to storage.
@@ -87,9 +87,9 @@ public interface FactoryServiceClient {
      *         the number of the items to skip
      * @param maxItems
      *         the limit of the items in the response, default is 30
-     * @return a promise that will provide a list of {@link Factory}s, or rejects with an error
+     * @return a promise that will provide a list of {@link FactoryDto}s, or rejects with an error
      */
-    Promise<List<Factory>> findFactory(Integer skipCount, Integer maxItems, List<Pair<String, String>> params);
+    Promise<List<FactoryDto>> findFactory(Integer skipCount, Integer maxItems, List<Pair<String, String>> params);
 
     /**
      * Updates factory by id
@@ -100,7 +100,7 @@ public interface FactoryServiceClient {
      *         update body
      * @return updated factory
      */
-    Promise<Factory> updateFactory(String id, Factory factory);
+    Promise<FactoryDto> updateFactory(String id, FactoryDto factory);
 
 
     /**
@@ -112,6 +112,6 @@ public interface FactoryServiceClient {
      *         indicates whether or not factory should be validated by accept validator
      * @return Factory through a Promise
      */
-    Promise<Factory> resolveFactory(@NotNull Map<String, String> factoryParameters, boolean validate);
+    Promise<FactoryDto> resolveFactory(@NotNull Map<String, String> factoryParameters, boolean validate);
 
 }
