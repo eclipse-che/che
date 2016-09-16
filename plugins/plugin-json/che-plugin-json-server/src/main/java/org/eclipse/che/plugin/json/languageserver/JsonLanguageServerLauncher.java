@@ -64,7 +64,7 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
     }
 
     protected JsonBasedLanguageServer connectToLanguageServer(Process languageServerProcess) {
-        JsonBasedLanguageServer languageServer = new JsonBasedLanguageServer();
+        JsonBasedLanguageServer languageServer = new JsonLanguageServer();
         languageServer.connect(languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
         return languageServer;
     }
