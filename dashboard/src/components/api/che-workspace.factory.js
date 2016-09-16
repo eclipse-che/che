@@ -11,6 +11,9 @@
 'use strict';
 
 import {CheWorkspaceAgent} from './che-workspace-agent';
+import {ComposeEnvironmentManager} from './environment/compose-environment-manager';
+import {DockerFileEnvironmentManager} from './environment/docker-file-environment-manager';
+import {DockerImageEnvironmentManager} from './environment/docker-image-environment-manager';
 
 /**
  * This class is handling the workspace retrieval
@@ -23,7 +26,7 @@ export class CheWorkspace {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor ($resource, $q, cheWebsocket, lodash) {
+  constructor ($resource, $q, cheWebsocket, lodash, cheEnvironmentRegistry, $log) {
     // keep resource
     this.$resource = $resource;
     this.$q = $q;
@@ -60,6 +63,10 @@ export class CheWorkspace {
         createSnapshot: {method: 'POST', url: '/api/workspace/:workspaceId/snapshot'}
       }
     );
+
+    cheEnvironmentRegistry.addEnvironmentManager('compose', new ComposeEnvironmentManager($log));
+    cheEnvironmentRegistry.addEnvironmentManager('dockerfile', new DockerFileEnvironmentManager($log));
+    cheEnvironmentRegistry.addEnvironmentManager('dockerimage', new DockerImageEnvironmentManager($log));
   }
 
   getWorkspaceAgent(workspaceId) {

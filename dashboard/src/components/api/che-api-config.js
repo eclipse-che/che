@@ -28,6 +28,7 @@ import {CheAdminPlugins} from './che-admin-plugins.factory';
 import {CheAdminService} from './che-admin-service.factory';
 import {CheRemote} from './remote/che-remote.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
+import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
 
 export class ApiConfig {
 
@@ -49,5 +50,6 @@ export class ApiConfig {
     register.factory('cheAPI', CheAPI);
     register.factory('cheRemote', CheRemote);
     register.factory('cheOAuthProvider', CheOAuthProvider);
+    register.factory('cheEnvironmentRegistry', CheEnvironmentRegistry);
   }
 }
