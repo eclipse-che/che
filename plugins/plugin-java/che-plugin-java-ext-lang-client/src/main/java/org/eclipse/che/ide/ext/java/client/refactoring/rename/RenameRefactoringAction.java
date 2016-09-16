@@ -15,11 +15,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -34,7 +35,6 @@ import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenamePresenter;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.COMPILATION_UNIT;
@@ -48,7 +48,7 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredIte
  * @author Vlad Zhukovskyi
  */
 @Singleton
-public class RenameRefactoringAction extends Action implements ActivePartChangedHandler {
+public class RenameRefactoringAction extends AbstractPerspectiveAction implements ActivePartChangedHandler {
 
     private final EditorAgent           editorAgent;
     private final RenamePresenter       renamePresenter;
@@ -66,7 +66,7 @@ public class RenameRefactoringAction extends Action implements ActivePartChanged
                                    JavaRefactoringRename javaRefactoringRename,
                                    AppContext appContext,
                                    FileTypeRegistry fileTypeRegistry) {
-        super(locale.renameRefactoringActionName(), locale.renameRefactoringActionDescription());
+        super(null, locale.renameRefactoringActionName(), locale.renameRefactoringActionDescription());
         this.editorAgent = editorAgent;
         this.renamePresenter = renamePresenter;
         this.javaRefactoringRename = javaRefactoringRename;
@@ -125,7 +125,7 @@ public class RenameRefactoringAction extends Action implements ActivePartChanged
     }
 
     @Override
-    public void update(ActionEvent event) {
+    public void updateInPerspective(ActionEvent event) {
         event.getPresentation().setVisible(true);
 
         if (editorInFocus) {
@@ -170,7 +170,8 @@ public class RenameRefactoringAction extends Action implements ActivePartChanged
             final Optional<Resource> srcFolder = resource.getParentWithMarker(SourceFolderMarker.ID);
 
             if (resource.getResourceType() == FILE) {
-                event.getPresentation().setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent() && isJavaFile((File)resource));
+                event.getPresentation()
+                     .setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent() && isJavaFile((File)resource));
             } else if (resource instanceof Container) {
                 event.getPresentation().setEnabled(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent());
             }
