@@ -28,8 +28,12 @@ export class WorkspaceSelectStackController {
     this.lodash = lodash;
 
     this.stacks = cheStack.getStacks();
-    if (!this.stacks.length) {
-      cheStack.fetchStacks();
+    if (this.stacks.length) {
+      this.$scope.$emit('create-project-stacks:initialized');
+    } else {
+      cheStack.fetchStacks().then(() => {
+        this.$scope.$emit('create-project-stacks:initialized');
+      });
     }
 
     $scope.$on('event:selectStackId', (event, data) => {
@@ -38,10 +42,12 @@ export class WorkspaceSelectStackController {
         return stack.id === data;
       });
       if (findStack) {
-        this.stackLibraryUser = findStack;
-        if (this.tabName === 'stack-library') {
-          this.onStackSelect(findStack);
+        if (this.tabName === 'ready-to-go') {
+          this.readyToGoStack = findStack;
+        } else if (this.tabName === 'stack-library') {
+          this.stackLibraryUser = findStack;
         }
+        this.onStackSelect(findStack);
       }
     });
   }
@@ -58,20 +64,19 @@ export class WorkspaceSelectStackController {
 
     if (tabName === 'ready-to-go') {
       this.onStackSelect(this.readyToGoStack);
+      return;
     } else if (tabName === 'stack-library') {
       this.onStackSelect(this.stackLibraryUser);
-    } else {
-      this.onStackSelect(null);
+      return;
     }
+    this.onStackSelect(null);
   }
 
   /**
    * Callback when stack has been select
+   * @param stack
    */
   onStackSelect(stack) {
-    if (!stack && this.tabName !== 'custom-stack') {
-      return;
-    }
     this.stack = stack;
     this.$timeout(() => {
       this.onStackChange();
