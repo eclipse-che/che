@@ -30,7 +30,7 @@ type Route struct {
 	// The call is a value returned from the DecoderFunc.
 	// If an error is returned from the function then it will be
 	// published to the channel as an error event.
-	HandlerFunc func(body interface{}, t Transmitter) error
+	HandlerFunc func(body interface{}, t *Transmitter) error
 }
 
 // Named group of operation routes, those groups

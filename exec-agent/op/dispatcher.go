@@ -109,7 +109,7 @@ func listenForOutputs(conn *websocket.Conn, channel Channel) {
 }
 
 func dispatchCall(call *Call, channel Channel) {
-	transmitter := &defaultTransmitter{channel: channel, id: call.Id}
+	transmitter := &Transmitter{Channel: channel, id: call.Id}
 
 	opRoute, ok := routes.get(call.Operation)
 	if !ok {

@@ -126,7 +126,7 @@ type getLogsBody struct {
 	Skip  int    `json:"skip"`
 }
 
-func startProcessCallHF(body interface{}, t op.Transmitter) error {
+func startProcessCallHF(body interface{}, t *op.Transmitter) error {
 	startBody := body.(startBody)
 
 	// Creating command
@@ -141,9 +141,9 @@ func startProcessCallHF(body interface{}, t op.Transmitter) error {
 
 	// Detecting subscription mask
 	subscriber := &Subscriber{
-		Id:      t.Channel().Id,
+		Id:      t.Channel.Id,
 		Mask:    parseTypes(startBody.EventTypes),
-		Channel: t.Channel().Events,
+		Channel: t.Channel.Events,
 	}
 
 	process := NewProcess(command).BeforeEventsHook(func(process *MachineProcess) {
@@ -158,7 +158,7 @@ func startProcessCallHF(body interface{}, t op.Transmitter) error {
 	return process.Start()
 }
 
-func killProcessCallHF(body interface{}, t op.Transmitter) error {
+func killProcessCallHF(body interface{}, t *op.Transmitter) error {
 	killBody := body.(killBody)
 	p, ok := Get(killBody.Pid)
 	if !ok {
@@ -174,7 +174,7 @@ func killProcessCallHF(body interface{}, t op.Transmitter) error {
 	return nil
 }
 
-func subscribeCallHF(body interface{}, t op.Transmitter) error {
+func subscribeCallHF(body interface{}, t *op.Transmitter) error {
 	subscribeBody := body.(subscribeBody)
 	p, ok := Get(subscribeBody.Pid)
 	if !ok {
@@ -182,9 +182,9 @@ func subscribeCallHF(body interface{}, t op.Transmitter) error {
 	}
 
 	subscriber := &Subscriber{
-		Id:      t.Channel().Id,
+		Id:      t.Channel.Id,
 		Mask:    parseTypes(subscribeBody.EventTypes),
-		Channel: t.Channel().Events,
+		Channel: t.Channel.Events,
 	}
 
 	// Check whether subscriber should see previous logs or not
@@ -209,13 +209,13 @@ func subscribeCallHF(body interface{}, t op.Transmitter) error {
 	return nil
 }
 
-func unsubscribeCallHF(call interface{}, t op.Transmitter) error {
+func unsubscribeCallHF(call interface{}, t *op.Transmitter) error {
 	unsubscribeBody := call.(unsubscribeBody)
 	p, ok := Get(unsubscribeBody.Pid)
 	if !ok {
 		return errors.New(fmt.Sprintf("Process with id '%s' doesn't exist", unsubscribeBody.Pid))
 	}
-	p.RemoveSubscriber(t.Channel().Id)
+	p.RemoveSubscriber(t.Channel.Id)
 	t.Send(&processOpResult{
 		Pid:  p.Pid,
 		Text: "Successfully unsubscribed",
@@ -223,7 +223,7 @@ func unsubscribeCallHF(call interface{}, t op.Transmitter) error {
 	return nil
 }
 
-func updateSubscriberCallHF(body interface{}, t op.Transmitter) error {
+func updateSubscriberCallHF(body interface{}, t *op.Transmitter) error {
 	updateBody := body.(updateSubscriberBody)
 	p, ok := Get(updateBody.Pid)
 	if !ok {
@@ -233,7 +233,7 @@ func updateSubscriberCallHF(body interface{}, t op.Transmitter) error {
 		return op.NewArgsError(errors.New("'eventTypes' required for subscriber update"))
 	}
 
-	if err := p.UpdateSubscriber(t.Channel().Id, maskFromTypes(updateBody.EventTypes)); err != nil {
+	if err := p.UpdateSubscriber(t.Channel.Id, maskFromTypes(updateBody.EventTypes)); err != nil {
 		return err
 	}
 	t.Send(&subscribeResult{
@@ -244,7 +244,7 @@ func updateSubscriberCallHF(body interface{}, t op.Transmitter) error {
 	return nil
 }
 
-func getProcessLogsCallHF(body interface{}, t op.Transmitter) error {
+func getProcessLogsCallHF(body interface{}, t *op.Transmitter) error {
 	args := body.(getLogsBody)
 	p, ok := Get(args.Pid)
 	if !ok {
