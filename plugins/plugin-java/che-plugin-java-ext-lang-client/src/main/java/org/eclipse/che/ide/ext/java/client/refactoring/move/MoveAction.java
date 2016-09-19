@@ -14,7 +14,7 @@ import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
@@ -39,10 +39,10 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredIte
  * @author Valeriy Svydenko
  */
 @Singleton
-public class MoveAction extends Action {
+public class MoveAction extends AbstractPerspectiveAction {
 
-    private final MovePresenter  movePresenter;
-    private final AppContext appContext;
+    private final MovePresenter    movePresenter;
+    private final AppContext       appContext;
     private final FileTypeRegistry fileTypeRegistry;
 
     @Inject
@@ -50,7 +50,7 @@ public class MoveAction extends Action {
                       MovePresenter movePresenter,
                       AppContext appContext,
                       FileTypeRegistry fileTypeRegistry) {
-        super(locale.moveActionName(), locale.moveActionDescription());
+        super(null, locale.moveActionName(), locale.moveActionDescription());
 
         this.movePresenter = movePresenter;
         this.appContext = appContext;
@@ -59,7 +59,7 @@ public class MoveAction extends Action {
 
     /** {@inheritDoc} */
     @Override
-    public void update(ActionEvent event) {
+    public void updateInPerspective(ActionEvent event) {
         event.getPresentation().setVisible(true);
 
         final Resource[] resources = appContext.getResources();

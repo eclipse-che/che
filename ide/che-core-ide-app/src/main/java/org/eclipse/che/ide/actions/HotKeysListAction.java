@@ -11,22 +11,26 @@
 package org.eclipse.che.ide.actions;
 
 import com.google.inject.Inject;
+
 import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.hotkeys.dialog.HotKeysDialogPresenter;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Show hotKeys list for IDE and editor
+ *
  * @author Alexander Andrienko
  */
-public class HotKeysListAction extends Action {
+public class HotKeysListAction extends AbstractPerspectiveAction {
 
     private HotKeysDialogPresenter hotKeysDialogPresenter;
 
     @Inject
     public HotKeysListAction(HotKeysDialogPresenter hotKeysDialogPresenter, CoreLocalizationConstant locale) {
-        super(locale.keyBindingsActionName(), locale.keyBindingsActionDescription(), null, null);
+        super(null, locale.keyBindingsActionName(), locale.keyBindingsActionDescription(), null, null);
         this.hotKeysDialogPresenter = hotKeysDialogPresenter;
     }
 
@@ -34,5 +38,10 @@ public class HotKeysListAction extends Action {
     @Override
     public void actionPerformed(ActionEvent e) {
         hotKeysDialogPresenter.showHotKeys();
+    }
+
+    @Override
+    public void updateInPerspective(@NotNull ActionEvent event) {
+        event.getPresentation().setEnabledAndVisible(true);
     }
 }
