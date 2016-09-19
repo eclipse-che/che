@@ -31,6 +31,7 @@ export class CheHttpBackend {
     this.remoteSvnUrlsMap = new Map();
     this.projectTypesWorkspaces = new Map();
     this.workspaceAgentMap = new Map();
+    this.stacks = [];
 
     this.defaultProfile = cheAPIBuilder.getProfileBuilder().withId('idDefaultUser').withEmail('eclipseChe@eclipse.org').withFirstName('FirstName').withLastName('LastName').build();
     this.defaultProfilePrefs = {};
@@ -53,6 +54,8 @@ export class CheHttpBackend {
     }
 
     this.httpBackend.when('GET', '/api/workspace').respond(workspaceReturn);
+
+    this.httpBackend.when('GET', '/api/stack?maxItems=50').respond(this.stacks);
 
     var projectTypeKeys = this.projectTypesWorkspaces.keys();
     for (let key of projectTypeKeys) {
@@ -101,6 +104,14 @@ export class CheHttpBackend {
       this.workspaces.set(workspace.id, workspace);
     });
 
+  }
+
+  /**
+   * Add the given stacks on this backend
+   * @param stacks an array of stacks
+   */
+  addStacks(stacks) {
+    this.stacks.push(...stacks);
   }
 
 
