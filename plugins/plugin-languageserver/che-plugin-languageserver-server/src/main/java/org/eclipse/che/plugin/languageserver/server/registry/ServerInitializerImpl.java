@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.languageserver.server.registry;
 
 import io.typefox.lsapi.InitializeResult;
 import io.typefox.lsapi.ServerCapabilities;
+import io.typefox.lsapi.impl.ClientCapabilitiesImpl;
 import io.typefox.lsapi.impl.InitializeParamsImpl;
 import io.typefox.lsapi.services.LanguageServer;
 
@@ -151,6 +152,7 @@ public class ServerInitializerImpl implements ServerInitializer {
         InitializeParamsImpl initializeParams = new InitializeParamsImpl();
         initializeParams.setProcessId(PROCESS_ID);
         initializeParams.setRootPath(projectPath);
+        initializeParams.setCapabilities(new ClientCapabilitiesImpl());
         initializeParams.setClientName(CLIENT_NAME);
         return initializeParams;
     }
