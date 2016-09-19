@@ -17,7 +17,7 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.PostPersist;
+import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 
 /**
@@ -36,6 +36,6 @@ public class UserEntityListener {
         eventService.publish(new BeforeUserRemovedEvent(user));
     }
 
-    @PostPersist
+    @PrePersist
     public void postPersist(UserImpl user) {eventService.publish(new AfterUserPersistedEvent(user));}
 }
