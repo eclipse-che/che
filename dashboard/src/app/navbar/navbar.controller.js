@@ -42,7 +42,8 @@ export class CheNavBarCtrl {
       administration: '#/administration',
       // subsections
       plugins: '#/admin/plugins',
-      account: '#/account'
+      account: '#/account',
+      stacks: '#/stacks'
     };
 
     // highlight navbar menu item

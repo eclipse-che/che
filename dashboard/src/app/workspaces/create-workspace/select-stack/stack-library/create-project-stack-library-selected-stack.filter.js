@@ -18,14 +18,14 @@
 export class CreateProjectStackLibrarySelectedStackFilter {
 
   constructor(register) {
-    register.app.filter( 'stackSelectedStackFilter' , function () {
+    register.app.filter('stackSelectedStackFilter', () => {
       return function (templates, idFilter) {
         if (!templates) {
           return [];
         }
 
         if (!idFilter || !idFilter.length) {
-          return [];
+          return templates;
         }
 
         var filtered = [];

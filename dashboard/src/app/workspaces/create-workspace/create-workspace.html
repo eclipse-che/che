@@ -64,17 +64,17 @@
         </che-input>
       </div>
     </che-label-container>
-    <che-label-container che-label-name="RAM" ng-init="createWorkspaceCtrl.isStackMemoryLimit = false">
+    <che-label-container che-label-name="RAM">
       <div ng-hide="createWorkspaceCtrl.isCustomStack"
            data-ng-repeat="(environmentKey, environmentValue) in createWorkspaceCtrl.stack.workspaceConfig.environments">
           <span ng-if="createWorkspaceCtrl.getObjectKeys(createWorkspaceCtrl.stack.workspaceConfig.environments).length > 1"
                 class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
+
         <div>
           <div data-ng-repeat="(machineKey, machineValue) in environmentValue.machines">
             <div class="workspace-machine" ng-if="machineValue.attributes && machineValue.attributes.memoryLimitBytes">
               <span ng-if="createWorkspaceCtrl.getObjectKeys(environmentValue.machines).length > 1">MACHINE: {{machineKey}}</span>
               <che-workspace-ram-allocation-slider
-                      ng-init="createWorkspaceCtrl.isStackMemoryLimit = true"
                       ng-model="machineValue.attributes.memoryLimitBytes"></che-workspace-ram-allocation-slider>
             </div>
           </div>

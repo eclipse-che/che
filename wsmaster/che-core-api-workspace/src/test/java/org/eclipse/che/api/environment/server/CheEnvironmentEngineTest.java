@@ -24,7 +24,7 @@ import org.eclipse.che.api.environment.server.compose.ComposeServicesStartStrate
 import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
-import org.eclipse.che.api.machine.server.dao.SnapshotDao;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -61,6 +61,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
@@ -75,8 +76,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -84,6 +87,9 @@ import static org.testng.Assert.assertTrue;
  */
 @Listeners(MockitoTestNGListener.class)
 public class CheEnvironmentEngineTest {
+    private static final int    DEFAULT_MACHINE_MEM_LIMIT_MB = 256;
+    private static final String API_ENDPOINT                 = "http://eclipse.che:8080/api";
+
     @Mock
     MessageConsumer<MachineLogMessage> messageConsumer;
     @Mock
@@ -111,12 +117,14 @@ public class CheEnvironmentEngineTest {
         engine = spy(new CheEnvironmentEngine(snapshotDao,
                                               machineInstanceProviders,
                                               "/tmp",
-                                              256,
+                                              DEFAULT_MACHINE_MEM_LIMIT_MB,
                                               eventService,
                                               environmentParser,
                                               new ComposeServicesStartStrategy(),
                                               composeProvider,
-                                              agentConfigApplier));
+                                              agentConfigApplier,
+                                              API_ENDPOINT,
+                                              recipeDownloader));
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
@@ -223,6 +231,353 @@ public class CheEnvironmentEngineTest {
 
         // then
         assertEquals(machines, expectedMachines);
+    }
+
+    @Test
+    public void shouldSetDefaultRamToMachinesWithoutRamOnEnvironmentStart() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String machineName = "machineWithoutRam";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    image: codenvy/ubuntu_jdk8";
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+
+        // when
+        startEnv(env);
+
+        // then
+        ArgumentCaptor<ComposeServiceImpl> captor = ArgumentCaptor.forClass(ComposeServiceImpl.class);
+        verify(composeProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        ComposeServiceImpl actualService = captor.getValue();
+        assertEquals((long)actualService.getMemLimit(), DEFAULT_MACHINE_MEM_LIMIT_MB * 1024L * 1024L);
+    }
+
+    @Test
+    public void shouldUseConfiguredInServiceRamInsteadOfSetDefaultOnEnvironmentStart() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String machineName = "machineWithoutRam";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 42943433";
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+
+        // when
+        startEnv(env);
+
+        // then
+        ArgumentCaptor<ComposeServiceImpl> captor = ArgumentCaptor.forClass(ComposeServiceImpl.class);
+        verify(composeProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        ComposeServiceImpl actualService = captor.getValue();
+        assertEquals((long)actualService.getMemLimit(), 42943433L);
+    }
+
+    @Test
+    public void shouldSetDockerfileContentInsteadOfUrlIfUrlPointsToCheApiOnEnvironmentStart() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String machineName = "machineWithDockerfileFromApi";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    build:\n      context: " + API_ENDPOINT + "/recipe/12345";
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+        String dockerfileContent = "this is dockerfile content";
+        when(recipeDownloader.getRecipe(anyString())).thenReturn(dockerfileContent);
+
+        // when
+        startEnv(env);
+
+        // then
+        ArgumentCaptor<ComposeServiceImpl> captor = ArgumentCaptor.forClass(ComposeServiceImpl.class);
+        verify(composeProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        ComposeServiceImpl actualService = captor.getValue();
+        assertNull(actualService.getBuild().getContext());
+        assertEquals(actualService.getBuild().getDockerfile(), dockerfileContent);
+    }
+
+    @Test
+    public void shouldNotSetDockerfileContentInsteadOfUrlIfUrlDoesNotPointToCheApiOnEnvironmentStart() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String machineName = "machineWithDockerfileNotFromApi";
+        String contextUrl = "http://another-server.com/recipe/12345";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    build:\n      context: " + contextUrl;
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+
+        // when
+        startEnv(env);
+
+        // then
+        ArgumentCaptor<ComposeServiceImpl> captor = ArgumentCaptor.forClass(ComposeServiceImpl.class);
+        verify(composeProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        ComposeServiceImpl actualService = captor.getValue();
+        assertNull(actualService.getBuild().getDockerfile());
+        assertEquals(actualService.getBuild().getContext(), contextUrl);
+    }
+
+    @Test
+    public void shouldApplyAgentsOnEnvironmentStart() throws Exception {
+        EnvironmentImpl env = createEnv();
+        String machineName = "extraMachine";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    image: codenvy/ubuntu_jdk8";
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+
+        // when
+        startEnv(env);
+
+        // then
+        verify(composeProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             any(ComposeServiceImpl.class),
+                                             any(LineConsumer.class));
+        for (ExtendedMachineImpl extendedMachine : env.getMachines().values()) {
+            verify(agentConfigApplier).modify(any(ComposeServiceImpl.class), eq(extendedMachine.getAgents()));
+        }
+        verifyNoMoreInteractions(agentConfigApplier);
+    }
+
+    @Test
+    public void shouldSetDefaultRamToMachineWithoutRamOnMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(composeProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(ComposeServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        String machineName = "extraMachine";
+        config.setName(machineName);
+        config.setLimits(null);
+
+        // when
+        engine.startMachine(workspaceId, config, emptyList());
+
+        // then
+        ArgumentCaptor<ComposeServiceImpl> captor = ArgumentCaptor.forClass(ComposeServiceImpl.class);
+        verify(composeProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        ComposeServiceImpl actualService = captor.getValue();
+        assertEquals((long)actualService.getMemLimit(), DEFAULT_MACHINE_MEM_LIMIT_MB * 1024L * 1024L);
+    }
+
+    @Test
+    public void shouldUseConfiguredInMachineRamInsteadOfSetDefaultOnMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(composeProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(ComposeServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        String machineName = "extraMachine";
+        config.setName(machineName);
+        config.setLimits(new MachineLimitsImpl(4096));
+
+        // when
+        engine.startMachine(workspaceId, config, emptyList());
+
+        // then
+        ArgumentCaptor<ComposeServiceImpl> captor = ArgumentCaptor.forClass(ComposeServiceImpl.class);
+        verify(composeProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        ComposeServiceImpl actualService = captor.getValue();
+        assertEquals((long)actualService.getMemLimit(), 4096L * 1024L * 1024L);
+    }
+
+    @Test
+    public void shouldSetDockerfileContentInsteadOfUrlIfUrlPointsToCheApiOnMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(composeProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(ComposeServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        String machineName = "extraMachine";
+        config.setName(machineName);
+        config.setSource(new MachineSourceImpl("docker").setLocation(API_ENDPOINT + "/recipe/12345"));
+        String dockerfileContent = "this is dockerfile content";
+        when(recipeDownloader.getRecipe(anyString())).thenReturn("this is dockerfile content");
+
+        // when
+        engine.startMachine(workspaceId, config, emptyList());
+
+        // then
+        ArgumentCaptor<ComposeServiceImpl> captor = ArgumentCaptor.forClass(ComposeServiceImpl.class);
+        verify(composeProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        ComposeServiceImpl actualService = captor.getValue();
+        assertNull(actualService.getBuild().getContext());
+        assertEquals(actualService.getBuild().getDockerfile(), dockerfileContent);
+    }
+
+    @Test
+    public void shouldNotSetDockerfileContentInsteadOfUrlIfUrlDoesNotPointToCheApiOnMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(composeProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(ComposeServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        String machineName = "extraMachine";
+        config.setName(machineName);
+        String contextUrl = "http://another-server.com/recipe/12345";
+        config.setSource(new MachineSourceImpl("docker").setLocation(contextUrl));
+
+        // when
+        engine.startMachine(workspaceId, config, emptyList());
+
+        // then
+        ArgumentCaptor<ComposeServiceImpl> captor = ArgumentCaptor.forClass(ComposeServiceImpl.class);
+        verify(composeProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        ComposeServiceImpl actualService = captor.getValue();
+        assertNull(actualService.getBuild().getDockerfile());
+        assertEquals(actualService.getBuild().getContext(), contextUrl);
+    }
+
+    @Test
+    public void shouldApplyAgentsOnDockerMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(composeProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(ComposeServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        List<String> agents = asList("agent1", "agent2");
+
+        // when
+        engine.startMachine(workspaceId, config, agents);
+
+        // then
+        verify(agentConfigApplier).modify(any(ComposeServiceImpl.class), eq(agents));
     }
 
     @Test
@@ -337,7 +692,7 @@ public class CheEnvironmentEngineTest {
         MachineConfigImpl config = createConfig(false);
 
         // when
-        Instance actualInstance = engine.startMachine(workspaceId, config);
+        Instance actualInstance = engine.startMachine(workspaceId, config, emptyList());
 
         // then
         assertEquals(actualInstance, newMachine);
@@ -373,7 +728,7 @@ public class CheEnvironmentEngineTest {
 
 
         // when
-        Instance actualInstance = engine.startMachine(workspaceId, config);
+        Instance actualInstance = engine.startMachine(workspaceId, config, emptyList());
 
         // then
         assertEquals(actualInstance, newMachine);
@@ -388,7 +743,7 @@ public class CheEnvironmentEngineTest {
         MachineConfigImpl config = createConfig(false);
 
         // when
-        engine.startMachine("wsIdOfNotRunningEnv", config);
+        engine.startMachine("wsIdOfNotRunningEnv", config, emptyList());
     }
 
     @Test(expectedExceptions = ConflictException.class,
@@ -402,7 +757,7 @@ public class CheEnvironmentEngineTest {
         config.setName(instance.getConfig().getName());
 
         // when
-        engine.startMachine(instance.getWorkspaceId(), config);
+        engine.startMachine(instance.getWorkspaceId(), config, emptyList());
     }
 
     @Test
@@ -415,7 +770,7 @@ public class CheEnvironmentEngineTest {
         when(engine.generateMachineId()).thenReturn("newMachineId");
 
         // when
-        engine.startMachine(instance.getWorkspaceId(), config);
+        engine.startMachine(instance.getWorkspaceId(), config, emptyList());
 
         // then
         verify(eventService).publish(newDto(MachineStatusEvent.class)
@@ -557,6 +912,10 @@ public class CheEnvironmentEngineTest {
 
     private List<Instance> startEnv() throws Exception {
         EnvironmentImpl env = createEnv();
+        return startEnv(env);
+    }
+
+    private List<Instance> startEnv(EnvironmentImpl env) throws Exception {
         String envName = "env-1";
         String workspaceId = "wsId";
         when(composeProvider.startService(anyString(),
@@ -642,6 +1001,11 @@ public class CheEnvironmentEngineTest {
             machineSource = new MachineSourceImpl("dockerfile").setLocation(service.getBuild().getContext());
         } else if (service.getImage() != null) {
             machineSource = new MachineSourceImpl("image").setLocation(service.getImage());
+        } else if (service.getBuild() != null &&
+                   service.getBuild().getContext() == null &&
+                   service.getBuild().getDockerfile() != null) {
+
+            machineSource = new MachineSourceImpl("dockerfile").setContent(service.getBuild().getDockerfile());
         } else {
             throw new IllegalArgumentException("Build context or image should contain non empty value");
         }

@@ -17,7 +17,7 @@
     <ui:with field="machineResources" type="org.eclipse.che.ide.extension.machine.client.MachineResources"/>
 
     <g:SplitLayoutPanel width="100%" height="100%" ui:field="splitLayoutPanel" debugId="consolesPanel">
-        <g:west size="285">
+        <g:west size="185">
             <g:FlowPanel addStyleNames="{machineResources.getCss.processNavigation}" ui:field="navigationPanel">
                 <ideui:Tree ui:field="processTree"/>
             </g:FlowPanel>

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
-import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 
@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
  *
  * @author Eugene Voevodin
  */
-@Deprecated
 public class MachineConfigImpl implements MachineConfig {
 
     public static MachineConfigImplBuilder builder() {
@@ -92,8 +91,8 @@ public class MachineConfigImpl implements MachineConfig {
         return source;
     }
 
-    public void setSource(MachineSource machineSource) {
-        this.source = new MachineSourceImpl(machineSource);
+    public void setSource(MachineSourceImpl machineSource) {
+        this.source = machineSource;
     }
 
     @Override
@@ -101,14 +100,26 @@ public class MachineConfigImpl implements MachineConfig {
         return dev;
     }
 
+    public void setDev(boolean dev) {
+        this.dev = dev;
+    }
+
     @Override
     public String getType() {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @Override
     public MachineLimitsImpl getLimits() {
         return limits;
+    }
+
+    public void setLimits(MachineLimits machineLimits) {
+        this.limits = new MachineLimitsImpl(machineLimits);
     }
 
     @Override
@@ -119,6 +130,10 @@ public class MachineConfigImpl implements MachineConfig {
         return servers;
     }
 
+    public void setServers(List<ServerConfImpl> servers) {
+        this.servers = servers;
+    }
+
     @Override
     public Map<String, String> getEnvVariables() {
         if (envVariables == null) {
@@ -127,8 +142,8 @@ public class MachineConfigImpl implements MachineConfig {
         return envVariables;
     }
 
-    public void setLimits(MachineLimits machineLimits) {
-        this.limits = new MachineLimitsImpl(machineLimits);
+    public void setEnvVariables(Map<String, String> envVariables) {
+        this.envVariables = envVariables;
     }
 
     @Override

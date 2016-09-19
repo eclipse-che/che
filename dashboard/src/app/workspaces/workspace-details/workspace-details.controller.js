@@ -20,7 +20,7 @@ export class WorkspaceDetailsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($scope, $rootScope, $route, $location, cheWorkspace, $mdDialog, cheNotification, ideSvc, $log, workspaceDetailsService, lodash, $timeout) {
+  constructor($scope, $rootScope, $route, $location, cheWorkspace, $mdDialog, cheNotification, ideSvc, $log, workspaceDetailsService, lodash, $q, $timeout) {
     this.$rootScope = $rootScope;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
@@ -30,9 +30,11 @@ export class WorkspaceDetailsController {
     this.$log = $log;
     this.workspaceDetailsService = workspaceDetailsService;
     this.lodash = lodash;
+    this.$q = $q;
     this.$timeout = $timeout;
 
     this.workspaceDetails = {};
+    this.copyWorkspaceDetails = {};
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
     this.workspaceKey = this.namespace + ":" + this.workspaceName;
@@ -49,11 +51,9 @@ export class WorkspaceDetailsController {
       let promise = this.cheWorkspace.fetchWorkspaceDetails(this.workspaceKey);
       promise.then(() => {
         this.updateWorkspaceData();
-        this.origRam = this.newRam;
       }, (error) => {
         if (error.status === 304) {
           this.updateWorkspaceData();
-          this.origRam = this.newRam;
         } else {
           this.loading = false;
           this.invalidWorkspace = error.statusText;
@@ -61,7 +61,6 @@ export class WorkspaceDetailsController {
       });
     } else {
       this.updateWorkspaceData();
-      this.origRam = this.newRam;
     }
 
     this.cheWorkspace.fetchWorkspaces();
@@ -102,26 +101,11 @@ export class WorkspaceDetailsController {
     if (this.loading) {
       this.loading = false;
     }
+
+    angular.copy(this.workspaceDetails, this.copyWorkspaceDetails);
+
     this.workspaceId = this.workspaceDetails.id;
-    this.newName = angular.copy(this.workspaceDetails.config.name);
-    this.newRam = this.getRam();
-  }
-
-  /**
-   * Returns amount of RAM for dev machine in default environment.
-   * @returns {*}
-   */
-  getRam() {
-    // get default environment
-    let defaultEnv = this.workspaceDetails.config.environments[this.workspaceDetails.config.defaultEnv];
-
-    // get dev machine config
-    let devMachineConfig = this.lodash.find(defaultEnv.machines, (machine) => {
-      return machine.agents.indexOf('org.eclipse.che.ws-agent') >= 0;
-    });
-
-    //TODO not implemented yet return angular.copy(devMachineConfig.limits.ram);
-    return "";
+    this.newName = this.workspaceDetails.config.name;
   }
 
   /**
@@ -136,78 +120,57 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Returns true if amount of RAM of workspace is changed
-   * @returns {boolean}
+   * Updates name of workspace
+   * @param isFormValid {boolean} true if workspaceNameForm is valid
    */
-  isRamChanged() {
-    if (this.workspaceDetails) {
-      return this.getRam() !== this.newRam;
-    }
-    return false;
-  }
-
-  /**
-   * Calls method to update workspace info after timeout.
-   * @param isFormValid {Boolean} true if form is valid
-   */
-  updateWorkspace(isFormValid) {
-    this.$timeout.cancel(this.timeoutPromise);
-
-    if (isFormValid === false || !(this.isNameChanged() || this.isRamChanged())) {
+  updateName(isFormValid) {
+    if (isFormValid === false || !this.isNameChanged()) {
       return;
     }
 
-    this.timeoutPromise = this.$timeout(() => {
-      this.isLoading = true;
-      this.cheWorkspace.fetchWorkspaceDetails(this.workspaceId).then(() => {
-        this.doUpdateWorkspace();
-      }, () => {
-        this.doUpdateWorkspace();
-      });
-    }, 500);
+    this.copyWorkspaceDetails.config.name = this.newName;
+    this.doUpdateWorkspace();
+  }
+
+  /**
+   * Callback which is called in order to update workspace config
+   * @returns {Promise}
+   */
+  updateWorkspaceConfig() {
+    if (angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config)) {
+      let defer = this.$q.defer();
+      defer.resolve();
+      return defer.promise;
+    }
+
+    return this.doUpdateWorkspace();
   }
 
   /**
    * Updates workspace info.
    */
   doUpdateWorkspace() {
-    this.workspaceDetails = this.cheWorkspace.getWorkspacesById().get(this.workspaceId);
-    let workspaceNewDetails = angular.copy(this.workspaceDetails);
+    this.isLoading = true;
+    delete this.copyWorkspaceDetails.links;
 
-    workspaceNewDetails.config.name = this.newName;
-
-    this.lodash.forEach(workspaceNewDetails.config.environments, (env) => {
-      if (env.name === workspaceNewDetails.config.defaultEnv) {
-        this.lodash.forEach(env.machines, (machine) => {
-          if (machine.agents.indexOf('org.eclipse.che.ws-agent') >= 0) {
-           /* TODO not implemented yet machine.limits.ram = this.newRam;
-
-            if (this.getWorkspaceStatus() === 'STOPPED') {
-              this.origRam = this.newRam;
-            }*/
-          }
-        });
-      }
-    });
-
-    delete workspaceNewDetails.links;
-
-    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, workspaceNewDetails);
+    let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, this.copyWorkspaceDetails);
     promise.then((data) => {
       this.workspaceName = data.config.name;
       this.updateWorkspaceData();
-      this.cheNotification.showInfo('Workspace is successfully updated.');
-      this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
+      this.cheNotification.showInfo('Workspace updated.');
+      return this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
     }, (error) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update workspace failed.');
       this.$log.error(error);
     });
+
+    return promise;
   }
 
   //Perform workspace deletion.
   deleteWorkspace(event) {
-    var confirm = this.$mdDialog.confirm()
+    let confirm = this.$mdDialog.confirm()
       .title('Would you like to delete workspace \'' + this.workspaceDetails.config.name + '\'?')
       .ariaLabel('Delete workspace')
       .ok('Delete it!')
@@ -274,9 +237,7 @@ export class WorkspaceDetailsController {
   stopWorkspace() {
     let promise = this.cheWorkspace.stopWorkspace(this.workspaceId);
 
-    promise.then(() => {
-      this.origRam = this.newRam;
-    }, (error) => {
+    promise.then(() => {}, (error) => {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');
       this.$log.error(error);
     });

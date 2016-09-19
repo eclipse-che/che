@@ -30,6 +30,13 @@ public interface Theme {
     String getDescription();
 
     /**
+     * Global background color.
+     *
+     * @return the color
+     */
+    String backgroundColor();
+
+    /**
      * return the logo color
      */
     String getLogoFill();
@@ -1518,5 +1525,15 @@ public interface Theme {
      *
      ********************************************************************************************/
     String resourceMonitorBarBackground();
+
+    /********************************************************************************************
+     *
+     * Popup Loader
+     *
+     ********************************************************************************************/
+    String popupLoaderBackgroundColor();
+    String popupLoaderBorderColor();
+    String popupLoaderShadow();
+    String popupLoaderTitleColor();
 
 }

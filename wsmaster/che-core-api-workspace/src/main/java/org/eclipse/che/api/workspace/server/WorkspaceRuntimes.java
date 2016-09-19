@@ -407,8 +407,9 @@ public class WorkspaceRuntimes {
             }
         }
 
-        Instance instance = environmentEngine.startMachine(workspaceId, machineConfig);
-        launchAgents(instance, Collections.singletonList("org.eclipse.che.terminal"));
+        List<String> agents = Collections.singletonList("org.eclipse.che.terminal");
+        Instance instance = environmentEngine.startMachine(workspaceId, machineConfig, agents);
+        launchAgents(instance, agents);
 
         try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);
@@ -490,10 +491,12 @@ public class WorkspaceRuntimes {
      *
      * @param snapshot
      *         description of snapshot that should be removed
+     * @throws NotFoundException
+     *         if snapshot is not found
      * @throws ServerException
      *         if error occurs
      */
-    public void removeSnapshot(SnapshotImpl snapshot) throws ServerException {
+    public void removeSnapshot(SnapshotImpl snapshot) throws ServerException, NotFoundException {
         environmentEngine.removeSnapshot(snapshot);
     }
 

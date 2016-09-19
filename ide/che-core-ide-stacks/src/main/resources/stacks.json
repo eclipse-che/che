@@ -1,5 +1,74 @@
 [
   {
+    "id": "java-mysql",
+    "creator": "ide",
+    "name": "Java-MySQL",
+    "description": "Multi-machine environment with Default Java Stack and MySQL database",
+    "scope": "general",
+    "tags": [
+      "Java 1.8, Tomcat 8, MySQL 5.7"
+    ],
+    "components": [
+      {
+        "name": "JDK",
+        "version": "1.8.0_45"
+      },
+      {
+        "name": "Maven",
+        "version": "3.2.2"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_jdk8"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {}
+            },
+            "db": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {}
+            }
+          },
+          "recipe": {
+            "content": "services:\n db:\n  image: codenvy/mysql\n  environment:\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 2147483648\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n  mem_limit: 2147483648\n  links:\n    - db",
+            "contentType": "application/x-yaml",
+            "type": "compose"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mysql -u $MYSQL_USER -p$MYSQL_PASSWORD -e 'show databases;'",
+          "name": "show databases",
+          "type": "custom"
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-java-mysql.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "che-in-che",
     "creator": "ide",
     "name": "Eclipse Che",
@@ -46,7 +115,7 @@
             }
           },
           "recipe": {
-            "location": "codenvy/alpine-jdk8",
+            "location": "codenvy/alpine_jdk8",
             "type": "dockerimage"
           }
         }
@@ -86,14 +155,6 @@
 
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-che.svg",
       "mediaType": "image/svg+xml"
@@ -163,14 +224,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
@@ -217,14 +270,6 @@
       "defaultEnv": "default",
       "description": null
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-blank.svg",
       "mediaType": "image/svg+xml"
@@ -290,14 +335,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-android.svg",
       "mediaType": "image/svg+xml"
@@ -365,14 +402,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-cpp.svg",
       "mediaType": "image/svg+xml"
@@ -445,14 +474,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-dotnet.svg",
       "mediaType": "image/svg+xml"
@@ -516,14 +537,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-go.svg",
       "mediaType": "image/svg+xml"
@@ -583,14 +596,6 @@
       "defaultEnv": "default",
       "description": null
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-hadoop.svg",
       "mediaType": "image/svg+xml"
@@ -668,14 +673,6 @@
       "defaultEnv": "default",
       "description": null
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-node.svg",
       "mediaType": "image/svg+xml"
@@ -772,14 +769,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-php.svg",
       "mediaType": "image/svg+xml"
@@ -845,14 +834,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-python.svg",
       "mediaType": "image/svg+xml"
@@ -931,14 +912,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-ruby.svg",
       "mediaType": "image/svg+xml"
@@ -986,15 +959,7 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null
-    },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ]
+    }
   },
   {
     "id": "java-centos",
@@ -1063,14 +1028,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
@@ -1143,14 +1100,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
@@ -1229,14 +1178,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-php.svg",
       "mediaType": "image/svg+xml"
@@ -1302,14 +1243,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-python.svg",
       "mediaType": "image/svg+xml"
@@ -1372,14 +1305,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-python.svg",
       "mediaType": "image/svg+xml"
@@ -1450,15 +1375,7 @@
       "name": "default",
       "defaultEnv": "default",
       "description": null
-    },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ]
+    }
   },
   {
     "id": "tomee-default",
@@ -1467,13 +1384,7 @@
     "description": "Default Java Stack with JDK 8, Maven and Apache TomEE 1.7.3.",
     "scope": "advanced",
     "tags": [
-      "Ubuntu",
-      "Java",
-      "JDK",
-      "Maven",
-      "TomEE",
-      "Subversion",
-      "Git"
+      "TomEE"
     ],
     "components": [
       {
@@ -1524,14 +1435,6 @@
         }
       ]
     },
-    "acl": [
-      {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
-      }
-    ],
     "stackIcon": {
       "name": "type-java.svg",
       "mediaType": "image/svg+xml"
@@ -1579,14 +1482,493 @@
     "source": {
       "type": "image",
       "origin": "codenvy/ubuntu_jre"
-    },
-    "acl": [
+    }    
+  },
+  {
+    "id": "bitnami-express",
+    "creator": "Bitnami",
+    "name": "Bitnami Express",
+    "description": "Default Express stack with Node.js 6.4.0, Express 4.14.0, MongoDB 3.2.7.",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "Node.JS",
+      "NPM",
+      "Express"
+    ],
+    "components": [
       {
-        "user": "*",
-        "actions": [
-          "search"
-        ]
+        "name": "Node.JS",
+        "version": "6.4.0"
+      },
+      {
+        "name": "NPM",
+        "version": "---"
+      },
+      {
+        "name": "Express",
+        "version": "4.14.0"
+      },
+      {
+        "name": "MongoDB",
+        "version": "3.2.7"
+      },
+      {
+        "name": "Git",
+        "version": "---"
       }
-    ]
+    ],
+    "source": {
+      "type": "image",
+      "origin": "bitnami/che-express:che-4.14.0-r1"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "bitnami/che-express:che-4.14.0-r1",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-bitnami.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "bitnami-swift",
+    "creator": "Bitnami",
+    "name": "Bitnami Swift",
+    "description": "Default Swift stack with Swift 3.0-PREVIEW-6",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "Swift"
+    ],
+    "components": [
+      {
+        "name": "Swift",
+        "version": "3.0-PREVIEW-6"
+      },
+      {
+        "name": "JDK",
+        "version": "1.8.0_91"
+      },
+      {
+        "name": "Python",
+        "version": "2.7.12rc1"
+      },
+      {
+        "name": "CLANG",
+        "version": "---"
+      },
+      {
+        "name": "libxml2",
+        "version": "---"
+      },
+      {
+        "name": "libedit2",
+        "version": "---"
+      },
+      {
+        "name": "libicu52",
+        "version": "---"
+      },
+      {
+        "name": "Git",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "bitnami/che-swift:che-3.0-PREVIEW-6-r2"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "bitnami/che-swift:che-3.0-PREVIEW-6-r2",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-bitnami.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "bitnami-laravel",
+    "creator": "Bitnami",
+    "name": "Bitnami Laravel",
+    "description": "Default Laravel stack with PHP 7.0.10, Laravel 5.2.31, MariaDB 10.1.14.",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "Node.JS",
+      "Laravel",
+      "PHP",
+      "MariaDB"
+    ],
+    "components": [
+      {
+        "name": "PHP",
+        "version": "7.0.10"
+      },
+      {
+        "name": "Laravel",
+        "version": "5.2.31"
+      },
+      {
+        "name": "MariaDB",
+        "version": "10.1.14"
+      },
+      {
+        "name": "Gulp",
+        "version": "---"
+      },
+      {
+        "name": "Git",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "bitnami/che-laravel:che-5.2.31-r5"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "bitnami/che-laravel:che-5.2.31-r5",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-bitnami.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "bitnami-rails",
+    "creator": "Bitnami",
+    "name": "Bitnami Rails",
+    "description": "Bitnami Rails stack with Ruby 2.3.1, Rails 5.0.0.1, MariaDB 10.1.14.",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "BitnamiRails",
+      "MariaDB",
+      "Ruby"
+    ],
+    "components": [
+      {
+        "name": "MariaDb",
+        "version": "10.1.14"
+      },
+      {
+        "name": "Ruby",
+        "version": "2.3.1"
+      },
+      {
+        "name": "Rails",
+        "version": "5.0.0.1"
+      },
+      {
+        "name": "MySQL Client",
+        "version": "10.1.13"
+      },
+      {
+        "name": "Git",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "bitnami/che-rails:che-5.0.0.1-r0"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "bitnami/che-rails:che-5.0.0.1-r0",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-bitnami.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "bitnami-codeigniter",
+    "creator": "Bitnami",
+    "name": "Bitnami Codeigniter",
+    "description": "Default CodeIgniter stack with PHP 7.0.10, CodeIgniter 3.1.0, MariaDB 10.1.14.",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "CodeIgniter",
+      "MariaDB",
+      "PHP"
+    ],
+    "components": [
+      {
+        "name": "PHP",
+        "version": "7.0.10"
+      },
+      {
+        "name": "Codeigniter",
+        "version": "3.1.0"
+      },
+      {
+        "name": "MariaDB",
+        "version": "10.1.14"
+      },
+      {
+        "name": "MySQL Client",
+        "version": "10.1.13"
+      },
+      {
+        "name": "Git",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "bitnami/che-codeigniter:che-3.1.0-r2"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "bitnami/che-codeigniter:che-3.1.0-r2",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-bitnami.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "bitnami-symfony",
+    "creator": "Bitnami",
+    "name": "Bitnami Symfony",
+    "description": "Default Symfony stack with PHP 7.0.10, Symfony 3.1.3, MariaDB 10.1.14.",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "Symfony",
+      "PHP",
+      "MariaDB"
+    ],
+    "components": [
+      {
+        "name": "PHP",
+        "version": "7.0.10"
+      },
+      {
+        "name": "Symfony",
+        "version": "3.1.3"
+      },
+      {
+        "name": "MariaDB",
+        "version": "10.1.14"
+      },
+      {
+        "name": "MySQL Client",
+        "version": "10.1.13"
+      },
+      {
+        "name": "Git",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "bitnami/che-symfony:che-3.1.3-r0"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "bitnami/che-symfony:che-3.1.3-r0",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-bitnami.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "bitnami-java-play",
+    "creator": "Bitnami",
+    "name": "Bitnami Play for Java",
+    "description": "Default Play stack with OpenJDK 1.8.0 and Play 2.55.",
+    "scope": "advanced",
+    "tags": [
+      "Ubuntu",
+      "Activator",
+      "Play",
+      "Java"
+    ],
+    "components": [
+      {
+        "name": "OpenJDK",
+        "version": "1.8.0"
+      },
+      {
+        "name": "Play",
+        "version": "2.55"
+      },
+      {
+        "name": "Node",
+        "version": "6.4.0"
+      },
+      {
+        "name": "Activator",
+        "version": "1.13.10"
+      },
+      {
+        "name": "Git",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "bitnami/che-java-play:che-2.55-r3"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "bitnami/che-java-play:che-2.55-r3",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-bitnami.svg",
+      "mediaType": "image/svg+xml"
+    }
   }
 ]

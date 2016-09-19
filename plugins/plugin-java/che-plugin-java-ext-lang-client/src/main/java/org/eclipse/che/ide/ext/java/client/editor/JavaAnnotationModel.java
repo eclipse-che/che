@@ -14,6 +14,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import org.eclipse.che.ide.api.editor.text.Position;
+import org.eclipse.che.ide.editor.orion.client.OrionAnnotationSeverityProvider;
 import org.eclipse.che.ide.ext.java.client.JavaCss;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.shared.dto.Problem;
@@ -31,7 +32,7 @@ import java.util.Map;
 /**
  * An annotation model for java sources.
  */
-public class JavaAnnotationModel extends AnnotationModelImpl implements AnnotationModel, ProblemRequester {
+public class JavaAnnotationModel extends AnnotationModelImpl implements AnnotationModel, ProblemRequester, OrionAnnotationSeverityProvider {
 
     private final JavaCss javaCss;
     private final EditorCss editorCss;
@@ -138,5 +139,20 @@ public class JavaAnnotationModel extends AnnotationModelImpl implements Annotati
         decorations.put("org.eclipse.jdt.ui.info", javaCss.overviewMarkTask());
         decorations.put("org.eclipse.ui.workbench.texteditor.task", javaCss.overviewMarkTask());
         return decorations;
+    }
+
+    @Override
+    public String getSeverity(String annotationType) {
+        if (annotationType == null) {
+            return "error";
+        }
+        switch (annotationType) {
+            case "org.eclipse.jdt.ui.error":
+                return "error";
+            case "org.eclipse.jdt.ui.warning":
+                return "warning";
+            default:
+                return "task";
+        }
     }
 }

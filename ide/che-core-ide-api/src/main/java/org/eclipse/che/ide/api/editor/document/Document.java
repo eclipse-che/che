@@ -122,6 +122,22 @@ public interface Document extends ReadOnlyDocument {
      */
     void replace(int offset, int length, String text);
 
+    /**
+     * Replaces the text range with the given replacement contents.
+     *
+     * @param startLine
+     *         start line of the range
+     * @param startChar
+     *         start char of the range
+     * @param endLine
+     *         end line of the range
+     * @param endChar
+     *         end char of the range
+     * @param text
+     *         the replacement text
+     */
+    void replace(int startLine, int startChar, int endLine, int endChar, String text);
+
     void setFile(VirtualFile file);
 
     VirtualFile getFile();

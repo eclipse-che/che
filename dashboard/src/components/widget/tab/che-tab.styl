@@ -1,4 +1,3 @@
-
 /* There are two kinds of elements here:
    md-tab-item Those are the items you see in the tab header
    md-dummy-tab Those are used for pagination size calculations so need to have the same layout as md-tab-item
@@ -10,11 +9,18 @@ md-tabs md-tabs-canvas.md-center-tabs
   & md-tab-item.md-tab,
   & md-dummy-tab.md-tab
     min-width max-content /* at least as wide as the content */
-    flex-basis 0          /* all tab headers should have same width _when possible_ */
+    flex-basis 0 /* all tab headers should have same width _when possible_ */
     /* same as angular-md layout="row" layout-align="center center" */
     flex-direction row
     justify-content center
     align-items center
+
+md-tabs md-tab-content
+  transition-property none
+  transform none
+
+md-tabs md-tab-content.md-active-remove-active
+  visibility hidden
 
 md-tab-item.md-tab, md-dummy-tab.md-tab
   & .che-tab-label-icon
@@ -44,7 +50,9 @@ md-tab-content
 /* selected tab color changes */
 md-tabs-canvas md-tab-item.md-tab.md-active,
 md-tabs-canvas md-tab-item.md-tab.md-active md-icon.che-tab-label-icon::before
-  color $primary-color !important /* either !important or preprend md-tabs.md-maincontent-theme-theme  to selector */
+  color $primary-color !important
+
+/* either !important or preprend md-tabs.md-maincontent-theme-theme  to selector */
 
 md-tabs md-tab-item:not(.md-active)
   border-bottom 1px solid $disabled-color

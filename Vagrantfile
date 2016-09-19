@@ -11,13 +11,13 @@
 $http_proxy    = ENV['HTTP_PROXY'] || ""
 $https_proxy   = ENV['HTTPS_PROXY'] || ""
 $no_proxy      = ENV['NO_PROXY'] || "localhost,127.0.0.1"
-$che_version   = ENV['CHE_VERSION'] || "nightly"
-$ip            = ENV['CHE_IP'] || "192.168.28.100"
+$che_version   = ENV['CHE_VERSION'] || "4.7.2"
+$ip            = ENV['CHE_HOST_IP'] || "192.168.28.100"
 $hostPort      = (ENV['CHE_PORT'] || 8080).to_i
 $containerPort = (ENV['CHE_CONTAINER_PORT'] || ($hostPort == -1 ? 8080 : $hostPort)).to_i
 $user_data     = ENV['CHE_DATA'] || "."
 $vm_name       = ENV['CHE_VM_NAME'] || "eclipse-che-vm"
-$provisionProgress = ENV['PROVISION_PROGRESS'] || "basic"
+$provisionProgress = ENV['PROVISION_PROGRESS'] || "extended"
 
 Vagrant.configure(2) do |config|
   puts ("ECLIPSE CHE: VAGRANT INSTALLER")
@@ -36,7 +36,7 @@ Vagrant.configure(2) do |config|
     config.proxy.no_proxy = $no_proxy
   end
 
-  config.vm.box = "boxcutter/centos72-docker"
+  config.vm.box = "boxcutter/centos72"
   config.vm.box_download_insecure = true
   config.ssh.insert_key = false
   if $ip.to_s.downcase == "dhcp"
@@ -89,51 +89,29 @@ Vagrant.configure(2) do |config|
       echo "ECLIPSE CHE: CONFIGURING SYSTEM PROXY"
       echo "."
       echo "-------------------------------------"
-      echo 'export HTTP_PROXY="'$HTTP_PROXY'"' >> /home/vagrant/.bashrc
-      echo 'export HTTPS_PROXY="'$HTTPS_PROXY'"' >> /home/vagrant/.bashrc
-      source /home/vagrant/.bashrc
+      echo "export http_proxy=$HTTP_PROXY" >> /etc/profile.d/vars.sh
+      echo "export https_proxy=$HTTPS_PROXY" >> /etc/profile.d/vars.sh
+      echo "export no_proxy=$NO_PROXY" >> /etc/profile.d/vars.sh
+      source /etc/profile.d/vars.sh
 
       # Configuring the Che properties file - mounted into Che container when it starts
-      echo 'http.proxy="'$HTTP_PROXY'"' >> /home/user/che/conf/che.properties
-      echo 'https.proxy="'$HTTPS_PROXY'"' >> /home/user/che/conf/che.properties
+      echo "export CHE_PROPERTY_http_proxy=${HTTP_PROXY}" >> /etc/profile.d/vars.sh
+      echo "export CHE_PROPERTY_https_proxy=${HTTP_PROXY}" >> /etc/profile.d/vars.sh
 
       echo "HTTP PROXY set to: $HTTP_PROXY"
       echo "HTTPS PROXY set to: $HTTPS_PROXY"
     fi
 
-    function perform
-    {
-      local progress=$1
-      local command=$2
-      shift 2
+    echo "------------------------------"
+    echo "ECLIPSE CHE: INSTALLING DOCKER"
+    echo "------------------------------"
+    sudo yum -y install expect
 
-      local pid=""
-
-      case "$progress" in
-        extended)
-          # simulate tty environment to get full output of progress bars and percentages
-          printf "set timeout -1\nspawn %s\nexpect eof" "$command $*" | expect -f -
-          ;;
-        basic|*)
-          $command "$@" &>/dev/null &
-          pid=$!
-          while kill -0 "$pid" >/dev/null 2>&1; do
-            printf "#"
-            sleep 10
-          done
-          wait $pid # return pid's exit code
-          ;;
-      esac
-    }
-
-    echo "------------------------------------"
-    echo "ECLIPSE CHE: UPGRADING DOCKER ENGINE"
-    echo "------------------------------------"
-    if [ "$PROVISION_PROGRESS" = "extended" ]; then
-       # we sacrifice a few seconds of additional install time for much better progress afterwards
-       perform basic yum -y install expect
-    fi
-    perform $PROVISION_PROGRESS sudo yum -y update docker-engine
+    # INstall docker
+    sudo yum -y update
+#    perform $PROVISION_PROGRESS sudo yum install docker-engine
+    curl -fsSL https://get.docker.com/ | sh
+    sudo service docker start 
 
     echo $(docker --version)
 
@@ -151,14 +129,14 @@ Vagrant.configure(2) do |config|
         mkdir /etc/systemd/system/docker.service.d
     fi
     if [ -n "$HTTP_PROXY" ]; then
-        printf "[Service]\nEnvironment=\"HTTP_PROXY=${HTTP_PROXY}\"" > /etc/systemd/system/docker.service.d/http-proxy.conf
+        printf "[Service]\nEnvironment=\"HTTP_PROXY=${1}\"" > /etc/systemd/system/docker.service.d/http-proxy.conf
         printf ""
     fi
     if [ -n "$HTTPS_PROXY" ]; then
-        printf "[Service]\nEnvironment=\"HTTPS_PROXY=${HTTPS_PROXY}\"" > /etc/systemd/system/docker.service.d/https-proxy.conf
+        printf "[Service]\nEnvironment=\"HTTPS_PROXY=${2}\"" > /etc/systemd/system/docker.service.d/https-proxy.conf
     fi
     if [ -n "$HTTP_PROXY" ] || [ -n "$HTTPS_PROXY" ]; then
-        printf "[Service]\nEnvironment=\"NO_PROXY=${NO_PROXY}\"" > /etc/systemd/system/docker.service.d/no-proxy.conf
+        printf "[Service]\nEnvironment=\"NO_PROXY=${3}\"" > /etc/systemd/system/docker.service.d/no-proxy.conf
     fi
 
     systemctl daemon-reload
@@ -167,19 +145,19 @@ Vagrant.configure(2) do |config|
     echo "--------------------------------------------------"
     echo "ECLIPSE CHE: DOWNLOADING ECLIPSE CHE DOCKER IMAGES"
     echo "--------------------------------------------------"
-#    perform $PROVISION_PROGRESS docker pull codenvy/che-launcher:${CHE_VERSION}
-#    perform $PROVISION_PROGRESS docker pull codenvy/che-server:${CHE_VERSION}
     docker pull alpine:latest
-    docker pull codenvy/che-launcher:${CHE_VERSION}
-    docker pull codenvy/che-server:${CHE_VERSION}
+    docker pull codenvy/che-launcher:${4}
+    docker pull codenvy/che-server:${4}
 
     curl -sL https://raw.githubusercontent.com/eclipse/che/master/che.sh | tr -d '\15\32' > /home/vagrant/che.sh
     chmod +x /home/vagrant/che.sh
     
-    echo "export CHE_PORT=${PORT}" >> /etc/profile.d/vars.sh
-    echo "export CHE_VERSION=${CHE_VERSION}" >> /etc/profile.d/vars.sh
-    echo "export CHE_HOST_IP=172.17.0.1" >> /etc/profile.d/vars.sh
-    echo "export CHE_HOSTNAME=${IP}" >> /etc/profile.d/vars.sh
+    echo "export CHE_PORT=${6}" >> /etc/profile.d/vars.sh
+    echo "export CHE_VERSION=${4}" >> /etc/profile.d/vars.sh
+    echo "export CHE_HOST_IP=${5}" >> /etc/profile.d/vars.sh
+    echo "export CHE_HOSTNAME=${5}" >> /etc/profile.d/vars.sh
+    echo "export IS_INTERACTIVE=false" >> /etc/profile.d/vars.sh
+    echo "export IS_PSEUDO_TTY=false" >> /etc/profile.d/vars.sh
 
   SHELL
 
@@ -198,10 +176,10 @@ Vagrant.configure(2) do |config|
     echo "--------------------------------"
 
     docker run --rm -t -v /var/run/docker.sock:/var/run/docker.sock \
-               -e "CHE_PORT=${CHE_PORT}" \
+               -e "CHE_PORT=${2}" \
                -e "CHE_RESTART_POLICY=always" \
-               -e "CHE_HOST_IP=${CHE_HOST_IP}" \
-               -e "CHE_HOSTNAME=${CHE_HOSTNAME}" \
+               -e "CHE_HOST_IP=${1}" \
+               -e "CHE_HOSTNAME=${1}" \
                codenvy/che-launcher:${CHE_VERSION} start
 
 

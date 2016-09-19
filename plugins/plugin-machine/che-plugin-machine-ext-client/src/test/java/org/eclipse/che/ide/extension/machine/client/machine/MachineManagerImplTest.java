@@ -27,7 +27,6 @@ import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.ui.loaders.initialization.InitialLoadingInfo;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,9 +68,6 @@ public class MachineManagerImplTest {
 
     @Mock
     private MessageBusProvider messageBusProvider;
-
-    @Mock
-    private InitialLoadingInfo initialLoadingInfo;
 
     @Mock
     private PerspectiveManager perspectiveManager;

@@ -62,15 +62,7 @@
                 }
             ]
         },
-        "acl": [
-            {
-                "user": "*",
-                "actions": [
-                    "search"
-                ]
-            }
-        ],
-        "stackIcon": {
+        "stackIcon" : {
             "name": "type-java.svg",
             "mediaType": "image/svg+xml"
         }
@@ -153,15 +145,7 @@
                     "type": "mvn"
                 }
             ]
-        },
-        "acl": [
-            {
-                "user": "*",
-                "actions": [
-                    "search"
-                ]
-            }
-        ]
+        }
     },
     {
         "id": "node-default",
@@ -241,15 +225,7 @@
                     "type": "mvn"
                 }
             ]
-        },
-        "acl": [
-            {
-                "user": "*",
-                "actions": [
-                    "search"
-                ]
-            }
-        ]
+        }
     },
     {
         "id": "compose-location",
@@ -329,15 +305,7 @@
                     "type": "mvn"
                 }
             ]
-        },
-        "acl": [
-            {
-                "user": "*",
-                "actions": [
-                    "search"
-                ]
-            }
-        ]
+        }
     },
     {
         "id": "compose-content",
@@ -414,14 +382,6 @@
                     "type": "mvn"
                 }
             ]
-        },
-        "acl": [
-            {
-                "user": "*",
-                "actions": [
-                    "search"
-                ]
-            }
-        ]
+        }
     }
 ]

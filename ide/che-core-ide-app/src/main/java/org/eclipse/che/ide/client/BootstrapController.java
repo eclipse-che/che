@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.client;
 
-import elemental.client.Browser;
+import com.google.gwt.dom.client.Document;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
@@ -37,6 +37,7 @@ import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
+import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.context.AppContextImpl;
@@ -47,6 +48,8 @@ import org.eclipse.che.ide.workspace.WorkspacePresenter;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Performs initial application startup.
@@ -115,7 +118,9 @@ public class BootstrapController {
 
                         wsAgentStateControllerProvider.get().initialize(devMachine);
                         wsAgentURLModifier.initialize(devMachine);
-                        startWsAgentComponents(components.values().iterator());
+                        SortedMap<String, Provider<WsAgentComponent>> sortedComponents = new TreeMap<>();
+                        sortedComponents.putAll(components);
+                        startWsAgentComponents(sortedComponents.values().iterator());
                     }
                 }).catchError(new Operation<PromiseError>() {
                     @Override
@@ -171,6 +176,11 @@ public class BootstrapController {
     }
 
     private void startExtensionsAndDisplayUI() {
+        // Change background color according to the current theme
+        if (Style.theme != null) {
+            Document.get().getBody().getStyle().setBackgroundColor(Style.theme.backgroundColor());
+        }
+
         appStateManagerProvider.get();
 
         extensionInitializer.startExtensions();
@@ -211,8 +221,6 @@ public class BootstrapController {
                 eventBus.fireEvent(WindowActionEvent.createWindowClosedEvent());
             }
         });
-
-        elemental.html.Window window = Browser.getWindow();
 
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
             @Override

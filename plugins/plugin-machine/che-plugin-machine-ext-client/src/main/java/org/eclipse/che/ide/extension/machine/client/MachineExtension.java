@@ -30,6 +30,7 @@ import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.api.parts.PartStackType;
+import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
@@ -96,6 +97,11 @@ public class MachineExtension {
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
+                Perspective perspective = perspectiveManager.getActivePerspective();
+                if (perspective != null) {
+                    perspective.restoreParts();
+                }
+
                 machinePortProvider.get();
                 /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
@@ -120,6 +126,17 @@ public class MachineExtension {
                 if (appContext.getFactory() == null) {
                     workspaceAgent.setActivePart(processesPanelPresenter);
                 }
+
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        Perspective perspective = perspectiveManager.getActivePerspective();
+                        if (perspective != null) {
+                            perspective.maximizeBottomPart();
+                        }
+                    }
+                });
+
             }
         });
 

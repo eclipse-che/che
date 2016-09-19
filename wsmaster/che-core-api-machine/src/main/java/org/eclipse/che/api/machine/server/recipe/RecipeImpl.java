@@ -10,11 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.recipe;
 
-import org.eclipse.che.api.core.acl.AclEntryImpl;
 import org.eclipse.che.api.core.model.machine.Recipe;
+import org.eclipse.che.api.machine.server.jpa.RecipeEntityListener;
 import org.eclipse.che.api.machine.shared.ManagedRecipe;
-import org.eclipse.che.commons.annotation.Nullable;
 
+import javax.persistence.Basic;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.Id;
+import javax.persistence.Index;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -23,17 +30,34 @@ import java.util.Objects;
  * Implementation of {@link ManagedRecipe}
  *
  * @author Eugene Voevodin
+ * @author Anton Korneta
  */
+@Entity(name = "Recipe")
+@EntityListeners(RecipeEntityListener.class)
 public class RecipeImpl implements ManagedRecipe {
 
-    private String             id;
-    private String             name;
-    private String             creator;
-    private String             type;
-    private String             script;
-    private List<String>       tags;
-    private String             description;
-    private List<AclEntryImpl> acl;
+    @Id
+    private String id;
+
+    @Basic
+    private String name;
+
+    @Basic
+    private String creator;
+
+    @Basic
+    private String type;
+
+    @Column(columnDefinition = "TEXT")
+    private String script;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @ElementCollection
+    @Column(name = "tag")
+    @CollectionTable(indexes = @Index(columnList = "tag"))
+    private List<String> tags;
 
     public RecipeImpl() {
     }
@@ -50,8 +74,7 @@ public class RecipeImpl implements ManagedRecipe {
              recipe.getType(),
              recipe.getScript(),
              recipe.getTags(),
-             recipe.getDescription(),
-             null);
+             recipe.getDescription());
     }
 
     public RecipeImpl(RecipeImpl recipe) {
@@ -61,8 +84,7 @@ public class RecipeImpl implements ManagedRecipe {
              recipe.getType(),
              recipe.getScript(),
              recipe.getTags(),
-             recipe.getDescription(),
-             recipe.getAcl());
+             recipe.getDescription());
     }
 
     public RecipeImpl(String id,
@@ -71,8 +93,7 @@ public class RecipeImpl implements ManagedRecipe {
                       String type,
                       String script,
                       List<String> tags,
-                      String description,
-                      List<AclEntryImpl> acl) {
+                      String description) {
         this.id = id;
         this.name = name;
         this.creator = creator;
@@ -80,7 +101,6 @@ public class RecipeImpl implements ManagedRecipe {
         this.script = script;
         this.tags = tags;
         this.description = description;
-        this.acl = acl;
     }
 
     @Override
@@ -184,20 +204,6 @@ public class RecipeImpl implements ManagedRecipe {
         return this;
     }
 
-    @Nullable
-    public List<AclEntryImpl> getAcl() {
-        return acl;
-    }
-
-    public void setAcl(List<AclEntryImpl> acl) {
-        this.acl = acl;
-    }
-
-    public RecipeImpl withAcl(List<AclEntryImpl> acl) {
-        this.acl = acl;
-        return this;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -213,8 +219,7 @@ public class RecipeImpl implements ManagedRecipe {
                Objects.equals(type, other.type) &&
                Objects.equals(script, other.script) &&
                Objects.equals(description, other.description) &&
-               getTags().equals(other.getTags()) &&
-               Objects.equals(acl, other.acl);
+               getTags().equals(other.getTags());
     }
 
     @Override
@@ -227,7 +232,6 @@ public class RecipeImpl implements ManagedRecipe {
         hash = 31 * hash + Objects.hashCode(script);
         hash = 31 * hash + Objects.hashCode(description);
         hash = 31 * hash + getTags().hashCode();
-        hash = 31 * hash + Objects.hashCode(acl);
         return hash;
     }
 
@@ -239,9 +243,8 @@ public class RecipeImpl implements ManagedRecipe {
                ", creator='" + creator + '\'' +
                ", type='" + type + '\'' +
                ", script='" + script + '\'' +
-               ", tags=" + tags +
                ", description='" + description + '\'' +
-               ", acl=" + acl +
+               ", tags=" + tags +
                '}';
     }
 }
