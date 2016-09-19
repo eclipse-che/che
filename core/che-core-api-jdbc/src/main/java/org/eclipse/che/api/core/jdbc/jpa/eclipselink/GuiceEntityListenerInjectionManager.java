@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.persistence.internal.sessions.AbstractSession;
 import org.eclipse.persistence.internal.sessions.cdi.EntityListenerInjectionManager;
 
@@ -45,6 +46,9 @@ import javax.naming.NamingException;
  */
 @Singleton
 public class GuiceEntityListenerInjectionManager implements EntityListenerInjectionManager {
+
+    @Inject
+    private JpaInitializer jpaInitializer;
 
     @Inject
     private Injector injector;
