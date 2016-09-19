@@ -45,6 +45,7 @@
         <module>plugin-svn</module>
         <module>plugin-cpp</module>
         <module>plugin-nodejs</module>
+        <module>plugin-nodejs-debugger</module>
         <module>plugin-ssh-machine</module>
         <module>plugin-ssh-key</module>
     </modules>

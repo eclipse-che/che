@@ -518,6 +518,16 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-nodejs-debugger-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-nodejs-debugger-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-nodejs-lang-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
