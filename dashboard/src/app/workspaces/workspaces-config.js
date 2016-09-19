@@ -43,6 +43,22 @@ import {CheStackLibraryFilterController} from './create-workspace/select-stack/s
 import {CheStackLibraryFilter}     from './create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.directive';
 import {CreateProjectStackLibrarySelectedStackFilter} from './create-workspace/select-stack/stack-library/create-project-stack-library-selected-stack.filter';
 
+import {WorkspaceEnvironmentsController} from './workspace-details/environments/environments.controller';
+import {WorkspaceEnvironments} from './workspace-details/environments/environments.directive';
+import {WorkspaceMachineConfigController} from './workspace-details/environments/machine-config/machine-config.controller';
+import {WorkspaceMachineConfig} from './workspace-details/environments/machine-config/machine-config.directive';
+import {EditMachineNameDialogController} from  './workspace-details/environments/machine-config/edit-machine-name-dialog/edit-machine-name-dialog.controller';
+
+import {ListEnvVariablesController} from './workspace-details/environments/list-env-variables/list-env-variables.controller';
+import {ListEnvVariables} from './workspace-details/environments/list-env-variables/list-env-variables.directive';
+import {AddVariableDialogController} from  './workspace-details/environments/list-env-variables/add-variable-dialog/add-variable-dialog.controller';
+import {EditVariableDialogController} from  './workspace-details/environments/list-env-variables/edit-variable-dialog/edit-variable-dialog.controller';
+
+import {ListPortsController} from './workspace-details/environments/list-ports/list-ports.controller';
+import {ListPorts} from './workspace-details/environments/list-ports/list-ports.directive';
+import {AddPortDialogController} from  './workspace-details/environments/list-ports/add-port-dialog/add-port-dialog.controller';
+import {EditPortDialogController} from  './workspace-details/environments/list-ports/edit-port-dialog/edit-port-dialog.controller';
+
 /**
  * @ngdoc controller
  * @name workspaces:WorkspacesConfig
@@ -98,12 +114,28 @@ export class WorkspacesConfig {
     register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
     register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
 
+    register.controller('WorkspaceEnvironmentsController', WorkspaceEnvironmentsController);
+    register.directive('workspaceEnvironments', WorkspaceEnvironments);
+    register.controller('WorkspaceMachineConfigController', WorkspaceMachineConfigController);
+    register.directive('workspaceMachineConfig', WorkspaceMachineConfig);
+    register.controller('EditMachineNameDialogController', EditMachineNameDialogController);
+
+    register.controller('ListEnvVariablesController', ListEnvVariablesController);
+    register.directive('listEnvVariables', ListEnvVariables);
+    register.controller('AddVariableDialogController', AddVariableDialogController);
+    register.controller('EditVariableDialogController', EditVariableDialogController);
+
+    register.controller('ListPortsController', ListPortsController);
+    register.directive('listPorts', ListPorts);
+    register.controller('AddPortDialogController', AddPortDialogController);
+    register.controller('EditPortDialogController', EditPortDialogController);
+
     let locationProvider = {
       title: (params) => { return params.workspaceName;},
       templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
       controller: 'WorkspaceDetailsController',
       controllerAs: 'workspaceDetailsCtrl'
-    }
+    };
 
     // config routes
     register.app.config(function ($routeProvider) {

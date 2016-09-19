@@ -79,14 +79,14 @@ export class CheInput {
     if (attrs.chePattern) {
       template = template + ' pattern="' + pattern + '"';
     }
-    template = template + ' data-ng-model="valueModel">';
+    template = template + ' data-ng-model="valueModel">'
+      + '<md-icon class="fa fa-pencil che-input-icon"></md-icon>';
 
     if (attrs.cheWidth === 'auto') {
       template = template + '<div class="che-input-desktop-hidden-text">{{valueModel ? valueModel : placeHolder}}</div>';
     }
 
-    template = template + '<md-icon class="fa fa-pencil che-input-icon"></md-icon>'
-      + '<!-- display error messages for the form -->'
+    template = template + '<!-- display error messages for the form -->'
       + '<div ng-messages="myForm.desk' + inputName + '.$error" ng-transclude></div>'
       + '</div>'
       + '</div>'
