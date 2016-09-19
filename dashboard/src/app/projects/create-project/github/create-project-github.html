@@ -16,7 +16,7 @@
   We have a problem authenticating you with GitHub.
 </p>
 
-<div layout="column" layout-align="space-around center" ng-show="createProjectGithubCtrl.state == 'NO_REPO'">
+<div layout="column" layout-align="space-around flex-start" ng-show="createProjectGithubCtrl.state == 'NO_REPO'">
   <div class="github-create-project-github-warningempty">Your GitHub repositories will appear here</div>
   <div>GitHub repositories can easily be imported in {{createProjectGithubCtrl.productName}}</div>
   <che-button-default class="github-create-project-github-button"
@@ -32,7 +32,7 @@
 </div>
 
 <div ng-if="createProjectGithubCtrl.state == 'LOADED'">
-  <div layout="row" layout-align="space-around center">
+  <div layout="row" layout-align="space-around flex-start">
 
     <div layout="row" flex="45" class="github-create-project-search-component">
       <md-icon flex-gt-sm="5" md-font-icon="fa fa-search"></md-icon>
@@ -49,10 +49,10 @@
   </div>
   <che-list class="github-create-project-repositories-list">
     <che-list-item
-      ng-repeat="gitHubRepository in createProjectGithubCtrl.gitHubRepositories | githubFilterRepositories:createProjectGithubCtrl.organizationName:createProjectGithubCtrl.repositoryName | orderBy:'name'"
-      ng-click="createProjectGithubCtrl.selectRepository(gitHubRepository)" flex-gt-sm="100" flex="33"
-      ng-class="{'github-create-project-active' : gitHubRepository == createProjectGithubCtrl.selectedRepository}">
-      <div layout-gt-sm="row" flex="100" layout-align="start center" class="project-list-row">
+            ng-repeat="gitHubRepository in createProjectGithubCtrl.gitHubRepositories | githubFilterRepositories:createProjectGithubCtrl.organizationName:createProjectGithubCtrl.repositoryName | orderBy:'name'"
+            ng-click="createProjectGithubCtrl.selectRepository(gitHubRepository)" flex-gt-sm="100" flex="33"
+            ng-class="{'github-create-project-active' : gitHubRepository == createProjectGithubCtrl.selectedRepository}">
+      <div layout-gt-sm="row" flex="100" layout-align="start flex-start" class="project-list-row">
         <div class="github-create-project-icons" flex-gt-sm="5">
           <span ng-if="!gitHubRepository.fork" class="github-create-project-icon fa fa-folder"></span>
           <span ng-if="gitHubRepository.fork" class="github-create-project-icon fa fa-code-fork" title="forked"></span>

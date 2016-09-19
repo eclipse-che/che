@@ -21,46 +21,84 @@ export class ReadyToGoStacksController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout, $rootScope, lodash, cheStack) {
+  constructor($timeout, $scope, lodash, cheStack) {
     this.$timeout = $timeout;
-    this.$rootScope = $rootScope;
+    this.$scope = $scope;
     this.lodash = lodash;
     this.cheStack = cheStack;
 
     this.generalStacks = [];
-    this.stacks = cheStack.getStacks();
-    if (this.stacks.length) {
-      this.updateData();
+    this.allStackTags = [];
+    this.filteredStackIds = [];
+    this.stackIconsMap = new Map();
+
+    let stacks = cheStack.getStacks();
+    if (stacks.length) {
+      this.updateData(stacks);
     } else {
       cheStack.fetchStacks().then(() => {
-        this.updateData();
+        this.updateData(stacks);
       });
     }
+
+    // create array of id of stacks which contain selected tags
+    // to make filtration faster
+    $scope.$on('event:updateFilter', (event, tags) => {
+      this.allStackTags = [];
+      this.filteredStackIds = [];
+
+      if (!tags) {
+        tags = [];
+      }
+      this.generalStacks.forEach((stack) => {
+        let matches = 0,
+          stackTags = stack.tags.map(tag => tag.toLowerCase());
+        for (let i = 0; i < tags.length; i++) {
+          if (stackTags.indexOf(tags[i].toLowerCase()) > -1) {
+            matches++;
+          }
+        }
+        if (matches === tags.length) {
+          this.filteredStackIds.push(stack.id);
+          this.allStackTags = this.allStackTags.concat(stack.tags);
+        }
+      });
+      this.allStackTags = this.lodash.uniq(this.allStackTags);
+    });
+
+    // set first stack as selected after filtration finished
+    $scope.$watch('filteredStacks && filteredStacks.length', (length) => {
+      if (length) {
+        this.setStackSelectionById($scope.filteredStacks[0].id);
+      }
+    });
   }
 
   /**
    * Update stacks' data
+   * @param stacks
    */
-  updateData() {
-    this.stacks.forEach((stack) => {
+  updateData(stacks) {
+    stacks.forEach((stack) => {
       if (stack.scope !== 'general') {
         return;
       }
-      let generalStack = angular.copy(stack);
-      let findLink = this.lodash.find(generalStack.links, (link) => {
+      let findLink = this.lodash.find(stack.links, (link) => {
         return link.rel === 'get icon link';
       });
       if (findLink) {
-        generalStack.iconSrc = findLink.href;
+        this.stackIconsMap.set(stack.id, findLink.href);
       }
-      this.generalStacks.push(generalStack);
+      this.generalStacks.push(stack);
+      this.allStackTags = this.allStackTags.concat(stack.tags);
     });
-    // broadcast event
-    this.$rootScope.$broadcast('create-project-stacks:initialized');
+    this.allStackTags = this.lodash.uniq(this.allStackTags);
   }
 
   /**
    * Joins the tags into a string
+   * @param tags
+   * @returns String
    */
   tagsToString(tags) {
     return tags.join(', ');
@@ -68,6 +106,8 @@ export class ReadyToGoStacksController {
 
   /**
    * Gets privileged stack position
+   * @param item
+   * @returns number
    */
   getPrivilegedSortPosition(item) {
     let privilegedNames = ['Java', 'Java-MySQL', 'Blank'];
@@ -81,22 +121,13 @@ export class ReadyToGoStacksController {
   }
 
   /**
-   * Select stack
+   * Select stack by Id
+   * @param stackId
    */
-  select(stack) {
-    this.stack = stack;
-    this.$timeout(() => {
-      this.onChange();
-    });
-  }
-
-  /**
-   * When initializing with the first item, select it
-   */
-  initValue(isFirst, stack) {
-    if (isFirst) {
-      this.select(stack);
+  setStackSelectionById(stackId) {
+    this.selectedStackId = stackId;
+    if (this.selectedStackId) {
+      this.$scope.$emit('event:selectStackId', this.selectedStackId);
     }
   }
-
 }

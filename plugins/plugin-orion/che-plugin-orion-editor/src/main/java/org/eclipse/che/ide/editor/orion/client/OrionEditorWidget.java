@@ -658,6 +658,10 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         List<Annotation> addedAnnotations = event.getAddedAnnotations();
         JsArray<OrionProblemOverlay> jsArray = JsArray.createArray().cast();
         AnnotationModel annotationModel = event.getAnnotationModel();
+        OrionAnnotationSeverityProvider severityProvider = null;
+        if (annotationModel instanceof OrionAnnotationSeverityProvider) {
+            severityProvider = (OrionAnnotationSeverityProvider)annotationModel;
+        }
         for (Annotation annotation : addedAnnotations) {
             Position position = annotationModel.getPosition(annotation);
 
@@ -666,20 +670,17 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
             problem.setStart(position.getOffset());
             problem.setEnd(position.getOffset() + position.getLength());
             problem.setId("che-annotation");
-            problem.setSeverity(getSeverity(annotation.getType()));
+            problem.setSeverity(getSeverity(annotation.getType(), severityProvider));
             jsArray.push(problem);
         }
         editorOverlay.showProblems(jsArray);
     }
 
-    private String getSeverity(String type) {
-        switch (type) {
-            case "org.eclipse.jdt.ui.error":
-                return "error";
-            case "org.eclipse.jdt.ui.warning":
-                return "warning";
-            default:
-                return "task";
+    private String getSeverity(String type, OrionAnnotationSeverityProvider provider) {
+        if(provider != null ){
+            return provider.getSeverity(type);
+        } else {
+            return "error";
         }
     }
 

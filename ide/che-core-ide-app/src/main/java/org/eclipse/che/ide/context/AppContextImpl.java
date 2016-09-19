@@ -209,7 +209,6 @@ public class AppContextImpl implements AppContext,
                 AppContextImpl.this.projects = projects;
                 java.util.Arrays.sort(AppContextImpl.this.projects, ResourcePathComparator.getInstance());
                 eventBus.fireEvent(new WorkspaceReadyEvent(projects));
-                appStateManager.get().restoreWorkspaceState(getWorkspaceId());
             }
         });
     }

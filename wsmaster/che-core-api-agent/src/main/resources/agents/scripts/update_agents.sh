@@ -31,6 +31,9 @@ updateAgentScript() {
 updateAgentScript ".." "org.eclipse.che.ssh"
 updateAgentScript ".." "org.eclipse.che.terminal"
 updateAgentScript ".." "org.eclipse.che.ws-agent"
+updateAgentScript ".." "org.eclipse.che.ls.json"
+updateAgentScript ".." "org.eclipse.che.ls.csharp"
+updateAgentScript ".." "org.eclipse.che.ls.php"
 
 
 

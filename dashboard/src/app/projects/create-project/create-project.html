@@ -70,8 +70,8 @@
               <div layout="column" layout-align="end end"
                    ng-show="createProjectCtrl.getCreationSteps()[createProjectCtrl.getCurrentProgressStep()].hasError">
                 <che-button-danger
-                  che-button-title="{{createProjectCtrl.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"
-                  ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>
+                        che-button-title="{{createProjectCtrl.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"
+                        ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>
                 <che-link class="create-project-download-logs-link"
                           ng-click="createProjectCtrl.downloadLogs()"
                           che-link-text="Problem? download logs"></che-link>
@@ -109,7 +109,7 @@
           <md-tab md-on-select="createProjectCtrl.setCurrentTab('github')">
             <md-tab-label>
               <md-icon md-font-icon="fa-github" class="fa che-tab-label-icon"></md-icon>
-              <span class="che-tab-label-title">Github</span>
+              <span class="che-tab-label-title">GitHub</span>
             </md-tab-label>
             <md-tab-body>
               <form name="createProjectGitHubForm">
@@ -220,7 +220,7 @@
       <md-radio-group ng-model="createProjectCtrl.templatesChoice">
         <md-radio-button value="templates-samples">Ready-to-run project samples</md-radio-button>
         <create-project-samples
-          ng-if="createProjectCtrl.templatesChoice === 'templates-samples'"></create-project-samples>
+                ng-if="createProjectCtrl.templatesChoice === 'templates-samples'"></create-project-samples>
         <md-radio-button ng-if="createProjectCtrl.enableWizardProject"
                          ng-click="createProjectCtrl.selectWizardProject()"
                          value="templates-wizard">Wizard-driven templates
@@ -278,7 +278,7 @@
                         ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
                         ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
                         class="projects-create-project-button"
-    ></che-button-primary>
+            ></che-button-primary>
 
     <div class="create-project-empty-space"></div>
 
