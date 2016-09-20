@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-machine-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>5.0.0-M2-SNAPSHOT</version>
+        <version>5.0.0-M2</version>
     </parent>
     <artifactId>che-plugin-machine-ext-server</artifactId>
     <dependencies>
