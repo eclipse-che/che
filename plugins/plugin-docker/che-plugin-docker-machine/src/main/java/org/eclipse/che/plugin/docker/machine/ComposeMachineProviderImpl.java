@@ -290,8 +290,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
             readContainerLogsInSeparateThread(container,
                                               workspaceId,
                                               machineId,
-                                              machineLogger,
-                                              5);
+                                              machineLogger);
 
             DockerNode node = dockerMachineFactory.createNode(workspaceId, container);
             if (isDev) {
@@ -576,8 +575,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
     private void readContainerLogsInSeparateThread(String container,
                                                    String workspaceId,
                                                    String machineId,
-                                                   LineConsumer outputConsumer,
-                                                   int maxErrorsToStop) {
+                                                   LineConsumer outputConsumer) {
         executor.execute(() -> {
             long lastProcessedLogDate = 0;
             boolean isContainerRunning = true;
@@ -595,19 +593,20 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                 } catch (ContainerNotFoundException e) {
                     isContainerRunning = false;
                 } catch (IOException e) {
-                    LOG.warn("Failed to get logs from machine {} of workspace {} backed by container {}, because: {}. Cause: {}",
+                    LOG.warn("Failed to get logs from machine {} of workspace {} backed by container {}, because: {}.",
                               workspaceId,
                               machineId,
                               container,
                               e.getMessage(),
                               e);
-                    errorsCounter++;
-                    if (errorsCounter == maxErrorsToStop) {
+                    if (++errorsCounter == 5) {
                         LOG.error("Too many errors while streaming logs from machine {} of workspace {} backed by container {}. " +
-                                  "Logs streaming is closed.",
+                                  "Logs streaming is closed. Last error: {}.",
                                   workspaceId,
                                   machineId,
-                                  container);
+                                  container,
+                                  e.getMessage(),
+                                  e);
                         break;
                     } else {
                         try {
