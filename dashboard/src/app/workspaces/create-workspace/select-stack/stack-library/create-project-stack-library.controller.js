@@ -41,8 +41,8 @@ export class CreateProjectStackLibraryController {
       });
     }
 
-    $scope.$on('event:selectStackId', (event, data) => {
-      this.selectedStackId = data;
+    $scope.$on('event:library:selectStackId', (event, data) => {
+      this.setStackSelectionById(data)
     });
 
     // create array of id of stacks which contain selected tags
@@ -85,7 +85,7 @@ export class CreateProjectStackLibraryController {
   setStackSelectionById(stackId) {
     this.selectedStackId = stackId;
     if (this.selectedStackId) {
-      this.$scope.$emit('event:selectStackId', this.selectedStackId);
+      this.$scope.$emit('event:selectStackId', {tabName: this.tabName, stackId: this.selectedStackId});
     }
   }
 

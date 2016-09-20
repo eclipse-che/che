@@ -39,15 +39,17 @@ export class WorkspaceSelectStackController {
     $scope.$on('event:selectStackId', (event, data) => {
       event.stopPropagation();
       let findStack = this.lodash.find(this.stacks, (stack) => {
-        return stack.id === data;
+        return stack.id === data.stackId;
       });
       if (findStack) {
-        if (this.tabName === 'ready-to-go') {
+        if (data.tabName === 'ready-to-go') {
           this.readyToGoStack = findStack;
-        } else if (this.tabName === 'stack-library') {
+        } else if (data.tabName === 'stack-library') {
           this.stackLibraryUser = findStack;
         }
-        this.onStackSelect(findStack);
+        if (this.tabName === data.tabName) {
+          this.onStackSelect(findStack);
+        }
       }
     });
   }
@@ -58,9 +60,7 @@ export class WorkspaceSelectStackController {
    */
   setStackTab(tabName) {
     this.tabName = tabName;
-    this.$timeout(() => {
-      this.onTabChange();
-    });
+    this.onTabChange({tabName: tabName});
 
     if (tabName === 'ready-to-go') {
       this.onStackSelect(this.readyToGoStack);
@@ -78,8 +78,6 @@ export class WorkspaceSelectStackController {
    */
   onStackSelect(stack) {
     this.stack = stack;
-    this.$timeout(() => {
-      this.onStackChange();
-    });
+    this.onStackChange({stack: stack});
   }
 }

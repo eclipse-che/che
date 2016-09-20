@@ -196,11 +196,11 @@
                     class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
 
               <div>
-                <div data-ng-repeat="(machineKey, machineValue) in environmentValue.machines">
-                  <div class="workspace-machine" ng-if="machineValue.attributes && machineValue.attributes.memoryLimitBytes">
-                    <span ng-if="createProjectCtrl.getObjectKeys(environmentValue.machines).length > 1">MACHINE: {{machineKey}}</span>
+                <div data-ng-repeat="machine in createProjectCtrl.getStackMachines(environmentValue)">
+                  <div class="workspace-machine" ng-if="machine.attributes && machine.attributes.memoryLimitBytes">
+                    <span ng-if="$first !== $last">MACHINE: {{machineKey}}</span>
                     <che-workspace-ram-allocation-slider
-                            ng-model="machineValue.attributes.memoryLimitBytes"></che-workspace-ram-allocation-slider>
+                            ng-model="machine.attributes.memoryLimitBytes"></che-workspace-ram-allocation-slider>
                   </div>
                 </div>
               </div>

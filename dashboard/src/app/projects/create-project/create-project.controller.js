@@ -20,7 +20,7 @@ export class CreateProjectController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory, $window) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory, $window, cheEnvironmentRegistry) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -36,6 +36,8 @@ export class CreateProjectController {
     this.$q = $q;
     this.$document = $document;
     this.$window = $window;
+    this.cheEnvironmentRegistry = cheEnvironmentRegistry;
+    this.stackMachines = {};
 
     this.resetCreateProgress();
 
@@ -1249,5 +1251,15 @@ export class CreateProjectController {
    */
   updateRecentWorkspace(workspaceId) {
     this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
+  }
+
+  getStackMachines(environment) {
+    let recipeType = environment.recipe.type;
+    let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
+    if (!this.stackMachines[this.stack.id]) {
+      this.stackMachines[this.stack.id] = environmentManager.getMachines(environment);
+    }
+
+    return this.stackMachines[this.stack.id];
   }
 }
