@@ -39,7 +39,9 @@ export class ReadyToGoStacks {
     this.bindToController = true;
 
     // scope values
-    this.scope = {};
+    this.scope = {
+      tabName: '@cheTabName'
+    };
   }
 
 }

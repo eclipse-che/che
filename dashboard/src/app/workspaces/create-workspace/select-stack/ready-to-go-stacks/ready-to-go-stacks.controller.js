@@ -127,7 +127,7 @@ export class ReadyToGoStacksController {
   setStackSelectionById(stackId) {
     this.selectedStackId = stackId;
     if (this.selectedStackId) {
-      this.$scope.$emit('event:selectStackId', this.selectedStackId);
+      this.$scope.$emit('event:selectStackId', {tabName: this.tabName, stackId: this.selectedStackId});
     }
   }
 }
