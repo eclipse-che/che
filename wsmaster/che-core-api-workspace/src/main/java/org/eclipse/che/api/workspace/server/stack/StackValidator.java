@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.stack;
 
-
-import com.google.common.annotations.VisibleForTesting;
-
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
@@ -53,7 +50,7 @@ public class StackValidator {
         if (stack.getSource() == null && stack.getWorkspaceConfig() == null) {
             throw new BadRequestException("Stack source required. You must specify either 'workspaceConfig' or 'stackSource'");
         }
-        if(stack.getWorkspaceConfig() == null) {
+        if (stack.getWorkspaceConfig() == null) {
             throw new BadRequestException("Workspace config required");
         }
         wsValidator.validateConfig(stack.getWorkspaceConfig());
