@@ -43,6 +43,15 @@
             </md-list-item>
             <md-list-item flex class="navbar-subsection-item">
               <md-button nav-bar-selected flex che-reload-href
+                         ng-href="{{navbarCtrl.menuItemUrl.stacks}}" layout-align="left">
+                <div class="navbar-item" layout="row" layout-align="start center">
+                  <md-icon md-font-icon="navbar-icon material-design icon-ic_inbox_24px"></md-icon>
+                  <span>Stacks</span>
+                </div>
+              </md-button>
+            </md-list-item>
+            <md-list-item flex class="navbar-subsection-item">
+              <md-button nav-bar-selected flex che-reload-href
                          ng-href="{{navbarCtrl.menuItemUrl.administration}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
                   <md-icon md-font-icon="navbar-icon material-design icon-ic_settings_24px"></md-icon>

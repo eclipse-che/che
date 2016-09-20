@@ -97,22 +97,19 @@ public class StackService extends Service {
                                                       "(e.g. The stack with such name already exists)"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public Response createStack(@ApiParam("The new stack") final StackDto stackDto) throws ApiException {
-
         stackValidator.check(stackDto);
-        String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
-
-        StackImpl newStack = StackImpl.builder()
-                                      .generateId()
-                                      .setName(stackDto.getName())
-                                      .setDescription(stackDto.getDescription())
-                                      .setScope(stackDto.getScope())
-                                      .setCreator(userId)
-                                      .setTags(stackDto.getTags())
-                                      .setWorkspaceConfig(stackDto.getWorkspaceConfig())
-                                      .setSource(stackDto.getSource())
-                                      .setComponents(stackDto.getComponents())
-                                      .build();
-
+        final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
+        final StackImpl newStack = StackImpl.builder()
+                                            .generateId()
+                                            .setName(stackDto.getName())
+                                            .setDescription(stackDto.getDescription())
+                                            .setScope(stackDto.getScope())
+                                            .setCreator(userId)
+                                            .setTags(stackDto.getTags())
+                                            .setWorkspaceConfig(stackDto.getWorkspaceConfig())
+                                            .setSource(stackDto.getSource())
+                                            .setComponents(stackDto.getComponents())
+                                            .build();
         stackDao.create(newStack);
 
         return Response.status(CREATED)
