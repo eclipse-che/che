@@ -41,6 +41,7 @@ import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
+import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -87,6 +88,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.lang.Thread.sleep;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -288,7 +290,8 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
             readContainerLogsInSeparateThread(container,
                                               workspaceId,
                                               machineId,
-                                              machineLogger);
+                                              machineLogger,
+                                              5);
 
             DockerNode node = dockerMachineFactory.createNode(workspaceId, container);
             if (isDev) {
@@ -573,10 +576,12 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
     private void readContainerLogsInSeparateThread(String container,
                                                    String workspaceId,
                                                    String machineId,
-                                                   LineConsumer outputConsumer) {
+                                                   LineConsumer outputConsumer,
+                                                   int maxErrorsToStop) {
         executor.execute(() -> {
             long lastProcessedLogDate = 0;
             boolean isContainerRunning = true;
+            int errorsCounter = 0;
             while (isContainerRunning) {
                 try {
                     docker.getContainerLogs(GetContainerLogsParams.create(container)
@@ -590,10 +595,22 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                 } catch (ContainerNotFoundException e) {
                     isContainerRunning = false;
                 } catch (IOException e) {
-                    LOG.error("Failed to get logs from machine {} of workspace {} backed by container {}",
+                    LOG.error("Failed to get logs from machine {} of workspace {} backed by container {}, because: {}. Cause: {}",
                               workspaceId,
                               machineId,
-                              container);
+                              container,
+                              e.getMessage(),
+                              e);
+                    errorsCounter++;
+                    if (errorsCounter == maxErrorsToStop) {
+                        break;
+                    } else {
+                        try {
+                            sleep(1000);
+                        } catch (InterruptedException ie) {
+                            break;
+                        }
+                    }
                 }
             }
         });
