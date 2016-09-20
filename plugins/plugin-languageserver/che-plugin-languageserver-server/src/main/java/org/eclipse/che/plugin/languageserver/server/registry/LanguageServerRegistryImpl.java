@@ -14,6 +14,7 @@ import io.typefox.lsapi.ServerCapabilities;
 import io.typefox.lsapi.services.LanguageServer;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.core.ServerException;
@@ -52,14 +53,14 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
      */
     private final ConcurrentHashMap<ProjectExtensionKey, LanguageServer> projectToServer;
 
-    private final ProjectManager         projectManager;
-    private final ServerInitializer      initializer;
+    private final Provider<ProjectManager> projectManagerProvider;
+    private final ServerInitializer        initializer;
 
     @Inject
     public LanguageServerRegistryImpl(Set<LanguageServerLauncher> languageServerLaunchers,
-                                      ProjectManager projectManager,
+                                      Provider<ProjectManager> projectManagerProvider,
                                       ServerInitializer initializer) {
-        this.projectManager = projectManager;
+        this.projectManagerProvider = projectManagerProvider;
         this.initializer = initializer;
         this.extensionToLauncher = new ConcurrentHashMap<>();
         this.projectToServer = new ConcurrentHashMap<>();
@@ -123,7 +124,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
     protected String extractProjectPath(String filePath) throws LanguageServerException {
         FolderEntry root;
         try {
-            root = projectManager.getProjectsRoot();
+            root = projectManagerProvider.get().getProjectsRoot();
         } catch (ServerException e) {
             throw new LanguageServerException("Project not found for " + filePath, e);
         }
