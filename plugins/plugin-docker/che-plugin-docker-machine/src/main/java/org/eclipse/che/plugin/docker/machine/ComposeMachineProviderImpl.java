@@ -595,7 +595,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                 } catch (ContainerNotFoundException e) {
                     isContainerRunning = false;
                 } catch (IOException e) {
-                    LOG.error("Failed to get logs from machine {} of workspace {} backed by container {}, because: {}. Cause: {}",
+                    LOG.warn("Failed to get logs from machine {} of workspace {} backed by container {}, because: {}. Cause: {}",
                               workspaceId,
                               machineId,
                               container,
@@ -603,6 +603,11 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                               e);
                     errorsCounter++;
                     if (errorsCounter == maxErrorsToStop) {
+                        LOG.error("Too many errors while streaming logs from machine {} of workspace {} backed by container {}. " +
+                                  "Logs streaming is closed.",
+                                  workspaceId,
+                                  machineId,
+                                  container);
                         break;
                     } else {
                         try {
