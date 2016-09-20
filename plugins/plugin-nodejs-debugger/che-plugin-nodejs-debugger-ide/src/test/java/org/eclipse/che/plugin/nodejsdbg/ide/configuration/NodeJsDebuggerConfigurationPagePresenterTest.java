@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.ide.configuration;
+package org.eclipse.che.plugin.nodejsdbg.ide.configuration;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 
 /** @author Artem Zatsarynnyi */
 @RunWith(MockitoJUnitRunner.class)
-public class GdbConfigurationPagePresenterTest {
+public class NodeJsDebuggerConfigurationPagePresenterTest {
 
     private static final String HOST = "localhost";
     private static final int    PORT = 8000;

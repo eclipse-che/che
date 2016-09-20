@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  */
 public class NodeJsBackTrace {
 
-    private static final Pattern BACKTRACE = Pattern.compile("#([0-9]*) (.*):(.*):(.*)");
+    private static final Pattern BACKTRACE = Pattern.compile("#0(.*) (.*):(.*):(.*)");
 
     private final Location location;
 

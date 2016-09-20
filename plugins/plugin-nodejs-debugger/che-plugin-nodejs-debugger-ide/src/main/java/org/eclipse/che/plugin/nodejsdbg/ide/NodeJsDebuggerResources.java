@@ -8,16 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.ide;
+package org.eclipse.che.plugin.nodejsdbg.ide;
 
 import com.google.gwt.resources.client.ClientBundle;
 
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-/** @author Artem Zatsarynnyi */
-public interface GdbResources extends ClientBundle {
+/**
+ * @author Anatolii Bazko
+ */
+public interface NodeJsDebuggerResources extends ClientBundle {
 
-    /** Returns the icon for GDB configurations. */
-    @Source("configuration/gdb-configuration-type.svg")
-    SVGResource gdbDebugConfigurationType();
+    /** Returns the icon for NodeJs debugger configurations. */
+    @Source("configuration/nodejs-debugger-configuration-type.svg")
+    SVGResource nodeJsDebugConfigurationType();
 }

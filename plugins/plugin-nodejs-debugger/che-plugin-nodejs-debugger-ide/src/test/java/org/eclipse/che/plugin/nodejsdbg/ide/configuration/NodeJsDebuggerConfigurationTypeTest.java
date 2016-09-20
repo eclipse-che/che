@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.ide.configuration;
+package org.eclipse.che.plugin.nodejsdbg.ide.configuration;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
@@ -16,21 +16,19 @@ import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.plugin.gdb.ide.GdbDebugger;
-import org.eclipse.che.plugin.gdb.ide.GdbResources;
+import org.eclipse.che.plugin.gdb.ide.NodeJsDebuggerResources;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.junit.Assert.assertEquals;
-
-/** @author Artem Zatsarynnyi */
+/** @author Anatolii Bazko */
 @RunWith(GwtMockitoTestRunner.class)
-public class GdbConfigurationTypeTest {
+public class NodeJsDebuggerConfigurationTypeTest {
 
     @Mock
-    private GdbResources                  resources;
+    private NodeJsDebuggerResources       resources;
     @Mock
     private GdbConfigurationPagePresenter gdbConfigurationPagePresenter;
     @Mock

@@ -188,4 +188,9 @@ public class NodeJsDebugProcessTest {
         assertEquals(location.getLineNumber(), 9);
         assertEquals(location.getTarget(), "app.js");
     }
+
+    @Test
+    public void testFinishDebug() throws Exception {
+        nodeJsDebugProcess.cont();
+    }
 }

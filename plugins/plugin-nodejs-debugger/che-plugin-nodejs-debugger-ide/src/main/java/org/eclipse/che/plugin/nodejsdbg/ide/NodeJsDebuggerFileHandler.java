@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.ide;
+package org.eclipse.che.plugin.nodejsdbg.ide;
 
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.Timer;
@@ -39,16 +39,16 @@ import org.eclipse.che.ide.api.editor.text.TextPosition;
  *
  * @author Anatoliy Bazko
  */
-public class GdbDebuggerFileHandler implements ActiveFileHandler {
+public class NodeJsDebuggerFileHandler implements ActiveFileHandler {
 
     private final EditorAgent editorAgent;
     private final EventBus    eventBus;
     private final AppContext  appContext;
 
     @Inject
-    public GdbDebuggerFileHandler(EditorAgent editorAgent,
-                                  EventBus eventBus,
-                                  AppContext appContext) {
+    public NodeJsDebuggerFileHandler(EditorAgent editorAgent,
+                                     EventBus eventBus,
+                                     AppContext appContext) {
         this.editorAgent = editorAgent;
         this.eventBus = eventBus;
         this.appContext = appContext;

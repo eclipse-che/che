@@ -8,14 +8,13 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.ide;
+package org.eclipse.che.plugin.nodejsdbg.ide;
 
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
@@ -32,30 +31,27 @@ import org.eclipse.che.plugin.debugger.ide.debug.AbstractDebugger;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
-import static org.eclipse.che.plugin.gdb.ide.GdbDebugger.ConnectionProperties.HOST;
-import static org.eclipse.che.plugin.gdb.ide.GdbDebugger.ConnectionProperties.PORT;
-
 /**
- * The GDB debugger client.
+ * The NodeJs Debugger Client.
  *
  * @author Anatoliy Bazko
  */
-public class GdbDebugger extends AbstractDebugger {
+public class NodeJsDebugger extends AbstractDebugger {
 
-    public static final String ID = "gdb";
+    public static final String ID = "nodejsdbg";
 
     private final AppContext appContext;
 
     @Inject
-    public GdbDebugger(DebuggerServiceClient service,
-                       DtoFactory dtoFactory,
-                       LocalStorageProvider localStorageProvider,
-                       MessageBusProvider messageBusProvider,
-                       EventBus eventBus,
-                       GdbDebuggerFileHandler activeFileHandler,
-                       DebuggerManager debuggerManager,
-                       BreakpointManager breakpointManager,
-                       AppContext appContext) {
+    public NodeJsDebugger(DebuggerServiceClient service,
+                          DtoFactory dtoFactory,
+                          LocalStorageProvider localStorageProvider,
+                          MessageBusProvider messageBusProvider,
+                          EventBus eventBus,
+                          NodeJsDebuggerFileHandler activeFileHandler,
+                          DebuggerManager debuggerManager,
+                          BreakpointManager breakpointManager,
+                          AppContext appContext) {
 
         super(service,
               dtoFactory,
@@ -86,7 +82,6 @@ public class GdbDebugger extends AbstractDebugger {
         return location.getTarget();
     }
 
-    @Nullable
     @Override
     protected String pathToFqn(VirtualFile file) {
         return file.getName();
@@ -94,17 +89,30 @@ public class GdbDebugger extends AbstractDebugger {
 
     @Override
     protected DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties) {
-        String host = connectionProperties.get(HOST.toString());
-        String port = connectionProperties.get(PORT.toString());
-        String address = host + (port.isEmpty() || port.equals("0") ? ""
-                                                                    : (":" + port));
-        return new DebuggerDescriptor("", address);
+        StringBuilder sb = new StringBuilder();
+        for (ConnectionProperties prop : ConnectionProperties.values()) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(prop.process(connectionProperties));
+        }
+
+        return new DebuggerDescriptor("", sb.toString());
     }
 
     public enum ConnectionProperties {
-        HOST,
-        PORT,
-        BINARY,
-        SOURCES
+        URI,
+        PID,
+        SCRIPT;
+
+        public String process(Map<String, String> properties) {
+            for (String prop : properties.keySet()) {
+                if (this.toString().equalsIgnoreCase(prop)) {
+                    return this.toString().toLowerCase() + " : " + properties.get(prop);
+                }
+            }
+
+            return "";
+        }
     }
 }

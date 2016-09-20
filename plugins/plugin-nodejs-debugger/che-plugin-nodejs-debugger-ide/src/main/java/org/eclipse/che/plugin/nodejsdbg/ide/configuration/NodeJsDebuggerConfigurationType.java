@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.ide.configuration;
+package org.eclipse.che.plugin.nodejsdbg.ide.configuration;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -18,32 +18,32 @@ import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.debug.DebugConfigurationType;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.plugin.gdb.ide.GdbDebugger;
-import org.eclipse.che.plugin.gdb.ide.GdbResources;
+import org.eclipse.che.plugin.nodejsdbg.ide.NodeJsDebugger;
+import org.eclipse.che.plugin.nodejsdbg.ide.NodeJsDebuggerResources;
 
 /**
- * GDB debug configuration type.
+ * NodeJs debug configuration type.
  *
- * @author Artem Zatsarynnyi
+ * @author Anatolii Bazko
  */
 @Singleton
-public class GdbConfigurationType implements DebugConfigurationType {
+public class NodeJsDebuggerConfigurationType implements DebugConfigurationType {
 
-    public static final String DISPLAY_NAME = "GDB";
+    public static final String DISPLAY_NAME = "NodeJs";
 
-    private final GdbConfigurationPagePresenter page;
+    private final NodeJsDebuggerConfigurationPagePresenter page;
 
     @Inject
-    public GdbConfigurationType(GdbConfigurationPagePresenter page,
-                                IconRegistry iconRegistry,
-                                GdbResources resources) {
+    public NodeJsDebuggerConfigurationType(NodeJsDebuggerConfigurationPagePresenter page,
+                                           IconRegistry iconRegistry,
+                                           NodeJsDebuggerResources resources) {
         this.page = page;
-        iconRegistry.registerIcon(new Icon(GdbDebugger.ID + ".debug.configuration.type.icon", resources.gdbDebugConfigurationType()));
+        iconRegistry.registerIcon(new Icon(NodeJsDebugger.ID + ".debug.configuration.type.icon", resources.nodeJsDebugConfigurationType()));
     }
 
     @Override
     public String getId() {
-        return GdbDebugger.ID;
+        return NodeJsDebugger.ID;
     }
 
     @Override

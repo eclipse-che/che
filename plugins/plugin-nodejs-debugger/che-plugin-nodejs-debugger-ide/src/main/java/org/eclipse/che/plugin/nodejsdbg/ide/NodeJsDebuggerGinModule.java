@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.gdb.ide;
+package org.eclipse.che.plugin.nodejsdbg.ide;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
@@ -16,19 +16,18 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.debug.DebugConfigurationType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
-import org.eclipse.che.plugin.gdb.ide.configuration.GdbConfigurationPageViewImpl;
-import org.eclipse.che.plugin.gdb.ide.configuration.GdbConfigurationType;
-import org.eclipse.che.plugin.gdb.ide.configuration.GdbConfigurationPageView;
+import org.eclipse.che.plugin.nodejsdbg.ide.configuration.NodeJsDebuggerConfigurationPageView;
+import org.eclipse.che.plugin.nodejsdbg.ide.configuration.NodeJsDebuggerConfigurationPageViewImpl;
+import org.eclipse.che.plugin.nodejsdbg.ide.configuration.NodeJsDebuggerConfigurationType;
 
 /**
  * @author Anatolii Bazko
- * @author Artem Zatsarynnyi
  */
 @ExtensionGinModule
-public class GdbGinModule extends AbstractGinModule {
+public class NodeJsDebuggerGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
-        GinMultibinder.newSetBinder(binder(), DebugConfigurationType.class).addBinding().to(GdbConfigurationType.class);
-        bind(GdbConfigurationPageView.class).to(GdbConfigurationPageViewImpl.class).in(Singleton.class);
+        GinMultibinder.newSetBinder(binder(), DebugConfigurationType.class).addBinding().to(NodeJsDebuggerConfigurationType.class);
+        bind(NodeJsDebuggerConfigurationPageView.class).to(NodeJsDebuggerConfigurationPageViewImpl.class).in(Singleton.class);
     }
 }
