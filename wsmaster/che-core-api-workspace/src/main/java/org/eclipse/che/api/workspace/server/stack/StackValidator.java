@@ -31,8 +31,7 @@ import javax.inject.Singleton;
 public class StackValidator {
 
     @Inject
-    @VisibleForTesting
-    WorkspaceValidator wsValidator;
+    private WorkspaceValidator wsValidator;
 
     /**
      * Validate stack object

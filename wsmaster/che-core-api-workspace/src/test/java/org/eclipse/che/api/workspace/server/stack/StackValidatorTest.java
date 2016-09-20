@@ -16,7 +16,9 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackSourceDto;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -28,7 +30,6 @@ import java.util.Collections;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 
 /**
  * Test for {@link StackValidator}
@@ -38,14 +39,15 @@ import static org.mockito.Mockito.mock;
 @Listeners(MockitoTestNGListener.class)
 public class StackValidatorTest {
 
+    @InjectMocks
     private StackValidator     validator;
+
+    @Mock
+    private WorkspaceValidator wsValidator;
 
     @BeforeMethod
     public void setUp() throws Exception {
-        final WorkspaceValidator wsValidator = mock(WorkspaceValidator.class);
         doNothing().when(wsValidator).validateConfig(any(WorkspaceConfigDto.class));
-        validator = new StackValidator();
-        validator.wsValidator = wsValidator;
     }
 
     @Test
