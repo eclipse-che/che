@@ -740,38 +740,66 @@ update_che_image() {
 
 execute_che_mount() {
   debug $FUNCNAME
-  if [ ! $# -eq 3 ]; then 
-    error "${CHE_MINI_PRODUCT_NAME} mount: Wrong number of arguments provided."
-    return
-  fi
 
-  MOUNT_PATH=$(get_mount_path "${2}")
+  # Determine the mount path to do the mount
+  info "${CHE_MINI_PRODUCT_NAME} mount: Setting local mount path to ${PWD}"
+  MOUNT_PATH=$(get_mount_path "${PWD}")
+  HOME_PATH=$(get_mount_path "${HOME}")
 
-  if [ ! -e "${MOUNT_PATH}" ]; then
-    error "${CHE_MINI_PRODUCT_NAME} mount: Path provided does not exist."
-    return
-  fi
+  # If extra parameter provided, then this is the port to connect to
+  if [ $# -eq 1 ]; then
+    info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to remote workspace on port ${1}"
+    WS_PORT=${1}
 
-  if [ ! -d "${MOUNT_PATH}" ]; then
-    error "${CHE_MINI_PRODUCT_NAME} mount: Path provided is not a valid directory."
-    return
+  # Port not provided, let's do a simple discovery of running workspaces
+  else 
+    info "${CHE_MINI_PRODUCT_NAME} mount: Searching for running workspaces with open SSH port..."
+
+    CURRENT_WS_INSTANCES=$(docker ps -aq --filter "name=_che_dev-machine")
+    CURRENT_WS_COUNT=$(echo $CURRENT_WS_INSTANCES | wc -w)
+    
+    if [ $CURRENT_WS_COUNT -eq 0 ]; then
+      error "${CHE_MINI_PRODUCT_NAME} mount: We could not find any running workspaces"
+
+    elif [ $CURRENT_WS_COUNT -eq 1 ]; then
+      RUNNING_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CURRENT_WS_INSTANCES})
+      info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to remote workspace on port $RUNNING_WS_PORT"
+      WS_PORT=$RUNNING_WS_PORT
+   
+    else 
+      info "${CHE_MINI_PRODUCT_NAME} mount: Discovered $CURRENT_WS_COUNT running workspaces with SSH ports"
+      info "${CHE_MINI_PRODUCT_NAME} mount: Choose one and re-run with 'che mount <ws-port>'"
+      info "${CHE_MINI_PRODUCT_NAME} mount: Available workspace ports:"
+      IFS=$'\n'
+      for CHE_WS_CONTAINER_ID in $CURRENT_WS_INSTANCES; do
+        CURRENT_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CHE_WS_CONTAINER_ID})
+        echo $CURRENT_WS_PORT
+      done
+      return
+    fi
   fi
   
   if is_native; then
-    PLATFORM_SPECIFIC_OPTIONS="-v ${HOME}/.ssh:${HOME}/.ssh \
-            -v ${HOME}/.unison:${HOME}/.unison \
-            -v /etc/group:/etc/group:ro \
-            -v /etc/passwd:/etc/passwd:ro \
-            -u $(id -u ${USER})"
+    docker_run_with_che_properties --cap-add SYS_ADMIN \
+                                   --device /dev/fuse \
+                                   -v ${HOME}/.ssh:${HOME}/.ssh \
+                                   -v ${HOME}/.unison:${HOME}/.unison \
+                                   -v /etc/group:/etc/group:ro \
+                                   -v /etc/passwd:/etc/passwd:ro \
+                                   -u $(id -u ${USER})
+                                   -v "${MOUNT_PATH}":/mnthost \
+                                   "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" \
+                                        "${GLOBAL_GET_DOCKER_HOST_IP}" $WS_PORT
+    
   else
-    PLATFORM_SPECIFIC_OPTIONS="-v ${HOME}/.ssh:/root/.ssh"
+    docker_run_with_che_properties --cap-add SYS_ADMIN \
+                                   --device /dev/fuse \
+                                   -v "${HOME_PATH}"/.ssh:/root/.ssh \
+                                   -v "${MOUNT_PATH}":/mnthost \
+                                   "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" \
+                                        "${GLOBAL_GET_DOCKER_HOST_IP}" $WS_PORT
   fi
 
-  docker_run_with_che_properties --cap-add SYS_ADMIN \
-              --device /dev/fuse \
-              ${PLATFORM_SPECIFIC_OPTIONS} \
-              -v "${MOUNT_PATH}":/mnthost \
-              "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
 }
 
 execute_che_compile() {
@@ -964,6 +992,7 @@ case ${CHE_CLI_ACTION} in
     update_che_image "$@" ${CHE_DEV_IMAGE_NAME} ${CHE_UTILITY_VERSION}
   ;;
   mount)
+    shift
     load_profile
     execute_che_mount "$@"
   ;;
