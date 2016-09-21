@@ -1,0 +1,117 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Che Java highlighting Orion Plugin</title>
+    <script src="lib/plugin.js"></script>
+    <script>
+        var headers = {
+            name: "Che Java highlighting",
+            version: "1.0",
+            description: "Adds highlighting of 'enum' keyword and annotations in Java files." +
+            "Also changes highlighting of 'this' and 'super' keywords."
+        };
+        var provider = new orion.PluginProvider(headers);
+
+        // grammar rules were copied from
+        // https://github.com/eclipse/orion.client/blob/master/bundles/org.eclipse.orion.client.editor/web/orion/editor/stylers/text_x-java-source/syntax.js
+        var grammars = [];
+
+        var keywords = [
+            "abstract",
+            "boolean", "byte",
+            "char", "class",
+            "double",
+            "extends",
+            "final", "float",
+            "implements", "import", "instanceof", "int", "interface",
+            "long",
+            "native", "new",
+            "package", "private", "protected", "public",
+            "short", "static", "synchronized",
+            "throws", "transient",
+            "void", "volatile"
+        ];
+        keywords.push("enum");
+        var controlKeywords = [
+            "break",
+            "case", "catch", "continue",
+            "default", "do",
+            "else",
+            "finally", "for",
+            "if",
+            "return",
+            "switch",
+            "throw", "try",
+            "while"
+        ];
+        var constants = [
+            "false", "null", "true"
+        ];
+        var languageVariables = ["this", "super"];
+
+        grammars.push.apply(grammars, [
+            {include: "orion.lib#string_doubleQuote"},
+            {include: "orion.lib#string_singleQuote"},
+            {include: "orion.c-like#comment_singleLine"},
+            {include: "orion.lib#doc_block"},
+            {include: "orion.c-like#comment_block"},
+            {include: "orion.lib#brace_open"},
+            {include: "orion.lib#brace_close"},
+            {include: "orion.lib#bracket_open"},
+            {include: "orion.lib#bracket_close"},
+            {include: "orion.lib#parenthesis_open"},
+            {include: "orion.lib#parenthesis_close"},
+            {include: "orion.lib#operator"},
+            {include: "orion.lib#number_decimal"},
+            {include: "orion.lib#number_hex"},
+            {
+                match: "\\b(?:" + keywords.join("|") + ")\\b",
+                name: "keyword.operator.java"
+            },
+            {
+                match: "\\b(?:" + controlKeywords.join("|") + ")\\b",
+                name: "keyword.control.java"
+            },
+            {
+                match: "\\b(?:" + constants.join("|") + ")\\b",
+                name: "constant.language.java"
+            },
+            {
+                match: "\\b(?:" + languageVariables.join("|") + ")\\b",
+//                    name: "variable.language.java"
+                name: "constant.language.java"
+            },
+            {
+                match: "@[a-zA-Z_$\.]+",
+                name: "annotation.language.java"
+            }
+        ]);
+
+        provider.registerService("orion.edit.highlighter", {}, {
+            id: "orion.java",
+            contentTypes: ["text/x-java-source"],
+            patterns: grammars
+        });
+
+        provider.connect(function () {
+                },
+                function (e) {
+                    throw e;
+                });
+    </script>
+</head>
+<body></body>
+</html>

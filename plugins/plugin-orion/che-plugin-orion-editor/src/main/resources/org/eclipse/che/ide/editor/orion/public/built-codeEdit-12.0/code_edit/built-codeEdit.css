@@ -62,7 +62,7 @@
 	height: 100%;
 }
 .rulerLines {
-	color: silver;
+	color: #767676; 
 }
 .rulerLines.even
 .rulerLines.odd {
@@ -154,13 +154,16 @@
 .textviewTooltip .hoverTooltipTitle {
 	font-weight: normal;
 }
+.textviewTooltip .quickFixList { 
+	margin-top: 5px;
+}
 .textviewTooltip .commandButton { 
 	border: 1px solid #325C80;
 	background-color: inherit;
 	color: white;
 }
 .textviewTooltip .commandButton:not(.dropdownTrigger){ 
-  text-transform: initial; 
+	text-transform: initial; 
 }
 .textviewTooltip .commandList > li {
 	margin: 0;
@@ -272,11 +275,11 @@
 }
 .contentassist .proposal-noemphasis-title-keywords {
 	background-color: aliceblue;
-	color: gray;
+	color: #717171;  
 }
 .contentassist .proposal-noemphasis-title {
 	background-color: aliceblue;
-	color: gray;
+	color: #717171;  
 	padding-top: 5px;
 }
 .contentassist .proposal-default {
@@ -730,10 +733,10 @@
 }
 
 .headerLayout {
-	height: 50px;
+	height: 35px;
 }
 .toolbarLayout {
-	height: 50px;
+	height: 35px;
 	
 	display: -webkit-box;
 	display: -moz-box;
@@ -821,7 +824,7 @@
     top: 0;
 	    
     bottom: 0;
-    left: 50px;
+    left: 35px;
     right: 0;
     background: #3b4b54;
 	
@@ -982,7 +985,7 @@
 }
 .toolbarTarget {
 	position: absolute;
-	top: 50px;  
+	top: 35px;  
  	width: 100%;
  	overflow-y: auto;
 }
@@ -991,11 +994,11 @@
 }
 .pageLayoutTarget {
 	position: absolute;
- 	width: calc( 100% - 60px );
+ 	width: calc( 100% - 15px );
  	bottom: 0;
  	overflow-y: auto;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.33); 
-	margin: 20px;
+	margin: 5px;
 	margin-right: 0;
 	padding-top: 10px;
 	padding-bottom: 5px;
@@ -1168,7 +1171,7 @@ and (max-device-width : 1024px)  {
 	margin-right: 0 !important;
 }
 .sideMenu{
-    width: 50px;
+    width: 35px;
     background: #26343F;
 	float: left;
     position: absolute;
@@ -1201,7 +1204,7 @@ and (max-device-width : 1024px)  {
 }
 .sideMenuHome{
 	width: 100%;
-	height: 50px;
+	height: 35px;
 }
 .sideMenuList{
 	display:inline-block !important;
@@ -1253,7 +1256,7 @@ and (max-device-width : 1024px)  {
 	text-decoration:none !important;
 	width: 100%;
 	display: inline-block;
-	padding: 9px 0px 12px 0px;
+	padding: 4px 0 4px 0;
 }
 .sideMenuItem>.submenu-trigger:hover, .sideMenuItem.expanded>.submenu-trigger{
 	text-decoration:none;
@@ -1365,12 +1368,12 @@ and (max-device-width : 1024px)  {
 }
 .mainContent{
 	position:absolute;
-	left:50px;
+	left:35px;
 }
 .innerPanels{
 	position:absolute;
 	width:100%;
-	top:50px;
+	top:35px;
 	bottom:0;
 }
 .userMenu {
@@ -1445,13 +1448,16 @@ and (max-device-width : 1024px)  {
 	padding-bottom:10px;
 	height:24px;
 }
+.splashMessages {
+}
 .splashMessage {
 	color: white;
 	font-size: 14px;
 }
 .splashDetailedMessage {
 	color: white;
-	font-size: 14px;
+	font-size: 12px;
+	padding-left: 20px;
 }
 .splashVisual {
 	width: 24px;
@@ -1702,7 +1708,7 @@ a.breadcrumb.currentLocation {
 .mainpane {
 	border: 0;
 	background: #3B4B54 !important;
-	padding-right:20px;
+	padding-right:5px;
 }
 .mainToolbar {
 	color: white;
@@ -2341,6 +2347,7 @@ a.breadcrumb.currentLocation {
 	visibility: hidden;
 	z-index: 175;  
 	position: absolute;
+	color: #222;
 	background-color: #fbfbfb;
 	border-radius: 2px;
 	border: 1px solid #BBB;
