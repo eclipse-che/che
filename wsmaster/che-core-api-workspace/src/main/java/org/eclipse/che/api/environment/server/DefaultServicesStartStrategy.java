@@ -8,14 +8,14 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.environment.server.compose;
+package org.eclipse.che.api.environment.server;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 
-import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,18 +27,18 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 
 /**
- * Finds order of compose services to start that respects dependencies between services.
+ * Finds order of Che services to start that respects dependencies between services.
  *
  * author Alexander Garagatyi
  */
-public class ComposeServicesStartStrategy {
+public class DefaultServicesStartStrategy {
     /**
      * Resolves order of start for machines in an environment.
      *
      * @throws IllegalArgumentException
      *         if order of machines can not be calculated
      */
-    public List<String> order(ComposeEnvironmentImpl composeEnvironment) throws IllegalArgumentException {
+    public List<String> order(CheServicesEnvironmentImpl composeEnvironment) throws IllegalArgumentException {
 
         Map<String, Integer> weights = weightMachines(composeEnvironment.getServices());
 
@@ -51,25 +51,49 @@ public class ComposeServicesStartStrategy {
      * @throws IllegalArgumentException
      *         if weights of machines can not be calculated
      */
-    private Map<String, Integer> weightMachines(Map<String, ComposeServiceImpl> services)
+    private Map<String, Integer> weightMachines(Map<String, CheServiceImpl> services)
             throws IllegalArgumentException {
 
         HashMap<String, Integer> weights = new HashMap<>();
         Set<String> machinesLeft = new HashSet<>(services.keySet());
 
         // create machines dependency graph
-        Map<String, List<String>> dependencies = new HashMap<>(services.size());
-        for (Map.Entry<String, ComposeServiceImpl> serviceEntry : services.entrySet()) {
-            ComposeServiceImpl service = serviceEntry.getValue();
+        Map<String, Set<String>> dependencies = new HashMap<>(services.size());
+        for (Map.Entry<String, CheServiceImpl> serviceEntry : services.entrySet()) {
+            CheServiceImpl service = serviceEntry.getValue();
 
-            ArrayList<String> machineDependencies = new ArrayList<>(service.getDependsOn().size() +
-                                                                    service.getLinks().size());
+            Set<String> machineDependencies = Sets.newHashSetWithExpectedSize(service.getDependsOn().size() +
+                                                                              service.getLinks().size() +
+                                                                              service.getVolumesFrom().size());
 
-            machineDependencies.addAll(service.getDependsOn());
+            for (String dependsOn : service.getDependsOn()) {
+                if (!services.containsKey(dependsOn)) {
+                    throw new IllegalArgumentException(
+                            format("Dependency '%s' in machine '%s' points to not known machine.",
+                                   dependsOn, serviceEntry.getKey()));
+                }
+                machineDependencies.add(dependsOn);
+            }
 
             // links also counts as dependencies
             for (String link : service.getLinks()) {
-                machineDependencies.add(getServiceFromMachineLink(link));
+                String dependency = getServiceFromLink(link);
+                if (!services.containsKey(dependency)) {
+                    throw new IllegalArgumentException(
+                            format("Dependency '%s' in machine '%s' points to not known machine.",
+                                   dependency, serviceEntry.getKey()));
+                }
+                machineDependencies.add(dependency);
+            }
+            // volumesFrom also counts as dependencies
+            for (String volumesFrom : service.getVolumesFrom()) {
+                String dependency = getServiceFromVolumesFrom(volumesFrom);
+                if (!services.containsKey(dependency)) {
+                    throw new IllegalArgumentException(
+                            format("Dependency '%s' in machine '%s' points to not known machine.",
+                                   dependency, serviceEntry.getKey()));
+                }
+                machineDependencies.add(dependency);
             }
             dependencies.put(serviceEntry.getKey(), machineDependencies);
         }
@@ -116,9 +140,9 @@ public class ComposeServicesStartStrategy {
         // Not evaluated weights of machines left.
         // Probably because of circular dependency.
         if (weights.size() != services.size()) {
-            throw new IllegalArgumentException("Launch order of machines " +
-                                               Joiner.on(',').join(machinesLeft) +
-                                               " can't be evaluated");
+            throw new IllegalArgumentException("Launch order of machines '" +
+                                               Joiner.on(", ").join(machinesLeft) +
+                                               "' can't be evaluated");
         }
 
         return weights;
@@ -127,12 +151,27 @@ public class ComposeServicesStartStrategy {
     /**
      * Parses link content into depends_on field representation - removes column and further chars
      */
-    private String getServiceFromMachineLink(String link) throws IllegalArgumentException {
+    private String getServiceFromLink(String link) throws IllegalArgumentException {
         String service = link;
         if (link != null) {
             String[] split = service.split(":");
-            if (split.length != 1 && split.length != 2) {
-                throw new IllegalArgumentException(format("Service link %s is invalid", link));
+            if (split.length > 2) {
+                throw new IllegalArgumentException(format("Service link '%s' is invalid", link));
+            }
+            service = split[0];
+        }
+        return service;
+    }
+
+    /**
+     * Parses volumesFrom content into depends_on field representation - removes column and further chars
+     */
+    private String getServiceFromVolumesFrom(String volumesFrom) throws IllegalArgumentException {
+        String service = volumesFrom;
+        if (volumesFrom != null) {
+            String[] split = service.split(":");
+            if (split.length > 2) {
+                throw new IllegalArgumentException(format("Service volumes_from '%s' is invalid", volumesFrom));
             }
             service = split[0];
         }

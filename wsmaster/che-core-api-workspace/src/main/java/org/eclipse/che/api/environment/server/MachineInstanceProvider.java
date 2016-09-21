@@ -8,11 +8,11 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.environment.server.compose;
+package org.eclipse.che.api.environment.server;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.LineConsumer;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 
 /**
@@ -20,7 +20,7 @@ import org.eclipse.che.api.machine.server.spi.Instance;
  *
  * @author Alexander Garagatyi
  */
-public interface ComposeMachineInstanceProvider {
+public interface MachineInstanceProvider {
     /**
      * Create docker container from compose service definition.
      *
@@ -30,8 +30,6 @@ public interface ComposeMachineInstanceProvider {
      *         ID of workspace that owns provided service
      * @param envName
      *         name of environment that owns provided service
-     * @param machineId
-     *         ID of machine which represents provided service
      * @param machineName
      *         name of machine which represents provided service
      * @param isDev
@@ -49,11 +47,10 @@ public interface ComposeMachineInstanceProvider {
     Instance startService(String namespace,
                           String workspaceId,
                           String envName,
-                          String machineId,
                           String machineName,
                           boolean isDev,
                           String networkName,
-                          ComposeServiceImpl service,
+                          CheServiceImpl service,
                           LineConsumer machineLogger)
             throws ServerException;
 
