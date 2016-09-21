@@ -594,14 +594,15 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                 } catch (ContainerNotFoundException e) {
                     isContainerRunning = false;
                 } catch (IOException e) {
+                    long errorTime = System.currentTimeMillis();
+                    lastProcessedLogDate = errorTime / 1000L;
                     LOG.warn("Failed to get logs from machine {} of workspace {} backed by container {}, because: {}.",
                              machineId,
                              workspaceId,
                              container,
                              e.getMessage(),
                              e);
-                    long errorTime = System.currentTimeMillis();
-                    if (errorTime - lastErrorTime < 20_000) { // if new error occurs less than 20 seconds after previous
+                    if (errorTime - lastErrorTime < 20_000L) { // if new error occurs less than 20 seconds after previous
                         if (++errorsCounter == 5) {
                             LOG.error("Too many errors while streaming logs from machine {} of workspace {} backed by container {}. " +
                                       "Logs streaming is closed. Last error: {}.",
@@ -614,8 +615,8 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                         }
                     } else {
                         errorsCounter = 1;
-                        lastErrorTime = errorTime;
                     }
+                    lastErrorTime = errorTime;
 
                     try {
                         sleep(1_000);
