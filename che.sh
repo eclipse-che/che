@@ -115,7 +115,7 @@ Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
            profile update <name>              Update profile in ~/.${CHE_MINI_PRODUCT_NAME}/
            profile info <name>                Print the profile configuration
            profile list                       List available profiles
-           mount <local-path> <ws-ssh-port>   Synchronize workspace to a local directory
+           mount [<ws-ssh-port>]              Synchronize workspace with current working directory
            dir init                           Initialize directory with ${CHE_MINI_PRODUCT_NAME} configuration
            dir up                             Create workspace from source in current directory
            dir down                           Stop workspace running in current directory
