@@ -323,7 +323,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
             throw e;
         } catch (RuntimeException | ServerException | NotFoundException | IOException e) {
             cleanUpContainer(container);
-            throw new ServerException(e.getLocalizedMessage());
+            throw new ServerException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -354,10 +354,11 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                    NotFoundException {
 
         String imageName = "eclipse-che/" + service.getContainerName();
-        if ((service.getBuild() == null || service.getBuild().getDockerfileContent() == null) &&
+        if ((service.getBuild() == null || (service.getBuild().getContext() == null &&
+                                            service.getBuild().getDockerfileContent() == null)) &&
             service.getImage() == null) {
 
-            throw new ServerException(format("Che service '%s' doesn't have neither build not image fields",
+            throw new ServerException(format("Che service '%s' doesn't have neither build nor image fields",
                                              machineName));
         }
 
