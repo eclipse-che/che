@@ -756,9 +756,20 @@ execute_che_mount() {
     error "${CHE_MINI_PRODUCT_NAME} mount: Path provided is not a valid directory."
     return
   fi
+  
+  if is_native; then
+    PLATFORM_SPECIFIC_OPTIONS="-v ${HOME}/.ssh:${HOME}/.ssh \
+            -v ${HOME}/.unison:${HOME}/.unison \
+            -v /etc/group:/etc/group:ro \
+            -v /etc/passwd:/etc/passwd:ro \
+            -u $(id -u ${USER})"
+  else
+    PLATFORM_SPECIFIC_OPTIONS="-v ${HOME}/.ssh:/root/.ssh"
+  fi
 
   docker_run_with_che_properties --cap-add SYS_ADMIN \
               --device /dev/fuse \
+              ${PLATFORM_SPECIFIC_OPTIONS} \
               -v "${MOUNT_PATH}":/mnthost \
               "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
 }
