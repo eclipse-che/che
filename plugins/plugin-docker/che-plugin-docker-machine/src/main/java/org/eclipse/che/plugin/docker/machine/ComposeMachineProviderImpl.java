@@ -595,17 +595,18 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                     isContainerRunning = false;
                 } catch (IOException e) {
                     LOG.warn("Failed to get logs from machine {} of workspace {} backed by container {}, because: {}.",
-                              workspaceId,
-                              machineId,
-                              container,
-                              e.getMessage(),
-                              e);
-                    if (System.currentTimeMillis() - lastErrorTime < 5 * 60 * 1000) { // TODO
+                             machineId,
+                             workspaceId,
+                             container,
+                             e.getMessage(),
+                             e);
+                    long errorTime = System.currentTimeMillis();
+                    if (errorTime - lastErrorTime < 20_000) { // if new error occurs less than 20 seconds after previous
                         if (++errorsCounter == 5) {
                             LOG.error("Too many errors while streaming logs from machine {} of workspace {} backed by container {}. " +
                                       "Logs streaming is closed. Last error: {}.",
-                                      workspaceId,
                                       machineId,
+                                      workspaceId,
                                       container,
                                       e.getMessage(),
                                       e);
@@ -613,14 +614,14 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                         }
                     } else {
                         errorsCounter = 1;
-                        lastErrorTime = System.currentTimeMillis(); // TODO use same time as in if
+                        lastErrorTime = errorTime;
                     }
-                        try {
-                            sleep(1000);
-                        } catch (InterruptedException ie) {
-                            break;
-                        }
 
+                    try {
+                        sleep(1_000);
+                    } catch (InterruptedException ie) {
+                        return;
+                    }
                 }
             }
         });
