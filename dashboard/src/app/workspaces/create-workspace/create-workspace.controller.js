@@ -23,12 +23,14 @@ export class CreateWorkspaceController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location, cheAPI, cheNotification, lodash, $rootScope) {
+  constructor($location, cheAPI, cheNotification, lodash, $rootScope, cheEnvironmentRegistry) {
     this.$location = $location;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.lodash = lodash;
     this.$rootScope = $rootScope;
+    this.cheEnvironmentRegistry = cheEnvironmentRegistry;
+    this.stackMachines = {};
 
     this.selectSourceOption = 'select-source-recipe';
 
@@ -54,7 +56,13 @@ export class CreateWorkspaceController {
     this.importWorkspace = '';
     this.defaultWorkspaceName = null;
 
-    cheAPI.cheWorkspace.fetchWorkspaces();
+    this.usedNamesList = [];
+    cheAPI.cheWorkspace.fetchWorkspaces().then(() => {
+      let workspaces = cheAPI.cheWorkspace.getWorkspaces();
+      workspaces.forEach((workspace) => {
+        this.usedNamesList.push(workspace.config.name);
+      });
+    });
 
     $rootScope.showIDE = false;
   }
@@ -91,7 +99,12 @@ export class CreateWorkspaceController {
       this.recipeUrl = null;
     }
     if (this.stack !== stack && stack && stack.workspaceConfig && stack.workspaceConfig.name) {
-      this.setWorkspaceName(stack.workspaceConfig.name);
+      let workspaceName = stack.workspaceConfig.name;
+      if (this.usedNamesList.includes(workspaceName)) {
+        this.generateWorkspaceName();
+      } else {
+        this.setWorkspaceName(workspaceName);
+      }
     } else {
       this.generateWorkspaceName();
     }
@@ -226,5 +239,15 @@ export class CreateWorkspaceController {
    */
   updateRecentWorkspace(workspaceId) {
     this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
+  }
+
+  getStackMachines(environment) {
+    let recipeType = environment.recipe.type;
+    let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
+    if (!this.stackMachines[this.stack.id]) {
+      this.stackMachines[this.stack.id] = environmentManager.getMachines(environment);
+    }
+
+    return this.stackMachines[this.stack.id];
   }
 }

@@ -39,14 +39,14 @@
             },
             "db": {
               "agents": [
-                "org.eclipse.che.terminal", "org.eclipse.che.ssh"
+                "org.eclipse.che.terminal"
               ],
               "servers": {},
               "attributes" : {}
             }
           },
           "recipe": {
-            "content": "services:\n db:\n  image: codenvy/mysql\n  environment:\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 2147483648\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n  mem_limit: 2147483648\n  links:\n    - db",
+            "content": "services:\n db:\n  image: codenvy/mysql\n  environment:\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n  mem_limit: 2147483648\n  links:\n    - db",
             "contentType": "application/x-yaml",
             "type": "compose"
           }

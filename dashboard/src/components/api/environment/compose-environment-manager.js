@@ -282,7 +282,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
       environment.recipe.content = this._stringifyRecipe(recipe);
 
       // and then update config
-      environment.machines[newName] = environment[oldName];
+      environment.machines[newName] = environment.machines[oldName];
       delete environment.machines[oldName];
     } catch (e) {
       this.$log.error('Cannot rename machine, error: ', e);

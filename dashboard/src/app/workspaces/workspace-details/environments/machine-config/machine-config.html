@@ -14,21 +14,24 @@
 
   <!-- Title -->
   <div class="config-title-row" layout="row"
-       layout-align="start center"
+       layout-align="left"
        flex
-       ng-click="workspaceMachineConfigController.machineIsOpened=!workspaceMachineConfigController.machineIsOpened"
        mouseover="hover=true" mouseout="hover=false">
-    <div>
+    <div layout="row" layout-align="center center"
+         ng-click="workspaceMachineConfigController.machineIsOpened=!workspaceMachineConfigController.machineIsOpened">
       <i class="config-title-action-show fa"
          ng-class="{'fa-chevron-circle-down': workspaceMachineConfigController.machineIsOpened, 'fa-chevron-circle-up': !workspaceMachineConfigController.machineIsOpened}"></i>
+      <div class="config-title">{{workspaceMachineConfigController.machineName}}</div>
     </div>
-    <div class="config-title">{{workspaceMachineConfigController.machineName}}</div>
-    <div class="config-title-action-edit"
+    <div layout="row" layout-align="center center"
+         class="config-title-action-edit"
          tooltip="Edit"
          ng-if="workspaceMachineConfigController.machineConfig.canRenameMachine"
          ng-click="workspaceMachineConfigController.showEditDialog($event)">
       <i class="config-title-action-edit fa fa-pencil" aria-hidden="true"></i>
     </div>
+    <div flex
+         ng-click="workspaceMachineConfigController.machineIsOpened=!workspaceMachineConfigController.machineIsOpened">&nbsp;</div>
   </div>
 
   <!-- Params -->
