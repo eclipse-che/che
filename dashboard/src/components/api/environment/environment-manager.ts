@@ -102,6 +102,14 @@ export class EnvironmentManager {
     machine.servers = angular.copy(servers);
   }
 
+  getAgents(machine) {
+    return machine.agents || {};
+  }
+
+  setAgents(machine, agents) {
+    machine.agents = angular.copy(agents);
+  }
+
   /**
    * Returns memory limit from machine's attributes
    *
