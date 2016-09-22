@@ -1519,4 +1519,8 @@ public class LightTheme implements Theme {
         return "#353535";
     }
 
+    @Override
+    public String popupLoaderTextColor() {
+        return "#999999";
+    }
 }
