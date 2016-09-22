@@ -15,4 +15,6 @@
 <module>
     <inherits name="com.google.gwt.user.User"/>
     <inherits name="elemental.Elemental"/>
+    <source path="client"/>
+    <source path="async"/>
 </module>

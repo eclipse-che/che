@@ -33,6 +33,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String backgroundColor() {
+        return "#D6D6D9";
+    }
+
+    @Override
     public String getLogoFill() {
         return "inherit";
     }
@@ -1486,6 +1491,32 @@ public class LightTheme implements Theme {
     @Override
     public String resourceMonitorBarBackground() {
         return "#e0e0e0";
+    }
+
+    /********************************************************************************************
+     *
+     * Popup Loader
+     *
+     ********************************************************************************************/
+
+    @Override
+    public String popupLoaderBackgroundColor() {
+        return "white";
+    }
+
+    @Override
+    public String popupLoaderBorderColor() {
+        return "#466695";
+    }
+
+    @Override
+    public String popupLoaderShadow() {
+        return "0 0 7px rgba(0,0,0,0.2)";
+    }
+
+    @Override
+    public String popupLoaderTitleColor() {
+        return "#353535";
     }
 
 }

@@ -19,7 +19,6 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.workspace.WorkspaceComponent;
 import org.eclipse.che.ide.api.component.Component;
-import org.eclipse.che.ide.ui.loaders.initialization.OperationInfo;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
 import org.eclipse.che.ide.workspace.create.CreateWorkspacePresenter;
@@ -71,8 +70,6 @@ public class StartWorkspacePresenterTest {
     private DefaultWorkspaceComponent      workspaceComponent;
     @Mock
     private Callback<Component, Exception> callback;
-    @Mock
-    private OperationInfo                  operationInfo;
 
     @InjectMocks
     private StartWorkspacePresenter presenter;
@@ -179,4 +176,5 @@ public class StartWorkspacePresenterTest {
 
         verify(view).hide();
     }
+
 }

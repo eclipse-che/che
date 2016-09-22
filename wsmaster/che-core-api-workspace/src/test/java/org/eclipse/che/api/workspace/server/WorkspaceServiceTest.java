@@ -15,6 +15,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.account.shared.model.Account;
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
@@ -118,11 +120,12 @@ import static org.testng.Assert.assertTrue;
 public class WorkspaceServiceTest {
 
     @SuppressWarnings("unused")
-    private static final ApiExceptionMapper MAPPER      = new ApiExceptionMapper();
-    private static final String             NAMESPACE   = "user";
-    private static final String             USER_ID     = "user123";
+    private static final ApiExceptionMapper MAPPER       = new ApiExceptionMapper();
+    private static final String             NAMESPACE    = "user";
+    private static final String             USER_ID      = "user123";
+    private static final Account            TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
     @SuppressWarnings("unused")
-    private static final EnvironmentFilter  FILTER      = new EnvironmentFilter();
+    private static final EnvironmentFilter  FILTER       = new EnvironmentFilter();
 
     @Mock
     private WorkspaceManager      wsManager;
@@ -144,7 +147,35 @@ public class WorkspaceServiceTest {
     public void shouldCreateWorkspace() throws Exception {
         final WorkspaceConfigDto configDto = createConfigDto();
         final WorkspaceImpl workspace = createWorkspace(configDto);
-        when(wsManager.createWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+        when(wsManager.createWorkspace(any(), any(), any())).thenReturn(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(configDto)
+                                         .when()
+                                         .post(SECURE_PATH + "/workspace" +
+                                               "?namespace=test" +
+                                               "&attribute=stackId:stack123" +
+                                               "&attribute=factoryId:factory123" +
+                                               "&attribute=custom:custom:value");
+
+        assertEquals(response.getStatusCode(), 201);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+        verify(validator).validateConfig(any());
+        verify(validator).validateAttributes(any());
+        verify(wsManager).createWorkspace(anyObject(),
+                                          eq("test"),
+                                          eq(ImmutableMap.of("stackId", "stack123",
+                                                             "factoryId", "factory123",
+                                                             "custom", "custom:value")));
+    }
+
+    @Test
+    public void shouldUseUsernameAsNamespaceWhenCreatingWorkspaceWithoutSpecifiedNamespace() throws Exception {
+        final WorkspaceConfigDto configDto = createConfigDto();
+        final WorkspaceImpl workspace = createWorkspace(configDto);
+        when(wsManager.createWorkspace(any(), any(), any())).thenReturn(workspace);
 
         final Response response = given().auth()
                                          .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -157,22 +188,21 @@ public class WorkspaceServiceTest {
                                                "&attribute=custom:custom:value");
 
         assertEquals(response.getStatusCode(), 201);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
         verify(validator).validateConfig(any());
         verify(validator).validateAttributes(any());
         verify(wsManager).createWorkspace(anyObject(),
-                                          anyString(),
+                                          eq(NAMESPACE),
                                           eq(ImmutableMap.of("stackId", "stack123",
                                                              "factoryId", "factory123",
-                                                             "custom", "custom:value")),
-                                          eq(null));
+                                                             "custom", "custom:value")));
     }
 
     @Test
     public void shouldStartTheWorkspaceAfterItIsCreatedWhenStartAfterCreateParamIsTrue() throws Exception {
         final WorkspaceConfigDto configDto = createConfigDto();
         final WorkspaceImpl workspace = createWorkspace(configDto);
-        when(wsManager.createWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+        when(wsManager.createWorkspace(any(), any(), any())).thenReturn(workspace);
 
         given().auth()
                .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
@@ -185,13 +215,12 @@ public class WorkspaceServiceTest {
                      "&attribute=custom:custom:value" +
                      "&start-after-create=true");
 
-        verify(wsManager).startWorkspace(workspace.getId(), null, null, false);
+        verify(wsManager).startWorkspace(workspace.getId(), null, false);
         verify(wsManager).createWorkspace(anyObject(),
                                           anyString(),
                                           eq(ImmutableMap.of("stackId", "stack123",
                                                              "factoryId", "factory123",
-                                                             "custom", "custom:value")),
-                                          eq(null));
+                                                             "custom", "custom:value")));
     }
 
     @Test
@@ -232,7 +261,7 @@ public class WorkspaceServiceTest {
                                          .get(SECURE_PATH + "/workspace/" + workspace.getId());
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
     }
 
     @Test
@@ -248,7 +277,25 @@ public class WorkspaceServiceTest {
 
         assertEquals(response.getStatusCode(), 200);
         assertEquals(unwrapDtoList(response, WorkspaceDto.class).stream()
-                                                                .map(WorkspaceImpl::new)
+                                                                .map(ws -> new WorkspaceImpl(ws, TEST_ACCOUNT))
+                                                                .collect(toList()),
+                     asList(workspace1, workspace2));
+    }
+
+    @Test
+    public void shouldGetWorkspacesByNamespace() throws Exception {
+        final WorkspaceImpl workspace1 = createWorkspace(createConfigDto());
+        final WorkspaceImpl workspace2 = createWorkspace(createConfigDto(), STARTING);
+        when(wsManager.getByNamespace(NAMESPACE)).thenReturn(asList(workspace1, workspace2));
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .when()
+                                         .get(SECURE_PATH + "/workspace/namespace/" + NAMESPACE);
+
+        assertEquals(response.getStatusCode(), 200);
+        assertEquals(unwrapDtoList(response, WorkspaceDto.class).stream()
+                                                                .map(ws -> new WorkspaceImpl(ws, TEST_ACCOUNT))
                                                                 .collect(toList()),
                      asList(workspace1, workspace2));
     }
@@ -266,7 +313,7 @@ public class WorkspaceServiceTest {
 
         assertEquals(response.getStatusCode(), 200);
         assertEquals(unwrapDtoList(response, WorkspaceDto.class).stream()
-                                                                .map(WorkspaceImpl::new)
+                                                                .map(ws -> new WorkspaceImpl(ws, TEST_ACCOUNT))
                                                                 .collect(toList()),
                      singletonList(workspace2));
     }
@@ -286,7 +333,7 @@ public class WorkspaceServiceTest {
                                          .put(SECURE_PATH + "/workspace/" + workspace.getId());
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
         verify(validator).validateWorkspace(any());
     }
 
@@ -310,7 +357,7 @@ public class WorkspaceServiceTest {
     @Test
     public void shouldStartWorkspace() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        when(wsManager.startWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+        when(wsManager.startWorkspace(any(),  any(), any())).thenReturn(workspace);
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
 
         final Response response = given().auth()
@@ -320,14 +367,14 @@ public class WorkspaceServiceTest {
                                                "?environment=" + workspace.getConfig().getDefaultEnv());
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
-        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null, null);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null);
     }
 
     @Test
     public void shouldRestoreWorkspace() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        when(wsManager.startWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+        when(wsManager.startWorkspace(any(), any(), any())).thenReturn(workspace);
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
 
         final Response response = given().auth()
@@ -337,14 +384,14 @@ public class WorkspaceServiceTest {
                                                "?environment=" + workspace.getConfig().getDefaultEnv() + "&restore=true");
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
-        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null, true);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), true);
     }
 
     @Test
     public void shouldNotRestoreWorkspace() throws Exception {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
-        when(wsManager.startWorkspace(any(), any(), any(), any())).thenReturn(workspace);
+        when(wsManager.startWorkspace(any(), any(), any())).thenReturn(workspace);
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
 
         final Response response = given().auth()
@@ -354,8 +401,8 @@ public class WorkspaceServiceTest {
                                                "?environment=" + workspace.getConfig().getDefaultEnv() + "&restore=false");
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class)), workspace);
-        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), null, false);
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+        verify(wsManager).startWorkspace(workspace.getId(), workspace.getConfig().getDefaultEnv(), false);
     }
 
     @Test
@@ -363,8 +410,7 @@ public class WorkspaceServiceTest {
         final WorkspaceImpl workspace = createWorkspace(createConfigDto());
         when(wsManager.startWorkspace(anyObject(),
                                       anyString(),
-                                      anyBoolean(),
-                                      anyString())).thenReturn(workspace);
+                                      anyBoolean())).thenReturn(workspace);
         when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
         final WorkspaceDto workspaceDto = DtoConverter.asDto(workspace);
 
@@ -373,10 +419,39 @@ public class WorkspaceServiceTest {
                                          .contentType("application/json")
                                          .body(workspaceDto.getConfig())
                                          .when()
-                                         .post(SECURE_PATH + "/workspace/runtime");
+                                         .post(SECURE_PATH + "/workspace/runtime" +
+                                               "?namespace=test" +
+                                               "&temporary=true");
 
         assertEquals(response.getStatusCode(), 200);
         verify(validator).validateConfig(any());
+        verify(wsManager).startWorkspace(any(),
+                                         eq("test"),
+                                         eq(true));
+    }
+
+    @Test
+    public void shouldUseUsernameAsNamespaceWhenStartingWorkspaceFromConfigWithoutNamespace() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace(createConfigDto());
+        when(wsManager.startWorkspace(anyObject(),
+                                      anyString(),
+                                      anyBoolean())).thenReturn(workspace);
+        when(wsManager.getWorkspace(workspace.getId())).thenReturn(workspace);
+        final WorkspaceDto workspaceDto = DtoConverter.asDto(workspace);
+
+        final Response response = given().auth()
+                                         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+                                         .contentType("application/json")
+                                         .body(workspaceDto.getConfig())
+                                         .when()
+                                         .post(SECURE_PATH + "/workspace/runtime" +
+                                               "?temporary=true");
+
+        assertEquals(response.getStatusCode(), 200);
+        verify(validator).validateConfig(any());
+        verify(wsManager).startWorkspace(any(),
+                                         eq(NAMESPACE),
+                                         eq(true));
     }
 
     @Test
@@ -423,7 +498,7 @@ public class WorkspaceServiceTest {
                                          .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/command");
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class))
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT)
                              .getConfig()
                              .getCommands()
                              .size(), commandsSizeBefore + 1);
@@ -502,7 +577,7 @@ public class WorkspaceServiceTest {
                                          .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/environment");
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class))
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT)
                              .getConfig()
                              .getEnvironments()
                              .size(), envsSizeBefore + 1);
@@ -582,7 +657,7 @@ public class WorkspaceServiceTest {
                                          .post(SECURE_PATH + "/workspace/" + workspace.getId() + "/project");
 
         assertEquals(response.getStatusCode(), 200);
-        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class))
+        assertEquals(new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT)
                              .getConfig()
                              .getProjects()
                              .size(), projectsSizeBefore + 1);
@@ -729,7 +804,6 @@ public class WorkspaceServiceTest {
                                                                    .setMachineName("machine1")
                                                                    .setMachineSource(new MachineSourceImpl("type")
                                                                                              .setContent("content"))
-                                                                   .setNamespace("namespace")
                                                                    .setType("type")
                                                                    .setWorkspaceId(workspaceId);
         SnapshotImpl snapshot1 = snapshotBuilder.build();
@@ -791,7 +865,7 @@ public class WorkspaceServiceTest {
         return WorkspaceImpl.builder()
                             .setConfig(configDto)
                             .generateId()
-                            .setNamespace(NAMESPACE)
+                            .setAccount(TEST_ACCOUNT)
                             .setStatus(status)
                             .build();
     }
@@ -818,7 +892,7 @@ public class WorkspaceServiceTest {
     private static EnvironmentDto createEnvDto() {
         ExtendedMachineImpl devMachine = new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
                                                                  null,
-                                                                 new HashMap<>(singletonMap("memoryLimitBytes", "10000")));
+                                                                 singletonMap("memoryLimitBytes", "10000"));
 
         return DtoConverter.asDto(new EnvironmentImpl(new EnvironmentRecipeImpl("type", "content-type", "content", null),
                                                       singletonMap("dev-machine", devMachine)));
@@ -828,11 +902,9 @@ public class WorkspaceServiceTest {
         final WorkspaceConfigImpl config = WorkspaceConfigImpl.builder()
                                                               .setName("dev-workspace")
                                                               .setDefaultEnv("dev-env")
-                                                              .setEnvironments(new HashMap<>(singletonMap("dev-env",
-                                                                                                          new EnvironmentImpl(
-                                                                                                                  createEnvDto()))))
-                                                              .setCommands(new ArrayList<>(singleton(createCommandDto())))
-                                                              .setProjects(new ArrayList<>(singleton(createProjectDto())))
+                                                              .setEnvironments(singletonMap("dev-env",new EnvironmentImpl(createEnvDto())))
+                                                              .setCommands(singletonList(createCommandDto()))
+                                                              .setProjects(singletonList(createProjectDto()))
                                                               .build();
         return DtoConverter.asDto(config);
     }

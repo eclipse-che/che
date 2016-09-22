@@ -32,8 +32,6 @@ export class CreateProjectStackLibraryController {
     this.allStackTags = [];
     this.filteredStackIds = [];
 
-    this.onChoice();
-
     this.stacks = cheStack.getStacks();
     if (this.stacks.length) {
       this.updateData();
@@ -43,8 +41,8 @@ export class CreateProjectStackLibraryController {
       });
     }
 
-    $scope.$on('event:selectStackId', (event, data) => {
-      this.selectedStackId = data;
+    $scope.$on('event:library:selectStackId', (event, data) => {
+      this.setStackSelectionById(data)
     });
 
     // create array of id of stacks which contain selected tags
@@ -56,7 +54,6 @@ export class CreateProjectStackLibraryController {
       if (!tags) {
         tags = [];
       }
-
       this.stacks.forEach((stack) => {
         let matches = 0,
           stackTags = stack.tags.map(tag => tag.toLowerCase());
@@ -83,20 +80,13 @@ export class CreateProjectStackLibraryController {
 
   /**
    * Select stack by Id
+   * @param stackId
    */
   setStackSelectionById(stackId) {
     this.selectedStackId = stackId;
-    this.onChoice();
-  }
-
-  /**
-   * Callback when item has been select
-   */
-  onChoice() {
-    if (!this.selectedStackId) {
-      return;
+    if (this.selectedStackId) {
+      this.$scope.$emit('event:selectStackId', {tabName: this.tabName, stackId: this.selectedStackId});
     }
-    this.$scope.$emit('event:selectStackId', this.selectedStackId);
   }
 
   /**
@@ -112,7 +102,8 @@ export class CreateProjectStackLibraryController {
 
   /**
    * Provides tooltip data from a stack
-   * @param stack the data to analyze
+   * @param stack - the data to analyze
+   * @returns String
    */
   getTooltip(stack) {
     // get components and add data from the components

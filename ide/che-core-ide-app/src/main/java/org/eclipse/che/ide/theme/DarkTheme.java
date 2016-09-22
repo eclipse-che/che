@@ -33,6 +33,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String backgroundColor() {
+        return "#21252b";
+    }
+
+    @Override
     public String getLogoFill() {
         return "#FFFFFF";
     }
@@ -1509,6 +1514,32 @@ public class DarkTheme implements Theme {
     @Override
     public String resourceMonitorBarBackground() {
         return "rgb(76, 76, 76)";
+    }
+
+    /********************************************************************************************
+     *
+     * Popup Loader
+     *
+     ********************************************************************************************/
+
+    @Override
+    public String popupLoaderBackgroundColor() {
+        return "#212325";
+    }
+
+    @Override
+    public String popupLoaderBorderColor() {
+        return "#466695";
+    }
+
+    @Override
+    public String popupLoaderShadow() {
+        return "0 0 10px rgba(0,0,0,0.6)";
+    }
+
+    @Override
+    public String popupLoaderTitleColor() {
+        return "white";
     }
 
 }

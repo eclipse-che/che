@@ -45,6 +45,19 @@ public final class Promises {
     }-*/;
 
     /**
+     * Creates a new promise using the provided executor body.
+     *
+     * @param conclusion
+     *         the executor body
+     * @param <V>
+     *         the type of the promised value
+     * @return a promise
+     */
+    public static final <V> JsPromise<V> create(Executor.ExecutorBody<V> conclusion) {
+        return create(Executor.create(conclusion));
+    }
+
+    /**
      * Creates a promise that resolves as soon as all the promises used as parameters are resolved or
      * rejected as soon as the first rejection happens on one of the included promises.
      * This is useful for aggregating results of multiple promises together.

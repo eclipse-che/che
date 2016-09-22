@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server.snippet;
 
-import org.eclipse.che.api.factory.shared.dto.Button;
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.core.model.factory.Button;
+import org.eclipse.che.api.core.model.factory.Factory;
 
 import javax.ws.rs.core.UriBuilder;
 import java.util.Formatter;
@@ -37,7 +37,7 @@ public class SnippetGenerator {
             throw new IllegalArgumentException("Unable to generate markdown snippet for factory without button");
         }
 
-        if (Button.ButtonType.logo.equals(factory.getButton().getType())) {
+        if (Button.Type.LOGO.equals(factory.getButton().getType())) {
             if (imageId != null && factory.getId() != null) {
                 imgUrl = format("%s/api/factory/%s/image?imgId=%s", baseUrl, factory.getId(), imageId);
             } else {

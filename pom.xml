@@ -16,11 +16,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>5.0.0-M1-SNAPSHOT</version>
+        <version>5.0.0-M3-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>5.0.0-M1-SNAPSHOT</version>
+    <version>5.0.0-M3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -40,12 +40,34 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.lib.version>5.0.0-M1-SNAPSHOT</che.lib.version>
-        <che.version>5.0.0-M1-SNAPSHOT</che.version>
+        <che.lib.version>5.0.0-M3-SNAPSHOT</che.lib.version>
+        <che.version>5.0.0-M3-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.typefox.lsapi</groupId>
+                <artifactId>io.typefox.lsapi</artifactId>
+                <version>0.3.0-SNAPSHOT</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>jsr305</artifactId>
+                        <groupId>com.google.code.findbugs</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.typefox.lsapi</groupId>
+                <artifactId>io.typefox.lsapi.services</artifactId>
+                <version>0.3.0-SNAPSHOT</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>jsr305</artifactId>
+                        <groupId>com.google.code.findbugs</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
@@ -79,6 +101,17 @@
                 <artifactId>assembly-wsmaster-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-account</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-account</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -127,6 +160,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-factory</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-factory-shared</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -153,8 +192,24 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-jdbc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-jdbc-vendor-h2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-machine</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-machine</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -193,6 +248,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-ssh</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-ssh-shared</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -211,6 +272,12 @@
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-user-shared</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-workspace</artifactId>
+                <version>${che.version}</version>
+                <classifier>tests</classifier>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -368,6 +435,21 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-csharp-lang-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-csharp-lang-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-csharp-lang-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-debugger-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -480,6 +562,21 @@
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-java-plain-shared</artifactId>
                 <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-languageserver-ide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-languageserver-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-languageserver-shared</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>

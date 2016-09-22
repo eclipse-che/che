@@ -22,15 +22,15 @@
                   </che-input>
                 </div>
               </che-label-container>
+              <che-label-container che-label-name="Recipe Type">
+                <div layout="column">
+                  <che-toggle ng-model="workspaceRecipeCtrl.recipeFormat" class="recipe-format">
+                    <che-toggle-button che-title="compose"></che-toggle-button>
+                    <che-toggle-button che-title="dockerfile"></che-toggle-button>
+                  </che-toggle>
+                </div>
+              </che-label-container>
             </div>
-            <che-label-container che-label-name="Recipe Type">
-              <div layout="column">
-                <che-toggle ng-model="workspaceRecipeCtrl.recipeFormat" class="recipe-format">
-                  <che-toggle-button che-title="compose"></che-toggle-button>
-                  <che-toggle-button che-title="dockerfile"></che-toggle-button>
-                </che-toggle>
-              </div>
-            </che-label-container>
           </div>
         </div>
         <div layout="column">
@@ -42,7 +42,7 @@
               <ui-codemirror ui-codemirror="workspaceRecipeCtrl.editorOptions"
                              ng-model="workspaceRecipeCtrl.recipeScript"></ui-codemirror>
               <div class="recipe-docs-link">
-                <a href="https://eclipse-che.readme.io/docs/custom-machine#che-stacks">Custom stack documentation</a>
+                <a href="https://eclipse-che.readme.io/docs/stacks#custom-stacks-for-che" target="_blank">Custom stack documentation</a>
               </div>
             </div>
           </div>

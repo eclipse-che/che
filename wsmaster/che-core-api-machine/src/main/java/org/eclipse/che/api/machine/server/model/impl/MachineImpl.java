@@ -30,13 +30,13 @@ public class MachineImpl implements Machine {
     }
 
     private final MachineConfigImpl      machineConfig;
-    private final String                 id;
     private final MachineRuntimeInfoImpl machineRuntime;
     private final String                 workspace;
     private final String                 envName;
     private final String                 owner;
 
     private MachineStatus status;
+    private String        id;
 
     public MachineImpl(MachineConfig machineConfig,
                        String id,
@@ -72,6 +72,10 @@ public class MachineImpl implements Machine {
     @Override
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override

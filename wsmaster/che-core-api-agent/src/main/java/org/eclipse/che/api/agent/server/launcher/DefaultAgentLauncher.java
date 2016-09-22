@@ -13,7 +13,19 @@ package org.eclipse.che.api.agent.server.launcher;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import javax.inject.Named;
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.core.util.AbstractLineConsumer;
+import org.eclipse.che.api.core.util.LineConsumer;
+import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.machine.server.spi.InstanceProcess;
+
+import java.io.IOException;
+
+import static java.lang.String.format;
 
 /**
  * Launches agent and waits while it is finished.
@@ -24,11 +36,34 @@ import javax.inject.Named;
  * @author Anatolii Bazko
  */
 @Singleton
-public class DefaultAgentLauncher extends AbstractAgentLauncher {
+public class DefaultAgentLauncher implements AgentLauncher {
     @Inject
-    public DefaultAgentLauncher(@Named("machine.agent.max_start_time_ms") long agentMaxStartTimeMs,
-                                @Named("machine.agent.ping_delay_ms") long agentPingDelayMs) {
-        super(agentMaxStartTimeMs, agentPingDelayMs, AgentLaunchingChecker.DEFAULT);
+    public DefaultAgentLauncher() { }
+
+    @Override
+    public void launch(Instance machine, Agent agent) throws ServerException {
+        final Command command = new CommandImpl(agent.getName(), agent.getScript(), "agent");
+        final InstanceProcess process = machine.createProcess(command, null);
+        final LineConsumer lineConsumer = new AbstractLineConsumer() {
+            @Override
+            public void writeLine(String line) throws IOException {
+                machine.getLogger().writeLine(line);
+            }
+        };
+
+        try {
+            process.start(lineConsumer);
+        } catch (ConflictException e) {
+            try {
+                machine.getLogger().writeLine(format("[ERROR] %s", e.getMessage()));
+            } catch (IOException ignored) {
+            }
+        } finally {
+            try {
+                lineConsumer.close();
+            } catch (IOException ignored) {
+            }
+        }
     }
 
     @Override

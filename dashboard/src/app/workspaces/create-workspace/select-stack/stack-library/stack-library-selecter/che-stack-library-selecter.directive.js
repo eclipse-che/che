@@ -39,7 +39,7 @@ export class CheStackLibrarySelecter {
   link($scope) {
     //select item
     $scope.select = () => {
-      $scope.$emit('event:selectStackId', $scope.stackId);
+      $scope.$emit('event:library:selectStackId', $scope.stackId);
     };
   }
 

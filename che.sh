@@ -13,6 +13,7 @@ init_logging() {
   BLUE='\033[1;34m'
   GREEN='\033[0;32m'
   RED='\033[0;31m'
+  YELLOW='\033[38;5;220m'
   NC='\033[0m'
 
   # Turns on stack trace
@@ -23,6 +24,9 @@ init_logging() {
   DEFAULT_CHE_CLI_INFO="true"
   CHE_CLI_INFO=${CHE_CLI_INFO:-${DEFAULT_CHE_CLI_INFO}}
 
+  # Activates console warnings
+  DEFAULT_CHE_CLI_WARN="true"
+  CHE_CLI_WARN=${CHE_CLI_WARN:-${DEFAULT_CHE_CLI_WARN}}
 }
 
 error_exit() {
@@ -82,8 +86,8 @@ init_global_variables() {
   CHE_VERSION=${CHE_VERSION:-${DEFAULT_CHE_VERSION}}
   CHE_UTILITY_VERSION=${CHE_UTILITY_VERSION:-${DEFAULT_CHE_UTILITY_VERSION}}
   CHE_CLI_ACTION=${CHE_CLI_ACTION:-${DEFAULT_CHE_CLI_ACTION}}
-  IS_INTERACTIVE=${IS_INTERACTIVE:-${DEFAULT_IS_INTERACTIVE}}
-  IS_PSEUDO_TTY=${IS_PSEUDO_TTY:-${DEFAULT_IS_PSEUDO_TTY}}
+  CHE_IS_INTERACTIVE=${CHE_IS_INTERACTIVE:-${DEFAULT_IS_INTERACTIVE}}
+  CHE_IS_PSEUDO_TTY=${CHE_IS_PSEUDO_TTY:-${DEFAULT_IS_PSEUDO_TTY}}
   CHE_DATA_FOLDER=${CHE_DATA_FOLDER:-${DEFAULT_CHE_DATA_FOLDER}}
 
   GLOBAL_NAME_MAP=$(docker info | grep "Name:" | cut -d" " -f2)
@@ -93,9 +97,8 @@ init_global_variables() {
 
   if is_boot2docker && has_docker_for_windows_client; then
   	if [[ "${CHE_DATA_FOLDER,,}" != *"${USERPROFILE,,}"* ]]; then
-  	  CHE_DATA_FOLDER=$(get_mount_path "${USERPROFILE}/.che/")
-      info "Boot2docker for Windows - CHE_DATA_FOLDER set to $CHE_DATA_FOLDER"
-      return
+  	  CHE_DATA_FOLDER=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+      warning "Boot2docker for Windows - CHE_DATA_FOLDER set to $CHE_DATA_FOLDER"   
   	fi
   fi
 
@@ -105,11 +108,11 @@ Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
            stop                               Stops ${CHE_MINI_PRODUCT_NAME} server
            restart                            Restart ${CHE_MINI_PRODUCT_NAME} server
            update [--force]                   Installs version, respecting CHE_VERSION & CHE_UTILITY_VERSION
-           profile add <name>                 Add a profile to ~/.che/ 
+           profile add <name>                 Add a profile to ~/.${CHE_MINI_PRODUCT_NAME}/ 
            profile set <name>                 Set this profile as the default for ${CHE_MINI_PRODUCT_NAME} CLI
            profile unset                      Removes the default profile - leaves it unset
-           profile rm <name>                  Remove this profile from ~/.che/
-           profile update <name>              Update profile in ~/.che/
+           profile rm <name>                  Remove this profile from ~/.${CHE_MINI_PRODUCT_NAME}/
+           profile update <name>              Update profile in ~/.${CHE_MINI_PRODUCT_NAME}/
            profile info <name>                Print the profile configuration
            profile list                       List available profiles
            mount <local-path> <ws-ssh-port>   Synchronize workspace to a local directory
@@ -135,6 +138,12 @@ usage () {
   printf "%s" "${USAGE}"
 }
 
+warning() {
+  if is_warning; then
+    printf  "${YELLOW}WARN:${NC} %s\n" "${1}"
+  fi
+}
+
 info() {
   if is_info; then
     printf  "${GREEN}INFO:${NC} %s\n" "${1}"
@@ -149,6 +158,14 @@ debug() {
 
 error() {
   printf  "${RED}ERROR:${NC} %s\n" "${1}"
+}
+
+is_warning() {
+  if [ "${CHE_CLI_WARN}" = "true" ]; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 is_info() {
@@ -204,9 +221,9 @@ docker_run_with_env_file() {
   get_list_of_che_system_environment_variables
   
   # Silly issue - docker run --env-file does not accept path to file - must be in same dir
-  cd ~/.che
+  cd ~/."${CHE_MINI_PRODUCT_NAME}"
   docker_run --env-file tmpgibberish "$@"
-  rm -rf ~/.che/tmpgibberish > /dev/null
+  rm -rf ~/."${CHE_MINI_PRODUCT_NAME}"/tmpgibberish > /dev/null
 }
 
 docker_run_with_pseudo_tty() {
@@ -237,8 +254,8 @@ docker_run_with_che_properties() {
     if has_che_properties; then
       # No user configuration directory, but CHE_PROPERTY_ values set
       generate_temporary_che_properties_file
-      docker_run_with_interactive -e "CHE_CONF_FOLDER=$(get_mount_path ~/.che/conf)" "$@"
-      rm -rf ~/.che/conf/che.properties > /dev/null
+      docker_run_with_interactive -e "CHE_CONF_FOLDER=$(get_mount_path ~/.${CHE_MINI_PRODUCT_NAME}/conf)" "$@"
+      rm -rf ~/."${CHE_MINI_PRODUCT_NAME}"/conf/che.properties > /dev/null
     else
       docker_run_with_interactive "$@"
     fi
@@ -247,7 +264,7 @@ docker_run_with_che_properties() {
 
 has_interactive() {
   debug $FUNCNAME
-  if [ "${IS_INTERACTIVE}" = "true" ]; then
+  if [ "${CHE_IS_INTERACTIVE}" = "true" ]; then
     return 0
   else
     return 1
@@ -256,7 +273,7 @@ has_interactive() {
 
 has_pseudo_tty() {
   debug $FUNCNAME
-  if [ "${IS_PSEUDO_TTY}" = "true" ]; then
+  if [ "${CHE_IS_PSEUDO_TTY}" = "true" ]; then
     return 0
   else
     return 1
@@ -425,41 +442,44 @@ get_list_of_che_system_environment_variables() {
 
   # See: http://stackoverflow.com/questions/4128235/what-is-the-exact-meaning-of-ifs-n
   IFS=$'\n'
-  DOCKER_ENV=~/.che/tmpgibberish
-  test -d ~/.che || mkdir -p ~/.che
-  touch ~/.che/tmpgibberish
   
+  TMP_DIR=~/."${CHE_MINI_PRODUCT_NAME}"
+  TMP_FILE="${TMP_DIR}"/tmpgibberish
+
+  test -d "${TMP_DIR}" || mkdir -p "${TMP_DIR}"
+  touch "${TMP_FILE}"
+
   if has_default_profile; then
-    cat ~/.che/profiles/${CHE_PROFILE} >> ~/.che/tmpgibberish
+    cat "${TMP_DIR}"/profiles/"${CHE_PROFILE}" >> "${TMP_FILE}"
   else
 
     # Grab these values to send to other utilities - they need to know the values  
-    echo "CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME}" >> ~/.che/tmpgibberish
-    echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> ~/.che/tmpgibberish
-    echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> ~/.che/tmpgibberish
-    echo "CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME}" >> ~/.che/tmpgibberish
-    echo "CHE_VERSION=${CHE_VERSION}" >> ~/.che/tmpgibberish
-    echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> ~/.che/tmpgibberish
-    echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> ~/.che/tmpgibberish
-    echo "CHE_DATA_FOLDER=${CHE_DATA_FOLDER}" >> ~/.che/tmpgibberish
+    echo "CHE_SERVER_CONTAINER_NAME=${CHE_SERVER_CONTAINER_NAME}" >> "${TMP_FILE}"
+    echo "CHE_SERVER_IMAGE_NAME=${CHE_SERVER_IMAGE_NAME}" >> "${TMP_FILE}"
+    echo "CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME}" >> "${TMP_FILE}"
+    echo "CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME}" >> "${TMP_FILE}"
+    echo "CHE_VERSION=${CHE_VERSION}" >> "${TMP_FILE}"
+    echo "CHE_CLI_INFO=${CHE_CLI_INFO}" >> "${TMP_FILE}"
+    echo "CHE_CLI_DEBUG=${CHE_CLI_DEBUG}" >> "${TMP_FILE}"
+    echo "CHE_DATA_FOLDER=${CHE_DATA_FOLDER}" >> "${TMP_FILE}"
 
     CHE_VARIABLES=$(env | grep CHE_)
 
     if [ ! -z ${CHE_VARIABLES+x} ]; then
-      env | grep CHE_ >> ~/.che/tmpgibberish
+      env | grep CHE_ >> "${TMP_FILE}"
     fi
 
     # Add in known proxy variables
     if [ ! -z ${http_proxy+x} ]; then
-      echo "http_proxy=${http_proxy}" >> ~/.che/tmpgibberish
+      echo "http_proxy=${http_proxy}" >> "${TMP_FILE}"
     fi
 
     if [ ! -z ${https_proxy+x} ]; then
-      echo "https_proxy=${https_proxy}" >> ~/.che/tmpgibberish
+      echo "https_proxy=${https_proxy}" >> "${TMP_FILE}"
     fi
 
     if [ ! -z ${no_proxy+x} ]; then
-      echo "no_proxy=${no_proxy}" >> ~/.che/tmpgibberish
+      echo "no_proxy=${no_proxy}" >> "${TMP_FILE}"
     fi
   fi
 }
@@ -488,8 +508,8 @@ has_che_properties() {
 generate_temporary_che_properties_file() {
   debug $FUNCNAME
   if has_che_properties; then
-    test -d ~/.che/conf || mkdir -p ~/.che/conf
-    touch ~/.che/conf/che.properties
+    test -d ~/."${CHE_MINI_PRODUCT_NAME}"/conf || mkdir -p ~/."${CHE_MINI_PRODUCT_NAME}"/conf
+    touch ~/."${CHE_MINI_PRODUCT_NAME}"/conf/che.properties
 
     # Get list of properties
     PROPERTIES_ARRAY=($(env | grep CHE_PROPERTY_))
@@ -508,7 +528,7 @@ generate_temporary_che_properties_file() {
       # Replace ".." in names to "_"
       SUPER_CONVERTED_PROPERTY_NAME="${CONVERTED_PROPERTY_NAME//../_}"
 
-      echo "$SUPER_CONVERTED_PROPERTY_NAME=$PROPERTY_VALUE" >> ~/.che/conf/che.properties
+      echo "$SUPER_CONVERTED_PROPERTY_NAME=$PROPERTY_VALUE" >> ~/."${CHE_MINI_PRODUCT_NAME}"/conf/che.properties
     done
   fi
 }
@@ -535,26 +555,20 @@ execute_profile(){
   debug $FUNCNAME
 
   if [ ! $# -ge 2 ]; then 
-    error ""
     error "${CHE_MINI_PRODUCT_NAME} profile: Wrong number of arguments."
-    error ""
     return
   fi
 
   case ${2} in
     add|rm|set|info|update)
     if [ ! $# -eq 3 ]; then 
-      error ""
       error "${CHE_MINI_PRODUCT_NAME} profile: Wrong number of arguments."
-      error ""
       return
     fi
     ;;
     unset|list)
     if [ ! $# -eq 2 ]; then 
-      error ""
       error "${CHE_MINI_PRODUCT_NAME} profile: Wrong number of arguments."
-      error ""
       return
     fi
     ;;
@@ -562,41 +576,39 @@ execute_profile(){
 
   case ${2} in
     add)
-      if [ -f ~/.che/profiles/"${3}" ]; then
-        error ""
-        error "Profile ~/.che/profiles/${3} already exists. Nothing to do. Exiting."
-        error ""
+      if [ -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}" ]; then
+        error "Profile ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3} already exists. Nothing to do. Exiting."
         return
       fi
 
-      test -d ~/.che/profiles || mkdir -p ~/.che/profiles
-      touch ~/.che/profiles/"${3}"
+      PROFILE_DIR=~/."${CHE_MINI_PRODUCT_NAME}"/profiles
+      PROFILE_FILE="${PROFILE_DIR}"/"${3}"
+      test -d "${PROFILE_DIR}" || mkdir -p "${PROFILE_DIR}"
+      touch "${PROFILE_FILE}"
 
-      echo "CHE_PRODUCT_NAME=$CHE_PRODUCT_NAME" > ~/.che/profiles/"${3}"
-      echo "CHE_MINI_PRODUCT_NAME=$CHE_MINI_PRODUCT_NAME" > ~/.che/profiles/"${3}"
-      echo "CHE_LAUNCHER_IMAGE_NAME=$CHE_LAUNCHER_IMAGE_NAME" > ~/.che/profiles/"${3}"
-      echo "CHE_SERVER_IMAGE_NAME=$CHE_SERVER_IMAGE_NAME" >> ~/.che/profiles/"${3}"
-      echo "CHE_DIR_IMAGE_NAME=$CHE_DIR_IMAGE_NAME" >> ~/.che/profiles/"${3}"
-      echo "CHE_MOUNT_IMAGE_NAME=$CHE_MOUNT_IMAGE_NAME" >> ~/.che/profiles/"${3}"
-      echo "CHE_TEST_IMAGE_NAME=$CHE_TEST_IMAGE_NAME" >> ~/.che/profiles/"${3}"
-      echo "CHE_SERVER_CONTAINER_NAME=$CHE_SERVER_CONTAINER_NAME" >> ~/.che/profiles/"${3}"
-      echo "CHE_VERSION=$CHE_VERSION" >> ~/.che/profiles/"${3}"
+      echo "CHE_PRODUCT_NAME=$CHE_PRODUCT_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_MINI_PRODUCT_NAME=$CHE_MINI_PRODUCT_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_LAUNCHER_IMAGE_NAME=$CHE_LAUNCHER_IMAGE_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_SERVER_IMAGE_NAME=$CHE_SERVER_IMAGE_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_DIR_IMAGE_NAME=$CHE_DIR_IMAGE_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_MOUNT_IMAGE_NAME=$CHE_MOUNT_IMAGE_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_TEST_IMAGE_NAME=$CHE_TEST_IMAGE_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_SERVER_CONTAINER_NAME=$CHE_SERVER_CONTAINER_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_VERSION=$CHE_VERSION" >> "${PROFILE_FILE}"
 
       # Add all other variables to the profile
-      env | grep CHE_ >> ~/.che/profiles/"${3}" || true
+      env | grep CHE_ >> "${PROFILE_FILE}" || true
 
       # Remove duplicates, if any
-      cat ~/.che/profiles/"${3}" | sort | uniq > ~/.che/profiles/tmp
-      mv -f ~/.che/profiles/tmp ~/.che/profiles/"${3}"
+      cat "${PROFILE_FILE}" | sort | uniq > "${PROFILE_DIR}"/tmp
+      mv -f "${PROFILE_DIR}"/tmp "${PROFILE_FILE}"
 
 
-      info "Added new ${CHE_MINI_PRODUCT_NAME} CLI profile ~/.che/profiles/${3}."
+      info "Added new ${CHE_MINI_PRODUCT_NAME} CLI profile ${PROFILE_FILE}."
     ;;
     update)
-      if [ ! -f ~/.che/profiles/"${3}" ]; then
-        error ""
-        error "Profile ~/.che/profiles/${3} does not exist. Nothing to update. Exiting."
-        error ""
+      if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}" ]; then
+        error "Profile ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3} does not exist. Nothing to update. Exiting."
         return
       fi
 
@@ -604,69 +616,51 @@ execute_profile(){
       execute_profile profile add "${3}"
     ;;
     rm)
-      if [ ! -f ~/.che/profiles/"${3}" ]; then
-        error ""
-        error "Profile ~/.che/profiles/${3} does not exist. Nothing to do. Exiting."
-        error ""
+      if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}" ]; then
+        error "Profile ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3} does not exist. Nothing to do. Exiting."
         return
       fi
 
-      rm ~/.che/profiles/"${3}" > /dev/null
+      rm ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}" > /dev/null
 
-      info "Removed ${CHE_MINI_PRODUCT_NAME} CLI profile ~/.che/profiles/${3}."
+      info "Removed ${CHE_MINI_PRODUCT_NAME} CLI profile ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3}."
     ;;
     info)
-      if [ ! -f ~/.che/profiles/"${3}" ]; then
-        error ""
-        error "Profile ~/.che/profiles/${3} does not exist. Nothing to do. Exiting."
-        error ""
+      if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}" ]; then
+        error "Profile ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3} does not exist. Nothing to do. Exiting."
         return
       fi
  
-
-      info "---------------------------------------"
-      info "---------   CLI PROFILE INFO   --------"
-      info "---------------------------------------"
-      info ""
-      info "Profile ~/.che/profiles/${3} contains:"
       while IFS= read line
       do
         # display $line or do somthing with $line
         info "$line"
-      done <~/.che/profiles/"${3}"
+      done <~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}"
     ;;
     set)
-      if [ ! -f ~/.che/profiles/"${3}" ]; then
-        error ""
-        error "Profile ~/.che/${3} does not exist. Nothing to do. Exiting."
-        error ""
+      if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}" ]; then
+        error "Profile ~/.${CHE_MINI_PRODUCT_NAME}/${3} does not exist. Nothing to do. Exiting."
         return
       fi
       
-      echo "CHE_PROFILE=${3}" > ~/.che/profiles/.profile
+      echo "CHE_PROFILE=${3}" > ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
 
-      info ""
-      info "Set active ${CHE_MINI_PRODUCT_NAME} CLI profile to ~/.che/profiles/${3}."
-      info ""
+      info "Set active ${CHE_MINI_PRODUCT_NAME} CLI profile to ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3}."
     ;;
     unset)
-      if [ ! -f ~/.che/profiles/.profile ]; then
-        error ""
+      if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile ]; then
         error "Default profile not set. Nothing to do. Exiting."
-        error ""
         return
       fi
       
-      rm -rf ~/.che/profiles/.profile
+      rm -rf ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
 
-      info ""
       info "Unset the default ${CHE_MINI_PRODUCT_NAME} CLI profile. No profile currently set."
-      info ""
     ;;
     list)
-      if [ -d ~/.che ]; then
+      if [ -d ~/."${CHE_MINI_PRODUCT_NAME}"/profiles ]; then
         info "Available ${CHE_MINI_PRODUCT_NAME} CLI profiles:"
-        ls ~/.che/profiles
+        ls ~/."${CHE_MINI_PRODUCT_NAME}"/profiles
       else
         info "No ${CHE_MINI_PRODUCT_NAME} CLI profiles currently set."
       fi
@@ -683,7 +677,7 @@ execute_profile(){
 
 has_default_profile() {
   debug $FUNCNAME
-  if [ -f ~/.che/profiles/.profile ]; then
+  if [ -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile ]; then
     return 0
   else 
     return 1
@@ -693,7 +687,7 @@ has_default_profile() {
 get_default_profile() {
   debug $FUNCNAME
   if [ has_default_profile ]; then
-    source ~/.che/profiles/.profile
+    source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
     echo "${CHE_PROFILE}"
   else
     echo ""
@@ -704,16 +698,16 @@ load_profile() {
   debug $FUNCNAME
   if has_default_profile; then
 
-    source ~/.che/profiles/.profile
+    source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
 
-    if [ ! -f ~/.che/profiles/"${CHE_PROFILE}" ]; then
+    if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${CHE_PROFILE}" ]; then
       error ""
-      error "${CHE_MINI_PRODUCT_NAME} CLI profile set in ~/.che/profiles/.profile to '${CHE_PROFILE}' but ~/.che/profiles/${CHE_PROFILE} does not exist."
+      error "${CHE_MINI_PRODUCT_NAME} CLI profile set in ~/.${CHE_MINI_PRODUCT_NAME}/profiles/.profile to '${CHE_PROFILE}' but ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${CHE_PROFILE} does not exist."
       error ""
       return
     fi
 
-    source ~/.che/profiles/"${CHE_PROFILE}"
+    source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${CHE_PROFILE}"
     info "${CHE_PRODUCT_NAME}: Loaded profile ${CHE_PROFILE}"
   fi
 }
@@ -762,9 +756,20 @@ execute_che_mount() {
     error "${CHE_MINI_PRODUCT_NAME} mount: Path provided is not a valid directory."
     return
   fi
+  
+  if is_native; then
+    PLATFORM_SPECIFIC_OPTIONS="-v ${HOME}/.ssh:${HOME}/.ssh \
+            -v ${HOME}/.unison:${HOME}/.unison \
+            -v /etc/group:/etc/group:ro \
+            -v /etc/passwd:/etc/passwd:ro \
+            -u $(id -u ${USER})"
+  else
+    PLATFORM_SPECIFIC_OPTIONS="-v ${HOME}/.ssh:/root/.ssh"
+  fi
 
   docker_run_with_che_properties --cap-add SYS_ADMIN \
               --device /dev/fuse \
+              ${PLATFORM_SPECIFIC_OPTIONS} \
               -v "${MOUNT_PATH}":/mnthost \
               "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${GLOBAL_GET_DOCKER_HOST_IP}" $3
 }
@@ -827,7 +832,7 @@ execute_che_info() {
 print_che_cli_debug() {
   debug $FUNCNAME
   info "---------------------------------------"
-  info "---------    CLI DEBUG INFO    --------"
+  info "-------------   CLI INFO   ------------"
   info "---------------------------------------"
   info ""
   info "---------  PLATFORM INFO  -------------"
@@ -845,8 +850,8 @@ print_che_cli_debug() {
   info "IS_MOBY_VM                = $(is_moby_vm && echo "YES" || echo "NO")"
   info "HAS_CHE_ENV_VARIABLES     = $(has_che_env_variables && echo "YES" || echo "NO")"
   info "HAS_TEMP_CHE_PROPERTIES   = $(has_che_properties && echo "YES" || echo "NO")"
-  info "HAS_INTERACTIVE           = $(has_interactive && echo "YES" || echo "NO")"
-  info "HAS_PSEUDO_TTY            = $(has_pseudo_tty && echo "YES" || echo "NO")"
+  info "IS_INTERACTIVE            = $(has_interactive && echo "YES" || echo "NO")"
+  info "IS_PSEUDO_TTY             = $(has_pseudo_tty && echo "YES" || echo "NO")"
   info ""
 }
 

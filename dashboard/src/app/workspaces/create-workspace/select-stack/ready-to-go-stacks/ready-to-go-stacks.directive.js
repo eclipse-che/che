@@ -20,7 +20,7 @@
  * `<ready-to-go-stacks></ready-to-go-stacks>` for creating new projects from ready to go stacks.
  *
  * @usage
- *   <ready-to-go-stacks class="projects-create-project-tab" layout="row" layout-wrap></ready-to-go-stacks>
+ *   <ready-to-go-stacks></ready-to-go-stacks>
  *
  * @author Florent Benoit
  */
@@ -30,8 +30,8 @@ export class ReadyToGoStacks {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () {
-    this.restrict='E';
+  constructor() {
+    this.restrict = 'E';
     this.templateUrl = 'app/workspaces/create-workspace/select-stack/ready-to-go-stacks/ready-to-go-stacks.html';
 
     this.controller = 'ReadyToGoStacksController';
@@ -40,10 +40,8 @@ export class ReadyToGoStacks {
 
     // scope values
     this.scope = {
-      stack: '=cheStack',
-      onChange: '&cheOnChange'
+      tabName: '@cheTabName'
     };
-
   }
 
 }

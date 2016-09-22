@@ -64,6 +64,7 @@ import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
+import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
@@ -111,6 +112,7 @@ import org.eclipse.che.ide.api.user.UserServiceClientImpl;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClientImpl;
 import org.eclipse.che.ide.client.StartUpActionsProcessor;
+import org.eclipse.che.ide.client.WorkspaceStateRestorer;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.EditorRegistryImpl;
@@ -237,8 +239,6 @@ import org.eclipse.che.ide.ui.dialogs.message.MessageDialogViewImpl;
 import org.eclipse.che.ide.ui.dropdown.DropDownListFactory;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidgetImpl;
-import org.eclipse.che.ide.ui.loaders.initialization.LoaderView;
-import org.eclipse.che.ide.ui.loaders.initialization.LoaderViewImpl;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
@@ -321,6 +321,8 @@ public class CoreGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(ResourceNode.NodeFactory.class));
 
         bind(AppContext.class).to(AppContextImpl.class);
+
+        install(new GinFactoryModuleBuilder().build(PopupLoaderFactory.class));
 
         install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
         install(new GinFactoryModuleBuilder().implement(PartStackView.class, PartStackViewImpl.class).build(PartStackViewFactory.class));
@@ -430,6 +432,7 @@ public class CoreGinModule extends AbstractGinModule {
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
         wsAgentComponentsBinder.addBinding("Project types").to(ProjectTypeComponent.class);
         wsAgentComponentsBinder.addBinding("Start-up actions processor").to(StartUpActionsProcessor.class);
+        wsAgentComponentsBinder.addBinding("ZZ Restore Workspace State").to(WorkspaceStateRestorer.class);
     }
 
     private void configureProjectWizard() {
@@ -568,8 +571,6 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ExtensionManagerView.class).to(ExtensionManagerViewImpl.class).in(Singleton.class);
         bind(AppearanceView.class).to(AppearanceViewImpl.class).in(Singleton.class);
         bind(FindActionView.class).to(FindActionViewImpl.class).in(Singleton.class);
-
-        bind(LoaderView.class).to(LoaderViewImpl.class).in(Singleton.class);
 
         bind(HotKeysDialogView.class).to(HotKeysDialogViewImpl.class).in(Singleton.class);
 

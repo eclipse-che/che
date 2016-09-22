@@ -61,10 +61,12 @@
 
     <inherits name='org.eclipse.che.plugin.product.info.ProductInfo'/>
     <inherits name='org.eclipse.che.plugin.cpp.Cpp'/>
+    <inherits name='org.eclipse.che.plugin.csharp.CSharp'/>
     <inherits name='org.eclipse.che.plugin.python.Python'/>
     <inherits name='org.eclipse.che.plugin.java.plain.PlainJava'/>
     <inherits name='org.eclipse.che.plugin.nodejs.NodeJs'/>
     <inherits name='org.eclipse.che.plugin.docker.client.dto.Dto'/>
+    <inherits name='org.eclipse.che.plugin.languageserver.LanguageServer'/>
 
     <inherits name='org.eclipse.che.api.core.Core'/>
     <inherits name='org.eclipse.che.api.core.model.Model'/>

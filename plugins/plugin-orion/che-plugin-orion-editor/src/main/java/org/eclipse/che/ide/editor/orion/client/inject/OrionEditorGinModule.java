@@ -12,6 +12,7 @@ package org.eclipse.che.ide.editor.orion.client.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
+import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 
@@ -39,5 +40,6 @@ public class OrionEditorGinModule extends AbstractGinModule {
 
         install(new GinFactoryModuleBuilder().build(ContentAssistWidgetFactory.class));
 
+        GinMultibinder.newSetBinder(binder(), OrionPlugin.class).addBinding().to(JavaHighlightingOrionPlugin.class);
     }
 }
