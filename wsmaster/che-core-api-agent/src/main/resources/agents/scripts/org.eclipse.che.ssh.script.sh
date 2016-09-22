@@ -92,11 +92,12 @@ else
     exit 1
 fi
 
-if echo ${LINUX_TYPE} | grep -qi "alpine"; then
-   pidof sshd >/dev/null 2>&1 && exit
-else
-   ps -fC sshd >/dev/null 2>&1 && exit
-fi
+command -v pidof >/dev/null 2>&1 && {
+    pidof sshd >/dev/null 2>&1 && exit
+} || {
+    ps -fC sshd >/dev/null 2>&1 && exit
+}
+
 
 ${SUDO} mkdir -p /var/run/sshd
 ${SUDO} /usr/bin/ssh-keygen -A && ${SUDO} /usr/sbin/sshd -D

@@ -87,11 +87,12 @@ else
     exit 1
 fi
 
-if echo ${LINUX_TYPE} | grep -qi "alpine"; then
-   pidof che-websocket-terminal >/dev/null 2>&1 && exit
-else
-   ps -fC che-websocket-terminal >/dev/null 2>&1 && exit
-fi
+command -v pidof >/dev/null 2>&1 && {
+    pidof che-websocket-terminal >/dev/null 2>&1 && exit
+} || {
+    ps -fC che-websocket-terminal >/dev/null 2>&1 && exit
+}
+
 
 ########################
 ### Install Terminal ###
