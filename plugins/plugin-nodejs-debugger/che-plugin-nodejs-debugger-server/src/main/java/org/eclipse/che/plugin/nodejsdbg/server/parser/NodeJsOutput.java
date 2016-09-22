@@ -16,6 +16,8 @@ package org.eclipse.che.plugin.nodejsdbg.server.parser;
  * @author Anatoliy Bazko
  */
 public class NodeJsOutput {
+    public static final NodeJsOutput EMPTY = new NodeJsOutput("");
+
     private final String output;
 
     private NodeJsOutput(String output) {

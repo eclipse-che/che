@@ -90,29 +90,46 @@ public class NodeJsDebugger extends AbstractDebugger {
     @Override
     protected DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties) {
         StringBuilder sb = new StringBuilder();
-        for (ConnectionProperties prop : ConnectionProperties.values()) {
-            if (sb.length() > 0) {
-                sb.append(", ");
+
+        for (String propName : connectionProperties.keySet()) {
+            try {
+                ConnectionProperties prop = ConnectionProperties.valueOf(propName.toUpperCase());
+                String connectionInfo = prop.getConnectionInfo(connectionProperties.get(propName));
+                if (!connectionInfo.isEmpty()) {
+                    if (sb.length() > 0) {
+                        sb.append(',');
+                    }
+                    sb.append(connectionInfo);
+                }
+            } catch (IllegalArgumentException ignored) {
             }
-            sb.append(prop.process(connectionProperties));
         }
 
-        return new DebuggerDescriptor("", sb.toString());
+        return new DebuggerDescriptor("", "{" + sb.toString() + "}");
     }
 
     public enum ConnectionProperties {
-        URI,
-        PID,
-        SCRIPT;
-
-        public String process(Map<String, String> properties) {
-            for (String prop : properties.keySet()) {
-                if (this.toString().equalsIgnoreCase(prop)) {
-                    return this.toString().toLowerCase() + " : " + properties.get(prop);
-                }
+        URI {
+            @Override
+            public String getConnectionInfo(String value) {
+                return "url : " + value;
             }
+        },
 
-            return "";
-        }
+        PID {
+            @Override
+            public String getConnectionInfo(String value) {
+                return "-1".equals(value) ? "" : ("pid : " + value);
+            }
+        },
+
+        SCRIPT {
+            @Override
+            public String getConnectionInfo(String value) {
+                return "script : " + value;
+            }
+        };
+
+        public abstract String getConnectionInfo(String value);
     }
 }

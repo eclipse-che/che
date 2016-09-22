@@ -30,6 +30,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Map;
 
+import static org.eclipse.che.plugin.nodejsdbg.ide.NodeJsDebugger.ConnectionProperties.SCRIPT;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -46,20 +47,20 @@ public class NodeJsDebuggerConfigurationPagePresenterTest {
     private static final int    PORT = 8000;
 
     @Mock
-    private GdbConfigurationPageView   pageView;
+    private NodeJsDebuggerConfigurationPageView pageView;
     @Mock
-    private DebugConfiguration         configuration;
+    private DebugConfiguration                  configuration;
     @Mock
-    private CurrentProjectPathProvider currentProjectPathProvider;
+    private CurrentProjectPathProvider          currentProjectPathProvider;
     @Mock
-    private AppContext                 appContext;
+    private AppContext                          appContext;
     @Mock
-    private RecipeServiceClient        recipeServiceClient;
+    private RecipeServiceClient                 recipeServiceClient;
     @Mock
-    private MachineServiceClient       machineServiceClient;
+    private MachineServiceClient                machineServiceClient;
 
     @InjectMocks
-    private GdbConfigurationPagePresenter pagePresenter;
+    private NodeJsDebuggerConfigurationPagePresenter pagePresenter;
 
     @Before
     public void setUp() {
@@ -88,60 +89,25 @@ public class NodeJsDebuggerConfigurationPagePresenterTest {
         verify(configuration, atLeastOnce()).getHost();
         verify(configuration, atLeastOnce()).getPort();
         verify(configuration, atLeastOnce()).getConnectionProperties();
-        verify(pageView).setHost(eq(HOST));
-        verify(pageView).setPort(eq(PORT));
-        verify(pageView).setBinaryPath(anyString());
-        verify(pageView).setDevHost(eq(false));
-        verify(pageView).setPortEnableState(eq(true));
-        verify(pageView).setHostEnableState(eq(true));
-    }
-
-    @Test
-    public void testOnHostChanged() throws Exception {
-        String host = "localhost";
-        when(pageView.getHost()).thenReturn(host);
-
-        final DebugConfigurationPage.DirtyStateListener listener = mock(DebugConfigurationPage.DirtyStateListener.class);
-        pagePresenter.setDirtyStateListener(listener);
-
-        pagePresenter.onHostChanged();
-
-        verify(pageView).getHost();
-        verify(configuration).setHost(eq(host));
-        verify(listener).onDirtyStateChanged();
-    }
-
-    @Test
-    public void testOnPortChanged() throws Exception {
-        int port = 8000;
-        when(pageView.getPort()).thenReturn(port);
-
-        final DebugConfigurationPage.DirtyStateListener listener = mock(DebugConfigurationPage.DirtyStateListener.class);
-        pagePresenter.setDirtyStateListener(listener);
-
-        pagePresenter.onPortChanged();
-
-        verify(pageView).getPort();
-        verify(configuration).setPort(eq(port));
-        verify(listener).onDirtyStateChanged();
+        verify(pageView).setScriptPath(anyString());
     }
 
     @Test
     public void testOnBinaryPathChanged() throws Exception {
         String binPath = "/path";
-        when(pageView.getBinaryPath()).thenReturn(binPath);
+        when(pageView.getScriptPath()).thenReturn(binPath);
 
         final DebugConfigurationPage.DirtyStateListener listener = mock(DebugConfigurationPage.DirtyStateListener.class);
         pagePresenter.setDirtyStateListener(listener);
 
-        pagePresenter.onBinaryPathChanged();
+        pagePresenter.onScriptPathChanged();
 
-        verify(pageView).getBinaryPath();
+        verify(pageView).getScriptPath();
         ArgumentCaptor<Map> argumentCaptor = ArgumentCaptor.forClass(Map.class);
 
         verify(configuration).setConnectionProperties(argumentCaptor.capture());
         Map argumentCaptorValue = argumentCaptor.getValue();
-        assertEquals(binPath, argumentCaptorValue.get(GdbConfigurationPagePresenter.BIN_PATH_CONNECTION_PROPERTY));
+        assertEquals(binPath, argumentCaptorValue.get(SCRIPT.toString()));
 
         verify(listener).onDirtyStateChanged();
     }

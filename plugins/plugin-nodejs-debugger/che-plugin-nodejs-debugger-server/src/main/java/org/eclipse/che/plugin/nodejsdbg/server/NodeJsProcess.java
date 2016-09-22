@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import static java.lang.Math.min;
+import static org.eclipse.che.plugin.nodejsdbg.server.NodeJsDebugProcess.SINGLE_LINE_CONSUMER;
 
 /**
  * NodeJs process is being run.
@@ -104,13 +106,17 @@ public abstract class NodeJsProcess {
     }
 
     protected NodeJsOutput sendCommand(String command) throws NodeJsDebuggerException {
-        return sendCommand(command, true);
+        return sendCommand(command, SINGLE_LINE_CONSUMER);
     }
 
-    protected synchronized NodeJsOutput sendCommand(String command, boolean waitPreviousCommand) throws NodeJsDebuggerException {
-        if (waitPreviousCommand) {
-            waitWhenPreviousCommandIsFinished();
-        }
+    protected synchronized NodeJsOutput sendCommand(String command,
+                                                    Function<BlockingQueue<NodeJsOutput>, NodeJsOutput> outputConsumer) throws
+                                                                                                                        NodeJsDebuggerException {
+        doSendCommand(command);
+        return outputConsumer.apply(outputs);
+    }
+
+    private void doSendCommand(String command) throws NodeJsDebuggerTerminatedException {
         LOG.debug("Execute: {}", command);
 
         outputs.clear();
@@ -125,12 +131,6 @@ public abstract class NodeJsProcess {
         } catch (IOException e) {
             LOG.error(String.format("Execution command <%s> failed", command), e);
         }
-
-        return grabOutput();
-    }
-
-    private void waitWhenPreviousCommandIsFinished() {
-        outputReader.waitCleanPrompt();
     }
 
     /**
@@ -191,28 +191,14 @@ public abstract class NodeJsProcess {
                                             : null);
         }
 
-        private void waitCleanPrompt() {
-            while (buf.length() != 0) {
-                synchronized (buf) {
-                    try {
-                        buf.wait();
-                    } catch (InterruptedException ignored) {
-                    }
-                }
-            }
-        }
-
         private void extractOutputs() {
             int indexOf;
             while ((indexOf = buf.indexOf(outputSeparator)) >= 0) {
                 NodeJsOutput nodeJsOutput = NodeJsOutput.of(buf.substring(0, indexOf));
-
-                if (!nodeJsOutput.isEmpty()) {
-                    LOG.debug("{}{}", outputSeparator, nodeJsOutput.getOutput());
-                    outputs.add(nodeJsOutput);
-                }
-
                 buf.delete(0, indexOf + outputSeparator.length());
+
+                LOG.debug("{}{}", outputSeparator, nodeJsOutput.getOutput());
+                outputs.add(nodeJsOutput);
             }
         }
 

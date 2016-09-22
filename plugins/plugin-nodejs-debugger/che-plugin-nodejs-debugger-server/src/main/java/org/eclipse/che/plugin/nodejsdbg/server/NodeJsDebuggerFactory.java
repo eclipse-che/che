@@ -28,7 +28,7 @@ import static java.util.stream.Collectors.toMap;
  *
  * uri - connects to the process via the URI such as localhost:5858
  * pid - connects to the process via the pid
- * file - entrypoint to start debugger
+ * script - entrypoint to start debugger
  *
  * @author Anatoliy Bazko
  */
@@ -68,15 +68,15 @@ public class NodeJsDebuggerFactory implements DebuggerFactory {
             }
         }
 
-        String file = normalizedProps.get("file");
-        if (!isNullOrEmpty(file) && !Files.exists(Paths.get(file))) {
-            throw new DebuggerException(String.format("File '%s' to debug not found. Debugger can't be started.", file));
+        String script = normalizedProps.get("script");
+        if (!isNullOrEmpty(script) && !Files.exists(Paths.get(script))) {
+            throw new DebuggerException(String.format("Script '%s' to debug not found. Debugger can't be started.", script));
         }
 
-        if (isNullOrEmpty(pidStr) && isNullOrEmpty(uriStr) && isNullOrEmpty(file)) {
-            throw new DebuggerException("Unrecognized debug connection options. Allowed only: pid, uri or file.");
+        if (isNullOrEmpty(pidStr) && isNullOrEmpty(uriStr) && isNullOrEmpty(script)) {
+            throw new DebuggerException("Unrecognized debug connection options. Allowed only: pid, uri or script.");
         }
 
-        return NodeJsDebugger.newInstance(pid, uri, file, debuggerCallback);
+        return NodeJsDebugger.newInstance(pid, uri, script, debuggerCallback);
     }
 }

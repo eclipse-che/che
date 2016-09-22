@@ -55,23 +55,21 @@ public class NodeJsDebugger implements Debugger {
     private final URI     uri;
     private final String  name;
     private final String  version;
-    private final String  file;
+    private final String  script;
 
     private final NodeJsDebugProcess nodeJsDebugProcess;
     private final DebuggerCallback   debuggerCallback;
 
     NodeJsDebugger(@Nullable Integer pid,
                    @Nullable URI uri,
-                   @Nullable String file,
-                   String name,
-                   String version,
+                   @Nullable String script,
                    NodeJsDebugProcess nodeJsDebugProcess,
-                   DebuggerCallback debuggerCallback) {
+                   DebuggerCallback debuggerCallback) throws NodeJsDebuggerException {
         this.pid = pid;
         this.uri = uri;
-        this.file = file;
-        this.name = name;
-        this.version = version;
+        this.script = script;
+        this.name = nodeJsDebugProcess.getName();
+        this.version = nodeJsDebugProcess.getVersion();
         this.nodeJsDebugProcess = nodeJsDebugProcess;
         this.debuggerCallback = debuggerCallback;
     }
@@ -80,9 +78,6 @@ public class NodeJsDebugger implements Debugger {
                                              @Nullable URI uri,
                                              @Nullable String file,
                                              DebuggerCallback debuggerCallback) throws DebuggerException {
-        NodeJsVersionProcess nodeJsVersionProcess = new NodeJsVersionProcess();
-        nodeJsVersionProcess.stop();
-
         NodeJsDebugProcess nodeJsDebugProcess;
         if (pid != null) {
             nodeJsDebugProcess = NodeJsDebugProcess.start(pid);
@@ -95,8 +90,6 @@ public class NodeJsDebugger implements Debugger {
         return new NodeJsDebugger(pid,
                                   uri,
                                   file,
-                                  nodeJsVersionProcess.getName(),
-                                  nodeJsVersionProcess.getVersion(),
                                   nodeJsDebugProcess,
                                   debuggerCallback);
     }
@@ -107,8 +100,8 @@ public class NodeJsDebugger implements Debugger {
                                     uri == null ? -1 : uri.getPort(),
                                     name,
                                     version,
-                                    pid,
-                                    file);
+                                    pid == null ? -1 : pid,
+                                    script);
     }
 
     @Override

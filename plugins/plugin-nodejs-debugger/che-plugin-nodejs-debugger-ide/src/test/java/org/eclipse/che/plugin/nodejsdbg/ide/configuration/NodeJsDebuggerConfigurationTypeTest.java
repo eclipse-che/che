@@ -15,46 +15,47 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.plugin.gdb.ide.GdbDebugger;
-import org.eclipse.che.plugin.gdb.ide.NodeJsDebuggerResources;
-import org.junit.Assert;
+import org.eclipse.che.plugin.nodejsdbg.ide.NodeJsDebugger;
+import org.eclipse.che.plugin.nodejsdbg.ide.NodeJsDebuggerResources;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.junit.Assert.assertEquals;
 
 /** @author Anatolii Bazko */
 @RunWith(GwtMockitoTestRunner.class)
 public class NodeJsDebuggerConfigurationTypeTest {
 
     @Mock
-    private NodeJsDebuggerResources       resources;
+    private NodeJsDebuggerResources                  resources;
     @Mock
-    private GdbConfigurationPagePresenter gdbConfigurationPagePresenter;
+    private NodeJsDebuggerConfigurationPagePresenter nodeJsDebuggerConfigurationPagePresenter;
     @Mock
-    private IconRegistry                  iconRegistry;
+    private IconRegistry                             iconRegistry;
 
     @InjectMocks
-    private GdbConfigurationType gdbConfigurationType;
+    private NodeJsDebuggerConfigurationType nodeJsDebuggerConfigurationType;
 
     @Test
     public void testGetId() throws Exception {
-        final String id = gdbConfigurationType.getId();
+        final String id = nodeJsDebuggerConfigurationType.getId();
 
-        Assert.assertEquals(GdbDebugger.ID, id);
+        assertEquals(NodeJsDebugger.ID, id);
     }
 
     @Test
     public void testGetDisplayName() throws Exception {
-        final String displayName = gdbConfigurationType.getDisplayName();
+        final String displayName = nodeJsDebuggerConfigurationType.getDisplayName();
 
-        assertEquals(GdbConfigurationType.DISPLAY_NAME, displayName);
+        assertEquals(NodeJsDebuggerConfigurationType.DISPLAY_NAME, displayName);
     }
 
     @Test
     public void testGetConfigurationPage() throws Exception {
-        final DebugConfigurationPage<? extends DebugConfiguration> page = gdbConfigurationType.getConfigurationPage();
+        final DebugConfigurationPage<? extends DebugConfiguration> page = nodeJsDebuggerConfigurationType.getConfigurationPage();
 
-        assertEquals(gdbConfigurationPagePresenter, page);
+        assertEquals(nodeJsDebuggerConfigurationPagePresenter, page);
     }
 }

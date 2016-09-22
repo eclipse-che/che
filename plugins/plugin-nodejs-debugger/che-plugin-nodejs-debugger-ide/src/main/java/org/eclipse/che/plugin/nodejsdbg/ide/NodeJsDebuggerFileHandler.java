@@ -19,6 +19,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -66,6 +67,14 @@ public class NodeJsDebuggerFileHandler implements ActiveFileHandler {
             callback.onFailure(new IllegalStateException("Project is undefined"));
             return;
         }
+
+        Promise<Resource[]> search = appContext.getWorkspaceRoot().search(location.getTarget(), "");
+        search.then(new Operation<Resource[]>() {
+            @Override
+            public void apply(Resource[] arg) throws OperationException {
+                arg[0].getLocation();
+            }
+        });
 
         final Path filePath = project.get().getLocation().append(location.getTarget());
         VirtualFile activeFile = null;

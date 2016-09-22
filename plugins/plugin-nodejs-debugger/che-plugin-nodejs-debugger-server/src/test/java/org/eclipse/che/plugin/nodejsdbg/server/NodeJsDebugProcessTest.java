@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.nodejsdbg.server;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
+import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerException;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerTerminatedException;
 import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsBackTrace;
 import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsBreakpoints;
@@ -26,6 +27,7 @@ import org.testng.annotations.Test;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Thread.sleep;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
@@ -190,7 +192,20 @@ public class NodeJsDebugProcessTest {
     }
 
     @Test
-    public void testFinishDebug() throws Exception {
-        nodeJsDebugProcess.cont();
+    public void debugShouldBeStoppedByQuitCommand() throws Exception {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    nodeJsDebugProcess.cont();
+                } catch (NodeJsDebuggerException ignored) {
+                }
+            }
+        }.start();
+
+        sleep(1000);
+        nodeJsDebugProcess.quit();
+
+        assertFalse(nodeJsDebugProcess.process.isAlive());
     }
 }
