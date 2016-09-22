@@ -1,16 +1,3 @@
-check_docker() {
-  if ! docker ps > /dev/null 2>&1; then
-    output=$(docker ps)
-    error "Error - Docker not installed properly: \n${output}"
-  fi
-
-  # Prep script by getting default image
-  if [ "$(docker images -q alpine 2> /dev/null)" = "" ]; then
-    info "Pulling image alpine:latest"
-    docker pull alpine > /dev/null 2>&1
-  fi
-}
-
 init_global_variables() {
   DEFAULT_CHE_PRODUCT_NAME="ECLIPSE CHE"
   DEFAULT_CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
