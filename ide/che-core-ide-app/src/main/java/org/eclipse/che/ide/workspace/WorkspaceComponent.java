@@ -217,8 +217,8 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
     /**
      * Starts workspace.
      *
-     * @param workspace
-     *          workspace to start
+     * @param workspaceID
+     *          workspace ID to start
      * @param callback
      *          callback
      * @param checkForShapshots
@@ -226,9 +226,9 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      * @param restoreFromSnapshot
      *          restore or not the workspace from snapshot
      */
-    public void startWorkspace(final Workspace workspace, final Callback<Component, Exception> callback,
+    public void startWorkspace(final String workspaceID, final Callback<Component, Exception> callback,
                                final boolean checkForShapshots, final boolean restoreFromSnapshot) {
-        workspaceServiceClient.getWorkspace(workspace.getId()).then(new Operation<WorkspaceDto>() {
+        workspaceServiceClient.getWorkspace(workspaceID).then(new Operation<WorkspaceDto>() {
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
                 handleWorkspaceEvents(workspace, callback, checkForShapshots, restoreFromSnapshot);
@@ -245,7 +245,7 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
      *         callback to be executed
      */
     public void startWorkspace(final Workspace workspace, final Callback<Component, Exception> callback) {
-        startWorkspace(workspace, callback, true, false);
+        startWorkspace(workspace.getId(), callback, true, false);
     }
 
     /**

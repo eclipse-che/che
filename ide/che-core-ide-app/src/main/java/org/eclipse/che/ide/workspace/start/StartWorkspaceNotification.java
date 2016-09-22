@@ -58,6 +58,8 @@ public class StartWorkspaceNotification {
     @UiField
     CheckBox                                    restore;
 
+    private String                              workspaceID;
+
     @Inject
     public StartWorkspaceNotification(LoaderPresenter loader,
                                       WorkspaceStarterUiBinder uiBinder,
@@ -72,15 +74,15 @@ public class StartWorkspaceNotification {
     }
 
     /**
-     * Displays a notification with a proposal to start current workspace.
+     * Displays a notification with a proposal to start workspace with ID.
+     *
+     * @param workspaceID
+     *          workspace ID
      */
-    public void show() {
-        final Workspace workspace = appContext.getWorkspace();
-        if (workspace == null) {
-            return;
-        }
+    public void show(String workspaceID) {
+        this.workspaceID = workspaceID;
 
-        workspaceServiceClient.getSnapshot(workspace.getId()).then(new Operation<List<SnapshotDto>>() {
+        workspaceServiceClient.getSnapshot(workspaceID).then(new Operation<List<SnapshotDto>>() {
             @Override
             public void apply(List<SnapshotDto> snapshots) throws OperationException {
                 Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
@@ -98,7 +100,7 @@ public class StartWorkspaceNotification {
     @UiHandler("button")
     void startClicked(ClickEvent e) {
         loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
-        workspaceComponentProvider.get().startWorkspace(appContext.getWorkspace(), new Callback<Component, Exception>() {
+        workspaceComponentProvider.get().startWorkspace(workspaceID, new Callback<Component, Exception>() {
             @Override
             public void onSuccess(Component result) {
             }

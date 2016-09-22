@@ -396,7 +396,7 @@ public class WorkspaceEventsHandler {
                 case STOPPED:
                     unSubscribeHandlers();
                     eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
-                    startWorkspaceNotification.show();
+                    startWorkspaceNotification.show(statusEvent.getWorkspaceId());
                     break;
 
                 case SNAPSHOT_CREATING:
