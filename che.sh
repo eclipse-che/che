@@ -533,6 +533,78 @@ generate_temporary_che_properties_file() {
   fi
 }
 
+contains() {
+  string="$1"
+  substring="$2"
+  if test "${string#*$substring}" != "$string"
+  then
+    return 0    # $substring is in $string
+  else
+    return 1    # $substring is not in $string
+  fi
+}
+
+get_container_ssh() {
+  CURRENT_CHE_DEBUG=$(docker inspect --format='{{.NetworkSettings.Ports}}' ${1})
+  IFS=$' '
+  for SINGLE_BIND in $CURRENT_CHE_DEBUG; do
+    case $SINGLE_BIND in
+      *22/tcp:*)
+        echo $SINGLE_BIND | cut -f2 -d":"
+        return
+      ;;
+      *)
+      ;;
+    esac
+  done
+  echo "<nil>"
+}
+
+has_ssh () {
+  if $(contains $(get_container_ssh $1) "<nil>"); then
+    return 1
+  else
+    return 0
+  fi
+}
+
+has_default_profile() {
+  debug $FUNCNAME
+  if [ -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile ]; then
+    return 0
+  else 
+    return 1
+  fi 
+}
+
+get_default_profile() {
+  debug $FUNCNAME
+  if [ has_default_profile ]; then
+    source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
+    echo "${CHE_PROFILE}"
+  else
+    echo ""
+  fi
+}
+
+load_profile() {
+  debug $FUNCNAME
+  if has_default_profile; then
+
+    source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
+
+    if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${CHE_PROFILE}" ]; then
+      error ""
+      error "${CHE_MINI_PRODUCT_NAME} CLI profile set in ~/.${CHE_MINI_PRODUCT_NAME}/profiles/.profile to '${CHE_PROFILE}' but ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${CHE_PROFILE} does not exist."
+      error ""
+      return
+    fi
+
+    source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${CHE_PROFILE}"
+    info "${CHE_PRODUCT_NAME}: Loaded profile ${CHE_PROFILE}"
+  fi
+}
+
 ###########################################################################
 ### END HELPER FUNCTIONS
 ###
@@ -675,43 +747,6 @@ execute_profile(){
   esac
 }
 
-has_default_profile() {
-  debug $FUNCNAME
-  if [ -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile ]; then
-    return 0
-  else 
-    return 1
-  fi 
-}
-
-get_default_profile() {
-  debug $FUNCNAME
-  if [ has_default_profile ]; then
-    source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
-    echo "${CHE_PROFILE}"
-  else
-    echo ""
-  fi
-}
-
-load_profile() {
-  debug $FUNCNAME
-  if has_default_profile; then
-
-    source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
-
-    if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${CHE_PROFILE}" ]; then
-      error ""
-      error "${CHE_MINI_PRODUCT_NAME} CLI profile set in ~/.${CHE_MINI_PRODUCT_NAME}/profiles/.profile to '${CHE_PROFILE}' but ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${CHE_PROFILE} does not exist."
-      error ""
-      return
-    fi
-
-    source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${CHE_PROFILE}"
-    info "${CHE_PRODUCT_NAME}: Loaded profile ${CHE_PROFILE}"
-  fi
-}
-
 execute_che_dir() {
   debug $FUNCNAME
   check_current_image_and_update_if_not_found ${CHE_DIR_IMAGE_NAME} ${CHE_UTILITY_VERSION}
@@ -755,25 +790,38 @@ execute_che_mount() {
   else 
     info "${CHE_MINI_PRODUCT_NAME} mount: Searching for running workspaces with open SSH port..."
 
-    CURRENT_WS_INSTANCES=$(docker ps -aq --filter "name=_che_dev-machine")
+    CURRENT_WS_INSTANCES=$(docker ps -aq --filter "name=workspace")
     CURRENT_WS_COUNT=$(echo $CURRENT_WS_INSTANCES | wc -w)
     
+    # No running workspaces
     if [ $CURRENT_WS_COUNT -eq 0 ]; then
       error "${CHE_MINI_PRODUCT_NAME} mount: We could not find any running workspaces"
+      return
 
+    # Exactly 1 running workspace
     elif [ $CURRENT_WS_COUNT -eq 1 ]; then
-      RUNNING_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CURRENT_WS_INSTANCES})
-      info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to remote workspace on port $RUNNING_WS_PORT"
-      WS_PORT=$RUNNING_WS_PORT
-   
+
+      if has_ssh ${CURRENT_WS_INSTANCES}; then
+        RUNNING_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CURRENT_WS_INSTANCES})
+        info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to remote workspace on port $RUNNING_WS_PORT"
+        WS_PORT=$RUNNING_WS_PORT
+      else
+        error "${CHE_MINI_PRODUCT_NAME} mount: We found 1 running workspace, but it does not have an SSH agent"
+        return
+      fi
+
+    # 2+ running workspace
     else 
-      info "${CHE_MINI_PRODUCT_NAME} mount: Discovered $CURRENT_WS_COUNT running workspaces with SSH ports"
-      info "${CHE_MINI_PRODUCT_NAME} mount: Choose one and re-run with 'che mount <ws-port>'"
-      info "${CHE_MINI_PRODUCT_NAME} mount: Available workspace ports:"
+      info "${CHE_MINI_PRODUCT_NAME} mount: Re-run with 'che mount <ssh-port>'"
       IFS=$'\n'
+
+      echo "WS CONTAINER ID    HAS SSH?    SSH PORT"
       for CHE_WS_CONTAINER_ID in $CURRENT_WS_INSTANCES; do
-        CURRENT_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CHE_WS_CONTAINER_ID})
-        echo $CURRENT_WS_PORT
+        CURRENT_WS_PORT=""
+        if has_ssh ${CHE_WS_CONTAINER_ID}; then 
+          CURRENT_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CHE_WS_CONTAINER_ID})
+        fi
+        echo "$CHE_WS_CONTAINER_ID       $(has_ssh ${CHE_WS_CONTAINER_ID} && echo "y" || echo "n")           $CURRENT_WS_PORT"
       done
       return
     fi
@@ -786,7 +834,7 @@ execute_che_mount() {
                                    -v ${HOME}/.unison:${HOME}/.unison \
                                    -v /etc/group:/etc/group:ro \
                                    -v /etc/passwd:/etc/passwd:ro \
-                                   -u $(id -u ${USER})
+                                   -u $(id -u ${USER}) \
                                    -v "${MOUNT_PATH}":/mnthost \
                                    "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" \
                                         "${GLOBAL_GET_DOCKER_HOST_IP}" $WS_PORT
