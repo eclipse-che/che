@@ -19,7 +19,7 @@ CHE_DIR=$HOME/che
 AGENT_BINARIES_URI="file:///mnt/che/terminal/websocket-terminal-\\${PREFIX}.tar.gz"
 TARGET_AGENT_BINARIES_URI="file://"${CHE_DIR}"/websocket-terminal-\\${PREFIX}.tar.gz"
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION.*=)
+LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}

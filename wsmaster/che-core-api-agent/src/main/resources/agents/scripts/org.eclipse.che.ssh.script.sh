@@ -14,7 +14,7 @@ unset PACKAGES
 test "$(id -u)" = 0 || SUDO="sudo"
 
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION.*=)
+LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
 
 ###############################
 ### Install Needed packaged ###

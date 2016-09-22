@@ -21,7 +21,7 @@ LS_DIR=${CHE_DIR}/ls-php
 LS_LAUNCHER=${LS_DIR}/launch.sh
 
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION.*=)
+LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
