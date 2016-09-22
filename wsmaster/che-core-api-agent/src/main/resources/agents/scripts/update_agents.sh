@@ -13,7 +13,7 @@
 updateAgentScript() {
   local DIR=$1
   local AGENT=$2
-  local SCRIPT=$(cat ${AGENT}.script.sh | sed -r 's/"/\\"/g' | sed -r ':a;N;$!ba;s/\n/\\n/g')
+  local SCRIPT=$(cat ${AGENT}.script.sh | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
 
   touch ${AGENT}.json.tmp
   cat ${DIR}/${AGENT}.json | while read line
