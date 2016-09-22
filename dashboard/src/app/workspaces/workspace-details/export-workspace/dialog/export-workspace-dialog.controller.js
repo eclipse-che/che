@@ -37,7 +37,7 @@ export class ExportWorkspaceDialogController {
       lineWrapping : true,
       lineNumbers: false,
       matchBrackets: true,
-      readOnly: 'nocursor',
+      readOnly: true,
       mode: 'application/json'
     };
     this.privateCloudUrl = '';
