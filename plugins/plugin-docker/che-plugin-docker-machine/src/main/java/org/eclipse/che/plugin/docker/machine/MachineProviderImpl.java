@@ -23,8 +23,8 @@ import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.SystemInfo;
-import org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProvider;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.MachineInstanceProvider;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
@@ -98,8 +98,8 @@ import static org.slf4j.LoggerFactory.getLogger;
  *
  * @author Alexander Garagatyi
  */
-public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvider {
-    private static final Logger LOG = getLogger(ComposeMachineProviderImpl.class);
+public class MachineProviderImpl implements MachineInstanceProvider {
+    private static final Logger LOG = getLogger(MachineProviderImpl.class);
 
     /**
      * Prefix of image repository, used to identify that the image is a machine saved to snapshot.
@@ -112,7 +112,6 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
-    private final DockerContainerNameGenerator                  containerNameGenerator;
     private final WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegeMode;
@@ -130,32 +129,30 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
     private final Set<String>                                   additionalNetworks;
 
     @Inject
-    public ComposeMachineProviderImpl(DockerConnector docker,
-                                      DockerConnectorConfiguration dockerConnectorConfiguration,
-                                      UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
-                                      DockerMachineFactory dockerMachineFactory,
-                                      DockerInstanceStopDetector dockerInstanceStopDetector,
-                                      DockerContainerNameGenerator containerNameGenerator,
-                                      @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
-                                      @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
-                                      @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
-                                      @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
-                                      @Nullable @Named("machine.docker.machine_extra_hosts") String allMachinesExtraHosts,
-                                      WorkspaceFolderPathProvider workspaceFolderPathProvider,
-                                      @Named("che.machine.projects.internal.storage") String projectFolderPath,
-                                      @Named("machine.docker.pull_image") boolean doForcePullOnBuild,
-                                      @Named("machine.docker.privilege_mode") boolean privilegeMode,
-                                      @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
-                                      @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
-                                      @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
-                                      @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier,
-                                      @Named("machine.docker.networks") Set<Set<String>> additionalNetworks)
+    public MachineProviderImpl(DockerConnector docker,
+                               DockerConnectorConfiguration dockerConnectorConfiguration,
+                               UserSpecificDockerRegistryCredentialsProvider dockerCredentials,
+                               DockerMachineFactory dockerMachineFactory,
+                               DockerInstanceStopDetector dockerInstanceStopDetector,
+                               @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
+                               @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
+                               @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
+                               @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
+                               @Nullable @Named("machine.docker.machine_extra_hosts") String allMachinesExtraHosts,
+                               WorkspaceFolderPathProvider workspaceFolderPathProvider,
+                               @Named("che.machine.projects.internal.storage") String projectFolderPath,
+                               @Named("machine.docker.pull_image") boolean doForcePullOnBuild,
+                               @Named("machine.docker.privilege_mode") boolean privilegeMode,
+                               @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
+                               @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
+                               @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
+                               @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier,
+                               @Named("machine.docker.networks") Set<Set<String>> additionalNetworks)
             throws IOException {
         this.docker = docker;
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
-        this.containerNameGenerator = containerNameGenerator;
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegeMode = privilegeMode;
@@ -168,7 +165,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
         //  1   enable swap with size equal to current memory size
         //
         //  according to docker docs field  memorySwap should be equal to memory+swap
-        //  we calculate this field as memorySwap=memory * (1+ multiplier) so we just add +1 to multiplier
+        //  we calculate this field as memorySwap=memory * (1 + multiplier) so we just add 1 to multiplier
         this.memorySwapMultiplier = memorySwapMultiplier == -1 ? -1 : memorySwapMultiplier + 1;
 
         allMachinesSystemVolumes = removeEmptyAndNullValues(allMachinesSystemVolumes);
@@ -244,16 +241,15 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
     public Instance startService(String namespace,
                                  String workspaceId,
                                  String envName,
-                                 String machineId,
                                  String machineName,
                                  boolean isDev,
                                  String networkName,
-                                 ComposeServiceImpl service,
+                                 CheServiceImpl service,
                                  LineConsumer machineLogger)
             throws ServerException {
 
         // copy to not affect/be affected by changes in origin
-        service = new ComposeServiceImpl(service);
+        service = new CheServiceImpl(service);
 
         ProgressLineFormatterImpl progressLineFormatter = new ProgressLineFormatterImpl();
         ProgressMonitor progressMonitor = currentProgressStatus -> {
@@ -266,16 +262,11 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
 
         String container = null;
         try {
-            String image = prepareImage(namespace,
-                                        workspaceId,
-                                        machineId,
-                                        machineName,
+            String image = prepareImage(machineName,
                                         service,
                                         progressMonitor);
 
-            container = createContainer(namespace,
-                                        workspaceId,
-                                        machineId,
+            container = createContainer(workspaceId,
                                         machineName,
                                         isDev,
                                         image,
@@ -289,18 +280,18 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
 
             readContainerLogsInSeparateThread(container,
                                               workspaceId,
-                                              machineId,
+                                              service.getId(),
                                               machineLogger);
 
             DockerNode node = dockerMachineFactory.createNode(workspaceId, container);
             if (isDev) {
                 node.bindWorkspace();
                 LOG.info("Machine with id '{}' backed by container '{}' has been deployed on node '{}'",
-                         machineId, container, node.getHost());
+                         service.getId(), container, node.getHost());
             }
 
             dockerInstanceStopDetector.startDetection(container,
-                                                      machineId,
+                                                      service.getId(),
                                                       workspaceId);
 
             MachineImpl machine = new MachineImpl(MachineConfigImpl.builder()
@@ -318,7 +309,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                                                                                                    service.getBuild().getContext() :
                                                                                                    service.getImage()))
                                                                    .build(),
-                                                  machineId,
+                                                  service.getId(),
                                                   workspaceId,
                                                   envName,
                                                   namespace,
@@ -334,7 +325,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
             throw e;
         } catch (RuntimeException | ServerException | NotFoundException | IOException e) {
             cleanUpContainer(container);
-            throw new ServerException(e.getLocalizedMessage());
+            throw new ServerException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -358,28 +349,23 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
         }
     }
 
-    private String prepareImage(String namespace,
-                                String workspaceId,
-                                String machineId,
-                                String machineName,
-                                ComposeServiceImpl service,
+    private String prepareImage(String machineName,
+                                CheServiceImpl service,
                                 ProgressMonitor progressMonitor)
             throws ServerException,
                    NotFoundException {
 
-        String containerName = generateContainerName(namespace, workspaceId, machineId, machineName);
-        String imageName = "eclipse-che/" + containerName;
-        // workaround: dockerfile content can be in service.build.dockerfile
-        if ((service.getBuild() == null ||
-             (service.getBuild().getContext() == null && service.getBuild().getDockerfile() == null)) &&
+        String imageName = "eclipse-che/" + service.getContainerName();
+        if ((service.getBuild() == null || (service.getBuild().getContext() == null &&
+                                            service.getBuild().getDockerfileContent() == null)) &&
             service.getImage() == null) {
 
-            throw new ServerException(format("Compose service '%s' doesn't have neither build not image fields",
+            throw new ServerException(format("Che service '%s' doesn't have neither build nor image fields",
                                              machineName));
         }
 
         if (service.getBuild() != null && (service.getBuild().getContext() != null ||
-                                           service.getBuild().getDockerfile() != null)) {
+                                           service.getBuild().getDockerfileContent() != null)) {
             buildImage(service, imageName, doForcePullOnBuild, progressMonitor);
         } else {
             pullImage(service, imageName, progressMonitor);
@@ -388,7 +374,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
         return imageName;
     }
 
-    protected void buildImage(ComposeServiceImpl service,
+    protected void buildImage(CheServiceImpl service,
                               String machineImageName,
                               boolean doForcePullOnBuild,
                               ProgressMonitor progressMonitor)
@@ -397,21 +383,19 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
         File workDir = null;
         try {
             BuildImageParams buildImageParams;
-            // workaround: dockerfile content can be in service.build.dockerfile
             if (service.getBuild() != null &&
-                service.getBuild().getContext() == null &&
-                service.getBuild().getDockerfile() != null) {
+                service.getBuild().getDockerfileContent() != null) {
 
                 workDir = Files.createTempDirectory(null).toFile();
                 final File dockerfileFile = new File(workDir, "Dockerfile");
                 try (FileWriter output = new FileWriter(dockerfileFile)) {
-                    output.append(service.getBuild().getDockerfile());
+                    output.append(service.getBuild().getDockerfileContent());
                 }
 
                 buildImageParams = BuildImageParams.create(dockerfileFile);
             } else {
                 buildImageParams = BuildImageParams.create(service.getBuild().getContext())
-                                                   .withDockerfile(service.getBuild().getDockerfile());
+                                                   .withDockerfile(service.getBuild().getDockerfilePath());
             }
             buildImageParams.withForceRemoveIntermediateContainers(true)
                             .withRepository(machineImageName)
@@ -430,11 +414,23 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
         }
     }
 
-    protected void pullImage(ComposeServiceImpl service,
+    /**
+     * Pulls docker image for container creation.
+     *
+     * @param service
+     *         service that provides description of image that should be pulled
+     * @param machineImageName
+     *         name of the image that should be assigned on pull
+     * @param progressMonitor
+     *         consumer of output
+     * @throws SourceNotFoundException
+     *         if image for pulling not found
+     * @throws MachineException
+     *         if any other error occurs
+     */
+    protected void pullImage(CheServiceImpl service,
                              String machineImageName,
-                             ProgressMonitor progressMonitor) throws NotFoundException,
-                                                                     MachineException,
-                                                                     SourceNotFoundException {
+                             ProgressMonitor progressMonitor) throws MachineException {
         DockerMachineSource dockerMachineSource = new DockerMachineSource(
                 new MachineSourceImpl("image").setLocation(service.getImage()));
         if (dockerMachineSource.getRepository() == null) {
@@ -472,20 +468,16 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
         }
     }
 
-    private String createContainer(String namespace,
-                                   String workspaceId,
-                                   String machineId,
+    private String createContainer(String workspaceId,
                                    String machineName,
                                    boolean isDev,
                                    String image,
                                    String networkName,
-                                   ComposeServiceImpl service) throws IOException {
+                                   CheServiceImpl service) throws IOException {
 
         long machineMemorySwap = memorySwapMultiplier == -1 ?
                                  -1 :
                                  (long)(service.getMemLimit() * memorySwapMultiplier);
-
-        String containerName = generateContainerName(namespace, workspaceId, machineId, machineName);
 
         addSystemWideContainerSettings(workspaceId,
                                        isDev,
@@ -528,13 +520,13 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                               .toArray(String[]::new));
 
         return docker.createContainer(CreateContainerParams.create(config)
-                                                           .withContainerName(containerName))
+                                                           .withContainerName(service.getContainerName()))
                      .getId();
     }
 
     private void addSystemWideContainerSettings(String workspaceId,
                                                 boolean isDev,
-                                                ComposeServiceImpl composeService) throws IOException {
+                                                CheServiceImpl composeService) throws IOException {
         List<String> portsToExpose;
         List<String> volumes;
         Map<String, String> env;
@@ -564,7 +556,7 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
     }
 
     private void connectContainerToAdditionalNetworks(String container,
-                                                      ComposeServiceImpl service) throws IOException {
+                                                      CheServiceImpl service) throws IOException {
 
         for (String network : service.getNetworks()) {
             docker.connectContainerToNetwork(
@@ -626,16 +618,6 @@ public class ComposeMachineProviderImpl implements ComposeMachineInstanceProvide
                 }
             }
         });
-    }
-
-    private String generateContainerName(String namespace,
-                                         String workspaceId,
-                                         String machineId,
-                                         String machineName) {
-        return containerNameGenerator.generateContainerName(workspaceId,
-                                                            machineId,
-                                                            namespace,
-                                                            machineName);
     }
 
     private void cleanUpContainer(String containerId) {

@@ -8,23 +8,17 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.model.workspace.compose;
-
-import java.util.Map;
+package org.eclipse.che.ide.editor.orion.client.inject;
 
 /**
- * Description of docker compose services file.
+ * Plugin that fixes some Orion's highlighting issues for Java files.
  *
- * @author Alexander Garagatyi
+ * @author Artem Zatsarynnyi
  */
-public interface ComposeEnvironment {
-    /**
-     * Version of compose syntax.
-     */
-    String getVersion();
+public class JavaHighlightingOrionPlugin implements OrionPlugin {
 
-    /**
-     * Mapping of compose services names to services configuration.
-     */
-    Map<String, ? extends ComposeService> getServices();
+    @Override
+    public String getRelPath() {
+        return "cheJavaHighlightingPlugin/plugin.html";
+    }
 }

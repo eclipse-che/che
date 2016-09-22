@@ -128,7 +128,7 @@ public class LocalWorkspaceDaoTest {
         machines = new HashMap<>();
         machines.put("machine1", new ExtendedMachineImpl(asList("org.eclipse.che.ws-agent", "someAgent"),
                                                          servers,
-                                                         new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
+                                                         singletonMap("memoryLimitBytes", "10000")));
         servers = new HashMap<>();
         properties = new HashMap<>();
         properties.put("prop5", "value5");
@@ -141,7 +141,7 @@ public class LocalWorkspaceDaoTest {
         machines = new HashMap<>();
         machines.put("machine2", new ExtendedMachineImpl(asList("ws-agent2", "someAgent2"),
                                                          servers,
-                                                         new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
+                                                         singletonMap("memoryLimitBytes", "10000")));
         env = new EnvironmentImpl();
         env.setRecipe(new EnvironmentRecipeImpl("type", "contentType", "content", null));
         env.setMachines(machines);
@@ -156,16 +156,16 @@ public class LocalWorkspaceDaoTest {
         machines = new HashMap<>();
         machines.put("machine11", new ExtendedMachineImpl(emptyList(),
                                                           servers,
-                                                          new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
+                                                          singletonMap("memoryLimitBytes", "10000")));
         servers.put("ref13", new ServerConf2Impl("port13", "proto13", singletonMap("prop11", "value11")));
         servers.put("ref14", new ServerConf2Impl("port4", null, null));
         servers.put("ref15", new ServerConf2Impl(null, null, null));
         machines.put("machine12", new ExtendedMachineImpl(null,
                                                           servers,
-                                                          new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
+                                                          singletonMap("memoryLimitBytes", "10000")));
         machines.put("machine13", new ExtendedMachineImpl(null,
                                                           null,
-                                                          new HashMap<>(singletonMap("memoryLimitBytes", "10000"))));
+                                                          singletonMap("memoryLimitBytes", "10000")));
         env.setRecipe(new EnvironmentRecipeImpl("type", "contentType", "content", null));
         env.setMachines(machines);
 

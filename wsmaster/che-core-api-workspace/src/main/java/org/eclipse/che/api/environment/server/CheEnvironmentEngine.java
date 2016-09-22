@@ -33,15 +33,11 @@ import org.eclipse.che.api.core.util.CompositeLineConsumer;
 import org.eclipse.che.api.core.util.FileLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
-import org.eclipse.che.api.environment.server.compose.ComposeMachineInstanceProvider;
-import org.eclipse.che.api.environment.server.compose.ComposeServicesStartStrategy;
-import org.eclipse.che.api.environment.server.compose.model.BuildContextImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
+import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
-import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
@@ -49,9 +45,11 @@ import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLogMessageImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.StripedLocks;
@@ -81,6 +79,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.machine.server.event.InstanceStateEvent.Type.DIE;
 import static org.eclipse.che.api.machine.server.event.InstanceStateEvent.Type.OOM;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -102,14 +101,15 @@ public class CheEnvironmentEngine {
     private final File                           machineLogsDir;
     private final MachineInstanceProviders       machineInstanceProviders;
     private final long                           defaultMachineMemorySizeBytes;
-    private final SnapshotDao                    snapshotDao;
-    private final EventService                   eventService;
-    private final EnvironmentParser              environmentParser;
-    private final ComposeServicesStartStrategy   startStrategy;
-    private final ComposeMachineInstanceProvider composeProvider;
-    private final AgentConfigApplier             agentConfigApplier;
-    private final RecipeDownloader               recipeDownloader;
-    private final Pattern                        recipeApiPattern;
+    private final SnapshotDao                  snapshotDao;
+    private final EventService                 eventService;
+    private final EnvironmentParser            environmentParser;
+    private final DefaultServicesStartStrategy startStrategy;
+    private final MachineInstanceProvider      machineProvider;
+    private final AgentConfigApplier           agentConfigApplier;
+    private final RecipeDownloader             recipeDownloader;
+    private final Pattern                      recipeApiPattern;
+    private final ContainerNameGenerator       containerNameGenerator;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -120,16 +120,17 @@ public class CheEnvironmentEngine {
                                 @Named("machine.default_mem_size_mb") int defaultMachineMemorySizeMB,
                                 EventService eventService,
                                 EnvironmentParser environmentParser,
-                                ComposeServicesStartStrategy startStrategy,
-                                ComposeMachineInstanceProvider composeProvider,
+                                DefaultServicesStartStrategy startStrategy,
+                                MachineInstanceProvider machineProvider,
                                 AgentConfigApplier agentConfigApplier,
                                 @Named("api.endpoint") String apiEndpoint,
-                                RecipeDownloader recipeDownloader) {
+                                RecipeDownloader recipeDownloader,
+                                ContainerNameGenerator containerNameGenerator) {
         this.snapshotDao = snapshotDao;
         this.eventService = eventService;
         this.environmentParser = environmentParser;
         this.startStrategy = startStrategy;
-        this.composeProvider = composeProvider;
+        this.machineProvider = machineProvider;
         this.agentConfigApplier = agentConfigApplier;
         this.recipeDownloader = recipeDownloader;
         this.environments = new ConcurrentHashMap<>();
@@ -138,7 +139,10 @@ public class CheEnvironmentEngine {
         this.defaultMachineMemorySizeBytes = Size.parseSize(defaultMachineMemorySizeMB + "MB");
         // 16 - experimental value for stripes count, it comes from default hash map size
         this.stripedLocks = new StripedLocks(16);
-        this.recipeApiPattern = Pattern.compile("^" + apiEndpoint + "/recipe/.*$");
+        this.recipeApiPattern = Pattern.compile("^https?" +
+                                                apiEndpoint.substring(apiEndpoint.indexOf(":")) +
+                                                "/recipe/.*$");
+        this.containerNameGenerator = containerNameGenerator;
 
         eventService.subscribe(new MachineCleaner());
     }
@@ -220,10 +224,14 @@ public class CheEnvironmentEngine {
                                 boolean recover,
                                 MessageConsumer<MachineLogMessage> messageConsumer) throws ServerException,
                                                                                            ConflictException {
+        // TODO move to machines provider
         // add random chars to ensure that old environments that weren't removed by some reason won't prevent start
         String networkId = NameGenerator.generate(workspaceId + "_", 16);
 
-        initializeEnvironment(workspaceId,
+        String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
+
+        initializeEnvironment(namespace,
+                              workspaceId,
                               envName,
                               env,
                               networkId,
@@ -231,7 +239,6 @@ public class CheEnvironmentEngine {
 
         String devMachineName = findDevMachineName(env);
 
-        String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
         startEnvironmentQueue(namespace,
                               workspaceId,
                               devMachineName,
@@ -322,13 +329,11 @@ public class CheEnvironmentEngine {
                 }
             }
         }
-        String machineId = generateMachineId();
         final String creator = EnvironmentContext.getCurrent().getSubject().getUserId();
         final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
 
         MachineImpl machine = MachineImpl.builder()
                                          .setConfig(machineConfig)
-                                         .setId(machineId)
                                          .setWorkspaceId(workspaceId)
                                          .setStatus(MachineStatus.CREATING)
                                          .setEnvName(environmentHolder.name)
@@ -339,21 +344,28 @@ public class CheEnvironmentEngine {
         if ("docker".equals(machineConfig.getType())) {
             // needed to reuse startInstance method and
             // create machine instances by different implementation-specific providers
-            ComposeServiceImpl composeService = machineConfigToComposeService(machineConfig);
-            normalize(composeService);
+            CheServiceImpl service = machineConfigToService(machineConfig);
+            normalize(namespace,
+                      workspaceId,
+                      machineConfig.getName(),
+                      service);
+            machine.setId(service.getId());
 
             machineStarter = (machineLogger, machineSource) -> {
-                ComposeServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(composeService, machineSource);
+                CheServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(service, machineSource);
 
-                normalize(serviceWithCorrectSource);
+                normalize(namespace,
+                          workspaceId,
+                          machineConfig.getName(),
+                          serviceWithCorrectSource);
+
                 ExtendedMachineImpl extendedMachine = new ExtendedMachineImpl();
                 extendedMachine.setAgents(agents);
                 applyAgents(extendedMachine, serviceWithCorrectSource);
 
-                return composeProvider.startService(namespace,
+                return machineProvider.startService(namespace,
                                                     workspaceId,
                                                     environmentHolder.name,
-                                                    machineId,
                                                     machineConfig.getName(),
                                                     machineConfig.isDev(),
                                                     environmentHolder.networkId,
@@ -363,6 +375,7 @@ public class CheEnvironmentEngine {
         } else {
             try {
                 InstanceProvider provider = machineInstanceProviders.getProvider(machineConfig.getType());
+                machine.setId(generateMachineId());
 
                 machineStarter = (machineLogger, machineSource) -> {
                     Machine machineWithCorrectSource = getMachineWithCorrectSource(machine, machineSource);
@@ -502,7 +515,8 @@ public class CheEnvironmentEngine {
         instanceProvider.removeInstanceSnapshot(snapshot.getMachineSource());
     }
 
-    private void initializeEnvironment(String workspaceId,
+    private void initializeEnvironment(String namespace,
+                                       String workspaceId,
                                        String envName,
                                        Environment env,
                                        String networkId,
@@ -510,16 +524,20 @@ public class CheEnvironmentEngine {
             throws ServerException,
                    ConflictException {
 
-        ComposeEnvironmentImpl composeEnvironment = environmentParser.parse(env);
+        CheServicesEnvironmentImpl environment = environmentParser.parse(env);
 
-        applyAgents(env, composeEnvironment);
+        applyAgents(env, environment);
 
-        normalize(composeEnvironment);
+        normalize(namespace,
+                  workspaceId,
+                  environment);
 
-        List<String> servicesOrder = startStrategy.order(composeEnvironment);
+        List<String> servicesOrder = startStrategy.order(environment);
+
+        normilizeVolumesFrom(environment);
 
         EnvironmentHolder environmentHolder = new EnvironmentHolder(servicesOrder,
-                                                                    composeEnvironment,
+                                                                    environment,
                                                                     messageConsumer,
                                                                     EnvStatus.STARTING,
                                                                     envName,
@@ -532,34 +550,58 @@ public class CheEnvironmentEngine {
         }
     }
 
-    private void applyAgents(Environment env, ComposeEnvironmentImpl composeEnvironment) throws ServerException {
+    private void applyAgents(Environment env, CheServicesEnvironmentImpl servicesEnvironment) throws ServerException {
         for (Map.Entry<String, ? extends ExtendedMachine> machineEntry : env.getMachines().entrySet()) {
             String machineName = machineEntry.getKey();
             ExtendedMachine extendedMachine = machineEntry.getValue();
-            ComposeServiceImpl service = composeEnvironment.getServices().get(machineName);
+            CheServiceImpl service = servicesEnvironment.getServices().get(machineName);
 
             applyAgents(extendedMachine, service);
         }
     }
 
     private void applyAgents(@Nullable ExtendedMachine extendedMachine,
-                             ComposeServiceImpl composeService) throws ServerException {
+                             CheServiceImpl service) throws ServerException {
         if (extendedMachine != null) {
             try {
-                agentConfigApplier.modify(composeService, extendedMachine.getAgents());
+                agentConfigApplier.modify(service, extendedMachine.getAgents());
             } catch (AgentException e) {
                 throw new ServerException("Can't apply agent config", e);
             }
         }
     }
 
-    private void normalize(ComposeEnvironmentImpl composeEnvironment) throws ServerException {
-        for (ComposeServiceImpl service : composeEnvironment.getServices().values()) {
-            normalize(service);
+    private void normalize(String namespace,
+                           String workspaceId,
+                           CheServicesEnvironmentImpl environment) throws ServerException {
+
+        Map<String, CheServiceImpl> services = environment.getServices();
+        for (Map.Entry<String, CheServiceImpl> serviceEntry : services.entrySet()) {
+            normalize(namespace,
+                      workspaceId,
+                      serviceEntry.getKey(),
+                      serviceEntry.getValue());
         }
     }
 
-    private void normalize(ComposeServiceImpl service) throws ServerException {
+    private void normilizeVolumesFrom(CheServicesEnvironmentImpl environment) {
+        Map<String, CheServiceImpl> services = environment.getServices();
+        // replace machines names in volumes_from with containers IDs
+        for (Map.Entry<String, CheServiceImpl> serviceEntry : services.entrySet()) {
+            CheServiceImpl service = serviceEntry.getValue();
+            if (service.getVolumesFrom() != null) {
+                service.setVolumesFrom(service.getVolumesFrom()
+                                              .stream()
+                                              .map(serviceName -> services.get(serviceName).getContainerName())
+                                              .collect(toList()));
+            }
+        }
+    }
+
+    private void normalize(String namespace,
+                           String workspaceId,
+                           String machineName,
+                           CheServiceImpl service) throws ServerException {
         // set default mem limit for service if it is not set
         if (service.getMemLimit() == null || service.getMemLimit() == 0) {
             service.setMemLimit(defaultMachineMemorySizeBytes);
@@ -570,9 +612,18 @@ public class CheEnvironmentEngine {
             recipeApiPattern.matcher(service.getBuild().getContext()).matches()) {
 
             String recipeContent = recipeDownloader.getRecipe(service.getBuild().getContext());
-            service.getBuild().setDockerfile(recipeContent);
+            service.getBuild().setDockerfileContent(recipeContent);
             service.getBuild().setContext(null);
+            service.getBuild().setDockerfilePath(null);
         }
+        if (service.getId() == null) {
+            service.setId(generateMachineId());
+        }
+
+        service.setContainerName(containerNameGenerator.generateContainerName(workspaceId,
+                                                                              service.getId(),
+                                                                              namespace,
+                                                                              machineName));
     }
 
     private String findDevMachineName(Environment env) throws ServerException {
@@ -614,7 +665,7 @@ public class CheEnvironmentEngine {
         }
 
         try {
-            composeProvider.createNetwork(networkId);
+            machineProvider.createNetwork(networkId);
 
             String machineName = queuePeekOrFail(workspaceId);
             while (machineName != null) {
@@ -622,54 +673,55 @@ public class CheEnvironmentEngine {
                 // Environment start is failed when any machine start is failed, so if any error
                 // occurs during machine creation then environment start fail is reported and
                 // start resources such as queue and descriptor must be cleaned up
-                String machineId = generateMachineId();
                 String creator = EnvironmentContext.getCurrent().getSubject().getUserId();
 
-                ComposeServiceImpl composeService;
+                CheServiceImpl service;
                 try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
                     EnvironmentHolder environmentHolder = environments.get(workspaceId);
                     if (environmentHolder == null) {
                         throw new ServerException("Environment start is interrupted.");
                     }
-                    composeService = environmentHolder.composeEnvironment.getServices().get(machineName);
+                    service = environmentHolder.environment.getServices().get(machineName);
                 }
                 // should not happen
-                if (composeService == null) {
-                    LOG.error("Compose service with name {} is missing in compose environment", machineName);
-                    throw new ServerException("Environment of workspace with ID '%s' failed due to internal error");
+                if (service == null) {
+                    LOG.error("Start of machine with name {} in workspace {} failed. Machine not found in start queue",
+                              machineName, workspaceId);
+                    throw new ServerException(
+                            format("Environment of workspace with ID '%s' failed due to internal error", workspaceId));
                 }
-
-                MachineImpl machine =
-                        MachineImpl.builder()
-                                   .setConfig(MachineConfigImpl.builder()
-                                                               .setDev(isDev)
-                                                               .setLimits(new MachineLimitsImpl(
-                                                                       bytesToMB(composeService.getMemLimit())))
-                                                               .setType("docker")
-                                                               .setName(machineName)
-                                                               .build())
-                                   .setId(machineId)
-                                   .setWorkspaceId(workspaceId)
-                                   .setStatus(MachineStatus.CREATING)
-                                   .setEnvName(envName)
-                                   .setOwner(creator)
-                                   .build();
 
                 final String finalMachineName = machineName;
                 // needed to reuse startInstance method and
                 // create machine instances by different implementation-specific providers
                 MachineStarter machineStarter = (machineLogger, machineSource) -> {
-                    ComposeServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(composeService, machineSource);
-                    return composeProvider.startService(namespace,
+                    CheServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(service, machineSource);
+                    return machineProvider.startService(namespace,
                                                         workspaceId,
                                                         envName,
-                                                        machineId,
                                                         finalMachineName,
                                                         isDev,
                                                         networkId,
                                                         serviceWithCorrectSource,
                                                         machineLogger);
                 };
+
+                MachineImpl machine =
+                        MachineImpl.builder()
+                                   .setConfig(MachineConfigImpl.builder()
+                                                               .setDev(isDev)
+                                                               .setLimits(new MachineLimitsImpl(
+                                                                       bytesToMB(service.getMemLimit())))
+                                                               .setType("docker")
+                                                               .setName(machineName)
+                                                               .build())
+                                   .setId(service.getId())
+                                   .setWorkspaceId(workspaceId)
+                                   .setStatus(MachineStatus.CREATING)
+                                   .setEnvName(envName)
+                                   .setOwner(creator)
+                                   .build();
+
                 Instance instance = startInstance(recover,
                                                   envLogger,
                                                   machine,
@@ -834,24 +886,26 @@ public class CheEnvironmentEngine {
                                                                   NotFoundException;
     }
 
-    private ComposeServiceImpl getServiceWithCorrectSource(ComposeServiceImpl composeService,
-                                                           MachineSource machineSource)
+    private CheServiceImpl getServiceWithCorrectSource(CheServiceImpl service,
+                                                       MachineSource machineSource)
             throws ServerException {
-        ComposeServiceImpl serviceWithCorrectSource = composeService;
+        CheServiceImpl serviceWithCorrectSource = service;
         if (machineSource != null) {
-            serviceWithCorrectSource = new ComposeServiceImpl(composeService);
+            serviceWithCorrectSource = new CheServiceImpl(service);
             if ("image".equals(machineSource.getType())) {
                 serviceWithCorrectSource.setBuild(null);
                 serviceWithCorrectSource.setImage(machineSource.getLocation());
             } else {
                 // dockerfile
+                serviceWithCorrectSource.setImage(null);
                 if (machineSource.getContent() != null) {
-                    throw new ServerException(
-                            "Additional machine creation from dockerfile content is not supported anymore. " +
-                            "Please use dockerfile location instead");
+                    serviceWithCorrectSource.setBuild(new CheServiceBuildContextImpl(null,
+                                                                                     null,
+                                                                                     machineSource.getContent()));
                 } else {
-                    serviceWithCorrectSource.setBuild(new BuildContextImpl(machineSource.getLocation(), null));
-                    serviceWithCorrectSource.setImage(null);
+                    serviceWithCorrectSource.setBuild(new CheServiceBuildContextImpl(machineSource.getLocation(),
+                                                                                     null,
+                                                                                     null));
                 }
             }
         }
@@ -975,7 +1029,7 @@ public class CheEnvironmentEngine {
             }
         }
         try {
-            composeProvider.destroyNetwork(networkId);
+            machineProvider.destroyNetwork(networkId);
         } catch (RuntimeException | ServerException netExc) {
             LOG.error(netExc.getLocalizedMessage(), netExc);
         }
@@ -1069,19 +1123,21 @@ public class CheEnvironmentEngine {
         }
     }
 
-    private ComposeServiceImpl machineConfigToComposeService(MachineConfig machineConfig) throws ServerException {
-        ComposeServiceImpl composeService = new ComposeServiceImpl();
-        composeService.setMemLimit(machineConfig.getLimits().getRam() * 1024L * 1024L);
-        composeService.setEnvironment(machineConfig.getEnvVariables());
+    private CheServiceImpl machineConfigToService(MachineConfig machineConfig) throws ServerException {
+        CheServiceImpl service = new CheServiceImpl();
+        service.setMemLimit(machineConfig.getLimits().getRam() * 1024L * 1024L);
+        service.setEnvironment(machineConfig.getEnvVariables());
         if ("image".equals(machineConfig.getSource().getType())) {
-            composeService.setImage(machineConfig.getSource().getLocation());
+            service.setImage(machineConfig.getSource().getLocation());
         } else {
             if (machineConfig.getSource().getContent() != null) {
                 throw new ServerException(
                         "Additional machine creation from dockerfile content is not supported anymore. " +
                         "Please use dockerfile location instead");
             } else {
-                composeService.setBuild(new BuildContextImpl(machineConfig.getSource().getLocation(), null));
+                service.setBuild(new CheServiceBuildContextImpl(machineConfig.getSource().getLocation(),
+                                                                null,
+                                                                null));
             }
         }
         List<? extends ServerConf> servers = machineConfig.getServers();
@@ -1090,10 +1146,10 @@ public class CheEnvironmentEngine {
             for (ServerConf server : servers) {
                 expose.add(server.getPort());
             }
-            composeService.setExpose(expose);
+            service.setExpose(expose);
         }
 
-        return composeService;
+        return service;
     }
 
     private enum EnvStatus {
@@ -1104,7 +1160,7 @@ public class CheEnvironmentEngine {
 
     private static class EnvironmentHolder {
         final Queue<String>                      startQueue;
-        final ComposeEnvironmentImpl             composeEnvironment;
+        final CheServicesEnvironmentImpl         environment;
         final MessageConsumer<MachineLogMessage> logger;
         final String                             name;
         final String                             networkId;
@@ -1113,7 +1169,7 @@ public class CheEnvironmentEngine {
         EnvStatus      status;
 
         EnvironmentHolder(List<String> startQueue,
-                          ComposeEnvironmentImpl composeEnvironment,
+                          CheServicesEnvironmentImpl environment,
                           MessageConsumer<MachineLogMessage> envLogger,
                           EnvStatus envStatus,
                           String name,
@@ -1123,7 +1179,7 @@ public class CheEnvironmentEngine {
             this.logger = envLogger;
             this.status = envStatus;
             this.name = name;
-            this.composeEnvironment = composeEnvironment;
+            this.environment = environment;
             this.networkId = networkId;
         }
 
@@ -1133,7 +1189,7 @@ public class CheEnvironmentEngine {
             this.logger = environmentHolder.logger;
             this.status = environmentHolder.status;
             this.name = environmentHolder.name;
-            this.composeEnvironment = environmentHolder.composeEnvironment;
+            this.environment = environmentHolder.environment;
             this.networkId = environmentHolder.networkId;
         }
 

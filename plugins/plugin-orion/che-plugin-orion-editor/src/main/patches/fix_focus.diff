@@ -1,9 +1,9 @@
 This patch fixes bug related to setting active EditorView on switching between different tabs.
 ===================================================================
-diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
---- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
-+++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-11.0/code_edit/built-codeEdit-amd.js
-@@ -42184,6 +42184,9 @@
+diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
+--- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
++++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
+@@ -43282,6 +43282,9 @@
  			domNode.addEventListener("mousedown", function() { //$NON-NLS-0$
  				this.setActiveEditorView(this.editorView);
  			}.bind(this), true);
