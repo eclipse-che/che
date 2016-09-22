@@ -13,15 +13,15 @@ package org.eclipse.che.api.user.server.event;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 /**
- * Published after {@link UserImpl user} is persisted.
+ * Published before {@link UserImpl user} is persisted.
  *
  * @author Max Shaposhnik
  */
-public class AfterUserPersistedEvent {
+public class BeforeUserPersistedEvent {
 
     private final UserImpl user;
 
-    public AfterUserPersistedEvent(UserImpl user) {
+    public BeforeUserPersistedEvent(UserImpl user) {
         this.user = user;
     }
 

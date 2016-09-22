@@ -12,7 +12,7 @@ package org.eclipse.che.api.user.server.jpa;
 
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.eclipse.che.api.user.server.event.AfterUserPersistedEvent;
+import org.eclipse.che.api.user.server.event.BeforeUserPersistedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.inject.Inject;
@@ -37,5 +37,5 @@ public class UserEntityListener {
     }
 
     @PrePersist
-    public void postPersist(UserImpl user) {eventService.publish(new AfterUserPersistedEvent(user));}
+    public void postPersist(UserImpl user) {eventService.publish(new BeforeUserPersistedEvent(user));}
 }
