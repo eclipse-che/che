@@ -34,11 +34,18 @@ public class FileLineConsumer implements LineConsumer {
 
     @Override
     public void writeLine(String line) throws IOException {
-        if (line != null) {
-            writer.write(line);
+        try {
+            if (line != null) {
+                writer.write(line);
+            }
+            writer.write('\n');
+            writer.flush();
+        } catch (IOException e) {
+            if("Stream closed".equals(e.getMessage())) {
+                throw new ConsumerAlreadyClosedException(e.getMessage());
+            }
+            throw e;
         }
-        writer.write('\n');
-        writer.flush();
     }
 
     @Override

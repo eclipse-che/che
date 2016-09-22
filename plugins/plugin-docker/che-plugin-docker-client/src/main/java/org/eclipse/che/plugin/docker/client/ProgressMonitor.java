@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client;
 
+import org.eclipse.che.api.core.util.ConsumerAlreadyClosedException;
 import org.eclipse.che.plugin.docker.client.json.ProgressStatus;
 
 /**
@@ -19,7 +20,7 @@ import org.eclipse.che.plugin.docker.client.json.ProgressStatus;
  * @author Alexander Garagatyi
  */
 public interface ProgressMonitor {
-    void updateProgress(ProgressStatus currentProgressStatus);
+    void updateProgress(ProgressStatus currentProgressStatus) throws ConsumerAlreadyClosedException;
 
     ProgressMonitor DEV_NULL = new ProgressMonitor() {
         @Override

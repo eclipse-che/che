@@ -14,38 +14,58 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.channels.ClosedByInterruptException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author andrew00x
+ * @author Mykola Morhun
  */
 public class CompositeLineConsumer implements LineConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(CompositeLineConsumer.class);
 
-    private final LineConsumer[] lineConsumers;
+    private final List<LineConsumer> lineConsumers;
+    private       boolean            isClosed;
 
     public CompositeLineConsumer(LineConsumer... lineConsumers) {
-        this.lineConsumers = lineConsumers;
+        this.lineConsumers = new ArrayList<>(lineConsumers.length);
+        Arrays.stream(lineConsumers).forEach(this.lineConsumers::add);
+
+        this.isClosed = false;
     }
 
     @Override
     public void close() throws IOException {
-        for (LineConsumer lineConsumer : lineConsumers) {
-            try {
-                lineConsumer.close();
-            } catch (IOException e) {
-                LOG.error(String.format("An error occurred while closing the line consumer %s", lineConsumer), e);
+        if (!isClosed) {
+            isClosed = true;
+            for (LineConsumer lineConsumer : lineConsumers) {
+                try {
+                    lineConsumer.close();
+                } catch (IOException e) {
+                    LOG.error(String.format("An error occurred while closing the line consumer %s", lineConsumer), e);
+                }
             }
         }
     }
 
     @Override
     public void writeLine(String line) throws IOException {
-        for (LineConsumer lineConsumer : lineConsumers) {
-            try {
-                lineConsumer.writeLine(line);
-            } catch (IOException e) {
-                LOG.error(String.format("An error occurred while writing line to the line consumer %s", lineConsumer), e);
+        if (!isClosed) {
+            for (LineConsumer lineConsumer : lineConsumers) {
+                try {
+                    lineConsumer.writeLine(line);
+                } catch (ConsumerAlreadyClosedException | ClosedByInterruptException e) {
+                    lineConsumers.remove(lineConsumer); // consumer is already closed, so we cannot write into it any more
+                    if (lineConsumers.size() == 0) { // if all consumers are closed then we can close this one
+                        isClosed = true;
+                    }
+                } catch (IOException e) {
+                    LOG.error(String.format("An error occurred while writing line to the line consumer %s", lineConsumer), e);
+                }
             }
         }
     }
+
 }
