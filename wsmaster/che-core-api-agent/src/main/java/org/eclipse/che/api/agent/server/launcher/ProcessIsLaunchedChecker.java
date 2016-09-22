@@ -29,6 +29,12 @@ import static java.lang.String.format;
  */
 public class ProcessIsLaunchedChecker implements AgentLaunchingChecker {
 
+    private static final String CHECK_COMMAND =
+            "if cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]' | grep -qi \"alpine\"; then\n" +
+            "   pidof %1$s >/dev/null 2>&1 && echo 0 || echo 1\n" +
+            "else\n" +
+            "   ps -fC %1$s >/dev/null 2>&1 && echo 0 || echo 1\n" +
+            "fi";
     private final String processNameToWait;
     private       long   counter;
 
@@ -39,7 +45,7 @@ public class ProcessIsLaunchedChecker implements AgentLaunchingChecker {
     @Override
     public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
         Command command = new CommandImpl(format("Wait for %s, try %d", agent.getName(), ++counter),
-                                          format("ps -fC %s 1>/dev/null && echo 0 || echo 1", processNameToWait),
+                                          format(CHECK_COMMAND, processNameToWait),
                                           "test");
 
         try (ListLineConsumer lineConsumer = new ListLineConsumer()) {

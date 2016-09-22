@@ -18,7 +18,7 @@ test "$(id -u)" = 0 || SUDO="sudo"
 AGENT_BINARIES_URI=file:///mnt/che/ws-agent.tar.gz
 CHE_DIR=$HOME/che
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION=)
+LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION.*=)
 MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
