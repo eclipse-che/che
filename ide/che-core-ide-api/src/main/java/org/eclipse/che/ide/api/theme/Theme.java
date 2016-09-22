@@ -448,6 +448,11 @@ public interface Theme {
     String editorPanelBackgroundColor();
 
     /**
+     * @return border color for editor panel
+     */
+    String editorPanelBorderColor();
+
+    /**
      * Background color of the editor
      *
      * @return the color
@@ -1354,18 +1359,31 @@ public interface Theme {
      *
      ********************************************************************************************/
     String openedFilesDropdownButtonBackground();
+
     String openedFilesDropdownButtonBorderColor();
+
     String openedFilesDropdownButtonShadowColor();
+
     String openedFilesDropdownButtonIconColor();
+
     String openedFilesDropdownButtonHoverIconColor();
+
     String openedFilesDropdownButtonActiveBackground();
+
     String openedFilesDropdownButtonActiveBorderColor();
+
     String openedFilesDropdownListBackgroundColor();
+
     String openedFilesDropdownListBorderColor();
+
     String openedFilesDropdownListShadowColor();
+
     String openedFilesDropdownListTextColor();
+
     String openedFilesDropdownListCloseButtonColor();
+
     String openedFilesDropdownListHoverBackgroundColor();
+
     String openedFilesDropdownListHoverTextColor();
 
     /********************************************************************************************
@@ -1374,11 +1392,17 @@ public interface Theme {
      *
      ********************************************************************************************/
     String radioButtonIconColor();
+
     String radioButtonBorderColor();
+
     String radioButtonBackgroundColor();
+
     String radioButtonFontColor();
+
     String radioButtonDisabledFontColor();
+
     String radioButtonDisabledIconColor();
+
     String radioButtonDisabledBackgroundColor();
 
     /********************************************************************************************
@@ -1387,11 +1411,17 @@ public interface Theme {
      *
      ********************************************************************************************/
     String checkBoxIconColor();
+
     String checkBoxFontColor();
+
     String checkBoxBorderColor();
+
     String checkBoxBackgroundColor();
+
     String checkBoxDisabledIconColor();
+
     String checkBoxDisabledFontColor();
+
     String checkBoxDisabledBackgroundColor();
 
 
@@ -1401,6 +1431,7 @@ public interface Theme {
      *
      ********************************************************************************************/
     String treeExpandArrowColor();
+
     String treeExpandArrowShadow();
 
     /********************************************************************************************
@@ -1409,14 +1440,21 @@ public interface Theme {
      *
      ********************************************************************************************/
     String projectExplorerJointContainerFill();
+
     String projectExplorerJointContainerShadow();
+
     String projectExplorerPresentableTextShadow();
+
     String projectExplorerInfoTextShadow();
+
     String projectExplorerSelectedRowBackground();
+
     String projectExplorerSelectedRowBorder();
+
     String projectExplorerHoverRowBackground();
+
     String projectExplorerHoverRowBorder();
-    
+
     /********************************************************************************************
      *
      * Loader
@@ -1455,10 +1493,15 @@ public interface Theme {
      *
      ********************************************************************************************/
     String categoryHeaderButtonHoverColor();
+
     String categoryHeaderButtonColor();
+
     String categoryElementButtonHoverColor();
+
     String categoryElementButtonColor();
+
     String categorySelectElementBackgroundColor();
+
     String categorySelectElementColor();
 
     /********************************************************************************************
@@ -1467,27 +1510,43 @@ public interface Theme {
      *
      ********************************************************************************************/
     String notificationPopupSuccessBackground();
+
     String notificationPopupFailBackground();
+
     String notificationPopupProgressBackground();
+
     String notificationPopupPanelShadow();
+
     String notificationPopupIconSuccessFill();
+
     String notificationPopupIconFailFill();
+
     String notificationPopupIconProgressFill();
+
     String notificationPopupIconSvgFill();
+
     String notificationPopupTextColor();
+
     String closeNotificationButtonColor();
+
     String closeNotificationHoveredButtonColor();
 
     String projectExplorerReadonlyItemBackground();
+
     String projectExplorerTestItemBackground();
 
     String editorTabPinBackgroundColor();
+
     String editorTabPinDropShadow();
 
     String loaderBackgroundColor();
+
     String loaderBorderColor();
+
     String loaderBoxShadow();
+
     String loaderSVGFill();
+
     String loaderLabelColor();
 
     String outputBoxShadow();
@@ -1498,12 +1557,19 @@ public interface Theme {
      *
      ********************************************************************************************/
     String toolButtonColor();
+
     String toolButtonHoverColor();
+
     String toolButtonBorder();
+
     String toolButtonActiveBorder();
+
     String toolButtonHoverBackgroundColor();
+
     String toolButtonActiveBackgroundColor();
+
     String toolButtonHoverBoxShadow();
+
     String toolButtonActiveBoxShadow();
 
     /********************************************************************************************
@@ -1512,9 +1578,13 @@ public interface Theme {
      *
      ********************************************************************************************/
     String vcsConsoleStagedFilesColor();
+
     String vcsConsoleUnstagedFilesColor();
+
     String vcsConsoleErrorColor();
+
     String vcsConsoleModifiedFilesColor();
+
     String vcsConsoleChangesLineNumbersColor();
 
     String editorPreferenceCategoryBackgroundColor();
@@ -1532,8 +1602,11 @@ public interface Theme {
      *
      ********************************************************************************************/
     String popupLoaderBackgroundColor();
+
     String popupLoaderBorderColor();
+
     String popupLoaderShadow();
+
     String popupLoaderTitleColor();
     String popupLoaderTextColor();
 
