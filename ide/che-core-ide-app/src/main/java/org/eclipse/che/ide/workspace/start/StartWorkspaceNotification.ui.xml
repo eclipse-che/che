@@ -1,0 +1,69 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:with field="locale" type="org.eclipse.che.ide.CoreLocalizationConstant"/>
+
+    <ui:with field='res' type='org.eclipse.che.ide.ui.window.Window.Resources'/>
+
+    <ui:style>
+
+        @eval popupLoaderTextColor org.eclipse.che.ide.api.theme.Style.theme.popupLoaderTextColor();
+
+        .main {
+            width: 140px;
+            height: 45px;
+            position: absolute;
+            left: 5px;
+            top: 5px;
+        }
+
+        .button {
+            position: relative;
+            left: 0px;
+            top: 5px;
+            height: 20px;
+            line-height: 18px;
+            float: left;
+        }
+
+        .check {
+            width: 100%;
+            height: 20px;
+            position: absolute;
+            left: 0px;
+            top: 25px;
+        }
+
+        .checkbox {
+            position: absolute;
+            left: 0px;
+            top: 5px;
+            transform: scale(0.85) translateX(-10px);
+        }
+
+        .checkbox label {
+            color: popupLoaderTextColor;
+        }
+
+    </ui:style>
+
+    <g:FlowPanel addStyleNames="{style.main}">
+        <g:Button ui:field="button" addStyleNames="{res.windowCss.button} {res.windowCss.primaryButton} {style.button}" text="{locale.startWsButton}"></g:Button>
+        <g:FlowPanel styleName="{style.check}">
+            <g:CheckBox ui:field="restore" checked="true" addStyleNames="{style.checkbox}" text="{locale.restoreWorkspaceFromSnapshot}"></g:CheckBox>
+        </g:FlowPanel>
+    </g:FlowPanel>
+
+</ui:UiBinder>

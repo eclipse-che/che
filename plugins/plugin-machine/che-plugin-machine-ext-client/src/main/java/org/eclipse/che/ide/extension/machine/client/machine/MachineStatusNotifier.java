@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -28,7 +27,6 @@ import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * Notifies about changing machine state.
@@ -73,7 +71,6 @@ public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler 
                 getMachine(workspaceId, machineId).then(notifyMachineRunning());
                 break;
             case DESTROYED:
-                notificationManager.notify(locale.notificationMachineDestroyed(machineName), SUCCESS, EMERGE_MODE);
                 break;
             case ERROR:
                 notificationManager.notify(event.getErrorMessage(), FAIL, EMERGE_MODE);
@@ -94,11 +91,6 @@ public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler 
         return new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto machine) throws OperationException {
-                if (machine.getConfig().isDev()) {
-                    // Will be used later
-                    // loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.LOADING);
-                }
-
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.CREATING));
             }
         };
@@ -108,14 +100,6 @@ public class MachineStatusNotifier implements MachineStatusChangedEvent.Handler 
         return new Operation<MachineDto>() {
             @Override
             public void apply(MachineDto machine) throws OperationException {
-                final MachineConfigDto machineConfig = machine.getConfig();
-                if (machineConfig.isDev()) {
-                    // Will be used later
-                    // loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.SUCCESS);
-                }
-
-                final String message = locale.notificationMachineIsRunning(machineConfig.getName());
-                notificationManager.notify(message, SUCCESS, EMERGE_MODE);
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.RUNNING));
             }
         };

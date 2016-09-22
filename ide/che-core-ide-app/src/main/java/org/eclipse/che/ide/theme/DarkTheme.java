@@ -891,6 +891,7 @@ public class DarkTheme implements Theme {
         return "#292C2F";
     }
 
+    @Override
     public String getPopupBkgColor() {
         return "#292c2f";
     }
@@ -1542,4 +1543,8 @@ public class DarkTheme implements Theme {
         return "white";
     }
 
+    @Override
+    public String popupLoaderTextColor() {
+        return "#999999";
+    }
 }

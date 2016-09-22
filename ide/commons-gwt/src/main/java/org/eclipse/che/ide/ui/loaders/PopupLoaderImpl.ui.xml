@@ -39,12 +39,10 @@
         .title {
             position: absolute;
             left: 40px;
-            right: 70px;
             top: 10px;
             height: 20px;
             line-height: 20px;
-            font-weight: bold;
-            font-size: 13px;
+            font-size: 12px;
             color: popupLoaderTitleColor;
             margin: 0px;
         }
@@ -52,7 +50,6 @@
         .description {
             position: absolute;
             left: 40px;
-            right: 70px;
             top: 28px;
             height: 16px;
             line-height: 16px;
@@ -60,11 +57,21 @@
             margin: 0px;
         }
 
+        .customWidget {
+            width: 150px;
+            bottom: 0px;
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            overflow: hidden;
+        }
+
     </ui:style>
 
     <g:FlowPanel styleName="{style.main}">
         <g:Label ui:field="titleLabel" addStyleNames="{style.title}" />
         <g:Label ui:field="descriptionLabel" addStyleNames="{style.description}" />
+        <g:FlowPanel ui:field="customWidget" styleName="{style.customWidget}" visible="false"></g:FlowPanel>
     </g:FlowPanel>
 
 </ui:UiBinder>

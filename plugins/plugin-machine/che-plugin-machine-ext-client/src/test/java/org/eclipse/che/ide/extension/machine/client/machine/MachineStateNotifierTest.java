@@ -130,8 +130,6 @@ public class MachineStateNotifierTest {
         machineCaptor.getValue().apply(machine);
 
         verify(handler).onMachineRunning(Matchers.<MachineStateEvent>anyObject());
-        verify(locale).notificationMachineIsRunning(MACHINE_NAME);
-        verify(notificationManager).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
     }
 
     @Test
@@ -145,17 +143,6 @@ public class MachineStateNotifierTest {
         machineCaptor.getValue().apply(machine);
 
         verify(handler).onMachineRunning(Matchers.<MachineStateEvent>anyObject());
-        verify(locale).notificationMachineIsRunning(MACHINE_NAME);
-        verify(notificationManager).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
-    }
-
-    @Test
-    public void shouldNotifyWhenMachineStateIsDestroyed() throws Exception {
-        when(machineStatusChangedEvent.getEventType()).thenReturn(DESTROYED);
-        statusNotifier.onMachineStatusChanged(machineStatusChangedEvent);
-
-        verify(locale).notificationMachineDestroyed(MACHINE_NAME);
-        verify(notificationManager).notify(anyString(), (StatusNotification.Status)anyObject(), anyObject());
     }
 
     @Test

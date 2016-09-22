@@ -1535,5 +1535,6 @@ public interface Theme {
     String popupLoaderBorderColor();
     String popupLoaderShadow();
     String popupLoaderTitleColor();
+    String popupLoaderTextColor();
 
 }
