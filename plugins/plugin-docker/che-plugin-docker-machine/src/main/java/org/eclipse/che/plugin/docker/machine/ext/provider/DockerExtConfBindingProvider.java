@@ -48,7 +48,10 @@ public class DockerExtConfBindingProvider implements Provider<String> {
         }
         File extConfDir = new File(localConfDir, PLUGIN_CONF);
         if (!extConfDir.isDirectory()) {
-            LOG.warn("{} set to the {} but it must be directory not file", CheBootstrap.CHE_LOCAL_CONF_DIR, localConfDir);
+            if (extConfDir.exists()) {
+                LOG.warn("{} set to the {} but it must be directory not file",
+                         CheBootstrap.CHE_LOCAL_CONF_DIR, extConfDir);
+            }
             return null;
         }
 
