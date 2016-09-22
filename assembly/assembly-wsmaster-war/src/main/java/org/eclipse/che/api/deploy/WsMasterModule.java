@@ -118,7 +118,6 @@ public class WsMasterModule extends AbstractModule {
         bind(org.eclipse.che.api.environment.server.MachineInstanceProvider.class)
                 .to(org.eclipse.che.plugin.docker.machine.MachineProviderImpl.class);
 
-        install(new org.eclipse.che.api.agent.server.AgentModule());
         install(new org.eclipse.che.api.core.rest.CoreRestModule());
         install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
         install(new org.eclipse.che.plugin.docker.machine.local.LocalDockerModule());
