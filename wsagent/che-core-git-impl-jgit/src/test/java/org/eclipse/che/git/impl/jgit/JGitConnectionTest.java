@@ -13,6 +13,7 @@ package org.eclipse.che.git.impl.jgit;
 
 import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitUserResolver;
+import org.eclipse.che.api.git.shared.GitRequest;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.lib.Repository;
@@ -50,7 +51,8 @@ public class JGitConnectionTest {
     private GitUserResolver gitUserResolver;
     @Mock
     private TransportCommand transportCommand;
-
+    @Mock
+    private GitRequest request;
     @InjectMocks
     private JGitConnection jGitConnection;
 
@@ -80,7 +82,7 @@ public class JGitConnectionTest {
         passwordField.setAccessible(true);
 
         //when
-        jGitConnection.executeRemoteCommand(url, transportCommand);
+        jGitConnection.executeRemoteCommand(url, transportCommand, request);
 
         //then
         verify(transportCommand).setCredentialsProvider(captor.capture());
@@ -94,7 +96,7 @@ public class JGitConnectionTest {
     @Test(dataProvider = "gitUrlsWithoutOrWrongCredentials")
     public void shouldNotSetCredentialsProviderIfUrlDoesNotContainCredentials(String url) throws Exception{
         //when
-        jGitConnection.executeRemoteCommand(url, transportCommand);
+        jGitConnection.executeRemoteCommand(url, transportCommand, request);
 
         //then
         verify(transportCommand, never()).setCredentialsProvider(any());

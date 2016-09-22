@@ -81,6 +81,7 @@ import org.eclipse.che.api.git.shared.Tag;
 import org.eclipse.che.api.git.shared.TagCreateRequest;
 import org.eclipse.che.api.git.shared.TagDeleteRequest;
 import org.eclipse.che.api.git.shared.TagListRequest;
+import org.eclipse.che.api.git.shared.GitRequest;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.che.commons.proxy.ProxyAuthenticator;
 import org.eclipse.jgit.api.AddCommand;
@@ -515,7 +516,7 @@ class JGitConnection implements GitConnection {
                 }
             });
 
-            executeRemoteCommand(remoteUri, cloneCommand);
+            executeRemoteCommand(remoteUri, cloneCommand , request);
 
             StoredConfig repositoryConfig = getRepository().getConfig();
             GitUser gitUser = getUser();
@@ -696,7 +697,7 @@ class JGitConnection implements GitConnection {
             }
             fetchCommand.setRemoveDeletedRefs(request.isRemoveDeletedRefs());
 
-            executeRemoteCommand(remoteUri, fetchCommand);
+            executeRemoteCommand(remoteUri, fetchCommand, request);
         } catch (GitException | GitAPIException exception) {
             String errorMessage;
             if (exception.getMessage().contains("Invalid remote: ")) {
@@ -1013,7 +1014,7 @@ class JGitConnection implements GitConnection {
                 fetchCommand.setTimeout(timeout);
             }
 
-            FetchResult fetchResult = (FetchResult)executeRemoteCommand(remoteUri, fetchCommand);
+            FetchResult fetchResult = (FetchResult)executeRemoteCommand(remoteUri, fetchCommand, request);
 
             Ref remoteBranchRef = fetchResult.getAdvertisedRef(remoteBranch);
             if (remoteBranchRef == null) {
@@ -1081,7 +1082,7 @@ class JGitConnection implements GitConnection {
         }
         try {
             @SuppressWarnings("unchecked")
-            Iterable<PushResult> pushResults = (Iterable<PushResult>)executeRemoteCommand(remoteUri, pushCommand);
+            Iterable<PushResult> pushResults = (Iterable<PushResult>)executeRemoteCommand(remoteUri, pushCommand, request);
             PushResult pushResult = pushResults.iterator().next();
             String commandOutput = pushResult.getMessages().isEmpty() ? "Successfully pushed to " + remoteUri : pushResult.getMessages();
             Collection<RemoteRefUpdate> refUpdates = pushResult.getRemoteUpdates();
@@ -1589,10 +1590,11 @@ class JGitConnection implements GitConnection {
      * @throws UnauthorizedException
      */
     @VisibleForTesting
-    Object executeRemoteCommand(String remoteUrl, TransportCommand command)
+    Object executeRemoteCommand(String remoteUrl, TransportCommand command, GitRequest request)
             throws GitException, GitAPIException, UnauthorizedException {
         File keyDirectory = null;
         UserCredential credentials = null;
+
         try {
             if (GitUrlUtils.isSSH(remoteUrl)) {
                 keyDirectory =  Files.createTempDir();
@@ -1622,14 +1624,19 @@ class JGitConnection implements GitConnection {
                     String password = remoteUrl.substring(remoteUrl.lastIndexOf(":") + 1, remoteUrl.indexOf("@"));
                     command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
                 } else {
-                    credentials = credentialsLoader.getUserCredential(remoteUrl);
-                    if (credentials != null) {
-                        command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(credentials.getUserName(),
-                                                                                               credentials.getPassword()));
+                    String gitUser = request.getAttributes().get("username");
+                    String gitPassword = request.getAttributes().get("password");
+                    if (gitUser != null && gitPassword != null) {
+                        command.setCredentialsProvider(new UsernamePasswordCredentialsProvider(gitUser, gitPassword));
+                    } else {
+                        credentials = credentialsLoader.getUserCredential(remoteUrl);
+                        if (credentials != null) {
+                            command.setCredentialsProvider(
+                                    new UsernamePasswordCredentialsProvider(credentials.getUserName(), credentials.getPassword()));
+                        }
                     }
                 }
             }
-
             ProxyAuthenticator.initAuthenticator(remoteUrl);
             return command.call();
         } catch (GitException | TransportException exception) {
@@ -1656,7 +1663,6 @@ class JGitConnection implements GitConnection {
                     throw new GitException("Can't remove SSH key directory", exception);
                 }
             }
-
             ProxyAuthenticator.resetAuthenticator();
         }
     }
