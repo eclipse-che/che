@@ -525,8 +525,13 @@ public final class ProjectManager {
                                                                   project.getAttributes(),
                                                                   project.getSource());
 
-            if (move instanceof  FolderEntry) {
-                projectRegistry.updateProject(project.getPath(), (FolderEntry)move, projectConfig, true, true);
+            if (move instanceof FolderEntry) {
+                projectRegistry.removeProjects(project.getPath());
+                try {
+                    updateProject(projectConfig);
+                } catch (Exception e) {
+                    throw new ServerException(e);
+                }
             }
         }
 

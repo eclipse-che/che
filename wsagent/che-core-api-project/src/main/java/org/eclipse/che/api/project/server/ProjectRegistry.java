@@ -212,39 +212,6 @@ public class ProjectRegistry {
     }
 
     /**
-     * Updates RegisteredProject and caches it.
-     *
-     * @param oldPath
-     *         current project path
-     * @param newProjectConfig
-     *         project config
-     * @param folder
-     *         base folder of project
-     * @param updated
-     *         whether this configuration was updated
-     * @param detected
-     *         whether this is automatically detected or explicitly defined project
-     * @return project
-     * @throws ServerException
-     * @throws ConflictException
-     * @throws NotFoundException
-     */
-    RegisteredProject updateProject(String oldPath,
-                                    FolderEntry folder,
-                                    ProjectConfig newProjectConfig,
-                                    boolean updated,
-                                    boolean detected) throws ServerException,
-                                                             ConflictException,
-                                                             NotFoundException {
-        final RegisteredProject project = new RegisteredProject(folder, newProjectConfig, updated, detected, this.projectTypeRegistry);
-
-        projects.remove(oldPath);
-        projects.put(project.getPath(), project);
-
-        return project;
-    }
-
-    /**
      * Removes all projects on and under the incoming path.
      *
      * @param path
