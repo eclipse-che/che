@@ -1522,6 +1522,18 @@ class JGitConnection implements GitConnection {
         this.lineConsumerFactory = lineConsumerFactory;
     }
 
+    /**
+     * Get the current branch on the current directory
+     *
+     * @return the name of the branch
+     * @throws GitException
+     *         if any exception occurs
+     */
+    @Override
+    public String getBranchName() throws GitException {
+        return this.getCurrentBranch();
+    }
+
     private Git getGit() {
         if (git != null) {
             return git;
