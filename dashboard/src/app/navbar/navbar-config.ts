@@ -30,6 +30,9 @@ export class NavbarConfig {
     register.directive('cheNavBar', CheNavBar);
     register.directive('navBarSelected', NavBarSelected);
 
+    register.controller('NavbarDropdownMenuController', NavbarDropdownMenuController);
+    register.directive('navbarDropdownMenu', NavbarDropdownMenu);
+
     register.controller('NavbarRecentWorkspacesController', NavbarRecentWorkspacesController);
     register.directive('navbarRecentWorkspaces', NavbarRecentWorkspaces);
 
