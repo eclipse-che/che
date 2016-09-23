@@ -53,7 +53,7 @@ check_docker() {
 
 init_global_variables() {
   # Name used in INFO statements
-  DEFAULT_CHE_PRODUCT_NAME="ECLIPSE CHE"
+  DEFAULT_CHE_PRODUCT_NAME="ECLIPSE_CHE"
 
   # Name used in CLI statements
   DEFAULT_CHE_MINI_PRODUCT_NAME="che"
