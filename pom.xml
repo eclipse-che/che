@@ -47,28 +47,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.typefox.lsapi</groupId>
-                <artifactId>io.typefox.lsapi</artifactId>
-                <version>0.3.0-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>jsr305</artifactId>
-                        <groupId>com.google.code.findbugs</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>io.typefox.lsapi</groupId>
-                <artifactId>io.typefox.lsapi.services</artifactId>
-                <version>0.3.0-SNAPSHOT</version>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>jsr305</artifactId>
-                        <groupId>com.google.code.findbugs</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-ide-war</artifactId>
                 <version>${che.version}</version>

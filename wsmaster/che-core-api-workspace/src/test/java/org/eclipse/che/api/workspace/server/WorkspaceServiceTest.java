@@ -892,7 +892,7 @@ public class WorkspaceServiceTest {
     private static EnvironmentDto createEnvDto() {
         ExtendedMachineImpl devMachine = new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
                                                                  null,
-                                                                 new HashMap<>(singletonMap("memoryLimitBytes", "10000")));
+                                                                 singletonMap("memoryLimitBytes", "10000"));
 
         return DtoConverter.asDto(new EnvironmentImpl(new EnvironmentRecipeImpl("type", "content-type", "content", null),
                                                       singletonMap("dev-machine", devMachine)));
@@ -902,11 +902,9 @@ public class WorkspaceServiceTest {
         final WorkspaceConfigImpl config = WorkspaceConfigImpl.builder()
                                                               .setName("dev-workspace")
                                                               .setDefaultEnv("dev-env")
-                                                              .setEnvironments(new HashMap<>(singletonMap("dev-env",
-                                                                                                          new EnvironmentImpl(
-                                                                                                                  createEnvDto()))))
-                                                              .setCommands(new ArrayList<>(singleton(createCommandDto())))
-                                                              .setProjects(new ArrayList<>(singleton(createProjectDto())))
+                                                              .setEnvironments(singletonMap("dev-env",new EnvironmentImpl(createEnvDto())))
+                                                              .setCommands(singletonList(createCommandDto()))
+                                                              .setProjects(singletonList(createProjectDto()))
                                                               .build();
         return DtoConverter.asDto(config);
     }

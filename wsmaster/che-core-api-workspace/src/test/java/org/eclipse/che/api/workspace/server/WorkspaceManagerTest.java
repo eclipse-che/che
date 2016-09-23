@@ -1188,9 +1188,7 @@ public class WorkspaceManagerTest {
                                                           singletonMap("dev-machine",
                                                                        new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
                                                                                                null,
-                                                                                               new HashMap<>(
-                                                                                                       singletonMap("memoryLimitBytes",
-                                                                                                                    "10000")))));
+                                                                                               singletonMap("memoryLimitBytes", "10000"))));
         return WorkspaceConfigImpl.builder()
                                   .setName("dev-workspace")
                                   .setDefaultEnv("dev-env")

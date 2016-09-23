@@ -11,26 +11,30 @@
 package org.eclipse.che.api.environment.server;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Maps;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.EnvironmentRecipe;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
+import org.eclipse.che.api.environment.server.compose.ComposeEnvironmentImpl;
 import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
-import org.eclipse.che.api.environment.server.compose.model.BuildContextImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.compose.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServicesEnvironmentImpl;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 
 import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 
 /**
- * Parses {@link Environment} into {@link ComposeEnvironmentImpl}.
+ * Parses {@link Environment} into {@link CheServicesEnvironmentImpl}.
  *
  * @author Alexander Garagatyi
  */
@@ -55,7 +59,7 @@ public class EnvironmentParser {
     }
 
     /**
-     * Parses {@link Environment} into {@link ComposeEnvironmentImpl}.
+     * Parses {@link Environment} into {@link CheServicesEnvironmentImpl}.
      *
      * @param environment
      *         environment to parse
@@ -65,8 +69,8 @@ public class EnvironmentParser {
      * @throws ServerException
      *         if fetching of environment recipe content fails
      */
-    public ComposeEnvironmentImpl parse(Environment environment) throws IllegalArgumentException,
-                                                                        ServerException {
+    public CheServicesEnvironmentImpl parse(Environment environment) throws IllegalArgumentException,
+                                                                            ServerException {
 
         checkNotNull(environment, "Environment should not be null");
         checkNotNull(environment.getRecipe(), "Environment recipe should not be null");
@@ -74,7 +78,7 @@ public class EnvironmentParser {
         checkArgument(environment.getRecipe().getContent() != null || environment.getRecipe().getLocation() != null,
                       "Recipe of environment must contain location or content");
 
-        ComposeEnvironmentImpl composeEnvironment;
+        CheServicesEnvironmentImpl composeEnvironment;
         String envType = environment.getRecipe().getType();
         switch (envType) {
             case "compose":
@@ -106,20 +110,55 @@ public class EnvironmentParser {
         return composeEnvironment;
     }
 
-    private ComposeEnvironmentImpl parseCompose(EnvironmentRecipe recipe) throws ServerException {
+    private CheServicesEnvironmentImpl parseCompose(EnvironmentRecipe recipe) throws ServerException {
         String recipeContent = getContentOfRecipe(recipe);
 
-        return composeFileParser.parse(recipeContent, recipe.getContentType());
+        ComposeEnvironmentImpl composeEnvironment = composeFileParser.parse(recipeContent, recipe.getContentType());
+
+        return asCheEnvironment(composeEnvironment);
     }
 
-    private ComposeEnvironmentImpl parseDocker(Environment environment) {
+    private CheServicesEnvironmentImpl asCheEnvironment(ComposeEnvironmentImpl composeEnvironment) {
+        Map<String, CheServiceImpl> services = Maps.newHashMapWithExpectedSize(composeEnvironment.getServices().size());
+        for (Map.Entry<String, ComposeServiceImpl> composeServiceEntry : composeEnvironment.getServices()
+                                                                                           .entrySet()) {
+            ComposeServiceImpl service = composeServiceEntry.getValue();
+
+            CheServiceBuildContextImpl buildContext = null;
+            if (service.getBuild() != null) {
+                buildContext = new CheServiceBuildContextImpl().withContext(service.getBuild().getContext())
+                                                               .withDockerfilePath(service.getBuild().getDockerfile());
+            }
+
+            CheServiceImpl cheService = new CheServiceImpl().withBuild(buildContext)
+                                                            .withCommand(service.getCommand())
+                                                            .withContainerName(service.getContainerName())
+                                                            .withDependsOn(service.getDependsOn())
+                                                            .withEntrypoint(service.getEntrypoint())
+                                                            .withEnvironment(service.getEnvironment())
+                                                            .withExpose(service.getExpose())
+                                                            .withImage(service.getImage())
+                                                            .withLabels(service.getLabels())
+                                                            .withLinks(service.getLinks())
+                                                            .withMemLimit(service.getMemLimit())
+                                                            .withNetworks(service.getNetworks())
+                                                            .withPorts(service.getPorts())
+                                                            .withVolumes(service.getVolumes())
+                                                            .withVolumesFrom(service.getVolumesFrom());
+
+            services.put(composeServiceEntry.getKey(), cheService);
+        }
+        return new CheServicesEnvironmentImpl().withServices(services);
+    }
+
+    private CheServicesEnvironmentImpl parseDocker(Environment environment) {
         checkArgument(environment.getMachines().size() == 1,
                       "Environment of type '%s' doesn't support multiple machines, but contains machines: %s",
                       environment.getRecipe().getType(),
                       Joiner.on(',').join(environment.getMachines().keySet()));
 
-        ComposeEnvironmentImpl composeEnvironment = new ComposeEnvironmentImpl();
-        ComposeServiceImpl service = new ComposeServiceImpl();
+        CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
+        CheServiceImpl service = new CheServiceImpl();
 
         composeEnvironment.getServices().put(environment.getMachines()
                                                         .keySet()
@@ -138,11 +177,9 @@ public class EnvironmentParser {
             }
 
             if (recipe.getLocation() != null) {
-                service.setBuild(new BuildContextImpl().withContext(recipe.getLocation()));
+                service.setBuild(new CheServiceBuildContextImpl().withContext(recipe.getLocation()));
             } else {
-                // workaround: put dockerfile content into field dockerfile.
-                // Service launching code must know about that workaround
-                service.setBuild(new BuildContextImpl().withDockerfile(recipe.getContent()));
+                service.setBuild(new CheServiceBuildContextImpl().withDockerfileContent(recipe.getContent()));
             }
         }
 

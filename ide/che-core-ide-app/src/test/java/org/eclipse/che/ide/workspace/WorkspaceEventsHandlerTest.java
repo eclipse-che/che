@@ -14,7 +14,6 @@ import com.google.gwt.core.client.Callback;
 import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.core.rest.shared.dto.LinkParameter;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
@@ -56,6 +55,7 @@ import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.eclipse.che.ide.websocket.events.MessageHandler;
 import org.eclipse.che.ide.websocket.rest.Pair;
+import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
 import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
 import org.junit.Before;
 import org.junit.Test;
@@ -124,6 +124,8 @@ public class WorkspaceEventsHandlerTest {
     private MachineServiceClient                machineServiceClient;
     @Mock
     private Promise<List<MachineProcessDto>>    processPromise;
+    @Mock
+    private StartWorkspaceNotification          startWorkspaceNotification;
     @Captor
     private ArgumentCaptor<Operation<List<MachineProcessDto>>> processCaptor;
 
@@ -164,7 +166,7 @@ public class WorkspaceEventsHandlerTest {
     private Promise<List<WorkspaceDto>>          workspacesPromise;
 
     @Mock
-    private AsyncRequestFactory asyncRequestFactory;
+    private AsyncRequestFactory                  asyncRequestFactory;
     @Mock
     private LoaderPresenter                      loader;
 
@@ -187,9 +189,8 @@ public class WorkspaceEventsHandlerTest {
                                                             machineManagerProvider,
                                                             machineServiceClient,
                                                             snapshotCreator,
-                                                            loaderFactory,
                                                             workspaceServiceClient,
-                                                            startWorkspacePresenter,
+                                                            startWorkspaceNotification,
                                                             wsComponentProvider,
                                                             asyncRequestFactory,
 															loader);
@@ -266,7 +267,7 @@ public class WorkspaceEventsHandlerTest {
         verify(workspaceComponent).setCurrentWorkspace(workspace);
         verify(machineManagerProvider).get();
 
-        verify(loader).setProgress(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME), eq(LoaderPresenter.Status.LOADING));
+        verify(loader).show(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME));
 
         verify(eventBus).fireEvent(Matchers.<WorkspaceStartingEvent>anyObject());
     }
@@ -284,10 +285,9 @@ public class WorkspaceEventsHandlerTest {
         verify(workspaceServiceClient).getWorkspace(WORKSPACE_ID);
         verify(workspaceComponent).setCurrentWorkspace(workspace);
 
-        verify(loader).setProgress(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME), eq(LoaderPresenter.Status.SUCCESS));
+        verify(loader).setSuccess(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME));
 
         verify(eventBus).fireEvent(Matchers.<WorkspaceStartedEvent>anyObject());
-        verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.SUCCESS), eq(FLOAT_MODE));
     }
 
     @Test
@@ -310,7 +310,7 @@ public class WorkspaceEventsHandlerTest {
         verify(messageBus, times(4)).unsubscribe(anyString(), (MessageHandler)anyObject());
         verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.FAIL), eq(FLOAT_MODE));
 
-        verify(loader).setProgress(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME), eq(LoaderPresenter.Status.ERROR));
+        verify(loader).setError(eq(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME));
 
         verify(eventBus).fireEvent(Matchers.<WorkspaceStoppedEvent>anyObject());
         verify(errorDialog).show();
@@ -324,7 +324,6 @@ public class WorkspaceEventsHandlerTest {
         workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
         verify(messageBus, times(4)).unsubscribe(anyString(), (MessageHandler)anyObject());
-        verify(notificationManager).notify(anyString(), eq(StatusNotification.Status.SUCCESS), eq(FLOAT_MODE));
         verify(eventBus).fireEvent(Matchers.<WorkspaceStoppedEvent>anyObject());
     }
 
@@ -335,7 +334,7 @@ public class WorkspaceEventsHandlerTest {
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
         workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
-        verify(snapshotLoader).show();
+        verify(loader).show(eq(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT));
     }
 
     @Test
@@ -345,7 +344,7 @@ public class WorkspaceEventsHandlerTest {
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
         workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
-        verify(snapshotLoader).hide();
+        verify(loader).setSuccess(eq(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT));
         verify(snapshotCreator).successfullyCreated();
     }
 
@@ -356,7 +355,7 @@ public class WorkspaceEventsHandlerTest {
         workspaceEventsHandler.trackWorkspaceEvents(workspace, callback);
         workspaceEventsHandler.workspaceStatusSubscriptionHandler.onMessageReceived(workspaceStatusEvent);
 
-        verify(snapshotLoader).hide();
+        verify(loader).setError(eq(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT));
         verify(snapshotCreator).creationError(anyString());
     }
 
@@ -406,4 +405,5 @@ public class WorkspaceEventsHandlerTest {
 
         verify(eventBus).fireEvent(Matchers.<EnvironmentOutputEvent> anyObject());
     }
+
 }
