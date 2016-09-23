@@ -55,6 +55,7 @@
   </md-sidenav>
   <div class="main-page ide-show" layout="column" flex>
     <div id="main-content" role="main" ng-view layout="column" flex ng-show="waitingLoaded && !showIDE"></div>
+    <ide-iframe id="ide-iframe-window" ng-show="showIDE && ideIframeLink" flex style="height: 100%"></ide-iframe>
     <che-footer che-support-help-path="{{branding.helpPath}}" che-support-help-title="{{branding.helpTitle}}" che-support-email="{{branding.supportEmail}}" che-product-name="Eclipse Che" ng-show="waitingLoaded && !showIDE"></che-footer>
   </div>
     <!-- Addons are not automatically injected -->

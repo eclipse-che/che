@@ -121,7 +121,6 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
     routeHistory;
 
     $rootScope.$on('$viewContentLoaded', () => {
-      ideIFrameSvc.addIFrame();
       cheUIElementsInjectorService.injectAll();
       $timeout(() => {
         if (!$rootScope.hideLoader) {

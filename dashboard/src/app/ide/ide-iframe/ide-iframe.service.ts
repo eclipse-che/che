@@ -45,16 +45,6 @@ class IdeIFrameSvc {
     }, false);
   }
 
-  addIFrame() {
-    if (!/\/ide\//.test(this.$location.path())) {
-      return;
-    }
-    this.$timeout(() => {
-      let jqElement = angular.element('<ide-iframe id="ide-iframe-window" ng-show="showIDE" flex style="height: 100%"></ide-iframe>');
-      this.cheUIElementsInjectorService.injectAdditionalElement(angular.element('body').find('.main-page'), jqElement);
-    });
-  }
-
 }
 
 export default IdeIFrameSvc;
