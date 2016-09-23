@@ -1,3 +1,14 @@
+#!/bin/bash
+# Copyright (c) 2012-2016 Codenvy, S.A.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#   Tyler Jewell - Initial Implementation
+#
+
 init_global_variables() {
   DEFAULT_CHE_PRODUCT_NAME="ECLIPSE CHE"
   DEFAULT_CHE_LAUNCHER_IMAGE_NAME="codenvy/che-launcher"
@@ -96,6 +107,7 @@ parse_command_line () {
   fi
 }
 
+<<<<<<< ff0b2ae21c697c62fd292b279c617cacc48ff9ac
 execute_cli() {
   case ${CHE_CLI_ACTION} in
     start|stop|restart)
@@ -157,6 +169,8 @@ execute_cli() {
   esac
 }
 
+=======
+>>>>>>> update
 docker_exec() {
   debug $FUNCNAME
   if has_docker_for_windows_client; then
@@ -954,3 +968,4 @@ run_connectivity_tests() {
 
   docker rm -f fakeagent > /dev/null
 }
+
