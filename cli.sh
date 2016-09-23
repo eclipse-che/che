@@ -107,7 +107,6 @@ parse_command_line () {
   fi
 }
 
-<<<<<<< ff0b2ae21c697c62fd292b279c617cacc48ff9ac
 execute_cli() {
   case ${CHE_CLI_ACTION} in
     start|stop|restart)
@@ -169,8 +168,6 @@ execute_cli() {
   esac
 }
 
-=======
->>>>>>> update
 docker_exec() {
   debug $FUNCNAME
   if has_docker_for_windows_client; then
