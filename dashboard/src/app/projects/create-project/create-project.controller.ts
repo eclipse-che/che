@@ -957,6 +957,7 @@ export class CreateProjectController {
 
     let attributes = this.stack ? {stackId: this.stack.id} : {};
     let stackWorkspaceConfig = this.stack ? this.stack.workspaceConfig : {};
+    this.setEnvironment(stackWorkspaceConfig);
     let workspaceConfig = this.cheAPI.getWorkspace().formWorkspaceConfig(stackWorkspaceConfig, this.workspaceName, source, this.workspaceRam);
 
     //TODO: no account in che ? it's null when testing on localhost
@@ -1261,5 +1262,26 @@ export class CreateProjectController {
     }
 
     return this.stackMachines[this.stack.id];
+  }
+
+  /**
+   * Updates the workspace's environment with data entered by user.
+   *
+   * @param workspace workspace to update
+   */
+  setEnvironment(workspace) {
+    if (!workspace.defaultEnv || !workspace.environments || workspace.environments.length === 0) {
+      return;
+    }
+
+    let environment = workspace.environments[workspace.defaultEnv];
+
+    if (!environment) {
+      return;
+    }
+
+    let recipeType = environment.recipe.type;
+    let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
+    workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, this.getStackMachines(environment));
   }
 }
