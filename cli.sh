@@ -48,40 +48,70 @@ init_global_variables() {
   GLOBAL_GET_DOCKER_HOST_IP=$(get_docker_host_ip)
 
   if is_boot2docker && has_docker_for_windows_client; then
-  	if [[ "${CHE_DATA_FOLDER,,}" != *"${USERPROFILE,,}"* ]]; then
-  	  CHE_DATA_FOLDER=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+    if [[ "${CHE_DATA_FOLDER,,}" != *"${USERPROFILE,,}"* ]]; then
+      CHE_DATA_FOLDER=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
       warning "Boot2docker for Windows - CHE_DATA_FOLDER set to $CHE_DATA_FOLDER"   
-  	fi
+    fi
   fi
 
   USAGE="
 Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
-           start                              Starts ${CHE_MINI_PRODUCT_NAME} server
-           stop                               Stops ${CHE_MINI_PRODUCT_NAME} server
-           restart                            Restart ${CHE_MINI_PRODUCT_NAME} server
-           update [--force]                   Installs version, respecting CHE_VERSION & CHE_UTILITY_VERSION
-           profile add <name>                 Add a profile to ~/.${CHE_MINI_PRODUCT_NAME}/ 
-           profile set <name>                 Set this profile as the default for ${CHE_MINI_PRODUCT_NAME} CLI
-           profile unset                      Removes the default profile - leaves it unset
-           profile rm <name>                  Remove this profile from ~/.${CHE_MINI_PRODUCT_NAME}/
-           profile update <name>              Update profile in ~/.${CHE_MINI_PRODUCT_NAME}/
-           profile info <name>                Print the profile configuration
-           profile list                       List available profiles
-           mount [<ws-ssh-port>]              Synchronize workspace with current working directory
-           dir init                           Initialize directory with ${CHE_MINI_PRODUCT_NAME} configuration
-           dir up                             Create workspace from source in current directory
-           dir down                           Stop workspace running in current directory
-           dir status                         Display status of ${CHE_MINI_PRODUCT_NAME} in current directory
-           action <action-name> [--help]      Start action on ${CHE_MINI_PRODUCT_NAME} instance
-           compile <mvn-command>              SDK - Builds Che source code or modules
-           test <test-name> [--help]          Start test on ${CHE_MINI_PRODUCT_NAME} instance
-           info [ --all                       Run all debugging tests
-                  --server                    Run ${CHE_MINI_PRODUCT_NAME} launcher and server debugging tests
-                  --networking                Test connectivity between ${CHE_MINI_PRODUCT_NAME} sub-systems
-                  --cli                       Print CLI (this program) debugging info
-                  --create [<url>]            Test creating a workspace and project in ${CHE_MINI_PRODUCT_NAME}
-                           [<user>] 
-                           [<pass>] ]
+    start                              Starts ${CHE_MINI_PRODUCT_NAME} server
+    stop                               Stops ${CHE_MINI_PRODUCT_NAME} server
+    restart                            Restart ${CHE_MINI_PRODUCT_NAME} server
+    update [--force]                   Installs version, respecting CHE_VERSION & CHE_UTILITY_VERSION
+    profile add <name>                 Add a profile to ~/.${CHE_MINI_PRODUCT_NAME}/ 
+    profile set <name>                 Set this profile as the default for ${CHE_MINI_PRODUCT_NAME} CLI
+    profile unset                      Removes the default profile - leaves it unset
+    profile rm <name>                  Remove this profile from ~/.${CHE_MINI_PRODUCT_NAME}/
+    profile update <name>              Update profile in ~/.${CHE_MINI_PRODUCT_NAME}/
+    profile info <name>                Print the profile configuration
+    profile list                       List available profiles
+    mount [<ws-ssh-port>]              Synchronize workspace with current working directory
+    dir init                           Initialize directory with ${CHE_MINI_PRODUCT_NAME} configuration
+    dir up                             Create workspace from source in current directory
+    dir down                           Stop workspace running in current directory
+    dir status                         Display status of ${CHE_MINI_PRODUCT_NAME} in current directory
+    dir ssh                            Make SSH connection into workspace mapped to current directory
+    action <action-name> [--help]      Start action on ${CHE_MINI_PRODUCT_NAME} instance
+    compile <mvn-command>              SDK - Builds Che source code or modules
+    test <test-name> [--help]          Start test on ${CHE_MINI_PRODUCT_NAME} instance
+    info [ --all                       Run all debugging tests
+           --server                    Run ${CHE_MINI_PRODUCT_NAME} launcher and server debugging tests
+           --networking                Test connectivity between ${CHE_MINI_PRODUCT_NAME} sub-systems
+           --cli                       Print CLI (this program) debugging info
+           --create [<url>]            Test creating a workspace and project in ${CHE_MINI_PRODUCT_NAME}
+                    [<user>] 
+                    [<pass>] ]
+
+Variables:
+    CHE_VERSION                        Version of Che to run
+    CHE_PORT                           External port of Che server
+    CHE_HOST_IP                        IP address Che server binds to - must set for external users
+    CHE_DATA_FOLDER                    Where workspaces and Che prefs are stored
+    CHE_HOSTNAME                       External hostname of Che server
+    CHE_CONF_FOLDER                    Folder for custom che.properties file
+    CHE_RESTART_POLICY                 Che server Docker restart policy if container exited
+    CHE_USER                           User ID of the Che server inside its container
+    CHE_LOCAL_BINARY                   Path to a Che assembly to use instead of binary in container
+    CHE_LOG_LEVEL                      Logging level for Che server - either debug or info
+    CHE_EXTRA_VOLUME_MOUNT             Folders to mount from host into Che workspaces
+    CHE_PROPERTY_<>                    One time use properties passed to Che - see docs
+    CHE_UTILITY_VERSION                Version of Che launcher, mount, dev, action to run
+    CHE_CLI_VERSION                    Version of CLI to run
+    CHE_PRODUCT_NAME                   Pretty name used by CLI in INFO statements
+    CHE_MINI_PRODUCT_NAME              Pretty short name used by CLI in INFO statements
+    CHE_LAUNCHER_IMAGE_NAME            Docker image for the Che launcher
+    CHE_SERVER_IMAGE_NAME              Docker image for the Che server
+    CHE_DIR_IMAGE_NAME                 Docker image for Chedir
+    CHE_MOUNT_IMAGE_NAME               Docker image used for local IDE mount and sync
+    CHE_ACTION_IMAGE_NAME              Docker image used for Che actions
+    CHE_DEV_IMAGE_NAME                 Docker image used to compile and package Che source code
+    CHE_SERVER_CONTAINER_NAME          Pretty container name given for the Che server container
+    CHE_IS_INTERACTIVE                 Passes -i into Docker run
+    CHE_IS_PSEUDO_TTY                  Passes -t into Docker run
+    CHE_DEBUG_SERVER                   Launches Che server with JPDA activated
+    CHE_DEBUG_SERVER_PORT              Port JPDA binds itself to
 "
 }
 
@@ -416,7 +446,7 @@ get_list_of_che_system_environment_variables() {
   touch "${TMP_FILE}"
 
   if has_default_profile; then
-    cat "${TMP_DIR}"/profiles/"${CHE_PROFILE}" >> "${TMP_FILE}"
+    cat "${TMP_DIR}"/profiles/"${CHE_PROFILE}" | sed 's/\"//g' >> "${TMP_FILE}"
   else
 
     # Grab these values to send to other utilities - they need to know the values  
@@ -624,8 +654,8 @@ execute_profile(){
       test -d "${PROFILE_DIR}" || mkdir -p "${PROFILE_DIR}"
       touch "${PROFILE_FILE}"
 
-      echo "CHE_PRODUCT_NAME=$CHE_PRODUCT_NAME" >> "${PROFILE_FILE}"
-      echo "CHE_MINI_PRODUCT_NAME=$CHE_MINI_PRODUCT_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_PRODUCT_NAME=\"""${CHE_PRODUCT_NAME}""\"" >> "${PROFILE_FILE}"
+      echo "CHE_MINI_PRODUCT_NAME=\"""${CHE_MINI_PRODUCT_NAME}""\"" >> "${PROFILE_FILE}"
       echo "CHE_LAUNCHER_IMAGE_NAME=$CHE_LAUNCHER_IMAGE_NAME" >> "${PROFILE_FILE}"
       echo "CHE_SERVER_IMAGE_NAME=$CHE_SERVER_IMAGE_NAME" >> "${PROFILE_FILE}"
       echo "CHE_DIR_IMAGE_NAME=$CHE_DIR_IMAGE_NAME" >> "${PROFILE_FILE}"
@@ -965,4 +995,3 @@ run_connectivity_tests() {
 
   docker rm -f fakeagent > /dev/null
 }
-
