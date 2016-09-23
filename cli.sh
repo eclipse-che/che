@@ -48,10 +48,10 @@ init_global_variables() {
   GLOBAL_GET_DOCKER_HOST_IP=$(get_docker_host_ip)
 
   if is_boot2docker && has_docker_for_windows_client; then
-  	if [[ "${CHE_DATA_FOLDER,,}" != *"${USERPROFILE,,}"* ]]; then
-  	  CHE_DATA_FOLDER=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
+    if [[ "${CHE_DATA_FOLDER,,}" != *"${USERPROFILE,,}"* ]]; then
+      CHE_DATA_FOLDER=$(get_mount_path "${USERPROFILE}/.${CHE_MINI_PRODUCT_NAME}/")
       warning "Boot2docker for Windows - CHE_DATA_FOLDER set to $CHE_DATA_FOLDER"   
-  	fi
+    fi
   fi
 
   USAGE="
@@ -416,7 +416,7 @@ get_list_of_che_system_environment_variables() {
   touch "${TMP_FILE}"
 
   if has_default_profile; then
-    cat "${TMP_DIR}"/profiles/"${CHE_PROFILE}" >> "${TMP_FILE}"
+    cat "${TMP_DIR}"/profiles/"${CHE_PROFILE}" | sed 's/\"//g' >> "${TMP_FILE}"
   else
 
     # Grab these values to send to other utilities - they need to know the values  
@@ -624,8 +624,8 @@ execute_profile(){
       test -d "${PROFILE_DIR}" || mkdir -p "${PROFILE_DIR}"
       touch "${PROFILE_FILE}"
 
-      echo "CHE_PRODUCT_NAME=$CHE_PRODUCT_NAME" >> "${PROFILE_FILE}"
-      echo "CHE_MINI_PRODUCT_NAME=$CHE_MINI_PRODUCT_NAME" >> "${PROFILE_FILE}"
+      echo "CHE_PRODUCT_NAME=\"""${CHE_PRODUCT_NAME}""\"" >> "${PROFILE_FILE}"
+      echo "CHE_MINI_PRODUCT_NAME=\"""${CHE_MINI_PRODUCT_NAME}""\"" >> "${PROFILE_FILE}"
       echo "CHE_LAUNCHER_IMAGE_NAME=$CHE_LAUNCHER_IMAGE_NAME" >> "${PROFILE_FILE}"
       echo "CHE_SERVER_IMAGE_NAME=$CHE_SERVER_IMAGE_NAME" >> "${PROFILE_FILE}"
       echo "CHE_DIR_IMAGE_NAME=$CHE_DIR_IMAGE_NAME" >> "${PROFILE_FILE}"
@@ -965,4 +965,3 @@ run_connectivity_tests() {
 
   docker rm -f fakeagent > /dev/null
 }
-
