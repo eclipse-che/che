@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.theme;
 
-import org.eclipse.che.ide.api.theme.Theme;
-
 import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.api.theme.Theme;
 
 /**
  * @author Evgen Vidolob
@@ -80,12 +80,12 @@ public class DarkTheme implements Theme {
 
     @Override
     public String tabBorderColor() {
-        return "#121416";
+        return "#33373b";
     }
 
     @Override
     public String inactiveTabBorderColor() {
-        return "#353535";
+        return "#33373b";
     }
 
     @Override
@@ -116,7 +116,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String activeTabBorderColor() {
-        return "#121416";
+        return tabBorderColor();
     }
 
     @Override
@@ -349,6 +349,11 @@ public class DarkTheme implements Theme {
     @Override
     public String editorPanelBackgroundColor() {
         return "#21252b";
+    }
+
+    @Override
+    public String editorPanelBorderColor() {
+        return getEditorBackgroundColor();
     }
 
     @Override
@@ -868,7 +873,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getSplitterSmallBorderColor() {
-        return "#0D0F10";
+        return "#21252b";
     }
 
     @Override
