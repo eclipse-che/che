@@ -75,6 +75,7 @@ public class LanguageServerRegistryImplTest {
 //        when(serverCapabilities.isMultiplyProjectsProvider()).thenReturn(true);
 
         when(languageServerLauncher.getLanguageDescription()).thenReturn(languageDescription);
+        when(languageServerLauncher.isAbleToLaunch()).thenReturn(true);
         when(languageDescription.getLanguageId()).thenReturn(JsonLanguageServerLauncher.LANGUAGE_ID);
         when(languageDescription.getFileExtensions()).thenReturn(asList(JsonLanguageServerLauncher.EXTENSIONS));
         when(languageDescription.getMimeTypes()).thenReturn(asList(JsonLanguageServerLauncher.MIME_TYPES));

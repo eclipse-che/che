@@ -36,6 +36,7 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
     public static final String[] MIME_TYPES  = new String[] {"application/json"};
 
     private static final LanguageDescriptionImpl description;
+    private static final String SCRIPT_PATH = "che/ls-json/launch.sh";
 
     static {
         description = new LanguageDescriptionImpl();
@@ -49,6 +50,12 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
         return description;
     }
 
+    @Override
+    public boolean isAbleToLaunch() {
+        Path launchFile = Paths.get(System.getenv("HOME"), SCRIPT_PATH);
+        return launchFile.toFile().exists();
+    }
+
     protected JsonBasedLanguageServer connectToLanguageServer(Process languageServerProcess) {
         JsonBasedLanguageServer languageServer = new JsonBasedLanguageServer();
         languageServer.connect(languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
@@ -56,7 +63,7 @@ public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
     }
 
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-        Path launchFile = Paths.get(System.getenv("HOME"), "che/ls-json/launch.sh");
+        Path launchFile = Paths.get(System.getenv("HOME"), SCRIPT_PATH);
 
         ProcessBuilder processBuilder = new ProcessBuilder(launchFile.toString());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
