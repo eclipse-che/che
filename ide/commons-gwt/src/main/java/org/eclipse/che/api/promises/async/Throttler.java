@@ -21,20 +21,10 @@ import org.eclipse.che.api.promises.client.js.Promises;
  * @author Evgen Vidolob
  */
 public class Throttler {
-//    private Promise activePromise;
-//    private Promise queuedPromise;
-//    private Task promiseFactory;
     private Promise current = Promises.resolve(null);
 
     @SuppressWarnings("unchecked")
     public <T> Promise<T> queue(final Task<Promise<T>> promiseFactory) {
-//        if (activePromise != null) {
-//            this.promiseFactory = promiseFactory;
-//
-//            if (queuedPromise == null) {
-//                queuedPromise = Promises.
-//            }
-//        }
         return current = current.thenPromise(new Function<Object, Promise>() {
             @Override
             public Promise apply(Object arg) throws FunctionException {

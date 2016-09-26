@@ -100,6 +100,11 @@ public class FatJarBasedLanguageServerLauncher extends LanguageServerLauncherTem
         return null;
     }
 
+    @Override
+    public boolean isAbleToLaunch() {
+        return true;
+    }
+
     private static class StreamReader implements Runnable {
         public Process process;
 
