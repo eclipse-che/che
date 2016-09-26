@@ -40,8 +40,8 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.lib.version>5.0.0-M3-SNAPSHOT</che.lib.version>
-        <che.version>5.0.0-M3-SNAPSHOT</che.version>
+        <che.lib.version>5.0.0-M3</che.lib.version>
+        <che.version>5.0.0-M3</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
