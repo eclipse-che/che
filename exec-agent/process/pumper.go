@@ -1,5 +1,3 @@
-// TODO: consider using []byte instead of strings
-// TODO: consider using go channels instead of LogsConsumers
 package process
 
 import (
@@ -66,14 +64,15 @@ func pump(r io.Reader, lineConsumer acceptLine, wg *sync.WaitGroup) {
 		line, err := br.ReadBytes('\n')
 
 		if err != nil {
-			// handle not normal exit
 			if err != io.EOF {
 				log.Println("Error pumping: " + err.Error())
+			} else if len(line) != 0 {
+				lineConsumer(string(line))
 			}
 			return
 		}
 
-		lineConsumer(string(line[:len(line) - 1]))
+		lineConsumer(string(line[:len(line)-1]))
 	}
 }
 

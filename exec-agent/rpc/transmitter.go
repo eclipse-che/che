@@ -1,4 +1,4 @@
-package op
+package rpc
 
 // Transmitter is used for sending
 // results of the operation executions to the channel.
@@ -13,15 +13,17 @@ type Transmitter struct {
 
 // Wraps the given message with an 'op.Result' and sends it to the client.
 func (t *Transmitter) Send(message interface{}) {
-	t.Channel.output <- &Result{
-		Id:   t.id,
-		Body: message,
+	t.Channel.output <- &Response{
+		Version: "2.0",
+		Id:      t.id,
+		Result:  message,
 	}
 }
 
 // Wraps the given error with an 'op.Result' and sends it to the client.
 func (t *Transmitter) SendError(err Error) {
-	t.Channel.output <- &Result{
+	t.Channel.output <- &Response{
+		Version: "2.0",
 		Id:    t.id,
 		Error: &err,
 	}

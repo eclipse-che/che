@@ -2,28 +2,22 @@
 package auth
 
 import (
-	"net/http"
-	"os"
-	"flag"
-	"github.com/eclipse/che/exec-agent/rest"
 	"errors"
+	"github.com/eclipse/che/exec-agent/rest"
+	"net/http"
 )
 
 var (
-	Enabled = false
-	apiEndpoint = os.Getenv("CHE_API_ENDPOINT")
+	Enabled     = false
+	ApiEndpoint string
 )
-
-func init() {
-	flag.BoolVar(&Enabled, "enable-auth", false, "Whether authenticate on workspace master or not")
-}
 
 func AuthenticateOnMaster(r *http.Request) error {
 	tokenParam := r.URL.Query().Get("token")
 	if tokenParam == "" {
 		return rest.Unauthorized(errors.New("Authentication failed: missing 'token' query parameter"))
 	}
-	req, err := http.NewRequest("GET", apiEndpoint + "/machine/token/user/" + tokenParam, nil)
+	req, err := http.NewRequest("GET", ApiEndpoint+"/machine/token/user/"+tokenParam, nil)
 	if err != nil {
 		return rest.Unauthorized(err)
 	}

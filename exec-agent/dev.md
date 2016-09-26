@@ -1,8 +1,9 @@
 ##### Link the sources to standard go workspace
 
 ```
+export PROJECTS_PATH=~/code
 mkdir $GOPATH/src/github.com/eclipse/che -p
-ln -s ~/code/che/exec-agent $GOPATH/src/github.com/eclipse/che/exec-agent
+ln -s $PROJECTS_PATH/che/exec-agent $GOPATH/src/github.com/eclipse/che/exec-agent
 ```
 
 ##### Install godep

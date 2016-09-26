@@ -2,9 +2,8 @@ package process
 
 import (
 	"errors"
-	"flag"
 	"fmt"
-	"github.com/eclipse/che/exec-agent/op"
+	"github.com/eclipse/che/exec-agent/rpc"
 	"os"
 	"os/exec"
 	"sync"
@@ -99,7 +98,7 @@ type MachineProcess struct {
 type Subscriber struct {
 	Id      string
 	Mask    uint64
-	Channel chan *op.Event
+	Channel chan *rpc.Event
 }
 
 type LogMessage struct {
@@ -112,12 +111,6 @@ type LogMessage struct {
 type processesMap struct {
 	sync.RWMutex
 	items map[uint64]*MachineProcess
-}
-
-func init() {
-	curDir, _ := os.Getwd()
-	curDir += string(os.PathSeparator) + "logs"
-	flag.StringVar(&LogsDir, "logs-dir", curDir, "Base directory for process logs")
 }
 
 func NewProcess(newCommand Command) *MachineProcess {
@@ -198,13 +191,7 @@ func (process *MachineProcess) Start() error {
 	// before pumping is started publish process_started event
 	startPublished := make(chan bool)
 	go func() {
-		body := &ProcessStatusEventBody{
-			ProcessEventBody: ProcessEventBody{Pid: process.Pid},
-			NativePid:        process.NativePid,
-			Name:             process.Name,
-			CommandLine:      process.CommandLine,
-		}
-		process.notifySubs(op.NewEventNow(ProcessStartedEventType, body), ProcessStatusBit)
+		process.notifySubs(newStartedEvent(*process), ProcessStatusBit)
 		startPublished <- true
 	}()
 
@@ -255,6 +242,10 @@ func (mp *MachineProcess) ReadLogs(from time.Time, till time.Time) ([]*LogMessag
 	return NewLogsReader(mp.logfileName).From(from).Till(till).ReadLogs()
 }
 
+func (mp *MachineProcess) ReadAllLogs() ([]*LogMessage, error) {
+	return mp.ReadLogs(time.Time{}, time.Now())
+}
+
 func (mp *MachineProcess) RemoveSubscriber(id string) {
 	mp.updateLastUsedTime()
 	mp.mutex.Lock()
@@ -280,11 +271,6 @@ func (mp *MachineProcess) AddSubscriber(subscriber *Subscriber) error {
 		}
 	}
 	mp.subs = append(mp.subs, subscriber)
-
-	// if process is alive subscriber must receive 'Subscribed event'
-	if mp.Alive {
-		subscriber.Channel <- newSubscribedEvent(mp.Pid, subscriber.Mask)
-	}
 
 	return nil
 }
@@ -317,7 +303,11 @@ func (mp *MachineProcess) RestoreSubscriber(subscriber *Subscriber, after time.T
 	// Publish all the logs between (after, now]
 	for i := 1; i < len(logs); i++ {
 		message := logs[i]
-		subscriber.Channel <- newOutputEvent(mp.Pid, message.Kind, message.Text, message.Time)
+		if message.Kind == StdoutKind {
+			subscriber.Channel <- newStdoutEvent(mp.Pid, message.Text, message.Time)
+		} else {
+			subscriber.Channel <- newStderrEvent(mp.Pid, message.Text, message.Time)
+		}
 	}
 
 	return nil
@@ -340,11 +330,11 @@ func (mp *MachineProcess) UpdateSubscriber(id string, newMask uint64) error {
 }
 
 func (process *MachineProcess) OnStdout(line string, time time.Time) {
-	process.notifySubs(newOutputEvent(process.Pid, StdoutEventType, line, time), StdoutBit)
+	process.notifySubs(newStdoutEvent(process.Pid, line, time), StdoutBit)
 }
 
 func (process *MachineProcess) OnStderr(line string, time time.Time) {
-	process.notifySubs(newOutputEvent(process.Pid, StderrEventType, line, time), StderrBit)
+	process.notifySubs(newStderrEvent(process.Pid, line, time), StderrBit)
 }
 
 func (mp *MachineProcess) Close() {
@@ -357,13 +347,7 @@ func (mp *MachineProcess) Close() {
 	mp.pumper = nil
 	mp.mutex.Unlock()
 
-	body := &ProcessStatusEventBody{
-		ProcessEventBody: ProcessEventBody{Pid: mp.Pid},
-		NativePid:        mp.NativePid,
-		Name:             mp.Name,
-		CommandLine:      mp.CommandLine,
-	}
-	mp.notifySubs(op.NewEventNow(ProcessDiedEventType, body), ProcessStatusBit)
+	mp.notifySubs(newDiedEvent(*mp), ProcessStatusBit)
 
 	mp.mutex.Lock()
 	mp.subs = nil
@@ -372,7 +356,7 @@ func (mp *MachineProcess) Close() {
 	mp.updateLastUsedTime()
 }
 
-func (mp *MachineProcess) notifySubs(event *op.Event, typeBit uint64) {
+func (mp *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
 	mp.mutex.RLock()
 	subs := mp.subs
 	for _, subscriber := range subs {
@@ -394,7 +378,7 @@ func (mp *MachineProcess) updateLastUsedTime() {
 
 // Writes to a channel and returns true if write is successful,
 // otherwise if write to the channel failed e.g. channel is closed then returns false
-func tryWrite(eventsChan chan *op.Event, event *op.Event) (ok bool) {
+func tryWrite(eventsChan chan *rpc.Event, event *rpc.Event) (ok bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			ok = false
@@ -402,20 +386,4 @@ func tryWrite(eventsChan chan *op.Event, event *op.Event) (ok bool) {
 	}()
 	eventsChan <- event
 	return true
-}
-
-func newOutputEvent(pid uint64, kind string, line string, time time.Time) *op.Event {
-	body := &ProcessOutputEventBody{
-		ProcessEventBody: ProcessEventBody{Pid: pid},
-		Text:             line,
-	}
-	return op.NewEvent(kind, body, time)
-}
-
-func newSubscribedEvent(pid uint64, mask uint64) *op.Event {
-	subEvent := &ProcessSubscribedEventBody{
-		ProcessEventBody: ProcessEventBody{Pid: pid},
-		EventTypes:       typesFromMask(mask),
-	}
-	return op.NewEventNow(SubscribedEventType, subEvent)
 }

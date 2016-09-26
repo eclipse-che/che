@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"flag"
 	"github.com/eclipse/che-lib/pty"
+	"github.com/eclipse/che/exec-agent/auth"
 	"github.com/eclipse/che/exec-agent/rest"
 	"github.com/gorilla/websocket"
 	"io"
@@ -33,7 +34,6 @@ import (
 	"os/exec"
 	"regexp"
 	"unicode/utf8"
-	"github.com/eclipse/che/exec-agent/auth"
 )
 
 type wsPty struct {

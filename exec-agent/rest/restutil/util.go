@@ -13,9 +13,8 @@ func WriteJson(w http.ResponseWriter, body interface{}) error {
 }
 
 // Reads json body from the request
-func ReadJson(r *http.Request, v interface{}) {
-	// TODO deal with an error
-	json.NewDecoder(r.Body).Decode(v)
+func ReadJson(r *http.Request, v interface{}) error {
+	return json.NewDecoder(r.Body).Decode(v)
 }
 
 func IntQueryParam(r *http.Request, name string, defaultValue int) int {
