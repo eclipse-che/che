@@ -37,12 +37,6 @@ public interface Workspace {
     String getNamespace();
 
     /**
-     * Returns the name of the current workspace instance.
-     * Workspace name is unique per namespace.
-     */
-    String getName();
-
-    /**
      * Returns the status of the current workspace instance.
      *
      * <p>All the workspaces which are stopped have runtime
