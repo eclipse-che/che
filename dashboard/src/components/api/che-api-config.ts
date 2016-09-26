@@ -29,6 +29,7 @@ import {CheAdminService} from './che-admin-service.factory';
 import {CheRemote} from './remote/che-remote.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
 import {CheEnvironmentRegistry} from './environment/che-environment-registry.factory';
+import {CheAgent} from './che-agent.factory';
 
 export class ApiConfig {
 
@@ -51,5 +52,6 @@ export class ApiConfig {
     register.factory('cheRemote', CheRemote);
     register.factory('cheOAuthProvider', CheOAuthProvider);
     register.factory('cheEnvironmentRegistry', CheEnvironmentRegistry);
+    register.factory('cheAgent', CheAgent);
   }
 }

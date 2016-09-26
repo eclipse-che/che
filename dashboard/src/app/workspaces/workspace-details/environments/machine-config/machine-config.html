@@ -69,6 +69,14 @@
       </div>
     </che-label-container>
 
+    <!-- Agents -->
+    <che-label-container che-label-name="Agents">
+      <div class="config-agents">
+         <list-agents agents="workspaceMachineConfigController.machineConfig.agents"
+                      agents-on-change="workspaceMachineConfigController.updateAgents()"></list-agents>
+      </div>
+    </che-label-container>
+
     <!-- Ports -->
     <che-label-container che-label-name="Exposed Ports">
       <div class="config-params-table">
