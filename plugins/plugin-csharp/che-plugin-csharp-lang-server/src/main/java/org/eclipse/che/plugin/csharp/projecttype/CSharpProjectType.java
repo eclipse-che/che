@@ -22,7 +22,7 @@ import org.eclipse.che.plugin.csharp.shared.Constants;
 public class CSharpProjectType extends ProjectTypeDef {
     @Inject
     public CSharpProjectType() {
-        super(Constants.CSHARP_PROJECT_TYPE_ID, "C#", true, false, true);
+        super(Constants.CSHARP_PROJECT_TYPE_ID, "C# .NET Core", true, false, true);
         addConstantDefinition(Constants.LANGUAGE, "language", Constants.CSHARP_LANG);
     }
 }
