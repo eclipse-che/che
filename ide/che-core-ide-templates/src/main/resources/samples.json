@@ -1029,7 +1029,7 @@
     "displayName": "laravel",
     "path": "/laravel",
     "description": "A simple application created by Laravel. Execute the '1. Create and run project' command to create the sample project.",
-    "projectType": "blank",
+    "projectType": "php",
     "mixins": [],
     "attributes": {
       "language": [
@@ -1125,7 +1125,7 @@
     "displayName": "codeigniter",
     "path": "/codeigniter",
     "description": "A simple application created by Codeigniter. Execute the '1. Create and run project' command to create the sample project.",
-    "projectType": "blank",
+    "projectType": "php",
     "mixins": [],
     "attributes": {
       "language": [
@@ -1170,7 +1170,7 @@
     "displayName": "symfony",
     "path": "/symfony",
     "description": "A simple application created by Symfony. Execute the '1. Create and run project' command to create the sample project.",
-    "projectType": "blank",
+    "projectType": "php",
     "mixins": [],
     "attributes": {
       "language": [
