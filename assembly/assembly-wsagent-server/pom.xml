@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.0.0-M3-SNAPSHOT</version>
+        <version>5.0.0-M3</version>
     </parent>
     <artifactId>assembly-wsagent-server</artifactId>
     <packaging>pom</packaging>

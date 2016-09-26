@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-commons-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.0.0-M3-SNAPSHOT</version>
+        <version>5.0.0-M3</version>
     </parent>
     <artifactId>che-core-commons-inject</artifactId>
     <packaging>jar</packaging>

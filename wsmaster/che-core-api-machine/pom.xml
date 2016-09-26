@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.0.0-M3-SNAPSHOT</version>
+        <version>5.0.0-M3</version>
     </parent>
     <artifactId>che-core-api-machine</artifactId>
     <packaging>jar</packaging>
