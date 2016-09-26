@@ -35,7 +35,7 @@ public class PhpExtension {
 
     @Inject
     public PhpExtension(FileTypeRegistry fileTypeRegistry,
-                           @Named("PhpFileType") FileType phpFile) {
+                        @Named("PhpFileType") FileType phpFile) {
         fileTypeRegistry.registerFileType(phpFile);
     }
 

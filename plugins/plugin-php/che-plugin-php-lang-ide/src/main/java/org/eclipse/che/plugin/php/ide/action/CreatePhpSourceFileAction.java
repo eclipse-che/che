@@ -21,7 +21,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.plugin.php.ide.PhpLocalizationConstant;
 import org.eclipse.che.plugin.php.ide.PhpResources;
 import org.eclipse.che.plugin.php.shared.Constants;
-import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
  * Action to create new PHP source file.
@@ -37,12 +36,12 @@ public class CreatePhpSourceFileAction extends NewPhplikeResourceAction {
 
     @Inject
     public CreatePhpSourceFileAction(PhpLocalizationConstant localizationConstant,
-                                        PhpResources resources,
-                                        DialogFactory dialogFactory,
-                                        CoreLocalizationConstant coreLocalizationConstant,
-                                        EventBus eventBus,
-                                        AppContext appContext,
-                                        NotificationManager notificationManager) {
+                                     PhpResources resources,
+                                     DialogFactory dialogFactory,
+                                     CoreLocalizationConstant coreLocalizationConstant,
+                                     EventBus eventBus,
+                                     AppContext appContext,
+                                     NotificationManager notificationManager) {
         super(localizationConstant.createPhpFileActionTitle(),
               localizationConstant.createPhpFileActionDescription(),
               resources.phpFile(),

@@ -40,13 +40,13 @@ public abstract class NewPhplikeResourceAction extends AbstractNewResourceAction
      * @param svgIcon
      */
     public NewPhplikeResourceAction(String title,
-                                       String description,
-                                       SVGResource svgIcon,
-                                       DialogFactory dialogFactory,
-                                       CoreLocalizationConstant coreLocalizationConstant,
-                                       EventBus eventBus,
-                                       AppContext appContext,
-                                       NotificationManager notificationManager) {
+                                    String description,
+                                    SVGResource svgIcon,
+                                    DialogFactory dialogFactory,
+                                    CoreLocalizationConstant coreLocalizationConstant,
+                                    EventBus eventBus,
+                                    AppContext appContext,
+                                    NotificationManager notificationManager) {
         super(title, description, svgIcon, dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
         this.appContext = appContext;
     }
