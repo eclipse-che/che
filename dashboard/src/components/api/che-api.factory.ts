@@ -23,7 +23,7 @@ export class CheAPI {
    * @ngInject for Dependency injection
    */
   constructor(cheWorkspace, cheProfile, chePreferences, cheProjectTemplate, cheWebsocket, cheService,
-              cheAdminPlugins, cheAdminService, cheRecipe, cheRecipeTemplate, cheStack, cheOAuthProvider) {
+              cheAdminPlugins, cheAdminService, cheRecipe, cheRecipeTemplate, cheStack, cheOAuthProvider, cheAgent) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.chePreferences = chePreferences;
@@ -36,6 +36,7 @@ export class CheAPI {
     this.cheRecipeTemplate = cheRecipeTemplate;
     this.cheStack = cheStack;
     this.cheOAuthProvider = cheOAuthProvider;
+    this.cheAgent = cheAgent;
   }
 
 
@@ -135,4 +136,13 @@ export class CheAPI {
   getStack() {
     return this.cheStack;
   }
+
+  /**
+   * The Che Agent API
+   * @returns {CheAPI.cheAgent|*}
+   */
+  getAgent() {
+    return this.cheAgent;
+  }
+
 }
