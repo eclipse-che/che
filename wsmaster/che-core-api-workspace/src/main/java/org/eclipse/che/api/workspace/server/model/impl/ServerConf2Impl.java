@@ -14,7 +14,6 @@ import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
 import javax.persistence.Basic;
 import javax.persistence.ElementCollection;
-import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
