@@ -24,9 +24,14 @@ import java.util.Map;
  * @author Valeriy Svydenko
  */
 public class PythonProjectGenerator implements CreateProjectHandler {
+
+    private static final String FILE_NAME = "main.py";
+
     @Override
-    public void onCreateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes, Map<String, String> options)
-            throws ForbiddenException, ConflictException, ServerException {
+    public void onCreateProject(FolderEntry baseFolder,
+                                Map<String, AttributeValue> attributes,
+                                Map<String, String> options) throws ForbiddenException, ConflictException, ServerException {
+        baseFolder.createFile(FILE_NAME, getClass().getClassLoader().getResourceAsStream("files/default_python_content"));
     }
 
     @Override
