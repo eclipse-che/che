@@ -12,7 +12,7 @@ package org.eclipse.che.api.user.server.spi.tck;
 
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.UnauthorizedException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.user.server.Constants;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -29,10 +29,13 @@ import org.testng.annotations.Test;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertTrue;
 
 /**
  * Tests {@link UserDao} contract.
@@ -77,48 +80,41 @@ public class UserDaoTest {
     }
 
     @Test
-    public void shouldAuthenticateUserByName() throws Exception {
+    public void shouldGetUserByNameAndPassword() throws Exception {
         final UserImpl user = users[0];
 
-        assertEquals(userDao.authenticate(user.getName(), user.getPassword()), user.getId());
+        assertEqualsNoPassword(userDao.getByAliasAndPassword(user.getName(), user.getPassword()), user);
     }
 
     @Test
-    public void shouldAuthenticateUserByEmail() throws Exception {
+    public void shouldGetUserByEmailAndPassword() throws Exception {
         final UserImpl user = users[0];
 
-        assertEquals(userDao.authenticate(user.getEmail(), user.getPassword()), user.getId());
+        assertEqualsNoPassword(userDao.getByAliasAndPassword(user.getEmail(), user.getPassword()), user);
     }
 
-    @Test
-    public void shouldAuthenticateUserByAlias() throws Exception {
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionIfUserWithSuchNameOrEmailDoesNotExist() throws Exception {
         final UserImpl user = users[0];
 
-        assertEquals(userDao.authenticate(user.getAliases().get(0), user.getPassword()), user.getId());
+        userDao.getByAliasAndPassword(user.getId(), user.getPassword());
     }
 
-    @Test(expectedExceptions = UnauthorizedException.class)
-    public void shouldNotAuthenticateUserById() throws Exception {
+    @Test(expectedExceptions = NotFoundException.class)
+    public void shouldThrowNotFoundExceptionWhenGettingUserByNameAndWrongPassword() throws Exception {
         final UserImpl user = users[0];
 
-        assertEquals(userDao.authenticate(user.getId(), user.getPassword()), user.getId());
-    }
-
-    @Test(expectedExceptions = UnauthorizedException.class)
-    public void shouldNotAuthenticateUserWithWrongPassword() throws Exception {
-        final UserImpl user = users[0];
-
-        assertEquals(userDao.authenticate(user.getName(), "fake" + user.getPassword()), user.getId());
+        userDao.getByAliasAndPassword(user.getName(), "fake" + user.getPassword());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
-    public void shouldThrowNpeWhenAuthorizingUserWithNullAlias() throws Exception {
-        userDao.authenticate(null, "password");
+    public void shouldThrowNpeWhenAuthorizingUserWithNullEmailOrName() throws Exception {
+        userDao.getByAliasAndPassword(null, "password");
     }
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenAuthorizingUserWithNullPassword() throws Exception {
-        userDao.authenticate("alias", null);
+        userDao.getByAliasAndPassword(users[0].getName(), null);
     }
 
     @Test
@@ -187,6 +183,55 @@ public class UserDaoTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenGettingUserByNullAlias() throws Exception {
         userDao.getByAlias(null);
+    }
+
+    @Test
+    public void shouldGetTotalUserCount() throws Exception {
+        assertEquals(userDao.getTotalCount(), 5);
+    }
+
+    @Test
+    public void getAllShouldReturnAllUsersWithinSingleResponse() throws Exception {
+        List<UserImpl> result = userDao.getAll(6, 0).getItems();
+        assertEquals(result.size(), 5);
+
+        result.sort((User o1, User o2) -> o1.getName().compareTo(o2.getName()));
+        for (int i = 0; i < result.size(); i++) {
+            assertEqualsNoPassword(users[i], result.get(i));
+        }
+    }
+
+    @Test
+    public void shouldReturnGetAllWithSkipCountAndMaxItems() throws Exception {
+        List<UserImpl> users = userDao.getAll(3, 0).getItems();
+        assertEquals(users.size(), 3);
+
+        users = userDao.getAll(3, 3).getItems();
+        assertEquals(users.size(), 2);
+    }
+
+    @Test
+    public void shouldReturnEmptyListIfNoMoreUsers() throws Exception {
+        List<UserImpl> users = userDao.getAll(1, 6).getItems();
+        assertTrue(users.isEmpty());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void getAllShouldThrowIllegalArgumentExceptionIfMaxItemsWrong() throws Exception {
+        userDao.getAll(-1, 5);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void getAllShouldThrowIllegalArgumentExceptionIfSkipCountWrong() throws Exception {
+        userDao.getAll(2, -1);
+    }
+
+    @Test(dependsOnMethods = "shouldGetTotalUserCount")
+    public void shouldReturnCorrectTotalCountAlongWithRequestedUsers() throws Exception {
+        final Page<UserImpl> page = userDao.getAll(2, 0);
+
+        assertEquals(page.getItems().size(), 2);
+        assertEquals(page.getTotalItemsCount(), 5);
     }
 
     @Test(dependsOnMethods = "shouldGetUserById")
@@ -258,14 +303,14 @@ public class UserDaoTest {
         userDao.update(new UserImpl(user.getId(),
                                     "new-email",
                                     "new-name",
-                                    "new-password",
+                                    null,
                                     asList("google:new-alias", "github:new-alias")));
 
         final UserImpl updated = userDao.getById(user.getId());
         assertEquals(updated.getId(), user.getId());
         assertEquals(updated.getEmail(), "new-email");
         assertEquals(updated.getName(), "new-name");
-        assertEquals(updated.getAliases(), asList("google:new-alias", "github:new-alias"));
+        assertEquals(new HashSet<>(updated.getAliases()), new HashSet<>(asList("google:new-alias", "github:new-alias")));
     }
 
     @Test(expectedExceptions = ConflictException.class)
@@ -328,10 +373,48 @@ public class UserDaoTest {
         userDao.remove(null);
     }
 
+    @Test(dependsOnMethods = "shouldGetUserById")
+    public void shouldReturnUserWithNullPasswordWhenGetUserById() throws Exception {
+        assertEquals(userDao.getById(users[0].getId()).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = "shouldGetUserByAlias")
+    public void shouldReturnUserWithNullPasswordWhenGetUserByAliases() throws Exception {
+        assertEquals(userDao.getByAlias(users[0].getAliases().get(0)).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = "shouldGetUserByName")
+    public void shouldReturnUserWithNullPasswordWhenGetUserByName() throws Exception {
+        assertEquals(userDao.getByName(users[0].getName()).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = "shouldGetUserByEmail")
+    public void shouldReturnUserWithNullPasswordWhenGetUserByEmail() throws Exception {
+        assertEquals(userDao.getByEmail(users[0].getEmail()).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = {"shouldGetUserByNameAndPassword",
+                              "shouldGetUserByEmailAndPassword"})
+    public void shouldReturnUserWithNullPasswordWhenGetUserByAliasAndPassword() throws Exception {
+        final UserImpl user = users[0];
+        assertEquals(userDao.getByAliasAndPassword(user.getName(), user.getPassword()).getPassword(), null);
+        assertEquals(userDao.getByAliasAndPassword(user.getEmail(), user.getPassword()).getPassword(), null);
+    }
+
+    @Test(dependsOnMethods = "getAllShouldReturnAllUsersWithinSingleResponse")
+    public void shouldReturnUserWithNullPasswordWhenGetAllUser() throws Exception {
+        assertEquals(userDao.getAll(users.length, 0)
+                            .getItems()
+                            .stream()
+                            .filter(u -> u.getPassword() == null)
+                            .count(), users.length);
+    }
+
     private static void assertEqualsNoPassword(User actual, User expected) {
+        assertNotNull(actual, "Expected not-null user");
         assertEquals(actual.getId(), expected.getId());
         assertEquals(actual.getEmail(), expected.getEmail());
         assertEquals(actual.getName(), expected.getName());
-        assertEquals(actual.getAliases(), expected.getAliases());
+        assertEquals(new HashSet<>(actual.getAliases()), new HashSet<>(expected.getAliases()));
     }
 }

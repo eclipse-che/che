@@ -108,9 +108,7 @@ public class ProfileService extends Service {
                                            Map<String, String> updates) throws NotFoundException,
                                                                                ServerException,
                                                                                BadRequestException {
-        if (updates == null) {
-            throw new BadRequestException("Update attributes required");
-        }
+        checkAttributes(updates);
         final ProfileImpl profile = new ProfileImpl(profileManager.getById(userId));
         profile.setAttributes(updates);
         profileManager.update(profile);
@@ -129,9 +127,7 @@ public class ProfileService extends Service {
                                        Map<String, String> updates) throws NotFoundException,
                                                                            ServerException,
                                                                            BadRequestException {
-        if (updates == null) {
-            throw new BadRequestException("Update attributes required");
-        }
+        checkAttributes(updates);
         final ProfileImpl profile = new ProfileImpl(profileManager.getById(userId()));
         profile.setAttributes(updates);
         profileManager.update(profile);
@@ -158,6 +154,17 @@ public class ProfileService extends Service {
             names.forEach(attributes::remove);
         }
         profileManager.update(profile);
+    }
+
+    private void checkAttributes(Map<String, String> attributes) throws BadRequestException {
+        if (attributes == null) {
+            throw new BadRequestException("Update attributes required");
+        }
+        for (String value : attributes.values()) {
+            if (value == null) {
+                throw new BadRequestException("Update attributes must not be null");
+            }
+        }
     }
 
     private static ProfileDto asDto(Profile profile, User user) {

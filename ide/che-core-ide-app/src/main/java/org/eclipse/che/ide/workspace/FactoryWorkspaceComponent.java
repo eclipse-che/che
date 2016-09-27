@@ -17,7 +17,7 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
@@ -119,7 +119,7 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
         // get workspace ID to use dedicated workspace for this factory
         this.workspaceId = browserQueryFieldRenderer.getParameterFromURLByName("workspaceId");
 
-        Promise<Factory> factoryPromise;
+        Promise<FactoryDto> factoryPromise;
         // now search if it's a factory based on id or from parameters
         if (factoryParameters.containsKey("id")) {
             factoryPromise = factoryServiceClient.getFactory(factoryParameters.get("id"), true);
@@ -127,9 +127,10 @@ public class FactoryWorkspaceComponent extends WorkspaceComponent {
             factoryPromise = factoryServiceClient.resolveFactory(factoryParameters, true);
         }
 
-        factoryPromise.then(new Function<Factory, Void>() {
+        Promise<Void> promise = factoryPromise.then(new Function<FactoryDto, Void>() {
             @Override
-            public Void apply(final Factory factory) throws FunctionException {
+            public Void apply(final FactoryDto factory) throws FunctionException {
+                
                 if (appContext instanceof AppContextImpl) {
                     ((AppContextImpl)appContext).setFactory(factory);
                 }

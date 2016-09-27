@@ -94,7 +94,7 @@ public class LocalStackDaoTest {
         StackImpl stack = createStack();
 
         stackDao.create(stack);
-        stackDao.stop();
+        stackDao.saveStacks();
 
         assertEquals(GSON.toJson(ImmutableMap.of("stackdskhfdskf", stack)), new String(readAllBytes(stackJsonPath)));
         //check icon content

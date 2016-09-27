@@ -21,8 +21,7 @@ import org.eclipse.che.api.factory.server.FactoryConstants;
 import org.eclipse.che.api.factory.server.LegacyConverter;
 import org.eclipse.che.api.factory.server.ValueHelper;
 import org.eclipse.che.api.factory.server.impl.SourceStorageParametersValidator;
-import org.eclipse.che.api.factory.shared.dto.Factory;
-import org.eclipse.che.api.factory.shared.dto.FactoryV4_0;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.shared.DTO;
@@ -80,9 +79,9 @@ public class FactoryBuilder {
      *         - json Reader from encoded factory.
      * @return - Factory object represented by given factory json.
      */
-    public Factory build(Reader json) throws IOException, ApiException {
-        Factory factory = DtoFactory.getInstance()
-                                    .createDtoFromJson(json, Factory.class);
+    public FactoryDto build(Reader json) throws IOException, ApiException {
+        FactoryDto factory = DtoFactory.getInstance()
+                                    .createDtoFromJson(json, FactoryDto.class);
         checkValid(factory);
         return factory;
     }
@@ -94,9 +93,9 @@ public class FactoryBuilder {
      *         - json string from encoded factory.
      * @return - Factory object represented by given factory json.
      */
-    public Factory build(String json) throws ApiException {
-        Factory factory = DtoFactory.getInstance()
-                                    .createDtoFromJson(json, Factory.class);
+    public FactoryDto build(String json) throws ApiException {
+        FactoryDto factory = DtoFactory.getInstance()
+                                    .createDtoFromJson(json, FactoryDto.class);
         checkValid(factory);
         return factory;
     }
@@ -108,9 +107,9 @@ public class FactoryBuilder {
      *         - json  InputStream from encoded factory.
      * @return - Factory object represented by given factory json.
      */
-    public Factory build(InputStream json) throws IOException, ConflictException {
-        Factory factory = DtoFactory.getInstance()
-                                    .createDtoFromJson(json, Factory.class);
+    public FactoryDto build(InputStream json) throws IOException, ConflictException {
+        FactoryDto factory = DtoFactory.getInstance()
+                                    .createDtoFromJson(json, FactoryDto.class);
         checkValid(factory);
         return factory;
     }
@@ -122,7 +121,7 @@ public class FactoryBuilder {
      *         - factory object to validate
      * @throws ConflictException
      */
-    public void checkValid(Factory factory) throws ConflictException {
+    public void checkValid(FactoryDto factory) throws ConflictException {
        checkValid(factory,  false);
     }
 
@@ -136,7 +135,7 @@ public class FactoryBuilder {
      *           Set-by-server variables are allowed during update.
      * @throws ConflictException
      */
-    public void checkValid(Factory factory, boolean isUpdate) throws ConflictException {
+    public void checkValid(FactoryDto factory, boolean isUpdate) throws ConflictException {
         if (null == factory) {
             throw new ConflictException(FactoryConstants.UNPARSABLE_FACTORY_MESSAGE);
         }
@@ -154,12 +153,12 @@ public class FactoryBuilder {
         Class usedFactoryVersionMethodProvider;
         switch (v) {
             case V4_0:
-                usedFactoryVersionMethodProvider = FactoryV4_0.class;
+                usedFactoryVersionMethodProvider = FactoryDto.class;
                 break;
             default:
                 throw new ConflictException(FactoryConstants.INVALID_VERSION_MESSAGE);
         }
-        validateCompatibility(factory, null, Factory.class, usedFactoryVersionMethodProvider, v, "", isUpdate);
+        validateCompatibility(factory, null, FactoryDto.class, usedFactoryVersionMethodProvider, v, "", isUpdate);
     }
 
     /**
@@ -170,8 +169,8 @@ public class FactoryBuilder {
      * @return - factory in latest format.
      * @throws org.eclipse.che.api.core.ApiException
      */
-    public Factory convertToLatest(Factory factory) throws ApiException {
-        Factory resultFactory = DtoFactory.getInstance().clone(factory).withV("4.0");
+    public FactoryDto convertToLatest(FactoryDto factory) throws ApiException {
+        FactoryDto resultFactory = DtoFactory.getInstance().clone(factory).withV("4.0");
         for (LegacyConverter converter : LEGACY_CONVERTERS) {
             converter.convert(resultFactory);
         }

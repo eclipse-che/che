@@ -40,7 +40,8 @@ import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentIm
 import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
-import org.eclipse.che.api.machine.server.dao.SnapshotDao;
+import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.event.InstanceStateEvent;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SourceNotFoundException;
@@ -458,7 +459,6 @@ public class CheEnvironmentEngine {
                     snapshot = SnapshotImpl.builder()
                                            .generateId()
                                            .setType(machine.getConfig().getType())
-                                           .setNamespace(namespace)
                                            .setWorkspaceId(machine.getWorkspaceId())
                                            .setDescription(machine.getEnvName())
                                            .setDev(machine.getConfig().isDev())
@@ -475,7 +475,7 @@ public class CheEnvironmentEngine {
         }
         try {
             MachineSource machineSource = instance.saveToSnapshot();
-            snapshot.setMachineSource(machineSource);
+            snapshot.setMachineSource(new MachineSourceImpl(machineSource));
             return snapshot;
         } catch (ServerException e) {
             try {
