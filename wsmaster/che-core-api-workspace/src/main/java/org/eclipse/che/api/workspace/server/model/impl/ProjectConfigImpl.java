@@ -57,7 +57,7 @@ public class ProjectConfigImpl implements ProjectConfig {
     @Basic
     private String type;
 
-    @Basic
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
