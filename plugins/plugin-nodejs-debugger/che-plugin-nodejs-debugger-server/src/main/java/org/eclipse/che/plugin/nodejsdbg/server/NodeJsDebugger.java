@@ -22,6 +22,7 @@ import org.eclipse.che.api.debug.shared.model.action.StartAction;
 import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
+import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.DebuggerInfoImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
@@ -31,17 +32,19 @@ import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.plugin.nodejsdbg.server.command.NodeJsDebugCommandsLibrary;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerException;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerTerminatedException;
-import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsBackTrace;
-import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsBreakpoints;
-import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsExec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.regex.Pattern;
 
 /**
  * Server side NodeJs debugger.
@@ -57,8 +60,10 @@ public class NodeJsDebugger implements Debugger {
     private final String  version;
     private final String  script;
 
-    private final NodeJsDebugProcess nodeJsDebugProcess;
-    private final DebuggerCallback   debuggerCallback;
+    private final NodeJsDebugProcess         nodeJsDebugProcess;
+    private final DebuggerCallback           debuggerCallback;
+    private final NodeJsDebugCommandsLibrary library;
+    private final Set<Location>              pendingBreakpoints;
 
     NodeJsDebugger(@Nullable Integer pid,
                    @Nullable URI uri,
@@ -68,25 +73,19 @@ public class NodeJsDebugger implements Debugger {
         this.pid = pid;
         this.uri = uri;
         this.script = script;
-        this.name = nodeJsDebugProcess.getName();
-        this.version = nodeJsDebugProcess.getVersion();
         this.nodeJsDebugProcess = nodeJsDebugProcess;
+        this.library = new NodeJsDebugCommandsLibrary(nodeJsDebugProcess);
+        this.name = library.getName();
+        this.version = library.getVersion();
         this.debuggerCallback = debuggerCallback;
+        this.pendingBreakpoints = new CopyOnWriteArraySet<>();
     }
 
     public static NodeJsDebugger newInstance(@Nullable Integer pid,
                                              @Nullable URI uri,
-                                             @Nullable String file,
+                                             String file,
                                              DebuggerCallback debuggerCallback) throws DebuggerException {
-        NodeJsDebugProcess nodeJsDebugProcess;
-        if (pid != null) {
-            nodeJsDebugProcess = NodeJsDebugProcess.start(pid);
-        } else if (uri != null) {
-            nodeJsDebugProcess = NodeJsDebugProcess.start(uri);
-        } else {
-            nodeJsDebugProcess = NodeJsDebugProcess.start(file);
-        }
-
+        NodeJsDebugProcess nodeJsDebugProcess = NodeJsDebugProcess.start(file);
         return new NodeJsDebugger(pid,
                                   uri,
                                   file,
@@ -107,21 +106,17 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void disconnect() {
         debuggerCallback.onEvent(new DisconnectEventImpl());
-
-        try {
-            nodeJsDebugProcess.quit();
-        } catch (NodeJsDebuggerException e) {
-            LOG.error(e.getMessage(), e);
-        }
+        nodeJsDebugProcess.stop();
     }
 
     @Override
     public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
         try {
             Location location = breakpoint.getLocation();
-            nodeJsDebugProcess.setBreakpoint(location.getTarget(), location.getLineNumber());
+            pendingBreakpoints.add(location);
 
-            debuggerCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
+            library.setBreakpoint(location.getTarget(), location.getLineNumber());
+            checkActivatedBreakpoints();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -133,7 +128,8 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void deleteBreakpoint(Location location) throws DebuggerException {
         try {
-            nodeJsDebugProcess.clearBreakpoint(location.getTarget(), location.getLineNumber());
+            pendingBreakpoints.remove(location);
+            library.clearBreakpoint(location.getTarget(), location.getLineNumber());
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -145,15 +141,14 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void deleteAllBreakpoints() throws DebuggerException {
         try {
-            NodeJsBreakpoints nodeJsBreakpoints = nodeJsDebugProcess.getBreakpoints();
-            for (Breakpoint breakpoint : nodeJsBreakpoints.getBreakpoints()) {
-                Location location = breakpoint.getLocation();
+            for (Breakpoint breakpoint : library.getBreakpoints()) {
                 try {
-                    nodeJsDebugProcess.clearBreakpoint(location.getTarget(), location.getLineNumber());
+                    deleteBreakpoint(breakpoint.getLocation());
                 } catch (NodeJsDebuggerException e) {
-                    LOG.error("Can't delete breakpoint: {}", location, e);
+                    LOG.error("Can't delete breakpoint: {}", breakpoint.getLocation(), e);
                 }
             }
+            pendingBreakpoints.clear();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -165,8 +160,7 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public List<Breakpoint> getAllBreakpoints() throws DebuggerException {
         try {
-            NodeJsBreakpoints nodeJsBreakpoints = nodeJsDebugProcess.getBreakpoints();
-            return nodeJsBreakpoints.getBreakpoints();
+            return library.getBreakpoints();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -180,28 +174,25 @@ public class NodeJsDebugger implements Debugger {
         try {
             for (Breakpoint breakpoint : action.getBreakpoints()) {
                 Location location = breakpoint.getLocation();
-                try {
-                    nodeJsDebugProcess.setBreakpoint(location.getTarget(), location.getLineNumber());
-                } catch (NodeJsDebuggerException e) {
-                    LOG.warn("Breakpoint skipped {}", location);
-                }
+                library.setBreakpoint(location.getTarget(), location.getLineNumber());
+                pendingBreakpoints.add(location);
             }
 
-            NodeJsBackTrace nodeJsBackTrace = nodeJsDebugProcess.backtrace();
-            debuggerCallback.onEvent(new SuspendEventImpl(nodeJsBackTrace.getLocation()));
+            debuggerCallback.onEvent(new SuspendEventImpl(library.backtrace()));
+            checkActivatedBreakpoints();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
         } catch (NodeJsDebuggerException e) {
-            throw new DebuggerException("Error during running. " + e.getMessage(), e);
+            throw new DebuggerException("Start error. " + e.getMessage(), e);
         }
     }
 
     @Override
     public void stepOver(StepOverAction action) throws DebuggerException {
         try {
-            NodeJsBackTrace nodeJsBackTrace = nodeJsDebugProcess.next();
-            debuggerCallback.onEvent(new SuspendEventImpl(nodeJsBackTrace.getLocation()));
+            debuggerCallback.onEvent(new SuspendEventImpl(library.next()));
+            checkActivatedBreakpoints();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -213,8 +204,8 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void stepInto(StepIntoAction action) throws DebuggerException {
         try {
-            NodeJsBackTrace nodeJsBackTrace = nodeJsDebugProcess.stepIn();
-            debuggerCallback.onEvent(new SuspendEventImpl(nodeJsBackTrace.getLocation()));
+            debuggerCallback.onEvent(new SuspendEventImpl(library.stepIn()));
+            checkActivatedBreakpoints();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -226,8 +217,8 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void stepOut(StepOutAction action) throws DebuggerException {
         try {
-            NodeJsBackTrace nodeJsBackTrace = nodeJsDebugProcess.stepOut();
-            debuggerCallback.onEvent(new SuspendEventImpl(nodeJsBackTrace.getLocation()));
+            debuggerCallback.onEvent(new SuspendEventImpl(library.stepOut()));
+            checkActivatedBreakpoints();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -239,8 +230,8 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public void resume(ResumeAction action) throws DebuggerException {
         try {
-            NodeJsBackTrace nodeJsBackTrace = nodeJsDebugProcess.cont();
-            debuggerCallback.onEvent(new SuspendEventImpl(nodeJsBackTrace.getLocation()));
+            debuggerCallback.onEvent(new SuspendEventImpl(library.cont()));
+            checkActivatedBreakpoints();
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -256,7 +247,7 @@ public class NodeJsDebugger implements Debugger {
             if (path.isEmpty()) {
                 throw new DebuggerException("Variable path is empty");
             }
-            nodeJsDebugProcess.setVar(path.get(0), variable.getValue());
+            library.setVar(path.get(0), variable.getValue());
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -273,8 +264,7 @@ public class NodeJsDebugger implements Debugger {
                 throw new DebuggerException("Variable path is empty");
             }
 
-            NodeJsExec nodeJsExec = nodeJsDebugProcess.getVar(path.get(0));
-            return new SimpleValueImpl(Collections.emptyList(), nodeJsExec.getValue());
+            return new SimpleValueImpl(Collections.emptyList(), library.getVar(path.get(0)));
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -286,8 +276,7 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public String evaluate(String expression) throws DebuggerException {
         try {
-            NodeJsExec nodeJsExec = nodeJsDebugProcess.evaluate(expression);
-            return nodeJsExec.getValue();
+            return library.evaluate(expression);
         } catch (NodeJsDebuggerTerminatedException e) {
             disconnect();
             throw e;
@@ -299,5 +288,23 @@ public class NodeJsDebugger implements Debugger {
     @Override
     public StackFrameDump dumpStackFrame() throws DebuggerException {
         return new StackFrameDumpImpl(Collections.emptyList(), Collections.emptyList());
+    }
+
+    private void checkActivatedBreakpoints() throws DebuggerException {
+        Set<Location> brk2Remove = new HashSet<>();
+        for (Breakpoint breakpoint : library.getBreakpoints()) {
+            for (Location pending : pendingBreakpoints) {
+                Location added = breakpoint.getLocation();
+                if (added.getLineNumber() == pending.getLineNumber() &&
+                    Pattern.compile(added.getTarget()).matcher(pending.getTarget()).matches()) {
+
+                    BreakpointImpl brkToSend = new BreakpointImpl(pending, breakpoint.isEnabled(), breakpoint.getCondition());
+                    debuggerCallback.onEvent(new BreakpointActivatedEventImpl(brkToSend));
+                    brk2Remove.add(pending);
+                }
+            }
+        }
+
+        pendingBreakpoints.removeAll(brk2Remove);
     }
 }

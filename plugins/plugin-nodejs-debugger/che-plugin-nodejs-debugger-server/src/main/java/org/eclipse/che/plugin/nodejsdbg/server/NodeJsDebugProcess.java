@@ -10,219 +10,239 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.nodejsdbg.server;
 
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerException;
-import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsBackTrace;
-import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsBreakpoints;
-import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsExec;
-import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsOutput;
-import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsScripts;
+import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerTerminatedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.util.concurrent.BlockingQueue;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+
+import static java.lang.Math.min;
+import static java.lang.Thread.sleep;
 
 /**
- * NodeJs debug process.
+ * Wrapper over NodeJs process is being run.
+ * Communication is performed through standard input/output streams.
  *
  * @author Anatoliy Bazko
  */
-public class NodeJsDebugProcess extends NodeJsProcess {
-    private NodeJsDebugProcess(String... options) throws NodeJsDebuggerException {
-        super("debug> ", options);
-    }
+public class NodeJsDebugProcess implements NodeJsProcessObservable {
+    private static final Logger LOG        = LoggerFactory.getLogger(NodeJsDebugProcess.class);
+    private static final int    MAX_OUTPUT = 4096;
 
-    public static NodeJsDebugProcess start(int pid) throws NodeJsDebuggerException {
-        return new NodeJsDebugProcess("debug", "-p", String.valueOf(pid));
-    }
+    private static final String NODEJS_COMMAND = detectNodeJsCommand();
 
-    public static NodeJsDebugProcess start(URI uri) throws NodeJsDebuggerException {
-        return new NodeJsDebugProcess("debug", uri.toString());
+    private final Process        process;
+    private final String         outputSeparator;
+    private final OutputReader   outputReader;
+    private final BufferedWriter processWriter;
+
+    private final List<NodeJsProcessObserver> observers;
+
+    private NodeJsDebugProcess(String outputSeparator, String... options) throws NodeJsDebuggerException {
+        this.observers = new CopyOnWriteArrayList<>();
+        this.outputSeparator = outputSeparator;
+
+        List<String> commands = new ArrayList<>(1 + options.length);
+        commands.add(NODEJS_COMMAND);
+        commands.addAll(Arrays.asList(options));
+
+        ProcessBuilder processBuilder = new ProcessBuilder(commands);
+        try {
+            process = processBuilder.start();
+        } catch (IOException e) {
+            throw new NodeJsDebuggerException("NodeJs process failed.", e);
+        }
+
+        processWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+
+        outputReader = new OutputReader("NodeJs output reader");
+        outputReader.setDaemon(true);
+        outputReader.start();
     }
 
     public static NodeJsDebugProcess start(String file) throws NodeJsDebuggerException {
-        NodeJsDebugProcess nodeJsDebugProcess = new NodeJsDebugProcess("debug", "--debug-brk", file);
-        nodeJsDebugProcess.run();
-        return nodeJsDebugProcess;
+        return new NodeJsDebugProcess("debug> ", "debug", "--debug-brk", file);
     }
 
-    /**
-     * Execute {@code quit} command.
-     */
-    public void quit() throws NodeJsDebuggerException {
-        stop();
-    }
-
-    /**
-     * Execute {@code run} command.
-     */
-    public void run() throws NodeJsDebuggerException {
-        sendCommand("run", RUN_COMMAND_LINE_CONSUMER);
-    }
-
-    /**
-     * Execute {@code exec} command to set a new value for the giving variable.
-     */
-    public void setVar(String varName, String value) throws NodeJsDebuggerException {
-        String command = "exec " + varName + "=" + value;
-        sendCommand(command);
-    }
-
-    /**
-     * Execute {@code exec} command to get value for the giving variable.
-     */
-    public NodeJsExec getVar(String varName) throws NodeJsDebuggerException {
-        NodeJsOutput nodeJsOutput = sendCommand("exec " + varName);
-        return NodeJsExec.parse(nodeJsOutput);
-    }
-
-    /**
-     * Execute {@code exec} command to evaluate expression.
-     */
-    public NodeJsExec evaluate(String expression) throws NodeJsDebuggerException {
-        NodeJsOutput nodeJsOutput = sendCommand("exec " + expression);
-        return NodeJsExec.parse(nodeJsOutput);
-    }
-
-    /**
-     * Execute {@code script} command.
-     */
-    public NodeJsScripts findLoadedScripts() throws NodeJsDebuggerException {
-        NodeJsOutput nodeJsOutput = sendCommand("scripts", DOUBLE_LINE_CONSUMER);
-        return NodeJsScripts.parse(nodeJsOutput);
-    }
-
-    /**
-     * Execute {@code breakpoints} command.
-     */
-    public NodeJsBreakpoints getBreakpoints() throws NodeJsDebuggerException {
-        NodeJsOutput breakpointsOutput = sendCommand("breakpoints", DOUBLE_LINE_CONSUMER);
-        NodeJsOutput scriptsOutput = sendCommand("scripts", DOUBLE_LINE_CONSUMER);
-
-        return NodeJsBreakpoints.parse(scriptsOutput, breakpointsOutput);
-    }
-
-    /**
-     * Execute {@code sb} command.
-     */
-    public void setBreakpoint(@Nullable String script, int lineNumber) throws NodeJsDebuggerException {
-        String command = script != null ? String.format("sb('%s', %d)", script, lineNumber)
-                                        : String.format("sb(%d)", lineNumber);
-        sendCommand(command);
-    }
-
-    /**
-     * Execute {@code back trace} command.
-     */
-    public NodeJsBackTrace backtrace() throws NodeJsDebuggerException {
-        NodeJsOutput nodeJsOutput = sendCommand("bt");
-        return NodeJsBackTrace.parse(nodeJsOutput);
-    }
-
-    /**
-     * Execute {@code next} command.
-     */
-    public NodeJsBackTrace next() throws NodeJsDebuggerException {
-        sendCommand("next", STEP_COMMAND_LINE_CONSUMER);
-        return backtrace();
-    }
-
-    /**
-     * Execute {@code cont} command.
-     */
-    public NodeJsBackTrace cont() throws NodeJsDebuggerException {
-        sendCommand("cont", STEP_COMMAND_LINE_CONSUMER);
-        return backtrace();
-    }
-
-    /**
-     * Execute {@code step in} command.
-     */
-    public NodeJsBackTrace stepIn() throws NodeJsDebuggerException {
-        sendCommand("step", STEP_COMMAND_LINE_CONSUMER);
-        return backtrace();
-    }
-
-    /**
-     * Execute {@code step out} command.
-     */
-    public NodeJsBackTrace stepOut() throws NodeJsDebuggerException {
-        sendCommand("out", STEP_COMMAND_LINE_CONSUMER);
-        return backtrace();
-    }
-
-    /**
-     * Returns NodeJs version.
-     */
-    public String getVersion() throws NodeJsDebuggerException {
-        return sendCommand("process.version").getOutput();
-    }
-
-    /**
-     * Returns NodeJs title.
-     */
-    public String getName() throws NodeJsDebuggerException {
-        return sendCommand("process.title").getOutput();
-    }
-
-    /**
-     * Execute {@code cb} command.
-     */
-    public void clearBreakpoint(String script, int lineNumber) throws NodeJsDebuggerException {
-        String command = script != null ? String.format("cb('%s', %d)", script, lineNumber)
-                                        : String.format("cb(%d)", lineNumber);
-        sendCommand(command);
-    }
-
-    static Function<BlockingQueue<NodeJsOutput>, NodeJsOutput> SINGLE_LINE_CONSUMER = outputs -> {
-        try {
-            return outputs.take();
-        } catch (InterruptedException e) {
-            return NodeJsOutput.EMPTY;
+    @Override
+    public void addObserver(NodeJsProcessObserver observer) {
+        if (outputReader.isAlive()) {
+            observers.add(observer);
         }
-    };
+    }
 
-    static Function<BlockingQueue<NodeJsOutput>, NodeJsOutput> DOUBLE_LINE_CONSUMER = outputs -> {
+    @Override
+    public void removeObserver(NodeJsProcessObserver observer) {
+        observers.remove(observer);
+    }
+
+    /**
+     * Stops process.
+     */
+    void stop() {
         try {
-            NodeJsOutput nodeJsOutput1 = outputs.take();
-            NodeJsOutput nodeJsOutput2 = outputs.take();
-            return nodeJsOutput1.isEmpty() ? nodeJsOutput2 : nodeJsOutput1;
-        } catch (InterruptedException e) {
-            return NodeJsOutput.EMPTY;
+            send("quit");
+        } catch (NodeJsDebuggerException ignored) {
         }
-    };
 
-    static Function<BlockingQueue<NodeJsOutput>, NodeJsOutput> STEP_COMMAND_LINE_CONSUMER = outputs -> {
+        outputReader.interrupt();
+
+        process.destroy();
         try {
-            while (!outputs.take().getOutput().contains("break in")) {
+            if (!process.waitFor(1, TimeUnit.MINUTES)) {
+                LOG.error("NodeJs failed to stop");
             }
         } catch (InterruptedException ignored) {
         }
 
-        return NodeJsOutput.EMPTY;
-    };
-
-    static Function<BlockingQueue<NodeJsOutput>, NodeJsOutput> RUN_COMMAND_LINE_CONSUMER = outputs -> {
         try {
-            for (; ; ) {
-                String output = outputs.take().getOutput();
-                if (output.contains("break in") || output.contains("App is already running")) {
+            processWriter.close();
+        } catch (IOException e) {
+            LOG.warn("Failed to close NodeJs process output stream", e);
+        }
+        observers.clear();
+    }
+
+    public synchronized void send(String command) throws NodeJsDebuggerException {
+        LOG.debug("Execute: {}", command);
+
+        if (!process.isAlive()) {
+            throw new NodeJsDebuggerTerminatedException("NodeJs process is terminated.");
+        }
+
+        try {
+            processWriter.write(command);
+            processWriter.newLine();
+            processWriter.flush();
+        } catch (IOException e) {
+            LOG.error(String.format("Command execution <%s> failed", command), e);
+        }
+
+        try {
+            sleep(100);
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    /**
+     * Continuously reads process output and store in the {@code #outputs}.
+     */
+    private class OutputReader extends Thread {
+        private final StringBuffer buf;
+
+        public OutputReader(String name) {
+            super(name);
+            this.buf = new StringBuffer();
+        }
+
+        @Override
+        public void run() {
+            while (!isInterrupted()) {
+                try {
+                    InputStream in = getInput();
+                    if (in != null) {
+                        String data = read(in);
+                        if (!data.isEmpty()) {
+                            buf.append(data);
+                            if (buf.length() > MAX_OUTPUT) {
+                                buf.delete(0, buf.length() - MAX_OUTPUT);
+                            }
+
+                            extractOutputs();
+                        }
+                    }
+                } catch (IOException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+
+                try {
+                    sleep(100);
+                } catch (InterruptedException e) {
                     break;
                 }
             }
-        } catch (InterruptedException ignored) {
+
+            LOG.debug(getName() + " has been stopped");
         }
 
-        return NodeJsOutput.EMPTY;
-    };
+        private InputStream getInput() throws IOException {
+            return hasError() ? process.getErrorStream()
+                              : (hasInput() ? (hasError() ? process.getErrorStream()
+                                                          : process.getInputStream())
+                                            : null);
+        }
 
-    static Function<BlockingQueue<NodeJsOutput>, NodeJsOutput> QUIT_COMMAND_LINE_CONSUMER = outputs -> {
+        private void extractOutputs() {
+            int indexOf;
+            while ((indexOf = buf.indexOf(outputSeparator)) >= 0) {
+                NodeJsOutput nodeJsOutput = NodeJsOutput.of(buf.substring(0, indexOf));
+                buf.delete(0, indexOf + outputSeparator.length());
+
+                notifyObservers(nodeJsOutput);
+            }
+        }
+
+        private boolean hasError() throws IOException {
+            return process.getErrorStream().available() != 0;
+        }
+
+        private boolean hasInput() throws IOException {
+            return process.getInputStream().available() != 0;
+        }
+
+        private String read(InputStream in) throws IOException {
+            int available = min(in.available(), MAX_OUTPUT);
+            byte[] buf = new byte[available];
+            int read = in.read(buf, 0, available);
+
+            return new String(buf, 0, read, StandardCharsets.UTF_8);
+        }
+    }
+
+    private void notifyObservers(NodeJsOutput nodeJsOutput) {
+        LOG.debug("{}{}", outputSeparator, nodeJsOutput.getOutput());
+
+        for (NodeJsProcessObserver observer : observers) {
+            try {
+                if (observer.onOutputProduced(nodeJsOutput)) {
+                    break;
+                }
+            } catch (NodeJsDebuggerException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Returns NodeJs command to run: either {@code nodejs} or {@code node}.
+     */
+    private static String detectNodeJsCommand() {
+        String detectionCommand = "if command -v nodejs >/dev/null 2>&1; then echo -n 'nodejs'; else echo -n 'node'; fi";
+        ProcessBuilder builder = new ProcessBuilder("sh", "-c", detectionCommand);
+
         try {
-            outputs.poll(10, TimeUnit.SECONDS);
-        } catch (InterruptedException ignored) {
-        }
+            Process process = builder.start();
+            int resultCode = process.waitFor();
+            if (resultCode != 0) {
+                String errMsg = IoUtil.readAndCloseQuietly(process.getErrorStream());
+                throw new IllegalStateException("NodeJs not found. " + errMsg);
+            }
 
-        return NodeJsOutput.EMPTY;
-    };
+            return IoUtil.readAndCloseQuietly(process.getInputStream());
+        } catch (IOException | InterruptedException e) {
+            throw new IllegalStateException("NodeJs not found", e);
+        }
+    }
+
 }

@@ -8,13 +8,20 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.nodejsdbg.server.exception;
+package org.eclipse.che.plugin.nodejsdbg.server;
 
 /**
- * @author Anatoliy Bazko
+ * @author Anatolii Bazko
  */
-public class NodeJsDebuggerTerminatedException extends NodeJsDebuggerException {
-    public NodeJsDebuggerTerminatedException(String message) {
-        super(message);
-    }
+public interface NodeJsProcessObservable {
+
+    /**
+     * Adds observer.
+     */
+    void addObserver(NodeJsProcessObserver observer);
+
+    /**
+     * Removes observer.
+     */
+    void removeObserver(NodeJsProcessObserver observer);
 }

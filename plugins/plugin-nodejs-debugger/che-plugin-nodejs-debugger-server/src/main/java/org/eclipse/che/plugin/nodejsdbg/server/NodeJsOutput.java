@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.nodejsdbg.server.parser;
+package org.eclipse.che.plugin.nodejsdbg.server;
 
 /**
  * Wrapper for NodeJs output.
@@ -16,8 +16,6 @@ package org.eclipse.che.plugin.nodejsdbg.server.parser;
  * @author Anatoliy Bazko
  */
 public class NodeJsOutput {
-    public static final NodeJsOutput EMPTY = new NodeJsOutput("");
-
     private final String output;
 
     private NodeJsOutput(String output) {

@@ -8,30 +8,19 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.nodejsdbg.server.parser;
+package org.eclipse.che.plugin.nodejsdbg.server;
+
+import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerException;
 
 /**
- * {@code exec} command parser.
- *
- * @author Anatoliy Bazko
+ * @author Anatolii Bazko
  */
-public class NodeJsExec {
-
-    private final String value;
-
-    public NodeJsExec(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
+public interface NodeJsProcessObserver {
 
     /**
-     * Factory method.
+     * Is occurred when a nodejs generates a new output.
+     *
+     * Returns {@code true} if no processing requires after.
      */
-    public static NodeJsExec parse(NodeJsOutput nodeJsOutput) {
-        String output = nodeJsOutput.getOutput();
-        return new NodeJsExec(output);
-    }
+    boolean onOutputProduced(NodeJsOutput nodeJsOutput) throws NodeJsDebuggerException;
 }

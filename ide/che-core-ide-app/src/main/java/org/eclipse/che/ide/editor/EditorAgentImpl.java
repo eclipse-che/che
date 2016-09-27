@@ -298,7 +298,7 @@ public class EditorAgentImpl implements EditorAgent,
     @Override
     public EditorPartPresenter getOpenedEditor(Path path) {
         EditorPartStack editorPartStack = editorMultiPartStack.getPartStackByPart(activeEditor);
-        return (EditorPartPresenter)editorPartStack.getPartByPath(path);
+        return editorPartStack == null ? null : (EditorPartPresenter)editorPartStack.getPartByPath(path);
     }
 
     /** {@inheritDoc} */

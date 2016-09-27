@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.nodejsdbg.server.parser;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.plugin.nodejsdbg.server.NodeJsOutput;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerParseException;
 
 import java.util.regex.Matcher;
@@ -22,35 +23,31 @@ import java.util.regex.Pattern;
  *
  * @author Anatoliy Bazko
  */
-public class NodeJsBackTrace {
+public class NodeJsStepParser implements NodeJsOutputParser<Location> {
 
-    private static final Pattern BACKTRACE = Pattern.compile("#0(.*) (.*):(.*):(.*)");
+    public static final NodeJsStepParser INSTANCE = new NodeJsStepParser();
+    public static final Pattern          PATTERN  = Pattern.compile("^break in (.*):([0-9]+)");
 
-    private final Location location;
+    private NodeJsStepParser() { }
 
-    public NodeJsBackTrace(Location location) {
-        this.location = location;
+    @Override
+    public boolean match(NodeJsOutput nodeJsOutput) {
+        return nodeJsOutput.getOutput().startsWith("break in");
     }
 
-    public Location getLocation() {
-        return location;
-    }
-
-    /**
-     * Factory method.
-     */
-    public static NodeJsBackTrace parse(NodeJsOutput nodeJsOutput) throws NodeJsDebuggerParseException {
+    @Override
+    public Location parse(NodeJsOutput nodeJsOutput) throws NodeJsDebuggerParseException {
         String output = nodeJsOutput.getOutput();
 
         for (String line : output.split("\n")) {
-            Matcher matcher = BACKTRACE.matcher(line);
+            Matcher matcher = PATTERN.matcher(line);
             if (matcher.find()) {
-                String file = matcher.group(2);
-                String lineNumber = matcher.group(3);
-                return new NodeJsBackTrace(new LocationImpl(file, Integer.parseInt(lineNumber)));
+                String file = matcher.group(1);
+                String lineNumber = matcher.group(2);
+                return new LocationImpl(file, Integer.parseInt(lineNumber));
             }
         }
 
-        throw new NodeJsDebuggerParseException(NodeJsBackTrace.class, output);
+        throw new NodeJsDebuggerParseException(Location.class, output);
     }
 }

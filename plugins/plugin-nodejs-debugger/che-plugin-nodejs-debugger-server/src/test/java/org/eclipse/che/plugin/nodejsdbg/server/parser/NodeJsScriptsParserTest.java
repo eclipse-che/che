@@ -10,24 +10,35 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.nodejsdbg.server.parser;
 
+import org.eclipse.che.plugin.nodejsdbg.server.NodeJsOutput;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Anatolii Bazko
  */
-public class NodeJsScriptsTest {
+public class NodeJsScriptsParserTest {
+
+    private NodeJsScriptsParser parser;
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        parser = new NodeJsScriptsParser();
+    }
 
     @Test
     public void testParseScriptCommand() throws Exception {
         NodeJsOutput output = NodeJsOutput.of("  35: bootstrap_node.js\n" +
                                               "* 63: app.js\n");
 
-        NodeJsScripts nodeJsScripts = NodeJsScripts.parse(output);
-        Map<Integer, String> scripts = nodeJsScripts.getScripts();
+        assertTrue(parser.match(output));
+
+        Map<Integer, String> scripts = parser.parse(output).getAll();
 
         assertEquals(scripts.size(), 2);
         assertEquals(scripts.get(35), "bootstrap_node.js");

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.nodejsdbg.server.parser;
 
+import org.eclipse.che.plugin.nodejsdbg.server.NodeJsOutput;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -20,23 +22,25 @@ import java.util.regex.Pattern;
  *
  * @author Anatoliy Bazko
  */
-public class NodeJsScripts {
+public class NodeJsScriptsParser implements NodeJsOutputParser<NodeJsScriptsParser.Scripts> {
     private static final Pattern SCRIPT = Pattern.compile(".* ([0-9]*): (.*)");
 
-    private final Map<Integer, String> scripts;
+    public static final NodeJsScriptsParser INSTANCE = new NodeJsScriptsParser();
 
-    private NodeJsScripts(Map<Integer, String> scripts) {
-        this.scripts = scripts;
+    @Override
+    public boolean match(NodeJsOutput nodeJsOutput) {
+        for (String line : nodeJsOutput.getOutput().split("\n")) {
+            Matcher matcher = SCRIPT.matcher(line);
+            if (!matcher.find()) {
+                return false;
+            }
+        }
+
+        return !nodeJsOutput.isEmpty();
     }
 
-    public Map<Integer, String> getScripts() {
-        return scripts;
-    }
-
-    /**
-     * Factory method.
-     */
-    public static NodeJsScripts parse(NodeJsOutput nodeJsOutput) {
+    @Override
+    public Scripts parse(NodeJsOutput nodeJsOutput) {
         Map<Integer, String> scripts = new HashMap<>();
 
         for (String line : nodeJsOutput.getOutput().split("\n")) {
@@ -49,6 +53,16 @@ public class NodeJsScripts {
             }
         }
 
-        return new NodeJsScripts(scripts);
+        return new Scripts(scripts);
+    }
+
+    public static class Scripts {
+        private final Map<Integer, String> scripts;
+
+        public Scripts(Map<Integer, String> scripts) {this.scripts = scripts;}
+
+        public Map<Integer, String> getAll() {
+            return scripts;
+        }
     }
 }

@@ -14,8 +14,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
+import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.BreakpointImpl;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
+import org.eclipse.che.plugin.nodejsdbg.server.NodeJsOutput;
+import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,36 +27,28 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Double.parseDouble;
-
 /**
  * {@code breakpoints} command parser.
  *
  * @author Anatoliy Bazko
  */
-public class NodeJsBreakpoints {
-    private static final Logger LOG  = LoggerFactory.getLogger(NodeJsBreakpoints.class);
+public class NodeJsBreakpointsParser implements NodeJsOutputParser<NodeJsBreakpointsParser.Breakpoints> {
+    private static final Logger LOG  = LoggerFactory.getLogger(NodeJsBreakpointsParser.class);
     private static final Gson   GSON = new GsonBuilder().serializeNulls().create();
 
-    private final List<Breakpoint> breakpoints;
+    public static final NodeJsBreakpointsParser INSTANCE = new NodeJsBreakpointsParser();
 
-    private NodeJsBreakpoints(List<Breakpoint> breakpoints) {
-        this.breakpoints = breakpoints;
+    @Override
+    public boolean match(NodeJsOutput nodeJsOutput) {
+        return nodeJsOutput.getOutput().startsWith("{ breakpoints:");
     }
 
-    public List<Breakpoint> getBreakpoints() {
-        return breakpoints;
-    }
-
-    /**
-     * Factory method.
-     */
-    public static NodeJsBreakpoints parse(NodeJsOutput scriptsOutput, NodeJsOutput breakpointsOutput) {
+    @Override
+    public Breakpoints parse(NodeJsOutput nodeJsOutput) throws NodeJsDebuggerParseException {
         final List<Breakpoint> breakpoints = new ArrayList<>();
-        final Map<Integer, String> scripts = NodeJsScripts.parse(scriptsOutput).getScripts();
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> m = GSON.fromJson(breakpointsOutput.getOutput(), Map.class);
+        Map<String, Object> m = GSON.fromJson(nodeJsOutput.getOutput(), Map.class);
         if (m.containsKey("breakpoints")) {
 
             @SuppressWarnings("unchecked")
@@ -72,8 +67,7 @@ public class NodeJsBreakpoints {
 
                     switch (targetType) {
                         case "scriptId":
-                            int scriptId = (int)parseDouble(item.get("script_id").toString());
-                            target = scripts.get(scriptId);
+                            target = item.get("script_id").toString();
                             break;
                         case "scriptRegExp":
                             target = (String)item.get("script_regexp");
@@ -82,7 +76,8 @@ public class NodeJsBreakpoints {
                             throw new IllegalArgumentException("Unsupported 'type' value: " + targetType);
                     }
 
-                    Breakpoint breakpoint = new BreakpointImpl(new LocationImpl(target, lineNumber), isEnabled, condition);
+                    Location location = new LocationImpl(targetType + ":" + target, lineNumber + 1);
+                    Breakpoint breakpoint = new BreakpointImpl(location, isEnabled, condition);
                     breakpoints.add(breakpoint);
                 } catch (Exception e) {
                     LOG.error("Failed to parse breakpoint: " + item.toString(), e);
@@ -90,6 +85,16 @@ public class NodeJsBreakpoints {
             }
         }
 
-        return new NodeJsBreakpoints(breakpoints);
+        return new Breakpoints(breakpoints);
+    }
+
+    public static class Breakpoints {
+        private final List<Breakpoint> breakpoints;
+
+        private Breakpoints(List<Breakpoint> breakpoints) {this.breakpoints = breakpoints;}
+
+        public List<Breakpoint> getAll() {
+            return breakpoints;
+        }
     }
 }
