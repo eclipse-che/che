@@ -13,6 +13,8 @@ package org.eclipse.che.api.core.util;
 import java.io.IOException;
 
 /**
+ * Is thrown as result of attempt to write a line into closed line consumer.
+ *
  * @author Mykola Morhun
  */
 public class ConsumerAlreadyClosedException extends IOException {

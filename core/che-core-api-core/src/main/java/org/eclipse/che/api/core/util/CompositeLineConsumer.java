@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.nio.channels.ClosedByInterruptException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author andrew00x
@@ -30,9 +32,7 @@ public class CompositeLineConsumer implements LineConsumer {
     private       boolean            isClosed;
 
     public CompositeLineConsumer(LineConsumer... lineConsumers) {
-        this.lineConsumers = new ArrayList<>(lineConsumers.length);
-        Arrays.stream(lineConsumers).forEach(this.lineConsumers::add);
-
+        this.lineConsumers = new CopyOnWriteArrayList<>(lineConsumers);
         this.isClosed = false;
     }
 
