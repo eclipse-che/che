@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.machine.ServerProperties;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -24,6 +25,7 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.commons.test.mockito.answer.SelfReturningAnswer;
@@ -51,20 +53,25 @@ import static org.mockito.Mockito.when;
 
 @Listeners(MockitoTestNGListener.class)
 public class WsAgentLauncherImplTest {
-    private static final String     MACHINE_ID                    = "machineId";
-    private static final String     WORKSPACE_ID                  = "testWorkspaceId";
-    private static final String     WS_AGENT_PORT                 = Constants.WS_AGENT_PORT;
-    private static final long       WS_AGENT_MAX_START_TIME_MS    = 1000;
-    private static final long       WS_AGENT_PING_DELAY_MS        = 1;
-    private static final int        WS_AGENT_PING_CONN_TIMEOUT_MS = 1;
-    private static final String     WS_AGENT_SERVER_LOCATION      = "ws-agent.com:456789/";
-    private static final String     WS_AGENT_SERVER_URL           = "http://" + WS_AGENT_SERVER_LOCATION;
-    private static final ServerImpl SERVER                        = new ServerImpl("ref",
-                                                                                   "http",
+    private static final String               MACHINE_ID                    = "machineId";
+    private static final String               WORKSPACE_ID                  = "testWorkspaceId";
+    private static final String               WS_AGENT_PORT                 = Constants.WS_AGENT_PORT;
+    private static final long                 WS_AGENT_MAX_START_TIME_MS    = 1000;
+    private static final long                 WS_AGENT_PING_DELAY_MS        = 1;
+    private static final int                  WS_AGENT_PING_CONN_TIMEOUT_MS = 1;
+    private static final String               WS_AGENT_SERVER_LOCATION      = "ws-agent.com:456789/";
+    private static final String               WS_AGENT_SERVER_URL           = "http://" + WS_AGENT_SERVER_LOCATION;
+    private static final String               WS_AGENT_SERVER_LOCATION_EXT  = "ws-agent-ext.com:456789/";
+    private static final String               WS_AGENT_SERVER_URL_EXT       = "http://" + WS_AGENT_SERVER_LOCATION;
+    private static final ServerPropertiesImpl SERVER_PROPERTIES             = new ServerPropertiesImpl(null,
                                                                                    WS_AGENT_SERVER_LOCATION,
-                                                                                   null,
                                                                                    WS_AGENT_SERVER_URL);
-    private static final String     WS_AGENT_TIMED_OUT_MESSAGE    = "timeout error message";
+    private static final ServerImpl           SERVER                        = new ServerImpl("ref",
+                                                                                   "http",
+                                                                                   WS_AGENT_SERVER_LOCATION_EXT,
+                                                                                   WS_AGENT_SERVER_URL_EXT,
+                                                                                   SERVER_PROPERTIES);
+    private static final String               WS_AGENT_TIMED_OUT_MESSAGE    = "timeout error message";
 
     @Mock
     private MachineProcessManager  machineProcessManager;

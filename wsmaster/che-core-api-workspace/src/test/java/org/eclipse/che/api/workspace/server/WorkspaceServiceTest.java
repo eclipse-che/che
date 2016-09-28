@@ -33,6 +33,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
@@ -748,11 +749,16 @@ public class WorkspaceServiceTest {
                                               MachineStatus.RUNNING,
                                               new MachineRuntimeInfoImpl(emptyMap(),
                                                                          emptyMap(),
-                                                                         singletonMap("8080/https", new ServerImpl("wsagent",
-                                                                                                                   "8080",
-                                                                                                                   "https",
-                                                                                                                   "path1",
-                                                                                                                   "url")))));
+                                                                         singletonMap("8080/https",
+                                                                                      new ServerImpl(
+                                                                                              "wsagent",
+                                                                                              "https",
+                                                                                              "address",
+                                                                                              "url",
+                                                                                              new ServerPropertiesImpl(
+                                                                                                  "path",
+                                                                                                  "internaladdress",
+                                                                                                  "internalurl"))))));
         runtime.getMachines().add(runtime.getDevMachine());
         workspace.setStatus(RUNNING);
         workspace.setRuntime(runtime);

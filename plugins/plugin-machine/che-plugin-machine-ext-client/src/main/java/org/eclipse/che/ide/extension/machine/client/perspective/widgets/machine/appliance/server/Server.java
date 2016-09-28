@@ -16,6 +16,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
 
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 /**
  * The class which describes entity which store information of current server.
@@ -24,19 +25,17 @@ import javax.validation.constraints.NotNull;
  */
 public class Server implements org.eclipse.che.api.core.model.machine.Server {
 
-    private final String    port;
     private final ServerDto descriptor;
+    private final String    port;
 
     @Inject
     public Server(@Assisted String port, @Assisted ServerDto descriptor) {
-        this.port = port;
+        this.port       = port;
         this.descriptor = descriptor;
     }
 
     @NotNull
-    public String getPort() {
-        return port;
-    }
+    public String getPort() { return port; }
 
     @NotNull
     @Override
@@ -61,7 +60,32 @@ public class Server implements org.eclipse.che.api.core.model.machine.Server {
     }
 
     @Override
-    public String getPath() {
-        return descriptor.getPath();
+    public ServerProperties getProperties() {
+        return new ServerProperties(descriptor.getProperties());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Server)) return false;
+        Server other = (Server) o;
+        return Objects.equals(descriptor, other.descriptor) &&
+                       Objects.equals(port, other.port);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = hash * 31 + Objects.hashCode(descriptor);
+        hash = hash * 31 + Objects.hashCode(port);
+        return hash;
+    }
+
+    @Override
+    public String toString() {
+        return "Server{" +
+                       "descriptor=" + descriptor +
+                       ", port='" + port + '\'' +
+                       '}';
     }
 }
