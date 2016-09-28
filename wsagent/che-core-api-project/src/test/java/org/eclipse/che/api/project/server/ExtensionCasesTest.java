@@ -22,6 +22,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,7 +63,8 @@ public class ExtensionCasesTest extends WsAgentTestBase {
         projectRegistry.initProjects();
 
         pm = new ProjectManager(vfsProvider, null, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                null, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder, projectTreeChangesDetector);
+                                null, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder, projectTreeChangesDetector,
+                                Mockito.mock(ReadmeInjectionHandler.class));
         pm.initWatcher();
 
 

@@ -24,7 +24,6 @@ import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionMana
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.shared.Constants;
-import org.eclipse.che.api.project.server.template.ReadmeVolumeProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
 import org.eclipse.che.api.workspace.server.WorkspaceMessageBodyAdapter;
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
@@ -146,6 +145,6 @@ public class WsMasterModule extends AbstractModule {
     private void configureDefaultReadmeInjector() {
         Multibinder.newSetBinder(binder(), String.class, Names.named("machine.docker.machine_volumes"))
                    .addBinding()
-                   .toProvider(ReadmeVolumeProvider.class);
+                   .toProvider(org.eclipse.che.api.project.server.template.ReadmeVolumeProvider.class);
     }
 }

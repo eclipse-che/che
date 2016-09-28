@@ -33,6 +33,7 @@ import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.nio.file.PathMatcher;
@@ -124,7 +125,7 @@ public class WsAgentTestBase {
 
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
                                 importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, wsHolder,
-                                projectTreeChangesDetector);
+                                projectTreeChangesDetector, Mockito.mock(ReadmeInjectionHandler.class));
         pm.initWatcher();
     }
 

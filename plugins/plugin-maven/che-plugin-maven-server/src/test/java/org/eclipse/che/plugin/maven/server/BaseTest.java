@@ -20,6 +20,7 @@ import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectRegistry;
+import org.eclipse.che.api.project.server.ReadmeInjectionHandler;
 import org.eclipse.che.api.project.server.WorkspaceProjectsSyncer;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.internal.codeassist.impl.AssistOptions;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -150,7 +152,7 @@ public abstract class BaseTest {
 
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
                                 importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, new TestWorkspaceHolder(new ArrayList<>()),
-                                projectTreeChangesDetector);
+                                projectTreeChangesDetector, Mockito.mock(ReadmeInjectionHandler.class));
 
         plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> pm);
 

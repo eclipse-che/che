@@ -18,7 +18,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.ReadmeInjectionHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -46,13 +45,11 @@ import org.eclipse.jdt.core.JavaCore;
 public abstract class AbstractJavaInitHandler implements ProjectInitHandler {
 
 
-    private ResourcesPlugin        plugin;
-    private ReadmeInjectionHandler injectionHandler;
+    private ResourcesPlugin plugin;
 
     @Inject
-    void init(ResourcesPlugin plugin, ReadmeInjectionHandler injectionHandler) {
+    void init(ResourcesPlugin plugin) {
         this.plugin = plugin;
-        this.injectionHandler = injectionHandler;
     }
 
     @Override
@@ -61,8 +58,6 @@ public abstract class AbstractJavaInitHandler implements ProjectInitHandler {
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectFolder.getPath().toString());
         IJavaProject javaProject = JavaCore.create(project);
         initializeClasspath(javaProject);
-
-        injectionHandler.handleReadmeInjection(projectFolder);
     }
 
     /**

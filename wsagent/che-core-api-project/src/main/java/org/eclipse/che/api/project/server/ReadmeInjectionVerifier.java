@@ -19,6 +19,9 @@ import org.eclipse.che.api.vfs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.io.File.separator;
+import static org.eclipse.che.api.project.server.UtilityFolderProvider.DEFAULT_FOLDER_NAME;
+
 /**
  * @author Dmitry Kuleshov
  */
@@ -46,7 +49,9 @@ public class ReadmeInjectionVerifier {
     }
 
     public boolean isReadmeNotPresent(FolderEntry projectFolder) throws ServerException {
-        return projectFolder.getChild(readmeName) == null;
+        final String defaultReadmeName = DEFAULT_FOLDER_NAME + separator + readmeName;
+        return projectFolder.getChild(readmeName) == null &&
+               projectFolder.getChild(defaultReadmeName) == null;
     }
 }
 

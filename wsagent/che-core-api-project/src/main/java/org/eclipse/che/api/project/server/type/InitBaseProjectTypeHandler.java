@@ -18,11 +18,9 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.ReadmeInjectionHandler;
 import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 
-import javax.inject.Inject;
 import java.util.List;
 
 /**
@@ -32,13 +30,6 @@ import java.util.List;
  */
 @Singleton
 public class InitBaseProjectTypeHandler implements ProjectInitHandler {
-
-    private final ReadmeInjectionHandler injectionHandler;
-
-    @Inject
-    public InitBaseProjectTypeHandler(ReadmeInjectionHandler injectionHandler) {
-        this.injectionHandler = injectionHandler;
-    }
 
     @Override
     public String getProjectType() {
@@ -57,7 +48,5 @@ public class InitBaseProjectTypeHandler implements ProjectInitHandler {
                 projectRegistry.setProjectType(project, BaseProjectType.ID, false);
             }
         }
-
-        injectionHandler.handleReadmeInjection(projectFolder);
     }
 }

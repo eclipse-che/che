@@ -71,6 +71,7 @@ public final class ProjectManager {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectManager.class);
 
     private final VirtualFileSystem              vfs;
+    private final VirtualFileSystemProvider      vfsProvider;
     private final EventService                   eventService;
     private final ProjectTypeRegistry            projectTypeRegistry;
     private final ProjectRegistry                projectRegistry;
@@ -81,6 +82,7 @@ public final class ProjectManager {
     private final ExecutorService                executor;
     private final WorkspaceProjectsSyncer        workspaceProjectsHolder;
     private final ProjectTreeChangesDetector     projectTreeChangesDetector;
+    private final ReadmeInjectionHandler         readmeInjectionHandler;
 
     @Inject
     public ProjectManager(VirtualFileSystemProvider vfsProvider,
@@ -92,8 +94,10 @@ public final class ProjectManager {
                           FileWatcherNotificationHandler fileWatcherNotificationHandler,
                           FileTreeWatcher fileTreeWatcher,
                           WorkspaceProjectsSyncer workspaceProjectsHolder,
-                          ProjectTreeChangesDetector projectTreeChangesDetector) throws ServerException {
+                          ProjectTreeChangesDetector projectTreeChangesDetector,
+                          ReadmeInjectionHandler readmeInjectionHandler) throws ServerException {
         this.vfs = vfsProvider.getVirtualFileSystem();
+        this.vfsProvider = vfsProvider;
         this.eventService = eventService;
         this.projectTypeRegistry = projectTypeRegistry;
         this.projectRegistry = projectRegistry;
@@ -103,6 +107,7 @@ public final class ProjectManager {
         this.fileWatcher = fileTreeWatcher;
         this.workspaceProjectsHolder = workspaceProjectsHolder;
         this.projectTreeChangesDetector = projectTreeChangesDetector;
+        this.readmeInjectionHandler = readmeInjectionHandler;
 
         executor = Executors.newFixedThreadPool(1 + Runtime.getRuntime().availableProcessors(),
                                                 new ThreadFactoryBuilder().setNameFormat("ProjectService-IndexingThread-")
@@ -237,6 +242,7 @@ public final class ProjectManager {
             }
 
             final FolderEntry projectFolder = new FolderEntry(vfs.getRoot().createFolder(path), projectRegistry);
+            readmeInjectionHandler.handleReadmeInjection(projectFolder);
             final CreateProjectHandler generator = handlers.getCreateProjectHandler(projectConfig.getType());
 
             if (generator != null) {
@@ -357,6 +363,7 @@ public final class ProjectManager {
                 throw e;
             }
 
+            readmeInjectionHandler.handleReadmeInjection(folder);
             final String name = folder.getPath().getName();
             for (ProjectConfig project : workspaceProjectsHolder.getProjects()) {
                 if (normalizePath.equals(project.getPath())) {
