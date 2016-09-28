@@ -161,6 +161,10 @@
             <outputDirectory>conf</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${project.parent.basedir}/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/readme</directory>
+            <outputDirectory>readme</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${project.basedir}/src/assembly</directory>
             <outputDirectory></outputDirectory>
             <includes>

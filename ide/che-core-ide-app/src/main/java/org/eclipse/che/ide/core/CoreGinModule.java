@@ -23,6 +23,7 @@ import com.google.web.bindery.event.shared.SimpleEventBus;
 
 import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.actions.ActionManagerImpl;
+import org.eclipse.che.ide.actions.OpenReadmeAction;
 import org.eclipse.che.ide.actions.find.FindActionView;
 import org.eclipse.che.ide.actions.find.FindActionViewImpl;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -350,6 +351,8 @@ public class CoreGinModule extends AbstractGinModule {
         configureWebSocket();
         configureClientServerEventService();
 
+        configureActions();
+
         GinMultibinder<PersistenceComponent> persistenceComponentsMultibinder =
                 GinMultibinder.newSetBinder(binder(), PersistenceComponent.class);
         persistenceComponentsMultibinder.addBinding().to(ShowHiddenFilesPersistenceComponent.class);
@@ -364,6 +367,10 @@ public class CoreGinModule extends AbstractGinModule {
         bind(ClipboardManager.class).to(ClipboardManagerImpl.class);
 
         GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class).addBinding().to(ResourceInterceptor.NoOpInterceptor.class);
+    }
+
+    private void configureActions() {
+        bind(OpenReadmeAction.class).asEagerSingleton();
     }
 
     private void configureClientServerEventService() {
