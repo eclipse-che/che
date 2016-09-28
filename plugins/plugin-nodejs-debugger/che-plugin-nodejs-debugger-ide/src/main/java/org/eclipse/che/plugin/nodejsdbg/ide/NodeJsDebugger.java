@@ -85,7 +85,7 @@ public class NodeJsDebugger extends AbstractDebugger {
             }
         }
 
-        return new DebuggerDescriptor("", "{" + sb.toString() + "}");
+        return new DebuggerDescriptor("", "{ " + sb.toString() + " }");
     }
 
     public enum ConnectionProperties {
