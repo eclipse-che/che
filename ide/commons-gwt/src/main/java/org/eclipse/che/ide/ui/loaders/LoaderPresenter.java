@@ -30,6 +30,7 @@ public class LoaderPresenter {
         STARTING_WORKSPACE_AGENT,
         CREATING_PROJECT,
         CREATING_WORKSPACE_SNAPSHOT,
+        STOPPING_WORKSPACE,
         WORKSPACE_STOPPED
     }
 
@@ -84,11 +85,12 @@ public class LoaderPresenter {
             case CREATING_PROJECT:
                 loader = popupLoaderFactory.getPopup(locale.creatingProject(), locale.creatingProjectDescription());
                 break;
-
             case CREATING_WORKSPACE_SNAPSHOT:
                 loader = popupLoaderFactory.getPopup(locale.snapshottingWorkspace(), locale.snapshottingWorkspaceDescription());
                 break;
-
+            case STOPPING_WORKSPACE:
+                loader = popupLoaderFactory.getPopup(locale.stoppingWorkspace(), locale.stoppingWorkspaceDescription());
+                break;
             case WORKSPACE_STOPPED:
                 loader = popupLoaderFactory.getPopup(locale.workspaceStopped(), locale.workspaceStoppedDescription(), widget);
                 break;

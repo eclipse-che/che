@@ -714,6 +714,7 @@ public class CheEnvironmentEngine {
                                                                        bytesToMB(service.getMemLimit())))
                                                                .setType("docker")
                                                                .setName(machineName)
+                                                               .setEnvVariables(service.getEnvironment())
                                                                .build())
                                    .setId(service.getId())
                                    .setWorkspaceId(workspaceId)

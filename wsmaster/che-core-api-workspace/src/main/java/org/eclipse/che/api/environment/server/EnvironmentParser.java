@@ -32,6 +32,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Parses {@link Environment} into {@link CheServicesEnvironmentImpl}.
@@ -40,6 +41,12 @@ import static java.lang.String.format;
  */
 public class EnvironmentParser {
     private static final List<String> types = Arrays.asList("compose", "dockerimage", "dockerfile");
+
+    // TODO move to container related code
+    protected static final String SERVER_CONF_LABEL_PREFIX          = "che:server:";
+    protected static final String SERVER_CONF_LABEL_REF_SUFFIX      = ":ref";
+    protected static final String SERVER_CONF_LABEL_PROTOCOL_SUFFIX = ":protocol";
+    protected static final String SERVER_CONF_LABEL_PATH_SUFFIX     = ":path";
 
     private final ComposeFileParser composeFileParser;
     private final RecipeDownloader  recipeDownloader;
@@ -78,36 +85,73 @@ public class EnvironmentParser {
         checkArgument(environment.getRecipe().getContent() != null || environment.getRecipe().getLocation() != null,
                       "Recipe of environment must contain location or content");
 
-        CheServicesEnvironmentImpl composeEnvironment;
+        CheServicesEnvironmentImpl cheServicesEnvironment;
         String envType = environment.getRecipe().getType();
         switch (envType) {
             case "compose":
-                composeEnvironment = parseCompose(environment.getRecipe());
+                cheServicesEnvironment = parseCompose(environment.getRecipe());
                 break;
             case "dockerimage":
             case "dockerfile":
-                composeEnvironment = parseDocker(environment);
+                cheServicesEnvironment = parseDocker(environment);
                 break;
             default:
-                throw new IllegalArgumentException("Environment type " + envType + " is not supported");
+                throw new IllegalArgumentException(format("Environment type '%s' is not supported. " +
+                                                          "Supported environment types: %s",
+                                                          envType,
+                                                          Joiner.on(", ").join(types)));
         }
 
-        composeEnvironment.getServices().forEach((name, service) -> {
+        cheServicesEnvironment.getServices().forEach((name, service) -> {
             ExtendedMachine extendedMachine = environment.getMachines().get(name);
-            if (extendedMachine != null &&
-                extendedMachine.getAttributes() != null &&
-                extendedMachine.getAttributes().containsKey("memoryLimitBytes")) {
-
-                try {
-                    service.setMemLimit(Long.parseLong(extendedMachine.getAttributes().get("memoryLimitBytes")));
-                } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException(
-                            format("Value of attribute 'memoryLimitBytes' of machine '%s' is illegal", name));
-                }
+            if (extendedMachine != null) {
+                normalizeMachine(name, service, extendedMachine);
             }
         });
 
-        return composeEnvironment;
+        return cheServicesEnvironment;
+    }
+
+    private void normalizeMachine(String name, CheServiceImpl service, ExtendedMachine extendedMachine) {
+        if (extendedMachine.getAttributes().containsKey("memoryLimitBytes")) {
+
+            try {
+                service.setMemLimit(Long.parseLong(extendedMachine.getAttributes().get("memoryLimitBytes")));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(
+                        format("Value of attribute 'memoryLimitBytes' of machine '%s' is illegal", name));
+            }
+        }
+        service.setExpose(service.getExpose()
+                                 .stream()
+                                 .map(expose -> expose.contains("/") ?
+                                                expose :
+                                                expose + "/tcp")
+                                 .collect(toList()));
+        extendedMachine.getServers().forEach((serverRef, serverConf) -> {
+            String normalizedPort = serverConf.getPort().contains("/") ?
+                                    serverConf.getPort() :
+                                    serverConf.getPort() + "/tcp";
+
+            service.getExpose().add(normalizedPort);
+
+            String portLabelPrefix = SERVER_CONF_LABEL_PREFIX + normalizedPort;
+
+            service.getLabels().put(portLabelPrefix +
+                                    SERVER_CONF_LABEL_REF_SUFFIX,
+                                    serverRef);
+            if (serverConf.getProperties() != null && serverConf.getProperties().get("path") != null) {
+
+                service.getLabels().put(portLabelPrefix +
+                                        SERVER_CONF_LABEL_PATH_SUFFIX,
+                                        serverConf.getProperties().get("path"));
+            }
+            if (serverConf.getProtocol() != null) {
+                service.getLabels().put(portLabelPrefix +
+                                        SERVER_CONF_LABEL_PROTOCOL_SUFFIX,
+                                        serverConf.getProtocol());
+            }
+        });
     }
 
     private CheServicesEnvironmentImpl parseCompose(EnvironmentRecipe recipe) throws ServerException {
@@ -155,7 +199,7 @@ public class EnvironmentParser {
         checkArgument(environment.getMachines().size() == 1,
                       "Environment of type '%s' doesn't support multiple machines, but contains machines: %s",
                       environment.getRecipe().getType(),
-                      Joiner.on(',').join(environment.getMachines().keySet()));
+                      Joiner.on(", ").join(environment.getMachines().keySet()));
 
         CheServicesEnvironmentImpl composeEnvironment = new CheServicesEnvironmentImpl();
         CheServiceImpl service = new CheServiceImpl();
@@ -171,9 +215,9 @@ public class EnvironmentParser {
             service.setImage(recipe.getLocation());
         } else {
             if (!"text/x-dockerfile".equals(recipe.getContentType())) {
-                throw new IllegalArgumentException(
-                        format("Content type '%s' of recipe of environment is unsupported. Supported values are: text/x-dockerfile",
-                               recipe.getContentType()));
+                throw new IllegalArgumentException(format("Content type '%s' of recipe of environment is unsupported." +
+                                                          " Supported values are: text/x-dockerfile",
+                                                          recipe.getContentType()));
             }
 
             if (recipe.getLocation() != null) {

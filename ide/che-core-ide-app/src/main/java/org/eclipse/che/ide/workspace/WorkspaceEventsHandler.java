@@ -393,7 +393,12 @@ public class WorkspaceEventsHandler {
                     eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                     break;
 
+                case STOPPING:
+                    loader.show(LoaderPresenter.Phase.STOPPING_WORKSPACE);
+                    break;
+
                 case STOPPED:
+                    loader.setSuccess(LoaderPresenter.Phase.STOPPING_WORKSPACE);
                     unSubscribeHandlers();
                     eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                     startWorkspaceNotification.show(statusEvent.getWorkspaceId());

@@ -154,9 +154,9 @@ export class CreateWorkspaceController {
         this.submitWorkspace(source);
       }
     } else if (this.selectSourceOption === 'select-source-import') {
-      let workspaceConfig = this.importWorkspace.length > 0 ? angular.fromJson(this.importWorkspace) : {};
-      workspaceConfig.name = this.workspaceName;
-      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig);
+      this.importWorkspaceConfig.name = this.workspaceName;
+      this.setEnvironment(this.importWorkspaceConfig);
+      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, this.importWorkspaceConfig);
       this.redirectAfterSubmitWorkspace(creationPromise);
     } else {
       //check predefined recipe location
@@ -169,6 +169,41 @@ export class CreateWorkspaceController {
         this.submitWorkspace(source);
       }
     }
+  }
+
+  /**
+   * Perform actions when content of workspace config is changed.
+   */
+  onWorkspaceSourceChange() {
+    this.importWorkspaceConfig = null;
+    this.importWorkspaceMachines = null;
+
+    if (this.importWorkspace && this.importWorkspace.length > 0) {
+      try {
+        this.importWorkspaceConfig = angular.fromJson(this.importWorkspace);
+        this.workspaceName = this.importWorkspaceConfig.name;
+        let environment = this.importWorkspaceConfig.environments[this.importWorkspaceConfig.defaultEnv];
+        let recipeType = environment.recipe.type;
+        let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
+        this.importWorkspaceMachines = environmentManager.getMachines(environment);
+      } catch (error) {
+
+      }
+    }
+  }
+
+  /**
+   * Returns the list of environments to be displayed.
+   *
+   * @returns {*} list of environments
+   */
+  getEnvironments() {
+    if (this.selectSourceOption === 'select-source-import') {
+      return (this.importWorkspaceConfig && this.importWorkspaceConfig.environments) ? this.importWorkspaceConfig.environments : [];
+    } else if (this.stack) {
+      return this.stack.workspaceConfig.environments;
+    }
+    return [];
   }
 
   /**
@@ -242,9 +277,14 @@ export class CreateWorkspaceController {
     this.$rootScope.$broadcast('recent-workspace:set', workspaceId);
   }
 
-  getStackMachines(environment) {
+  getMachines(environment) {
     let recipeType = environment.recipe.type;
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
+
+    if (this.selectSourceOption === 'select-source-import') {
+      return this.importWorkspaceMachines;
+    }
+
     if (!this.stackMachines[this.stack.id]) {
       this.stackMachines[this.stack.id] = environmentManager.getMachines(environment);
     }
@@ -269,6 +309,6 @@ export class CreateWorkspaceController {
 
     let recipeType = environment.recipe.type;
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
-    workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, this.getStackMachines(environment));
+    workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, this.getMachines(environment));
   }
 }

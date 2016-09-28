@@ -82,8 +82,6 @@ public class MachineExtension {
 
     private final PerspectiveManager perspectiveManager;
 
-    private boolean maximized;
-
     @Inject
     public MachineExtension(final MachineResources machineResources,
                             final EventBus eventBus,
@@ -137,8 +135,6 @@ public class MachineExtension {
                 if (appContext.getFactory() == null) {
                     workspaceAgent.setActivePart(processesPanelPresenter);
                 }
-
-                maximizeTerminal();
             }
         });
 
@@ -149,12 +145,6 @@ public class MachineExtension {
      * Maximizes terminal.
      */
     private void maximizeTerminal() {
-        if (maximized) {
-           return;
-        }
-
-        maximized = true;
-
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
@@ -170,12 +160,6 @@ public class MachineExtension {
      * Restores terminal to its default size.
      */
     private void restoreTerminal() {
-        if (!maximized) {
-            return;
-        }
-
-        maximized = false;
-
         Perspective perspective = perspectiveManager.getActivePerspective();
         if (perspective != null) {
             perspective.restoreParts();

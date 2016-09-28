@@ -195,8 +195,6 @@ public abstract class WorkspaceComponent implements Component, WsAgentStateHandl
                             @Override
                             public void execute() {
                                 loader.setSuccess(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
-
-                                notificationManager.notify(locale.startedWs(), StatusNotification.Status.SUCCESS, FLOAT_MODE);
                                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
                                 machineManagerProvider.get();//start instance of machine manager
                             }
