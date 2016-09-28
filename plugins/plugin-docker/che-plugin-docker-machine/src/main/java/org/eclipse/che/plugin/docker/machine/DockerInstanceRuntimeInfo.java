@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -275,7 +276,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
                     serverEntry.getValue().setProtocol(serverConf.getProtocol());
 
                     String url = serverConf.getProtocol() + "://" + serverEntry.getValue().getAddress();
-                    if (serverConf.getPath() != null) {
+                    if (!isNullOrEmpty(serverConf.getPath())) {
                         if (serverConf.getPath().charAt(0) != '/') {
                             url = url + '/';
                         }
