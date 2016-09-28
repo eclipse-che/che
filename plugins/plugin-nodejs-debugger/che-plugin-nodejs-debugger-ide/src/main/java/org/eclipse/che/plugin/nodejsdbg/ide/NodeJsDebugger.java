@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.model.Location;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
 import org.eclipse.che.ide.api.debug.DebuggerServiceClient;
 import org.eclipse.che.ide.api.resources.VirtualFile;
@@ -37,8 +36,6 @@ public class NodeJsDebugger extends AbstractDebugger {
 
     public static final String ID = "nodejsdbg";
 
-    private final AppContext appContext;
-
     @Inject
     public NodeJsDebugger(DebuggerServiceClient service,
                           DtoFactory dtoFactory,
@@ -47,8 +44,7 @@ public class NodeJsDebugger extends AbstractDebugger {
                           EventBus eventBus,
                           NodeJsDebuggerFileHandler activeFileHandler,
                           DebuggerManager debuggerManager,
-                          BreakpointManager breakpointManager,
-                          AppContext appContext) {
+                          BreakpointManager breakpointManager) {
 
         super(service,
               dtoFactory,
@@ -59,17 +55,16 @@ public class NodeJsDebugger extends AbstractDebugger {
               debuggerManager,
               breakpointManager,
               ID);
-        this.appContext = appContext;
     }
 
     @Override
     protected String fqnToPath(@NotNull Location location) {
-        return location.getTarget();
+        return location.getResourcePath() == null ? location.getTarget() : location.getResourcePath();
     }
 
     @Override
     protected String pathToFqn(VirtualFile file) {
-        return file.getName();
+        return file.getLocation().toString();
     }
 
     @Override
@@ -94,24 +89,10 @@ public class NodeJsDebugger extends AbstractDebugger {
     }
 
     public enum ConnectionProperties {
-        URI {
-            @Override
-            public String getConnectionInfo(String value) {
-                return "url : " + value;
-            }
-        },
-
-        PID {
-            @Override
-            public String getConnectionInfo(String value) {
-                return "-1".equals(value) ? "" : ("pid : " + value);
-            }
-        },
-
         SCRIPT {
             @Override
             public String getConnectionInfo(String value) {
-                return "script : " + value;
+                return value;
             }
         };
 

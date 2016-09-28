@@ -28,6 +28,7 @@ import org.eclipse.che.plugin.nodejsdbg.server.parser.NodeJsStepParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -69,7 +70,8 @@ public class NodeJsDebugCommandsLibrary {
      * Execute {@code sb} command.
      */
     public Void setBreakpoint(String script, int lineNumber) throws NodeJsDebuggerException {
-        String input = String.format("sb('%s', %d)", script, lineNumber);
+        String scriptName = Paths.get(script).getFileName().toString();
+        String input = String.format("sb('%s', %d)", scriptName, lineNumber);
         NodeJsDebugCommand<Void> command = createCommand(input, NodeJsOutputParser.VOID);
         return doExecute(command);
     }
