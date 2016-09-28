@@ -507,6 +507,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String completionPopupItemHighlightTextColor() {
+        return "#4EABFF";
+    }
+
+    @Override
     public String getWindowContentBackground() {
         return "#292C2F";
     }
