@@ -11,11 +11,13 @@
 package org.eclipse.che.api.user.server.jpa;
 
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.user.server.event.BeforeUserPersistedEvent;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 
 /**
@@ -32,5 +34,10 @@ public class UserEntityListener {
     @PreRemove
     public void preRemove(UserImpl user) {
         eventService.publish(new BeforeUserRemovedEvent(user));
+    }
+
+    @PrePersist
+    public void prePersist(UserImpl user) {
+        eventService.publish(new BeforeUserPersistedEvent(user));
     }
 }

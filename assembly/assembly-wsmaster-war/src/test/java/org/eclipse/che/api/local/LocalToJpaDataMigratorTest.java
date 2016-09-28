@@ -23,7 +23,9 @@ import com.google.inject.Stage;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.local.storage.stack.StackLocalStorage;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
@@ -48,11 +50,13 @@ import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.stack.StackJsonAdapter;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.persistence.internal.sessions.cdi.EntityListenerInjectionManager;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -105,6 +109,7 @@ public class LocalToJpaDataMigratorTest {
                 bindConstant().annotatedWith(Names.named("che.conf.storage")).to(workingDir.toString());
 
                 bind(JpaInitializer.class).asEagerSingleton();
+                bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
                 install(new JpaPersistModule("test"));
                 install(new UserJpaModule());
                 install(new SshJpaModule());
