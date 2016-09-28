@@ -15,6 +15,9 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceStatusIndicator {
+  restrict: string;
+  replace: boolean;
+  scope;
 
   /**
    * Default constructor that is using resource
@@ -33,7 +36,7 @@ export class WorkspaceStatusIndicator {
   /**
    * Template for the simple indicator of workspace's status
    * @param element
-   * @param attrs
+   * @param attr
    * @returns {string} the template
    */
   template (element, attr) {
@@ -51,6 +54,6 @@ export class WorkspaceStatusIndicator {
       '</span>' +
       '<span ng-switch-when="ERROR" class="fa fa-circle workspace-status-error"></span>' +
       '<span ng-switch-default class="fa ' + (emptyCircleOnStopped ? 'fa-circle-o' : 'fa-circle') + ' workspace-status-default"></span>' +
-    '</span>';
+      '</span>';
   }
 }
