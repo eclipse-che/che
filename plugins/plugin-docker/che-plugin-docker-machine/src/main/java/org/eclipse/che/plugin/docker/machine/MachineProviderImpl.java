@@ -41,6 +41,7 @@ import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
+import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -87,6 +88,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.lang.Thread.sleep;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -569,6 +571,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         executor.execute(() -> {
             long lastProcessedLogDate = 0;
             boolean isContainerRunning = true;
+            int errorsCounter = 0;
+            long lastErrorTime = 0;
             while (isContainerRunning) {
                 try {
                     docker.getContainerLogs(GetContainerLogsParams.create(container)
@@ -582,10 +586,35 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                 } catch (ContainerNotFoundException e) {
                     isContainerRunning = false;
                 } catch (IOException e) {
-                    LOG.error("Failed to get logs from machine {} of workspace {} backed by container {}",
-                              workspaceId,
-                              machineId,
-                              container);
+                    long errorTime = System.currentTimeMillis();
+                    lastProcessedLogDate = errorTime / 1000L;
+                    LOG.warn("Failed to get logs from machine {} of workspace {} backed by container {}, because: {}.",
+                             machineId,
+                             workspaceId,
+                             container,
+                             e.getMessage(),
+                             e);
+                    if (errorTime - lastErrorTime < 20_000L) { // if new error occurs less than 20 seconds after previous
+                        if (++errorsCounter == 5) {
+                            LOG.error("Too many errors while streaming logs from machine {} of workspace {} backed by container {}. " +
+                                      "Logs streaming is closed. Last error: {}.",
+                                      machineId,
+                                      workspaceId,
+                                      container,
+                                      e.getMessage(),
+                                      e);
+                            break;
+                        }
+                    } else {
+                        errorsCounter = 1;
+                    }
+                    lastErrorTime = errorTime;
+
+                    try {
+                        sleep(1_000);
+                    } catch (InterruptedException ie) {
+                        return;
+                    }
                 }
             }
         });
