@@ -37,7 +37,7 @@ public class UserEntityListener {
     }
 
     @PrePersist
-    public void postPersist(UserImpl user) {
+    public void prePersist(UserImpl user) {
         eventService.publish(new BeforeUserPersistedEvent(user));
     }
 }
