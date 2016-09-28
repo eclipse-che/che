@@ -235,6 +235,12 @@ initModule.config(($mdThemingProvider, jsonColors) => {
   });
   $mdThemingProvider.definePalette('cheWarning', cheWarningMap);
 
+  var cheGreenMap = $mdThemingProvider.extendPalette('green', {
+    'A100': '#46AF00',
+    'contrastDefaultColor': 'light'
+  });
+  $mdThemingProvider.definePalette('cheGreen', cheGreenMap);
+
   var cheDefaultMap = $mdThemingProvider.extendPalette('blue', {
     'A400': getColor('$che-medium-blue-color')
   });
@@ -244,7 +250,6 @@ initModule.config(($mdThemingProvider, jsonColors) => {
     'A400': getColor('$mouse-gray-color')
   });
   $mdThemingProvider.definePalette('cheNotice', cheNoticeMap);
-
 
   var cheAccentMap = $mdThemingProvider.extendPalette('blue', {
     '700': getColor('$che-medium-blue-color'),
@@ -291,12 +296,20 @@ initModule.config(($mdThemingProvider, jsonColors) => {
     .accentPalette('cheWarning')
     .backgroundPalette('grey');
 
+  $mdThemingProvider.theme('chesave')
+    .primaryPalette('green')
+    .accentPalette('cheGreen')
+    .backgroundPalette('grey');
+
+  $mdThemingProvider.theme('checancel')
+    .primaryPalette('che')
+    .accentPalette('cheGrey')
+    .backgroundPalette('grey');
 
   $mdThemingProvider.theme('chedefault')
     .primaryPalette('che')
     .accentPalette('cheDefault')
     .backgroundPalette('grey');
-
 
   $mdThemingProvider.theme('chenotice')
     .primaryPalette('che')
