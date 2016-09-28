@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.ProjectExplorerPart;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHandler;
@@ -146,8 +147,9 @@ public class ProjectExplorerPresenter extends BasePresenter implements ActionDel
             }
         } else {
             final Optional<Container> parent = resource.getParent();
+            final Optional<Project> relatedProject = resource.getRelatedProject();
 
-            if (parent.isPresent()) {
+            if (parent.isPresent() && relatedProject.isPresent()) {
                 final Container container = parent.get();
                 final Node parentNode = firstNonNull(getNode(container.getLocation()), getParentNode(container.getLocation()));
 
