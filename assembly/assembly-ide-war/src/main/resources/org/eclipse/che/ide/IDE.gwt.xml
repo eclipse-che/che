@@ -62,6 +62,7 @@
     <inherits name='org.eclipse.che.plugin.product.info.ProductInfo'/>
     <inherits name='org.eclipse.che.plugin.cpp.Cpp'/>
     <inherits name='org.eclipse.che.plugin.csharp.CSharp'/>
+    <inherits name='org.eclipse.che.plugin.php.Php'/>
     <inherits name='org.eclipse.che.plugin.python.Python'/>
     <inherits name='org.eclipse.che.plugin.java.plain.PlainJava'/>
     <inherits name='org.eclipse.che.plugin.nodejs.NodeJs'/>

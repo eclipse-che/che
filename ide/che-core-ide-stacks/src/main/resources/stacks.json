@@ -962,6 +962,56 @@
     }
   },
   {
+    "id": "debianlsp",
+    "creator": "ide",
+    "name": "Debian LSP",
+    "description": "Simple stack with Debian (Jessie) to test LSP",
+    "scope": "advanced",
+    "tags": [
+      "Debian",
+      "LSP"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "Jessie"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/debian_jre"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", 
+                "org.eclipse.che.ws-agent", 
+                "org.eclipse.che.ssh",
+                "org.eclipse.che.ls.csharp",
+                "org.eclipse.che.ls.json",
+                "org.eclipse.che.ls.php"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "codenvy/debian_jre",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null
+    }
+  },
+  {
     "id": "java-centos",
     "creator": "ide",
     "name": "Java CentOS",

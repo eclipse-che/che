@@ -37,6 +37,7 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
     public static final String[] MIME_TYPES  = new String[] {"text/x-php"};
 
     private static final LanguageDescriptionImpl description;
+    private static final String SCRIPT_PATH = "che/ls-php/launch.sh";
 
     static {
         description = new LanguageDescriptionImpl();
@@ -50,6 +51,12 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
         return description;
     }
 
+    @Override
+    public boolean isAbleToLaunch() {
+        Path launchFile = Paths.get(System.getenv("HOME"), SCRIPT_PATH);
+        return launchFile.toFile().exists();
+    }
+
     protected JsonBasedLanguageServer connectToLanguageServer(Process languageServerProcess) {
         JsonBasedLanguageServer languageServer = new JsonBasedLanguageServer();
         languageServer.connect(languageServerProcess.getInputStream(), languageServerProcess.getOutputStream());
@@ -57,7 +64,7 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
     }
 
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
-        Path launchFile = Paths.get(System.getenv("HOME"), "che/ls-php/launch.sh");
+        Path launchFile = Paths.get(System.getenv("HOME"), SCRIPT_PATH);
 
         ProcessBuilder processBuilder = new ProcessBuilder(launchFile.toString());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);

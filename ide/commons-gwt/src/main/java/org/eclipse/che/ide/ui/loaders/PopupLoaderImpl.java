@@ -17,9 +17,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.inject.Inject;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -48,7 +50,10 @@ public class PopupLoaderImpl extends Composite implements PopupLoader {
     @UiField
     Label descriptionLabel;
 
-    @Inject
+    @UiField
+    FlowPanel customWidget;
+
+    @AssistedInject
     public PopupLoaderImpl(LoaderPopupImplUiBinder uiBinder,
                            @NotNull @Assisted("title") String title,
                            @NotNull @Assisted("description") String description) {
@@ -68,6 +73,20 @@ public class PopupLoaderImpl extends Composite implements PopupLoader {
 
         // Start animation timer
         playTimer.scheduleRepeating(1000);
+    }
+
+    @AssistedInject
+    public PopupLoaderImpl(LoaderPopupImplUiBinder uiBinder,
+                           @NotNull @Assisted("title") String title,
+                           @NotNull @Assisted("description") String description,
+                           @Nullable @Assisted("widget") Widget widget) {
+        this(uiBinder, title, description);
+
+        if (widget != null) {
+            customWidget.setVisible(true);
+            customWidget.add(widget);
+            playTimer.cancel();
+        }
     }
 
     @Override
@@ -92,7 +111,7 @@ public class PopupLoaderImpl extends Composite implements PopupLoader {
         // Stop animation
         playTimer.cancel();
 
-        // Reset timer
+        // Reset title
         titleLabel.setText(title);
     }
 

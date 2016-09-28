@@ -41,7 +41,6 @@ import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.OutputMessageUnmarshaller;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
@@ -52,8 +51,6 @@ import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.StringUnmarshaller;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
-import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
-import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.MessageBus;
 import org.eclipse.che.ide.websocket.MessageBusProvider;
@@ -71,7 +68,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import org.eclipse.che.ide.workspace.start.StartWorkspacePresenter;
+import org.eclipse.che.ide.workspace.start.StartWorkspaceNotification;
 
 /**
  * <ul> Notifies about the events which occur in the workspace:
@@ -95,13 +92,12 @@ public class WorkspaceEventsHandler {
     private final DialogFactory                       dialogFactory;
     private final DtoUnmarshallerFactory              dtoUnmarshallerFactory;
     private final Provider<MachineManager>            machineManagerProvider;
-    private final MessageLoader                       snapshotLoader;
     private final Provider<DefaultWorkspaceComponent> wsComponentProvider;
     private final AsyncRequestFactory                 asyncRequestFactory;
     private final MachineServiceClient                machineServiceClient;
     private final WorkspaceSnapshotCreator            snapshotCreator;
     private final WorkspaceServiceClient              workspaceServiceClient;
-    private final StartWorkspacePresenter             startWorkspacePresenter;
+    private final StartWorkspaceNotification          startWorkspaceNotification;
     private final LoaderPresenter                     loader;
 
     private       DefaultWorkspaceComponent      workspaceComponent;
@@ -131,9 +127,8 @@ public class WorkspaceEventsHandler {
                             final Provider<MachineManager> machineManagerProvider,
                             final MachineServiceClient machineServiceClient,
                             final WorkspaceSnapshotCreator snapshotCreator,
-                            final LoaderFactory loaderFactory,
                             final WorkspaceServiceClient workspaceServiceClient,
-                            final StartWorkspacePresenter startWorkspacePresenter,
+                            final StartWorkspaceNotification startWorkspaceNotification,
                             final Provider<DefaultWorkspaceComponent> wsComponentProvider,
                             final AsyncRequestFactory asyncRequestFactory,
                             final LoaderPresenter loader) {
@@ -147,12 +142,10 @@ public class WorkspaceEventsHandler {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.machineManagerProvider = machineManagerProvider;
         this.workspaceServiceClient = workspaceServiceClient;
-        this.startWorkspacePresenter = startWorkspacePresenter;
+        this.startWorkspaceNotification = startWorkspaceNotification;
         this.wsComponentProvider = wsComponentProvider;
         this.asyncRequestFactory = asyncRequestFactory;
         this.loader = loader;
-
-        this.snapshotLoader = loaderFactory.newLoader(locale.createSnapshotProgress());
     }
 
     /**
@@ -192,7 +185,7 @@ public class WorkspaceEventsHandler {
                         workspaceComponent.setCurrentWorkspace(workspace);
                         machineManagerProvider.get();
 
-                		loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.LOADING);
+                		loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                         eventBus.fireEvent(new WorkspaceStartingEvent(workspace));
                     }
                 });
@@ -205,8 +198,7 @@ public class WorkspaceEventsHandler {
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
                 workspaceComponent.setCurrentWorkspace(workspace);
-                notificationManager.notify(locale.startedWs(), StatusNotification.Status.SUCCESS, FLOAT_MODE);
-                loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.SUCCESS);
+                loader.setSuccess(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                 eventBus.fireEvent(new WorkspaceStartedEvent(workspace));
             }
         });
@@ -394,30 +386,35 @@ public class WorkspaceEventsHandler {
                 case ERROR:
                     unSubscribeHandlers();
                     notificationManager.notify(locale.workspaceStartFailed(), FAIL, FLOAT_MODE);
-                    loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME, LoaderPresenter.Status.ERROR);
+                    loader.setError(LoaderPresenter.Phase.STARTING_WORKSPACE_RUNTIME);
                     final String workspaceName = workspace.getConfig().getName();
                     final String error = statusEvent.getError();
                     workspaceServiceClient.getWorkspaces(SKIP_COUNT, MAX_COUNT).then(showErrorDialog(workspaceName, error));
                     eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                     break;
 
+                case STOPPING:
+                    loader.show(LoaderPresenter.Phase.STOPPING_WORKSPACE);
+                    break;
+
                 case STOPPED:
+                    loader.setSuccess(LoaderPresenter.Phase.STOPPING_WORKSPACE);
                     unSubscribeHandlers();
-                    notificationManager.notify(locale.extServerStopped(), StatusNotification.Status.SUCCESS, FLOAT_MODE);
                     eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
+                    startWorkspaceNotification.show(statusEvent.getWorkspaceId());
                     break;
 
                 case SNAPSHOT_CREATING:
-                    snapshotLoader.show();
+                    loader.show(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT);
                     break;
 
                 case SNAPSHOT_CREATED:
-                    snapshotLoader.hide();
+                    loader.setSuccess(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT);
                     snapshotCreator.successfullyCreated();
                     break;
 
                 case SNAPSHOT_CREATION_ERROR:
-                    snapshotLoader.hide();
+                    loader.setError(LoaderPresenter.Phase.CREATING_WORKSPACE_SNAPSHOT);
                     snapshotCreator.creationError("Snapshot creation error: " + statusEvent.getError());
                     break;
             }

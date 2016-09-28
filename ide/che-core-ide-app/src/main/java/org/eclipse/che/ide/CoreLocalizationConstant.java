@@ -559,6 +559,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("workspace.recovering.dialog.text")
     String workspaceRecoveringDialogText();
 
+    @Key("workspace.restore.snapshot")
+    String restoreWorkspaceFromSnapshot();
+
     @Key("workspace.subscribe.on.events.failed")
     String workspaceSubscribeOnEventsFailed();
 

@@ -109,6 +109,7 @@ public class LanguageServerRegistryImpl implements LanguageServerRegistry, Serve
         return extensionToLauncher.values()
                                   .stream()
                                   .flatMap(Collection::stream)
+                                  .filter(LanguageServerLauncher::isAbleToLaunch)
                                   .map(LanguageServerLauncher::getLanguageDescription)
                                   .collect(Collectors.toList());
     }

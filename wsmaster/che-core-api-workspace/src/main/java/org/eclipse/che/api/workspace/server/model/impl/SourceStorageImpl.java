@@ -18,7 +18,6 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Lob;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

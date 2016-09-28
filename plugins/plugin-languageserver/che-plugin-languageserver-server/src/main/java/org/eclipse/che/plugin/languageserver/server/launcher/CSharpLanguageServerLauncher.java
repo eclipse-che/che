@@ -38,6 +38,7 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     public static final String[] MIME_TYPES  = new String[] {"text/x-csharp"};
 
     public static final LanguageDescriptionImpl description;
+    private static final String SCRIPT_PATH = "che/ls-csharp/launch.sh";
 
     static {
         description = new LanguageDescriptionImpl();
@@ -49,7 +50,7 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     @Override
     protected Process startLanguageServerProcess(String projectPath) throws LanguageServerException {
         restoreDependencies(projectPath);
-        Path launchFile = Paths.get(System.getenv("HOME"), "che/ls-csharp/launch.sh");
+        Path launchFile = Paths.get(System.getenv("HOME"), SCRIPT_PATH);
 
         ProcessBuilder processBuilder = new ProcessBuilder(launchFile.toString());
         processBuilder.redirectInput(ProcessBuilder.Redirect.PIPE);
@@ -88,5 +89,11 @@ public class CSharpLanguageServerLauncher extends LanguageServerLauncherTemplate
     @Override
     public LanguageDescription getLanguageDescription() {
         return description;
+    }
+
+    @Override
+    public boolean isAbleToLaunch() {
+        Path launchFile = Paths.get(System.getenv("HOME"), SCRIPT_PATH);
+        return launchFile.toFile().exists();
     }
 }

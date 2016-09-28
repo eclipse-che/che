@@ -29,4 +29,6 @@ public interface LanguageServerLauncher {
      * Gets supported languages.
      */
     LanguageDescription getLanguageDescription();
+
+    boolean isAbleToLaunch();
 }
