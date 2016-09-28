@@ -29,7 +29,7 @@ public class CompositeLineConsumer implements LineConsumer {
     private static final Logger LOG = LoggerFactory.getLogger(CompositeLineConsumer.class);
 
     private final List<LineConsumer> lineConsumers;
-    private       boolean            isClosed;
+    private volatile boolean isClosed;
 
     public CompositeLineConsumer(LineConsumer... lineConsumers) {
         this.lineConsumers = new CopyOnWriteArrayList<>(lineConsumers);
