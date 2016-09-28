@@ -80,6 +80,9 @@ public class ServerConf2Impl implements ServerConf2 {
 
     @Override
     public Map<String, String> getProperties() {
+        if (properties == null) {
+            properties = new HashMap<>();
+        }
         return properties;
     }
 

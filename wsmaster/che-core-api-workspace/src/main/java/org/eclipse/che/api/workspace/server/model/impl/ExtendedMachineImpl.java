@@ -81,6 +81,9 @@ public class ExtendedMachineImpl implements ExtendedMachine {
 
     @Override
     public Map<String, ServerConf2Impl> getServers() {
+        if (servers == null) {
+            servers = new HashMap<>();
+        }
         return servers;
     }
 
