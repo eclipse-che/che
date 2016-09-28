@@ -17,6 +17,8 @@ import {CheButtonDanger} from './button/che-button-danger.directive';
 import {CheButtonDefault} from './button/che-button-default.directive';
 import {CheButtonNotice} from './button/che-button-notice.directive';
 import {CheButtonWarning} from './button/che-button-warning.directive';
+import {CheButtonSaveFlat} from './button/che-button-save-flat.directive';
+import {CheButtonCancelFlat} from './button/che-button-cancel-flat.directive';
 import {CheButtonDropdownCtrl} from './button-dropdown/che-button-dropdown.controller';
 import {CheButtonDropdown} from './button-dropdown/che-button-dropdown.directive';
 import {CheClipboard} from './copy-clipboard/che-clipboard.directive';
@@ -76,6 +78,8 @@ export class WidgetConfig {
       .directive('cheButtonDefault', CheButtonDefault)
       .directive('cheButtonNotice', CheButtonNotice)
       .directive('cheButtonWarning', CheButtonWarning)
+      .directive('cheButtonSaveFlat', CheButtonSaveFlat)
+      .directive('cheButtonCancelFlat', CheButtonCancelFlat)
       // dropdown
       .controller('CheButtonDropdownCtrl', CheButtonDropdownCtrl)
       .directive('cheButtonDropdown', CheButtonDropdown)

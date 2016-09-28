@@ -50,7 +50,7 @@
                             machine-name-on-change="workspaceEnvironmentsController.updateMachineName(oldName,newName)"
                             machine-config-on-change="workspaceEnvironmentsController.updateEnvironmentConfig()"
                             machine-on-delete="workspaceEnvironmentsController.deleteMachine(name)"
-                            machine-is-opened="workspaceEnvironmentsController.machinesViewStatus[machine.name]"></workspace-machine-config>
+                            machine-is-opened="workspaceEnvironmentsController.machinesViewStatus[workspaceEnvironmentsController.environmentName][machine.name]"></workspace-machine-config>
 
   <!-- Recipe Content-->
   <che-label-container che-label-name="Recipe"

@@ -40,7 +40,7 @@ export class WorkspaceEnvironments {
 
     this.scope = {
       environmentName: '=',
-      environmentViewStatus: '=',
+      machinesViewStatus: '=',
       workspaceConfig: '=',
       environmentOnChange: '&'
     }
