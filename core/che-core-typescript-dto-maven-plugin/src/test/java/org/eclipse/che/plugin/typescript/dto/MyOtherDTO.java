@@ -12,28 +12,14 @@ package org.eclipse.che.plugin.typescript.dto;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import java.util.Map;
-
 /**
  * @author Florent Benoit
  */
 @DTO
-public interface MyCustomDTO {
+public interface MyOtherDTO {
 
     String getName();
     void setName(String name);
-    MyCustomDTO withName(String name);
-
-    MyOtherDTO getConfig();
-    MyCustomDTO withConfig(MyOtherDTO otherDTO);
-    void setConfig(MyOtherDTO otherDTO);
-
-    void setStatus(Status status);
-    MyCustomDTO withStatus(Status status);
-    Status getStatus();
-
-    Map<String, MyOtherDTO> getCustomMap();
-    void setCustomMap(Map<String, MyOtherDTO> map);
-    MyCustomDTO withCustomMap(Map<String, MyOtherDTO> map);
+    MyOtherDTO withName(String name);
 
 }
