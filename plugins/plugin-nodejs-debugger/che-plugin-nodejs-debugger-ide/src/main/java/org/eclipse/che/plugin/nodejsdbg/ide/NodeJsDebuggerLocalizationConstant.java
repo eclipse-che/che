@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.nodejsdbg.ide;
 
+import com.google.gwt.i18n.client.Messages;
+
 /**
  * I18n constants for the Debugger extension.
  *
  * @author Anatolii Bazko
  */
-public interface NodeJsDebuggerLocalizationConstant extends com.google.gwt.i18n.client.Messages {
+public interface NodeJsDebuggerLocalizationConstant extends Messages {
 
     @Key("view.nodeJsDebuggerConfigurationPage.hostLabel")
     String nodeJsDebuggerConfigurationPageViewHostLabel();

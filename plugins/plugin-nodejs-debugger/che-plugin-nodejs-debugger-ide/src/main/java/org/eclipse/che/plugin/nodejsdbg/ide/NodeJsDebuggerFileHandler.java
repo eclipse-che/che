@@ -67,12 +67,6 @@ public class NodeJsDebuggerFileHandler implements ActiveFileHandler {
         }
 
         findFileInProject(project.get(), location, callback);
-
-//        final EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-//        final VirtualFile activeFile = activeEditor == null ? null : activeEditor.getEditorInput().getFile();
-//        if (activeFile != null && activeFile.getLocation().toString().endsWith(location.getTarget())) {
-//
-//        }
     }
 
     private void findFileInProject(final Project project,
