@@ -112,19 +112,6 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
-            <outputDirectory>stacks</outputDirectory>
-            <includes>
-                <include>org.eclipse.che.core:che-core-ide-stacks</include>
-            </includes>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
             <outputDirectory>templates</outputDirectory>
             <includes>
                 <include>org.eclipse.che.core:che-core-ide-templates</include>
@@ -137,6 +124,13 @@
         </dependencySet>
     </dependencySets>
     <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/stacks/</directory>
+            <outputDirectory>stacks/</outputDirectory>
+            <excludes>
+                <exclude>META-INF/**</exclude>
+            </excludes>
+        </fileSet>
         <fileSet>
             <directory>${project.build.directory}/dependency/</directory>
             <outputDirectory>tomcat/</outputDirectory>
