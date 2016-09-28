@@ -72,8 +72,6 @@ public class NodeJsDebuggerConfigurationPagePresenterTest {
 
     @Test
     public void testResetting() throws Exception {
-        verify(configuration, atLeastOnce()).getHost();
-        verify(configuration, atLeastOnce()).getPort();
         verify(configuration, atLeastOnce()).getConnectionProperties();
         verify(currentProjectPathProvider).getKey();
     }
@@ -86,8 +84,6 @@ public class NodeJsDebuggerConfigurationPagePresenterTest {
         pagePresenter.go(container);
 
         verify(container).setWidget(eq(pageView));
-        verify(configuration, atLeastOnce()).getHost();
-        verify(configuration, atLeastOnce()).getPort();
         verify(configuration, atLeastOnce()).getConnectionProperties();
         verify(pageView).setScriptPath(anyString());
     }

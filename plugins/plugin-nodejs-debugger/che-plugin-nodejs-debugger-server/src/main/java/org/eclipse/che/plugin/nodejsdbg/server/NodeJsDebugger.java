@@ -114,7 +114,6 @@ public class NodeJsDebugger implements Debugger {
         try {
             Location location = breakpoint.getLocation();
             pendingBreakpoints.add(location);
-
             library.setBreakpoint(location.getTarget(), location.getLineNumber());
             checkActivatedBreakpoints();
         } catch (NodeJsDebuggerTerminatedException e) {

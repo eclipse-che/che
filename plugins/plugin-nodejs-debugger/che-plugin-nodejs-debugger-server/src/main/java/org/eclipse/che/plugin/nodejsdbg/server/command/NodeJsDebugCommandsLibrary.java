@@ -44,11 +44,13 @@ public class NodeJsDebugCommandsLibrary {
     private static final Logger  LOG                                    = LoggerFactory.getLogger(NodeJsDebugger.class);
     private static final Pattern PROCESS_TITLE_COMMAND_OUTPUT_PATTERN   = Pattern.compile("^'?(node|nodejs)'?$");
     private static final Pattern PROCESS_VERSION_COMMAND_OUTPUT_PATTERN = Pattern.compile("^'?(v|)[0-9\\.]+'?$");
+    private static final Pattern PROCESS_PID_COMMAND_OUTPUT_PATTERN     = Pattern.compile("^[0-9]+$");
     private static final Pattern RUN_COMMAND_OUTPUT_PATTERN             = Pattern.compile("(break in.*|App is already running.*)");
 
     private final NodeJsDebugProcess process;
     private final String             name;
     private final String             version;
+    private final int                pid;
 
     public NodeJsDebugCommandsLibrary(NodeJsDebugProcess process) throws NodeJsDebuggerException {
         this.process = process;
@@ -56,6 +58,7 @@ public class NodeJsDebugCommandsLibrary {
 
         this.name = detectName();
         this.version = detectVersion();
+        this.pid = detectPid();
     }
 
     /**
@@ -69,8 +72,8 @@ public class NodeJsDebugCommandsLibrary {
     /**
      * Execute {@code sb} command.
      */
-    public Void setBreakpoint(String script, int lineNumber) throws NodeJsDebuggerException {
-        String scriptName = Paths.get(script).getFileName().toString();
+    public Void setBreakpoint(String scriptPath, int lineNumber) throws NodeJsDebuggerException {
+        String scriptName = Paths.get(scriptPath).getFileName().toString();
         String input = String.format("sb('%s', %d)", scriptName, lineNumber);
         NodeJsDebugCommand<Void> command = createCommand(input, NodeJsOutputParser.VOID);
         return doExecute(command);
@@ -188,15 +191,22 @@ public class NodeJsDebugCommandsLibrary {
     /**
      * Returns NodeJs version.
      */
-    public String getVersion() throws NodeJsDebuggerException {
+    public String getVersion() {
         return version;
     }
 
     /**
      * Returns NodeJs title.
      */
-    public String getName() throws NodeJsDebuggerException {
+    public String getName() {
         return name;
+    }
+
+    /**
+     * Returns NodeJs pid.
+     */
+    public int getPid() {
+        return pid;
     }
 
     /**
@@ -206,6 +216,15 @@ public class NodeJsDebugCommandsLibrary {
         NodeJsDebugCommand<String> command = createCommand("process.version",
                                                            new NodeJsOutputRegExpParser(PROCESS_VERSION_COMMAND_OUTPUT_PATTERN));
         return doExecute(command);
+    }
+
+    /**
+     * Returns NodeJs pid.
+     */
+    private int detectPid() throws NodeJsDebuggerException {
+        NodeJsDebugCommand<String> command = createCommand("process.pid",
+                                                           new NodeJsOutputRegExpParser(PROCESS_PID_COMMAND_OUTPUT_PATTERN));
+        return Integer.parseInt(doExecute(command));
     }
 
     /**
