@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.project;
 
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 
@@ -211,7 +212,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<ItemReference> createFile(Path path, String content) {
-        final String url = getBaseUrl() + FILE + path(path.parent().toString()) + "?name=" + path.lastSegment();
+        final String url = getBaseUrl() + FILE + path(path.parent().toString()) + "?name=" + URL.encodeQueryString(path.lastSegment());
 
         return reqFactory.createPostRequest(url, null)
                          .data(content)
@@ -263,7 +264,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> copy(Path source, Path target, String newName, boolean overwrite) {
-        final String url = getBaseUrl() + COPY + path(source.toString()) + "?to=" + target.toString();
+        final String url = getBaseUrl() + COPY + path(source.toString()) + "?to=" + URL.encodeQueryString(target.toString());
 
         final CopyOptions copyOptions = dtoFactory.createDto(CopyOptions.class);
         copyOptions.setName(newName);
@@ -277,7 +278,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
     /** {@inheritDoc} */
     @Override
     public Promise<Void> move(Path source, Path target, String newName, boolean overwrite) {
-        final String url = getBaseUrl() + MOVE + path(source.toString()) + "?to=" + target.toString();
+        final String url = getBaseUrl() + MOVE + path(source.toString()) + "?to=" + URL.encodeQueryString(target.toString());
 
         final MoveOptions moveOptions = dtoFactory.createDto(MoveOptions.class);
         moveOptions.setName(newName);

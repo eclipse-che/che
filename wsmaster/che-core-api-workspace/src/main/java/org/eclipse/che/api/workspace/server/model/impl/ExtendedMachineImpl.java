@@ -13,6 +13,13 @@ package org.eclipse.che.api.workspace.server.model.impl;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
+import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +30,22 @@ import java.util.stream.Collectors;
 /**
  * @author Alexander Garagatyi
  */
+@Entity(name = "ExternalMachine")
 public class ExtendedMachineImpl implements ExtendedMachine {
-    private List<String>                 agents;
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @ElementCollection
+    private List<String> agents;
+
+    @ElementCollection
+    private Map<String, String> attributes;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
     private Map<String, ServerConf2Impl> servers;
-    private Map<String, String>          attributes;
 
     public ExtendedMachineImpl() {}
 
@@ -62,6 +81,9 @@ public class ExtendedMachineImpl implements ExtendedMachine {
 
     @Override
     public Map<String, ServerConf2Impl> getServers() {
+        if (servers == null) {
+            servers = new HashMap<>();
+        }
         return servers;
     }
 

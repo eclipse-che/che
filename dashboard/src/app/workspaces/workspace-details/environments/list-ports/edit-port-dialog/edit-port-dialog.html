@@ -1,0 +1,36 @@
+<md-dialog flex="50"
+           class="edit-port-dialog-content">
+  <ng-form flex layout="column" name="editPortForm">
+    <che-label-container che-label-name="Name">
+      <div class="edit-port-dialog-input">
+        <che-input che-form="editPortForm"
+                   che-name="port"
+                   che-place-holder="Server port number"
+                   ng-model="editPortDialogController.port"
+                   type="number"
+                   min="1024"
+                   max="65535"
+                   custom-validator="editPortDialogController.isUnique($value)"
+                   aria-label="Server port number"
+                   required>
+          <div ng-message="required">A number is required.</div>
+          <div ng-message="customValidator">This port is already in use.</div>
+          <div ng-message="min">A number should be greater than 1023.</div>
+          <div ng-message="max">A number should be less than 65536.</div>
+        </che-input>
+      </div>
+    </che-label-container>
+
+    <che-label-container>
+      <div layout="row">
+        <che-button-primary che-button-title="Update"
+                            ng-disabled="editPortForm.$invalid || editPortDialogController.updateInProgress"
+                            ng-click="editPortDialogController.updatePort()"></che-button-primary>
+
+        <che-button-notice che-button-title="Cancel"
+                           ng-click="editPortDialogController.hide()"
+                           tabindex="0"></che-button-notice>
+      </div>
+    </che-label-container>
+  </ng-form>
+</md-dialog>

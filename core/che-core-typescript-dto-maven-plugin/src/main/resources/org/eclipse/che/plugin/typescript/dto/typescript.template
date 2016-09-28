@@ -1,0 +1,93 @@
+// File has been generated automatically by Eclipse Che TypeScript DTO generator
+
+<dtos: { dto |
+
+<! Write TypeScript DTO interface first !>
+
+<! BEGIN declare dto module !>
+export module <dto.packageName> {
+
+  <! BEGIN declare interface !>
+  export interface <dto.simpleName> {
+  <dto.methods : {method |
+    <method.name>(<method.parameters :{parameter | <if(!first(parameter))>,<endif><parameter.name>}>): <method.returnType>;
+  }>
+  \} <! END declare interface !>
+\} <! END declare dto module !>
+
+
+<! Now write TypeScript DTO implementation with suffix Impl !>
+<! BEGIN declare dto module !>
+export module <dto.packageName> {
+
+  <! BEGIN declare class !>
+  export class <dto.simpleName>Impl implements <dto.name> {
+
+    <! BEGIN declare fields !>
+    <dto.fieldAttributeModels:{ field |
+    <field.name> : <field.simpleType>;
+    }>
+    <! add custom field for storing the JSON object !>
+    __jsonObject : any;
+
+    <! BEGIN constructor !>
+    constructor(__jsonObject?: any) {
+      this.__jsonObject = __jsonObject;
+      <dto.fieldAttributeModels:{ field |
+      <if(field.needInitialize)>
+      this.<field.name> = new <field.simpleType>();
+      <endif>
+      if (__jsonObject.<field.name>) {
+        <! handle list object !>
+        <if(field.list)>
+          __jsonObject.<field.name>.forEach((item) => {
+          <if(field.listOfDto)>
+          this.<field.name>.push(new <field.dtoImpl>(item));
+          <else>
+          this.<field.name>.push(item);
+          <endif>
+          \});
+        <endif>
+        <! handle map object !>
+        <if(field.map)>
+        let tmp : Array\<any> = Object.keys(__jsonObject.<field.name>);
+        tmp.forEach((key) => {
+          this.<field.name>.set(key, __jsonObject.<field.name>[key]);
+         \});
+        <endif>
+        <if(field.primitive)>
+        this.<field.name> = __jsonObject.<field.name>;
+        <endif>
+        <if(field.dto)>
+        this.<field.name> = new <field.dtoImp>(__jsonObject.<field.name>);
+        <endif>
+      \}
+      }>
+    \} <! END constructor !>
+
+    <! BEGIN write methods !>
+    <dto.methods : {method |
+    <! Generate Getter code !>
+    <if(method.getter)>
+    <method.name>() : <method.returnType> {
+      return this.<method.fieldName>;
+    \}
+    <endif>
+    <! Generate setter code !>
+    <if(method.setter)>
+    <method.name>(<method.fieldName> : <method.fieldType>) : void {
+      this.<method.fieldName> = this.<method.fieldName>;
+    \}
+    <endif>
+    <! Generate with code !>
+    <if(method.with)>
+    <method.name>(<method.fieldName> : <method.fieldType>) : <method.returnType> {
+      this.<method.fieldName> = this.<method.fieldName>;
+      return this;
+    \}
+    <endif>
+  }> <! END write methods !>
+  \} <! END declare interface !>
+\} <! END declare dto module !>
+
+}>

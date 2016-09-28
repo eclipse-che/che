@@ -10,16 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.dto.generator;
 
+import com.google.common.base.Preconditions;
+import com.google.common.primitives.Primitives;
+
 import org.eclipse.che.dto.server.JsonSerializable;
-import org.eclipse.che.dto.shared.DelegateRule;
 import org.eclipse.che.dto.shared.DTOImpl;
+import org.eclipse.che.dto.shared.DelegateRule;
 import org.eclipse.che.dto.shared.DelegateTo;
 import org.eclipse.che.dto.shared.JsonArray;
 import org.eclipse.che.dto.shared.JsonStringMap;
 import org.eclipse.che.dto.shared.SerializationIndex;
-
-import com.google.common.base.Preconditions;
-import com.google.common.primitives.Primitives;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -493,6 +493,14 @@ public class DtoImplClientTemplate extends DtoImpl {
         emitDeserializerImpl(expandedTypes, 0, builder, fieldNameIn, fieldNameOut, baseIndentation);
         builder.append("        dto.").append(getSetterName(fieldName)).append("(").append(fieldNameOut).append(");\n");
         builder.append("      }\n");
+        Type type = expandedTypes.get(0);
+
+        Class<?> aClass = getRawClass(type);
+        if(Boolean.class.equals(aClass)){
+            builder.append("     else {\n");
+            builder.append("        dto.").append(getSetterName(fieldName)).append("(").append("false").append(");\n");
+            builder.append("     }\n");
+        }
     }
 
     private void emitDeserializeFieldForMethodCompact(Method method, final StringBuilder builder) {
@@ -946,7 +954,7 @@ public class DtoImplClientTemplate extends DtoImpl {
             sb.append('>');
             return sb.toString();
         } else {
-            throw new IllegalArgumentException("We do not handle this type");
+            throw new IllegalArgumentException("We do not handle the type '" + type == null ? null : type.getTypeName() + "'.");
         }
     }
 

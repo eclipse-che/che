@@ -33,6 +33,7 @@ import org.eclipse.che.ide.api.parts.PartStackType;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction;
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
@@ -79,6 +80,8 @@ public class MachineExtension {
     public static final String GROUP_MACHINES_DROPDOWN = "MachinesSelector";
     public static final String GROUP_MACHINES_LIST     = "MachinesListGroup";
 
+    private final PerspectiveManager perspectiveManager;
+
     @Inject
     public MachineExtension(final MachineResources machineResources,
                             final EventBus eventBus,
@@ -91,16 +94,15 @@ public class MachineExtension {
                             final CustomCommandType arbitraryCommandType,
                             final Provider<MachineStatusNotifier> machineStatusNotifierProvider,
                             final ProjectExplorerPresenter projectExplorerPresenter) {
+        this.perspectiveManager = perspectiveManager;
+
         machineResources.getCss().ensureInjected();
         machineStatusNotifierProvider.get();
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, new WsAgentStateHandler() {
             @Override
             public void onWsAgentStarted(WsAgentStateEvent event) {
-                Perspective perspective = perspectiveManager.getActivePerspective();
-                if (perspective != null) {
-                    perspective.restoreParts();
-                }
+                restoreTerminal();
 
                 machinePortProvider.get();
                 /* Do not show terminal on factories by default */
@@ -117,6 +119,13 @@ public class MachineExtension {
             }
         });
 
+        eventBus.addHandler(WorkspaceStartingEvent.TYPE, new WorkspaceStartingEvent.Handler() {
+            @Override
+            public void onWorkspaceStarting(WorkspaceStartingEvent event) {
+                maximizeTerminal();
+            }
+        });
+
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
@@ -126,21 +135,35 @@ public class MachineExtension {
                 if (appContext.getFactory() == null) {
                     workspaceAgent.setActivePart(processesPanelPresenter);
                 }
-
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                        Perspective perspective = perspectiveManager.getActivePerspective();
-                        if (perspective != null) {
-                            perspective.maximizeBottomPart();
-                        }
-                    }
-                });
-
             }
         });
 
         iconRegistry.registerIcon(new Icon(arbitraryCommandType.getId() + ".commands.category.icon", machineResources.customCommandType()));
+    }
+
+    /**
+     * Maximizes terminal.
+     */
+    private void maximizeTerminal() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                Perspective perspective = perspectiveManager.getActivePerspective();
+                if (perspective != null) {
+                    perspective.maximizeBottomPart();
+                }
+            }
+        });
+    }
+
+    /**
+     * Restores terminal to its default size.
+     */
+    private void restoreTerminal() {
+        Perspective perspective = perspectiveManager.getActivePerspective();
+        if (perspective != null) {
+            perspective.restoreParts();
+        }
     }
 
     @Inject

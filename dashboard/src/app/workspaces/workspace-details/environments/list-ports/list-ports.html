@@ -1,0 +1,101 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<div class="list-ports"
+     layout="column">
+
+  <div ng-if="listPortsController.serversList.length > 0">
+
+    <che-list-header>
+      <div flex="100"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="row"
+             layout-align="start center"
+             class="che-checkbox-area">
+          <div layout="row" layout-align="start center" class="che-list-item-checkbox-main">
+            <md-checkbox class="che-list-item-checkbox"
+                         aria-label="All ports"
+                         md-theme="default"
+                         ng-checked="listPortsController.isBulkChecked"
+                         ng-click="listPortsController.changeBulkSelection()"></md-checkbox>
+          </div>
+        </div>
+        <div flex hide-xs layout-gt-xs="row"
+             layout-align="start center"
+             class="che-list-item-details">
+          <che-list-header-column flex="25"
+                                  che-sort-value="listPortsController.serversOrderBy"
+                                  che-sort-item="port"
+                                  che-column-title='Port'></che-list-header-column>
+          <che-list-header-column flex="65"
+                                  che-column-title='Public'></che-list-header-column>
+          <che-list-header-column flex="10"
+                                  che-column-title='Action'></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+
+    <che-list flex>
+      <che-list-item ng-mouseover="hover=true" ng-mouseout="hover=false"
+                     ng-repeat="server in listPortsController.serversList | orderBy:listPortsController.serversOrderBy">
+        <div flex="100"
+             layout="row"
+             layout-align="start stretch"
+             class="server-item-row">
+          <div layout="row"
+               layout-align="start center"
+               class="che-checkbox-area">
+            <che-list-item-checked ng-model="listPortsController.serversSelectedStatus[server.name]"
+                                   che-aria-label-checkbox="Port {{server.name}}"
+                                   ng-click="listPortsController.updateSelectedStatus()"></che-list-item-checked>
+          </div>
+          <div flex
+               layout-xs="column" layout-gt-xs="row"
+               layout-align-gt-xs="start center"
+               layout-align-xs="start start"
+               class="che-list-item-details">
+            <div flex="25"
+                 class="che-list-item-name">
+              <span class="che-hover">{{server.port}}</span>
+            </div>
+            <div flex="65">
+              <span class="">YES</span>
+            </div>
+            <div flex="10">
+              <div class="che-list-actions"
+                   ng-click="listPortsController.showEditDialog($event,server.name)">
+                <i class="fa fa-pencil" tooltip="Edit"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </che-list-item>
+    </che-list>
+  </div>
+
+  <!-- buttons -->
+  <div layout="row" flex>
+    <div flex>
+      <che-button-default class="che-list-add-button"
+                          che-button-title="Add" name="addButton"
+                          ng-click="listPortsController.showAddDialog($event)"></che-button-default>
+    </div>
+    <div flex-offset="5" ng-if="listPortsController.serversList.length > 0">
+      <che-button-primary-flat ng-disabled="(listPortsController.serversSelectedNumber === 0)"
+                               che-button-title="Delete" name="deleteButton"
+                               ng-click="listPortsController.deleteSelectedPorts()"></che-button-primary-flat>
+    </div>
+  </div>
+</div>
+

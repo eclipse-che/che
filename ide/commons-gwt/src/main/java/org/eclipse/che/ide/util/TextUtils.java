@@ -254,6 +254,10 @@ public class TextUtils {
         }
     }
 
+    public static String stripWildcards(String text) {
+        return RegExp.compile("\\*", "g").replace(text, "");
+    }
+
     private static int skipWhitespace(String text, int column, boolean forward) {
         // we only execute the whitespace skip if the current character is in fact
         // whitespace

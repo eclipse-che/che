@@ -11,6 +11,7 @@
 package org.eclipse.che.api.local;
 
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.api.core.ServerException;
@@ -27,12 +28,17 @@ import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.requireNonNull;
+
 /**
- * @author Eugene Voevodin
+ * In-memory implementation of {@link PreferenceDao}.
+ *
+ * <p>The implementation is thread-safe guarded by this instance.
+ * Clients may use instance locking to perform extra, thread-safe operation.
+ *
+ * @author Yevhenii Voevodin
  * @author Dmitry Shnurenko
  * @author Anton Korneta
  * @author Valeriy Svydenko
@@ -40,21 +46,23 @@ import java.util.regex.Pattern;
 @Singleton
 public class LocalPreferenceDaoImpl implements PreferenceDao {
 
+    public static final String FILENAME = "preferences.json";
+
     private static final Logger LOG = LoggerFactory.getLogger(LocalPreferenceDaoImpl.class);
 
-    private final Map<String, Map<String, String>> preferences;
-    private final ReadWriteLock                    lock;
-    private final LocalStorage                     preferenceStorage;
+    private final LocalStorage preferenceStorage;
+
+    @VisibleForTesting
+    final Map<String, Map<String, String>> preferences;
 
     @Inject
     public LocalPreferenceDaoImpl(LocalStorageFactory localStorageFactory) throws IOException {
         preferences = new HashMap<>();
-        lock = new ReentrantReadWriteLock();
         preferenceStorage = localStorageFactory.create("preferences.json");
     }
 
     @PostConstruct
-    private void start() {
+    private synchronized void start() {
         preferences.putAll(preferenceStorage.loadMap(new TypeToken<Map<String, Map<String, String>>>() {}));
         // Add default entry if file doesn't exist or invalid or empty.
         if (preferences.isEmpty()) {
@@ -65,68 +73,58 @@ public class LocalPreferenceDaoImpl implements PreferenceDao {
         }
     }
 
-    @PreDestroy
-    private void stop() throws IOException {
+    public synchronized void savePreferences() throws IOException {
         preferenceStorage.store(preferences);
     }
 
     @Override
-    public void setPreferences(String userId, Map<String, String> prefs) throws ServerException {
-        lock.writeLock().lock();
+    public synchronized void setPreferences(String userId, Map<String, String> prefs) throws ServerException {
+        requireNonNull(userId);
+        requireNonNull(prefs);
         try {
             preferences.put(userId, new HashMap<>(prefs));
             preferenceStorage.store(preferences);
         } catch (IOException e) {
             LOG.warn("Impossible to store preferences");
-        } finally {
-            lock.writeLock().unlock();
         }
     }
 
     @Override
-    public Map<String, String> getPreferences(String userId) throws ServerException {
-        lock.readLock().lock();
-        try {
-            //Need read all new preferences without restarting dev-machine. It is needed for  IDEX-2180
-            preferences.putAll(preferenceStorage.loadMap(new TypeToken<Map<String, Map<String, String>>>() {}));
-            final Map<String, String> prefs = new HashMap<>();
-            if (preferences.containsKey(userId)) {
-                prefs.putAll(preferences.get(userId));
-            }
-            return prefs;
-        } finally {
-            lock.readLock().unlock();
+    public synchronized Map<String, String> getPreferences(String userId) throws ServerException {
+        requireNonNull(userId);
+        //Need read all new preferences without restarting dev-machine. It is needed for  IDEX-2180
+        preferences.putAll(preferenceStorage.loadMap(new TypeToken<Map<String, Map<String, String>>>() {}));
+        final Map<String, String> prefs = new HashMap<>();
+        if (preferences.containsKey(userId)) {
+            prefs.putAll(preferences.get(userId));
         }
+        return prefs;
     }
 
     @Override
-    public Map<String, String> getPreferences(String userId, String filter) throws ServerException {
-        lock.readLock().lock();
-        try {
-            return filter(getPreferences(userId), filter);
-        } finally {
-            lock.readLock().unlock();
-        }
+    public synchronized Map<String, String> getPreferences(String userId, String filter) throws ServerException {
+        requireNonNull(userId);
+        requireNonNull(filter);
+        return filter(getPreferences(userId), filter);
+    }
+
+    @Override
+    public synchronized void remove(String userId) throws ServerException {
+        requireNonNull(userId);
+        preferences.remove(userId);
     }
 
     private Map<String, String> filter(Map<String, String> prefs, String filter) {
         final Map<String, String> filtered = new HashMap<>();
         final Pattern pattern = Pattern.compile(filter);
+        if (filter.isEmpty()) {
+            return prefs;
+        }
         for (Map.Entry<String, String> entry : prefs.entrySet()) {
             if (pattern.matcher(entry.getKey()).matches()) {
                 filtered.put(entry.getKey(), entry.getValue());
             }
         }
         return filtered;
-    }
-
-    @Override
-    public void remove(String userId) throws ServerException {
-        lock.writeLock().lock();
-        try {
-            preferences.remove(userId);
-        } finally {
-            lock.writeLock().unlock();
-        }
     }
 }

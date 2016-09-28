@@ -14,20 +14,21 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
-import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.InputCallback;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.machine.MachineServiceClient;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
@@ -121,7 +122,7 @@ public class MachinePanelPresenterTest {
     @Mock
     private AppContext                appContext;
     @Mock
-    private WorkspaceDto              usersWorkspaceDto;
+    private Workspace                 usersWorkspace;
 
     @Captor
     private ArgumentCaptor<Operation<List<MachineDto>>> operationMachineStateCaptor;
@@ -165,8 +166,8 @@ public class MachinePanelPresenterTest {
         when(service.getMachine(anyString(), anyString())).thenReturn(machinePromise);
         when(machinePromise.then(Matchers.<Operation<MachineDto>>anyObject())).thenReturn(machinePromise);
 
-        when(appContext.getWorkspace()).thenReturn(usersWorkspaceDto);
-        when(usersWorkspaceDto.getId()).thenReturn(TEXT);
+        when(appContext.getWorkspace()).thenReturn(usersWorkspace);
+        when(usersWorkspace.getId()).thenReturn(TEXT);
     }
 
     @Test

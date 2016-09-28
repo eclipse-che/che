@@ -17,7 +17,17 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,18 +42,39 @@ import static java.util.stream.Collectors.toMap;
  * @author Alexander Garagatyi
  * @author Yevhenii Voevodin
  */
+@Entity(name = "WorkspaceConfig")
 public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     public static WorkspaceConfigImplBuilder builder() {
         return new WorkspaceConfigImplBuilder();
     }
 
-    private String                       name;
-    private String                       description;
-    private String                       defaultEnv;
-    private List<CommandImpl>            commands;
-    private List<ProjectConfigImpl>      projects;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(nullable = false)
+    private String defaultEnv;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
+    private List<CommandImpl> commands;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
+    private List<ProjectConfigImpl> projects;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn
     private Map<String, EnvironmentImpl> environments;
+
+    public WorkspaceConfigImpl() {}
 
     public WorkspaceConfigImpl(String name,
                                String description,
@@ -105,6 +136,10 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
         return defaultEnv;
     }
 
+    public void setDefaultEnv(String defaultEnv) {
+        this.defaultEnv = defaultEnv;
+    }
+
     @Override
     public List<CommandImpl> getCommands() {
         if (commands == null) {
@@ -131,7 +166,14 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public Map<String, EnvironmentImpl> getEnvironments() {
+        if (environments == null) {
+            return new HashMap<>();
+        }
         return environments;
+    }
+
+    public void setEnvironments(Map<String, EnvironmentImpl> environments) {
+        this.environments = environments;
     }
 
     @Override
@@ -169,6 +211,12 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
                ", environments=" + environments +
                ", description='" + description + '\'' +
                '}';
+    }
+
+    @PreUpdate
+    @PrePersist
+    public void syncProjects() {
+        getProjects().forEach(ProjectConfigImpl::syncDbAttributes);
     }
 
     /**

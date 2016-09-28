@@ -17,8 +17,12 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.constraints.Constraints;
+import org.eclipse.che.ide.api.editor.AsyncEditorProvider;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
@@ -213,7 +217,7 @@ public class EditorAgentImpl implements EditorAgent,
         doOpen(file, callback, null);
     }
 
-    private void doOpen(final VirtualFile file, final OpenEditorCallback callback, Constraints constraints) {
+    private void doOpen(final VirtualFile file, final OpenEditorCallback callback, final Constraints constraints) {
         PartPresenter activePart = editorMultiPartStack.getActivePart();
         EditorPartStack activePartStack = editorMultiPartStack.getPartStackByPart(activePart);
         if (constraints == null && activePartStack != null) {
@@ -225,15 +229,32 @@ public class EditorAgentImpl implements EditorAgent,
             }
         }
 
-        FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
+        final FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
         EditorProvider editorProvider = editorRegistry.getEditor(fileType);
-        final EditorPartPresenter editor = editorProvider.getEditor();
+        if (editorProvider instanceof AsyncEditorProvider) {
+            AsyncEditorProvider provider = (AsyncEditorProvider)editorProvider;
+            Promise<EditorPartPresenter> promise = provider.createEditor(file);
+            if (promise != null) {
+                promise.then(new Operation<EditorPartPresenter>() {
+                    @Override
+                    public void apply(EditorPartPresenter arg) throws OperationException {
+                        initEditor(file, callback, fileType, arg, constraints);
+                    }
+                });
+                return;
+            }
+        }
 
+        final EditorPartPresenter editor = editorProvider.getEditor();
+        initEditor(file, callback, fileType, editor, constraints);
+    }
+
+    private void initEditor(final VirtualFile file, final OpenEditorCallback callback, FileType fileType,
+                            final EditorPartPresenter editor, final Constraints constraints) {
         editor.init(new EditorInputImpl(fileType, file), callback);
         editor.addCloseHandler(this);
 
         workspaceAgent.openPart(editor, EDITING, constraints);
-
         openedEditors.add(editor);
 
         workspaceAgent.setActivePart(editor);
@@ -248,7 +269,6 @@ public class EditorAgentImpl implements EditorAgent,
                     if (editor instanceof TextEditor) {
                         editorContentSynchronizerProvider.get().trackEditor(editor);
                     }
-
                     callback.onEditorOpened(editor);
                     eventBus.fireEvent(new EditorOpenedEvent(file, editor));
                 }

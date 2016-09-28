@@ -26,6 +26,7 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
@@ -515,6 +516,10 @@ public final class ResourceManager {
                          .thenPromise(new Function<Void, Promise<Resource>>() {
                              @Override
                              public Promise<Resource> apply(Void ignored) throws FunctionException {
+
+                                 if (source.isProject()) {
+                                     return Promises.resolve(source);
+                                 }
 
                                  return findResource(destination, false).then(new Function<Optional<Resource>, Resource>() {
                                      @Override

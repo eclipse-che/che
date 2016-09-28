@@ -17,8 +17,8 @@
     padding: 3px 10px 0 10px;
     vertical-align: middle;
     font-size: 11px;
-    border-left: 1px solid tabsPanelBackground;
-    border-right: 1px solid tabsPanelBackground;
+    border-left: 1px solid tabBorderColor;
+    border-right: 1px solid tabBorderColor;
 
     box-sizing: border-box;
     -webkit-box-sizing: border-box;

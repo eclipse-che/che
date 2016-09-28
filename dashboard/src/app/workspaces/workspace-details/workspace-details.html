@@ -1,4 +1,14 @@
-<che-toolbar che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
+<che-toolbar ng-if="workspaceDetailsCtrl.showSaveButton"
+             che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
+             che-title-icons-controller="workspaceDetailsCtrl"
+             che-breadcrumb-title="All workspaces"
+             che-breadcrumb-href="#/workspaces">
+  <workspace-edit-mode-toolbar-button workspace-edit-mode-message="Changes will be applied and workspace restarted"
+                              workspace-edit-mode-show-message="workspaceDetailsCtrl.showApplyMessage"
+                              workspace-edit-mode-on-save="workspaceDetailsCtrl.applyConfigChanges()"></workspace-edit-mode-toolbar-button>
+</che-toolbar>
+<che-toolbar ng-if="!workspaceDetailsCtrl.showSaveButton"
+             che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
              che-title-icons-controller="workspaceDetailsCtrl"
              che-button-name="Open"
              che-button-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.namespace}}/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
@@ -22,12 +32,14 @@
           <!-- Name -->
           <che-label-container che-label-name="Name">
             <div layout="column" class="workspace-details-input">
-              <ng-form flex layout="column" name="workspaceInformationForm">
-                <che-input che-form="workspaceInformationForm"
+              <ng-form flex layout="column" name="workspaceNameForm">
+                <che-input che-form="workspaceNameForm"
                            che-name="name"
                            che-place-holder="Name of the workspace"
+                           aria-label="Name of the workspace"
                            ng-model="workspaceDetailsCtrl.newName"
-                           ng-change="workspaceDetailsCtrl.updateWorkspace(workspaceInformationForm.$valid)"
+                           ng-change="workspaceDetailsCtrl.updateName(workspaceNameForm.$valid)"
+                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
                            required
                            unique-workspace-name="workspaceDetailsCtrl.workspaceDetails.config.name"
                            ng-maxlength="128"
@@ -42,15 +54,6 @@
               </ng-form>
             </div>
           </che-label-container>
-
-          <!-- RAM -->
-          <!--<che-label-container che-label-name="RAM">-->
-            <!--<ng-form flex layout="column" name="workspaceInformationForm">-->
-              <!--<che-workspace-ram-allocation-slider ng-model="workspaceDetailsCtrl.newRam"-->
-                                                   <!--che-on-change="workspaceDetailsCtrl.updateWorkspace(workspaceInformationForm.$valid)"></che-workspace-ram-allocation-slider>-->
-            <!--</ng-form>-->
-            <!--<div class="workspace-details-restart-message" ng-if="workspaceDetailsCtrl.getWorkspaceStatus() !== 'STOPPED' && (workspaceDetailsCtrl.origRam !== workspaceDetailsCtrl.newRam)">Restart workspace to apply new value.</div>-->
-          <!--</che-label-container>-->
 
           <!-- Status -->
           <che-label-container che-label-name="State">
@@ -98,6 +101,22 @@
         </div>
       </md-tab-body>
     </md-tab>
+
+    <!-- Environment tabs -->
+    <md-tab ng-disabled="workspaceDetailsCtrl.loading"
+            ng-repeat="(environmentName, environmentValue) in workspaceDetailsCtrl.copyWorkspaceDetails.config.environments">
+      <md-tab-label>
+        <span class="che-tab-label-title">Runtime</span>
+      </md-tab-label>
+      <md-tab-body>
+        <workspace-environments environment-name="environmentName"
+                                workspace-config="workspaceDetailsCtrl.copyWorkspaceDetails.config"
+                                machines-view-status="workspaceDetailsCtrl.machinesViewStatus"
+                                environment-on-change="workspaceDetailsCtrl.updateWorkspaceConfig()"></workspace-environments>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Other tabs -->
     <md-tab ng-repeat="section in workspaceDetailsCtrl.getSections()">
       <md-tab-label>
         <md-icon md-font-icon="material-design {{section.icon}}" class="che-tab-label-icon"></md-icon>
@@ -109,6 +128,12 @@
     </md-tab>
   </md-tabs>
 </md-content>
+
+<workspace-edit-mode-overlay ng-if="workspaceDetailsCtrl.showSaveButton"
+                             workspace-edit-mode-message="Changes will be applied and workspace restarted"
+                             workspace-edit-mode-show-message="workspaceDetailsCtrl.showApplyMessage"
+                             workspace-edit-mode-on-save="workspaceDetailsCtrl.applyConfigChanges()"
+                             workspace-edit-mode-on-cancel="workspaceDetailsCtrl.cancelConfigChanges()"></workspace-edit-mode-overlay>
 
 <md-content ng-show="workspaceDetailsCtrl.invalidWorkspace">
   {{workspaceDetailsCtrl.invalidWorkspace}}

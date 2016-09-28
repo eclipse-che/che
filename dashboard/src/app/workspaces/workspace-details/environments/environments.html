@@ -1,0 +1,74 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<div class="workspace-environments">
+
+  <!-- Name -->
+  <che-label-container che-label-name="Name">
+    <ng-form flex layout="column" name="workspaceEnvironmentsForm">
+      <div layout="column" class="workspace-environments-input">
+        <che-input che-form="workspaceEnvironmentsForm"
+                   che-name="name"
+                   che-place-holder="Name of the environment"
+                   aria-label="Name of the environment"
+                   ng-model="workspaceEnvironmentsController.newEnvironmentName"
+                   ng-change="workspaceEnvironmentsController.updateEnvironmentName(workspaceEnvironmentsForm.$valid)"
+                   ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
+                   custom-validator="workspaceEnvironmentsController.isUnique($value)"
+                   required
+                   ng-maxlength="128"
+                   ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.
+          </div>
+          <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+          <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+          <div ng-message="customValidator">This environment name is already used.</div>
+        </che-input>
+      </div>
+    </ng-form>
+  </che-label-container>
+
+  <!-- Machines -->
+  <che-label-container ng-if="workspaceEnvironmentsController.environment.machines.length"
+                       che-label-name="Machines"
+                       class="che-label-container-last">
+  </che-label-container>
+  <workspace-machine-config ng-repeat="machine in workspaceEnvironmentsController.machines | orderBy:'name'"
+                            machine-name="machine.name"
+                            machines-list="workspaceEnvironmentsController.machines"
+                            environment-manager="workspaceEnvironmentsController.environmentManager"
+                            machine-name-on-change="workspaceEnvironmentsController.updateMachineName(oldName,newName)"
+                            machine-config-on-change="workspaceEnvironmentsController.updateEnvironmentConfig()"
+                            machine-on-delete="workspaceEnvironmentsController.deleteMachine(name)"
+                            machine-is-opened="workspaceEnvironmentsController.machinesViewStatus[workspaceEnvironmentsController.environmentName][machine.name]"></workspace-machine-config>
+
+  <!-- Recipe Content-->
+  <che-label-container che-label-name="Recipe"
+                       che-label-description="The contents of the runtime started by the workspace."
+                       ng-if="workspaceEnvironmentsController.environment.recipe.content">
+    <div layout="row" layout-wrap>
+      <div flex class="recipe-editor">
+        <ui-codemirror ui-codemirror="workspaceEnvironmentsController.editorOptions"
+                       ng-model="workspaceEnvironmentsController.environment.recipe.content"></ui-codemirror>
+      </div>
+    </div>
+  </che-label-container>
+  <!-- OR Location -->
+  <che-label-container che-label-name="Recipe Location"
+                       ng-if="workspaceEnvironmentsController.recipeType !== 'dockerimage' && workspaceEnvironmentsController.environment.recipe.location">
+    <che-text-info che-text="workspaceEnvironmentsController.environment.recipe.location"
+                   che-href="workspaceEnvironmentsController.environment.recipe.location"
+                   che-copy-clipboard="true"
+                   class="recipe-location"></che-text-info>
+  </che-label-container>
+</div>

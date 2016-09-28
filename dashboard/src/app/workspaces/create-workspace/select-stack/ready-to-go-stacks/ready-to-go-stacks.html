@@ -10,24 +10,26 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<ng-form name="workspaceInformationForm">
-
+<div layout="column" flex>
   <div class="stack-label-info">Create a new workspace with a ready-to-go stack.</div>
-  <div layout="column" flex>
-    <div layout="row" layout-wrap>
-      <md-card layout="column" class="che-simple-selector"
-               ng-repeat="stack in readyToGoStacksCtrl.generalStacks | orderBy:[readyToGoStacksCtrl.getPrivilegedSortPosition, 'name']"
-               ng-init="readyToGoStacksCtrl.initValue($first, stack)"
-               ng-click="readyToGoStacksCtrl.select(stack)"
-               ng-class="{'che-simple-selector-active' : '{{stack.name}}' === readyToGoStacksCtrl.stack.name}">
-        <div layout="row">
-          <div class="selector-icon" ng-class="{'chefont cheico-type-blank' : !stack.iconSrc}">
-            <img ng-if="stack.iconSrc" ng-src="{{stack.iconSrc}}"/>
-          </div>
-          <div flex="70" class="title">{{stack.name}}</div>
-        </div>
-        <div class="description">{{readyToGoStacksCtrl.tagsToString(stack.tags)}}</div>
-      </md-card>
-    </div>
+  <div layout="row" flex="100">
+    <che-stack-library-filter layout="row" flex
+                              ng-model="readyToGoStacksCtrl.allStackTags">
+    </che-stack-library-filter>
   </div>
-</ng-form>
+  <div layout="row" layout-wrap>
+    <md-card layout="column" class="che-simple-selector"
+             ng-repeat="stack in filteredStacks = (readyToGoStacksCtrl.generalStacks | stackSelectedStackFilter:readyToGoStacksCtrl.filteredStackIds) | orderBy:[readyToGoStacksCtrl.getPrivilegedSortPosition, 'name']"
+             ng-init="$first && readyToGoStacksCtrl.setStackSelectionById(stack.id)"
+             ng-click="readyToGoStacksCtrl.setStackSelectionById(stack.id)"
+             ng-class="{'che-simple-selector-active' : '{{stack.id}}' === readyToGoStacksCtrl.selectedStackId}">
+      <div layout="row">
+        <div class="selector-icon" ng-class="{'chefont cheico-type-blank' : !readyToGoStacksCtrl.stackIconsMap.has(stack.id)}">
+          <img ng-src="{{readyToGoStacksCtrl.stackIconsMap.get(stack.id)}}"/>
+        </div>
+        <div flex="70" class="title">{{stack.name}}</div>
+      </div>
+      <div class="description">{{readyToGoStacksCtrl.tagsToString(stack.tags)}}</div>
+    </md-card>
+  </div>
+</div>

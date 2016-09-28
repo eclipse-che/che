@@ -62,13 +62,11 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.connection.WsConnectionListener;
+import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.machine.macro.ServerHostNameMacroProvider;
 import org.eclipse.che.ide.machine.macro.ServerMacroProvider;
 import org.eclipse.che.ide.machine.macro.ServerPortMacroProvider;
 import org.eclipse.che.ide.machine.macro.ServerProtocolMacroProvider;
-import org.eclipse.che.ide.part.editor.actions.SwitchNextEditorAction;
-import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
-import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
 import org.eclipse.che.ide.part.editor.actions.CloseAction;
@@ -79,6 +77,9 @@ import org.eclipse.che.ide.part.editor.actions.PinEditorTabAction;
 import org.eclipse.che.ide.part.editor.actions.ReopenClosedFileAction;
 import org.eclipse.che.ide.part.editor.actions.SplitHorizontallyAction;
 import org.eclipse.che.ide.part.editor.actions.SplitVerticallyAction;
+import org.eclipse.che.ide.part.editor.actions.SwitchNextEditorAction;
+import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
+import org.eclipse.che.ide.part.editor.recent.ClearRecentListAction;
 import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.resources.action.CopyResourceAction;
@@ -96,6 +97,8 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
+import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
+import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.RECENT_GROUP_ID;
 import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_CATEGORY;
 
 /**
@@ -268,6 +271,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private OpenRecentFilesAction openRecentFilesAction;
+
+    @Inject
+    private ClearRecentListAction clearRecentFilesAction;
 
     @Inject
     private CloseActiveEditorAction closeActiveEditorAction;
@@ -461,7 +467,12 @@ public class StandardComponentInitializer {
 
         // Edit (New Menu)
         DefaultActionGroup editGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDIT);
-
+        DefaultActionGroup recentGroup = new DefaultActionGroup(RECENT_GROUP_ID, true, actionManager);
+        actionManager.registerAction(IdeActions.GROUP_RECENT_FILES, recentGroup);
+        actionManager.registerAction("clearRecentList", clearRecentFilesAction);
+        recentGroup.addSeparator();
+        recentGroup.add(clearRecentFilesAction, LAST);
+        editGroup.add(recentGroup);
         actionManager.registerAction("openRecentFiles", openRecentFilesAction);
         editGroup.add(openRecentFilesAction);
 

@@ -14,7 +14,7 @@ unset PACKAGES
 test "$(id -u)" = 0 || SUDO="sudo"
 
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
-LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION=)
+LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
 
 ###############################
 ### Install Needed packaged ###
@@ -92,7 +92,12 @@ else
     exit 1
 fi
 
-ps -fC sshd && exit
+command -v pidof >/dev/null 2>&1 && {
+    pidof sshd >/dev/null 2>&1 && exit
+} || {
+    ps -fC sshd >/dev/null 2>&1 && exit
+}
+
 
 ${SUDO} mkdir -p /var/run/sshd
 ${SUDO} /usr/bin/ssh-keygen -A && ${SUDO} /usr/sbin/sshd -D

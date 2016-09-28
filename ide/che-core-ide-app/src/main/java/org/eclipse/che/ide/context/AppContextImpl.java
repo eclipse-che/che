@@ -16,10 +16,10 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -82,9 +82,9 @@ public class AppContextImpl implements AppContext,
     private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
     private final List<String>              projectsInImport;
 
-    private WorkspaceDto        usersWorkspaceDto;
+    private Workspace           usersWorkspace;
     private CurrentUser         currentUser;
-    private Factory             factory;
+    private FactoryDto          factory;
     private DevMachine          devMachine;
     private Path                projectsRoot;
     /**
@@ -117,22 +117,22 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public WorkspaceDto getWorkspace() {
-        return usersWorkspaceDto;
+    public Workspace getWorkspace() {
+        return usersWorkspace;
     }
 
     @Override
-    public void setWorkspace(WorkspaceDto workspace) {
-        this.usersWorkspaceDto = workspace;
+    public void setWorkspace(Workspace workspace) {
+        this.usersWorkspace = workspace;
     }
 
     @Override
     public String getWorkspaceId() {
-        if (usersWorkspaceDto == null) {
+        if (usersWorkspace == null) {
             throw new IllegalArgumentException(getClass() + " Workspace can not be null.");
         }
 
-        return usersWorkspaceDto.getId();
+        return usersWorkspace.getId();
     }
 
     @Override
@@ -170,11 +170,12 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public Factory getFactory() {
+    public FactoryDto getFactory() {
         return factory;
     }
 
-    public void setFactory(Factory factory) {
+    @Override
+    public void setFactory(FactoryDto factory) {
         this.factory = factory;
     }
 
@@ -208,14 +209,13 @@ public class AppContextImpl implements AppContext,
                 AppContextImpl.this.projects = projects;
                 java.util.Arrays.sort(AppContextImpl.this.projects, ResourcePathComparator.getInstance());
                 eventBus.fireEvent(new WorkspaceReadyEvent(projects));
-                appStateManager.get().restoreWorkspaceState(getWorkspaceId());
             }
         });
     }
 
     @Override
     public String getWorkspaceName() {
-        return usersWorkspaceDto.getConfig().getName();
+        return usersWorkspace.getConfig().getName();
     }
 
     /** {@inheritDoc} */

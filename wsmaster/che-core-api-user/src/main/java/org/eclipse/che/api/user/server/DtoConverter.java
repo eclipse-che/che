@@ -29,8 +29,7 @@ public final class DtoConverter {
                          .withId(user.getId())
                          .withEmail(user.getEmail())
                          .withName(user.getName())
-                         .withAliases(user.getAliases())
-                         .withPassword("<none>");
+                         .withAliases(user.getAliases());
     }
 
     private DtoConverter() {}

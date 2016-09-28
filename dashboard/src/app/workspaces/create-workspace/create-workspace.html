@@ -27,7 +27,7 @@
     <che-label-container che-label-name="Import workspace"
                          ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-import'">
       <ui-codemirror class="workspace-editor" ui-codemirror="createWorkspaceCtrl.editorOptions"
-                     ng-model="createWorkspaceCtrl.importWorkspace"></ui-codemirror>
+                     ng-model="createWorkspaceCtrl.importWorkspace" ng-change="createWorkspaceCtrl.onWorkspaceSourceChange()"></ui-codemirror>
     </che-label-container>
 
     <che-label-container ng-if="createWorkspaceCtrl.selectSourceOption === 'select-source-recipe'"
@@ -47,6 +47,7 @@
         <che-input che-form="workspaceInformationForm"
                    che-name="name"
                    che-place-holder="Name of the workspace"
+                   aria-label="Name of the workspace"
                    ng-model="createWorkspaceCtrl.workspaceName"
                    required
                    unique-workspace-name=""
@@ -66,16 +67,16 @@
     </che-label-container>
     <che-label-container che-label-name="RAM">
       <div ng-hide="createWorkspaceCtrl.isCustomStack"
-           data-ng-repeat="(environmentKey, environmentValue) in createWorkspaceCtrl.stack.workspaceConfig.environments">
-          <span ng-if="createWorkspaceCtrl.getObjectKeys(createWorkspaceCtrl.stack.workspaceConfig.environments).length > 1"
+           data-ng-repeat="(environmentKey, environmentValue) in createWorkspaceCtrl.getEnvironments()">
+          <span ng-if="createWorkspaceCtrl.getObjectKeys(createWorkspaceCtrl.getEnvironments()).length > 1"
                 class="workspace-environment-name">ENVIRONMENT: {{environmentKey}}</span>
 
         <div>
-          <div data-ng-repeat="(machineKey, machineValue) in environmentValue.machines">
-            <div class="workspace-machine" ng-if="machineValue.attributes && machineValue.attributes.memoryLimitBytes">
-              <span ng-if="createWorkspaceCtrl.getObjectKeys(environmentValue.machines).length > 1">MACHINE: {{machineKey}}</span>
+          <div data-ng-repeat="machine in createWorkspaceCtrl.getMachines(environmentValue)">
+            <div class="workspace-machine" ng-if="machine.attributes && machine.attributes.memoryLimitBytes">
+              <span ng-if="$first !== $last">MACHINE: {{machine.name}}</span>
               <che-workspace-ram-allocation-slider
-                      ng-model="machineValue.attributes.memoryLimitBytes"></che-workspace-ram-allocation-slider>
+                ng-model="machine.attributes.memoryLimitBytes"></che-workspace-ram-allocation-slider>
             </div>
           </div>
         </div>

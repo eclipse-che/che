@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -116,5 +117,10 @@ public class LocalStorage {
             return Collections.emptyMap();
         }
         return result;
+    }
+
+    /** Returns the file managed by this storage. */
+    public File getFile() {
+        return storedFile;
     }
 }

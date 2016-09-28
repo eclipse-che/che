@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.user.server.Constants;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
+import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.test.tck.TckModuleFactory;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -52,27 +54,33 @@ public class ProfileDaoTest {
     private ProfileDao profileDao;
 
     @Inject
-    private TckRepository<ProfileImpl> tckRepository;
+    private TckRepository<ProfileImpl> profileTckRepository;
+    @Inject
+    private TckRepository<UserImpl> userTckRepository;
 
     @BeforeMethod
     private void setUp() throws TckRepositoryException {
+        UserImpl[] users = new UserImpl[COUNT_OF_PROFILES];
         profiles = new ProfileImpl[COUNT_OF_PROFILES];
 
         for (int i = 0; i < COUNT_OF_PROFILES; i++) {
             final String userId = NameGenerator.generate("user", Constants.ID_LENGTH);
+            users[i] = new UserImpl(userId, userId + "@eclipse.org", userId, "password", emptyList());
+
             final Map<String, String> attributes = new HashMap<>();
             attributes.put("firstName", "first-name-" + i);
             attributes.put("lastName", "last-name-" + i);
             attributes.put("company", "company-" + i);
             profiles[i] = new ProfileImpl(userId, attributes);
         }
-
-        tckRepository.createAll(Arrays.asList(profiles));
+        userTckRepository.createAll(Arrays.asList(users));
+        profileTckRepository.createAll(Arrays.asList(profiles));
     }
 
     @AfterMethod
     private void cleanup() throws TckRepositoryException {
-        tckRepository.removeAll();
+        profileTckRepository.removeAll();
+        userTckRepository.removeAll();
     }
 
     @Test
@@ -92,16 +100,14 @@ public class ProfileDaoTest {
         profileDao.getById(null);
     }
 
-    @Test(dependsOnMethods = "shouldGetProfileById")
+    @Test(dependsOnMethods = {"shouldGetProfileById", "shouldRemoveProfile"})
     public void shouldCreateProfile() throws Exception {
-        final ProfileImpl newProfile = new ProfileImpl("user123",
-                                                       ImmutableMap.of("attribute1", "value1",
-                                                                       "attribute2", "value2",
-                                                                       "attribute3", "value3"));
+        final ProfileImpl profile = profiles[0];
 
-        profileDao.create(newProfile);
+        profileDao.remove(profile.getUserId());
+        profileDao.create(profile);
 
-        assertEquals(profileDao.getById(newProfile.getUserId()), newProfile);
+        assertEquals(profileDao.getById(profile.getUserId()), profile);
     }
 
     @Test(expectedExceptions = ConflictException.class)

@@ -48,7 +48,7 @@ public class StackLocalStorage {
 
     private static final Logger LOG = LoggerFactory.getLogger(StackLocalStorage.class);
 
-    private static final String STACK_STORAGE_FILE = "stacks.json";
+    public static final String STACK_STORAGE_FILE = "stacks.json";
     private static final String ICON_FOLDER_NAME   = "images";
 
     private final LocalStorage localStorage;
