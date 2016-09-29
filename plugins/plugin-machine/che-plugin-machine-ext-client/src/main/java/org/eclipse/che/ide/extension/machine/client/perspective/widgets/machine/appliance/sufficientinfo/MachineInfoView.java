@@ -13,7 +13,7 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.ImplementedBy;
 
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 
 import javax.validation.constraints.NotNull;
 
@@ -31,7 +31,7 @@ public interface MachineInfoView extends IsWidget {
      * @param machine
      *         machine for which need update view
      */
-    void updateInfo(@NotNull Machine machine);
+    void updateInfo(@NotNull MachineEntity machine);
 
     /**
      * Sets owner's name in special place on view.

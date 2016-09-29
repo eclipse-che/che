@@ -12,10 +12,10 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
 import org.junit.Before;
@@ -50,7 +50,7 @@ public class RestartMachineActionTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private ActionEvent      event;
     @Mock
-    private MachineDto       machine;
+    private MachineEntity    machine;
     @Mock
     private MachineConfigDto machineConfig;
 

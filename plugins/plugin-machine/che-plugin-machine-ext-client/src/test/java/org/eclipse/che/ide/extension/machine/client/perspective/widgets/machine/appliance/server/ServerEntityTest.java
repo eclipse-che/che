@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
  * @author Dmitry Shnurenko
  */
 @RunWith(MockitoJUnitRunner.class)
-public class ServerTest {
+public class ServerEntityTest {
 
     private static final String SOME_TEXT = "someText";
 
@@ -37,23 +37,23 @@ public class ServerTest {
     @Mock
     private ServerPropertiesDto descriptor2;
 
-    private Server server;
+    private ServerEntity serverEntity;
 
     @Before
     public void setUp() {
-        server = new Server(SOME_TEXT, descriptor);
+        serverEntity = new ServerEntity(SOME_TEXT, descriptor);
     }
 
     @Test
     public void exposedPortShouldBeReturned() {
-        assertThat(server.getPort(), equalTo(SOME_TEXT));
+        assertThat(serverEntity.getPort(), equalTo(SOME_TEXT));
     }
 
     @Test
     public void addressShouldBeReturned() {
         when(descriptor.getAddress()).thenReturn(SOME_TEXT);
 
-        assertThat(server.getAddress(), equalTo(SOME_TEXT));
+        assertThat(serverEntity.getAddress(), equalTo(SOME_TEXT));
 
         verify(descriptor).getAddress();
     }
@@ -62,7 +62,7 @@ public class ServerTest {
     public void urlShouldBeReturned() {
         when(descriptor.getUrl()).thenReturn(SOME_TEXT);
 
-        assertThat(server.getUrl(), equalTo(SOME_TEXT));
+        assertThat(serverEntity.getUrl(), equalTo(SOME_TEXT));
 
         verify(descriptor).getUrl();
     }
@@ -71,7 +71,7 @@ public class ServerTest {
     public void refShouldBeReturned() {
         when(descriptor.getRef()).thenReturn(SOME_TEXT);
 
-        assertThat(server.getRef(), equalTo(SOME_TEXT));
+        assertThat(serverEntity.getRef(), equalTo(SOME_TEXT));
 
         verify(descriptor).getRef();
     }
@@ -81,7 +81,7 @@ public class ServerTest {
         when(descriptor.getProperties()).thenReturn(descriptor2);
         when(descriptor2.getPath()).thenReturn(SOME_TEXT);
 
-        assertThat(server.getProperties().getPath(), equalTo(SOME_TEXT));
+        assertThat(serverEntity.getProperties().getPath(), equalTo(SOME_TEXT));
 
         verify(descriptor).getProperties();
         verify(descriptor2).getPath();
@@ -92,7 +92,7 @@ public class ServerTest {
         when(descriptor.getProperties()).thenReturn(descriptor2);
         when(descriptor2.getInternalAddress()).thenReturn(SOME_TEXT);
 
-        assertThat(server.getProperties().getInternalAddress(), equalTo(SOME_TEXT));
+        assertThat(serverEntity.getProperties().getInternalAddress(), equalTo(SOME_TEXT));
 
         verify(descriptor).getProperties();
         verify(descriptor2).getInternalAddress();
@@ -103,10 +103,9 @@ public class ServerTest {
         when(descriptor.getProperties()).thenReturn(descriptor2);
         when(descriptor2.getInternalUrl()).thenReturn(SOME_TEXT);
 
-        assertThat(server.getProperties().getInternalUrl(), equalTo(SOME_TEXT));
+        assertThat(serverEntity.getProperties().getInternalUrl(), equalTo(SOME_TEXT));
 
         verify(descriptor).getProperties();
         verify(descriptor2).getInternalUrl();
     }
-
 }

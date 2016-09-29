@@ -13,7 +13,8 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.api.core.model.machine.Server;
+import org.eclipse.che.api.core.model.machine.ServerProperties;
 
 import javax.validation.constraints.NotNull;
 import java.util.Objects;
@@ -23,19 +24,21 @@ import java.util.Objects;
  *
  * @author Dmitry Shnurenko
  */
-public class Server implements org.eclipse.che.api.core.model.machine.Server {
+public class ServerEntity implements Server {
 
-    private final ServerDto descriptor;
+    private final Server descriptor;
     private final String    port;
 
     @Inject
-    public Server(@Assisted String port, @Assisted ServerDto descriptor) {
-        this.port       = port;
+    public ServerEntity(@Assisted String port, @Assisted Server descriptor) {
+        this.port = port;
         this.descriptor = descriptor;
     }
 
     @NotNull
-    public String getPort() { return port; }
+    public String getPort() {
+        return port;
+    }
 
     @NotNull
     @Override
@@ -61,16 +64,16 @@ public class Server implements org.eclipse.che.api.core.model.machine.Server {
 
     @Override
     public ServerProperties getProperties() {
-        return new ServerProperties(descriptor.getProperties());
+        return new ServerPropertiesImpl(descriptor.getProperties());
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Server)) return false;
-        Server other = (Server) o;
+        if (!(o instanceof ServerEntity)) return false;
+        ServerEntity other = (ServerEntity)o;
         return Objects.equals(descriptor, other.descriptor) &&
-                       Objects.equals(port, other.port);
+               Objects.equals(port, other.port);
     }
 
     @Override
@@ -84,8 +87,8 @@ public class Server implements org.eclipse.che.api.core.model.machine.Server {
     @Override
     public String toString() {
         return "Server{" +
-                       "descriptor=" + descriptor +
-                       ", port='" + port + '\'' +
-                       '}';
+               "descriptor=" + descriptor +
+               ", port='" + port + '\'' +
+               '}';
     }
 }

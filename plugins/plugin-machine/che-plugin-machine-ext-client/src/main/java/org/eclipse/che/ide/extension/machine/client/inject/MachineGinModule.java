@@ -20,6 +20,7 @@ import com.google.inject.name.Names;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.Perspective;
@@ -35,6 +36,7 @@ import org.eclipse.che.ide.extension.machine.client.command.valueproviders.DevMa
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.WidgetsFactory;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineEntityImpl;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineManagerImpl;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineView;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineViewImpl;
@@ -110,7 +112,9 @@ public class MachineGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().implement(TabHeader.class, TabHeaderImpl.class)
                                              .implement(EditorButtonWidget.class, EditorButtonWidgetImpl.class)
                                              .build(WidgetsFactory.class));
-        install(new GinFactoryModuleBuilder().implement(Tab.class, TabImpl.class).build(EntityFactory.class));
+        install(new GinFactoryModuleBuilder().implement(Tab.class, TabImpl.class)
+                                             .implement(MachineEntity.class, MachineEntityImpl.class)
+                                             .build(EntityFactory.class));
         install(new GinFactoryModuleBuilder().build(TerminalFactory.class));
 
         bind(MachineManager.class).to(MachineManagerImpl.class).in(Singleton.class);
