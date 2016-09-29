@@ -82,6 +82,7 @@ public class NodeJsDebugger extends AbstractDebugger {
                     sb.append(connectionInfo);
                 }
             } catch (IllegalArgumentException ignored) {
+                // unrecognized connection property
             }
         }
 

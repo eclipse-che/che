@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.nodejsdbg.server.parser;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -25,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * {@code breakpoints} command parser.
@@ -34,7 +34,6 @@ import java.util.Map;
  */
 public class NodeJsBreakpointsParser implements NodeJsOutputParser<NodeJsBreakpointsParser.Breakpoints> {
     private static final Logger LOG  = LoggerFactory.getLogger(NodeJsBreakpointsParser.class);
-    private static final Gson   GSON = new GsonBuilder().serializeNulls().create();
 
     public static final NodeJsBreakpointsParser INSTANCE = new NodeJsBreakpointsParser();
 
@@ -47,30 +46,27 @@ public class NodeJsBreakpointsParser implements NodeJsOutputParser<NodeJsBreakpo
     public Breakpoints parse(NodeJsOutput nodeJsOutput) throws NodeJsDebuggerParseException {
         final List<Breakpoint> breakpoints = new ArrayList<>();
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> m = GSON.fromJson(nodeJsOutput.getOutput(), Map.class);
-        if (m.containsKey("breakpoints")) {
-
-            @SuppressWarnings("unchecked")
-            Iterator<Map> iter = ((Iterable)m.get("breakpoints")).iterator();
+        JsonObject json = new JsonParser().parse(nodeJsOutput.getOutput()).getAsJsonObject();
+        if (json.has("breakpoints")) {
+            Iterator<JsonElement> iter = json.getAsJsonArray("breakpoints").iterator();
             while (iter.hasNext()) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> item = iter.next();
-
+                JsonObject item = iter.next().getAsJsonObject();
                 try {
-                    final String condition = (String)item.get("condition");
-                    final boolean isEnabled = (Boolean)item.getOrDefault("active", false);
-                    final int lineNumber = ((Double)item.get("line")).intValue();
+                    final String condition = item.has("condition") && !item.get("condition").isJsonNull()
+                                             ? item.get("condition").getAsString()
+                                             : null;
+                    final boolean isEnabled = item.has("active") && !item.get("active").isJsonNull() && item.get("active").getAsBoolean();
+                    final int lineNumber = item.get("line").getAsInt();
 
                     final String target;
-                    String targetType = (String)item.get("type");
+                    String targetType = item.get("type").getAsString();
 
                     switch (targetType) {
                         case "scriptId":
-                            target = item.get("script_id").toString();
+                            target = String.valueOf(item.get("script_id").getAsInt());
                             break;
                         case "scriptRegExp":
-                            target = (String)item.get("script_regexp");
+                            target = item.get("script_regexp").getAsString();
                             break;
                         default:
                             throw new IllegalArgumentException("Unsupported 'type' value: " + targetType);

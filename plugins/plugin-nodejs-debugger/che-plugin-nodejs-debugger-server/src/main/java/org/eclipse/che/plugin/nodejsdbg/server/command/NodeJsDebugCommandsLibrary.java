@@ -35,6 +35,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
+
 /**
  * Library of the NodeJs debug commands: https://nodejs.org/api/debugger.html
  *
@@ -74,7 +76,7 @@ public class NodeJsDebugCommandsLibrary {
      */
     public Void setBreakpoint(String scriptPath, int lineNumber) throws NodeJsDebuggerException {
         String scriptName = Paths.get(scriptPath).getFileName().toString();
-        String input = String.format("sb('%s', %d)", scriptName, lineNumber);
+        String input = format("sb('%s', %d)", scriptName, lineNumber);
         NodeJsDebugCommand<Void> command = createCommand(input, NodeJsOutputParser.VOID);
         return doExecute(command);
     }
@@ -96,6 +98,11 @@ public class NodeJsDebugCommandsLibrary {
 
             String newTarget;
             String[] target = location.getTarget().split(":");
+            if (target.length != 2) {
+                LOG.error(format("Illegal breakpoint location format %s", target));
+                continue;
+            }
+
             if (target[0].equals("scriptId")) {
                 newTarget = scripts.get((int)Double.parseDouble(target[1]));
             } else {
@@ -114,7 +121,7 @@ public class NodeJsDebugCommandsLibrary {
      * Execute {@code cb} command.
      */
     public Void clearBreakpoint(String script, int lineNumber) throws NodeJsDebuggerException {
-        String input = String.format("cb('%s', %d)", script, lineNumber);
+        String input = format("cb('%s', %d)", script, lineNumber);
         NodeJsDebugCommand<Void> command = createCommand(input, NodeJsOutputParser.VOID);
         return doExecute(command);
     }
@@ -165,7 +172,7 @@ public class NodeJsDebugCommandsLibrary {
      * Execute {@code exec} command to set a new value for the giving variable.
      */
     public Void setVar(String varName, String newValue) throws NodeJsDebuggerException {
-        String input = String.format("exec %s=%s", varName, newValue);
+        String input = format("exec %s=%s", varName, newValue);
         NodeJsDebugCommand<Void> command = createCommand(input, NodeJsOutputParser.VOID);
         return doExecute(command);
     }
@@ -174,7 +181,7 @@ public class NodeJsDebugCommandsLibrary {
      * Execute {@code exec} command to get value for the giving variable.
      */
     public String getVar(String varName) throws NodeJsDebuggerException {
-        String line = String.format("exec %s", varName);
+        String line = format("exec %s", varName);
         NodeJsDebugCommand<String> command = createCommand(line, NodeJsOutputParser.DEFAULT);
         return doExecute(command);
     }
@@ -183,7 +190,7 @@ public class NodeJsDebugCommandsLibrary {
      * Execute {@code exec} command to evaluate expression.
      */
     public String evaluate(String expression) throws NodeJsDebuggerException {
-        String line = String.format("exec %s", expression);
+        String line = format("exec %s", expression);
         NodeJsDebugCommand<String> command = createCommand(line, NodeJsOutputParser.DEFAULT);
         return doExecute(command);
     }
