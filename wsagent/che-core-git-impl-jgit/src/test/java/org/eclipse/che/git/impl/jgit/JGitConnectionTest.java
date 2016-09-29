@@ -154,13 +154,13 @@ public class JGitConnectionTest {
      * @throws Exception if it fails
      */
     @Test
-    public void checkBranchName() throws Exception {
+    public void checkCurrentBranch() throws Exception {
         String branchTest = "helloWorld";
         Ref ref = Mockito.mock(Ref.class);
         when(repository.exactRef(Constants.HEAD)).thenReturn(ref);
         when(ref.getLeaf()).thenReturn(ref);
         when(ref.getName()).thenReturn(branchTest);
-        String branchName = jGitConnection.getBranchName();
+        String branchName = jGitConnection.getCurrentBranch();
 
         assertEquals(branchTest, branchName);
     }

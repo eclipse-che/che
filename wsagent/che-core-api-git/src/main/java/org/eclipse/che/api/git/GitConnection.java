@@ -485,7 +485,6 @@ public interface GitConnection extends Closeable {
     /** Set publisher for git output, e.g. for sending git command output to the client side. */
     void setOutputLineConsumerFactory(LineConsumerFactory outputPublisherFactory);
 
-
     /**
      * Get the current branch on the current directory
      *
@@ -493,5 +492,5 @@ public interface GitConnection extends Closeable {
      * @throws GitException
      *         if any exception occurs
      */
-    String getBranchName() throws GitException;
+    String getCurrentBranch() throws GitException;
 }

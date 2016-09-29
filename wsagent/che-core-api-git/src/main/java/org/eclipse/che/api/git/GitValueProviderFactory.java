@@ -58,7 +58,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
                         case VCS_PROVIDER_NAME:
                             return Collections.singletonList("git");
                         case GIT_CURRENT_BRANCH_NAME:
-                            return Collections.singletonList(gitConnection.getBranchName());
+                            return Collections.singletonList(gitConnection.getCurrentBranch());
                         case GIT_REPOSITORY_REMOTES:
                             return gitConnection.remoteList(newDto(RemoteListRequest.class))
                                                 .stream()
