@@ -14,7 +14,7 @@ const (
 )
 
 func TestOneLineOutput(t *testing.T) {
-	defer cleanupProcessResources()
+	defer cleanupLogsDir()
 	// create and start a process
 	p := startAndWaitTestProcess("echo test", t)
 
@@ -30,7 +30,7 @@ func TestOneLineOutput(t *testing.T) {
 }
 
 func TestEmptyLinesOutput(t *testing.T) {
-	defer cleanupProcessResources()
+	defer cleanupLogsDir()
 	p := startAndWaitTestProcess("printf \"\n\n\n\n\n\"", t)
 
 	logs, _ := p.ReadAllLogs()
@@ -48,7 +48,7 @@ func TestEmptyLinesOutput(t *testing.T) {
 
 func TestAddSubscriber(t *testing.T) {
 	process.LogsDir = TmpFile()
-	defer cleanupProcessResources()
+	defer cleanupLogsDir()
 
 	outputLines := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
 
@@ -101,9 +101,59 @@ func TestAddSubscriber(t *testing.T) {
 	}
 }
 
+func TestRestoreSubscriberForDeadProcess(t *testing.T) {
+	process.LogsDir = TmpFile()
+	defer cleanupLogsDir()
+	beforeStart := time.Now()
+	p := startAndWaitTestProcess("echo test", t)
+
+	// Read all the data from channel
+	channel := make(chan *rpc.Event)
+	done := make(chan bool)
+	var received []*rpc.Event
+	go func() {
+		statusReceived := false
+		timeoutReached := false
+		for !statusReceived && !timeoutReached {
+			select {
+			case v := <-channel:
+				received = append(received, v)
+				if v.EventType == process.DiedEventType {
+					statusReceived = true
+				}
+			case <-time.After(time.Second):
+				timeoutReached = true
+			}
+		}
+		done <- true
+	}()
+
+	p.RestoreSubscriber(&process.Subscriber{
+		"test",
+		process.DefaultMask,
+		channel,
+	}, beforeStart)
+
+	<-done
+
+	if len(received) != 2 {
+		t.Fatalf("Expected to recieve 2 events but got %d", len(received))
+	}
+	e1Type := received[0].EventType
+	e1Text := received[0].Body.(*process.ProcessOutputEventBody).Text
+	if received[0].EventType != process.StdoutEventType || e1Text != "test" {
+		t.Fatalf("Expected to receieve output event with text 'test', but got '%s' event with text %s",
+			e1Type,
+			e1Text)
+	}
+	if received[1].EventType != process.DiedEventType {
+		t.Fatal("Expected to get 'process_died' event")
+	}
+}
+
 func TestMachineProcessIsNotAliveAfterItIsDead(t *testing.T) {
 	p := startAndWaitTestProcess(testCmd, t)
-	defer cleanupProcessResources()
+	defer cleanupLogsDir()
 	if p.Alive {
 		t.Fatal("Process should not be alive")
 	}
@@ -111,7 +161,7 @@ func TestMachineProcessIsNotAliveAfterItIsDead(t *testing.T) {
 
 func TestItIsNotPossibleToAddSubscriberToDeadProcess(t *testing.T) {
 	p := startAndWaitTestProcess(testCmd, t)
-	defer cleanupProcessResources()
+	defer cleanupLogsDir()
 	if err := p.AddSubscriber(&process.Subscriber{}); err == nil {
 		t.Fatal("Should not be able to add subscriber")
 	}
@@ -119,7 +169,7 @@ func TestItIsNotPossibleToAddSubscriberToDeadProcess(t *testing.T) {
 
 func TestReadProcessLogs(t *testing.T) {
 	p := startAndWaitTestProcess(testCmd, t)
-	defer cleanupProcessResources()
+	defer cleanupLogsDir()
 	logs, err := p.ReadLogs(time.Time{}, time.Now())
 	if err != nil {
 		t.Fatal(err)
@@ -138,7 +188,7 @@ func TestReadProcessLogs(t *testing.T) {
 
 func TestCleanOnce(t *testing.T) {
 	p := startAndWaitTestProcess(testCmd, t)
-	defer cleanupProcessResources()
+	defer cleanupLogsDir()
 	process.CleanOnce(0)
 	_, ok := process.Get(p.Pid)
 	if ok {
@@ -165,18 +215,19 @@ func startAndWaitTestProcess(cmd string, t *testing.T) *process.MachineProcess {
 	})
 
 	go func() {
-		for {
+		statusReceived := false
+		timeoutReached := false
+		for !statusReceived && !timeoutReached {
 			select {
 			case event := <-events:
 				if event.EventType == process.DiedEventType {
-					done <- true
-					break
+					statusReceived = true
 				}
-			case <-time.After(2 * time.Second):
-				done <- false
-				break
+			case <-time.After(time.Second):
+				timeoutReached = true
 			}
 		}
+		done <- true
 	}()
 
 	if err := p.Start(); err != nil {
@@ -200,6 +251,6 @@ func TmpFile() string {
 	return os.TempDir() + string(os.PathSeparator) + randomName(10)
 }
 
-func cleanupProcessResources() {
+func cleanupLogsDir() {
 	os.RemoveAll(process.LogsDir)
 }

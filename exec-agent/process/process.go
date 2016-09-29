@@ -304,13 +304,20 @@ func (mp *MachineProcess) RestoreSubscriber(subscriber *Subscriber, after time.T
 	}
 
 	// Publish all the logs between (after, now]
-	for i := 1; i < len(logs); i++ {
+	for i := 0; i < len(logs); i++ {
 		message := logs[i]
-		if message.Kind == StdoutKind {
-			subscriber.Channel <- newStdoutEvent(mp.Pid, message.Text, message.Time)
-		} else {
-			subscriber.Channel <- newStderrEvent(mp.Pid, message.Text, message.Time)
+		if message.Time.After(after) {
+			if message.Kind == StdoutKind {
+				subscriber.Channel <- newStdoutEvent(mp.Pid, message.Text, message.Time)
+			} else {
+				subscriber.Channel <- newStderrEvent(mp.Pid, message.Text, message.Time)
+			}
 		}
+	}
+
+	// Publish died event after logs are published and process is dead
+	if !mp.Alive {
+		subscriber.Channel <- newDiedEvent(*mp)
 	}
 
 	return nil
@@ -408,7 +415,9 @@ func CleanOnce(thresholdMinutes int) {
 		if !mp.Alive && mp.lastUsed.Before(deadPoint) {
 			delete(processes.items, mp.Pid)
 			if err := os.Remove(mp.logfileName); err != nil {
-				log.Printf("Couldn't remove process logs file, '%s'", mp.logfileName)
+				if !os.IsNotExist(err) {
+					log.Printf("Couldn't remove process logs file, '%s'", mp.logfileName)
+				}
 			}
 		}
 		mp.lastUsedLock.RUnlock()
