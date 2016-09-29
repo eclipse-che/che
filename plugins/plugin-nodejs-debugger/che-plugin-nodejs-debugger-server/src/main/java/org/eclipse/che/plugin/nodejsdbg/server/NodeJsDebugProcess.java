@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.nodejsdbg.server;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerException;
 import org.eclipse.che.plugin.nodejsdbg.server.exception.NodeJsDebuggerTerminatedException;
@@ -25,10 +27,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.min;
-import static java.lang.Thread.sleep;
 
 /**
  * Wrapper over NodeJs process is being run.
@@ -42,10 +45,10 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
 
     private static final String NODEJS_COMMAND = detectNodeJsCommand();
 
-    private final Process        process;
-    private final String         outputSeparator;
-    private final OutputReader   outputReader;
-    private final BufferedWriter processWriter;
+    private final Process                  process;
+    private final String                   outputSeparator;
+    private final ScheduledExecutorService executor;
+    private final BufferedWriter           processWriter;
 
     private final List<NodeJsProcessObserver> observers;
 
@@ -66,9 +69,10 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
 
         processWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 
-        outputReader = new OutputReader("NodeJs output reader");
-        outputReader.setDaemon(true);
-        outputReader.start();
+        executor = Executors.newScheduledThreadPool(1, new ThreadFactoryBuilder().setNameFormat("nodejs-debugger-%d")
+                                                                                 .setDaemon(true)
+                                                                                 .build());
+        executor.scheduleWithFixedDelay(new OutputReader(), 0, 100, TimeUnit.MILLISECONDS);
     }
 
     public static NodeJsDebugProcess start(String file) throws NodeJsDebuggerException {
@@ -77,9 +81,7 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
 
     @Override
     public void addObserver(NodeJsProcessObserver observer) {
-        if (outputReader.isAlive()) {
-            observers.add(observer);
-        }
+        observers.add(observer);
     }
 
     @Override
@@ -93,17 +95,30 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
     void stop() {
         try {
             send("quit");
-        } catch (NodeJsDebuggerException ignored) {
+        } catch (NodeJsDebuggerException e) {
+            LOG.warn(e.getMessage());
         }
 
-        outputReader.interrupt();
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+                if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    LOG.warn("Unable to terminate main pool");
+                }
+            }
+        } catch (InterruptedException e) {
+            LOG.warn(e.getMessage());
+        }
+
 
         process.destroy();
         try {
-            if (!process.waitFor(1, TimeUnit.MINUTES)) {
-                LOG.error("NodeJs failed to stop");
+            if (!process.waitFor(10, TimeUnit.SECONDS)) {
+                LOG.error("Unable to terminate NodeJs");
             }
-        } catch (InterruptedException ignored) {
+        } catch (InterruptedException e) {
+            LOG.warn(e.getMessage());
         }
 
         try {
@@ -128,52 +143,37 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
         } catch (IOException e) {
             LOG.error(String.format("Command execution <%s> failed", command), e);
         }
-
-        try {
-            sleep(100);
-        } catch (InterruptedException ignored) {
-        }
     }
+
 
     /**
      * Continuously reads process output and store in the {@code #outputs}.
      */
-    private class OutputReader extends Thread {
-        private final StringBuffer buf;
+    private class OutputReader implements Runnable {
+        private final StringBuffer outputBuffer;
 
-        public OutputReader(String name) {
-            super(name);
-            this.buf = new StringBuffer();
+        public OutputReader() {
+            this.outputBuffer = new StringBuffer();
         }
 
         @Override
         public void run() {
-            while (!isInterrupted()) {
-                try {
-                    InputStream in = getInput();
-                    if (in != null) {
-                        String data = read(in);
-                        if (!data.isEmpty()) {
-                            buf.append(data);
-                            if (buf.length() > MAX_OUTPUT) {
-                                buf.delete(0, buf.length() - MAX_OUTPUT);
-                            }
-
-                            extractOutputs();
+            try {
+                InputStream in = getInput();
+                if (in != null) {
+                    String outputData = read(in);
+                    if (!outputData.isEmpty()) {
+                        outputBuffer.append(outputData);
+                        if (outputBuffer.length() > MAX_OUTPUT) {
+                            outputBuffer.delete(0, outputBuffer.length() - MAX_OUTPUT);
                         }
+
+                        extractOutputs();
                     }
-                } catch (IOException e) {
-                    LOG.error(e.getMessage(), e);
                 }
-
-                try {
-                    sleep(100);
-                } catch (InterruptedException e) {
-                    break;
-                }
+            } catch (IOException e) {
+                LOG.error(e.getMessage(), e);
             }
-
-            LOG.debug(getName() + " has been stopped");
         }
 
         private InputStream getInput() throws IOException {
@@ -185,9 +185,9 @@ public class NodeJsDebugProcess implements NodeJsProcessObservable {
 
         private void extractOutputs() {
             int indexOf;
-            while ((indexOf = buf.indexOf(outputSeparator)) >= 0) {
-                NodeJsOutput nodeJsOutput = NodeJsOutput.of(buf.substring(0, indexOf));
-                buf.delete(0, indexOf + outputSeparator.length());
+            while ((indexOf = outputBuffer.indexOf(outputSeparator)) >= 0) {
+                NodeJsOutput nodeJsOutput = NodeJsOutput.of(outputBuffer.substring(0, indexOf));
+                outputBuffer.delete(0, indexOf + outputSeparator.length());
 
                 notifyObservers(nodeJsOutput);
             }
