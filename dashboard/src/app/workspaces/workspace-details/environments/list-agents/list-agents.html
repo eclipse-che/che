@@ -37,8 +37,8 @@
             </div>
             <div flex="20">
               <div>
-                <md-switch ng-model="agent.isEnabled" 
-                           ng-disabled="listAgentsController.needToDisable(agent.name)" 
+                <md-switch ng-model="agent.isEnabled"
+                           ng-disabled="listAgentsController.needToDisable(agent.name)"
                            ng-change="listAgentsController.updateAgent(agent)"
                            aria-label="Agent">
                   <span ng-if="agent.isEnabled === true">ACTIVE</span>
@@ -53,11 +53,11 @@
         </div>
       </che-list-item>
     </che-list>
-    
+
   </div>
 
   <div class="che-list-empty">
-    <span ng-show="listAgentsController.agentsList.length === 0">There are no agents available</span>
+    <span ng-show="listAgentsController.agentsList.length === 0">There are no available agents.</span>
   </div>
 
 </div>
