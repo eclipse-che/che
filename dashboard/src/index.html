@@ -38,12 +38,8 @@
   </head>
   <body layout="row">
   <div ng-hide="hideLoader" class="main-page-loader">
-      <div layout="column" class="main-page-loader-content">
-        <div class="spinner">
-          <div class="rect1"></div>
-          <div class="rect2"></div>
-          <div class="rect3"></div>
-        </div>
+    <div class="ide-page-loader-content">
+      <img ng-src="{{branding.loaderURL}}">
     </div>
   </div>
   <!--[if lt IE 10]>
