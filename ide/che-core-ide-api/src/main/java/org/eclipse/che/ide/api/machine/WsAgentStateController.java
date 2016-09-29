@@ -80,7 +80,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     public void initialize(DevMachine devMachine) {
         this.devMachine = devMachine;
         this.state = STOPPED;
-        loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT, LoaderPresenter.Status.LOADING);
+        loader.show(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT);
         checkHttpConnection();
     }
 
@@ -119,7 +119,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     private void started() {
         state = STARTED;
-        loader.setProgress(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT, LoaderPresenter.Status.SUCCESS);
+        loader.setSuccess(LoaderPresenter.Phase.STARTING_WORKSPACE_AGENT);
 
         for (AsyncCallback<MessageBus> callback : messageBusCallbacks) {
         	callback.onSuccess(messageBus);

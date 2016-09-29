@@ -71,7 +71,7 @@ public class StackImpl implements Stack {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @Basic
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Basic

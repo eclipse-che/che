@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.RemoteListRequest;
-import org.eclipse.che.api.git.shared.StatusFormat;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
@@ -59,7 +58,7 @@ public class GitValueProviderFactory implements ValueProviderFactory {
                         case VCS_PROVIDER_NAME:
                             return Collections.singletonList("git");
                         case GIT_CURRENT_BRANCH_NAME:
-                            return Collections.singletonList(gitConnection.status(StatusFormat.LONG).getBranchName());
+                            return Collections.singletonList(gitConnection.getCurrentBranch());
                         case GIT_REPOSITORY_REMOTES:
                             return gitConnection.remoteList(newDto(RemoteListRequest.class))
                                                 .stream()

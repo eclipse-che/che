@@ -58,7 +58,7 @@ public class DevMachineHostNameProvider implements CommandPropertyValueProvider,
 
     @Override
     public void onWsAgentStarted(WsAgentStateEvent event) {
-        String hostName = appContext.getDevMachine().getRuntimeProperties().get("config.hostname");
+        String hostName = appContext.getDevMachine().getProperties().get("config.hostname");
         if (hostName != null) {
             value = hostName;
         }

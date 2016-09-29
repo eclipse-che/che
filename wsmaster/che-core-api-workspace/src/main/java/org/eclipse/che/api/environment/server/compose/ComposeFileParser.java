@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.environment.server.compose.model.ComposeEnvironmentImpl;
 
 import java.io.IOException;
 

@@ -15,7 +15,9 @@ import com.google.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
@@ -36,6 +38,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspaceConfig;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Tests {@link SnapshotDao} contract.
@@ -57,6 +60,9 @@ public class StackDaoTest {
 
     @Inject
     private StackDao stackDao;
+
+    @Inject
+    private EventService eventService;
 
     @BeforeMethod
     private void createStacks() throws TckRepositoryException {
@@ -217,6 +223,16 @@ public class StackDaoTest {
         }
 
         assertEquals(new HashSet<>(found), new HashSet<>(asList(stacks)));
+    }
+
+    @Test
+    public void shouldPublishStackPersistedEventAfterStackIsPersisted() throws Exception {
+        final boolean[] isNotified = new boolean[] { false };
+        eventService.subscribe(event -> isNotified[0] = true, StackPersistedEvent.class);
+
+        stackDao.create(createStack("test", "test"));
+
+        assertTrue(isNotified[0], "Event subscriber notified");
     }
 
     private void updateAll() throws ConflictException, NotFoundException, ServerException {

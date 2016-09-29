@@ -1,0 +1,35 @@
+<md-dialog flex="50"
+           class="add-port-dialog-content">
+  <ng-form flex layout="column" name="addPortForm">
+    <che-label-container che-label-name="Port">
+      <div class="add-port-dialog-input">
+        <che-input che-form="addPortForm"
+                   che-name="port"
+                   che-place-holder="New port number"
+                   ng-model="addPortDialogController.port"
+                   custom-validator="addPortDialogController.isUnique($value)"
+                   type="number"
+                   min="1024"
+                   max="65535"
+                   aria-label="New port number"
+                   required>
+          <div ng-message="required">A number is required.</div>
+          <div ng-message="customValidator">This port is already in use.</div>
+          <div ng-message="min">A number should be greater than 1023.</div>
+          <div ng-message="max">A number should be less than 65536.</div>
+        </che-input>
+      </div>
+    </che-label-container>
+
+    <che-label-container>
+      <div layout="row">
+        <che-button-primary che-button-title="Add"
+                            ng-disabled="addPortForm.$invalid || addPortDialogController.updateInProgress"
+                            ng-click="addPortDialogController.addPort()"></che-button-primary>
+        <che-button-notice che-button-title="Cancel"
+                           ng-click="addPortDialogController.hide()"
+                           tabindex="0"></che-button-notice>
+      </div>
+    </che-label-container>
+  </ng-form>
+</md-dialog>

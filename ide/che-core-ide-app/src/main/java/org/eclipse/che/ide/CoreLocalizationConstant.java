@@ -559,6 +559,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("workspace.recovering.dialog.text")
     String workspaceRecoveringDialogText();
 
+    @Key("workspace.restore.snapshot")
+    String restoreWorkspaceFromSnapshot();
+
     @Key("workspace.subscribe.on.events.failed")
     String workspaceSubscribeOnEventsFailed();
 
@@ -830,4 +833,10 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("action.convert.folder.to.project.description")
     String actionConvertFolderToProjectDescription();
+
+    @Key("signature.name")
+    String signatureName();
+
+    @Key("signature.description")
+    String signatureDescription();
 }

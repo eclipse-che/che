@@ -24,7 +24,6 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -67,14 +66,6 @@ public class AgentSorterTest {
     }
 
     @Test
-    public void shouldNotCreateNewAgentsIfDependenciesExist() throws Exception {
-        List<AgentKey> sorted = agentSorter.sort(Collections.singletonList("fqn1"));
-
-        assertEquals(sorted.size(), 1);
-        assertEquals(sorted.get(0).getName(), "fqn1");
-    }
-
-    @Test
     public void sortAgentsRespectingDependencies() throws Exception {
         List<AgentKey> sorted = agentSorter.sort(Arrays.asList("fqn1", "fqn2", "fqn3"));
 
@@ -84,7 +75,7 @@ public class AgentSorterTest {
         assertEquals(sorted.get(2).getName(), "fqn2");
     }
 
-    @Test(expectedExceptions = AgentException.class)
+    @Test(expectedExceptions = AgentException.class, expectedExceptionsMessageRegExp = ".*fqn1.*fqn2.*")
     public void sortingShouldFailIfCircularDependenciesFound() throws Exception {
         when(agent1.getDependencies()).thenReturn(singletonList("fqn2"));
         when(agent2.getDependencies()).thenReturn(singletonList("fqn1"));

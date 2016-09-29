@@ -16,10 +16,10 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentUser;
 import org.eclipse.che.ide.api.app.StartUpAction;
@@ -41,6 +41,7 @@ import org.eclipse.che.ide.api.resources.ResourcePathComparator;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.resource.Path;
@@ -77,16 +78,17 @@ public class AppContextImpl implements AppContext,
                                        SelectionChangedHandler,
                                        ResourceChangedHandler,
                                        WindowActionHandler,
+                                       WorkspaceStartedEvent.Handler,
                                        WorkspaceStoppedEvent.Handler {
 
     private final BrowserQueryFieldRenderer browserQueryFieldRenderer;
     private final List<String>              projectsInImport;
 
-    private WorkspaceDto usersWorkspaceDto;
-    private CurrentUser  currentUser;
-    private FactoryDto   factory;
-    private DevMachine   devMachine;
-    private Path         projectsRoot;
+    private Workspace           usersWorkspace;
+    private CurrentUser         currentUser;
+    private FactoryDto          factory;
+    private DevMachine          devMachine;
+    private Path                projectsRoot;
     /**
      * List of actions with parameters which comes from startup URL.
      * Can be processed after IDE initialization as usual after starting ws-agent.
@@ -117,22 +119,22 @@ public class AppContextImpl implements AppContext,
     }
 
     @Override
-    public WorkspaceDto getWorkspace() {
-        return usersWorkspaceDto;
+    public Workspace getWorkspace() {
+        return usersWorkspace;
     }
 
     @Override
-    public void setWorkspace(WorkspaceDto workspace) {
-        this.usersWorkspaceDto = workspace;
+    public void setWorkspace(Workspace workspace) {
+        this.usersWorkspace = workspace;
     }
 
     @Override
     public String getWorkspaceId() {
-        if (usersWorkspaceDto == null) {
+        if (usersWorkspace == null) {
             throw new IllegalArgumentException(getClass() + " Workspace can not be null.");
         }
 
-        return usersWorkspaceDto.getId();
+        return usersWorkspace.getId();
     }
 
     @Override
@@ -209,14 +211,13 @@ public class AppContextImpl implements AppContext,
                 AppContextImpl.this.projects = projects;
                 java.util.Arrays.sort(AppContextImpl.this.projects, ResourcePathComparator.getInstance());
                 eventBus.fireEvent(new WorkspaceReadyEvent(projects));
-                appStateManager.get().restoreWorkspaceState(getWorkspaceId());
             }
         });
     }
 
     @Override
     public String getWorkspaceName() {
-        return usersWorkspaceDto.getConfig().getName();
+        return usersWorkspace.getConfig().getName();
     }
 
     /** {@inheritDoc} */
@@ -430,6 +431,11 @@ public class AppContextImpl implements AppContext,
     @Override
     public void onWindowClosing(WindowActionEvent event) {
         appStateManager.get().persistWorkspaceState(getWorkspaceId());
+    }
+
+    @Override
+    public void onWorkspaceStarted(WorkspaceStartedEvent event) {
+        setWorkspace(event.getWorkspace());
     }
 
     @Override

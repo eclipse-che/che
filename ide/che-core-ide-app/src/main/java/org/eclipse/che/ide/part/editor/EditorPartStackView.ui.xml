@@ -17,14 +17,14 @@
     <ui:style>
 
         @eval editorPanelBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.editorPanelBackgroundColor();
-        @eval tabBorderColor org.eclipse.che.ide.api.theme.Style.theme.tabBorderColor();
+        @eval editorPanelBorderColor org.eclipse.che.ide.api.theme.Style.theme.editorPanelBorderColor();
 
         .tabsPanel {
             -webkit-box-sizing: border-box;
             -moz-box-sizing: border-box;
             box-sizing: border-box;
             background-color: editorPanelBackgroundColor;
-            border-bottom: 1px solid tabBorderColor;
+            border-bottom: 1px solid editorPanelBorderColor;
             overflow: hidden;
         }
 

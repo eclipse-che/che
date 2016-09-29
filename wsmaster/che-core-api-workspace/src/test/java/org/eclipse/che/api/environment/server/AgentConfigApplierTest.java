@@ -15,7 +15,7 @@ import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
 import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -23,11 +23,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
@@ -77,15 +76,16 @@ public class AgentConfigApplierTest {
 
     @Test
     public void shouldAddExposedPorts() throws Exception {
-        when(sorter.sort(any()))
-                .thenReturn(Arrays.asList(AgentKeyImpl.parse("agent1"), AgentKeyImpl.parse("agent2"), AgentKeyImpl.parse("agent3")));
+        when(sorter.sort(any())).thenReturn(asList(AgentKeyImpl.parse("agent1"),
+                                                   AgentKeyImpl.parse("agent2"),
+                                                   AgentKeyImpl.parse("agent3")));
         when(agent1.getProperties()).thenReturn(singletonMap("ports", "terminal:1111/udp,terminal:2222/tcp"));
         when(agent2.getProperties()).thenReturn(singletonMap("ports", "3333/udp"));
-        ComposeServiceImpl composeService = new ComposeServiceImpl();
+        CheServiceImpl service = new CheServiceImpl();
 
-        agentConfigApplier.modify(composeService, Arrays.asList("agent1", "agent2", "agent3"));
+        agentConfigApplier.modify(service, asList("agent1", "agent2", "agent3"));
 
-        List<String> exposedPorts = composeService.getExpose();
+        List<String> exposedPorts = service.getExpose();
         assertTrue(exposedPorts.contains("1111/udp"));
         assertTrue(exposedPorts.contains("2222/tcp"));
         assertTrue(exposedPorts.contains("3333/udp"));
@@ -93,14 +93,14 @@ public class AgentConfigApplierTest {
 
     @Test
     public void shouldAddEnvVariables() throws Exception {
-        when(sorter.sort(any())).thenReturn(Arrays.asList(AgentKeyImpl.parse("agent1"), AgentKeyImpl.parse("agent2")));
+        when(sorter.sort(any())).thenReturn(asList(AgentKeyImpl.parse("agent1"), AgentKeyImpl.parse("agent2")));
         when(agent1.getProperties()).thenReturn(singletonMap("environment", "p1=v1,p2=v2"));
         when(agent2.getProperties()).thenReturn(singletonMap("environment", "p3=v3"));
-        ComposeServiceImpl composeService = new ComposeServiceImpl();
+        CheServiceImpl service = new CheServiceImpl();
 
-        agentConfigApplier.modify(composeService, Arrays.asList("agent1", "agent2"));
+        agentConfigApplier.modify(service, asList("agent1", "agent2"));
 
-        Map<String, String> env = composeService.getEnvironment();
+        Map<String, String> env = service.getEnvironment();
         assertEquals(env.size(), 3);
         assertEquals(env.get("p1"), "v1");
         assertEquals(env.get("p2"), "v2");
@@ -109,13 +109,13 @@ public class AgentConfigApplierTest {
 
     @Test
     public void shouldIgnoreEnvironmentIfIllegalFormat() throws Exception {
-        when(sorter.sort(any())).thenReturn(Arrays.asList(AgentKeyImpl.parse("agent1")));
+        when(sorter.sort(any())).thenReturn(singletonList(AgentKeyImpl.parse("agent1")));
         when(agent1.getProperties()).thenReturn(singletonMap("environment", "p1"));
-        ComposeServiceImpl composeService = new ComposeServiceImpl();
+        CheServiceImpl service = new CheServiceImpl();
 
-        agentConfigApplier.modify(composeService, Collections.singletonList("agent1"));
+        agentConfigApplier.modify(service, singletonList("agent1"));
 
-        Map<String, String> env = composeService.getEnvironment();
+        Map<String, String> env = service.getEnvironment();
         assertEquals(env.size(), 0);
     }
 }

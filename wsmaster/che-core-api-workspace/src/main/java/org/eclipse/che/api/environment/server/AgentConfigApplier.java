@@ -18,8 +18,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
-import org.eclipse.che.api.core.model.workspace.compose.ComposeService;
-import org.eclipse.che.api.environment.server.compose.model.ComposeServiceImpl;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,7 @@ import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTI
 import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTIES.PORTS;
 
 /**
- * Applies docker specific properties of the agents over {@link ComposeService}.
+ * Applies docker specific properties of the agents over {@link CheServiceImpl}.
  * Dependencies between agents are respected.
  * Docker instance must't be started, otherwise changing configuration has no effect.
  *
@@ -49,8 +48,8 @@ import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTI
  * respecting the following format: "name=value".
  *
  * @see Agent#getProperties()
- * @see ComposeService#getEnvironment()
- * @see ComposeService#getPorts()
+ * @see CheServiceImpl#getEnvironment()
+ * @see CheServiceImpl#getPorts()
  *
  * @author Anatolii Bazko
  */
@@ -70,30 +69,30 @@ public class AgentConfigApplier {
     /**
      * Applies docker specific properties.
      *
-     * @param composeService
-     *      the compose service
+     * @param service
+     *      the service
      * @param agentKeys
      *      the list of injected agents into machine
      *
      * @throws AgentException
      */
-    public void modify(ComposeServiceImpl composeService, @Nullable List<String> agentKeys) throws AgentException {
+    public void modify(CheServiceImpl service, @Nullable List<String> agentKeys) throws AgentException {
         for (AgentKey agentKey : sorter.sort(agentKeys)) {
             Agent agent = agentRegistry.getAgent(agentKey);
-            addEnv(composeService, agent.getProperties());
-            addExposedPorts(composeService, agent.getProperties());
+            addEnv(service, agent.getProperties());
+            addExposedPorts(service, agent.getProperties());
         }
     }
 
-    private void addEnv(ComposeServiceImpl composeService, Map<String, String> properties) {
+    private void addEnv(CheServiceImpl service, Map<String, String> properties) {
         String environment = properties.get(ENVIRONMENT.toString());
         if (isNullOrEmpty(environment)) {
             return;
         }
 
         Map<String, String> newEnv = new HashMap<>();
-        if (composeService.getEnvironment() != null) {
-            newEnv.putAll(composeService.getEnvironment());
+        if (service.getEnvironment() != null) {
+            newEnv.putAll(service.getEnvironment());
         }
 
         for (String env : environment.split(",")) {
@@ -108,10 +107,10 @@ public class AgentConfigApplier {
             newEnv.put(var, name);
         }
 
-        composeService.setEnvironment(newEnv);
+        service.setEnvironment(newEnv);
     }
 
-    private void addExposedPorts(ComposeServiceImpl composeService, Map<String, String> properties) {
+    private void addExposedPorts(CheServiceImpl service, Map<String, String> properties) {
         String ports = properties.get(PORTS.toString());
         if (isNullOrEmpty(ports)) {
             return;
@@ -120,9 +119,9 @@ public class AgentConfigApplier {
         for (String port : ports.split(",")) {
             String[] items = port.split(":"); // ref:port
             if (items.length == 1) {
-                composeService.getExpose().add(items[0]);
+                service.getExpose().add(items[0]);
             } else {
-                composeService.getExpose().add(items[1]);
+                service.getExpose().add(items[1]);
             }
         }
     }

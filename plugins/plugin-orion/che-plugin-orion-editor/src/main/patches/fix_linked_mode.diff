@@ -1,0 +1,70 @@
+This patch fixes bug related to linked mode.
+===================================================================
+diff --git a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
+--- a/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
++++ b/org/eclipse/che/ide/editor/orion/public/built-codeEdit-12.0/code_edit/built-codeEdit-amd.js
+@@ -32269,8 +32269,9 @@
+ 	'orion/editor/keyModes',
+ 	'orion/editor/annotations',
+ 	'orion/objects',
++	'orion/editor/eventTarget',
+ 	'orion/util'
+-], function(messages, mKeyBinding, mKeyModes, mAnnotations, objects) {
++], function(messages, mKeyBinding, mKeyModes, mAnnotations, objects, mEventTarget) {
+ 
+ 	var exports = {};
+ 
+@@ -32354,11 +32355,11 @@
+ 		this.linkedModeModel = null;
+ 		
+ 		textView.setAction("linkedModeEnter", function() { //$NON-NLS-0$
+-			this.exitLinkedMode(true);
++			this.exitLinkedMode(true, true);
+ 			return true;
+ 		}.bind(this));
+ 		textView.setAction("linkedModeCancel", function() { //$NON-NLS-0$
+-			this.exitLinkedMode(true);
++			this.exitLinkedMode(false, false);
+ 			return true;
+ 		}.bind(this));
+ 		textView.setAction("linkedModeNextGroup", function() { //$NON-NLS-0$
+@@ -32396,7 +32397,7 @@
+ 					changed = positionChanged.position;
+ 					if (changed === undefined || changed.model !== model) {
+ 						// The change has been done outside of the positions, exit the Linked Mode
+-						this.exitLinkedMode(false);
++						this.exitLinkedMode(false, false);
+ 						model = this.linkedModeModel;
+ 					} else {
+ 						break;
+@@ -32441,7 +32442,7 @@
+ 					changed = positionChanged.position;
+ 					if (changed === undefined || changed.model !== model) {
+ 						// The change has been done outside of the positions, exit the Linked Mode
+-						this.exitLinkedMode(false);
++						this.exitLinkedMode(false, false);
+ 						model = this.linkedModeModel;
+ 					} else {
+ 						break;
+@@ -32573,10 +32574,11 @@
+ 		 * Exits Linked Mode. Optionally places the caret at linkedMode escapePosition. 
+ 		 * @param {Boolean} [escapePosition=false] if true, place the caret at the  escape position.
+ 		 */
+-		exitLinkedMode: function(escapePosition) {
++		exitLinkedMode: function(escapePosition, successful) {
+ 			if (!this.isActive()) {
+ 				return;
+ 			}
++			this.dispatchEvent({type:"LinkedModeExit", isSuccessful: successful});
+ 			if (this._compoundChange) {
+ 				this.endUndo();
+ 				this._compoundChange = null;
+@@ -32822,6 +32824,7 @@
+ 			annotationModel.replaceAnnotations(remove, add);
+ 		}
+ 	});
++	mEventTarget.EventTarget.addMixin(LinkedMode.prototype);
+ 	exports.LinkedMode = LinkedMode;
+ 
+ 	return exports;
+\ No newline at end of file

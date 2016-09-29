@@ -47,7 +47,7 @@ import java.util.Set;
  * @author Roman Iuvshyn
  * @author Mykola Morhun
  *
- * @deprecated use {@link ComposeMachineProviderImpl} instead
+ * @deprecated use {@link MachineProviderImpl} instead
  */
 @Deprecated
 @Singleton

@@ -11,8 +11,11 @@
 package org.eclipse.che.api.workspace.server.stack;
 
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 
@@ -24,6 +27,9 @@ import javax.inject.Singleton;
 @Singleton
 public class StackValidator {
 
+    @Inject
+    private WorkspaceValidator wsValidator;
+
     /**
      * Validate stack object
      *
@@ -31,12 +37,9 @@ public class StackValidator {
      *          stack to validate
      * @throws BadRequestException if stack is not valid
      */
-    public void check(Stack stack) throws BadRequestException {
+    public void check(Stack stack) throws BadRequestException, ServerException {
         if (stack == null) {
             throw new BadRequestException("Required non-null stack");
-        }
-        if (stack.getCreator() == null) {
-            throw new BadRequestException("Required non-null stack creator");
         }
         if (stack.getName() == null || stack.getName().isEmpty()) {
             throw new BadRequestException("Required non-null and non-empty stack name");
@@ -47,8 +50,9 @@ public class StackValidator {
         if (stack.getSource() == null && stack.getWorkspaceConfig() == null) {
             throw new BadRequestException("Stack source required. You must specify either 'workspaceConfig' or 'stackSource'");
         }
-        if (stack.getTags() == null || stack.getTags().isEmpty()) {
-            throw new BadRequestException("Required non-null and non-empty tag list");
+        if (stack.getWorkspaceConfig() == null) {
+            throw new BadRequestException("Workspace config required");
         }
+        wsValidator.validateConfig(stack.getWorkspaceConfig());
     }
 }

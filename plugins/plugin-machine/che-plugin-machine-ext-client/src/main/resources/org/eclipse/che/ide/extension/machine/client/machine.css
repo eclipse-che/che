@@ -41,6 +41,10 @@
     background: blueIconColor;
 }
 
+.terminal > div span {
+    white-space: nowrap;
+}
+
 .fullSize {
     width: 100% !important;
     height: 100% !important;

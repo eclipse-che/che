@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -116,7 +117,7 @@ public class RecipeDownloader {
             file = IoUtil.downloadFileWithRedirect(null, "recipe", null, recipeUrl);
 
             return IoUtil.readAndCloseQuietly(new FileInputStream(file));
-        } catch (IOException | IllegalArgumentException e) {
+        } catch (IOException | IllegalArgumentException | UriBuilderException e) {
             throw new MachineException(format("Failed to download recipe %s. Error: %s",
                                               location,
                                               e.getLocalizedMessage()));

@@ -31,10 +31,28 @@ public interface PopupLoaderMessages extends Messages {
     @Key("startingWorkspaceAgent.description")
     String startingWorkspaceAgentDescription();
 
+    @Key("stoppingWorkspace.title")
+    String stoppingWorkspace();
+
+    @Key("stoppingWorkspace.description")
+    String stoppingWorkspaceDescription();
+
     @Key("creatingProject.title")
     String creatingProject();
 
     @Key("creatingProject.description")
     String creatingProjectDescription();
+
+    @Key("snapshottingWorkspace.title")
+    String snapshottingWorkspace();
+
+    @Key("snapshottingWorkspace.description")
+    String snapshottingWorkspaceDescription();
+
+    @Key("workspaceStopped.title")
+    String workspaceStopped();
+
+    @Key("workspaceStopped.description")
+    String workspaceStoppedDescription();
 
 }

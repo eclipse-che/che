@@ -89,7 +89,7 @@ public class DefaultWorkspaceComponent extends WorkspaceComponent  {
                 new Operation<WorkspaceDto>() {
                     @Override
                     public void apply(WorkspaceDto workspaceDto) throws OperationException {
-                        handleWorkspaceEvents(workspaceDto, callback);
+                        handleWorkspaceEvents(workspaceDto, callback, true, false);
                     }
                 }).catchError(new Operation<PromiseError>() {
             @Override

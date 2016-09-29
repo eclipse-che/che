@@ -54,3 +54,6 @@ Icon?
 Thumbs.db
 */overlays
 *~
+
+# Che files
+.che

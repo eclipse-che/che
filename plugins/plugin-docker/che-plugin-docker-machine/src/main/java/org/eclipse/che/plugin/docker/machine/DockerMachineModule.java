@@ -61,5 +61,8 @@ public class DockerMachineModule extends AbstractModule {
                                                                      new TypeLiteral<Set<String>>() {},
                                                                      Names.named("machine.docker.networks"))
                                                        .permitDuplicates();
+
+        bind(org.eclipse.che.api.environment.server.ContainerNameGenerator.class)
+                .to(org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.class);
     }
 }

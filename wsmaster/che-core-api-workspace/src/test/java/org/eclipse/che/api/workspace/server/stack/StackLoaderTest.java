@@ -69,7 +69,7 @@ public class StackLoaderTest {
         URL url = Resources.getResource("stacks.json");
         URL urlFolder = Thread.currentThread().getContextClassLoader().getResource("stack_img");
 
-        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
+        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao, null);
 
         stackLoader.start();
         verify(stackDao, times(5)).update(any());
@@ -83,7 +83,7 @@ public class StackLoaderTest {
 
         doThrow(new NotFoundException("Stack is already exist")).when(stackDao).update(any());
 
-        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
+        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao, null);
 
         stackLoader.start();
         verify(stackDao, times(5)).update(any());
@@ -97,7 +97,7 @@ public class StackLoaderTest {
 
         doThrow(new ServerException("Internal server error")).when(stackDao).update(any());
 
-        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
+        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao, null);
 
         stackLoader.start();
         verify(stackDao, times(5)).update(any());

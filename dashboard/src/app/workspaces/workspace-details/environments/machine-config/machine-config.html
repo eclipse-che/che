@@ -1,0 +1,107 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<div class="workspace-machine-config">
+
+  <!-- Title -->
+  <div class="config-title-row" layout="row"
+       layout-align="left"
+       flex
+       mouseover="hover=true" mouseout="hover=false">
+    <div layout="row" layout-align="center center"
+         ng-click="workspaceMachineConfigController.machineIsOpened=!workspaceMachineConfigController.machineIsOpened">
+      <i class="config-title-action-show fa"
+         ng-class="{'fa-chevron-circle-down': workspaceMachineConfigController.machineIsOpened, 'fa-chevron-circle-right': !workspaceMachineConfigController.machineIsOpened}"></i>
+      <div class="config-title">{{workspaceMachineConfigController.machineName}}</div>
+    </div>
+    <div layout="row" layout-align="center center"
+         class="config-title-action-edit"
+         tooltip="Edit"
+         ng-if="workspaceMachineConfigController.machineConfig.canRenameMachine"
+         ng-click="workspaceMachineConfigController.showEditDialog($event)">
+      <i class="config-title-action-edit fa fa-pencil" aria-hidden="true"></i>
+    </div>
+    <div flex
+         ng-click="workspaceMachineConfigController.machineIsOpened=!workspaceMachineConfigController.machineIsOpened">&nbsp;</div>
+  </div>
+
+  <!-- Params -->
+  <div class="config-params" ng-show="workspaceMachineConfigController.machineIsOpened">
+
+    <!-- Source -->
+    <che-label-container che-label-name="Source"
+                         ng-if="workspaceMachineConfigController.machineConfig.source">
+      <div class="config-paragraph">
+        <p ng-repeat="(key, val) in workspaceMachineConfigController.machineConfig.source">
+          <span class="recipe-item-name">{{key}}:</span>{{val}}
+        </p>
+      </div>
+    </che-label-container>
+
+    <!-- RAM -->
+    <che-label-container che-label-name="RAM">
+      <div class="config-ram">
+        <ng-form flex layout="column" name="workspaceMachineConfigForm">
+          <che-workspace-ram-allocation-slider ng-model="workspaceMachineConfigController.newRam"
+                                               che-on-change="workspaceMachineConfigController.updateRam(workspaceMachineConfigForm.$valid)"></che-workspace-ram-allocation-slider>
+        </ng-form>
+      </div>
+    </che-label-container>
+
+    <!-- Is Dev -->
+    <che-label-container che-label-name="Dev">
+      <div class="config-dev-machine-switch">
+        <md-switch ng-model="workspaceMachineConfigController.newDev"
+                   ng-change="workspaceMachineConfigController.enableDev()"
+                   ng-disabled="workspaceMachineConfigController.machineConfig.isDev"
+                   aria-label="Dev machine">
+          <span class="config-dev-machine-info">Injects terminal, SSH and IDE tooling.</span>
+        </md-switch>
+      </div>
+    </che-label-container>
+
+    <!-- Agents -->
+    <che-label-container che-label-name="Agents">
+      <div class="config-agents">
+         <list-agents agents="workspaceMachineConfigController.machineConfig.agents"
+                      agents-on-change="workspaceMachineConfigController.updateAgents()"></list-agents>
+      </div>
+    </che-label-container>
+
+    <!-- Ports -->
+    <che-label-container che-label-name="Exposed Ports">
+      <div class="config-params-table">
+        <list-ports servers="workspaceMachineConfigController.machineConfig.servers"
+                    servers-on-change="workspaceMachineConfigController.updateServers()"></list-ports>
+      </div>
+    </che-label-container>
+
+    <!-- Environment Variables-->
+    <che-label-container che-label-name="Environment variables"
+                         ng-if="workspaceMachineConfigController.machineConfig.canEditEnvVariables">
+      <div class="config-params-table">
+        <list-env-variables env-variables="workspaceMachineConfigController.machineConfig.envVariables"
+                            env-variables-on-change="workspaceMachineConfigController.updateEnvVariables()"></list-env-variables>
+      </div>
+    </che-label-container>
+
+    <!-- Delete -->
+    <che-label-container class="config-delete-label"
+                         che-label-name="Delete machine"
+                         che-label-description="Environment should contain at least one machine."
+                         ng-if="workspaceMachineConfigController.machineConfig.canDeleteMachine">
+      <che-button-danger che-button-title="Delete"
+                         ng-disabled="workspaceMachineConfigController.machineConfig.isDev"
+                         ng-click="workspaceMachineConfigController.deleteMachine()"></che-button-danger>
+    </che-label-container>
+  </div>
+</div>

@@ -363,7 +363,7 @@ public class LocalDataMigrator {
         @Override
         public void migrate(WorkspaceImpl entity) throws Exception {
             entity.setAccount(userDao.getByName(entity.getNamespace()).getAccount());
-            entity.setName(entity.getConfig().getName());
+            entity.getConfig().setName(entity.getConfig().getName());
             workspaceDao.create(entity);
         }
 

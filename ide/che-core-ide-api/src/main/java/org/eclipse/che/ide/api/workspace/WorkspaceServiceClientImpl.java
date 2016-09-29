@@ -300,8 +300,8 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<WorkspaceDto> addEnvironment(String wsId, EnvironmentDto newEnv) {
-        return asyncRequestFactory.createPostRequest(baseHttpUrl + '/' + wsId + "/environment", newEnv)
+    public Promise<WorkspaceDto> addEnvironment(String wsId, String envName, EnvironmentDto newEnv) {
+        return asyncRequestFactory.createPostRequest(baseHttpUrl + '/' + wsId + "/environment?name=" + envName, newEnv)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Adding environment..."))

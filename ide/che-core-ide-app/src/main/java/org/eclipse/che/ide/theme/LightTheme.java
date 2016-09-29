@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.theme;
 
-import org.eclipse.che.ide.api.theme.Theme;
-
 import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.api.theme.Theme;
 
 /**
  * @author Evgen Vidolob
@@ -330,6 +330,11 @@ public class LightTheme implements Theme {
     @Override
     public String editorPanelBackgroundColor() {
         return "#D6D6D9";
+    }
+
+    @Override
+    public String editorPanelBorderColor() {
+        return tabBorderColor();
     }
 
     @Override
@@ -1519,4 +1524,8 @@ public class LightTheme implements Theme {
         return "#353535";
     }
 
+    @Override
+    public String popupLoaderTextColor() {
+        return "#999999";
+    }
 }

@@ -112,6 +112,7 @@ import org.eclipse.che.ide.api.user.UserServiceClientImpl;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClientImpl;
 import org.eclipse.che.ide.client.StartUpActionsProcessor;
+import org.eclipse.che.ide.client.WorkspaceStateRestorer;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.EditorRegistryImpl;
@@ -431,6 +432,7 @@ public class CoreGinModule extends AbstractGinModule {
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
         wsAgentComponentsBinder.addBinding("Project types").to(ProjectTypeComponent.class);
         wsAgentComponentsBinder.addBinding("Start-up actions processor").to(StartUpActionsProcessor.class);
+        wsAgentComponentsBinder.addBinding("ZZ Restore Workspace State").to(WorkspaceStateRestorer.class);
     }
 
     private void configureProjectWizard() {

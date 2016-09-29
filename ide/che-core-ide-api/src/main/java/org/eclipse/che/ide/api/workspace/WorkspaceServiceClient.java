@@ -182,12 +182,14 @@ public interface WorkspaceServiceClient {
      *
      * @param wsId
      *         workspace ID
+     * @param envName
+     *         the name of the environment to add
      * @param newEnv
      *         the new environment
      * @return a promise that resolves to the {@link WorkspaceDto}, or rejects with an error
      * @see WorkspaceService#addEnvironment(String, EnvironmentDto)
      */
-    Promise<WorkspaceDto> addEnvironment(String wsId, EnvironmentDto newEnv);
+    Promise<WorkspaceDto> addEnvironment(String wsId, String envName, EnvironmentDto newEnv);
 
     /**
      * Updates environment.

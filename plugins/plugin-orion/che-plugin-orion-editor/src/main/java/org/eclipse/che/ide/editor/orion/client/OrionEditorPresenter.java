@@ -80,6 +80,8 @@ import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistantFactory;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
@@ -98,7 +100,6 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditorPartView;
 import org.eclipse.che.ide.api.editor.texteditor.UndoableEditor;
 import org.eclipse.che.ide.api.event.FileContentUpdateEvent;
 import org.eclipse.che.ide.api.event.ng.DeletedFilesController;
-import org.eclipse.che.ide.api.event.ng.FileTrackingEvent;
 import org.eclipse.che.ide.api.hotkeys.HasHotKeyItems;
 import org.eclipse.che.ide.api.hotkeys.HotKeyItem;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -115,6 +116,7 @@ import org.eclipse.che.ide.api.selection.Selection;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelDataOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelGroupOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionLinkedModelOverlay;
+import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpView;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -124,7 +126,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -167,19 +168,20 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     private final EditorLocalizationConstants            constant;
     private final EditorWidgetFactory<OrionEditorWidget> editorWidgetFactory;
     private final EditorInitializePromiseHolder          editorModule;
-    private final TextEditorPartView                     editorView;
-    private final EventBus                               generalEventBus;
-    private final FileTypeIdentifier                     fileTypeIdentifier;
-    private final QuickAssistantFactory                  quickAssistantFactory;
-    private final WorkspaceAgent                         workspaceAgent;
-    private final NotificationManager                    notificationManager;
-    private final AppContext                             appContext;
+    private final TextEditorPartView    editorView;
+    private final EventBus              generalEventBus;
+    private final FileTypeIdentifier    fileTypeIdentifier;
+    private final QuickAssistantFactory quickAssistantFactory;
+    private final WorkspaceAgent        workspaceAgent;
+    private final NotificationManager   notificationManager;
+    private final AppContext            appContext;
+    private final SignatureHelpView     signatureHelpView;
 
     private final AnnotationRendering rendering = new AnnotationRendering();
     private HasKeyBindings           keyBindingsManager;
     private List<EditorUpdateAction> updateActions;
     private TextEditorConfiguration  configuration;
-    private EditorWidget             editorWidget;
+    private OrionEditorWidget        editorWidget;
     private Document                 document;
     private CursorModelWithHandler   cursorModel;
     private QuickAssistAssistant     quickAssistant;
@@ -210,7 +212,8 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                                 final QuickAssistantFactory quickAssistantFactory,
                                 final WorkspaceAgent workspaceAgent,
                                 final NotificationManager notificationManager,
-                                final AppContext appContext) {
+                                final AppContext appContext,
+                                final SignatureHelpView signatureHelpView) {
         this.codeAssistantFactory = codeAssistantFactory;
         this.deletedFilesController = deletedFilesController;
         this.breakpointManager = breakpointManager;
@@ -228,6 +231,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
         this.workspaceAgent = workspaceAgent;
         this.notificationManager = notificationManager;
         this.appContext = appContext;
+        this.signatureHelpView = signatureHelpView;
 
         keyBindingsManager = new TemporaryKeyBindingsManager();
 
@@ -567,7 +571,10 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
     @Override
     public void doSave(final AsyncCallback<EditorInput> callback) {
-
+        //If the workspace is stopped we shouldn't try to save a file
+        if (appContext.getDevMachine() == null) {
+            return;
+        }
         this.documentStorage.saveDocument(getEditorInput(), this.document, false, new AsyncCallback<EditorInput>() {
             @Override
             public void onSuccess(EditorInput editorInput) {
@@ -794,6 +801,12 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
                 return true;
             }
         }
+
+        if (TextEditorOperations.SIGNATURE_HELP == operation) {
+            if (getConfiguration().getSignatureHelpProvider() != null) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -814,8 +827,21 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
             case TextEditorOperations.QUICK_ASSIST:
                 showQuickAssist();
                 break;
+            case TextEditorOperations.SIGNATURE_HELP:
+                showSignatureHelp();
+                break;
             default:
                 throw new UnsupportedOperationException("Operation code: " + operation + " is not supported!");
+        }
+    }
+
+    private void showSignatureHelp() {
+        //TODO XXX
+        SignatureHelpProvider signatureHelpProvider = getConfiguration().getSignatureHelpProvider();
+        if (document != null && signatureHelpProvider != null) {
+            Promise<Optional<SignatureHelp>> promise = signatureHelpProvider.signatureHelp(document, getCursorOffset());
+            PositionConverter.PixelCoordinates coordinates = getPositionConverter().offsetToPixel(getCursorOffset());
+            signatureHelpView.showSignature(promise, coordinates.getX(), coordinates.getY() - editorWidget.getTextView().getLineHeight());
         }
     }
 
@@ -963,7 +989,7 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
 
         @Override
         public void initialized(EditorWidget widget) {
-            editorWidget = widget;
+            editorWidget = (OrionEditorWidget)widget;
             // finish editor initialization
             editorView.setEditorWidget(editorWidget);
 

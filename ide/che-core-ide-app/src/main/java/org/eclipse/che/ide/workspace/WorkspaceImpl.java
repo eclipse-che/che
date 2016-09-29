@@ -25,7 +25,6 @@ import java.util.Map;
 public class WorkspaceImpl implements Workspace {
 
     private final String              id;
-    private final String              name;
     private final WorkspaceRuntime    workspaceRuntime;
     private final String              namespace;
     private final WorkspaceStatus     status;
@@ -36,7 +35,6 @@ public class WorkspaceImpl implements Workspace {
 
     public WorkspaceImpl(Workspace workspace) {
         id = workspace.getId();
-        name = workspace.getName();
         workspaceRuntime = workspace.getRuntime();
         namespace = workspace.getNamespace();
         status = workspace.getStatus();
@@ -54,11 +52,6 @@ public class WorkspaceImpl implements Workspace {
     @Override
     public String getNamespace() {
         return namespace;
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override

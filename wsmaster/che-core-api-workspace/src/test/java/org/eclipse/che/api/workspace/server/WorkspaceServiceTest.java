@@ -33,6 +33,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
@@ -748,11 +749,16 @@ public class WorkspaceServiceTest {
                                               MachineStatus.RUNNING,
                                               new MachineRuntimeInfoImpl(emptyMap(),
                                                                          emptyMap(),
-                                                                         singletonMap("8080/https", new ServerImpl("wsagent",
-                                                                                                                   "8080",
-                                                                                                                   "https",
-                                                                                                                   "path1",
-                                                                                                                   "url")))));
+                                                                         singletonMap("8080/https",
+                                                                                      new ServerImpl(
+                                                                                              "wsagent",
+                                                                                              "https",
+                                                                                              "address",
+                                                                                              "url",
+                                                                                              new ServerPropertiesImpl(
+                                                                                                  "path",
+                                                                                                  "internaladdress",
+                                                                                                  "internalurl"))))));
         runtime.getMachines().add(runtime.getDevMachine());
         workspace.setStatus(RUNNING);
         workspace.setRuntime(runtime);
@@ -892,7 +898,7 @@ public class WorkspaceServiceTest {
     private static EnvironmentDto createEnvDto() {
         ExtendedMachineImpl devMachine = new ExtendedMachineImpl(singletonList("org.eclipse.che.ws-agent"),
                                                                  null,
-                                                                 new HashMap<>(singletonMap("memoryLimitBytes", "10000")));
+                                                                 singletonMap("memoryLimitBytes", "10000"));
 
         return DtoConverter.asDto(new EnvironmentImpl(new EnvironmentRecipeImpl("type", "content-type", "content", null),
                                                       singletonMap("dev-machine", devMachine)));
@@ -902,11 +908,9 @@ public class WorkspaceServiceTest {
         final WorkspaceConfigImpl config = WorkspaceConfigImpl.builder()
                                                               .setName("dev-workspace")
                                                               .setDefaultEnv("dev-env")
-                                                              .setEnvironments(new HashMap<>(singletonMap("dev-env",
-                                                                                                          new EnvironmentImpl(
-                                                                                                                  createEnvDto()))))
-                                                              .setCommands(new ArrayList<>(singleton(createCommandDto())))
-                                                              .setProjects(new ArrayList<>(singleton(createProjectDto())))
+                                                              .setEnvironments(singletonMap("dev-env",new EnvironmentImpl(createEnvDto())))
+                                                              .setCommands(singletonList(createCommandDto()))
+                                                              .setProjects(singletonList(createProjectDto()))
                                                               .build();
         return DtoConverter.asDto(config);
     }

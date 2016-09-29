@@ -569,13 +569,6 @@ public class ProjectService extends Service {
                                                 .path(getClass(), move.isFile() ? "getFile" : "getChildren")
                                                 .build(new String[]{move.getPath().toString().substring(1)}, false);
 
-        eventService.publish(new ProjectItemModifiedEvent(ProjectItemModifiedEvent.EventType.MOVED,
-                                                          workspace,
-                                                          entry.getProject(),
-                                                          entry.getPath().toString(),
-                                                          entry.isFolder(),
-                                                          path));
-
         return Response.created(location).build();
     }
 

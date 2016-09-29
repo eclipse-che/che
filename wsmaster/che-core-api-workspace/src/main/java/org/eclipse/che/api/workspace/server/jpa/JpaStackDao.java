@@ -16,6 +16,8 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -42,11 +44,15 @@ public class JpaStackDao implements StackDao {
     @Inject
     private Provider<EntityManager> managerProvider;
 
+    @Inject
+    private EventService eventService;
+
     @Override
     public void create(StackImpl stack) throws ConflictException, ServerException {
         requireNonNull(stack, "Required non-null stack");
         try {
             doCreate(stack);
+            eventService.publish(new StackPersistedEvent(stack));
         } catch (DuplicateKeyException x) {
             throw new ConflictException(format("Stack with id '%s' or name '%s' already exists", stack.getId(), stack.getName()));
         } catch (RuntimeException x) {

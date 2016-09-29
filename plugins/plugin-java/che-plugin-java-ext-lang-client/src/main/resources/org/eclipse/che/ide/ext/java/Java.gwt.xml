@@ -23,6 +23,7 @@
     <inherits name="org.eclipse.che.api.project.Project"/>
     <inherits name="org.eclipse.che.ide.Core"/>
     <inherits name="org.eclipse.che.plugin.java.plain.PlainJava"/>
+    <inherits name="org.eclipse.che.ide.editor.orion.OrionEditor"/>
     <inherits name="org.eclipse.che.ide.extension.machine.Machine"/>
 
     <source path="client"/>
