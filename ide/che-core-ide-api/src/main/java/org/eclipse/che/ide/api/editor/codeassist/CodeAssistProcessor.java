@@ -20,8 +20,7 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
  * assisting process.
  * </p>
  *
- * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
- * @version $Id:
+ * @author Evgen Vidolob
  */
 public interface CodeAssistProcessor {
 
@@ -30,7 +29,7 @@ public interface CodeAssistProcessor {
      * specified location within the document that corresponds
      * to the current cursor position within the text view.
      *
-     * @param view
+     * @param editor
      *         the editor whose document is used to compute the proposals
      * @param offset
      *         an offset within the document for which completions should be computed

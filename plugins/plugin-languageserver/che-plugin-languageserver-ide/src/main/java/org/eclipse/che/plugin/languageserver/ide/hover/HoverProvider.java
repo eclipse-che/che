@@ -20,19 +20,16 @@ import org.eclipse.che.api.promises.client.js.JsPromise;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.editor.orion.client.OrionHoverHandler;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionHoverContextOverlay;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionHoverOverlay;
 import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.HoverDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.MarkedStringDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 /**
@@ -45,13 +42,13 @@ public class HoverProvider implements OrionHoverHandler {
 
     private final EditorAgent               editorAgent;
     private final TextDocumentServiceClient client;
-    private final DtoFactory                dtoFactory;
+    private final DtoBuildHelper            helper;
 
     @Inject
-    public HoverProvider(EditorAgent editorAgent, TextDocumentServiceClient client, DtoFactory dtoFactory) {
+    public HoverProvider(EditorAgent editorAgent, TextDocumentServiceClient client, DtoBuildHelper helper) {
         this.editorAgent = editorAgent;
         this.client = client;
-        this.dtoFactory = dtoFactory;
+        this.helper = helper;
     }
 
     @Override
@@ -72,19 +69,8 @@ public class HoverProvider implements OrionHoverHandler {
         }
 
         Document document = editor.getDocument();
+        TextDocumentPositionParamsDTO paramsDTO = helper.createTDPP(document, context.getOffset());
 
-        TextDocumentPositionParamsDTO paramsDTO = dtoFactory.createDto(TextDocumentPositionParamsDTO.class);
-        TextDocumentIdentifierDTO identifierDTO = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifierDTO.setUri(editor.getEditorInput().getFile().getLocation().toString());
-
-        PositionDTO positionDTO = dtoFactory.createDto(PositionDTO.class);
-        TextPosition position = document.getPositionFromIndex(context.getOffset());
-        positionDTO.setCharacter(position.getCharacter());
-        positionDTO.setLine(position.getLine());
-
-        paramsDTO.setUri(editor.getEditorInput().getFile().getLocation().toString());
-        paramsDTO.setTextDocument(identifierDTO);
-        paramsDTO.setPosition(positionDTO);
 
         Promise<HoverDTO> promise = client.hover(paramsDTO);
         Promise<OrionHoverOverlay> then = promise.then(new Function<HoverDTO, OrionHoverOverlay>() {

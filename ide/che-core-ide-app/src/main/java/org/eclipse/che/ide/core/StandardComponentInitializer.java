@@ -43,6 +43,7 @@ import org.eclipse.che.ide.actions.SaveAllAction;
 import org.eclipse.che.ide.actions.ShowHiddenFilesAction;
 import org.eclipse.che.ide.actions.ShowPreferencesAction;
 import org.eclipse.che.ide.actions.ShowReferenceAction;
+import org.eclipse.che.ide.actions.SignatureHelpAction;
 import org.eclipse.che.ide.actions.UndoAction;
 import org.eclipse.che.ide.actions.UploadFileAction;
 import org.eclipse.che.ide.actions.UploadFolderAction;
@@ -295,6 +296,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private RefreshPathAction refreshPathAction;
+
+    @Inject
+    private SignatureHelpAction signatureHelpAction;
 
     @Inject
     @Named("XMLFileType")
@@ -635,6 +639,7 @@ public class StandardComponentInitializer {
         editorTabContextMenu.add(splitHorizontallyAction);
 
         actionManager.registerAction("noOpAction", new NoOpAction());
+        actionManager.registerAction("signatureHelp", signatureHelpAction);
 
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().action().alt().charCode('n').build(), "navigateToFile");
@@ -652,8 +657,10 @@ public class StandardComponentInitializer {
 
         if (UserAgent.isMac()) {
             keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('w').build(), "closeActiveEditor");
+            keyBinding.getGlobal().addKey(new KeyBuilder().control().charCode('p').build(), "signatureHelp");
         } else {
             keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode('w').build(), "closeActiveEditor");
+            keyBinding.getGlobal().addKey(new KeyBuilder().action().charCode('p').build(), "signatureHelp");
         }
     }
 

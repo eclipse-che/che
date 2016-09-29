@@ -90,7 +90,9 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
     @Override
     public void getCompletion(final CompletionCallback callback) {
 
-        if (serverCapabilities.getCompletionProvider().getResolveProvider()) {
+        if (serverCapabilities.getCompletionProvider() != null &&
+            serverCapabilities.getCompletionProvider().getResolveProvider() != null &&
+            serverCapabilities.getCompletionProvider().getResolveProvider()) {
             completionItem.setTextDocumentIdentifier(documentId);
             documentServiceClient.resolveCompletionItem(completionItem).then(new Operation<CompletionItemDTO>() {
                 @Override

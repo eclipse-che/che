@@ -25,14 +25,12 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 import javax.validation.constraints.NotNull;
@@ -50,16 +48,16 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
 
     private final EditorAgent               editorAgent;
     private final TextDocumentServiceClient client;
-    private final DtoFactory                dtoFactory;
+    private final DtoBuildHelper            dtoBuildHelper;
     private final OpenLocationPresenter     presenter;
 
     @Inject
     public FindDefinitionAction(EditorAgent editorAgent, OpenLocationPresenterFactory presenterFactory,
-                                TextDocumentServiceClient client, DtoFactory dtoFactory) {
+                                TextDocumentServiceClient client, DtoBuildHelper dtoBuildHelper) {
         super(singletonList(PROJECT_PERSPECTIVE_ID), "Find Definition", "Find Definition", null, null);
         this.editorAgent = editorAgent;
         this.client = client;
-        this.dtoFactory = dtoFactory;
+        this.dtoBuildHelper = dtoBuildHelper;
         presenter = presenterFactory.create("Find Definition");
     }
 
@@ -83,24 +81,9 @@ public class FindDefinitionAction extends AbstractPerspectiveAction {
     public void actionPerformed(ActionEvent e) {
         EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
 
-        //TODO replace this
-        if (!(activeEditor instanceof TextEditor)) {
-            return;
-        }
         TextEditor textEditor = ((TextEditor)activeEditor);
-        String path = activeEditor.getEditorInput().getFile().getPath();
-        TextDocumentPositionParamsDTO paramsDTO = dtoFactory.createDto(TextDocumentPositionParamsDTO.class);
+        TextDocumentPositionParamsDTO paramsDTO = dtoBuildHelper.createTDPP(textEditor.getDocument(), textEditor.getCursorPosition());
 
-        PositionDTO positionDTO = dtoFactory.createDto(PositionDTO.class);
-        positionDTO.setLine(textEditor.getCursorPosition().getLine());
-        positionDTO.setCharacter(textEditor.getCursorPosition().getCharacter());
-
-        TextDocumentIdentifierDTO identifierDTO = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-        identifierDTO.setUri(path);
-
-        paramsDTO.setUri(path);
-        paramsDTO.setPosition(positionDTO);
-        paramsDTO.setTextDocument(identifierDTO);
         final Promise<List<LocationDTO>> promise = client.definition(paramsDTO);
         promise.then(new Operation<List<LocationDTO>>() {
             @Override

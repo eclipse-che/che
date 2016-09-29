@@ -40,9 +40,11 @@ import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.position.PositionConverter;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistAssistant;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TypedRegion;
 import org.eclipse.che.ide.api.editor.texteditor.HasKeyBindings;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.util.browser.UserAgent;
 
 import java.util.List;
@@ -92,13 +94,26 @@ public class OrionEditorInit {
         configureCodeAssist(documentHandle);
         configureChangeInterceptors(documentHandle);
         configureFormatter(textEditor);
+        configureSignatureHelp(textEditor);
         addQuickAssistKeyBinding();
     }
+
 
     public void uninstall() {
         Reconciler reconciler = configuration.getReconciler();
         if (reconciler != null) {
             reconciler.uninstall();
+        }
+        SignatureHelpProvider signatureHelpProvider = configuration.getSignatureHelpProvider();
+        if (signatureHelpProvider != null) {
+            signatureHelpProvider.uninstall();
+        }
+    }
+
+    private void configureSignatureHelp(TextEditor textEditor) {
+        SignatureHelpProvider signatureHelpProvider = configuration.getSignatureHelpProvider();
+        if (signatureHelpProvider != null) {
+            signatureHelpProvider.install(textEditor);
         }
     }
 

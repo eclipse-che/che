@@ -34,7 +34,7 @@ import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry
 import javax.inject.Inject;
 
 /**
- * @author Anatolii Bazko
+ * Provide editor with LS support
  */
 public class LanguageServerEditorProvider implements AsyncEditorProvider, EditorProvider {
 

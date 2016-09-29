@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 
 import java.util.Map;
 
@@ -74,6 +75,11 @@ public class DefaultTextEditorConfiguration implements TextEditorConfiguration {
 
     @Override
     public ChangeInterceptorProvider getChangeInterceptorProvider() {
+        return null;
+    }
+
+    @Override
+    public SignatureHelpProvider getSignatureHelpProvider() {
         return null;
     }
 }

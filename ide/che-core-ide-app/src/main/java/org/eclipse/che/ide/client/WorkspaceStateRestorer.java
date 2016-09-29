@@ -20,6 +20,8 @@ import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.statepersistance.AppStateManager;
 
 /**
+ * Restore workspace state, like opened files.
+ *
  * @author Evgen Vidolob
  */
 @Singleton

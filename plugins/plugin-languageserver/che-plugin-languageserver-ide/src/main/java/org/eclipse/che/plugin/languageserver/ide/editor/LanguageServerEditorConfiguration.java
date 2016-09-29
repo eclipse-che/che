@@ -24,30 +24,33 @@ import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
 import org.eclipse.che.ide.api.editor.reconciler.ReconcilerWithAutoSave;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
+import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Anatolii Bazko
+ * Configure editor with LS support
  */
 public class LanguageServerEditorConfiguration extends DefaultTextEditorConfiguration {
 
     public static final int INITIAL_DOCUMENT_VERSION = 0;
 
-    private final ServerCapabilities                serverCapabilities;
-    private final AnnotationModel                   annotationModel;
-    private final ReconcilerWithAutoSave            reconciler;
+    private final ServerCapabilities                       serverCapabilities;
+    private final AnnotationModel                          annotationModel;
+    private final ReconcilerWithAutoSave                   reconciler;
     private final LanguageServerCodeassistProcessorFactory codeAssistProcessorFactory;
-
-    private LanguageServerFormatter formatter;
+    private final SignatureHelpProvider                    signatureHelpProvider;
+    private       LanguageServerFormatter                  formatter;
 
     @Inject
-    public LanguageServerEditorConfiguration(final LanguageServerCodeassistProcessorFactory codeAssistProcessor,
-                                             final Provider<DocumentPositionMap> docPositionMapProvider,
-                                             final LanguageServerAnnotationModelFactory annotationModelFactory,
-                                             final LanguageServerReconcileStrategyFactory reconcileStrategyProviderFactory,
-                                             final LanguageServerFormatterFactory formatterFactory,
+    public LanguageServerEditorConfiguration(LanguageServerCodeassistProcessorFactory codeAssistProcessor,
+                                             Provider<DocumentPositionMap> docPositionMapProvider,
+                                             LanguageServerAnnotationModelFactory annotationModelFactory,
+                                             LanguageServerReconcileStrategyFactory reconcileStrategyProviderFactory,
+                                             LanguageServerFormatterFactory formatterFactory,
+                                             LanguageServerSignatureHelpFactory signatureHelpFactory,
                                              @Assisted ServerCapabilities serverCapabilities) {
         codeAssistProcessorFactory = codeAssistProcessor;
         if (serverCapabilities.isDocumentFormattingProvider() || serverCapabilities.isDocumentRangeFormattingProvider() ||
@@ -60,6 +63,11 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
 
         this.reconciler = new ReconcilerWithAutoSave(DocumentPartitioner.DEFAULT_CONTENT_TYPE, getPartitioner());
         reconciler.addReconcilingStrategy(DocumentPartitioner.DEFAULT_CONTENT_TYPE, reconcileStrategyProviderFactory.build(serverCapabilities));
+        if (serverCapabilities.getSignatureHelpProvider() != null) {
+            signatureHelpProvider = signatureHelpFactory.create(serverCapabilities);
+        } else {
+            signatureHelpProvider = null;
+        }
     }
 
     @Override
@@ -90,5 +98,10 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
 
     public ServerCapabilities getServerCapabilities() {
         return serverCapabilities;
+    }
+
+    @Override
+    public SignatureHelpProvider getSignatureHelpProvider() {
+        return signatureHelpProvider;
     }
 }

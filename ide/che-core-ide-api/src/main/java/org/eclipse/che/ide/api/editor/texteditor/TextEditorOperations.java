@@ -79,4 +79,9 @@ public interface TextEditorOperations {
      * show quick assist and quick fix proposals for the current position.
      */
     int QUICK_ASSIST = 15;
+
+    /**
+     * Text operation code for requesting signature help for current cursor position.
+     */
+    int SIGNATURE_HELP = 16;
 }
