@@ -122,7 +122,7 @@ public class JGitConnectionTest {
         }).when(transportCommand).setTransportConfigCallback(any());
 
         //when
-        jGitConnection.executeRemoteCommand("ssh://host.xz/repo.git", transportCommand);
+        jGitConnection.executeRemoteCommand("ssh://host.xz/repo.git", transportCommand, null);
 
         //then
         verify(sshTransport).setSshSessionFactory(any());
@@ -140,7 +140,7 @@ public class JGitConnectionTest {
         }).when(transportCommand).setTransportConfigCallback(any());
 
         //when
-        jGitConnection.executeRemoteCommand("ssh://host.xz/repo.git", transportCommand);
+        jGitConnection.executeRemoteCommand("ssh://host.xz/repo.git", transportCommand, null);
 
         //then
         verifyZeroInteractions(transportHttp);
