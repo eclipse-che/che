@@ -54,6 +54,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -225,7 +226,12 @@ public class LocalDataMigratorTest {
         final ProfileImpl profile = new ProfileImpl(user.getId());
         final Map<String, String> prefs = singletonMap("key", "value");
         final SshPairImpl sshPair = new SshPairImpl(user.getId(), "service", "name", "public", "private");
-        final WorkspaceImpl workspace = new WorkspaceImpl("id", user.getAccount(), new WorkspaceConfigImpl());
+        final WorkspaceImpl workspace = new WorkspaceImpl("id", user.getAccount(), new WorkspaceConfigImpl("name",
+                                                                                                           "description",
+                                                                                                           "env",
+                                                                                                           emptyList(),
+                                                                                                           emptyList(),
+                                                                                                           emptyMap()));
         final SnapshotImpl snapshot = new SnapshotImpl();
         snapshot.setId("snapshotId");
         snapshot.setWorkspaceId(workspace.getId());

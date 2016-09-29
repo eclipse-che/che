@@ -16,7 +16,6 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
@@ -41,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
@@ -137,7 +137,7 @@ public class WorkspaceDaoTest {
     public void shouldGetWorkspaceByNameAndNamespace() throws Exception {
         final WorkspaceImpl workspace = workspaces[0];
 
-        assertEquals(workspaceDao.get(workspace.getName(), workspace.getNamespace()), workspace);
+        assertEquals(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()), workspace);
     }
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -151,7 +151,7 @@ public class WorkspaceDaoTest {
     public void shouldThrowNotFoundExceptionWhenWorkspaceWithSuchNamespaceDoesNotExist() throws Exception {
         final WorkspaceImpl workspace = workspaces[0];
 
-        workspaceDao.get(workspace.getName(), "non-existing-namespace");
+        workspaceDao.get(workspace.getConfig().getName(), "non-existing-namespace");
     }
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -159,7 +159,7 @@ public class WorkspaceDaoTest {
         final WorkspaceImpl workspace1 = workspaces[0];
         final WorkspaceImpl workspace2 = workspaces[2];
 
-        workspaceDao.get(workspace1.getName(), workspace2.getNamespace());
+        workspaceDao.get(workspace1.getConfig().getName(), workspace2.getNamespace());
     }
 
     @Test(expectedExceptions = NullPointerException.class)
@@ -169,7 +169,7 @@ public class WorkspaceDaoTest {
 
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenGettingWorkspaceByNameAndNamespaceWhereNamespaceIsNull() throws Exception {
-        workspaceDao.get(workspaces[0].getName(), null);
+        workspaceDao.get(workspaces[0].getConfig().getName(), null);
     }
 
     @Test(expectedExceptions = NotFoundException.class,
@@ -204,7 +204,7 @@ public class WorkspaceDaoTest {
     public void shouldNotCreateWorkspaceWithANameWhichAlreadyExistsInGivenNamespace() throws Exception {
         final WorkspaceImpl workspace = workspaces[0];
 
-        final WorkspaceImpl newWorkspace = createWorkspace("new-id", workspace.getAccount(), workspace.getName());
+        final WorkspaceImpl newWorkspace = createWorkspace("new-id", workspace.getAccount(), workspace.getConfig().getName());
 
         workspaceDao.create(newWorkspace);
     }
@@ -214,7 +214,7 @@ public class WorkspaceDaoTest {
         final WorkspaceImpl workspace = workspaces[0];
         final WorkspaceImpl workspace2 = workspaces[4];
 
-        final WorkspaceImpl newWorkspace = createWorkspace("new-id", workspace.getAccount(), workspace2.getName());
+        final WorkspaceImpl newWorkspace = createWorkspace("new-id", workspace.getAccount(), workspace2.getConfig().getName());
         final WorkspaceImpl expected = new WorkspaceImpl(newWorkspace, newWorkspace.getAccount());
         expected.setAccount(newWorkspace.getAccount());
         assertEquals(workspaceDao.create(newWorkspace), expected);
@@ -231,115 +231,118 @@ public class WorkspaceDaoTest {
 
     @Test(dependsOnMethods = "shouldGetWorkspaceById")
     public void shouldUpdateWorkspace() throws Exception {
-//        final WorkspaceImpl workspace = new WorkspaceImpl(workspaces[0], workspaces[0].getAccount());
-//
-//        // Remove an existing project configuration from workspace
-//        workspace.getConfig().getProjects().remove(1);
-//
-//        // Add new project to the workspace configuration
-//        final SourceStorageImpl source3 = new SourceStorageImpl();
-//        source3.setType("type3");
-//        source3.setLocation("location3");
-//        source3.setParameters(new HashMap<>(ImmutableMap.of("param1", "value1",
-//                                                            "param2", "value2",
-//                                                            "param3", "value3")));
-//        final ProjectConfigImpl newProjectCfg = new ProjectConfigImpl();
-//        newProjectCfg.setPath("/path3");
-//        newProjectCfg.setType("type3");
-//        newProjectCfg.setName("project3");
-//        newProjectCfg.setDescription("description3");
-//        newProjectCfg.getMixins().addAll(asList("mixin3", "mixin4"));
-//        newProjectCfg.setSource(source3);
-//        newProjectCfg.getAttributes().put("new-key", asList("1", "2"));
-//        workspace.getConfig().getProjects().add(newProjectCfg);
-//
-//        // Update an existing project configuration
-//        final ProjectConfigImpl projectCfg = workspace.getConfig().getProjects().get(0);
-//        projectCfg.getAttributes().clear();
-//        projectCfg.getSource().setLocation("new-location");
-//        projectCfg.getSource().setType("new-type");
-//        projectCfg.getSource().getParameters().put("new-param", "new-param-value");
-//        projectCfg.getMixins().add("new-mixin");
-//        projectCfg.setPath("/new-path");
-//        projectCfg.setDescription("new project description");
-//
-//        // Remove an existing command
-//        workspace.getConfig().getCommands().remove(1);
-//
-//        // Add a new command
-//        final CommandImpl newCmd = new CommandImpl();
-//        newCmd.setName("name3");
-//        newCmd.setType("type3");
-//        newCmd.setCommandLine("cmd3");
-//        newCmd.getAttributes().putAll(ImmutableMap.of("attr1", "value1",
-//                                                      "attr2", "value2",
-//                                                      "attr3", "value3"));
-//        workspace.getConfig().getCommands().add(newCmd);
-//
-//        // Update an existing command
-//        final CommandImpl command = workspace.getConfig().getCommands().get(0);
-//        command.setName("new-name");
-//        command.setType("new-type");
-//        command.setCommandLine("new-command-line");
-//        command.getAttributes().clear();
-//
-//        // Remove an existing machine config
-//        workspace.getConfig().getEnvironments().get(0).getMachineConfigs().remove(1);
-//
-//        // Add a new machine config
-//        final MachineConfigImpl newMachineCfg = new MachineConfigImpl();
-//        newMachineCfg.setName("name3");
-//        newMachineCfg.setDev(false);
-//        newMachineCfg.setType("type3");
-//        newMachineCfg.setLimits(new MachineLimitsImpl(2048));
-//        newMachineCfg.getEnvVariables().putAll(ImmutableMap.of("env4", "value4",
-//                                                               "env5", "value5",
-//                                                               "env6", "value6"));
-//        newMachineCfg.setServers(new ArrayList<>(singleton(new ServerConfImpl("ref", "port", "protocol", "path"))));
-//        newMachineCfg.setSource(new MachineSourceImpl("type", "location", "content"));
-//        workspace.getConfig().getEnvironments().get(0).getMachineConfigs().add(newMachineCfg);
-//
-//        // Update an existing machine configuration
-//        final MachineConfigImpl machineCfg = workspace.getConfig().getEnvironments().get(0).getMachineConfigs().get(0);
-//        machineCfg.getEnvVariables().clear();
-//        machineCfg.setType("new-type");
-//        machineCfg.setName("new-name");
-//        machineCfg.getLimits().setRam(512);
-//        machineCfg.getServers().clear();
-//        machineCfg.getServers().add(new ServerConfImpl("new-ref", "new-port", "new-protocol", "new-path"));
-//        machineCfg.getSource().setType("new-type");
-//        machineCfg.getSource().setLocation("new-location");
-//        machineCfg.getSource().setContent("new-content");
-//
-//        // Remove an existing environment
-//        workspace.getConfig().getEnvironments().remove(1);
-//
-//        // Add a new environment
-//        final EnvironmentImpl newEnv = new EnvironmentImpl();
-//        newEnv.setName("new-env");
-//        final MachineConfigImpl newEnvMachineCfg = new MachineConfigImpl(newMachineCfg);
-//        newEnvMachineCfg.setDev(true);
-//        newEnv.getMachineConfigs().add(newEnvMachineCfg);
-//        workspace.getConfig().getEnvironments().add(newEnv);
-//
-//        // Update an existing environment
-//        final EnvironmentImpl environment = workspace.getConfig().getEnvironments().get(0);
-//        environment.setName("new-name");
-//
-//        // Update workspace configuration
-//        final WorkspaceConfigImpl wCfg = workspace.getConfig();
-//        wCfg.setDefaultEnv(newEnv.getName());
-//        wCfg.setName("new-name");
-//        wCfg.setDescription("This is a new description");
-//
-//        // Update workspace object
-//        workspace.setName("new-name");
-//        workspace.setAccount(new AccountImpl("accId", "new-namespace", "test"));
-//        workspace.getAttributes().clear();
-//
-//        workspaceDao.update(workspace);
-//
-//        assertEquals(workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
+        final WorkspaceImpl workspace = new WorkspaceImpl(workspaces[0], workspaces[0].getAccount());
+
+        // Remove an existing project configuration from workspace
+        workspace.getConfig().getProjects().remove(1);
+
+        // Add new project to the workspace configuration
+        final SourceStorageImpl source3 = new SourceStorageImpl();
+        source3.setType("type3");
+        source3.setLocation("location3");
+        source3.setParameters(new HashMap<>(ImmutableMap.of("param1", "value1",
+                                                            "param2", "value2",
+                                                            "param3", "value3")));
+        final ProjectConfigImpl newProjectCfg = new ProjectConfigImpl();
+        newProjectCfg.setPath("/path3");
+        newProjectCfg.setType("type3");
+        newProjectCfg.setName("project3");
+        newProjectCfg.setDescription("description3");
+        newProjectCfg.getMixins().addAll(asList("mixin3", "mixin4"));
+        newProjectCfg.setSource(source3);
+        newProjectCfg.getAttributes().put("new-key", asList("1", "2"));
+        workspace.getConfig().getProjects().add(newProjectCfg);
+
+        // Update an existing project configuration
+        final ProjectConfigImpl projectCfg = workspace.getConfig().getProjects().get(0);
+        projectCfg.getAttributes().clear();
+        projectCfg.getSource().setLocation("new-location");
+        projectCfg.getSource().setType("new-type");
+        projectCfg.getSource().getParameters().put("new-param", "new-param-value");
+        projectCfg.getMixins().add("new-mixin");
+        projectCfg.setPath("/new-path");
+        projectCfg.setDescription("new project description");
+
+        // Remove an existing command
+        workspace.getConfig().getCommands().remove(1);
+
+        // Add a new command
+        final CommandImpl newCmd = new CommandImpl();
+        newCmd.setName("name3");
+        newCmd.setType("type3");
+        newCmd.setCommandLine("cmd3");
+        newCmd.getAttributes().putAll(ImmutableMap.of("attr1", "value1",
+                                                      "attr2", "value2",
+                                                      "attr3", "value3"));
+        workspace.getConfig().getCommands().add(newCmd);
+
+        // Update an existing command
+        final CommandImpl command = workspace.getConfig().getCommands().get(0);
+        command.setName("new-name");
+        command.setType("new-type");
+        command.setCommandLine("new-command-line");
+        command.getAttributes().clear();
+
+        // Add a new environment
+        final EnvironmentRecipeImpl newRecipe = new EnvironmentRecipeImpl();
+        newRecipe.setLocation("new-location");
+        newRecipe.setType("new-type");
+        newRecipe.setContentType("new-content-type");
+        newRecipe.setContent("new-content");
+        final ExtendedMachineImpl newMachine = new ExtendedMachineImpl();
+        final ServerConf2Impl serverConf1 = new ServerConf2Impl("2265", "http", singletonMap("prop1", "val"));
+        final ServerConf2Impl serverConf2 = new ServerConf2Impl("2266", "ftp", singletonMap("prop1", "val"));
+        newMachine.setServers(ImmutableMap.of("ref1", serverConf1, "ref2", serverConf2));
+        newMachine.setAgents(ImmutableList.of("agent5", "agent4"));
+        newMachine.setAttributes(singletonMap("att1", "val"));
+        final EnvironmentImpl newEnv = new EnvironmentImpl();
+        newEnv.setMachines(ImmutableMap.of("new-machine", newMachine));
+        newEnv.setRecipe(newRecipe);
+        workspace.getConfig().getEnvironments().put("new-env", newEnv);
+
+        // Update an existing environment
+        final EnvironmentImpl defaultEnv = workspace.getConfig().getEnvironments().get(workspace.getConfig().getDefaultEnv());
+        // Remove an existing machine config
+        final List<String> machineNames = new ArrayList<>(defaultEnv.getMachines().keySet());
+        // Update an existing machine
+        final ExtendedMachineImpl existingMachine = defaultEnv.getMachines().get(machineNames.get(1));
+        existingMachine.setAgents(asList("new-agent1", "new-agent2"));
+        existingMachine.setAttributes(ImmutableMap.of("attr1", "value1",
+                                                      "attr2", "value2",
+                                                      "attr3", "value3"));
+        existingMachine.getServers().clear();
+        existingMachine.getServers().put("new-ref", new ServerConf2Impl("new-port",
+                                                                        "new-protocol",
+                                                                        ImmutableMap.of("prop1", "value")));
+        defaultEnv.getMachines().remove(machineNames.get(0));
+        defaultEnv.getRecipe().setContent("updated-content");
+        defaultEnv.getRecipe().setContentType("updated-content-type");
+        defaultEnv.getRecipe().setLocation("updated-location");
+        defaultEnv.getRecipe().setType("updated-type");
+
+        // Remove an existing environment
+        final Optional<String> nonDefaultEnv = workspace.getConfig()
+                                                        .getEnvironments()
+                                                        .keySet()
+                                                        .stream()
+                                                        .filter(key -> !key.equals(workspace.getConfig().getDefaultEnv()))
+                                                        .findAny();
+        assertTrue(nonDefaultEnv.isPresent());
+        workspace.getConfig().getEnvironments().remove(nonDefaultEnv.get());
+
+        // Update workspace configuration
+        final WorkspaceConfigImpl wCfg = workspace.getConfig();
+        wCfg.setDefaultEnv("new-env");
+        wCfg.setName("new-name");
+        wCfg.setDescription("This is a new description");
+
+        // Update workspace object
+        workspace.setAccount(new AccountImpl("accId", "new-namespace", "test"));
+        workspace.getAttributes().clear();
+
+        workspaceDao.update(workspace);
+
+        assertEquals(workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
     }
 
     @Test(expectedExceptions = NotFoundException.class)
@@ -355,7 +358,7 @@ public class WorkspaceDaoTest {
         final WorkspaceImpl workspace1 = workspaces[0];
         final WorkspaceImpl workspace2 = workspaces[1];
 
-        workspace1.setName(workspace2.getName());
+        workspace1.getConfig().setName(workspace2.getConfig().getName());
 
         workspaceDao.update(workspace1);
     }
@@ -453,7 +456,7 @@ public class WorkspaceDaoTest {
         recipe2.setContent("content");
         final EnvironmentImpl env2 = new EnvironmentImpl();
         env2.setMachines(new HashMap<>(ImmutableMap.of("machine1", exMachine1,
-                                         "machine3", exMachine3)));
+                                                       "machine3", exMachine3)));
         env2.setRecipe(recipe2);
 
         final Map<String, EnvironmentImpl> environments = ImmutableMap.of("env1", env1, "env2", env2);
@@ -473,10 +476,11 @@ public class WorkspaceDaoTest {
         final WorkspaceConfigImpl wCfg = createWorkspaceConfig(name);
         // Workspace
         final WorkspaceImpl workspace = new WorkspaceImpl();
-        workspace.setStatus(WorkspaceStatus.STOPPED);
         workspace.setId(id);
         workspace.setAccount(account);
-        workspace.setName(name);
+        final WorkspaceConfigImpl cfg = new WorkspaceConfigImpl();
+        cfg.setName(name);
+        workspace.setConfig(cfg);
         workspace.setAttributes(new HashMap<>(ImmutableMap.of("attr1", "value1",
                                                               "attr2", "value2",
                                                               "attr3", "value3")));

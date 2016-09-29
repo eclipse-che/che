@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.jpa;
 import com.google.inject.Guice;
 
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -45,6 +46,10 @@ public class JpaWorkspaceDaoTest {
 
     @AfterMethod
     private void cleanup() {
+        manager.getTransaction().begin();
+        manager.createQuery("DELETE FROM Workspace workspaces");
+        manager.createQuery("DELETE FROM Account accounts");
+        manager.getTransaction().commit();
         manager.getEntityManagerFactory().close();
     }
 
@@ -80,6 +85,26 @@ public class JpaWorkspaceDaoTest {
         assertEquals(asLong("SELECT COUNT(p) FROM ProjectConfig p"), 0L, "Project configs");
         assertEquals(asLong("SELECT COUNT(c) FROM Command c"), 0L, "Commands");
         assertEquals(asLong("SELECT COUNT(e) FROM Environment e"), 0L, "Environments");
+    }
+
+    @Test(expectedExceptions = DuplicateKeyException.class)
+    public void shouldSynchronizeWorkspaceNameWithConfigNameWhenConfigIsUpdated() throws Exception {
+        final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+        final WorkspaceImpl workspace1 = createWorkspace("id", account, "name1");
+        final WorkspaceImpl workspace2 = createWorkspace("id2", account, "name2");
+
+        // persist prepared data
+        manager.getTransaction().begin();
+        manager.persist(account);
+        manager.persist(workspace1);
+        manager.persist(workspace2);
+        manager.getTransaction().commit();
+
+        // make conflict update
+        workspace2.getConfig().setName(workspace1.getConfig().getName());
+        manager.getTransaction().begin();
+        manager.merge(workspace2);
+        manager.getTransaction().commit();
     }
 
     private long asLong(String query) {
