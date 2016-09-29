@@ -13,6 +13,7 @@ package org.eclipse.che.api.user.server;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 
@@ -36,8 +37,9 @@ public class CheUserCreator {
     @Inject
     @SuppressWarnings("unused")
     // this work around needed for Guice to help initialize components in right sequence,
-    // because instance of JpaInitializer should be created before components that dependent on dao (such as UserManager)
-    private JpaInitializer jpaInitializer;
+    // because instance of EntityListenerInjectionManagerInitializer should be created before
+    // jpa callback components (such as UserEntityListener)
+    private EntityListenerInjectionManagerInitializer initializer;
 
     @PostConstruct
     public void createCheUser() throws ServerException {
