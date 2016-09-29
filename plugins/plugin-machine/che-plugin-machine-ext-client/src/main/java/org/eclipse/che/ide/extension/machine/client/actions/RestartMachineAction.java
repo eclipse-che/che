@@ -12,10 +12,10 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
 
@@ -34,7 +34,7 @@ public class RestartMachineAction extends AbstractPerspectiveAction {
     private final MachineManager              machineManager;
     private final MachineLocalizationConstant locale;
 
-    private Machine selectedMachine;
+    private MachineEntity selectedMachine;
 
     @Inject
     public RestartMachineAction(MachineLocalizationConstant locale,

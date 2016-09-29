@@ -22,6 +22,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.DevMachine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
@@ -64,7 +65,7 @@ public class MachineManagerImplTest {
     private WorkspaceServiceClient workspaceServiceClient;
 
     @Mock
-    private MachineStatusNotifier machineStatusNotifier;
+    private MachineStatusHandler machineStatusHandler;
 
     @Mock
     private MessageBusProvider messageBusProvider;
@@ -111,7 +112,7 @@ public class MachineManagerImplTest {
         final String SOURCE_LOCATION = "source-location";
         final String SOURCE_CONTENT = "source-content";
 
-        org.eclipse.che.api.core.model.machine.Machine machineState = mock(org.eclipse.che.api.core.model.machine.Machine.class);
+        MachineEntity machineState = mock(MachineEntity.class);
         when(machineState.getId()).thenReturn(ID);
         when(machineState.getWorkspaceId()).thenReturn(WORKSPACE_ID);
         Promise<Void> promise = mock(Promise.class);

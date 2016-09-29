@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.extension.machine.client.targets;
 
 import com.google.inject.Inject;
+
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;

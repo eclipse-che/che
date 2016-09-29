@@ -145,7 +145,7 @@ public class WorkspaceServiceLinksInjector {
                                                                                                                workspace.getId())))));
 
         // add links for running workspace
-        injectRuntimeLinks(workspace, ideUri, uriBuilder);
+        injectRuntimeLinks(workspace, ideUri, uriBuilder, serviceContext);
         return workspace.withLinks(links);
     }
 
@@ -175,7 +175,7 @@ public class WorkspaceServiceLinksInjector {
         return snapshotDto.withLinks(asList(machineLink, workspaceLink, workspaceSnapshotLink));
     }
 
-    protected void injectRuntimeLinks(WorkspaceDto workspace, URI ideUri, UriBuilder uriBuilder) {
+    protected void injectRuntimeLinks(WorkspaceDto workspace, URI ideUri, UriBuilder uriBuilder, ServiceContext serviceContext) {
         final WorkspaceRuntimeDto runtime = workspace.getRuntime();
         // add links for running workspace
         if (workspace.getStatus() == RUNNING && runtime != null) {
@@ -186,6 +186,8 @@ public class WorkspaceServiceLinksInjector {
                                              .build(workspace.getId())
                                              .toString(),
                                    LINK_REL_STOP_WORKSPACE));
+
+            runtime.getMachines().forEach(machine -> injectMachineLinks(machine, serviceContext));
 
             final MachineDto devMachine = runtime.getDevMachine();
             if (devMachine != null) {

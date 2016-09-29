@@ -27,10 +27,9 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.notification.NotificationManager;
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.content.TabPresenter;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.ide.websocket.WebSocket;
@@ -42,6 +41,7 @@ import org.eclipse.che.ide.websocket.events.MessageReceivedHandler;
 import javax.validation.constraints.NotNull;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -59,7 +59,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     private final TerminalView                view;
     private final NotificationManager         notificationManager;
     private final MachineLocalizationConstant locale;
-    private final Machine                     machine;
+    private final MachineEntity               machine;
     private final Timer                       retryConnectionTimer;
 
     private Promise<Boolean>      promise;
@@ -73,7 +73,7 @@ public class TerminalPresenter implements TabPresenter, TerminalView.ActionDeleg
     public TerminalPresenter(TerminalView view,
                              NotificationManager notificationManager,
                              MachineLocalizationConstant locale,
-                             @Assisted Machine machine) {
+                             @Assisted MachineEntity machine) {
         this.view = view;
         view.setDelegate(this);
         this.notificationManager = notificationManager;

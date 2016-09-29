@@ -12,11 +12,9 @@ package org.eclipse.che.plugin.gdb.ide.configuration;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
 import org.junit.Before;
@@ -55,8 +53,6 @@ public class GdbConfigurationPagePresenterTest {
     private AppContext                 appContext;
     @Mock
     private RecipeServiceClient        recipeServiceClient;
-    @Mock
-    private MachineServiceClient       machineServiceClient;
 
     @InjectMocks
     private GdbConfigurationPagePresenter pagePresenter;
@@ -80,10 +76,10 @@ public class GdbConfigurationPagePresenterTest {
     @Test
     public void testGo() throws Exception {
         AcceptsOneWidget container = Mockito.mock(AcceptsOneWidget.class);
-        when(machineServiceClient.getMachines(appContext.getWorkspaceId())).thenReturn(mock(Promise.class));
 
         pagePresenter.go(container);
 
+        verify(appContext).getWorkspace();
         verify(container).setWidget(eq(pageView));
         verify(configuration, atLeastOnce()).getHost();
         verify(configuration, atLeastOnce()).getPort();
