@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	TestCmd = "printf \"1\n2\n3\n4\n5\n6\n7\n8\n9\n10\""
+	testCmd = "printf \"1\n2\n3\n4\n5\n6\n7\n8\n9\n10\""
 )
 
 func TestOneLineOutput(t *testing.T) {
-	defer cleanupLogsDir()
+	defer cleanupProcessResources()
 	// create and start a process
 	p := startAndWaitTestProcess("echo test", t)
 
@@ -30,7 +30,7 @@ func TestOneLineOutput(t *testing.T) {
 }
 
 func TestEmptyLinesOutput(t *testing.T) {
-	defer cleanupLogsDir()
+	defer cleanupProcessResources()
 	p := startAndWaitTestProcess("printf \"\n\n\n\n\n\"", t)
 
 	logs, _ := p.ReadAllLogs()
@@ -48,7 +48,7 @@ func TestEmptyLinesOutput(t *testing.T) {
 
 func TestAddSubscriber(t *testing.T) {
 	process.LogsDir = TmpFile()
-	defer cleanupLogsDir()
+	defer cleanupProcessResources()
 
 	outputLines := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
 
@@ -102,24 +102,24 @@ func TestAddSubscriber(t *testing.T) {
 }
 
 func TestMachineProcessIsNotAliveAfterItIsDead(t *testing.T) {
-	p := startAndWaitTestProcess(TestCmd, t)
-	defer cleanupLogsDir()
+	p := startAndWaitTestProcess(testCmd, t)
+	defer cleanupProcessResources()
 	if p.Alive {
 		t.Fatal("Process should not be alive")
 	}
 }
 
 func TestItIsNotPossibleToAddSubscriberToDeadProcess(t *testing.T) {
-	p := startAndWaitTestProcess(TestCmd, t)
-	defer cleanupLogsDir()
+	p := startAndWaitTestProcess(testCmd, t)
+	defer cleanupProcessResources()
 	if err := p.AddSubscriber(&process.Subscriber{}); err == nil {
 		t.Fatal("Should not be able to add subscriber")
 	}
 }
 
 func TestReadProcessLogs(t *testing.T) {
-	p := startAndWaitTestProcess(TestCmd, t)
-	defer cleanupLogsDir()
+	p := startAndWaitTestProcess(testCmd, t)
+	defer cleanupProcessResources()
 	logs, err := p.ReadLogs(time.Time{}, time.Now())
 	if err != nil {
 		t.Fatal(err)
@@ -133,6 +133,16 @@ func TestReadProcessLogs(t *testing.T) {
 		if expected[idx] != logs[idx].Text {
 			t.Fatalf("Expected log message to be '%s', but got '%s'", expected[idx], logs[idx].Text)
 		}
+	}
+}
+
+func TestCleanOnce(t *testing.T) {
+	p := startAndWaitTestProcess(testCmd, t)
+	defer cleanupProcessResources()
+	process.CleanOnce(0)
+	_, ok := process.Get(p.Pid)
+	if ok {
+		t.Fatal("Process should be cleaned")
 	}
 }
 
@@ -190,6 +200,6 @@ func TmpFile() string {
 	return os.TempDir() + string(os.PathSeparator) + randomName(10)
 }
 
-func cleanupLogsDir() {
+func cleanupProcessResources() {
 	os.RemoveAll(process.LogsDir)
 }

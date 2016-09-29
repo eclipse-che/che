@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+	"log"
 )
 
 const (
@@ -25,10 +26,12 @@ const (
 )
 
 var (
-	prevPid   uint64 = 0
-	processes        = &processesMap{items: make(map[uint64]*MachineProcess)}
-	logsDist         = NewLogsDistributor()
-	LogsDir   string
+	prevPid                   uint64 = 0
+	processes                        = &processesMap{items: make(map[uint64]*MachineProcess)}
+	logsDist                         = NewLogsDistributor()
+	LogsDir                   string
+	CleanupPeriodInMinutes    int
+	CleanupThresholdInMinutes int
 )
 
 type Command struct {
@@ -386,4 +389,29 @@ func tryWrite(eventsChan chan *rpc.Event, event *rpc.Event) (ok bool) {
 	}()
 	eventsChan <- event
 	return true
+}
+
+
+func CleanPeriodically() {
+	ticker := time.NewTicker(time.Duration(CleanupPeriodInMinutes) * time.Minute)
+	defer ticker.Stop()
+	for range ticker.C {
+		CleanOnce(CleanupThresholdInMinutes)
+	}
+}
+
+func CleanOnce(thresholdMinutes int) {
+	deadPoint := time.Now().Add(-time.Duration(thresholdMinutes) * time.Minute)
+	processes.Lock()
+	for _, mp := range processes.items {
+		mp.lastUsedLock.RLock()
+		if !mp.Alive && mp.lastUsed.Before(deadPoint) {
+			delete(processes.items, mp.Pid)
+			if err := os.Remove(mp.logfileName); err != nil {
+				log.Printf("Couldn't remove process logs file, '%s'", mp.logfileName)
+			}
+		}
+		mp.lastUsedLock.RUnlock()
+	}
+	processes.Unlock()
 }

@@ -85,7 +85,9 @@ func main() {
 		}
 	}
 
-	go process.NewCleaner().CleanupPeriodically()
+	if process.CleanupThresholdInMinutes > 0 {
+		go process.CleanPeriodically()
+	}
 	if term.ActivityTrackingEnabled {
 		go term.Activity.StartTracking()
 	}
