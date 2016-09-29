@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextThemeOverlay;
+import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpResources;
 import org.eclipse.che.ide.requirejs.RequireJsLoader;
 import org.eclipse.che.ide.requirejs.RequirejsErrorHandler.RequireError;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
@@ -60,12 +61,14 @@ public class OrionEditorExtension {
                                 final EditorInitializePromiseHolder editorModule,
                                 final OrionResource orionResource,
                                 final LoaderFactory loaderFactory,
-                                final EditorLocalizationConstants constants) {
+                                final EditorLocalizationConstants constants,
+                                final SignatureHelpResources signatureHelpResources) {
         this.notificationManager = notificationManager;
         this.requireJsLoader = requireJsLoader;
         this.orionResource = orionResource;
         this.loader = loaderFactory.newLoader();
         this.waitEditorMessage = constants.waitEditorInitMessage();
+        signatureHelpResources.css().ensureInjected();
 
         Promise<Void> promise = AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<Void>() {
             @Override

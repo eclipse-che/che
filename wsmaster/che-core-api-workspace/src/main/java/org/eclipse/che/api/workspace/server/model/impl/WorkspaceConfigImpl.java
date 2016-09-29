@@ -17,7 +17,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -57,7 +56,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     @Column(nullable = false)
     private String name;
 
-    @Basic
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)

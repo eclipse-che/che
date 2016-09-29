@@ -55,7 +55,7 @@ public class ProjectRegistry {
     private final ProjectTypeRegistry            projectTypeRegistry;
     private final ProjectHandlerRegistry         handlers;
     private final FolderEntry                    root;
-    private final EventService eventService;
+    private final EventService                   eventService;
 
     private boolean initialized;
 
@@ -140,7 +140,7 @@ public class ProjectRegistry {
     /**
      * @param parentPath
      *         parent path
-     * @return list projects of pojects 
+     * @return list projects of pojects
      */
     public List<String> getProjects(String parentPath) {
         checkInitializationState();
@@ -210,8 +210,6 @@ public class ProjectRegistry {
 
         return project;
     }
-
-
 
     /**
      * Removes all projects on and under the incoming path.

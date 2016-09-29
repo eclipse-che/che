@@ -15,6 +15,35 @@
  * @author Ann Shumilova
  */
 export class WorkspaceDetailsController {
+  $location;
+  $log;
+  $mdDialog;
+  $q;
+  $rootScope: angular.IRootScopeService;
+  $route;
+  $scope: angular.IScope;
+  $timeout;
+  cheNotification;
+  cheWorkspace;
+  ideSvc;
+  lodash;
+  workspaceDetailsService;
+
+  workspaceDetails;
+  copyWorkspaceDetails;
+  machinesViewStatus;
+  namespace: string;
+  workspaceId: string;
+  workspaceName: string;
+  newName: string;
+  workspaceKey: string;
+  editMode: boolean;
+  showApplyMessage: boolean;
+  loading: boolean;
+  timeoutPromise: Promise<any>;
+  invalidWorkspace: string;
+  selectedTabIndex;
+  errorMessage: string;
 
   /**
    * Default constructor that is using resource injection
@@ -35,9 +64,12 @@ export class WorkspaceDetailsController {
 
     this.workspaceDetails = {};
     this.copyWorkspaceDetails = {};
+    this.machinesViewStatus = {};
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
     this.workspaceKey = this.namespace + ":" + this.workspaceName;
+    this.editMode = false;
+    this.showApplyMessage = false;
 
     this.loading = true;
     this.timeoutPromise;
@@ -75,10 +107,10 @@ export class WorkspaceDetailsController {
           this.selectedTabIndex = 0;
           break;
         case 'projects':
-          this.selectedTabIndex = 1;
+          this.selectedTabIndex = 2;
           break;
         case 'share':
-          this.selectedTabIndex = 2;
+          this.selectedTabIndex = 3;
           break;
         default:
           $location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
@@ -133,24 +165,28 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Callback which is called in order to update workspace config
+   * Callback which is called after workspace config was changed
    * @returns {Promise}
    */
   updateWorkspaceConfig() {
-    if (angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config)) {
-      let defer = this.$q.defer();
-      defer.resolve();
-      return defer.promise;
+    this.editMode = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
+
+    let status = this.getWorkspaceStatus();
+    if (status === 'STOPPED' || status === 'STOPPING') {
+      this.showApplyMessage = false;
+    } else {
+      this.showApplyMessage = true;
     }
 
-    return this.doUpdateWorkspace();
+    let defer = this.$q.defer();
+    defer.resolve();
+    return defer.promise;
   }
 
   /**
    * Updates workspace info.
    */
   doUpdateWorkspace() {
-    this.isLoading = true;
     delete this.copyWorkspaceDetails.links;
 
     let promise = this.cheWorkspace.updateWorkspace(this.workspaceId, this.copyWorkspaceDetails);
@@ -160,12 +196,61 @@ export class WorkspaceDetailsController {
       this.cheNotification.showInfo('Workspace updated.');
       return this.$location.path('/workspace/' + this.namespace + '/' + this.workspaceName);
     }, (error) => {
-      this.isLoading = false;
+      this.loading = false;
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update workspace failed.');
       this.$log.error(error);
     });
 
     return promise;
+  }
+
+  /**
+   * Updates workspace config and restarts workspace if it's necessary
+   */
+  applyConfigChanges() {
+    this.editMode = false;
+    this.showApplyMessage = false;
+
+    let status = this.getWorkspaceStatus();
+
+    if (status !== 'RUNNING' && status !== 'STARTING') {
+      this.doUpdateWorkspace();
+      return;
+    }
+
+    this.selectedTabIndex = 0;
+    this.loading = true;
+
+    let stoppedStatusPromise = this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED');
+    if (status === 'RUNNING') {
+      this.stopWorkspace();
+      stoppedStatusPromise.then(() => {
+        return this.doUpdateWorkspace();
+      }).then(() => {
+        this.runWorkspace();
+      });
+      return;
+    }
+
+    let runningStatusPromise = this.cheWorkspace.fetchStatusChange(this.workspaceId, 'RUNNING');
+    if (status === 'STARTING') {
+      runningStatusPromise.then(() => {
+        this.stopWorkspace();
+        return stoppedStatusPromise;
+      }).then(() => {
+        return this.doUpdateWorkspace();
+      }).then(() => {
+        this.runWorkspace();
+      });
+    }
+  }
+
+  /**
+   * Cancels workspace config changes that weren't stored
+   */
+  cancelConfigChanges() {
+    this.editMode = false;
+    this.updateWorkspaceData();
   }
 
   //Perform workspace deletion.

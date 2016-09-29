@@ -10,23 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server;
 
-import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineLimits;
 import org.eclipse.che.api.core.model.machine.MachineProcess;
 import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.model.machine.ServerProperties;
 import org.eclipse.che.api.core.model.machine.Snapshot;
-import org.eclipse.che.api.machine.shared.dto.MachineLimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.machine.shared.dto.MachineLimitsDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
 import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
 import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.api.machine.shared.dto.ServerPropertiesDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 
 import java.util.Map;
@@ -106,10 +108,19 @@ public final class DtoConverter {
      */
     public static ServerDto asDto(Server server) {
         return newDto(ServerDto.class).withAddress(server.getAddress())
-                                      .withRef(server.getRef())
-                                      .withProtocol(server.getProtocol())
-                                      .withPath(server.getPath())
-                                      .withUrl(server.getUrl());
+                       .withRef(server.getRef())
+                       .withProtocol(server.getProtocol())
+                       .withUrl(server.getUrl())
+                       .withProperties(asDto(server.getProperties()));
+    }
+
+    /**
+     * Converts {@link ServerProperties} to {@link ServerPropertiesDto}.
+     */
+    public static ServerPropertiesDto asDto(ServerProperties serverProperties) {
+        return newDto(ServerPropertiesDto.class).withPath(serverProperties.getPath())
+                       .withInternalAddress(serverProperties.getInternalAddress())
+                       .withInternalUrl(serverProperties.getInternalUrl());
     }
 
     /**

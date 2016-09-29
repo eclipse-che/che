@@ -32,7 +32,7 @@ public class EnvironmentRecipeImpl implements EnvironmentRecipe {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Basic
+    @Column(columnDefinition = "TEXT")
     private String location;
 
     public EnvironmentRecipeImpl() {}

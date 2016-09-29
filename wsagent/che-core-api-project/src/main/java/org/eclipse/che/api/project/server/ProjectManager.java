@@ -290,13 +290,11 @@ public final class ProjectManager {
      * @throws ServerException
      * @throws NotFoundException
      * @throws ConflictException
-     * @throws IOException
      */
     public RegisteredProject updateProject(ProjectConfig newConfig) throws ForbiddenException,
                                                                            ServerException,
                                                                            NotFoundException,
-                                                                           ConflictException,
-                                                                           IOException {
+                                                                           ConflictException {
         String path = newConfig.getPath();
 
         if (path == null) {
@@ -516,8 +514,19 @@ public final class ProjectManager {
         }
 
         if (move.isProject()) {
-            projectRegistry.getProject(move.getProject()).getTypes();
-            // fire event
+            final RegisteredProject project = projectRegistry.getProject(itemPath);
+            NewProjectConfig projectConfig = new NewProjectConfig(newItem.getPath().toString(),
+                                                                  project.getType(),
+                                                                  project.getMixins(),
+                                                                  newName,
+                                                                  project.getDescription(),
+                                                                  project.getAttributes(),
+                                                                  project.getSource());
+
+            if (move instanceof FolderEntry) {
+                projectRegistry.removeProjects(project.getPath());
+                updateProject(projectConfig);
+            }
         }
 
         return move;

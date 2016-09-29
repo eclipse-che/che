@@ -21,8 +21,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.api.notification.NotificationManager;
-import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.collections.Jso;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -42,8 +40,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
-
 /**
  * Handler which receives messages from the maven server.
  *
@@ -54,14 +50,12 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
 public class MavenMessagesHandler {
 
     private final EventBus                  eventBus;
-    private final NotificationManager       notificationManager;
     private final BackgroundLoaderPresenter dependencyResolver;
     private final PomEditorReconciler       pomEditorReconciler;
     private final AppContext                appContext;
 
     @Inject
     public MavenMessagesHandler(EventBus eventBus,
-                                NotificationManager notificationManager,
                                 DtoFactory factory,
                                 BackgroundLoaderPresenter dependencyResolver,
                                 PomEditorReconciler pomEditorReconciler,
@@ -69,7 +63,6 @@ public class MavenMessagesHandler {
                                 AppContext appContext) {
         this.eventBus = eventBus;
 
-        this.notificationManager = notificationManager;
         this.dependencyResolver = dependencyResolver;
         this.pomEditorReconciler = pomEditorReconciler;
         this.appContext = appContext;
@@ -146,22 +139,6 @@ public class MavenMessagesHandler {
                     }
                 }
             });
-        }
-
-        int updatedNumber = 0;
-        String deletedProject = "";
-
-        for (String path : dto.getDeletedProjects()) {
-            if (!updatedProjects.contains(path)) {
-                updatedNumber++;
-                deletedProject = path;
-            }
-        }
-
-        if (updatedNumber > 1) {
-            notificationManager.notify("Maven", updatedNumber + " modules were deleted", StatusNotification.Status.SUCCESS, EMERGE_MODE);
-        } else if (updatedNumber == 1) {
-            notificationManager.notify("Maven", "Module was deleted: " + deletedProject, StatusNotification.Status.SUCCESS, EMERGE_MODE);
         }
 
         pomEditorReconciler.reconcilePoms(updatedProjects);

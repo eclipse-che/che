@@ -75,7 +75,7 @@ public class SnapshotImpl implements Snapshot {
     @Basic
     private long creationDate;
 
-    @Basic
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Embedded

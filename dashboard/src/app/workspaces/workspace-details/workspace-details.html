@@ -1,4 +1,14 @@
-<che-toolbar che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
+<che-toolbar ng-if="workspaceDetailsCtrl.editMode"
+             che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
+             che-title-icons-controller="workspaceDetailsCtrl"
+             che-breadcrumb-title="All workspaces"
+             che-breadcrumb-href="#/workspaces">
+  <workspace-edit-mode-toolbar-button workspace-edit-mode-message="Changes will be applied and workspace restarted"
+                              workspace-edit-mode-show-message="workspaceDetailsCtrl.showApplyMessage"
+                              workspace-edit-mode-on-save="workspaceDetailsCtrl.applyConfigChanges()"></workspace-edit-mode-toolbar-button>
+</che-toolbar>
+<che-toolbar ng-if="!workspaceDetailsCtrl.editMode"
+             che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
              che-title-icons-controller="workspaceDetailsCtrl"
              che-button-name="Open"
              che-button-href="#/ide/{{workspaceDetailsCtrl.workspaceDetails.namespace}}/{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
@@ -93,13 +103,15 @@
     </md-tab>
 
     <!-- Environment tabs -->
-    <md-tab ng-repeat="(environmentName, environmentValue) in workspaceDetailsCtrl.copyWorkspaceDetails.config.environments">
+    <md-tab ng-disabled="workspaceDetailsCtrl.loading"
+            ng-repeat="(environmentName, environmentValue) in workspaceDetailsCtrl.copyWorkspaceDetails.config.environments">
       <md-tab-label>
         <span class="che-tab-label-title">Runtime</span>
       </md-tab-label>
       <md-tab-body>
         <workspace-environments environment-name="environmentName"
                                 workspace-config="workspaceDetailsCtrl.copyWorkspaceDetails.config"
+                                machines-view-status="workspaceDetailsCtrl.machinesViewStatus"
                                 environment-on-change="workspaceDetailsCtrl.updateWorkspaceConfig()"></workspace-environments>
       </md-tab-body>
     </md-tab>
@@ -116,6 +128,12 @@
     </md-tab>
   </md-tabs>
 </md-content>
+
+<workspace-edit-mode-overlay ng-if="workspaceDetailsCtrl.editMode"
+                             workspace-edit-mode-message="Changes will be applied and workspace restarted"
+                             workspace-edit-mode-show-message="workspaceDetailsCtrl.showApplyMessage"
+                             workspace-edit-mode-on-save="workspaceDetailsCtrl.applyConfigChanges()"
+                             workspace-edit-mode-on-cancel="workspaceDetailsCtrl.cancelConfigChanges()"></workspace-edit-mode-overlay>
 
 <md-content ng-show="workspaceDetailsCtrl.invalidWorkspace">
   {{workspaceDetailsCtrl.invalidWorkspace}}

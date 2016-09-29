@@ -39,18 +39,18 @@
   </che-label-container>
 
   <!-- Machines -->
-  <che-label-container ng-if="workspaceEnvironmentsController.environment.machines.length"
-                       che-label-name="Machines"
+  <che-label-container che-label-name="Machines"
                        class="che-label-container-last">
   </che-label-container>
   <workspace-machine-config ng-repeat="machine in workspaceEnvironmentsController.machines | orderBy:'name'"
                             machine-name="machine.name"
                             machines-list="workspaceEnvironmentsController.machines"
                             environment-manager="workspaceEnvironmentsController.environmentManager"
+                            machine-dev-on-change="workspaceEnvironmentsController.changeMachineDev(name)"
                             machine-name-on-change="workspaceEnvironmentsController.updateMachineName(oldName,newName)"
                             machine-config-on-change="workspaceEnvironmentsController.updateEnvironmentConfig()"
                             machine-on-delete="workspaceEnvironmentsController.deleteMachine(name)"
-                            machine-is-opened="workspaceEnvironmentsController.machinesViewStatus[machine.name]"></workspace-machine-config>
+                            machine-is-opened="workspaceEnvironmentsController.machinesViewStatus[workspaceEnvironmentsController.environmentName][machine.name]"></workspace-machine-config>
 
   <!-- Recipe Content-->
   <che-label-container che-label-name="Recipe"

@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.languageserver.server.service;
 import io.typefox.lsapi.CompletionItem;
 import io.typefox.lsapi.Hover;
 import io.typefox.lsapi.Location;
+import io.typefox.lsapi.SignatureHelp;
 import io.typefox.lsapi.SymbolInformation;
 import io.typefox.lsapi.TextEdit;
 import io.typefox.lsapi.impl.LocationImpl;
@@ -179,6 +180,22 @@ public class TextDocumentService {
         LanguageServer server = getServer(positionParams.getTextDocument().getUri());
         if (server != null) {
             return server.getTextDocumentService().hover(positionParams).get();
+        } else {
+            return null;
+        }
+    }
+
+    @POST
+    @Path("signatureHelp")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public SignatureHelp signatureHelp(TextDocumentPositionParamsDTO positionParams)
+            throws LanguageServerException, ExecutionException, InterruptedException {
+        positionParams.getTextDocument().setUri(prefixURI(positionParams.getTextDocument().getUri()));
+        positionParams.setUri(prefixURI(positionParams.getUri()));
+        LanguageServer server = getServer(positionParams.getTextDocument().getUri());
+        if (server != null) {
+            return server.getTextDocumentService().signatureHelp(positionParams).get();
         } else {
             return null;
         }

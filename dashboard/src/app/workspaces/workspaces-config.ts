@@ -17,6 +17,8 @@ import {WorkspaceStatusController} from './list-workspaces/workspace-status-acti
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive';
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
+import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
+import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-edit-mode-toolbar-button.directive';
 import {WorkspaceDetailsController} from './workspace-details/workspace-details.controller';
 import {WorkspaceDetailsProjectsCtrl} from './workspace-details/workspace-projects/workspace-details-projects.controller';
 import {WorkspaceDetailsService} from './workspace-details/workspace-details.service';
@@ -84,6 +86,9 @@ export class WorkspacesConfig {
 
     register.directive('cheWorkspaceStatus', CheWorkspaceStatus);
     register.controller('WorkspaceStatusController', WorkspaceStatusController);
+
+    register.directive('workspaceEditModeOverlay', WorkspaceEditModeOverlay);
+    register.directive('workspaceEditModeToolbarButton', WorkspaceEditModeToolbarButton);
 
     register.controller('WorkspaceDetailsController', WorkspaceDetailsController);
 

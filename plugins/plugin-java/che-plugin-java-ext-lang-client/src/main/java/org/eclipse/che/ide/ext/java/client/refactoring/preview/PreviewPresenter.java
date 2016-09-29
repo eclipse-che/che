@@ -20,7 +20,7 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
-import org.eclipse.che.ide.api.event.ng.FileTrackingEvent;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactoringUpdater;
@@ -34,11 +34,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringChange;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringPreview;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringResult;
 import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringSession;
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.MOVE;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.RESUME;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.SUSPEND;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingMoveEvent;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingResumeEvent;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingSuspendEvent;
@@ -70,7 +66,8 @@ public class PreviewPresenter implements PreviewView.ActionDelegate {
                             DtoFactory dtoFactory,
                             EditorAgent editorAgent,
                             RefactoringUpdater refactoringUpdater,
-                            RefactoringServiceClient refactoringService, EventBus eventBus) {
+                            RefactoringServiceClient refactoringService,
+                            EventBus eventBus) {
         this.view = view;
         this.renamePresenterProvider = renamePresenterProvider;
         this.dtoFactory = dtoFactory;

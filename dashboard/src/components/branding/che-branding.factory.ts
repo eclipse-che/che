@@ -43,6 +43,7 @@ export class CheBranding {
                 logoURL: assetPrefix + brandingData.logoFile,
                 logoText: assetPrefix + brandingData.logoTextFile,
                 favicon : assetPrefix + brandingData.favicon,
+                loaderURL: assetPrefix + brandingData.loader,
                 ideResourcesPath : brandingData.ideResources,
                 helpPath : brandingData.helpPath,
                 helpTitle : brandingData.helpTitle,

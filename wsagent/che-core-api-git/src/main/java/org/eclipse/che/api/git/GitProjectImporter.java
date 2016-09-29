@@ -277,7 +277,7 @@ public class GitProjectImporter implements ProjectImporter {
         final CheckoutRequest request = dtoFactory.createDto(CheckoutRequest.class).withName(branchName);
         final boolean branchExist = git.branchList(dtoFactory.createDto(BranchListRequest.class).withListMode(LIST_ALL))
                                        .stream()
-                                       .anyMatch(branch -> branch.getName().equals(branchName));
+                                       .anyMatch(branch -> branch.getDisplayName().equals("origin/" + branchName));
         final GitCheckoutEvent checkout = dtoFactory.createDto(GitCheckoutEvent.class)
                                                     .withWorkspaceId(WorkspaceIdProvider.getWorkspaceId())
                                                     .withProjectName(projectName);

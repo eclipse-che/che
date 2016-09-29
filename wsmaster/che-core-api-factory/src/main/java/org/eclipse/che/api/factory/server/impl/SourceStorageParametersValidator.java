@@ -39,6 +39,7 @@ public class SourceStorageParametersValidator implements FactoryParameterValidat
                     }
                     break;
                 case "branch":
+                case "startPoint":
                 case "commitId":
                 case "keepDir":
                 case "fetch":

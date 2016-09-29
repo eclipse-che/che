@@ -17,13 +17,33 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceMachineConfigController {
+  $mdDialog;
+  $q;
+  $timeout;
+  lodash;
+
+  timeoutPromise;
+
+  environmentManager;
+  machine;
+  machineConfig;
+  machinesList: Array<any>;
+  machineName: string;
+  newDev: boolean;
+  newRam: number;
+
+  machineDevOnChange;
+  machineConfigOnChange;
+  machineNameOnChange;
+  machineOnDelete;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, $scope, $timeout, lodash) {
+  constructor($mdDialog, $q, $scope, $timeout, lodash) {
     this.$mdDialog = $mdDialog;
+    this.$q = $q;
     this.$timeout = $timeout;
     this.lodash = lodash;
 
@@ -66,27 +86,11 @@ export class WorkspaceMachineConfigController {
    * Modifies agents list in order to add or remove 'ws-agent'
    */
   enableDev() {
-    this.$timeout.cancel(this.timeoutPromise);
-
     if (this.machineConfig.isDev === this.newDev) {
       return;
     }
 
-    this.timeoutPromise = this.$timeout(() => {
-      // remove ws-agent from machine which is the dev machine now
-      this.machinesList.forEach((machine) => {
-        if (this.environmentManager.isDev(machine)) {
-          this.environmentManager.setDev(machine, false);
-        }
-      });
-
-      // add ws-agent to current machine agents list
-      this.environmentManager.setDev(this.machine, this.newDev);
-
-      this.doUpdateConfig().then(() => {
-        this.init();
-      });
-    }, 1000);
+    this.machineDevOnChange({name: this.machineName});
   }
 
   /**
@@ -96,16 +100,14 @@ export class WorkspaceMachineConfigController {
   updateRam(isFormValid) {
     this.$timeout.cancel(this.timeoutPromise);
 
-    if (!isFormValid || this.ram === this.newRam) {
+    if (!isFormValid || this.machineConfig.memoryLimitBytes === this.newRam) {
       return;
     }
 
     this.timeoutPromise = this.$timeout(() => {
       this.environmentManager.setMemoryLimit(this.machine, this.newRam);
 
-      this.doUpdateConfig().then(() => {
-        this.init();
-      });
+      this.doUpdateConfig();
     }, 1000);
   }
 

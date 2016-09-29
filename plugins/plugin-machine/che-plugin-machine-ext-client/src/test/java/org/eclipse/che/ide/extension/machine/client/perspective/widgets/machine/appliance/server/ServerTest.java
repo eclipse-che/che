@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server;
 
 import org.eclipse.che.api.machine.shared.dto.ServerDto;
+import org.eclipse.che.api.machine.shared.dto.ServerPropertiesDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,9 @@ public class ServerTest {
 
     @Mock
     private ServerDto descriptor;
+
+    @Mock
+    private ServerPropertiesDto descriptor2;
 
     private Server server;
 
@@ -55,15 +59,6 @@ public class ServerTest {
     }
 
     @Test
-    public void pathShouldBeReturned() {
-        when(descriptor.getPath()).thenReturn(SOME_TEXT);
-
-        assertThat(server.getPath(), equalTo(SOME_TEXT));
-
-        verify(descriptor).getPath();
-    }
-
-    @Test
     public void urlShouldBeReturned() {
         when(descriptor.getUrl()).thenReturn(SOME_TEXT);
 
@@ -79,6 +74,39 @@ public class ServerTest {
         assertThat(server.getRef(), equalTo(SOME_TEXT));
 
         verify(descriptor).getRef();
+    }
+
+    @Test
+    public void pathShouldBeReturned() {
+        when(descriptor.getProperties()).thenReturn(descriptor2);
+        when(descriptor2.getPath()).thenReturn(SOME_TEXT);
+
+        assertThat(server.getProperties().getPath(), equalTo(SOME_TEXT));
+
+        verify(descriptor).getProperties();
+        verify(descriptor2).getPath();
+    }
+
+    @Test
+    public void internalAddressShouldBeReturned() {
+        when(descriptor.getProperties()).thenReturn(descriptor2);
+        when(descriptor2.getInternalAddress()).thenReturn(SOME_TEXT);
+
+        assertThat(server.getProperties().getInternalAddress(), equalTo(SOME_TEXT));
+
+        verify(descriptor).getProperties();
+        verify(descriptor2).getInternalAddress();
+    }
+
+    @Test
+    public void internalUrlShouldBeReturned() {
+        when(descriptor.getProperties()).thenReturn(descriptor2);
+        when(descriptor2.getInternalUrl()).thenReturn(SOME_TEXT);
+
+        assertThat(server.getProperties().getInternalUrl(), equalTo(SOME_TEXT));
+
+        verify(descriptor).getProperties();
+        verify(descriptor2).getInternalUrl();
     }
 
 }

@@ -17,12 +17,26 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceEnvironmentsController {
+  cheEnvironmentRegistry;
+  environmentManager;
+
+  editorOptions;
+
+  workspaceConfig;
+  environment;
+  environmentName: string;
+  newEnvironmentName: string;
+  recipeType: string;
+  machines: Array<any>;
+  machinesViewStatus;
+
+  environmentOnChange;
 
   /**
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($timeout, cheEnvironmentRegistry) {
+  constructor($scope, $timeout, cheEnvironmentRegistry) {
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
     this.editorOptions = {
@@ -37,9 +51,11 @@ export class WorkspaceEnvironmentsController {
       }
     };
 
-    this.machinesViewStatus = {};
-
-    this.init();
+    $scope.$watch(() => {
+      return this.workspaceConfig.environments;
+    }, () => {
+      this.init();
+    });
   }
 
   /**
@@ -55,6 +71,10 @@ export class WorkspaceEnvironmentsController {
     this.editorOptions.mode = this.environmentManager.editorMode;
 
     this.machines = this.environmentManager.getMachines(this.environment);
+
+    if (!this.machinesViewStatus[this.environmentName]) {
+      this.machinesViewStatus[this.environmentName] = {};
+    }
   }
 
   /**
@@ -83,7 +103,39 @@ export class WorkspaceEnvironmentsController {
       this.workspaceConfig.defaultEnv = this.newEnvironmentName;
     }
 
+    this.machinesViewStatus[this.newEnvironmentName] = this.machinesViewStatus[this.environmentName];
+
+    this.environmentName = this.newEnvironmentName;
+
     this.doUpdateEnvironments();
+  }
+
+  changeMachineDev(machineName) {
+    if (!machineName) {
+      return;
+    }
+
+    // remove ws-agent from machine which is the dev machine now
+    this.machines.forEach((machine) => {
+      if (this.environmentManager.isDev(machine)) {
+        this.environmentManager.setDev(machine, false);
+      }
+    });
+
+    let machine = this.machines.find(machine => {
+      return machine.name === machineName;
+    });
+
+    // add ws-agent to current machine agents list
+    this.environmentManager.setDev(machine, true);
+
+    let newEnvironment = this.environmentManager.getEnvironment(this.environment, this.machines);
+    this.workspaceConfig.environments[this.environmentName] = newEnvironment;
+    this.environment = newEnvironment;
+
+    return this.doUpdateEnvironments().then(() => {
+      this.init();
+    });
   }
 
   /**
@@ -93,9 +145,8 @@ export class WorkspaceEnvironmentsController {
   updateEnvironmentConfig() {
     let newEnvironment = this.environmentManager.getEnvironment(this.environment, this.machines);
     this.workspaceConfig.environments[this.newEnvironmentName] = newEnvironment;
-    return this.doUpdateEnvironments().then(() => {
-      this.init();
-    });
+    this.environment = newEnvironment;
+    return this.doUpdateEnvironments();
   }
 
   /**
@@ -107,6 +158,10 @@ export class WorkspaceEnvironmentsController {
   updateMachineName(oldName, newName) {
     let newEnvironment = this.environmentManager.renameMachine(this.environment, oldName, newName);
     this.workspaceConfig.environments[this.newEnvironmentName] = newEnvironment;
+
+    this.machinesViewStatus[this.newEnvironmentName][newName] = this.machinesViewStatus[this.newEnvironmentName][oldName];
+    delete this.machinesViewStatus[this.newEnvironmentName][oldName];
+
     return this.doUpdateEnvironments().then(() => {
       this.init();
     })
