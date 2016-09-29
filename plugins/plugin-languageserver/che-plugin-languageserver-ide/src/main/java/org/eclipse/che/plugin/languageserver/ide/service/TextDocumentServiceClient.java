@@ -44,6 +44,7 @@ import org.eclipse.che.plugin.languageserver.shared.lsapi.HoverDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.PublishDiagnosticsParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.ReferenceParamsDTO;
+import org.eclipse.che.plugin.languageserver.shared.lsapi.SignatureHelpDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.SymbolInformationDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.plugin.languageserver.shared.lsapi.TextEditDTO;
@@ -170,6 +171,21 @@ public class TextDocumentServiceClient {
     public Promise<HoverDTO> hover(TextDocumentPositionParamsDTO params) {
         String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/hover";
         Unmarshallable<HoverDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(HoverDTO.class);
+        return asyncRequestFactory.createPostRequest(requestUrl, params)
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .header(CONTENT_TYPE, APPLICATION_JSON)
+                                  .send(unmarshaller);
+    }
+
+    /**
+     * GWT client implementation of {@link io.typefox.lsapi.TextDocumentService#signatureHelp(io.typefox.lsapi.TextDocumentPositionParams)}
+     *
+     * @param params
+     * @return
+     */
+    public Promise<SignatureHelpDTO> signatureHelp(TextDocumentPositionParamsDTO params) {
+        String requestUrl = appContext.getDevMachine().getWsAgentBaseUrl() + "/languageserver/textDocument/signatureHelp";
+        Unmarshallable<SignatureHelpDTO> unmarshaller = unmarshallerFactory.newUnmarshaller(SignatureHelpDTO.class);
         return asyncRequestFactory.createPostRequest(requestUrl, params)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)

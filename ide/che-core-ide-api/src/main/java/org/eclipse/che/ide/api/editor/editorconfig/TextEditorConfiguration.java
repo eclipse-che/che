@@ -19,6 +19,7 @@ import org.eclipse.che.ide.api.editor.partition.DocumentPartitioner;
 import org.eclipse.che.ide.api.editor.partition.DocumentPositionMap;
 import org.eclipse.che.ide.api.editor.quickfix.QuickAssistProcessor;
 import org.eclipse.che.ide.api.editor.reconciler.Reconciler;
+import org.eclipse.che.ide.api.editor.signature.SignatureHelpProvider;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -97,4 +98,11 @@ public interface TextEditorConfiguration {
      */
     @Nullable
     ChangeInterceptorProvider getChangeInterceptorProvider();
+
+    /**
+     * Return the {@link SignatureHelpProvider}
+     * @return the signature help provider
+     */
+    @Nullable
+    SignatureHelpProvider getSignatureHelpProvider();
 }
