@@ -26,7 +26,6 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -156,7 +155,7 @@ public class JGitConnectionTest {
     @Test
     public void checkCurrentBranch() throws Exception {
         String branchTest = "helloWorld";
-        Ref ref = Mockito.mock(Ref.class);
+        Ref ref = mock(Ref.class);
         when(repository.exactRef(Constants.HEAD)).thenReturn(ref);
         when(ref.getLeaf()).thenReturn(ref);
         when(ref.getName()).thenReturn(branchTest);
