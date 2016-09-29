@@ -200,8 +200,8 @@ public class SshMachineInstance extends AbstractInstance {
         return new ServerImpl(serverConf.getRef(),
                               serverConf.getProtocol(),
                               serverUri.getHost() + ":" + serverUri.getPort(),
-                              serverUri.getPath(),
-                              serverConf.getProtocol() != null ? serverUri.toString() : null);
+                              serverConf.getProtocol() != null ? serverUri.toString() : null,
+                              null);
     }
 
 }
