@@ -1,4 +1,4 @@
-<che-toolbar ng-if="workspaceDetailsCtrl.showSaveButton"
+<che-toolbar ng-if="workspaceDetailsCtrl.editMode"
              che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
              che-title-icons-controller="workspaceDetailsCtrl"
              che-breadcrumb-title="All workspaces"
@@ -7,7 +7,7 @@
                               workspace-edit-mode-show-message="workspaceDetailsCtrl.showApplyMessage"
                               workspace-edit-mode-on-save="workspaceDetailsCtrl.applyConfigChanges()"></workspace-edit-mode-toolbar-button>
 </che-toolbar>
-<che-toolbar ng-if="!workspaceDetailsCtrl.showSaveButton"
+<che-toolbar ng-if="!workspaceDetailsCtrl.editMode"
              che-title="{{workspaceDetailsCtrl.workspaceDetails.config.name}}"
              che-title-icons-controller="workspaceDetailsCtrl"
              che-button-name="Open"
@@ -129,7 +129,7 @@
   </md-tabs>
 </md-content>
 
-<workspace-edit-mode-overlay ng-if="workspaceDetailsCtrl.showSaveButton"
+<workspace-edit-mode-overlay ng-if="workspaceDetailsCtrl.editMode"
                              workspace-edit-mode-message="Changes will be applied and workspace restarted"
                              workspace-edit-mode-show-message="workspaceDetailsCtrl.showApplyMessage"
                              workspace-edit-mode-on-save="workspaceDetailsCtrl.applyConfigChanges()"
