@@ -18,7 +18,7 @@ import {EnvironmentManager} from './environment-manager';
  * Format sample and specific description:
  * <code>
  *services:
- *  devmachine:
+ *  dev-machine:
  *    image: codenvy/ubuntu_jdk8
  *    depends_on:
  *      - anotherMachine
