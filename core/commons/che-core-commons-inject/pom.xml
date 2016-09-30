@@ -106,6 +106,7 @@
                     <environmentVariables>
                         <CHE_LOCAL_CONF_DIR>${project.build.directory}/conf</CHE_LOCAL_CONF_DIR>
                         <CHE_SOME_OTHER_NAME>che_underscore_environment_variable_value</CHE_SOME_OTHER_NAME>
+                        <CHE_SOME_OTHER_NAME__WITH__UNDERSCORES>che_underscore_environment_variable_value_with_underscores_in_name</CHE_SOME_OTHER_NAME__WITH__UNDERSCORES>
                     </environmentVariables>
                 </configuration>
             </plugin>
