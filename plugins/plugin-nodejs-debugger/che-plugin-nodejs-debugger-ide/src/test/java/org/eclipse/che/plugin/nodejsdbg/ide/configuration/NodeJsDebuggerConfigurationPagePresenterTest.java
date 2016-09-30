@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.nodejsdbg.ide.configuration;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
@@ -79,7 +78,6 @@ public class NodeJsDebuggerConfigurationPagePresenterTest {
     @Test
     public void testGo() throws Exception {
         AcceptsOneWidget container = Mockito.mock(AcceptsOneWidget.class);
-        when(machineServiceClient.getMachines(appContext.getWorkspaceId())).thenReturn(mock(Promise.class));
 
         pagePresenter.go(container);
 
