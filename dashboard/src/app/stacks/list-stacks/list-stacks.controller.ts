@@ -22,7 +22,7 @@ export class ListStacksController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheStack, $log, $mdDialog, cheNotification, $rootScope, lodash, $q) {
+  constructor(cheStack, cheProfile, $log, $mdDialog, cheNotification, $rootScope, lodash, $q) {
     this.cheStack = cheStack;
     this.$log = $log;
     this.$mdDialog = $mdDialog;
@@ -40,7 +40,19 @@ export class ListStacksController {
     this.isNoSelected = true;
 
     this.stacks = [];
-    this.getStacks();
+
+    this.profile = cheProfile.getProfile();
+    if (this.profile.userId) {
+      this.userId = this.profile.userId;
+      this.getStacks();
+    } else {
+      this.profile.$promise.then(() => {
+        this.userId = this.profile.userId ? this.profile.userId : undefined;
+        this.getStacks();
+      }, () => {
+        this.userId = undefined;
+      });
+    }
   }
 
   /**
