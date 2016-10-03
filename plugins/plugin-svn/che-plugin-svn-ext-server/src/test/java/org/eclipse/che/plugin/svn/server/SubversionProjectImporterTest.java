@@ -48,9 +48,6 @@ public class SubversionProjectImporterTest {
 
     @Mock
     private ProfileDao userProfileDao;
-
-    @Mock
-    private CredentialsProvider   credentialsProvider;
     @Mock
     private RepositoryUrlProvider repositoryUrlProvider;
     @Mock
@@ -75,7 +72,6 @@ public class SubversionProjectImporterTest {
 
                 bind(SshKeyProvider.class).toInstance(sshKeyProvider);
                 bind(ProfileDao.class).toInstance(userProfileDao);
-                bind(CredentialsProvider.class).toInstance(credentialsProvider);
                 bind(RepositoryUrlProvider.class).toInstance(repositoryUrlProvider);
             }
         });

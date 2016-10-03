@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.inject;
 
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
+import org.eclipse.che.plugin.svn.ide.credentialsdialog.SubversionCredentialsDialogImpl;
 import org.eclipse.che.plugin.svn.ide.commit.diff.DiffViewerView;
 import org.eclipse.che.plugin.svn.ide.commit.diff.DiffViewerViewImpl;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsole;
@@ -27,9 +29,6 @@ import org.eclipse.che.plugin.svn.ide.resolve.ResolveView;
 import org.eclipse.che.plugin.svn.ide.resolve.ResolveViewImpl;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionClientServiceImpl;
-import org.eclipse.che.plugin.svn.ide.askcredentials.AskCredentialsPresenter;
-import org.eclipse.che.plugin.svn.ide.askcredentials.AskCredentialsView;
-import org.eclipse.che.plugin.svn.ide.askcredentials.AskCredentialsViewImpl;
 import org.eclipse.che.plugin.svn.ide.commit.CommitView;
 import org.eclipse.che.plugin.svn.ide.commit.CommitViewImpl;
 import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialog;
@@ -80,8 +79,7 @@ public class SubversionGinModule extends AbstractGinModule {
         bind(CommitView.class).to(CommitViewImpl.class).in(Singleton.class);
         bind(DiffViewerView.class).to(DiffViewerViewImpl.class).in(Singleton.class);
 
-        bind(AskCredentialsPresenter.class);
-        bind(AskCredentialsView.class).to(AskCredentialsViewImpl.class);
+        bind(SubversionCredentialsDialog.class).to(SubversionCredentialsDialogImpl.class);
 
         install(new GinFactoryModuleBuilder().implement(ChoiceDialog.class, ChoiceDialogPresenter.class)
                                              .build(ChoiceDialogFactory.class));

@@ -19,6 +19,8 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
@@ -31,14 +33,17 @@ import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.SubversionItem;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Manages the displaying commit log messages for specified period.
  */
 public class ShowLogPresenter extends SubversionActionPresenter {
 
+    private final SubversionCredentialsDialog              subversionCredentialsDialog;
     private final SubversionClientService                  service;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
@@ -51,6 +56,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
     @Inject
     protected ShowLogPresenter(AppContext appContext,
                                SubversionOutputConsoleFactory consoleFactory,
+                               SubversionCredentialsDialog subversionCredentialsDialog,
                                ProcessesPanelPresenter processesPanelPresenter,
                                SubversionClientService service,
                                NotificationManager notificationManager,
@@ -58,6 +64,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
                                ShowLogsView view,
                                StatusColors statusColors) {
         super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        this.subversionCredentialsDialog = subversionCredentialsDialog;
 
         this.service = service;
         this.notificationManager = notificationManager;
@@ -94,7 +101,11 @@ public class ShowLogPresenter extends SubversionActionPresenter {
         checkState(!Arrays.isNullOrEmpty(resources));
         checkState(resources.length == 1);
 
-        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false).then(new Operation<InfoResponse>() {
+        showLog(project, resources, null, null);
+    }
+
+    private void showLog(final Project project, final Resource[] resources, final String userName, final String password) {
+        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, userName, password).then(new Operation<InfoResponse>() {
             @Override
             public void apply(InfoResponse response) throws OperationException {
                 if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
@@ -111,7 +122,23 @@ public class ShowLogPresenter extends SubversionActionPresenter {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
+                    notificationManager.notify(constants.authenticationFailed(), FAIL, FLOAT_MODE);
+
+                    subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
+                        @Override
+                        public void apply(Credentials credentials) throws OperationException {
+                            showLog(project, resources, credentials.getUserName(), credentials.getPassword());
+                        }
+                    }).catchError(new Operation<PromiseError>() {
+                        @Override
+                        public void apply(PromiseError error) throws OperationException {
+                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                        }
+                    });
+                } else {
+                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                }
             }
         });
     }
@@ -119,7 +146,8 @@ public class ShowLogPresenter extends SubversionActionPresenter {
     /**
      * Fetches and displays commit log messages for specified range.
      *
-     * @param range range to be logged
+     * @param range
+     *         range to be logged
      */
     private void showLogs(String range) {
         final Project project = appContext.getRootProject();

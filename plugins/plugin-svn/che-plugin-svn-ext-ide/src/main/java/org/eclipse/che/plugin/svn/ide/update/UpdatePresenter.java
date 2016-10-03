@@ -19,6 +19,8 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
@@ -31,10 +33,12 @@ import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Handler for the {@link import UpdateAction} action.
@@ -44,17 +48,20 @@ public class UpdatePresenter extends SubversionActionPresenter {
 
     private final NotificationManager                      notificationManager;
     private final SubversionClientService                  service;
+    private final SubversionCredentialsDialog              subversionCredentialsDialog;
     private final SubversionExtensionLocalizationConstants constants;
 
     @Inject
     public UpdatePresenter(AppContext appContext,
                            SubversionOutputConsoleFactory consoleFactory,
                            SubversionClientService service,
+                           SubversionCredentialsDialog subversionCredentialsDialog,
                            ProcessesPanelPresenter processesPanelPresenter,
                            SubversionExtensionLocalizationConstants constants,
                            NotificationManager notificationManager,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter,  statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        this.subversionCredentialsDialog = subversionCredentialsDialog;
 
         this.constants = constants;
         this.notificationManager = notificationManager;
@@ -65,9 +72,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
         doUpdate("HEAD", "infinity", false, null);
     }
 
-    protected void doUpdate(final String revision, final String depth, final boolean ignoreExternals,
-                            final UpdateToRevisionView view) {
-
+    void doUpdate(final String revision, final String depth, final boolean ignoreExternals, final UpdateToRevisionView view) {
         final Project project = appContext.getRootProject();
 
         checkState(project != null);
@@ -79,28 +84,72 @@ public class UpdatePresenter extends SubversionActionPresenter {
         final StatusNotification notification = new StatusNotification(constants.updateToRevisionStarted(revision), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        service.update(project.getLocation(), toRelative(project, resources), revision, depth, ignoreExternals, "postpone")
-                .then(new Operation<CLIOutputWithRevisionResponse>() {
-                    @Override
-                    public void apply(CLIOutputWithRevisionResponse response) throws OperationException {
-                        printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(),
-                                      constants.commandUpdate());
+        doUpdate(revision, depth, ignoreExternals, view, project, resources, notification, null, null);
+    }
 
-                        notification.setTitle(constants.updateSuccessful(Long.toString(response.getRevision())));
-                        notification.setStatus(SUCCESS);
+    private void doUpdate(final String revision,
+                          final String depth,
+                          final boolean ignoreExternals,
+                          final UpdateToRevisionView view,
+                          final Project project,
+                          final Resource[] resources,
+                          final StatusNotification notification,
+                          final String userName,
+                          final String password) {
+        service.update(project.getLocation(),
+                       toRelative(project, resources),
+                       revision,
+                       depth,
+                       ignoreExternals,
+                       "postpone",
+                       userName,
+                       password)
+               .then(new Operation<CLIOutputWithRevisionResponse>() {
+                   @Override
+                   public void apply(CLIOutputWithRevisionResponse response) throws OperationException {
+                       printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(),
+                                     constants.commandUpdate());
 
-                        if (view != null) {
-                            view.close();
-                        }
-                    }
-                })
-                .catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError error) throws OperationException {
-                        notification.setTitle(constants.updateFailed());
-                        notification.setStatus(FAIL);
-                    }
-                });
+                       notification.setTitle(constants.updateSuccessful(Long.toString(response.getRevision())));
+                       notification.setStatus(SUCCESS);
+
+                       if (view != null) {
+                           view.close();
+                       }
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(final PromiseError error) throws OperationException {
+                       if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
+                           notification.setTitle(constants.authenticationFailed());
+                           notification.setStatus(FAIL);
+
+                           subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
+                               @Override
+                               public void apply(Credentials credentials) throws OperationException {
+                                   doUpdate(revision,
+                                            depth,
+                                            ignoreExternals,
+                                            view,
+                                            project,
+                                            resources,
+                                            notification,
+                                            credentials.getUserName(),
+                                            credentials.getPassword());
+                               }
+                           }).catchError(new Operation<PromiseError>() {
+                               @Override
+                               public void apply(PromiseError arg) throws OperationException {
+                                   notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                               }
+                           });
+                       } else {
+                           notification.setTitle(constants.updateFailed());
+                           notification.setStatus(FAIL);
+                       }
+                   }
+               });
     }
 
 }

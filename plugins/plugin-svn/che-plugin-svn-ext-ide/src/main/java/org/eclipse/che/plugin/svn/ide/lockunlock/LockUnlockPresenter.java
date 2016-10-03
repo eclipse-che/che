@@ -20,6 +20,8 @@ import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
@@ -34,8 +36,10 @@ import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Handler for the {@link org.eclipse.che.plugin.svn.ide.action.LockAction} and {@link UnlockAction} actions.
@@ -43,6 +47,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public class LockUnlockPresenter extends SubversionActionPresenter {
 
     private final NotificationManager                      notificationManager;
+    private final SubversionCredentialsDialog              subversionCredentialsDialog;
     private final SubversionClientService                  service;
     private final SubversionExtensionLocalizationConstants constants;
 
@@ -53,11 +58,13 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                                   ChoiceDialogFactory choiceDialogFactory,
                                   NotificationManager notificationManager,
                                   SubversionOutputConsoleFactory consoleFactory,
+                                  SubversionCredentialsDialog subversionCredentialsDialog,
                                   ProcessesPanelPresenter processesPanelPresenter,
                                   SubversionExtensionLocalizationConstants constants,
                                   SubversionClientService service,
                                   StatusColors statusColors) {
         super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        this.subversionCredentialsDialog = subversionCredentialsDialog;
 
         this.service = service;
         this.notificationManager = notificationManager;
@@ -143,19 +150,22 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
     }
 
     private void doAction(final boolean lock, final boolean force, final Path[] paths) {
-        if (lock) {
-            doLockAction(force, paths);
-        } else {
-            doUnlockAction(force, paths);
-        }
-    }
-
-    private void doLockAction(final boolean force, final Path[] paths) {
         final Project project = appContext.getRootProject();
 
         checkState(project != null);
+        if (lock) {
+            doLockAction(force, paths, project, null, null);
+        } else {
+            doUnlockAction(force, paths, project, null, null);
+        }
+    }
 
-        service.lock(project.getLocation(), paths, force).then(new Operation<CLIOutputResponse>() {
+    private void doLockAction(final boolean force,
+                              final Path[] paths,
+                              final Project project,
+                              final String userName,
+                              final String password) {
+        service.lock(project.getLocation(), paths, force, userName, password).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandLock());
@@ -163,18 +173,33 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
+                    notificationManager.notify(constants.authenticationFailed(), FAIL, FLOAT_MODE);
+
+                    subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
+                        @Override
+                        public void apply(Credentials credentials) throws OperationException {
+                            doLockAction(force, paths, project, credentials.getUserName(), credentials.getPassword());
+                        }
+                    }).catchError(new Operation<PromiseError>() {
+                        @Override
+                        public void apply(PromiseError error) throws OperationException {
+                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                        }
+                    });
+                } else {
+                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                }
             }
         });
     }
 
-    private void doUnlockAction(final boolean force, final Path[] paths) {
-
-        final Project project = appContext.getRootProject();
-
-        checkState(project != null);
-
-        service.unlock(project.getLocation(), paths, force).then(new Operation<CLIOutputResponse>() {
+    private void doUnlockAction(final boolean force,
+                                final Path[] paths,
+                                final Project project,
+                                final String userName,
+                                final String password) {
+        service.unlock(project.getLocation(), paths, force, userName, password).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandUnlock());
@@ -182,7 +207,23 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
+                    notificationManager.notify(constants.authenticationFailed(), FAIL, FLOAT_MODE);
+
+                    subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
+                        @Override
+                        public void apply(Credentials credentials) throws OperationException {
+                            doUnlockAction(force, paths, project, credentials.getUserName(), credentials.getPassword());
+                        }
+                    }).catchError(new Operation<PromiseError>() {
+                        @Override
+                        public void apply(PromiseError error) throws OperationException {
+                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                        }
+                    });
+                } else {
+                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                }
             }
         });
     }

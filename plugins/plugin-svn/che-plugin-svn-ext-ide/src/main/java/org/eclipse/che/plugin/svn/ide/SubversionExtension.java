@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.plugin.svn.ide.action.AddAction;
-import org.eclipse.che.plugin.svn.ide.action.ChangeCredentialsAction;
 import org.eclipse.che.plugin.svn.ide.action.CleanupAction;
 import org.eclipse.che.plugin.svn.ide.action.CommitAction;
 import org.eclipse.che.plugin.svn.ide.action.CopyAction;
@@ -60,7 +59,6 @@ public class SubversionExtension {
     @Inject
     public SubversionExtension(final ActionManager actionManager,
                                final AddAction addAction,
-                               final ChangeCredentialsAction changeCredentialsAction,
                                final CleanupAction cleanupAction,
                                final CommitAction commitAction,
                                final DiffAction diffAction,
@@ -174,9 +172,6 @@ public class SubversionExtension {
         addCommandGroup.add(unlockAction);
         actionManager.registerAction("SvnCleanup", cleanupAction);
         addCommandGroup.add(cleanupAction);
-
-        actionManager.registerAction("SvnChangeCredentials", changeCredentialsAction);
-        credentialsCommandGroup.add(changeCredentialsAction);
 
         //context menu
         DefaultActionGroup contextGroup = new DefaultActionGroup("Subversion", true, actionManager);

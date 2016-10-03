@@ -26,6 +26,8 @@ import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
@@ -42,8 +44,10 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Manages merging the branches and folders.
@@ -53,6 +57,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
     private final MergeView                                view;
     private final SubversionClientService                  service;
+    private final SubversionCredentialsDialog              subversionCredentialsDialog;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
 
@@ -70,6 +75,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                           SubversionClientService service,
                           AppContext appContext,
                           SubversionOutputConsoleFactory consoleFactory,
+                          SubversionCredentialsDialog subversionCredentialsDialog,
                           ProcessesPanelPresenter processesPanelPresenter,
                           NotificationManager notificationManager,
                           SubversionExtensionLocalizationConstants constants,
@@ -78,6 +84,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
         this.view = view;
         this.service = service;
+        this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.notificationManager = notificationManager;
         this.constants = constants;
 
@@ -99,62 +106,84 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
         checkState(resources != null && resources.length == 1);
 
-        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false).then(new Operation<InfoResponse>() {
-            @Override
-            public void apply(InfoResponse response) throws OperationException {
-                if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
-                    printErrors(response.getErrorOutput(), constants.commandInfo());
-                    notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
-                    return;
-                }
+        merge(project, resources, null, null);
+    }
 
-                mergeTarget = response.getItems().get(0);
-                view.targetTextBox().setValue(mergeTarget.getRelativeURL());
+    private void merge(final Project project, final Resource[] resources, String userName, final String password) {
+        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, userName, password)
+               .then(new Operation<InfoResponse>() {
+                   @Override
+                   public void apply(InfoResponse response) throws OperationException {
+                       if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
+                           printErrors(response.getErrorOutput(), constants.commandInfo());
+                           notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
+                           return;
+                       }
 
-                String repositoryRoot = mergeTarget.getRepositoryRoot();
+                       mergeTarget = response.getItems().get(0);
+                       view.targetTextBox().setValue(mergeTarget.getRelativeURL());
 
-                service.info(project.getLocation(), repositoryRoot, "HEAD", true)
-                       .then(new Operation<InfoResponse>() {
-                                           @Override
-                                           public void apply(InfoResponse response) throws OperationException {
-                                               if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
-                                                   printErrors(response.getErrorOutput(), constants.commandInfo());
-                                                   notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
-                                                   return;
-                                               }
+                       String repositoryRoot = mergeTarget.getRepositoryRoot();
 
-                                               sourceURL = response.getItems().get(0).getURL();
-                                               SubversionItemNode subversionTreeNode = new SubversionItemNode(response.getItems().get(0));
+                       service.info(project.getLocation(), repositoryRoot, "HEAD", true)
+                              .then(new Operation<InfoResponse>() {
+                                  @Override
+                                  public void apply(InfoResponse response) throws OperationException {
+                                      if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
+                                          printErrors(response.getErrorOutput(), constants.commandInfo());
+                                          notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
+                                          return;
+                                      }
 
-                                               List<Node> children = new ArrayList<>();
-                                               if (response.getItems().size() > 1) {
-                                                   for (int i = 1; i < response.getItems().size(); i++) {
-                                                       SubversionItem item = response.getItems().get(i);
-                                                       if (!"file".equals(item.getNodeKind())) {
-                                                           children.add(new SubversionItemNode(item));
-                                                       }
-                                                   }
-                                               }
+                                      sourceURL = response.getItems().get(0).getURL();
+                                      SubversionItemNode subversionTreeNode = new SubversionItemNode(response.getItems().get(0));
 
-                                               subversionTreeNode.setChildren(children);
-                                               view.setRootNode(subversionTreeNode);
-                                               view.show();
-                                               validateSourceURL();
-                                           }
-                                       })
-                       .catchError(new Operation<PromiseError>() {
-                                           @Override
-                                           public void apply(PromiseError error) throws OperationException {
-                                               notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                                           }
-                                       });
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-            }
-        });
+                                      List<Node> children = new ArrayList<>();
+                                      if (response.getItems().size() > 1) {
+                                          for (int i = 1; i < response.getItems().size(); i++) {
+                                              SubversionItem item = response.getItems().get(i);
+                                              if (!"file".equals(item.getNodeKind())) {
+                                                  children.add(new SubversionItemNode(item));
+                                              }
+                                          }
+                                      }
+
+                                      subversionTreeNode.setChildren(children);
+                                      view.setRootNode(subversionTreeNode);
+                                      view.show();
+                                      validateSourceURL();
+                                  }
+                              })
+                              .catchError(new Operation<PromiseError>() {
+                                  @Override
+                                  public void apply(PromiseError error) throws OperationException {
+                                      notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                                  }
+                              });
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError error) throws OperationException {
+                       if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
+                           notificationManager.notify(constants.authenticationFailed(), FAIL, FLOAT_MODE);
+
+                           subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
+                               @Override
+                               public void apply(Credentials credentials) throws OperationException {
+                                   merge(project, resources, credentials.getUserName(), credentials.getPassword());
+                               }
+                           }).catchError(new Operation<PromiseError>() {
+                               @Override
+                               public void apply(PromiseError error) throws OperationException {
+                                   notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                               }
+                           });
+                       } else {
+                           notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                       }
+                   }
+               });
     }
 
     /**
@@ -174,17 +203,17 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
         service.merge(project.getLocation(), resources[0].getLocation(), Path.valueOf(sourceURL))
                .then(new Operation<CLIOutputResponse>() {
-                                   @Override
-                                   public void apply(CLIOutputResponse response) throws OperationException {
-                                       printResponse(response.getCommand(), response.getOutput(), null, constants.commandMerge());
-                                   }
-                               })
+                   @Override
+                   public void apply(CLIOutputResponse response) throws OperationException {
+                       printResponse(response.getCommand(), response.getOutput(), null, constants.commandMerge());
+                   }
+               })
                .catchError(new Operation<PromiseError>() {
-                                   @Override
-                                   public void apply(PromiseError error) throws OperationException {
-                                       notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                                   }
-                               });
+                   @Override
+                   public void apply(PromiseError error) throws OperationException {
+                       notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                   }
+               });
     }
 
     /**
@@ -255,32 +284,32 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
             return service.info(project.getLocation(), getData().getURL(), "HEAD", true)
                           .then(new Function<InfoResponse, List<Node>>() {
-                                       @Override
-                                       public List<Node> apply(InfoResponse response) throws FunctionException {
-                                           if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
-                                               printErrors(response.getErrorOutput(), constants.commandInfo());
-                                               notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
-                                               return Collections.emptyList();
-                                           }
+                              @Override
+                              public List<Node> apply(InfoResponse response) throws FunctionException {
+                                  if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
+                                      printErrors(response.getErrorOutput(), constants.commandInfo());
+                                      notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
+                                      return Collections.emptyList();
+                                  }
 
-                                           List<Node> children = new ArrayList<>();
-                                           if (response.getItems().size() > 1) {
-                                               for (int i = 1; i < response.getItems().size(); i++) {
-                                                   SubversionItem item = response.getItems().get(i);
-                                                   if (!"file".equals(item.getNodeKind())) {
-                                                       children.add(new SubversionItemNode(item));
-                                                   }
-                                               }
-                                           }
+                                  List<Node> children = new ArrayList<>();
+                                  if (response.getItems().size() > 1) {
+                                      for (int i = 1; i < response.getItems().size(); i++) {
+                                          SubversionItem item = response.getItems().get(i);
+                                          if (!"file".equals(item.getNodeKind())) {
+                                              children.add(new SubversionItemNode(item));
+                                          }
+                                      }
+                                  }
 
-                                           return children;
-                                       }
-                                   }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError error) throws OperationException {
-                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                }
-            });
+                                  return children;
+                              }
+                          }).catchError(new Operation<PromiseError>() {
+                        @Override
+                        public void apply(PromiseError error) throws OperationException {
+                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                        }
+                    });
         }
 
         @Override

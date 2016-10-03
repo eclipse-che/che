@@ -21,6 +21,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
@@ -43,9 +45,11 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.resource.Path.valueOf;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter for the {@link CommitView}.
@@ -57,7 +61,8 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
     private final SubversionClientService                  service;
     private final CommitView                               view;
-    private       DiffViewerPresenter                      diffViewerPresenter;
+    private final SubversionCredentialsDialog              subversionCredentialsDialog;
+    private final DiffViewerPresenter                      diffViewerPresenter;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
 
@@ -75,12 +80,14 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                            SubversionOutputConsoleFactory consoleFactory,
                            SubversionExtensionLocalizationConstants constants,
                            SubversionClientService service,
+                           SubversionCredentialsDialog subversionCredentialsDialog,
                            ProcessesPanelPresenter processesPanelPresenter,
                            DiffViewerPresenter diffViewerPresenter,
                            StatusColors statusColors) {
         super(appContext, consoleFactory, processesPanelPresenter, statusColors);
         this.service = service;
         this.view = view;
+        this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.diffViewerPresenter = diffViewerPresenter;
         this.view.setDelegate(this);
         this.notificationManager = notificationManager;
@@ -98,24 +105,24 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
         service.status(project.getLocation(), new Path[0], null, false, false, false, true, false, null)
                .then(new Operation<CLIOutputResponse>() {
-                    @Override
-                    public void apply(CLIOutputResponse response) throws OperationException {
-                        List<StatusItem> statusItems = parseChangesList(response);
-                        view.setChangesList(statusItems);
-                        view.onShow();
+                   @Override
+                   public void apply(CLIOutputResponse response) throws OperationException {
+                       List<StatusItem> statusItems = parseChangesList(response);
+                       view.setChangesList(statusItems);
+                       view.onShow();
 
-                        cache.put(Changes.ALL, statusItems);
-                    }
-                })
-                .catchError(new Operation<PromiseError>() {
-                    @Override
-                    public void apply(PromiseError error) throws OperationException {
-                        Log.error(CommitPresenter.class, error.getMessage());
-                    }
-                });
+                       cache.put(Changes.ALL, statusItems);
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError error) throws OperationException {
+                       Log.error(CommitPresenter.class, error.getMessage());
+                   }
+               });
     }
 
-    private  List<StatusItem> parseChangesList(CLIOutputResponse response) {
+    private List<StatusItem> parseChangesList(CLIOutputResponse response) {
         return CLIOutputParser.parseFilesStatus(response.getOutput());
     }
 
@@ -188,18 +195,44 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
         checkState(project != null);
 
-        service.showDiff(project.getLocation(), new Path[]{valueOf(path)}, "HEAD").then(new Operation<CLIOutputResponse>() {
-            @Override
-            public void apply(CLIOutputResponse response) throws OperationException {
-                String content = Joiner.on('\n').join(response.getOutput());
-                diffViewerPresenter.showDiff(content);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-            }
-        });
+        showDiff(path, project, null, null);
+    }
+
+    private void showDiff(final String path, final Project project, final String userName, final String password) {
+        service.showDiff(project.getLocation(),
+                         new Path[]{valueOf(path)},
+                         "HEAD",
+                         userName,
+                         password)
+               .then(new Operation<CLIOutputResponse>() {
+                   @Override
+                   public void apply(CLIOutputResponse response) throws OperationException {
+                       String content = Joiner.on('\n').join(response.getOutput());
+                       diffViewerPresenter.showDiff(content);
+                   }
+               })
+               .catchError(new Operation<PromiseError>() {
+                   @Override
+                   public void apply(PromiseError error) throws OperationException {
+                       if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
+                           notificationManager.notify(constants.authenticationFailed(), FAIL, FLOAT_MODE);
+
+                           subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
+                               @Override
+                               public void apply(Credentials credentials) throws OperationException {
+                                   showDiff(path, project, credentials.getUserName(), credentials.getPassword());
+                               }
+                           }).catchError(new Operation<PromiseError>() {
+                               @Override
+                               public void apply(PromiseError error) throws OperationException {
+                                   notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                               }
+                           });
+                       } else {
+                           notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                       }
+                   }
+               });
     }
 
     private void commitSelection(String message, boolean keepLocks) {

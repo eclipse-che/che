@@ -61,16 +61,7 @@ public class TestUtils {
 
     private static DtoFactory dtoFactory = DtoFactory.getInstance();
 
-    private static SubversionApi subversionApi = new SubversionApi(new CredentialsProvider() {
-        @Override
-        public Credentials getCredentials(final String repositoryUrl) {
-            return null;
-        }
-
-        @Override
-        public void storeCredential(final String repositoryUrl, final Credentials credentials) throws CredentialsException {
-        }
-    }, new RepositoryUrlProvider() {
+    private static SubversionApi subversionApi = new SubversionApi(new RepositoryUrlProvider() {
         @Override
         public String getRepositoryUrl(final String projectPath) throws IOException {
             return "";

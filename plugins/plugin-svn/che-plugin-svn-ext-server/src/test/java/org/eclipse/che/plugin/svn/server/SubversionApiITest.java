@@ -52,8 +52,6 @@ import static org.junit.Assert.assertTrue;
 public class SubversionApiITest {
 
     @Mock
-    private CredentialsProvider   credentialsProvider;
-    @Mock
     private RepositoryUrlProvider repositoryUrlProvider;
     @Mock
     private SshKeyProvider sshKeyProvider;
@@ -72,7 +70,7 @@ public class SubversionApiITest {
         tmpAbsolutePath = tmpDir.toFile().getAbsolutePath();
         tmpDir.toFile().deleteOnExit();
 
-        this.subversionApi = new SubversionApi(credentialsProvider, repositoryUrlProvider, new SshScriptProvider(sshKeyProvider));
+        this.subversionApi = new SubversionApi(repositoryUrlProvider, new SshScriptProvider(sshKeyProvider));
     }
 
     /**
