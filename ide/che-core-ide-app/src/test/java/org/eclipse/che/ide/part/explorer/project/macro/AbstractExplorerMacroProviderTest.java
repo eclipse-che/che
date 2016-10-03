@@ -16,7 +16,9 @@ import com.google.common.collect.Lists;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
+import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.File;
+import org.eclipse.che.ide.api.resources.Folder;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.resource.Path;
@@ -37,8 +39,9 @@ public class AbstractExplorerMacroProviderTest {
 
     public static final String FILE_1_NAME   = "file_1";
     public static final String FILE_2_NAME   = "file_2";
-    public static final String FILE_1_PATH   = "/project/file_1";
-    public static final String FILE_2_PATH   = "/project/file_2";
+    public static final String FOLDER_PATH   = "/project";
+    public static final String FILE_1_PATH   = FOLDER_PATH + "/file_1";
+    public static final String FILE_2_PATH   = FOLDER_PATH + "/file_2";
     public static final String PROJECTS_ROOT = "/projects";
     public static final String PROJECT_NAME  = "project-name";
     public static final String PROJECT_TYPE  = "type";
@@ -71,6 +74,9 @@ public class AbstractExplorerMacroProviderTest {
     File file2;
 
     @Mock
+    Folder folder;
+
+    @Mock
     Project project;
 
     @Before
@@ -88,10 +94,12 @@ public class AbstractExplorerMacroProviderTest {
         when(selectionModel.getSelectedNodes()).thenReturn(Lists.<Node>newArrayList(node1));
         when(node1.getData()).thenReturn(file1);
         when(file1.getName()).thenReturn(FILE_1_NAME);
+        when(file1.getParent()).thenReturn(Optional.of((Container)folder));
         when(file1.getLocation()).thenReturn(Path.valueOf(FILE_1_PATH));
         when(file1.getRelatedProject()).thenReturn(Optional.of(project));
         when(project.getName()).thenReturn(PROJECT_NAME);
         when(project.getType()).thenReturn(PROJECT_TYPE);
+        when(folder.getLocation()).thenReturn(Path.valueOf(FOLDER_PATH));
     }
 
     protected void initWithTwoFiles() throws Exception {
@@ -99,14 +107,17 @@ public class AbstractExplorerMacroProviderTest {
         when(node1.getData()).thenReturn(file1);
         when(node2.getData()).thenReturn(file2);
         when(file1.getName()).thenReturn(FILE_1_NAME);
+        when(file1.getParent()).thenReturn(Optional.of((Container)folder));
         when(file1.getLocation()).thenReturn(Path.valueOf(FILE_1_PATH));
         when(file1.getRelatedProject()).thenReturn(Optional.of(project));
         when(project.getName()).thenReturn(PROJECT_NAME);
         when(project.getType()).thenReturn(PROJECT_TYPE);
         when(file2.getName()).thenReturn(FILE_2_NAME);
+        when(file2.getParent()).thenReturn(Optional.of((Container)folder));
         when(file2.getLocation()).thenReturn(Path.valueOf(FILE_2_PATH));
         when(file2.getRelatedProject()).thenReturn(Optional.of(project));
         when(project.getName()).thenReturn(PROJECT_NAME);
+        when(folder.getLocation()).thenReturn(Path.valueOf(FOLDER_PATH));
     }
 
 }

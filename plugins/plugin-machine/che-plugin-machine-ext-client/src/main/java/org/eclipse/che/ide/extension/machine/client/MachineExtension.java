@@ -152,9 +152,7 @@ public class MachineExtension {
                                 MachineResources machineResources,
                                 ReRunProcessAction reRunProcessAction,
                                 StopProcessAction stopProcessAction,
-                                CloseConsoleAction closeConsoleAction,
-                                Set<CommandProducer> commandProducers,
-                                CommandProducerActionFactory commandProducerActionFactory) {
+                                CloseConsoleAction closeConsoleAction) {
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
 
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
@@ -227,21 +225,26 @@ public class MachineExtension {
         consolesTreeContextMenu.add(closeConsoleAction);
 
 
-        // add actions for the context-dependent commands
-        DefaultActionGroup commandActionsGroup = new DefaultActionGroup(actionManager);
-        commandActionsGroup.addSeparator();
-        for (CommandProducer commandProducer : commandProducers) {
-            commandActionsGroup.add(commandProducerActionFactory.create(commandProducer));
-        }
-        DefaultActionGroup mainContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-        DefaultActionGroup editorTabContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
-        mainContextMenu.add(commandActionsGroup);
-        editorTabContextMenu.add(commandActionsGroup);
-
-
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");
 
         iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
+    }
+
+    @Inject(optional = true)
+    private void registerActionsForCommandProducers(ActionManager actionManager,
+                                                    CommandProducerActionFactory commandProducerActionFactory,
+                                                    Set<CommandProducer> commandProducers) {
+        DefaultActionGroup commandActionsGroup = new DefaultActionGroup(actionManager);
+
+        for (CommandProducer commandProducer : commandProducers) {
+            commandActionsGroup.add(commandProducerActionFactory.create(commandProducer));
+        }
+
+        DefaultActionGroup mainContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
+        mainContextMenu.add(commandActionsGroup);
+
+        DefaultActionGroup editorTabContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
+        editorTabContextMenu.add(commandActionsGroup);
     }
 }

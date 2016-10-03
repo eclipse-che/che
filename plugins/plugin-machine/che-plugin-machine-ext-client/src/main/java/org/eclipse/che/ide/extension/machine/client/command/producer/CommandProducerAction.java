@@ -15,7 +15,7 @@ import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
 
@@ -27,17 +27,19 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
  */
 public class CommandProducerAction extends Action {
 
-    private final CommandProducer commandProducer;
-    private final CommandManager  commandManager;
-    private final AppContext      appContext;
+    private final CommandProducer       commandProducer;
+    private final CommandManager        commandManager;
+    private final SelectCommandComboBox machineSelector;
 
     @Inject
-    public CommandProducerAction(@Assisted CommandProducer commandProducer, CommandManager commandManager, AppContext appContext) {
+    public CommandProducerAction(@Assisted CommandProducer commandProducer,
+                                 CommandManager commandManager,
+                                 SelectCommandComboBox machineSelector) {
         super();
 
         this.commandProducer = commandProducer;
         this.commandManager = commandManager;
-        this.appContext = appContext;
+        this.machineSelector = machineSelector;
     }
 
     @Override
@@ -49,6 +51,6 @@ public class CommandProducerAction extends Action {
     @Override
     public void actionPerformed(ActionEvent e) {
         CommandConfiguration command = commandProducer.createCommand();
-        commandManager.executeCommand(command, appContext.getDevMachine().getDescriptor());
+        commandManager.executeCommand(command, machineSelector.getSelectedMachine());
     }
 }
