@@ -28,7 +28,8 @@ export class StackItem {
 
     // scope values
     this.scope = {
-      stack: '=cheStack',
+      stack: '=stack',
+      userId: '=userId',
       isSelectable: '=cheSelectable',
       isSelect: '=?ngModel',
       onCheckboxClick: '&?cheOnCheckboxClick',
