@@ -8,24 +8,33 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.jdbc.jpa.guice;
+package org.eclipse.che.api.core.h2.jdbc.jpa.guice;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.google.inject.persist.PersistService;
 
+import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import java.nio.file.Paths;
+
 /**
- * Should be bound as eager singleton.
- * See <a href="https://github.com/google/guice/wiki/JPA">doc</a>
+ * Provides H2 specific initialization of persistent engine.
  *
- * @author Yevhenii Voevodin
- * @author Anton Korneta
+ * @author Anton Korneta.
  */
 @Singleton
-public class JpaInitializer {
+public class CheJpaInitializer extends JpaInitializer {
 
     @Inject
+    @Named("che.conf.storage")
+    private String storageRoot;
+
+    @Inject
+    @Override
     public void init(PersistService persistService) {
-        persistService.start();
+        System.setProperty("h2.baseDir", Paths.get(storageRoot).resolve("db").toString());
+        super.init(persistService);
     }
 }
