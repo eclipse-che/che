@@ -30,6 +30,9 @@ func (pb *ProcessBuilder) CmdName(cmdName string) *ProcessBuilder {
 	return pb
 }
 
+// Sets the hook which will be called once before
+// process subscribers notified with any of the process events,
+// and after process is started.
 func (pb *ProcessBuilder) BeforeEventsHook(hook func(p MachineProcess)) *ProcessBuilder {
 	pb.beforeEventsHook = hook
 	return pb

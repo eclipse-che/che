@@ -38,7 +38,7 @@ var (
 		[]rest.Route{
 			{
 				"GET",
-				"Connect to Machine-Agent(webscoket)",
+				"Connect to Exec-Agent(webscoket)",
 				"/connect",
 				registerChannel,
 			},

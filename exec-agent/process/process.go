@@ -119,14 +119,6 @@ type processesMap struct {
 	items map[uint64]*MachineProcess
 }
 
-// Sets the hook which will be called once before
-// process subscribers notified with any of the process events,
-// and after process is started.
-func (process MachineProcess) BeforeEventsHook(f func(p MachineProcess)) MachineProcess {
-	process.beforeEventsHook = f
-	return process
-}
-
 func Start(process MachineProcess) (MachineProcess, error) {
 	// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
 	cmd := exec.Command("setsid", "sh", "-c", process.CommandLine)
@@ -218,7 +210,6 @@ func GetProcesses(all bool) []MachineProcess {
 
 	pArr := make([]MachineProcess, 0, len(processes.items))
 	for _, p := range processes.items {
-		// TODO RLock before reading alive
 		if all {
 			pArr = append(pArr, *p)
 		} else {
