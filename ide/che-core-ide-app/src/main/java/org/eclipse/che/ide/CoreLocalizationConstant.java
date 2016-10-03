@@ -833,4 +833,10 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("action.convert.folder.to.project.description")
     String actionConvertFolderToProjectDescription();
+
+    @Key("signature.name")
+    String signatureName();
+
+    @Key("signature.description")
+    String signatureDescription();
 }

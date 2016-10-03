@@ -392,11 +392,17 @@ export class CreateProjectController {
         }
         if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
           this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+          let errorMessage = 'Error when trying to start the workspace';
+          if (message.error) {
+            errorMessage += ': ' + message.error;
+          } else {
+            errorMessage += '.';
+          }
           // need to show the error
           this.$mdDialog.show(
               this.$mdDialog.alert()
                   .title('Error when starting workspace')
-                  .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
+                  .content('Unable to start workspace. ' + errorMessage)
                   .ariaLabel('Workspace start')
                   .ok('OK')
           );

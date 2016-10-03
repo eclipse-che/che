@@ -12,10 +12,10 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
+import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.machine.MachineManager;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
 
@@ -52,7 +52,7 @@ public class DestroyMachineAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void updateInPerspective(@NotNull ActionEvent event) {
-        final Machine selectedMachine = panelPresenter.getSelectedMachineState();
+        final MachineEntity selectedMachine = panelPresenter.getSelectedMachineState();
         event.getPresentation().setEnabled(selectedMachine != null
                                            && !selectedMachine.getConfig().isDev()
                                            && panelPresenter.isMachineRunning());
@@ -63,7 +63,7 @@ public class DestroyMachineAction extends AbstractPerspectiveAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(@NotNull ActionEvent event) {
-        final Machine selectedMachine = panelPresenter.getSelectedMachineState();
+        final MachineEntity selectedMachine = panelPresenter.getSelectedMachineState();
         if (selectedMachine == null) {
             return;
         }

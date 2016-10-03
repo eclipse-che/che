@@ -13,7 +13,7 @@ package org.eclipse.che.ide.extension.machine.client.targets.categories.developm
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
 import org.eclipse.che.ide.extension.machine.client.targets.Target;
@@ -26,8 +26,8 @@ import org.eclipse.che.ide.extension.machine.client.targets.TargetsTreeManager;
  * @author Oleksii Orel
  */
 public class DevelopmentCategoryPresenter implements CategoryPage, TargetManager, DevelopmentView.ActionDelegate {
-    private final DevelopmentView                 developmentView;
-    private final MachineLocalizationConstant     machineLocale;
+    private final DevelopmentView             developmentView;
+    private final MachineLocalizationConstant machineLocale;
 
     private DevelopmentMachineTarget selectedTarget;
     private TargetsTreeManager       targetsTreeManager;
@@ -61,7 +61,7 @@ public class DevelopmentCategoryPresenter implements CategoryPage, TargetManager
         container.setWidget(developmentView);
     }
 
-    private MachineDto getMachineByName(String machineName) {
+    private Machine getMachineByName(String machineName) {
         if (targetsTreeManager == null) {
             return null;
         }
@@ -75,7 +75,7 @@ public class DevelopmentCategoryPresenter implements CategoryPage, TargetManager
             return false;
         }
 
-        final MachineDto machine = this.getMachineByName(target.getName());
+        final Machine machine = this.getMachineByName(target.getName());
         if (machine == null) {
             return false;
         }

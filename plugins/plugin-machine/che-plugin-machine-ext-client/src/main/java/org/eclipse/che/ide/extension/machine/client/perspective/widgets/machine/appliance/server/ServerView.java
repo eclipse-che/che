@@ -30,7 +30,7 @@ public interface ServerView extends IsWidget {
      * @param servers
      *         servers which need save
      */
-    void setServers(@NotNull List<Server> servers);
+    void setServers(@NotNull List<ServerEntity> servers);
 
     /**
      * Change visibility of server tab panel.

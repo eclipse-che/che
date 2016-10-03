@@ -48,6 +48,7 @@ import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -106,8 +107,8 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
         renderer.setAddTerminalClickHandler(new AddTerminalClickHandler() {
             @Override
-            public void onAddTerminalClick(String workspaceId, String machineId) {
-                delegate.onAddTerminal(workspaceId, machineId);
+            public void onAddTerminalClick(@NotNull String machineId) {
+                delegate.onAddTerminal(machineId);
             }
         });
 

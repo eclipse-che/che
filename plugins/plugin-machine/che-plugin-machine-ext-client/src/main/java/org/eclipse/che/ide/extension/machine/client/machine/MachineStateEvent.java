@@ -13,7 +13,7 @@ package org.eclipse.che.ide.extension.machine.client.machine;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 
-import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 
 /**
  * Event that describes the fact that machine state has been changed.
@@ -55,7 +55,7 @@ public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
      */
     public static final Type<MachineStateEvent.Handler> TYPE = new Type<>();
 
-    private final Machine machine;
+    private final MachineEntity machine;
 
     private final MachineAction machineAction;
 
@@ -67,7 +67,7 @@ public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
      * @param machineAction
      *         the type of action
      */
-    public MachineStateEvent(Machine machine, MachineAction machineAction) {
+    public MachineStateEvent(MachineEntity machine, MachineAction machineAction) {
         this.machine = machine;
         this.machineAction = machineAction;
     }
@@ -77,7 +77,7 @@ public class MachineStateEvent extends GwtEvent<MachineStateEvent.Handler> {
         return TYPE;
     }
 
-    public Machine getMachine() {
+    public MachineEntity getMachine() {
         return machine;
     }
 

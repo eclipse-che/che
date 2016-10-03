@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.api.machine;
 
 import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -26,26 +25,6 @@ import java.util.List;
  * @author Dmitry Shnurenko
  */
 public interface MachineServiceClient {
-
-    /**
-     * Get machine information by it's id.
-     *
-     * @param workspaceId
-     *         ID of workspace
-     * @param machineId
-     *         ID of the machine
-     * @return a promise that resolves to the {@link MachineDto}, or rejects with an error
-     */
-    Promise<MachineDto> getMachine(@NotNull String workspaceId, @NotNull String machineId);
-
-    /**
-     * Returns list of machines which are bounded to the specified workspace.
-     *
-     * @param workspaceId
-     *         workspace id
-     * @return a promise that will provide a list of {@link MachineDto}s for the given workspace ID, or rejects with an error
-     */
-    Promise<List<MachineDto>> getMachines(String workspaceId);
 
     /**
      * Destroy machine with the specified ID.

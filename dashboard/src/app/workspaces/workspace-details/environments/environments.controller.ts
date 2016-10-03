@@ -110,6 +110,34 @@ export class WorkspaceEnvironmentsController {
     this.doUpdateEnvironments();
   }
 
+  changeMachineDev(machineName) {
+    if (!machineName) {
+      return;
+    }
+
+    // remove ws-agent from machine which is the dev machine now
+    this.machines.forEach((machine) => {
+      if (this.environmentManager.isDev(machine)) {
+        this.environmentManager.setDev(machine, false);
+      }
+    });
+
+    let machine = this.machines.find(machine => {
+      return machine.name === machineName;
+    });
+
+    // add ws-agent to current machine agents list
+    this.environmentManager.setDev(machine, true);
+
+    let newEnvironment = this.environmentManager.getEnvironment(this.environment, this.machines);
+    this.workspaceConfig.environments[this.environmentName] = newEnvironment;
+    this.environment = newEnvironment;
+
+    return this.doUpdateEnvironments().then(() => {
+      this.init();
+    });
+  }
+
   /**
    * Callback which is called in order to update environment config
    * @returns {Promise}

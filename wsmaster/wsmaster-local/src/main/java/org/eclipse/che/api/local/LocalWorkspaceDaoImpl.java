@@ -89,7 +89,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         if (workspaces.containsKey(workspace.getId())) {
             throw new ConflictException("Workspace with id " + workspace.getId() + " already exists");
         }
-        if (find(workspace.getName(), workspace.getNamespace()).isPresent()) {
+        if (find(workspace.getConfig().getName(), workspace.getNamespace()).isPresent()) {
             throw new ConflictException(format("Workspace with name %s and owner %s already exists",
                                                workspace.getConfig().getName(),
                                                workspace.getNamespace()));
@@ -109,7 +109,7 @@ public class LocalWorkspaceDaoImpl implements WorkspaceDao {
         if (!workspaces.containsKey(workspace.getId())) {
             throw new NotFoundException("Workspace with id " + workspace.getId() + " was not found");
         }
-        if (find(workspace.getName(), workspace.getNamespace()).isPresent()) {
+        if (find(workspace.getConfig().getName(), workspace.getNamespace()).isPresent()) {
             throw new ConflictException(format("Workspace with name %s and owner %s already exists",
                                                workspace.getConfig().getName(),
                                                workspace.getNamespace()));

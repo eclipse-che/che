@@ -13,9 +13,8 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-import org.eclipse.che.api.machine.shared.dto.ServerPropertiesDto;
+import org.eclipse.che.api.core.model.machine.ServerProperties;
 
-import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
@@ -23,12 +22,12 @@ import java.util.Objects;
  *
  * @author Mario Loriedo
  */
-public class ServerProperties implements org.eclipse.che.api.core.model.machine.ServerProperties {
+public class ServerPropertiesImpl implements ServerProperties {
 
-    private final ServerPropertiesDto descriptor;
+    private final ServerProperties descriptor;
 
     @Inject
-    public ServerProperties(@Assisted ServerPropertiesDto descriptor) {
+    public ServerPropertiesImpl(@Assisted ServerProperties descriptor) {
         this.descriptor = descriptor;
     }
 
@@ -38,7 +37,9 @@ public class ServerProperties implements org.eclipse.che.api.core.model.machine.
     }
 
     @Override
-    public String getInternalAddress() { return descriptor.getInternalAddress(); }
+    public String getInternalAddress() {
+        return descriptor.getInternalAddress();
+    }
 
     @Override
     public String getInternalUrl() {
@@ -48,8 +49,8 @@ public class ServerProperties implements org.eclipse.che.api.core.model.machine.
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ServerProperties)) return false;
-        final ServerProperties other = (ServerProperties) o;
+        if (!(o instanceof ServerPropertiesImpl)) return false;
+        final ServerPropertiesImpl other = (ServerPropertiesImpl)o;
         return Objects.equals(descriptor, other.descriptor);
     }
 
@@ -61,7 +62,7 @@ public class ServerProperties implements org.eclipse.che.api.core.model.machine.
     @Override
     public String toString() {
         return "ServerProperties{" +
-                       "descriptor=" + descriptor +
-                       '}';
+               "descriptor=" + descriptor +
+               '}';
     }
 }

@@ -22,6 +22,7 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerCodeassist
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfigurationFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerFormatterFactory;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerReconcileStrategyFactory;
+import org.eclipse.che.plugin.languageserver.ide.editor.signature.LanguageServerSignatureHelpFactory;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 
@@ -39,6 +40,7 @@ public class LanguageServerGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(LanguageServerFormatterFactory.class));
         install(new GinFactoryModuleBuilder().build(LanguageServerCodeassistProcessorFactory.class));
         install(new GinFactoryModuleBuilder().build(LanguageServerReconcileStrategyFactory.class));
+        install(new GinFactoryModuleBuilder().build(LanguageServerSignatureHelpFactory.class));
         bind(LanguageServerRegistry.class);
 
         GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =

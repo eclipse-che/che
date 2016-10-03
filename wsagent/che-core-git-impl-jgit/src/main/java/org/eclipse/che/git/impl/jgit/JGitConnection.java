@@ -1522,6 +1522,7 @@ class JGitConnection implements GitConnection {
         this.lineConsumerFactory = lineConsumerFactory;
     }
 
+
     private Git getGit() {
         if (git != null) {
             return git;
@@ -1615,8 +1616,11 @@ class JGitConnection implements GitConnection {
                     }
                 };
                 command.setTransportConfigCallback(transport -> {
-                    SshTransport sshTransport = (SshTransport)transport;
-                    sshTransport.setSshSessionFactory(sshSessionFactory);
+                    // If recursive clone is performed and git-module added by http(s) url is present in the cloned project,
+                    // transport will be instance of TransportHttp in the step of cloning this module
+                    if (transport instanceof SshTransport) {
+                        ((SshTransport)transport).setSshSessionFactory(sshSessionFactory);
+                    }
                 });
             } else {
                 if (remoteUrl != null && GIT_URL_WITH_CREDENTIALS_PATTERN.matcher(remoteUrl).matches()) {
@@ -1712,7 +1716,14 @@ class JGitConnection implements GitConnection {
         return repository;
     }
 
-    private String getCurrentBranch() throws GitException {
+    /**
+     * Get the current branch on the current directory
+     *
+     * @return the name of the branch
+     * @throws GitException
+     *         if any exception occurs
+     */
+    public String getCurrentBranch() throws GitException {
         try {
             return Repository.shortenRefName(repository.exactRef(Constants.HEAD).getLeaf().getName());
         } catch (IOException exception) {

@@ -138,6 +138,7 @@ public class ServerInitializerImpl implements ServerInitializer {
     protected void registerCallbacks(LanguageServer server) {
         server.getTextDocumentService().onPublishDiagnostics(publishDiagnosticsParamsMessenger::onEvent);
         server.getWindowService().onLogMessage(messageParams -> LOG.error(messageParams.getType() + " " + messageParams.getMessage()));
+        server.onTelemetryEvent(o -> LOG.error(o.toString()));
     }
 
     protected InitializeParamsImpl prepareInitializeParams(String projectPath) {

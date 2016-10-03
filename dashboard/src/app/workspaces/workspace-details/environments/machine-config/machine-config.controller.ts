@@ -32,6 +32,7 @@ export class WorkspaceMachineConfigController {
   newDev: boolean;
   newRam: number;
 
+  machineDevOnChange;
   machineConfigOnChange;
   machineNameOnChange;
   machineOnDelete;
@@ -89,19 +90,7 @@ export class WorkspaceMachineConfigController {
       return;
     }
 
-    // remove ws-agent from machine which is the dev machine now
-    this.machinesList.forEach((machine) => {
-      if (this.environmentManager.isDev(machine)) {
-        this.environmentManager.setDev(machine, false);
-      }
-    });
-
-    // add ws-agent to current machine agents list
-    this.environmentManager.setDev(this.machine, this.newDev);
-
-    this.doUpdateConfig().then(() => {
-      this.init();
-    });
+    this.machineDevOnChange({name: this.machineName});
   }
 
   /**
@@ -118,9 +107,7 @@ export class WorkspaceMachineConfigController {
     this.timeoutPromise = this.$timeout(() => {
       this.environmentManager.setMemoryLimit(this.machine, this.newRam);
 
-      this.doUpdateConfig().then(() => {
-        this.init();
-      });
+      this.doUpdateConfig();
     }, 1000);
   }
 

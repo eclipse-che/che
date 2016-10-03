@@ -37,7 +37,7 @@ export class WorkspaceDetailsController {
   workspaceName: string;
   newName: string;
   workspaceKey: string;
-  showSaveButton: boolean;
+  editMode: boolean;
   showApplyMessage: boolean;
   loading: boolean;
   timeoutPromise: Promise<any>;
@@ -68,7 +68,7 @@ export class WorkspaceDetailsController {
     this.namespace = $route.current.params.namespace;
     this.workspaceName = $route.current.params.workspaceName;
     this.workspaceKey = this.namespace + ":" + this.workspaceName;
-    this.showSaveButton = false;
+    this.editMode = false;
     this.showApplyMessage = false;
 
     this.loading = true;
@@ -169,7 +169,7 @@ export class WorkspaceDetailsController {
    * @returns {Promise}
    */
   updateWorkspaceConfig() {
-    this.showSaveButton = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
+    this.editMode = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
 
     let status = this.getWorkspaceStatus();
     if (status === 'STOPPED' || status === 'STOPPING') {
@@ -208,7 +208,7 @@ export class WorkspaceDetailsController {
    * Updates workspace config and restarts workspace if it's necessary
    */
   applyConfigChanges() {
-    this.showSaveButton = false;
+    this.editMode = false;
     this.showApplyMessage = false;
 
     let status = this.getWorkspaceStatus();
@@ -249,6 +249,7 @@ export class WorkspaceDetailsController {
    * Cancels workspace config changes that weren't stored
    */
   cancelConfigChanges() {
+    this.editMode = false;
     this.updateWorkspaceData();
   }
 
