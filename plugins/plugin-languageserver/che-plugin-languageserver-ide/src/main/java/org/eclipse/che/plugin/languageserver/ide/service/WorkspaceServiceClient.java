@@ -13,13 +13,13 @@ package org.eclipse.che.plugin.languageserver.ide.service;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.SymbolInformationDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.Unmarshallable;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.SymbolInformationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.WorkspaceSymbolParamsDTO;
 
 import java.util.List;
 
