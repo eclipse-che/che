@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eclipse/che/exec-agent/rpc"
+	"log"
 	"os"
 	"os/exec"
 	"sync"
 	"sync/atomic"
 	"syscall"
 	"time"
-	"log"
 )
 
 const (
@@ -42,7 +42,8 @@ type Command struct {
 
 // Defines machine process model
 type MachineProcess struct {
-	// The virtual id of the process, it is guaranteed  that pid
+
+	// The virtual id of the process, it is guaranteed that pid
 	// is always unique, while NativePid may occur twice or more(when including dead processes)
 	Pid uint64 `json:"pid"`
 
@@ -95,7 +96,7 @@ type MachineProcess struct {
 
 	// Called once before any of process events is published
 	// and after process is started
-	beforeEventsHook func(process *MachineProcess)
+	beforeEventsHook func(process MachineProcess)
 }
 
 type Subscriber struct {
@@ -110,48 +111,42 @@ type LogMessage struct {
 	Text string    `json:"text"`
 }
 
+type NoProcessError error
+
 // Lockable map for storing processes
 type processesMap struct {
 	sync.RWMutex
 	items map[uint64]*MachineProcess
 }
 
-func NewProcess(newCommand Command) *MachineProcess {
-	return &MachineProcess{
-		Name:        newCommand.Name,
-		CommandLine: newCommand.CommandLine,
-		Type:        newCommand.Type,
-	}
-}
-
 // Sets the hook which will be called once before
 // process subscribers notified with any of the process events,
 // and after process is started.
-func (process *MachineProcess) BeforeEventsHook(f func(p *MachineProcess)) *MachineProcess {
+func (process MachineProcess) BeforeEventsHook(f func(p MachineProcess)) MachineProcess {
 	process.beforeEventsHook = f
 	return process
 }
 
-func (process *MachineProcess) Start() error {
+func Start(process MachineProcess) (MachineProcess, error) {
 	// wrap command to be able to kill child processes see https://github.com/golang/go/issues/8854
 	cmd := exec.Command("setsid", "sh", "-c", process.CommandLine)
 
 	// getting stdout pipe
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return err
+		return process, err
 	}
 
 	// getting stderr pipe
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		return err
+		return process, err
 	}
 
 	// starting a new process
 	err = cmd.Start()
 	if err != nil {
-		return err
+		return process, err
 	}
 
 	// increment current pid & assign it to the value
@@ -160,13 +155,13 @@ func (process *MachineProcess) Start() error {
 	// Figure out the place for logs file
 	dir, err := logsDist.DirForPid(LogsDir, pid)
 	if err != nil {
-		return err
+		return process, err
 	}
 	filename := fmt.Sprintf("%s%cpid-%d", dir, os.PathSeparator, pid)
 
 	fileLogger, err := NewLogger(filename)
 	if err != nil {
-		return err
+		return process, err
 	}
 
 	// save process
@@ -180,12 +175,12 @@ func (process *MachineProcess) Start() error {
 	process.updateLastUsedTime()
 
 	processes.Lock()
-	processes.items[pid] = process
+	processes.items[pid] = &process
 	processes.Unlock()
 
 	// register logs consumers
 	process.pumper.AddConsumer(fileLogger)
-	process.pumper.AddConsumer(process)
+	process.pumper.AddConsumer(&process)
 
 	if process.beforeEventsHook != nil {
 		process.beforeEventsHook(process)
@@ -194,7 +189,7 @@ func (process *MachineProcess) Start() error {
 	// before pumping is started publish process_started event
 	startPublished := make(chan bool)
 	go func() {
-		process.notifySubs(newStartedEvent(*process), ProcessStatusBit)
+		process.notifySubs(newStartedEvent(process), ProcessStatusBit)
 		startPublished <- true
 	}()
 
@@ -204,88 +199,130 @@ func (process *MachineProcess) Start() error {
 		process.pumper.Pump()
 	}()
 
-	return nil
+	return process, nil
 }
 
-func Get(pid uint64) (*MachineProcess, bool) {
-	processes.RLock()
-	defer processes.RUnlock()
-	item, ok := processes.items[pid]
+// Gets process by pid.
+// If process doesn't exist then error of type NoProcessError is returned.
+func Get(pid uint64) (MachineProcess, error) {
+	p, ok := directGet(pid)
 	if ok {
-		item.updateLastUsedTime()
+		return *p, nil
 	}
-	return item, ok
+	return MachineProcess{}, noProcess(pid)
 }
 
-func GetProcesses(all bool) []*MachineProcess {
+func GetProcesses(all bool) []MachineProcess {
 	processes.RLock()
 	defer processes.RUnlock()
 
-	pArr := make([]*MachineProcess, 0, len(processes.items))
-	for _, v := range processes.items {
-		if all || v.Alive {
-			pArr = append(pArr, v)
+	pArr := make([]MachineProcess, 0, len(processes.items))
+	for _, p := range processes.items {
+		// TODO RLock before reading alive
+		if all {
+			pArr = append(pArr, *p)
+		} else {
+			p.mutex.RLock()
+			if p.Alive {
+				pArr = append(pArr, *p)
+			}
+			p.mutex.RUnlock()
 		}
 	}
 	return pArr
 }
 
-func (mp *MachineProcess) Kill() error {
-	mp.updateLastUsedTime()
+// Kills process by given pid.
+// Returns an error when any error occurs during process kill.
+// If process doesn't exist error of type NoProcessError is returned.
+func Kill(pid uint64) error {
+	p, ok := directGet(pid)
+	if !ok {
+		return noProcess(pid)
+	}
 	// workaround for killing child processes see https://github.com/golang/go/issues/8854
-	return syscall.Kill(-mp.NativePid, syscall.SIGKILL)
+	return syscall.Kill(-p.NativePid, syscall.SIGKILL)
 }
 
-func (mp *MachineProcess) ReadLogs(from time.Time, till time.Time) ([]*LogMessage, error) {
-	mp.updateLastUsedTime()
-	fl := mp.fileLogger
-	if mp.Alive {
+// Reads process logs between [from, till] inclusive.
+// Returns an error if any error occurs during logs reading.
+// If process doesn't exist error of type NoProcessError is returned.
+func ReadLogs(pid uint64, from time.Time, till time.Time) ([]*LogMessage, error) {
+	p, ok := directGet(pid)
+	if !ok {
+		return nil, noProcess(pid)
+	}
+	fl := p.fileLogger
+	if p.Alive {
 		fl.Flush()
 	}
-	return NewLogsReader(mp.logfileName).From(from).Till(till).ReadLogs()
+	return NewLogsReader(p.logfileName).From(from).Till(till).ReadLogs()
 }
 
-func (mp *MachineProcess) ReadAllLogs() ([]*LogMessage, error) {
-	return mp.ReadLogs(time.Time{}, time.Now())
+// Reads all process logs.
+// Returns an error if any error occurs during logs reading.
+// If process doesn't exist error of type NoProcessError is returned.
+func ReadAllLogs(pid uint64) ([]*LogMessage, error) {
+	return ReadLogs(pid, time.Time{}, time.Now())
 }
 
-func (mp *MachineProcess) RemoveSubscriber(id string) {
-	mp.updateLastUsedTime()
-	mp.mutex.Lock()
-	defer mp.mutex.Unlock()
-	for idx, sub := range mp.subs {
+// Unsubscribe subscriber with given id from process events.
+// If process doesn't exist then error of type NoProcessError is returned.
+func RemoveSubscriber(pid uint64, id string) error {
+	p, ok := directGet(pid)
+	if !ok {
+		return noProcess(pid)
+	}
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+	for idx, sub := range p.subs {
 		if sub.Id == id {
-			mp.subs = append(mp.subs[0:idx], mp.subs[idx+1:]...)
+			p.subs = append(p.subs[0:idx], p.subs[idx+1:]...)
 			break
 		}
 	}
+	return nil
 }
 
-func (mp *MachineProcess) AddSubscriber(subscriber *Subscriber) error {
-	mp.updateLastUsedTime()
-	mp.mutex.Lock()
-	defer mp.mutex.Unlock()
-	if !mp.Alive && mp.NativePid != 0 {
+// Subscribe to the process output.
+// An error of type NoProcessError is returned when process
+// with given pid doesn't exist, a regular error is returned
+// if the process is dead or subscriber with such id already subscribed
+// to the process output.
+func AddSubscriber(pid uint64, subscriber Subscriber) error {
+	p, ok := directGet(pid)
+	if !ok {
+		return noProcess(pid)
+	}
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+	if !p.Alive && p.NativePid != 0 {
 		return errors.New("Can't subscribe to the events of dead process")
 	}
-	for _, sub := range mp.subs {
+	for _, sub := range p.subs {
 		if sub.Id == subscriber.Id {
 			return errors.New("Already subscribed")
 		}
 	}
-	mp.subs = append(mp.subs, subscriber)
-
+	p.subs = append(p.subs, &subscriber)
 	return nil
 }
 
 // Adds a new process subscriber by reading all the logs between
-// given 'after' and now and publishing them to the channel
-func (mp *MachineProcess) RestoreSubscriber(subscriber *Subscriber, after time.Time) error {
-	mp.mutex.Lock()
-	defer mp.mutex.Unlock()
+// given 'after' and now and publishing them to the channel.
+// Returns an error of type NoProcessError if process with given id doesn't exist,
+// returns a regular error if process is alive an subscriber with such id
+// already subscribed.
+func RestoreSubscriber(pid uint64, subscriber Subscriber, after time.Time) error {
+	p, ok := directGet(pid)
+	if !ok {
+		return noProcess(pid)
+	}
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
 
 	// Read logs between after and now
-	logs, err := mp.ReadLogs(after, time.Now())
+	logs, err := ReadLogs(pid, after, time.Now())
 	if err != nil {
 		return err
 	}
@@ -294,13 +331,13 @@ func (mp *MachineProcess) RestoreSubscriber(subscriber *Subscriber, after time.T
 	// as it is impossible to get it alive again, but it is still
 	// may be useful for client to get missed logs, that's why this
 	// function doesn't throw any errors in the case of dead process
-	if mp.Alive {
-		for _, sub := range mp.subs {
+	if p.Alive {
+		for _, sub := range p.subs {
 			if sub.Id == subscriber.Id {
 				return errors.New("Already subscribed")
 			}
 		}
-		mp.subs = append(mp.subs, subscriber)
+		p.subs = append(p.subs, &subscriber)
 	}
 
 	// Publish all the logs between (after, now]
@@ -308,29 +345,36 @@ func (mp *MachineProcess) RestoreSubscriber(subscriber *Subscriber, after time.T
 		message := logs[i]
 		if message.Time.After(after) {
 			if message.Kind == StdoutKind {
-				subscriber.Channel <- newStdoutEvent(mp.Pid, message.Text, message.Time)
+				subscriber.Channel <- newStdoutEvent(p.Pid, message.Text, message.Time)
 			} else {
-				subscriber.Channel <- newStderrEvent(mp.Pid, message.Text, message.Time)
+				subscriber.Channel <- newStderrEvent(p.Pid, message.Text, message.Time)
 			}
 		}
 	}
 
 	// Publish died event after logs are published and process is dead
-	if !mp.Alive {
-		subscriber.Channel <- newDiedEvent(*mp)
+	if !p.Alive {
+		subscriber.Channel <- newDiedEvent(*p)
 	}
 
 	return nil
 }
 
-func (mp *MachineProcess) UpdateSubscriber(id string, newMask uint64) error {
-	mp.updateLastUsedTime()
-	mp.mutex.Lock()
-	defer mp.mutex.Unlock()
-	if !mp.Alive {
+// Updates subscriber with given id.
+// An error of type NoProcessError is returned when process
+// with given pid doesn't exist, a regular error is returned
+// if the process is dead.
+func UpdateSubscriber(pid uint64, id string, newMask uint64) error {
+	p, ok := directGet(pid)
+	if !ok {
+		return noProcess(pid)
+	}
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+	if !p.Alive {
 		return errors.New("Can't update subscriber, the process is dead")
 	}
-	for _, sub := range mp.subs {
+	for _, sub := range p.subs {
 		if sub.Id == id {
 			sub.Mask = newMask
 			break
@@ -366,18 +410,18 @@ func (mp *MachineProcess) Close() {
 	mp.updateLastUsedTime()
 }
 
-func (mp *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
-	mp.mutex.RLock()
-	subs := mp.subs
+func (p *MachineProcess) notifySubs(event *rpc.Event, typeBit uint64) {
+	p.mutex.RLock()
+	subs := p.subs
 	for _, subscriber := range subs {
 		// Check whether subscriber needs such kind of event and then try to notify it
 		if subscriber.Mask&typeBit == typeBit && !tryWrite(subscriber.Channel, event) {
 			// Impossible to write to the channel, remove the channel from the subscribers list.
 			// It may happen when writing to the closed channel
-			defer mp.RemoveSubscriber(subscriber.Id)
+			defer RemoveSubscriber(p.Pid, subscriber.Id)
 		}
 	}
-	mp.mutex.RUnlock()
+	p.mutex.RUnlock()
 }
 
 func (mp *MachineProcess) updateLastUsedTime() {
@@ -398,6 +442,20 @@ func tryWrite(eventsChan chan *rpc.Event, event *rpc.Event) (ok bool) {
 	return true
 }
 
+func directGet(pid uint64) (*MachineProcess, bool) {
+	processes.RLock()
+	defer processes.RUnlock()
+	item, ok := processes.items[pid]
+	if ok {
+		item.updateLastUsedTime()
+	}
+	return item, ok
+}
+
+// Returns an error indicating that process with given pid doesn't exist
+func noProcess(pid uint64) NoProcessError {
+	return errors.New(fmt.Sprintf("Process with id '%d' does not exist", pid))
+}
 
 func CleanPeriodically() {
 	ticker := time.NewTicker(time.Duration(CleanupPeriodInMinutes) * time.Minute)

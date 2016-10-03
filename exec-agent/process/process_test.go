@@ -18,7 +18,7 @@ func TestOneLineOutput(t *testing.T) {
 	// create and start a process
 	p := startAndWaitTestProcess("echo test", t)
 
-	logs, _ := p.ReadAllLogs()
+	logs, _ := process.ReadAllLogs(p.Pid)
 
 	if len(logs) != 1 {
 		t.Fatalf("Expected logs size to be 1, but got %d", len(logs))
@@ -33,7 +33,7 @@ func TestEmptyLinesOutput(t *testing.T) {
 	defer cleanupLogsDir()
 	p := startAndWaitTestProcess("printf \"\n\n\n\n\n\"", t)
 
-	logs, _ := p.ReadAllLogs()
+	logs, _ := process.ReadAllLogs(p.Pid)
 
 	if len(logs) != 5 {
 		t.Fatal("Expected logs to be 4 sized")
@@ -53,22 +53,21 @@ func TestAddSubscriber(t *testing.T) {
 	outputLines := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}
 
 	// create and start a process
-	p := process.NewProcess(process.Command{
-		Name:        "test",
-		CommandLine: "printf \"" + strings.Join(outputLines, "\n") + "\"",
-		Type:        "test",
-	})
+	pb := process.NewBuilder().
+		CmdName("test").
+		CmdType("test").
+		CmdLine("printf \"" + strings.Join(outputLines, "\n") + "\"")
 
 	// add a new subscriber
 	eventsChan := make(chan *rpc.Event)
-	p.AddSubscriber(&process.Subscriber{
+	pb.FirstSubscriber(process.Subscriber{
 		Id:      "test",
 		Mask:    process.DefaultMask,
 		Channel: eventsChan,
 	})
 
 	// start a new process
-	if err := p.Start(); err != nil {
+	if _, err := pb.Start(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -128,7 +127,7 @@ func TestRestoreSubscriberForDeadProcess(t *testing.T) {
 		done <- true
 	}()
 
-	p.RestoreSubscriber(&process.Subscriber{
+	process.RestoreSubscriber(p.Pid, process.Subscriber{
 		"test",
 		process.DefaultMask,
 		channel,
@@ -162,7 +161,7 @@ func TestMachineProcessIsNotAliveAfterItIsDead(t *testing.T) {
 func TestItIsNotPossibleToAddSubscriberToDeadProcess(t *testing.T) {
 	p := startAndWaitTestProcess(testCmd, t)
 	defer cleanupLogsDir()
-	if err := p.AddSubscriber(&process.Subscriber{}); err == nil {
+	if err := process.AddSubscriber(p.Pid, process.Subscriber{}); err == nil {
 		t.Fatal("Should not be able to add subscriber")
 	}
 }
@@ -170,7 +169,7 @@ func TestItIsNotPossibleToAddSubscriberToDeadProcess(t *testing.T) {
 func TestReadProcessLogs(t *testing.T) {
 	p := startAndWaitTestProcess(testCmd, t)
 	defer cleanupLogsDir()
-	logs, err := p.ReadLogs(time.Time{}, time.Now())
+	logs, err := process.ReadLogs(p.Pid, time.Time{}, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,29 +189,30 @@ func TestCleanOnce(t *testing.T) {
 	p := startAndWaitTestProcess(testCmd, t)
 	defer cleanupLogsDir()
 	process.CleanOnce(0)
-	_, ok := process.Get(p.Pid)
-	if ok {
-		t.Fatal("Process should be cleaned")
+	_, err := process.Get(p.Pid)
+	if err == nil {
+		t.Fatal("Must not exist")
+	}
+	if _, ok := err.(process.NoProcessError); !ok {
+		t.Fatal(err)
 	}
 }
 
-func startAndWaitTestProcess(cmd string, t *testing.T) *process.MachineProcess {
+func startAndWaitTestProcess(cmd string, t *testing.T) process.MachineProcess {
 	process.LogsDir = TmpFile()
 	events := make(chan *rpc.Event)
 	done := make(chan bool)
 
 	// Create and start process
-	p := process.NewProcess(process.Command{
-		Name:        "test",
-		CommandLine: cmd,
-		Type:        "test",
-	})
-
-	p.AddSubscriber(&process.Subscriber{
-		Id:      "test",
-		Mask:    process.DefaultMask,
-		Channel: events,
-	})
+	pb := process.NewBuilder().
+		CmdName("test").
+		CmdType("test").
+		CmdLine(cmd).
+		FirstSubscriber(process.Subscriber{
+			Id:      "test",
+			Mask:    process.DefaultMask,
+			Channel: events,
+		})
 
 	go func() {
 		statusReceived := false
@@ -230,7 +230,8 @@ func startAndWaitTestProcess(cmd string, t *testing.T) *process.MachineProcess {
 		done <- true
 	}()
 
-	if err := p.Start(); err != nil {
+	p, err := pb.Start()
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -240,9 +241,9 @@ func startAndWaitTestProcess(cmd string, t *testing.T) *process.MachineProcess {
 	}
 
 	// Check process state after it is finished
-	result, ok := process.Get(p.Pid)
-	if !ok {
-		t.Fatal("Expected process to exist")
+	result, err := process.Get(p.Pid)
+	if err != nil {
+		t.Fatal(err)
 	}
 	return result
 }

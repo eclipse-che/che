@@ -3,7 +3,6 @@ package process
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/eclipse/che/exec-agent/rpc"
 	"math"
 	"time"
@@ -113,36 +112,29 @@ type StartParams struct {
 	EventTypes  string `json:"eventTypes"`
 }
 
-func startProcessReqHF(body interface{}, t *rpc.Transmitter) error {
-	startBody := body.(StartParams)
-
+func startProcessReqHF(params interface{}, t *rpc.Transmitter) error {
+	startParams := params.(StartParams)
 	// Creating command
 	command := Command{
-		Name:        startBody.Name,
-		CommandLine: startBody.CommandLine,
-		Type:        startBody.Type,
+		Name:        startParams.Name,
+		CommandLine: startParams.CommandLine,
+		Type:        startParams.Type,
 	}
 	if err := checkCommand(&command); err != nil {
 		return rpc.NewArgsError(err)
 	}
-
-	// Detecting subscription mask
-	subscriber := &Subscriber{
-		Id:      t.Channel.Id,
-		Mask:    parseTypes(startBody.EventTypes),
-		Channel: t.Channel.Events,
-	}
-
-	process := NewProcess(command).BeforeEventsHook(func(process *MachineProcess) {
-		t.Send(process)
-	})
-	if subscriber != nil {
-		if err := process.AddSubscriber(subscriber); err != nil {
-			return err
-		}
-	}
-
-	return process.Start()
+	_, err := NewBuilder().
+		Cmd(command).
+		FirstSubscriber(Subscriber{
+			Id:      t.Channel.Id,
+			Mask:    parseTypes(startParams.EventTypes),
+			Channel: t.Channel.Events,
+		}).
+		BeforeEventsHook(func(process MachineProcess) {
+			t.Send(process)
+		}).
+		Start()
+	return err
 }
 
 //-- process kill
@@ -151,17 +143,13 @@ type KillParams struct {
 	NativePid uint64 `json:"nativePid"`
 }
 
-func killProcessReqHF(body interface{}, t *rpc.Transmitter) error {
-	killBody := body.(KillParams)
-	p, ok := Get(killBody.Pid)
-	if !ok {
-		return newNoSuchProcessError(killBody.Pid)
-	}
-	if err := p.Kill(); err != nil {
-		return err
+func killProcessReqHF(params interface{}, t *rpc.Transmitter) error {
+	killParams := params.(KillParams)
+	if err := Kill(killParams.Pid); err != nil {
+		return asRpcError(err)
 	}
 	t.Send(&ProcessResult{
-		Pid:  killBody.Pid,
+		Pid:  killParams.Pid,
 		Text: "Successfully killed",
 	})
 	return nil
@@ -180,36 +168,30 @@ type SubscribeParams struct {
 	After      string `json:"after"`
 }
 
-func subscribeReqHF(body interface{}, t *rpc.Transmitter) error {
-	subscribeBody := body.(SubscribeParams)
-	p, ok := Get(subscribeBody.Pid)
-	if !ok {
-		return newNoSuchProcessError(subscribeBody.Pid)
-	}
-
-	subscriber := &Subscriber{
+func subscribeReqHF(params interface{}, t *rpc.Transmitter) error {
+	subscribeParams := params.(SubscribeParams)
+	subscriber := Subscriber{
 		Id:      t.Channel.Id,
-		Mask:    parseTypes(subscribeBody.EventTypes),
+		Mask:    parseTypes(subscribeParams.EventTypes),
 		Channel: t.Channel.Events,
 	}
-
 	// Check whether subscriber should see previous logs or not
-	if subscribeBody.After == "" {
-		if err := p.AddSubscriber(subscriber); err != nil {
-			return err
+	if subscribeParams.After == "" {
+		if err := AddSubscriber(subscribeParams.Pid, subscriber); err != nil {
+			return asRpcError(err)
 		}
 	} else {
-		after, err := time.Parse(DateTimeFormat, subscribeBody.After)
+		after, err := time.Parse(DateTimeFormat, subscribeParams.After)
 		if err != nil {
 			return rpc.NewArgsError(errors.New("Bad format of 'after', " + err.Error()))
 		}
-		if err := p.RestoreSubscriber(subscriber, after); err != nil {
+		if err := RestoreSubscriber(subscribeParams.Pid, subscriber, after); err != nil {
 			return err
 		}
 	}
 	t.Send(&SubscribeResult{
-		Pid:        p.Pid,
-		EventTypes: subscribeBody.EventTypes,
+		Pid:        subscribeParams.Pid,
+		EventTypes: subscribeParams.EventTypes,
 		Text:       "Successfully subscribed",
 	})
 	return nil
@@ -220,15 +202,13 @@ type UnsubscribeParams struct {
 	Pid uint64 `json:"pid"`
 }
 
-func unsubscribeReqHF(call interface{}, t *rpc.Transmitter) error {
-	unsubscribeBody := call.(UnsubscribeParams)
-	p, ok := Get(unsubscribeBody.Pid)
-	if !ok {
-		return errors.New(fmt.Sprintf("Process with id '%s' doesn't exist", unsubscribeBody.Pid))
+func unsubscribeReqHF(params interface{}, t *rpc.Transmitter) error {
+	unsubscribeParams := params.(UnsubscribeParams)
+	if err := RemoveSubscriber(unsubscribeParams.Pid, t.Channel.Id); err != nil {
+		return asRpcError(err)
 	}
-	p.RemoveSubscriber(t.Channel.Id)
 	t.Send(&ProcessResult{
-		Pid:  p.Pid,
+		Pid:  unsubscribeParams.Pid,
 		Text: "Successfully unsubscribed",
 	})
 	return nil
@@ -240,22 +220,17 @@ type UpdateSubscriberParams struct {
 	EventTypes string `json:"eventTypes"`
 }
 
-func updateSubscriberReqHF(body interface{}, t *rpc.Transmitter) error {
-	updateBody := body.(UpdateSubscriberParams)
-	p, ok := Get(updateBody.Pid)
-	if !ok {
-		return newNoSuchProcessError(updateBody.Pid)
-	}
-	if updateBody.EventTypes == "" {
+func updateSubscriberReqHF(params interface{}, t *rpc.Transmitter) error {
+	updateParams := params.(UpdateSubscriberParams)
+	if updateParams.EventTypes == "" {
 		return rpc.NewArgsError(errors.New("'eventTypes' required for subscriber update"))
 	}
-
-	if err := p.UpdateSubscriber(t.Channel.Id, maskFromTypes(updateBody.EventTypes)); err != nil {
-		return err
+	if err := UpdateSubscriber(updateParams.Pid, t.Channel.Id, maskFromTypes(updateParams.EventTypes)); err != nil {
+		return asRpcError(err)
 	}
 	t.Send(&SubscribeResult{
-		Pid:        p.Pid,
-		EventTypes: updateBody.EventTypes,
+		Pid:        updateParams.Pid,
+		EventTypes: updateParams.EventTypes,
 		Text:       "Subscriber successfully updated",
 	})
 	return nil
@@ -270,42 +245,38 @@ type GetLogsParams struct {
 	Skip  int    `json:"skip"`
 }
 
-func getProcessLogsReqHF(body interface{}, t *rpc.Transmitter) error {
-	args := body.(GetLogsParams)
-	p, ok := Get(args.Pid)
-	if !ok {
-		return newNoSuchProcessError(args.Pid)
-	}
+func getProcessLogsReqHF(params interface{}, t *rpc.Transmitter) error {
+	getLogsParams := params.(GetLogsParams)
 
-	from, err := parseTime(args.From, time.Time{})
+	from, err := parseTime(getLogsParams.From, time.Time{})
 	if err != nil {
 		return rpc.NewArgsError(errors.New("Bad format of 'from', " + err.Error()))
 	}
 
-	till, err := parseTime(args.Till, time.Now())
+	till, err := parseTime(getLogsParams.Till, time.Now())
 	if err != nil {
 		return rpc.NewArgsError(errors.New("Bad format of 'till', " + err.Error()))
 	}
 
-	logs, err := p.ReadLogs(from, till)
+	logs, err := ReadLogs(getLogsParams.Pid,from, till)
 	if err != nil {
-		return err
+		return asRpcError(err)
 	}
 
 	limit := DefaultLogsPerPageLimit
-	if args.Limit != 0 {
+	if getLogsParams.Limit != 0 {
 		if limit < 1 {
 			return rpc.NewArgsError(errors.New("Required 'limit' to be > 0"))
 		}
-		limit = args.Limit
+		limit = getLogsParams.Limit
 	}
 
 	skip := 0
-	if args.Skip != 0 {
+	if getLogsParams.Skip != 0 {
 		if skip < 0 {
 			return rpc.NewArgsError(errors.New("Required 'skip' to be >= 0"))
 		}
-		skip = args.Skip
+		skip = getLogsParams.Skip
 	}
 
 	logsLen := len(logs)
@@ -323,11 +294,11 @@ type GetProcessParams struct {
 
 func getProcessReqHF(body interface{}, t *rpc.Transmitter) error {
 	params := body.(GetProcessParams)
-	mp, ok := Get(params.Pid)
-	if !ok {
-		return newNoSuchProcessError(params.Pid)
+	p, err := Get(params.Pid)
+	if err != nil {
+		return asRpcError(err)
 	}
-	t.Send(mp)
+	t.Send(p)
 	return nil
 }
 
@@ -342,6 +313,9 @@ func getProcessesReqHF(body interface{}, t *rpc.Transmitter) error {
 	return nil
 }
 
-func newNoSuchProcessError(pid uint64) rpc.Error {
-	return rpc.NewError(errors.New(fmt.Sprintf("No process with id '%d'", pid)), NoSuchProcessErrorCode)
+func asRpcError(err error) error {
+	if _, ok := err.(NoProcessError); ok {
+		return rpc.NewError(err, NoSuchProcessErrorCode)
+	}
+	return err
 }

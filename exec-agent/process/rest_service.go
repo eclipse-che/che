@@ -77,17 +77,17 @@ func startProcessHF(w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	process := NewProcess(command)
+	pb := NewBuilder().Cmd(command)
 
 	if subscriber != nil {
-		process.AddSubscriber(subscriber)
+		pb.FirstSubscriber(*subscriber)
 	}
 
-	err := process.Start()
+	p, err := pb.Start()
 	if err != nil {
 		return err
 	}
-	return restutil.WriteJson(w, process)
+	return restutil.WriteJson(w, p)
 }
 
 func getProcessHF(w http.ResponseWriter, r *http.Request) error {
@@ -96,12 +96,11 @@ func getProcessHF(w http.ResponseWriter, r *http.Request) error {
 		return rest.BadRequest(err)
 	}
 
-	process, ok := Get(pid)
-
-	if !ok {
-		return rest.NotFound(errors.New(fmt.Sprintf("No process with id '%d'", pid)))
+	p, err := Get(pid)
+	if err != nil {
+		return asHttpError(err)
 	}
-	return restutil.WriteJson(w, process)
+	return restutil.WriteJson(w, p)
 }
 
 func killProcessHF(w http.ResponseWriter, r *http.Request) error {
@@ -109,12 +108,8 @@ func killProcessHF(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return rest.BadRequest(err)
 	}
-	p, ok := Get(pid)
-	if !ok {
-		return rest.NotFound(errors.New(fmt.Sprintf("No process with id '%d'", pid)))
-	}
-	if err := p.Kill(); err != nil {
-		return err
+	if err := Kill(pid); err != nil {
+		return asHttpError(err)
 	}
 	return nil
 }
@@ -123,10 +118,6 @@ func getProcessLogsHF(w http.ResponseWriter, r *http.Request) error {
 	pid, err := parsePid(mux.Vars(r)["pid"])
 	if err != nil {
 		return rest.BadRequest(err)
-	}
-	p, ok := Get(pid)
-	if !ok {
-		return rest.NotFound(errors.New(fmt.Sprintf("No process with id '%d'", pid)))
 	}
 
 	// Parse 'from', if 'from' is not specified then read all the logs from the start
@@ -143,9 +134,9 @@ func getProcessLogsHF(w http.ResponseWriter, r *http.Request) error {
 		return rest.BadRequest(errors.New("Bad format of 'till', " + err.Error()))
 	}
 
-	logs, err := p.ReadLogs(from, till)
+	logs, err := ReadLogs(pid, from, till)
 	if err != nil {
-		return err
+		return asHttpError(err)
 	}
 
 	// limit logs from the latest to the earliest
@@ -183,4 +174,11 @@ func getProcessesHF(w http.ResponseWriter, r *http.Request) error {
 		all = false
 	}
 	return restutil.WriteJson(w, GetProcesses(all))
+}
+
+func asHttpError(err error) error {
+	if _, ok := err.(NoProcessError); ok {
+		return rest.NotFound(err)
+	}
+	return err
 }
