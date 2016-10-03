@@ -47,7 +47,6 @@ import static com.google.common.collect.Iterables.transform;
  * @author Artem Zatsarynnyi
  * @see CommandPropertyValueProvider
  * @see ProjectExplorerPresenter
- * @since 4.7.0
  */
 @Beta
 @Singleton
