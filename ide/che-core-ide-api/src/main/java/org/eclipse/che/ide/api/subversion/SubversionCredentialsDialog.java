@@ -8,6 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
+//TODO This is used in wizard/ProjectImporter, find a solution to move it to plugin-svn.
 package org.eclipse.che.ide.api.subversion;
 
 import org.eclipse.che.api.promises.client.Promise;
