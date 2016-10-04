@@ -97,13 +97,13 @@ public interface CopyRequest {
     CopyRequest withComment(String comment);
 
     /** @return user name for authentication */
-    String getUserName();
+    String getUsername();
 
     /** Set user name for authentication. */
-    void setUserName(@Nullable final String userName);
+    void setUsername(@Nullable final String username);
 
     /** @return {@link CheckoutRequest} with specified user name for authentication */
-    CopyRequest withUserName(@Nullable final String userName);
+    CopyRequest withUsername(@Nullable final String username);
 
     /** @return password for authentication */
     String getPassword();

@@ -67,13 +67,13 @@ public interface InfoRequest {
     InfoRequest withChildren(@NotNull final boolean children);
 
     /** @return user name for authentication */
-    String getUserName();
+    String getUsername();
 
     /** Set user name for authentication. */
-    void setUserName(@Nullable final String userName);
+    void setUsername(@Nullable final String username);
 
     /** @return {@link CheckoutRequest} with specified user name for authentication */
-    InfoRequest withUserName(@Nullable final String userName);
+    InfoRequest withUsername(@Nullable final String username);
 
     /** @return password for authentication */
     String getPassword();

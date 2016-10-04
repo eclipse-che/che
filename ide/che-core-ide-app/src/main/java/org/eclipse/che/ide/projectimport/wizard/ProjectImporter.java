@@ -171,7 +171,7 @@ public class ProjectImporter extends AbstractImporter {
                 credentialsDialog.askCredentials().then(new Operation<Credentials>() {
                     @Override
                     public void apply(Credentials credentials) throws OperationException {
-                        sourceStorage.getParameters().put("userName", credentials.getUserName());
+                        sourceStorage.getParameters().put("username", credentials.getUsername());
                         sourceStorage.getParameters().put("password", credentials.getPassword());
                         doImport(path, sourceStorage).then(new Operation<Project>() {
                             @Override

@@ -56,13 +56,13 @@ public interface LockRequest {
     void setForce(boolean force);
 
     /** @return user name for authentication */
-    String getUserName();
+    String getUsername();
 
     /** Set user name for authentication. */
-    void setUserName(@Nullable final String userName);
+    void setUsername(@Nullable final String username);
 
     /** @return {@link CheckoutRequest} with specified user name for authentication */
-    LockRequest withUserName(@Nullable final String userName);
+    LockRequest withUsername(@Nullable final String username);
 
     /** @return password for authentication */
     String getPassword();

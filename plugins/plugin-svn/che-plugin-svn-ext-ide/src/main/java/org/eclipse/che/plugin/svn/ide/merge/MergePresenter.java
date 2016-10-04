@@ -109,8 +109,8 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
         merge(project, resources, null, null);
     }
 
-    private void merge(final Project project, final Resource[] resources, String userName, final String password) {
-        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, userName, password)
+    private void merge(final Project project, final Resource[] resources, final String username, final String password) {
+        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, username, password)
                .then(new Operation<InfoResponse>() {
                    @Override
                    public void apply(InfoResponse response) throws OperationException {
@@ -171,7 +171,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                            subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
                                @Override
                                public void apply(Credentials credentials) throws OperationException {
-                                   merge(project, resources, credentials.getUserName(), credentials.getPassword());
+                                   merge(project, resources, credentials.getUsername(), credentials.getPassword());
                                }
                            }).catchError(new Operation<PromiseError>() {
                                @Override

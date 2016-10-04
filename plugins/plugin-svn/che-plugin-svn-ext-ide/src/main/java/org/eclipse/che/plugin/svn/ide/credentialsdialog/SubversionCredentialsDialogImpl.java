@@ -59,7 +59,7 @@ public class SubversionCredentialsDialogImpl implements SubversionCredentialsDia
     @Override
     public void onAuthenticateClicked() {
         Credentials credentials = new Credentials();
-        credentials.setUserName(view.getUserName());
+        credentials.setUsername(view.getUsername());
         credentials.setPassword(view.getPassword());
         callback.onSuccess(credentials);
         view.closeDialog();
@@ -67,6 +67,6 @@ public class SubversionCredentialsDialogImpl implements SubversionCredentialsDia
 
     @Override
     public void onCredentialsChanged() {
-        view.setEnabledAuthenticateButton(!isNullOrEmpty(view.getUserName()) && !isNullOrEmpty(view.getPassword()));
+        view.setEnabledAuthenticateButton(!isNullOrEmpty(view.getUsername()) && !isNullOrEmpty(view.getPassword()));
     }
 }

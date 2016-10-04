@@ -76,7 +76,7 @@ public class SubversionProjectImporter implements ProjectImporter {
         subversionApi.checkout(newDto(CheckoutRequest.class)
                                        .withProjectPath(baseFolder.getVirtualFile().toIoFile().getAbsolutePath())
                                        .withUrl(sourceStorage.getLocation())
-                                       .withUserName(sourceStorage.getParameters().remove("userName"))
+                                       .withUsername(sourceStorage.getParameters().remove("username"))
                                        .withPassword(sourceStorage.getParameters().remove("password")));
     }
 

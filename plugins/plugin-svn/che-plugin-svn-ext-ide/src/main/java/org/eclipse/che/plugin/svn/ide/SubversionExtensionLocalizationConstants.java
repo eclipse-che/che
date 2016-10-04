@@ -589,7 +589,7 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     String credentialsDialogTitle();
 
     @Key("credentials.dialog.username")
-    String credentialsDialogUserName();
+    String credentialsDialogUsername();
 
     @Key("credentials.dialog.password")
     String credentialsDialogPassword();

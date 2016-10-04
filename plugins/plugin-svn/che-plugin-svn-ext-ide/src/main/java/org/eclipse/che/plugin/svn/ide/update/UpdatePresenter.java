@@ -94,7 +94,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
                           final Project project,
                           final Resource[] resources,
                           final StatusNotification notification,
-                          final String userName,
+                          final String username,
                           final String password) {
         service.update(project.getLocation(),
                        toRelative(project, resources),
@@ -102,7 +102,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
                        depth,
                        ignoreExternals,
                        "postpone",
-                       userName,
+                       username,
                        password)
                .then(new Operation<CLIOutputWithRevisionResponse>() {
                    @Override
@@ -135,7 +135,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
                                             project,
                                             resources,
                                             notification,
-                                            credentials.getUserName(),
+                                            credentials.getUsername(),
                                             credentials.getPassword());
                                }
                            }).catchError(new Operation<PromiseError>() {

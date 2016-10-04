@@ -140,7 +140,7 @@ public class GitProjectImporter implements ProjectImporter {
                     recursiveEnabled = true;
                 }
                 branchMerge = parameters.get("branchMerge");
-                final String user = storage.getParameters().remove("userName");
+                final String user = storage.getParameters().remove("username");
                 final String pass = storage.getParameters().remove("password");
                 if (user != null && pass != null) {
                     credentialsHaveBeenSet = true;

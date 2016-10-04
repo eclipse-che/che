@@ -16,21 +16,21 @@ package org.eclipse.che.ide.api.subversion;
  * @author Igor Vinokur
  */
 public class Credentials {
-    private String userName;
+    private String username;
     private String password;
 
     /**
      * Returns user name for authentication.
      */
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
     /**
      * Set user name for authentication.
      */
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     /**

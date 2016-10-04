@@ -124,13 +124,13 @@ public interface CheckoutRequest {
 
 
     /** @return user name for authentication */
-    String getUserName();
+    String getUsername();
 
     /** Set user name for authentication. */
-    void setUserName(@Nullable final String userName);
+    void setUsername(@Nullable final String username);
 
     /** @return {@link CheckoutRequest} with specified user name for authentication */
-    CheckoutRequest withUserName(@Nullable final String userName);
+    CheckoutRequest withUsername(@Nullable final String username);
 
     /** @return password for authentication */
     String getPassword();

@@ -34,7 +34,7 @@ interface SubversionCredentialsDialogView extends View<SubversionCredentialsDial
     }
 
     /** @return username */
-    String getUserName();
+    String getUsername();
 
     /** @return password */
     String getPassword();

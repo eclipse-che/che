@@ -218,7 +218,7 @@ public class SubversionApi {
                                                     cliArgs,
                                                     projectPath,
                                                     Arrays.asList(request.getSource(), request.getDestination()),
-                                                    request.getUserName(),
+                                                    request.getUsername(),
                                                     request.getPassword());
 
         return DtoFactory.getInstance()
@@ -262,7 +262,7 @@ public class SubversionApi {
                                               cliArgs,
                                               projectPath,
                                               request.getPaths(),
-                                              request.getUserName(),
+                                              request.getUsername(),
                                               request.getPassword(),
                                               request.getUrl());
 
@@ -409,7 +409,7 @@ public class SubversionApi {
                                                     uArgs,
                                                     projectPath,
                                                     addWorkingCopyPathIfNecessary(request.getPaths()),
-                                                    request.getUserName(),
+                                                    request.getUsername(),
                                                     request.getPassword());
 
         return DtoFactory.getInstance().createDto(CLIOutputWithRevisionResponse.class)
@@ -466,7 +466,7 @@ public class SubversionApi {
                                                     args,
                                                     projectPath,
                                                     request.getTargets(),
-                                                    request.getUserName(),
+                                                    request.getUsername(),
                                                     request.getPassword());
 
         return DtoFactory.getInstance()
@@ -499,7 +499,7 @@ public class SubversionApi {
                                                     uArgs,
                                                     projectPath,
                                                     request.getPaths(),
-                                                    request.getUserName(),
+                                                    request.getUsername(),
                                                     request.getPassword());
 
         return DtoFactory.getInstance().createDto(CLIOutputResponse.class)
@@ -668,7 +668,7 @@ public class SubversionApi {
                                                     cliArgs,
                                                     projectPath,
                                                     paths,
-                                                    request.getUserName(),
+                                                    request.getUsername(),
                                                     request.getPassword());
 
         return DtoFactory.getInstance().createDto(CLIOutputResponse.class)
@@ -885,17 +885,17 @@ public class SubversionApi {
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths,
-                                         String userName,
+                                         String username,
                                          String password) throws IOException, SubversionException, UnauthorizedException {
         String repoUrl = getRepositoryUrl(projectPath.getAbsolutePath());
-        return runCommand(env, args, projectPath, paths, userName, password, repoUrl);
+        return runCommand(env, args, projectPath, paths, username, password, repoUrl);
     }
 
     private CommandLineResult runCommand(Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths,
-                                         String userName,
+                                         String username,
                                          String password,
                                          String repoUrl) throws IOException, SubversionException, UnauthorizedException {
         final List<String> lines = new ArrayList<>();
@@ -909,8 +909,8 @@ public class SubversionApi {
         }
 
         String[] credentialsArgs;
-        if (userName != null && password != null) {
-            credentialsArgs = new String[]{"--username", userName, "--password", password};
+        if (username != null && password != null) {
+            credentialsArgs = new String[]{"--username", username, "--password", password};
         } else {
             credentialsArgs = null;
         }
@@ -999,7 +999,7 @@ public class SubversionApi {
                                                     args,
                                                     new File(request.getProjectPath()),
                                                     addWorkingCopyPathIfNecessary(paths),
-                                                    request.getUserName(),
+                                                    request.getUsername(),
                                                     request.getPassword());
 
         final InfoResponse response = DtoFactory.getInstance().createDto(InfoResponse.class)

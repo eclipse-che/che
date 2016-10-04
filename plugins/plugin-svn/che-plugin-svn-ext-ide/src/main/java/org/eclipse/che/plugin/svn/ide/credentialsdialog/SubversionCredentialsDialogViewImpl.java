@@ -43,7 +43,7 @@ public class SubversionCredentialsDialogViewImpl extends Window implements Subve
     private ActionDelegate                           delegate;
 
     @UiField
-    TextBox userNameTextBox;
+    TextBox usernameTextBox;
     @UiField
     TextBox passwordTextBox;
 
@@ -84,8 +84,8 @@ public class SubversionCredentialsDialogViewImpl extends Window implements Subve
     }
 
     @Override
-    public String getUserName() {
-        return userNameTextBox.getText();
+    public String getUsername() {
+        return usernameTextBox.getText();
     }
 
     @Override
@@ -95,12 +95,12 @@ public class SubversionCredentialsDialogViewImpl extends Window implements Subve
 
     @Override
     public void cleanCredentials() {
-        userNameTextBox.setText("");
+        usernameTextBox.setText("");
         passwordTextBox.setText("");
         setEnabledAuthenticateButton(false);
     }
 
-    @UiHandler({"userNameTextBox", "passwordTextBox"})
+    @UiHandler({"usernameTextBox", "passwordTextBox"})
     void credentialChangeHandler(KeyUpEvent event) {
         delegate.onCredentialsChanged();
     }

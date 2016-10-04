@@ -126,17 +126,17 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
 
         view.hide();
 
-        onCopyClicked(null, null, project, src, target, comment, notification);
+        onCopyClicked(project, src, target, comment, notification, null, null);
     }
 
-    private void onCopyClicked(final String userName,
-                               final String password,
-                               final Project project,
+    private void onCopyClicked(final Project project,
                                final Path src,
                                final Path target,
                                final String comment,
-                               final StatusNotification notification) {
-        service.copy(project.getLocation(), src, target, comment, userName, password).then(new Operation<CLIOutputResponse>() {
+                               final StatusNotification notification,
+                               final String username,
+                               final String password) {
+        service.copy(project.getLocation(), src, target, comment, username, password).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandCopy());
@@ -153,7 +153,13 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
                     subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
                         @Override
                         public void apply(Credentials credentials) throws OperationException {
-                            onCopyClicked(credentials.getUserName(), credentials.getPassword(), project, src, target, comment, notification);
+                            onCopyClicked(project,
+                                          src,
+                                          target,
+                                          comment,
+                                          notification,
+                                          credentials.getUsername(),
+                                          credentials.getPassword());
                         }
                     }).catchError(new Operation<PromiseError>() {
                         @Override

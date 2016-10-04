@@ -96,13 +96,13 @@ public interface MoveRequest {
     MoveRequest withComment(String comment);
 
     /** @return user name for authentication */
-    String getUserName();
+    String getUsername();
 
     /** Set user name for authentication. */
-    void setUserName(@Nullable final String userName);
+    void setUsername(@Nullable final String username);
 
     /** @return {@link CheckoutRequest} with specified user name for authentication */
-    MoveRequest withUserName(@Nullable final String userName);
+    MoveRequest withUsername(@Nullable final String username);
 
     /** @return password for authentication */
     String getPassword();

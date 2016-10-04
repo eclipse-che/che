@@ -85,7 +85,7 @@ public interface SubversionClientService {
      *         source item path
      * @param destination
      *         destination path
-     * @param userName
+     * @param username
      *         the user name for authentication
      * @param password
      *         the password for authentication
@@ -94,7 +94,7 @@ public interface SubversionClientService {
                                     Path source,
                                     Path destination,
                                     String comment,
-                                    @Nullable String userName,
+                                    @Nullable String username,
                                     @Nullable String password);
 
     /**
@@ -118,12 +118,12 @@ public interface SubversionClientService {
      *         target to operate
      * @param revision
      *         revision, use HEAD to specify latest revision
-     * @param userName
+     * @param username
      *         the user name for authentication
      * @param password
      *         the password for authentication
      */
-    Promise<InfoResponse> info(Path project, Path target, String revision, boolean children, String userName, String password);
+    Promise<InfoResponse> info(Path project, Path target, String revision, boolean children, String username, String password);
 
     Promise<InfoResponse> info(Path project, String target, String revision, boolean children);
 
@@ -174,7 +174,7 @@ public interface SubversionClientService {
      *         whether or not to ignore externals (--ignore-externals)
      * @param accept
      *         the accept argument (--accept)
-     * @param userName
+     * @param username
      *         the user name for authentication
      * @param password
      *         the password for authentication
@@ -185,12 +185,12 @@ public interface SubversionClientService {
                                                   String depth,
                                                   boolean ignoreExternals,
                                                   String accept,
-                                                  @Nullable String userName,
+                                                  @Nullable String username,
                                                   @Nullable String password);
 
     Promise<CLIOutputResponse> showLog(Path project, Path[] paths, String revision);
 
-    Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision, @Nullable String userName, @Nullable String password);
+    Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision, @Nullable String username, @Nullable String password);
 
     /**
      * Locks the given paths.
@@ -202,12 +202,12 @@ public interface SubversionClientService {
      * @param force
      *         if false, will warn if another user already has a lock on a target, leave this target unchanged, and continue.<br>
      *         if true, will steal the lock from the previous owner instead
-     * @param userName
+     * @param username
      *         the user name for authentication
      * @param password
      *         the password for authentication
      */
-    Promise<CLIOutputResponse> lock(Path project, Path[] paths, boolean force, @Nullable String userName, @Nullable String password);
+    Promise<CLIOutputResponse> lock(Path project, Path[] paths, boolean force, @Nullable String username, @Nullable String password);
 
     /**
      * Unocks the given paths.
@@ -219,12 +219,12 @@ public interface SubversionClientService {
      * @param force
      *         if false, will warn if another user already has a lock on a target, leave this target unchanged, and continue.<br>
      *         if true, will unlock anyway
-     * @param userName
+     * @param username
      *         the user name for authentication
      * @param password
      *         the password for authentication
      */
-    Promise<CLIOutputResponse> unlock(Path project, Path[] paths, boolean force, @Nullable String userName, @Nullable String password);
+    Promise<CLIOutputResponse> unlock(Path project, Path[] paths, boolean force, @Nullable String username, @Nullable String password);
 
     /**
      * Commits the changes in the repository.
@@ -263,7 +263,7 @@ public interface SubversionClientService {
      *         the project path
      * @param source
      *         source item path
-     * @param userName
+     * @param username
      *         the user name for authentication
      * @param password
      *         the password for authentication
@@ -272,7 +272,7 @@ public interface SubversionClientService {
                                     Path source,
                                     Path destination,
                                     String comment,
-                                    @Nullable String userName,
+                                    @Nullable String username,
                                     @Nullable String password);
 
     /**
