@@ -40,7 +40,7 @@ public class SubversionCredentialsDialogViewImpl extends Window implements Subve
 
     private static SubversionAuthenticatorImplUiBinder uiBinder = GWT.create(SubversionAuthenticatorImplUiBinder.class);
 
-    private ActionDelegate                           delegate;
+    private ActionDelegate delegate;
 
     @UiField
     TextBox usernameTextBox;
@@ -55,18 +55,22 @@ public class SubversionCredentialsDialogViewImpl extends Window implements Subve
         this.setWidget(uiBinder.createAndBindUi(this));
         this.setTitle(locale.credentialsDialogTitle());
 
-        authenticateButton = createPrimaryButton(locale.credentialsDialogAuthenticateButton(), "svn-authentication-username", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onAuthenticateClicked();
-            }
-        });
-        Button cancelButton = createButton(locale.credentialsDialogCancelButton(), "svn-authentication-password", new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                delegate.onCancelClicked();
-            }
-        });
+        authenticateButton = createPrimaryButton(locale.credentialsDialogAuthenticateButton(),
+                                                 "svn-authentication-username",
+                                                 new ClickHandler() {
+                                                     @Override
+                                                     public void onClick(ClickEvent event) {
+                                                         delegate.onAuthenticateClicked();
+                                                     }
+                                                 });
+        Button cancelButton = createButton(locale.credentialsDialogCancelButton(),
+                                           "svn-authentication-password",
+                                           new ClickHandler() {
+                                               @Override
+                                               public void onClick(ClickEvent event) {
+                                                   delegate.onCancelClicked();
+                                               }
+                                           });
 
         addButtonToFooter(authenticateButton);
         addButtonToFooter(cancelButton);
