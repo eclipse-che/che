@@ -103,7 +103,6 @@ public class DiffPresenter extends SubversionActionPresenter {
                 } else {
                     notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
                 }
-                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
             }
         });
     }
