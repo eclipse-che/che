@@ -63,7 +63,7 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                                   SubversionExtensionLocalizationConstants constants,
                                   SubversionClientService service,
                                   StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
         this.subversionCredentialsDialog = subversionCredentialsDialog;
 
         this.service = service;

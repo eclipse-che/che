@@ -60,7 +60,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
                            SubversionExtensionLocalizationConstants constants,
                            NotificationManager notificationManager,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
         this.subversionCredentialsDialog = subversionCredentialsDialog;
 
         this.constants = constants;

@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.svn.ide.common;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -39,15 +40,21 @@ public class SubversionActionPresenter {
     private final   SubversionOutputConsoleFactory consoleFactory;
     private final   ProcessesPanelPresenter        consolesPanelPresenter;
     private final   StatusColors                   statusColors;
+    private final   NotificationManager            notificationManager;
+    private final   SubversionCredentialsDialog    credentialsDialog;
 
     protected SubversionActionPresenter(AppContext appContext,
                                         SubversionOutputConsoleFactory consoleFactory,
                                         ProcessesPanelPresenter processesPanelPresenter,
-                                        StatusColors statusColors) {
+                                        StatusColors statusColors,
+                                        NotificationManager notificationManager,
+                                        SubversionCredentialsDialog credentialsDialog) {
         this.appContext = appContext;
         this.consoleFactory = consoleFactory;
         this.consolesPanelPresenter = processesPanelPresenter;
         this.statusColors = statusColors;
+        this.notificationManager = notificationManager;
+        this.credentialsDialog = credentialsDialog;
     }
 
     protected Path[] toRelative(Container project, Resource[] paths) {
@@ -122,39 +129,18 @@ public class SubversionActionPresenter {
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
     }
 
-    /**
-     * Performs given subversion operation with credentials.
-     *
-     * @param notificationManager
-     *         notification manager
-     * @param subversionCredentialsDialog
-     *         dialog for retrieving credentials
-     * @param errorMessage
-     *         error message to show in notification
-     * @param operation
-     *         subversion operation to perform when credentials are received
-     */
-    protected void tryWithCredentials(final NotificationManager notificationManager,
-                                      final SubversionCredentialsDialog subversionCredentialsDialog,
-                                      final String errorMessage,
-                                      final SVNOperation operation) {
-        notificationManager.notify(errorMessage, FAIL, FLOAT_MODE);
-
-        subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
-            @Override
-            public void apply(Credentials credentials) throws OperationException {
-                operation.perform(credentials);
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-            }
-        });
+    protected <Y, T extends Promise<Y>> Promise<Y> doWithCredentialsIfNeeded(SVNOperation<T> operation) {
+        return operation.perform(null)
+                        .catchError(new Operation<PromiseError>() {
+                            @Override
+                            public void apply(PromiseError arg) throws OperationException {
+                                
+                            }
+                        });
     }
 
-    protected interface SVNOperation {
-        void perform(Credentials credentials);
+    protected interface SVNOperation<T extends Promise<?>> {
+        T perform(Credentials credentials);
     }
 
     /**

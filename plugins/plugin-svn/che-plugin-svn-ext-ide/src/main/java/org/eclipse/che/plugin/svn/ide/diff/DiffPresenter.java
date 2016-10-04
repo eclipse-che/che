@@ -57,7 +57,7 @@ public class DiffPresenter extends SubversionActionPresenter {
                             final SubversionClientService service,
                             final SubversionExtensionLocalizationConstants constants,
                             final StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
         this.subversionCredentialsDialog = subversionCredentialsDialog;
 
         this.service = service;

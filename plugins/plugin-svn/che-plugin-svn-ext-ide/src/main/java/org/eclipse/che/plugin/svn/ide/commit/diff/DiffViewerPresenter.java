@@ -35,7 +35,7 @@ public class DiffViewerPresenter extends SubversionActionPresenter implements Di
                                   ProcessesPanelPresenter processesPanelPresenter,
                                   DiffViewerView view,
                                   StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
         this.view = view;
         this.view.setDelegate(this);
     }

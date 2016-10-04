@@ -63,7 +63,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
                                SubversionExtensionLocalizationConstants constants,
                                ShowLogsView view,
                                StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
         this.subversionCredentialsDialog = subversionCredentialsDialog;
 
         this.service = service;

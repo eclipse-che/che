@@ -51,7 +51,7 @@ public class CleanupPresenter extends SubversionActionPresenter {
                                SubversionExtensionLocalizationConstants constants,
                                SubversionClientService service,
                                StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
 
         this.service = service;
         this.notificationManager = notificationManager;

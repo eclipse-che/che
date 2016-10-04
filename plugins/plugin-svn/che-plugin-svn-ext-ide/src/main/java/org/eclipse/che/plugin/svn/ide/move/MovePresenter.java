@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -69,7 +70,7 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                          SubversionClientService service,
                          SubversionExtensionLocalizationConstants locale,
                          StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
         this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.notificationManager = notificationManager;
         this.service = service;
@@ -119,7 +120,12 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                                final Path source,
                                final String comment,
                                final Credentials credentials) {
-        service.move(project.getLocation(), source, getTarget(), comment, credentials).then(new Operation<CLIOutputResponse>() {
+        doWithCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.move(project.getLocation(), source, getTarget(), comment, credentials);
+            }
+        }).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 notification.setTitle(locale.moveNotificationSuccessful());

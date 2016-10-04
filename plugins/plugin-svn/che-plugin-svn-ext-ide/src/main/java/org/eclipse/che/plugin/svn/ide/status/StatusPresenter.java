@@ -51,7 +51,7 @@ public class StatusPresenter extends SubversionActionPresenter {
                               SubversionExtensionLocalizationConstants constants,
                               ProcessesPanelPresenter processesPanelPresenter,
                               StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
 
         this.service = service;
         this.notificationManager = notificationManager;

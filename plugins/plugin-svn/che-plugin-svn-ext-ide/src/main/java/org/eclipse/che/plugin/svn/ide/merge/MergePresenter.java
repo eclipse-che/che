@@ -80,7 +80,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                           NotificationManager notificationManager,
                           SubversionExtensionLocalizationConstants constants,
                           StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
 
         this.view = view;
         this.service = service;
@@ -181,6 +181,8 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                    }
                });
     }
+
+
 
     /**
      * Performs actions when clicking Merge button.

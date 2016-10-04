@@ -84,7 +84,7 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                            ProcessesPanelPresenter processesPanelPresenter,
                            DiffViewerPresenter diffViewerPresenter,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
         this.service = service;
         this.view = view;
         this.subversionCredentialsDialog = subversionCredentialsDialog;

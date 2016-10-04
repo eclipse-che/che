@@ -72,7 +72,7 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
                             SubversionClientService service,
                             SubversionExtensionLocalizationConstants constants,
                             StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
         this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.view = view;
         this.notificationManager = notificationManager;

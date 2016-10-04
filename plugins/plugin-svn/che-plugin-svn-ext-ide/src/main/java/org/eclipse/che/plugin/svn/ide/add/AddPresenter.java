@@ -54,7 +54,7 @@ public class AddPresenter extends SubversionActionPresenter {
                            SubversionClientService service,
                            ProcessesPanelPresenter processesPanelPresenter,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
 
         this.service = service;
         this.notificationManager = notificationManager;

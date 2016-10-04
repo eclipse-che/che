@@ -63,7 +63,7 @@ public class PropertyEditorPresenter extends SubversionActionPresenter implement
                                       NotificationManager notificationManager,
                                       SubversionExtensionLocalizationConstants constants,
                                       StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
         this.view = view;
         this.service = service;
         this.notificationManager = notificationManager;
