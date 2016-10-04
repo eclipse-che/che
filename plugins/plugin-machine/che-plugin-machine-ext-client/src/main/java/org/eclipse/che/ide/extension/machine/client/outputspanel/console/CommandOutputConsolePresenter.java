@@ -76,7 +76,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     /** Follow output when printing text */
     private boolean followOutput = true;
 
-    private List<ConsoleOutputListener> outputListenes = new ArrayList<>();
+    private final List<ActionDelegate> actionDelegates = new ArrayList<>();
 
     @Inject
     public CommandOutputConsolePresenter(final OutputConsoleView view,
@@ -146,8 +146,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
             protected void onMessageReceived(String result) {
                 view.print(result, result.endsWith("\r"));
 
-                for (ConsoleOutputListener listener : outputListenes) {
-                    listener.onConsoleOutput(CommandOutputConsolePresenter.this);
+                for (ActionDelegate actionDelegate : actionDelegates) {
+                    actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
                 }
             }
 
@@ -260,12 +260,12 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void close() {
-        outputListenes.clear();
+        actionDelegates.clear();
     }
 
     @Override
-    public void addOutputListener(ConsoleOutputListener listener) {
-        outputListenes.add(listener);
+    public void addActionDelegate(ActionDelegate actionDelegate) {
+        actionDelegates.add(actionDelegate);
     }
 
     @Override
@@ -295,6 +295,13 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     }
 
     @Override
+    public void downloadOutputsButtonClicked() {
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onDownloadOutput(this);
+        }
+    }
+
+    @Override
     public void wrapTextButtonClicked() {
         wrapText = !wrapText;
         view.wrapText(wrapText);
@@ -313,6 +320,16 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     public void onOutputScrolled(boolean bottomReached) {
         followOutput = bottomReached;
         view.toggleScrollToEndButton(bottomReached);
+    }
+
+    /**
+     * Returns the console text.
+     *
+     * @return
+     *          console text
+     */
+    public String getText() {
+        return view.getText();
     }
 
 }

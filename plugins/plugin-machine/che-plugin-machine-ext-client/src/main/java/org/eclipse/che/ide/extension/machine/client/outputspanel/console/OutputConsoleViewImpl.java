@@ -13,7 +13,9 @@ package org.eclipse.che.ide.extension.machine.client.outputspanel.console;
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.PreElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -36,6 +38,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
+import org.eclipse.che.ide.ui.FontAwesome;
 import org.eclipse.che.ide.ui.Tooltip;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -103,6 +106,9 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
     FlowPanel clearOutputsButton;
 
     @UiField
+    FlowPanel downloadOutputsButton;
+
+    @UiField
     FlowPanel wrapTextButton;
 
     @UiField
@@ -125,6 +131,7 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         reRunProcessButton.add(new SVGImage(resources.reRunIcon()));
         stopProcessButton.add(new SVGImage(resources.stopIcon()));
         clearOutputsButton.add(new SVGImage(resources.clearOutputsIcon()));
+        downloadOutputsButton.getElement().setInnerHTML(FontAwesome.DOWNLOAD);
 
         wrapTextButton.add(new SVGImage(resources.lineWrapIcon()));
         scrollToBottomButton.add(new SVGImage(resources.scrollToBottomIcon()));
@@ -154,6 +161,15 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
             public void onClick(ClickEvent event) {
                 if (!clearOutputsButton.getElement().hasAttribute("disabled") && delegate != null) {
                     delegate.clearOutputsButtonClicked();
+                }
+            }
+        }, ClickEvent.getType());
+
+        downloadOutputsButton.addDomHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (delegate != null) {
+                    delegate.downloadOutputsButtonClicked();
                 }
             }
         }, ClickEvent.getType());
@@ -335,6 +351,20 @@ public class OutputConsoleViewImpl extends Composite implements OutputConsoleVie
         consoleLines.getElement().appendChild(pre);
 
         followOutput();
+    }
+
+    @Override
+    public String getText() {
+        String text = "";
+        NodeList<Node> nodes = consoleLines.getElement().getChildNodes();
+
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.getItem(i);
+            Element element = node.cast();
+            text += element.getInnerText() + "\r\n";
+        }
+
+        return text;
     }
 
     @Override
