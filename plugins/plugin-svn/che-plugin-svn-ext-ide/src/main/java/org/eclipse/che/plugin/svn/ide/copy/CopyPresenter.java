@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -36,12 +37,10 @@ import org.eclipse.che.plugin.svn.ide.common.SubversionActionPresenter;
 import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
-import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter for the {@link CopyView}.
@@ -72,7 +71,7 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
                             SubversionClientService service,
                             SubversionExtensionLocalizationConstants constants,
                             StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
         this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.view = view;
         this.notificationManager = notificationManager;
@@ -126,45 +125,20 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
 
         view.hide();
 
-        onCopyClicked(project, src, target, comment, notification, null);
-    }
-
-    private void onCopyClicked(final Project project,
-                               final Path src,
-                               final Path target,
-                               final String comment,
-                               final StatusNotification notification,
-                               final Credentials credentials) {
-        service.copy(project.getLocation(), src, target, comment, credentials).then(new Operation<CLIOutputResponse>() {
+        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.copy(project.getLocation(), src, target, comment, credentials);
+            }
+        }).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
-                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandCopy());
-
-                notification.setTitle(constants.copyNotificationSuccessful());
-                notification.setStatus(SUCCESS);
+                notificationManager.notify(constants.copyNotificationSuccessful(), SUCCESS, FLOAT_MODE);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    tryWithCredentials(notificationManager,
-                                       subversionCredentialsDialog,
-                                       constants.authenticationFailed(),
-                                       new SVNOperation() {
-                                           @Override
-                                           public void perform(Credentials credentials) {
-                                               onCopyClicked(project,
-                                                             src,
-                                                             target,
-                                                             comment,
-                                                             notification,
-                                                             credentials);
-                                           }
-                                       });
-                } else {
-                    notification.setTitle(constants.copyNotificationFailed());
-                    notification.setStatus(FAIL);
-                }
+                notificationManager.notify(constants.copyNotificationFailed(), FAIL, FLOAT_MODE);
             }
         });
     }

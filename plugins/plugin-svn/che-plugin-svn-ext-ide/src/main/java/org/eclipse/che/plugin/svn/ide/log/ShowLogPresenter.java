@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -33,17 +34,14 @@ import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.SubversionItem;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Manages the displaying commit log messages for specified period.
  */
 public class ShowLogPresenter extends SubversionActionPresenter {
 
-    private final SubversionCredentialsDialog              subversionCredentialsDialog;
     private final SubversionClientService                  service;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
@@ -63,9 +61,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
                                SubversionExtensionLocalizationConstants constants,
                                ShowLogsView view,
                                StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
-        this.subversionCredentialsDialog = subversionCredentialsDialog;
-
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
         this.service = service;
         this.notificationManager = notificationManager;
         this.constants = constants;
@@ -101,11 +97,12 @@ public class ShowLogPresenter extends SubversionActionPresenter {
         checkState(!Arrays.isNullOrEmpty(resources));
         checkState(resources.length == 1);
 
-        showLog(project, resources, null);
-    }
-
-    private void showLog(final Project project, final Resource[] resources, final Credentials credentials) {
-        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials).then(new Operation<InfoResponse>() {
+        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<InfoResponse>>() {
+            @Override
+            public Promise<InfoResponse> perform(Credentials credentials) {
+                return service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials);
+            }
+        }).then(new Operation<InfoResponse>() {
             @Override
             public void apply(InfoResponse response) throws OperationException {
                 if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
@@ -122,19 +119,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    tryWithCredentials(notificationManager,
-                                       subversionCredentialsDialog,
-                                       constants.authenticationFailed(),
-                                       new SVNOperation() {
-                                           @Override
-                                           public void perform(Credentials credentials) {
-                                               showLog(project, resources, credentials);
-                                           }
-                                       });
-                } else {
-                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                }
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
             }
         });
     }

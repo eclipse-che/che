@@ -36,12 +36,10 @@ import org.eclipse.che.plugin.svn.ide.common.SubversionOutputConsoleFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
-import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter for the {@link MoveView}.
@@ -53,7 +51,6 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
 
     private final MoveView                                 view;
     private final SubversionExtensionLocalizationConstants locale;
-    private final SubversionCredentialsDialog              subversionCredentialsDialog;
     private final NotificationManager                      notificationManager;
     private final SubversionClientService                  service;
 
@@ -70,8 +67,7 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                          SubversionClientService service,
                          SubversionExtensionLocalizationConstants locale,
                          StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
-        this.subversionCredentialsDialog = subversionCredentialsDialog;
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
         this.notificationManager = notificationManager;
         this.service = service;
 
@@ -113,14 +109,7 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                 new StatusNotification(locale.moveNotificationStarted(source.toString()), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        onMoveClicked(notification, source, comment, null);
-    }
-
-    private void onMoveClicked(final StatusNotification notification,
-                               final Path source,
-                               final String comment,
-                               final Credentials credentials) {
-        doWithCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.move(project.getLocation(), source, getTarget(), comment, credentials);
@@ -128,25 +117,12 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
         }).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
-                notification.setTitle(locale.moveNotificationSuccessful());
-                notification.setStatus(SUCCESS);
+                notificationManager.notify(locale.moveNotificationSuccessful(), SUCCESS, FLOAT_MODE);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    tryWithCredentials(notificationManager,
-                                       subversionCredentialsDialog,
-                                       locale.authenticationFailed(),
-                                       new SVNOperation() {
-                                           @Override
-                                           public void perform(Credentials credentials) {
-                                               onMoveClicked(notification, source, comment, credentials);
-                                           }
-                                       });
-                } else {
-                    notificationManager.notify(locale.moveNotificationFailed(), FAIL, FLOAT_MODE);
-                }
+                notificationManager.notify(locale.moveNotificationFailed(), FAIL, FLOAT_MODE);
             }
         });
 

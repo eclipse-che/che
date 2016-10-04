@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
@@ -36,10 +37,8 @@ import org.eclipse.che.plugin.svn.ide.common.threechoices.ChoiceDialogFactory;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Handler for the {@link org.eclipse.che.plugin.svn.ide.action.LockAction} and {@link UnlockAction} actions.
@@ -63,7 +62,7 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                                   SubversionExtensionLocalizationConstants constants,
                                   SubversionClientService service,
                                   StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
         this.subversionCredentialsDialog = subversionCredentialsDialog;
 
         this.service = service;
@@ -153,68 +152,41 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
         final Project project = appContext.getRootProject();
 
         checkState(project != null);
+
         if (lock) {
-            doLockAction(force, paths, project, null);
+            performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+                @Override
+                public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                    return service.lock(project.getLocation(), paths, force, credentials);
+                }
+            }).then(new Operation<CLIOutputResponse>() {
+                @Override
+                public void apply(CLIOutputResponse response) throws OperationException {
+                    printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandLock());
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError error) throws OperationException {
+                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                }
+            });
         } else {
-            doUnlockAction(force, paths, project, null);
+            performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+                @Override
+                public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                    return service.unlock(project.getLocation(), paths, force, credentials);
+                }
+            }).then(new Operation<CLIOutputResponse>() {
+                @Override
+                public void apply(CLIOutputResponse response) throws OperationException {
+                    printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandUnlock());
+                }
+            }).catchError(new Operation<PromiseError>() {
+                @Override
+                public void apply(PromiseError error) throws OperationException {
+                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                }
+            });
         }
-    }
-
-    private void doLockAction(final boolean force,
-                              final Path[] paths,
-                              final Project project,
-                              final Credentials credentials) {
-        service.lock(project.getLocation(), paths, force, credentials).then(new Operation<CLIOutputResponse>() {
-            @Override
-            public void apply(CLIOutputResponse response) throws OperationException {
-                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandLock());
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    tryWithCredentials(notificationManager,
-                                       subversionCredentialsDialog,
-                                       constants.authenticationFailed(),
-                                       new SVNOperation() {
-                                           @Override
-                                           public void perform(Credentials credentials) {
-                                               doLockAction(force, paths, project, credentials);
-                                           }
-                                       });
-                } else {
-                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                }
-            }
-        });
-    }
-
-    private void doUnlockAction(final boolean force,
-                                final Path[] paths,
-                                final Project project,
-                                final Credentials credentials) {
-        service.unlock(project.getLocation(), paths, force, credentials).then(new Operation<CLIOutputResponse>() {
-            @Override
-            public void apply(CLIOutputResponse response) throws OperationException {
-                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandUnlock());
-            }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError error) throws OperationException {
-                if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    tryWithCredentials(notificationManager,
-                                       subversionCredentialsDialog,
-                                       constants.authenticationFailed(),
-                                       new SVNOperation() {
-                                           @Override
-                                           public void perform(Credentials credentials) {
-                                               doUnlockAction(force, paths, project, credentials);
-                                           }
-                                       });
-                } else {
-                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                }
-            }
-        });
     }
 }

@@ -44,10 +44,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Manages merging the branches and folders.
@@ -57,7 +55,6 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
     private final MergeView                                view;
     private final SubversionClientService                  service;
-    private final SubversionCredentialsDialog              subversionCredentialsDialog;
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
 
@@ -80,11 +77,10 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                           NotificationManager notificationManager,
                           SubversionExtensionLocalizationConstants constants,
                           StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
 
         this.view = view;
         this.service = service;
-        this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.notificationManager = notificationManager;
         this.constants = constants;
 
@@ -106,83 +102,68 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
         checkState(resources != null && resources.length == 1);
 
-        merge(project, resources, null);
+        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<InfoResponse>>() {
+            @Override
+            public Promise<InfoResponse> perform(Credentials credentials) {
+                return service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials);
+            }
+        }).then(new Operation<InfoResponse>() {
+            @Override
+            public void apply(InfoResponse response) throws OperationException {
+                if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
+                    printErrors(response.getErrorOutput(), constants.commandInfo());
+                    notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
+                    return;
+                }
+
+                mergeTarget = response.getItems().get(0);
+                view.targetTextBox().setValue(mergeTarget.getRelativeURL());
+
+                String repositoryRoot = mergeTarget.getRepositoryRoot();
+
+                service.info(project.getLocation(), repositoryRoot, "HEAD", true)
+                       .then(new Operation<InfoResponse>() {
+                           @Override
+                           public void apply(InfoResponse response) throws OperationException {
+                               if (!response.getErrorOutput().isEmpty()) {
+                                   printErrors(response.getErrorOutput(), constants.commandInfo());
+                                   notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
+                                   return;
+                               }
+
+                               sourceURL = response.getItems().get(0).getURL();
+                               SubversionItemNode subversionTreeNode = new SubversionItemNode(response.getItems().get(0));
+
+                               List<Node> children = new ArrayList<>();
+                               if (response.getItems().size() > 1) {
+                                   for (int i = 1; i < response.getItems().size(); i++) {
+                                       SubversionItem item = response.getItems().get(i);
+                                       if (!"file".equals(item.getNodeKind())) {
+                                           children.add(new SubversionItemNode(item));
+                                       }
+                                   }
+                               }
+
+                               subversionTreeNode.setChildren(children);
+                               view.setRootNode(subversionTreeNode);
+                               view.show();
+                               validateSourceURL();
+                           }
+                       })
+                       .catchError(new Operation<PromiseError>() {
+                           @Override
+                           public void apply(PromiseError error) throws OperationException {
+                               notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                           }
+                       });
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
     }
-
-    private void merge(final Project project, final Resource[] resources, final Credentials credentials) {
-        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials)
-               .then(new Operation<InfoResponse>() {
-                   @Override
-                   public void apply(InfoResponse response) throws OperationException {
-                       if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
-                           printErrors(response.getErrorOutput(), constants.commandInfo());
-                           notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
-                           return;
-                       }
-
-                       mergeTarget = response.getItems().get(0);
-                       view.targetTextBox().setValue(mergeTarget.getRelativeURL());
-
-                       String repositoryRoot = mergeTarget.getRepositoryRoot();
-
-                       service.info(project.getLocation(), repositoryRoot, "HEAD", true)
-                              .then(new Operation<InfoResponse>() {
-                                  @Override
-                                  public void apply(InfoResponse response) throws OperationException {
-                                      if (!response.getErrorOutput().isEmpty()) {
-                                          printErrors(response.getErrorOutput(), constants.commandInfo());
-                                          notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
-                                          return;
-                                      }
-
-                                      sourceURL = response.getItems().get(0).getURL();
-                                      SubversionItemNode subversionTreeNode = new SubversionItemNode(response.getItems().get(0));
-
-                                      List<Node> children = new ArrayList<>();
-                                      if (response.getItems().size() > 1) {
-                                          for (int i = 1; i < response.getItems().size(); i++) {
-                                              SubversionItem item = response.getItems().get(i);
-                                              if (!"file".equals(item.getNodeKind())) {
-                                                  children.add(new SubversionItemNode(item));
-                                              }
-                                          }
-                                      }
-
-                                      subversionTreeNode.setChildren(children);
-                                      view.setRootNode(subversionTreeNode);
-                                      view.show();
-                                      validateSourceURL();
-                                  }
-                              })
-                              .catchError(new Operation<PromiseError>() {
-                                  @Override
-                                  public void apply(PromiseError error) throws OperationException {
-                                      notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                                  }
-                              });
-                   }
-               })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                           tryWithCredentials(notificationManager,
-                                              subversionCredentialsDialog,
-                                              constants.authenticationFailed(),
-                                              new SVNOperation() {
-                                                  @Override
-                                                  public void perform(Credentials credentials) {
-                                                      merge(project, resources, credentials);
-                                                  }
-                                              });
-                       } else {
-                           notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                       }
-                   }
-               });
-    }
-
-
 
     /**
      * Performs actions when clicking Merge button.

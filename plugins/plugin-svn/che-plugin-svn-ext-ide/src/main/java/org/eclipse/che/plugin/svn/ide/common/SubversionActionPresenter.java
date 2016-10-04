@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.common;
 
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 
 /**
@@ -129,14 +131,31 @@ public class SubversionActionPresenter {
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
     }
 
-    protected <Y, T extends Promise<Y>> Promise<Y> doWithCredentialsIfNeeded(SVNOperation<T> operation) {
-        return operation.perform(null)
-                        .catchError(new Operation<PromiseError>() {
-                            @Override
-                            public void apply(PromiseError arg) throws OperationException {
-                                
-                            }
-                        });
+    /**
+     * Performs subversion operation. If this operations fails with authorization error
+     * the operation wil be performed with requested credentials
+     */
+    protected <Y, T extends Promise<Y>> Promise<Y> performOperationWithRequestingCredentialsIfNeeded(SVNOperation<T> operation) {
+        return operation.perform(null).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) {
+                if (getErrorCode(error.getCause()) == ErrorCodes.UNAUTHORIZED_SVN_OPERATION) {
+                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+
+                    credentialsDialog.askCredentials().then(new Operation<Credentials>() {
+                        @Override
+                        public void apply(Credentials credentials) throws OperationException {
+                            operation.perform(credentials);
+                        }
+                    }).catchError(new Operation<PromiseError>() {
+                        @Override
+                        public void apply(PromiseError error) throws OperationException {
+                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                        }
+                    });
+                }
+            }
+        });
     }
 
     protected interface SVNOperation<T extends Promise<?>> {

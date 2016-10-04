@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -45,11 +46,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.resource.Path.valueOf;
-import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 /**
  * Presenter for the {@link CommitView}.
@@ -84,7 +83,7 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                            ProcessesPanelPresenter processesPanelPresenter,
                            DiffViewerPresenter diffViewerPresenter,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
         this.service = service;
         this.view = view;
         this.subversionCredentialsDialog = subversionCredentialsDialog;
@@ -195,39 +194,28 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
         checkState(project != null);
 
-        showDiff(path, project, null);
-    }
+        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.showDiff(project.getLocation(),
+                                        new Path[]{valueOf(path)},
+                                        "HEAD",
+                                        credentials);
+            }
+        }).then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse response) throws OperationException {
+                String content = Joiner.on('\n').join(response.getOutput());
+                diffViewerPresenter.showDiff(content);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
 
-    private void showDiff(final String path, final Project project, final Credentials credentials) {
-        service.showDiff(project.getLocation(),
-                         new Path[]{valueOf(path)},
-                         "HEAD",
-                         credentials)
-               .then(new Operation<CLIOutputResponse>() {
-                   @Override
-                   public void apply(CLIOutputResponse response) throws OperationException {
-                       String content = Joiner.on('\n').join(response.getOutput());
-                       diffViewerPresenter.showDiff(content);
-                   }
-               })
-               .catchError(new Operation<PromiseError>() {
-                   @Override
-                   public void apply(PromiseError error) throws OperationException {
-                       if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                           tryWithCredentials(notificationManager,
-                                              subversionCredentialsDialog,
-                                              constants.authenticationFailed(),
-                                              new SVNOperation() {
-                                                  @Override
-                                                  public void perform(Credentials credentials) {
-                                                      showDiff(path, project, credentials);
-                                                  }
-                                              });
-                       } else {
-                           notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                       }
-                   }
-               });
+        view.onClose();
     }
 
     private void commitSelection(String message, boolean keepLocks) {
