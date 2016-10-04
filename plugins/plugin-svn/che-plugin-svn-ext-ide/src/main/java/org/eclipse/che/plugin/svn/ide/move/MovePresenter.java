@@ -143,11 +143,8 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                         }
                     });
                 } else {
-                    notification.setTitle(locale.moveNotificationFailed());
-                    notification.setStatus(FAIL);
+                    notificationManager.notify(locale.moveNotificationFailed(), FAIL, FLOAT_MODE);
                 }
-                notification.setTitle(locale.moveNotificationFailed());
-                notification.setStatus(FAIL);
             }
         });
 
