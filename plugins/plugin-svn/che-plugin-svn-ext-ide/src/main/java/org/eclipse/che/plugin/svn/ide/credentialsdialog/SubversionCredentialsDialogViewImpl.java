@@ -52,8 +52,7 @@ public class SubversionCredentialsDialogViewImpl extends Window implements Subve
     @Inject
     public SubversionCredentialsDialogViewImpl(SubversionExtensionLocalizationConstants locale) {
         this.locale = locale;
-        Widget widget = uiBinder.createAndBindUi(this);
-        this.setWidget(widget);
+        this.setWidget(uiBinder.createAndBindUi(this));
         this.setTitle(locale.credentialsDialogTitle());
 
         authenticateButton = createPrimaryButton(locale.credentialsDialogAuthenticateButton(), "svn-authentication-username", new ClickHandler() {
