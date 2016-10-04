@@ -155,6 +155,11 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     }
 
     @Override
+    public Promise<InfoResponse> info(Path project, String target, String revision, boolean children) {
+        return info(project, Path.valueOf(target), revision, children, dtoFactory.createDto(Credentials.class));
+    }
+
+    @Override
     public Promise<InfoResponse> info(Path project, Path target, String revision, boolean children, Credentials credentials) {
         final InfoRequest request = dtoFactory.createDto(InfoRequest.class)
                                               .withProjectPath(project.toString())
@@ -163,19 +168,6 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                                               .withChildren(children)
                                               .withUsername(credentials.getUsername())
                                               .withPassword(credentials.getPassword());
-
-        return asyncRequestFactory.createPostRequest(getBaseUrl() + "/info", request)
-                                  .loader(loader)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(InfoResponse.class));
-    }
-
-    @Override
-    public Promise<InfoResponse> info(Path project, String target, String revision, boolean children) {
-        final InfoRequest request = dtoFactory.createDto(InfoRequest.class)
-                                              .withProjectPath(project.toString())
-                                              .withTarget(target)
-                                              .withRevision(revision)
-                                              .withChildren(children);
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/info", request)
                                   .loader(loader)
