@@ -278,6 +278,9 @@ public class FileTreeWatcher {
         for (PendingEvent pendingEvent : pendingEvents) {
             Path eventDirectoryPath = pendingEvent.getPath();
             WatchedDirectory watchedDirectory = watchedDirectories.get(eventDirectoryPath);
+            if (watchedDirectory == null){
+                continue;
+            }
             if (Files.exists(eventDirectoryPath)) {
                 boolean isModifiedNotYetReported = true;
 
