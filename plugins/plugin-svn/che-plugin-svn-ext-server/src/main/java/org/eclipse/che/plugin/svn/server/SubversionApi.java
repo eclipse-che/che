@@ -909,7 +909,7 @@ public class SubversionApi {
         }
 
         String[] credentialsArgs;
-        if (username != null && password != null) {
+        if (!isNullOrEmpty(username) && !isNullOrEmpty(password)) {
             credentialsArgs = new String[]{"--username", username, "--password", password};
         } else {
             credentialsArgs = null;
