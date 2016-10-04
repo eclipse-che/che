@@ -108,6 +108,9 @@ public interface SubversionExtensionResources extends ClientBundle {
     @Source("actions/update.svg")
     SVGResource update();
 
+    @Source("actions/checkout.svg")
+    SVGResource checkout();
+
     @Source("actions/svn.svg")
     SVGResource svn();
 

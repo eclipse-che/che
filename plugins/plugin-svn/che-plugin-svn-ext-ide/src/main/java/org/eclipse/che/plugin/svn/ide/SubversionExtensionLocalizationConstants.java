@@ -309,6 +309,12 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("update.to.revision.title")
     String updateToRevisionTitle();
 
+    @Key("checkout.title")
+    String checkoutTitle();
+
+    @Key("checkout.description")
+    String checkoutDescription();
+
     @Key("change.credentials.title")
     String changeCredentialsTitle();
 
@@ -352,6 +358,9 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
 
     @Key("button.update")
     String buttonUpdate();
+
+    @Key("button.checkout")
+    String buttonCheckout();
 
     @Key("button.log")
     String buttonLog();

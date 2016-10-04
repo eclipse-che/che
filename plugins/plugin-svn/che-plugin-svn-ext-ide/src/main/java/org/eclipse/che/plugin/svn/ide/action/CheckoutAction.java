@@ -17,27 +17,30 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
-import org.eclipse.che.plugin.svn.ide.sw.SwitchPresenter;
+import org.eclipse.che.plugin.svn.ide.checkout.CheckoutPresenter;
 
 /**
- * Extension of {@link SubversionAction} for implementing the "svn switch" command.
+ * Extension of {@link SubversionAction} for implementing the "svn checkout" command.
+ *
+ * @author Anatolii Bazko
  */
 @Singleton
-public class SwitchAction extends SubversionAction {
+public class CheckoutAction extends SubversionAction {
 
-    private final SwitchPresenter presenter;
+    private final CheckoutPresenter presenter;
 
     @Inject
-    public SwitchAction(SwitchPresenter presenter,
-                        AppContext appContext,
-                        SubversionExtensionLocalizationConstants constants,
-                        SubversionExtensionResources resources) {
-        super(constants.switchTitle(), constants.switchDescription(), resources.switchLocation(), appContext, constants, resources);
+    public CheckoutAction(AppContext appContext,
+                          SubversionExtensionLocalizationConstants constants,
+                          SubversionExtensionResources resources,
+                          CheckoutPresenter presenter) {
+        super(constants.checkoutTitle(), constants.checkoutDescription(), resources.checkout(), appContext, constants, resources);
+
         this.presenter = presenter;
     }
 
     @Override
-    public void actionPerformed(ActionEvent actionEvent) {
+    public void actionPerformed(final ActionEvent e) {
         presenter.showWindow();
     }
 }

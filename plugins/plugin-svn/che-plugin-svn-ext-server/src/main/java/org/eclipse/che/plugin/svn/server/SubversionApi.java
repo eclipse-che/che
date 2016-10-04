@@ -60,6 +60,7 @@ import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
 import org.eclipse.che.plugin.svn.shared.SubversionItem;
+import org.eclipse.che.plugin.svn.shared.SwitchRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,6 +227,56 @@ public class SubversionApi {
                          .withCommand(result.getCommandLine().toString())
                          .withOutput(result.getStdout())
                          .withErrOutput(result.getStderr());
+    }
+
+
+    /**
+     * Perform an "svn switch" based on the request.
+     *
+     * @param request
+     *         the request
+     * @return the response
+     * @throws IOException
+     *         if there is a problem executing the command
+     * @throws SubversionException
+     *         if there is a Subversion issue
+     */
+    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws IOException, SubversionException {
+        return doSwitch(request, null);
+    }
+
+    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request,
+                                                  final String[] credentials) throws IOException, SubversionException {
+
+        final File projectPath = new File(request.getProjectPath());
+        final List<String> cliArgs = defaultArgs();
+
+        // Flags
+        addFlag(cliArgs, "--ignore-externals", request.isIgnoreExternals());
+        addFlag(cliArgs, "--ignore-ancestry", request.isIgnoreAncestry());
+        addFlag(cliArgs, "--relocate", request.isRelocate());
+        addFlag(cliArgs, "--force", request.isForce());
+
+        // Options
+        addOption(cliArgs, "--depth", request.getDepth());
+        addOption(cliArgs, "--set-depth", request.getSetDepth());
+        addOption(cliArgs, "--revision", request.getRevision());
+        addOption(cliArgs, "--accept", request.getAccept());
+
+        // Command Name
+        cliArgs.add("switch");
+
+        // Command Arguments
+        cliArgs.add(request.getUrl());
+        cliArgs.add(projectPath.getAbsolutePath());
+
+        CommandLineResult result = runCommand(null, cliArgs, projectPath, request.getPaths(), credentials, request.getUrl());
+
+        return DtoFactory.getInstance().createDto(CLIOutputWithRevisionResponse.class)
+                         .withCommand(result.getCommandLine().toString())
+                         .withOutput(result.getStdout())
+                         .withErrOutput(result.getStderr())
+                         .withRevision(SubversionUtils.getCheckoutRevision(result.getStdout()));
     }
 
     /**

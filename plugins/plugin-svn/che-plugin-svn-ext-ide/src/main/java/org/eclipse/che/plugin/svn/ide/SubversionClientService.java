@@ -164,6 +164,23 @@ public interface SubversionClientService {
      */
     Promise<CLIOutputWithRevisionResponse> update(Path project, Path[] paths, String revision, String depth, boolean ignoreExternals, String accept);
 
+    /**
+     * Update the working copy to a different URL within the same repository.
+     *
+     * @see org.eclipse.che.plugin.svn.shared.SwitchRequest
+     */
+    Promise<CLIOutputWithRevisionResponse> sw(String url,
+                                              Path project,
+                                              Path[] paths,
+                                              String revision,
+                                              String depth,
+                                              String setDepth,
+                                              String accept,
+                                              boolean ignoreExternals,
+                                              boolean ignoreAncestry,
+                                              boolean relocate,
+                                              boolean force);
+
     Promise<CLIOutputResponse> showLog(Path project, Path[] paths, String revision);
 
     Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision);

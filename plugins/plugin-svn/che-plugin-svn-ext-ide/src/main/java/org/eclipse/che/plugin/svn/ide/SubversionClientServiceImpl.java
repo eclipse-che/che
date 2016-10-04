@@ -48,6 +48,7 @@ import org.eclipse.che.plugin.svn.shared.SaveCredentialsRequest;
 import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
+import org.eclipse.che.plugin.svn.shared.SwitchRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
 
 import java.util.Collections;
@@ -210,6 +211,36 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                           .withAccept(accept);
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/update", request)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputWithRevisionResponse.class));
+    }
+
+    @Override
+    public Promise<CLIOutputWithRevisionResponse> sw(String url,
+                                                     Path project,
+                                                     Path[] paths,
+                                                     String revision,
+                                                     String depth,
+                                                     String setDepth,
+                                                     String accept,
+                                                     boolean ignoreExternals,
+                                                     boolean ignoreAncestry,
+                                                     boolean relocate,
+                                                     boolean force) {
+        SwitchRequest request = dtoFactory.createDto(SwitchRequest.class)
+                                          .withPaths(toList(paths))
+                                          .withProjectPath(project.toString())
+                                          .withDepth(depth)
+                                          .withSetDepth(setDepth)
+                                          .withRelocate(relocate)
+                                          .withIgnoreExternals(ignoreExternals)
+                                          .withIgnoreAncestry(ignoreAncestry)
+                                          .withRevision(revision)
+                                          .withAccept(accept)
+                                          .withForce(force)
+                                          .withUrl(url);
+
+        return asyncRequestFactory.createPostRequest(getBaseUrl() + "/switch", request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputWithRevisionResponse.class));
     }

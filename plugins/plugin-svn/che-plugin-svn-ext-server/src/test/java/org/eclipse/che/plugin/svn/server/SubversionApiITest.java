@@ -25,6 +25,7 @@ import org.eclipse.che.plugin.svn.shared.Depth;
 import org.eclipse.che.plugin.svn.shared.MoveRequest;
 import org.eclipse.che.plugin.svn.shared.PropertyDeleteRequest;
 import org.eclipse.che.plugin.svn.shared.PropertySetRequest;
+import org.eclipse.che.plugin.svn.shared.SwitchRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,6 +87,17 @@ public class SubversionApiITest {
         CLIOutputWithRevisionResponse response =
                 this.subversionApi.checkout(DtoFactory.getInstance()
                                                       .createDto(CheckoutRequest.class)
+                                                      .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                                      .withUrl(repoUrl));
+
+        assertTrue(response.getRevision() > -1);
+    }
+
+    @Test
+    public void testSwitch() throws Exception {
+        CLIOutputWithRevisionResponse response =
+                this.subversionApi.doSwitch(DtoFactory.getInstance()
+                                                      .createDto(SwitchRequest.class)
                                                       .withProjectPath(tmpDir.toFile().getAbsolutePath())
                                                       .withUrl(repoUrl)
                                                       .withDepth("immediates"));
