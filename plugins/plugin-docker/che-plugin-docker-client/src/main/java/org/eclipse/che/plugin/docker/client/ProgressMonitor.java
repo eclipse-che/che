@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client;
 
-import org.eclipse.che.api.core.util.ConsumerAlreadyClosedException;
 import org.eclipse.che.plugin.docker.client.json.ProgressStatus;
+
+import java.io.IOException;
 
 /**
  * Receives updated progress statuses to be able to show user beatified progress info.
@@ -20,7 +21,7 @@ import org.eclipse.che.plugin.docker.client.json.ProgressStatus;
  * @author Alexander Garagatyi
  */
 public interface ProgressMonitor {
-    void updateProgress(ProgressStatus currentProgressStatus) throws ConsumerAlreadyClosedException;
+    void updateProgress(ProgressStatus currentProgressStatus) throws IOException;
 
     ProgressMonitor DEV_NULL = new ProgressMonitor() {
         @Override

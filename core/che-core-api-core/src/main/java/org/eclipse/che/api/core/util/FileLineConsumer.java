@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author andrew00x
@@ -22,10 +23,12 @@ import java.nio.file.Files;
 public class FileLineConsumer implements LineConsumer {
     private final File   file;
     private final Writer writer;
+    private final AtomicBoolean isClosed;
 
     public FileLineConsumer(File file) throws IOException {
         this.file = file;
         writer = Files.newBufferedWriter(file.toPath(), Charset.defaultCharset());
+        isClosed = new AtomicBoolean(false);
     }
 
     public File getFile() {
@@ -34,22 +37,26 @@ public class FileLineConsumer implements LineConsumer {
 
     @Override
     public void writeLine(String line) throws IOException {
-        try {
-            if (line != null) {
-                writer.write(line);
+        if (!isClosed.get()) {
+            try {
+                if (line != null) {
+                    writer.write(line);
+                }
+                writer.write('\n');
+                writer.flush();
+            } catch (IOException e) {
+                if ("Stream closed".equals(e.getMessage())) {
+                    throw new ConsumerAlreadyClosedException(e.getMessage());
+                }
+                throw e;
             }
-            writer.write('\n');
-            writer.flush();
-        } catch (IOException e) {
-            if("Stream closed".equals(e.getMessage())) {
-                throw new ConsumerAlreadyClosedException(e.getMessage());
-            }
-            throw e;
         }
     }
 
     @Override
     public void close() throws IOException {
-        writer.close();
+        if (isClosed.compareAndSet(false, true)) {
+            writer.close();
+        }
     }
 }
