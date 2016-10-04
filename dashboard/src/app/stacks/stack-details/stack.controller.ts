@@ -16,6 +16,27 @@
  * @author Ann Shumilova
  */
 export class StackController {
+  $log: ng.ILogService;
+  $filter: ng.IFilterService;
+  $timeout: ng.ITimeoutService;
+  $location: ng.ILocationService;
+  $mdDialog: angular.material.IDialogService;
+
+  loading: boolean;
+  isLoading: boolean;
+  isCreation: boolean;
+
+  stackId: string;
+  stackName: string;
+  stackContent: string;
+  invalidStack: string;
+
+  stack: any;
+  editorOptions: any;
+  changesPromise: any;
+
+  cheStack;
+  cheNotification;
 
   /**
    * Default constructor that is using resource injection
@@ -57,14 +78,14 @@ export class StackController {
    *
    * @returns {{stack}} new stack template
    */
-  getNewStackTemplate() {
+  getNewStackTemplate(): any {
     this.stackName = 'New Stack';
-    let stack = {};
+    let stack: any = {};
     stack.name = this.stackName;
     stack.description = '';
     stack.source = {};
     stack.source.origin = '';
-    stack.source.type = ''
+    stack.source.type = '';
     stack.components = [];
     stack.tags = [];
     stack.workspaceConfig = {};
@@ -75,7 +96,7 @@ export class StackController {
   /**
    * Fetch the stack details.
    */
-  fetchStack() {
+  fetchStack(): void {
     this.loading = true;
     this.stack = this.cheStack.getStackById(this.stackId);
 
@@ -103,9 +124,35 @@ export class StackController {
   }
 
   /**
+   * Handle stack's tag adding.
+   *
+   * @param tag {string} stack's tag
+   * @returns {string} tag if it is unique one, otherwise null
+   */
+  handleTagAdding(tag: string): string {
+    //Prevents mentioning same tags twice:
+    if (this.stack.tags.includes(tag)) {
+      return null;
+    }
+
+    return tag;
+  }
+
+  /**
+   * Update stack's editor content.
+   */
+  updateEditorContent(): void {
+    this.stackContent = this.$filter('json')(this.stack);
+  }
+
+  /**
    * Prepare data to be displayed.
    */
-  prepareStackData() {
+  prepareStackData(): void {
+    if (!this.stack.tags) {
+      this.stack.tags = [];
+    }
+
     delete this.stack.links;
     this.stackName = angular.copy(this.stack.name);
     this.stackContent = this.$filter('json')(this.stack);
@@ -115,14 +162,14 @@ export class StackController {
    * Updates stack info.
    * @param isFormValid {Boolean} true if form is valid
    */
-  updateStack(isFormValid) {
+  updateStack(isFormValid: boolean) {
     if (this.isCreation) {
       this.stack.name = this.stackName;
-      this.stackContent = this.$filter('json')(this.stack);
+      this.updateEditorContent();
       return;
     }
 
-    this.stackContent = this.$filter('json')(this.stack);
+    this.updateEditorContent();
 
     if (this.changesPromise) {
       this.$timeout.cancel(this.changesPromise);
@@ -154,7 +201,7 @@ export class StackController {
   /**
    * Saves stack configuration - creates new one or updates existing.
    */
-  saveStack() {
+  saveStack(): void {
     if (this.isCreation) {
       this.createStack();
       return;
@@ -176,7 +223,7 @@ export class StackController {
   /**
    * Creates new stack.
    */
-  createStack() {
+  createStack(): void {
     this.cheStack.createStack(this.stackContent).then((stack) => {
       this.cheNotification.showInfo('Stack is successfully created.');
       this.stack = stack;
@@ -193,7 +240,7 @@ export class StackController {
   /**
    * Deletes current stack if user confirms.
    */
-  deleteStack() {
+  deleteStack(): void {
     let confirmTitle = 'Would you like to delete ' + this.stack.name + '?';
 
     let confirm = this.$mdDialog.confirm()

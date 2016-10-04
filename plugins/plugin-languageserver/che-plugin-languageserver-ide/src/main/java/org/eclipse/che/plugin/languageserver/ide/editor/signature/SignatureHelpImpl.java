@@ -12,10 +12,10 @@ package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
 import com.google.common.base.Optional;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.SignatureHelpDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.SignatureInformationDTO;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureInfo;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.SignatureHelpDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.SignatureInformationDTO;
 
 import java.util.ArrayList;
 import java.util.List;

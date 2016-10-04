@@ -180,6 +180,16 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-languageserver</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-languageserver-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-machine</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -543,17 +553,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-json-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-languageserver-ide</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-languageserver-server</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-languageserver-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -589,6 +594,16 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-maven-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-nodejs-debugger-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-nodejs-debugger-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

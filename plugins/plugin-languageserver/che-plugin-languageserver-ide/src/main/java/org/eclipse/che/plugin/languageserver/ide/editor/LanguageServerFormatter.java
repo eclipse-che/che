@@ -15,6 +15,14 @@ import io.typefox.lsapi.ServerCapabilities;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.FormattingOptionsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextEditDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -32,14 +40,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentFormattingParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentOnTypeFormattingParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DocumentRangeFormattingParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.FormattingOptionsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.RangeDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextEditDTO;
 
 import java.util.List;
 

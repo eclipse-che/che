@@ -16,12 +16,12 @@ import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.agent.server.launcher.AgentLauncher;
+import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
 import org.eclipse.che.account.api.AccountModule;
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
-import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigMessageBodyAdapter;
@@ -45,8 +45,8 @@ public class WsMasterModule extends AbstractModule {
     protected void configure() {
 
         install(new JpaPersistModule("main"));
+        bind(JpaInitializer.class).to(org.eclipse.che.api.core.h2.jdbc.jpa.guice.CheJpaInitializer.class).asEagerSingleton();
         bind(CheUserCreator.class);
-        bind(JpaInitializer.class).asEagerSingleton();
         bind(EntityListenerInjectionManagerInitializer.class).asEagerSingleton();
         install(new UserJpaModule());
         install(new SshJpaModule());

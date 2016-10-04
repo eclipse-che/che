@@ -793,7 +793,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String consolesToolbarButtonColor() {
-        return "#aaaaaa";
+        return "#808080";
     }
 
     @Override

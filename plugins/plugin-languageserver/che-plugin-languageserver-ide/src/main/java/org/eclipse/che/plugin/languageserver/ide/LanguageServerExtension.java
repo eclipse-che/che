@@ -14,6 +14,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentItemDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -33,11 +38,6 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.references.FindRefer
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentItemDTO;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 
