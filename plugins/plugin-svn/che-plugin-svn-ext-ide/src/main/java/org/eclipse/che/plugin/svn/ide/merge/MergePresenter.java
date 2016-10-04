@@ -129,7 +129,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                               .then(new Operation<InfoResponse>() {
                                   @Override
                                   public void apply(InfoResponse response) throws OperationException {
-                                      if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
+                                      if (!response.getErrorOutput().isEmpty()) {
                                           printErrors(response.getErrorOutput(), constants.commandInfo());
                                           notificationManager.notify("Unable to execute subversion command", FAIL, FLOAT_MODE);
                                           return;
