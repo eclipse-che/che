@@ -173,19 +173,15 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    notificationManager.notify(constants.authenticationFailed(), FAIL, FLOAT_MODE);
-
-                    subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
-                        @Override
-                        public void apply(Credentials credentials) throws OperationException {
-                            doLockAction(force, paths, project, credentials);
-                        }
-                    }).catchError(new Operation<PromiseError>() {
-                        @Override
-                        public void apply(PromiseError error) throws OperationException {
-                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                        }
-                    });
+                    tryWithCredentials(notificationManager,
+                                       subversionCredentialsDialog,
+                                       constants.authenticationFailed(),
+                                       new SVNOperation() {
+                                           @Override
+                                           public void perform(Credentials credentials) {
+                                               doLockAction(force, paths, project, credentials);
+                                           }
+                                       });
                 } else {
                     notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
                 }
@@ -206,19 +202,15 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    notificationManager.notify(constants.authenticationFailed(), FAIL, FLOAT_MODE);
-
-                    subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
-                        @Override
-                        public void apply(Credentials credentials) throws OperationException {
-                            doUnlockAction(force, paths, project, credentials);
-                        }
-                    }).catchError(new Operation<PromiseError>() {
-                        @Override
-                        public void apply(PromiseError error) throws OperationException {
-                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                        }
-                    });
+                    tryWithCredentials(notificationManager,
+                                       subversionCredentialsDialog,
+                                       constants.authenticationFailed(),
+                                       new SVNOperation() {
+                                           @Override
+                                           public void perform(Credentials credentials) {
+                                               doUnlockAction(force, paths, project, credentials);
+                                           }
+                                       });
                 } else {
                     notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
                 }

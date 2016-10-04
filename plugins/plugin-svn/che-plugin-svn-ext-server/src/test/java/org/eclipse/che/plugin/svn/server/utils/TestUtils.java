@@ -25,8 +25,6 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.svn.server.SubversionApi;
 import org.eclipse.che.plugin.svn.server.SubversionException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.upstream.CommandLineResult;
 import org.eclipse.che.plugin.svn.server.upstream.UpstreamUtils;

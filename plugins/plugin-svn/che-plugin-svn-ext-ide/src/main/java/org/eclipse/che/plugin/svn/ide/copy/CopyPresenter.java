@@ -147,24 +147,20 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
             @Override
             public void apply(PromiseError error) throws OperationException {
                 if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    notificationManager.notify(constants.authenticationFailed(), FAIL, FLOAT_MODE);
-
-                    subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
-                        @Override
-                        public void apply(Credentials credentials) throws OperationException {
-                            onCopyClicked(project,
-                                          src,
-                                          target,
-                                          comment,
-                                          notification,
-                                          credentials);
-                        }
-                    }).catchError(new Operation<PromiseError>() {
-                        @Override
-                        public void apply(PromiseError error) throws OperationException {
-                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                        }
-                    });
+                    tryWithCredentials(notificationManager,
+                                       subversionCredentialsDialog,
+                                       constants.authenticationFailed(),
+                                       new SVNOperation() {
+                                           @Override
+                                           public void perform(Credentials credentials) {
+                                               onCopyClicked(project,
+                                                             src,
+                                                             target,
+                                                             comment,
+                                                             notification,
+                                                             credentials);
+                                           }
+                                       });
                 } else {
                     notification.setTitle(constants.copyNotificationFailed());
                     notification.setStatus(FAIL);

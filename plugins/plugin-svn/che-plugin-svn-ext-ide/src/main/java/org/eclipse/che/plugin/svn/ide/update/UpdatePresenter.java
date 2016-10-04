@@ -120,27 +120,22 @@ public class UpdatePresenter extends SubversionActionPresenter {
                    @Override
                    public void apply(final PromiseError error) throws OperationException {
                        if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                           notification.setTitle(constants.authenticationFailed());
-                           notification.setStatus(FAIL);
-
-                           subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
-                               @Override
-                               public void apply(Credentials credentials) throws OperationException {
-                                   doUpdate(revision,
-                                            depth,
-                                            ignoreExternals,
-                                            view,
-                                            project,
-                                            resources,
-                                            notification,
-                                            credentials);
-                               }
-                           }).catchError(new Operation<PromiseError>() {
-                               @Override
-                               public void apply(PromiseError arg) throws OperationException {
-                                   notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                               }
-                           });
+                           tryWithCredentials(notificationManager,
+                                              subversionCredentialsDialog,
+                                              constants.authenticationFailed(),
+                                              new SVNOperation() {
+                                                  @Override
+                                                  public void perform(Credentials credentials) {
+                                                      doUpdate(revision,
+                                                               depth,
+                                                               ignoreExternals,
+                                                               view,
+                                                               project,
+                                                               resources,
+                                                               notification,
+                                                               credentials);
+                                                  }
+                                              });
                        } else {
                            notification.setTitle(constants.updateFailed());
                            notification.setStatus(FAIL);

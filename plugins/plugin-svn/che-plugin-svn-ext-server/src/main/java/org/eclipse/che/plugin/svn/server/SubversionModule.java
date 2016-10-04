@@ -17,10 +17,6 @@ import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CurrentUserPreferencesAccess;
-import org.eclipse.che.plugin.svn.server.credentials.CurrentUserPreferencesAccessImpl;
-import org.eclipse.che.plugin.svn.server.credentials.PreferencesCredentialsProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProviderImpl;
 import org.eclipse.che.plugin.svn.server.rest.SubversionService;
@@ -40,9 +36,7 @@ public class SubversionModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), ValueProviderFactory.class).addBinding().to(SubversionValueProviderFactory.class);
 
         bind(SubversionService.class);
-        bind(CredentialsProvider.class).to(PreferencesCredentialsProvider.class);
         bind(RepositoryUrlProvider.class).to(RepositoryUrlProviderImpl.class);
-        bind(CurrentUserPreferencesAccess.class).to(CurrentUserPreferencesAccessImpl.class);
 
         bind(SubversionConfigurationChecker.class).asEagerSingleton();
     }

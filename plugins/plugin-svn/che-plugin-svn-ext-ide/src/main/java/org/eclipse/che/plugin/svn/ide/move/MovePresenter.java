@@ -129,19 +129,15 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
             @Override
             public void apply(PromiseError error) throws OperationException {
                 if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    notificationManager.notify(locale.authenticationFailed(), FAIL, FLOAT_MODE);
-
-                    subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
-                        @Override
-                        public void apply(Credentials credentials) throws OperationException {
-                            onMoveClicked(notification, source, comment, credentials);
-                        }
-                    }).catchError(new Operation<PromiseError>() {
-                        @Override
-                        public void apply(PromiseError error) throws OperationException {
-                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                        }
-                    });
+                    tryWithCredentials(notificationManager,
+                                       subversionCredentialsDialog,
+                                       locale.authenticationFailed(),
+                                       new SVNOperation() {
+                                           @Override
+                                           public void perform(Credentials credentials) {
+                                               onMoveClicked(notification, source, comment, credentials);
+                                           }
+                                       });
                 } else {
                     notificationManager.notify(locale.moveNotificationFailed(), FAIL, FLOAT_MODE);
                 }

@@ -58,10 +58,7 @@ public class SubversionCredentialsDialogImpl implements SubversionCredentialsDia
 
     @Override
     public void onAuthenticateClicked() {
-        Credentials credentials = new Credentials();
-        credentials.setUsername(view.getUsername());
-        credentials.setPassword(view.getPassword());
-        callback.onSuccess(credentials);
+        callback.onSuccess(new Credentials(view.getUsername(), view.getPassword()));
         view.closeDialog();
     }
 

@@ -14,7 +14,6 @@ import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.utils.TestUtils;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;

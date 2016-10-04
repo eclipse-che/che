@@ -10,15 +10,24 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.common;
 
+import org.eclipse.che.api.promises.client.Operation;
+import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.action.SubversionAction;
 
 import java.util.List;
+
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 
 /**
@@ -68,8 +77,10 @@ public class SubversionActionPresenter {
     /**
      * Prints errors output in console.
      *
-     * @param errors the error output
-     * @param consoleTitle the title of the console to use
+     * @param errors
+     *         the error output
+     * @param consoleTitle
+     *         the title of the console to use
      */
     protected void printErrors(final List<String> errors, final String consoleTitle) {
         final SubversionOutputConsole console = consoleFactory.create(consoleTitle);
@@ -82,10 +93,14 @@ public class SubversionActionPresenter {
     /**
      * Colorizes and prints response outputs in console.
      *
-     * @param command the SVN command that was executed
-     * @param output the command output
-     * @param errors the error output
-     * @param consoleTitle the title of the console to use
+     * @param command
+     *         the SVN command that was executed
+     * @param output
+     *         the command output
+     * @param errors
+     *         the error output
+     * @param consoleTitle
+     *         the title of the console to use
      */
     protected void printResponse(final String command, final List<String> output, final List<String> errors, final String consoleTitle) {
         final SubversionOutputConsole console = consoleFactory.create(consoleTitle);
@@ -108,10 +123,47 @@ public class SubversionActionPresenter {
     }
 
     /**
+     * Performs given subversion operation with credentials.
+     *
+     * @param notificationManager
+     *         notification manager
+     * @param subversionCredentialsDialog
+     *         dialog for retrieving credentials
+     * @param errorMessage
+     *         error message to show in notification
+     * @param operation
+     *         subversion operation to perform when credentials are received
+     */
+    protected void tryWithCredentials(final NotificationManager notificationManager,
+                                      final SubversionCredentialsDialog subversionCredentialsDialog,
+                                      final String errorMessage,
+                                      final SVNOperation operation) {
+        notificationManager.notify(errorMessage, FAIL, FLOAT_MODE);
+
+        subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
+            @Override
+            public void apply(Credentials credentials) throws OperationException {
+                operation.perform(credentials);
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
+    }
+
+    protected interface SVNOperation {
+        void perform(Credentials credentials);
+    }
+
+    /**
      * Prints an executed command line in given console.
      *
-     * @param command the SVN command that was executed
-     * @param console the console to use to print
+     * @param command
+     *         the SVN command that was executed
+     * @param console
+     *         the console to use to print
      */
     private void printCommand(String command, final SubversionOutputConsole console) {
         if (command.startsWith("'") || command.startsWith("\"")) {
@@ -125,8 +177,10 @@ public class SubversionActionPresenter {
     /**
      * Prints output in given console.
      *
-     * @param output the command output
-     * @param console the console to use to print
+     * @param output
+     *         the command output
+     * @param console
+     *         the console to use to print
      */
     private void printOutput(List<String> output, SubversionOutputConsole console) {
         for (final String line : output) {
@@ -135,14 +189,14 @@ public class SubversionActionPresenter {
                 String prefix = trimLine.substring(0, 1);
 
                 final String color = statusColors.getStatusColor(prefix);
-                    if (color != null) {
-                        // TODO: Turn the file paths into links (where appropriate)
-                        console.print(line, color);
-                    } else {
-                        console.print(line);
-                    }
+                if (color != null) {
+                    // TODO: Turn the file paths into links (where appropriate)
+                    console.print(line, color);
+                } else {
+                    console.print(line);
                 }
             }
+        }
 
         console.print("");
     }

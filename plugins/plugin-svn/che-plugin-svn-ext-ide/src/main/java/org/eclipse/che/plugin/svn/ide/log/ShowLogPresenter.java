@@ -123,19 +123,15 @@ public class ShowLogPresenter extends SubversionActionPresenter {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 if (getErrorCode(error.getCause()) == UNAUTHORIZED_SVN_OPERATION) {
-                    notificationManager.notify(constants.authenticationFailed(), FAIL, FLOAT_MODE);
-
-                    subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
-                        @Override
-                        public void apply(Credentials credentials) throws OperationException {
-                            showLog(project, resources, credentials);
-                        }
-                    }).catchError(new Operation<PromiseError>() {
-                        @Override
-                        public void apply(PromiseError error) throws OperationException {
-                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                        }
-                    });
+                    tryWithCredentials(notificationManager,
+                                       subversionCredentialsDialog,
+                                       constants.authenticationFailed(),
+                                       new SVNOperation() {
+                                           @Override
+                                           public void perform(Credentials credentials) {
+                                               showLog(project, resources, credentials);
+                                           }
+                                       });
                 } else {
                     notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
                 }

@@ -19,9 +19,6 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.svn.server.SubversionApi;
 import org.eclipse.che.plugin.svn.server.SubversionException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider.Credentials;
 import org.eclipse.che.plugin.svn.shared.AddRequest;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
@@ -45,7 +42,6 @@ import org.eclipse.che.plugin.svn.shared.PropertySetRequest;
 import org.eclipse.che.plugin.svn.shared.RemoveRequest;
 import org.eclipse.che.plugin.svn.shared.ResolveRequest;
 import org.eclipse.che.plugin.svn.shared.RevertRequest;
-import org.eclipse.che.plugin.svn.shared.SaveCredentialsRequest;
 import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
@@ -77,9 +73,6 @@ public class SubversionService extends Service {
 
     @Inject
     private SubversionApi subversionApi;
-
-    @Inject
-    private CredentialsProvider credentialsProvider;
 
 
     /**
@@ -369,19 +362,6 @@ public class SubversionService extends Service {
     public CLIOutputResponse unlock(final LockRequest request) throws ApiException, IOException {
         request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
         return this.subversionApi.lockUnlock(request, false);
-    }
-
-    @Path("saveCredentials")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public void saveCredentials(final SaveCredentialsRequest request) throws ServerException, IOException {
-        try {
-            this.credentialsProvider.storeCredential(request.getRepositoryUrl(),
-                                                     new Credentials(request.getUsername(), request.getPassword()));
-        } catch (final CredentialsException e) {
-            throw new ServerException(e.getMessage());
-        }
     }
 
     @Path("export/{projectPath:.*}")
