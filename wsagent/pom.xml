@@ -32,6 +32,8 @@
         <module>che-core-git-impl-jgit</module>
         <module>che-core-api-debug</module>
         <module>che-core-api-debug-shared</module>
+        <module>che-core-api-languageserver</module>
+        <module>che-core-api-languageserver-shared</module>
         <module>wsagent-local</module>
     </modules>
 </project>

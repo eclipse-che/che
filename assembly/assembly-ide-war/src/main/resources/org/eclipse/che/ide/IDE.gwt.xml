@@ -81,6 +81,7 @@
     <inherits name="org.eclipse.che.api.workspace.Workspace"/>
     <inherits name="org.eclipse.che.api.debug.Debug"/>
     <inherits name="org.eclipse.che.api.ssh.Ssh"/>
+    <inherits name="org.eclipse.che.api.languageserver.LanguageServer"/>
 
     <inherits name="org.eclipse.che.plugin.svn.Subversion"/>
 

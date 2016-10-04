@@ -15,6 +15,7 @@ import com.google.gwt.core.client.JsArrayString;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.LanguageDescriptionDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -30,7 +31,6 @@ import org.eclipse.che.ide.editor.orion.client.jso.OrionHighlightingConfiguratio
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProvider;
 import org.eclipse.che.plugin.languageserver.ide.hover.HoverProvider;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
 
 import java.util.List;
 

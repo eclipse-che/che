@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.editor;
 
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DiagnosticDTO;
+
+import org.eclipse.che.api.languageserver.shared.lsapi.DiagnosticDTO;
 
 /**
  * @author Evgen Vidolob
