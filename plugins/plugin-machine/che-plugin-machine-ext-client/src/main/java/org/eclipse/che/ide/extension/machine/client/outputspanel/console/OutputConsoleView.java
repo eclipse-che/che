@@ -60,6 +60,14 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
     void print(String text, boolean carriageReturn, String color);
 
     /**
+     * Returns the console text.
+     *
+     * @return
+     *         console text
+     */
+    String getText();
+
+    /**
      * Hides command title and command label.
      */
     void hideCommand();
@@ -138,6 +146,9 @@ public interface OutputConsoleView extends View<OutputConsoleView.ActionDelegate
 
         /** Handle click on `Clear console` button. */
         void clearOutputsButtonClicked();
+
+        /** Handle click on `Download outputs` button. */
+        void downloadOutputsButtonClicked();
 
         /** Handle click on `Wrap text` button. */
         void wrapTextButtonClicked();

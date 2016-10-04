@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ui.loaders;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.web.bindery.event.shared.EventBus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ import java.util.Map;
  * @author Vitaliy Guliy
  */
 @Singleton
-public class LoaderPresenter {
+public class LoaderPresenter implements PopupLoader.ActionDelegate {
 
     public enum Phase {
         STARTING_WORKSPACE_RUNTIME,
@@ -36,14 +37,17 @@ public class LoaderPresenter {
 
     private PopupLoaderFactory      popupLoaderFactory;
     private PopupLoaderMessages     locale;
+    private EventBus                eventBus;
 
     private Map<Phase, PopupLoader> popups = new HashMap<>();
 
     @Inject
     public LoaderPresenter(PopupLoaderFactory popupLoaderFactory,
-                           PopupLoaderMessages locale) {
+                           PopupLoaderMessages locale,
+                           EventBus eventBus) {
         this.popupLoaderFactory = popupLoaderFactory;
         this.locale = locale;
+        this.eventBus = eventBus;
     }
 
     /**
@@ -78,6 +82,7 @@ public class LoaderPresenter {
         switch (phase) {
             case STARTING_WORKSPACE_RUNTIME:
                 loader = popupLoaderFactory.getPopup(locale.startingWorkspaceRuntime(), locale.startingWorkspaceRuntimeDescription());
+                loader.showDownloadButton();
                 break;
             case STARTING_WORKSPACE_AGENT:
                 loader = popupLoaderFactory.getPopup(locale.startingWorkspaceAgent(), locale.startingWorkspaceAgentDescription());
@@ -96,6 +101,7 @@ public class LoaderPresenter {
                 break;
         }
 
+        loader.setDelegate(this);
         popups.put(phase, loader);
         return loader;
     }
@@ -128,6 +134,11 @@ public class LoaderPresenter {
             popups.remove(phase);
             popup.setError();
         }
+    }
+
+    @Override
+    public void onDownloadLogs() {
+        eventBus.fireEvent(new DownloadWorkspaceOutputEvent());
     }
 
 }

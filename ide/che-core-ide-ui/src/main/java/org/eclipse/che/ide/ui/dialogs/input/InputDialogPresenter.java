@@ -74,6 +74,30 @@ public class InputDialogPresenter implements InputDialog, InputDialogView.Action
         this.localizationConstant = localizationConstant;
     }
 
+    @AssistedInject
+    public InputDialogPresenter(final @NotNull InputDialogView view,
+                                final @NotNull @Assisted("title") String title,
+                                final @NotNull @Assisted("label") String label,
+                                final @NotNull @Assisted("initialValue") String initialValue,
+                                final @NotNull @Assisted("selectionStartIndex") Integer selectionStartIndex,
+                                final @NotNull @Assisted("selectionLength") Integer selectionLength,
+                                final @NotNull @Assisted("okButtonLabel") String okButtonLabel,
+                                final @Nullable @Assisted InputCallback inputCallback,
+                                final @Nullable @Assisted CancelCallback cancelCallback,
+                                final UILocalizationConstant localizationConstant) {
+        this.view = view;
+        this.view.setContent(label);
+        this.view.setTitle(title);
+        this.view.setValue(initialValue);
+        this.view.setSelectionStartIndex(selectionStartIndex);
+        this.view.setSelectionLength(selectionLength);
+        this.view.setOkButtonLabel(okButtonLabel);
+        this.inputCallback = inputCallback;
+        this.cancelCallback = cancelCallback;
+        this.view.setDelegate(this);
+        this.localizationConstant = localizationConstant;
+    }
+
     @Override
     public void cancelled() {
         view.closeDialog();
