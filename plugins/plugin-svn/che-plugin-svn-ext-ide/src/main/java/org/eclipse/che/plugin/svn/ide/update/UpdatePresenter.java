@@ -84,7 +84,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
         final StatusNotification notification = new StatusNotification(constants.updateToRevisionStarted(revision), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        doUpdate(revision, depth, ignoreExternals, view, project, resources, notification, null, null);
+        doUpdate(revision, depth, ignoreExternals, view, project, resources, notification, null);
     }
 
     private void doUpdate(final String revision,
@@ -94,16 +94,14 @@ public class UpdatePresenter extends SubversionActionPresenter {
                           final Project project,
                           final Resource[] resources,
                           final StatusNotification notification,
-                          final String username,
-                          final String password) {
+                          final Credentials credentials) {
         service.update(project.getLocation(),
                        toRelative(project, resources),
                        revision,
                        depth,
                        ignoreExternals,
                        "postpone",
-                       username,
-                       password)
+                       credentials)
                .then(new Operation<CLIOutputWithRevisionResponse>() {
                    @Override
                    public void apply(CLIOutputWithRevisionResponse response) throws OperationException {
@@ -135,8 +133,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
                                             project,
                                             resources,
                                             notification,
-                                            credentials.getUsername(),
-                                            credentials.getPassword());
+                                            credentials);
                                }
                            }).catchError(new Operation<PromiseError>() {
                                @Override

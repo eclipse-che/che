@@ -112,15 +112,14 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                 new StatusNotification(locale.moveNotificationStarted(source.toString()), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        onMoveClicked(notification, source, comment, null, null);
+        onMoveClicked(notification, source, comment, null);
     }
 
     private void onMoveClicked(final StatusNotification notification,
                                final Path source,
                                final String comment,
-                               final String username,
-                               final String password) {
-        service.move(project.getLocation(), source, getTarget(), comment, username, password).then(new Operation<CLIOutputResponse>() {
+                               final Credentials credentials) {
+        service.move(project.getLocation(), source, getTarget(), comment, credentials).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 notification.setTitle(locale.moveNotificationSuccessful());
@@ -135,7 +134,7 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                     subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
                         @Override
                         public void apply(Credentials credentials) throws OperationException {
-                            onMoveClicked(notification, source, comment, credentials.getUsername(), credentials.getPassword());
+                            onMoveClicked(notification, source, comment, credentials);
                         }
                     }).catchError(new Operation<PromiseError>() {
                         @Override

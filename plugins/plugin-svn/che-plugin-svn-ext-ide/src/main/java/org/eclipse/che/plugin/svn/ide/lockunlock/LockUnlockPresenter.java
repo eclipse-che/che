@@ -154,18 +154,17 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
 
         checkState(project != null);
         if (lock) {
-            doLockAction(force, paths, project, null, null);
+            doLockAction(force, paths, project, null);
         } else {
-            doUnlockAction(force, paths, project, null, null);
+            doUnlockAction(force, paths, project, null);
         }
     }
 
     private void doLockAction(final boolean force,
                               final Path[] paths,
                               final Project project,
-                              final String username,
-                              final String password) {
-        service.lock(project.getLocation(), paths, force, username, password).then(new Operation<CLIOutputResponse>() {
+                              final Credentials credentials) {
+        service.lock(project.getLocation(), paths, force, credentials).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandLock());
@@ -179,7 +178,7 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                     subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
                         @Override
                         public void apply(Credentials credentials) throws OperationException {
-                            doLockAction(force, paths, project, credentials.getUsername(), credentials.getPassword());
+                            doLockAction(force, paths, project, credentials);
                         }
                     }).catchError(new Operation<PromiseError>() {
                         @Override
@@ -197,9 +196,8 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
     private void doUnlockAction(final boolean force,
                                 final Path[] paths,
                                 final Project project,
-                                final String username,
-                                final String password) {
-        service.unlock(project.getLocation(), paths, force, username, password).then(new Operation<CLIOutputResponse>() {
+                                final Credentials credentials) {
+        service.unlock(project.getLocation(), paths, force, credentials).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandUnlock());
@@ -213,7 +211,7 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                     subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
                         @Override
                         public void apply(Credentials credentials) throws OperationException {
-                            doUnlockAction(force, paths, project, credentials.getUsername(), credentials.getPassword());
+                            doUnlockAction(force, paths, project, credentials);
                         }
                     }).catchError(new Operation<PromiseError>() {
                         @Override

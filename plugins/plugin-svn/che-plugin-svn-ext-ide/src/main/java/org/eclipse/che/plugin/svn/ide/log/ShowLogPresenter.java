@@ -101,11 +101,11 @@ public class ShowLogPresenter extends SubversionActionPresenter {
         checkState(!Arrays.isNullOrEmpty(resources));
         checkState(resources.length == 1);
 
-        showLog(project, resources, null, null);
+        showLog(project, resources, null);
     }
 
-    private void showLog(final Project project, final Resource[] resources, final String username, final String password) {
-        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, username, password).then(new Operation<InfoResponse>() {
+    private void showLog(final Project project, final Resource[] resources, final Credentials credentials) {
+        service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials).then(new Operation<InfoResponse>() {
             @Override
             public void apply(InfoResponse response) throws OperationException {
                 if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {
@@ -128,7 +128,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
                     subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
                         @Override
                         public void apply(Credentials credentials) throws OperationException {
-                            showLog(project, resources, credentials.getUsername(), credentials.getPassword());
+                            showLog(project, resources, credentials);
                         }
                     }).catchError(new Operation<PromiseError>() {
                         @Override

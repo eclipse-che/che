@@ -126,7 +126,7 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
 
         view.hide();
 
-        onCopyClicked(project, src, target, comment, notification, null, null);
+        onCopyClicked(project, src, target, comment, notification, null);
     }
 
     private void onCopyClicked(final Project project,
@@ -134,9 +134,8 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
                                final Path target,
                                final String comment,
                                final StatusNotification notification,
-                               final String username,
-                               final String password) {
-        service.copy(project.getLocation(), src, target, comment, username, password).then(new Operation<CLIOutputResponse>() {
+                               final Credentials credentials) {
+        service.copy(project.getLocation(), src, target, comment, credentials).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandCopy());
@@ -158,8 +157,7 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
                                           target,
                                           comment,
                                           notification,
-                                          credentials.getUsername(),
-                                          credentials.getPassword());
+                                          credentials);
                         }
                     }).catchError(new Operation<PromiseError>() {
                         @Override

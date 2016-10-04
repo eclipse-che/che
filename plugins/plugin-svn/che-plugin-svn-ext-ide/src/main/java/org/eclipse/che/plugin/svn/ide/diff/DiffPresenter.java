@@ -74,11 +74,11 @@ public class DiffPresenter extends SubversionActionPresenter {
 
         checkState(!Arrays.isNullOrEmpty(resources));
 
-        showDiff(project, resources, null, null);
+        showDiff(project, resources, null);
     }
 
-    private void showDiff(final Project project, final Resource[] resources, final String username, final String password) {
-        service.showDiff(project.getLocation(), toRelative(project, resources), "HEAD", username, password).then(new Operation<CLIOutputResponse>() {
+    private void showDiff(final Project project, final Resource[] resources, final Credentials credentials) {
+        service.showDiff(project.getLocation(), toRelative(project, resources), "HEAD", credentials).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandDiff());
@@ -92,7 +92,7 @@ public class DiffPresenter extends SubversionActionPresenter {
                     subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
                         @Override
                         public void apply(Credentials credentials) throws OperationException {
-                            showDiff(project, resources, credentials.getUsername(), credentials.getPassword());
+                            showDiff(project, resources, credentials);
                         }
                     }).catchError(new Operation<PromiseError>() {
                         @Override

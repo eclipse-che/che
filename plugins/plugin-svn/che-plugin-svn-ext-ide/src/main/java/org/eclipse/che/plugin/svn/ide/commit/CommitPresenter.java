@@ -195,15 +195,14 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
         checkState(project != null);
 
-        showDiff(path, project, null, null);
+        showDiff(path, project, null);
     }
 
-    private void showDiff(final String path, final Project project, final String username, final String password) {
+    private void showDiff(final String path, final Project project, final Credentials credentials) {
         service.showDiff(project.getLocation(),
                          new Path[]{valueOf(path)},
                          "HEAD",
-                         username,
-                         password)
+                         credentials)
                .then(new Operation<CLIOutputResponse>() {
                    @Override
                    public void apply(CLIOutputResponse response) throws OperationException {
@@ -220,7 +219,7 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                            subversionCredentialsDialog.askCredentials().then(new Operation<Credentials>() {
                                @Override
                                public void apply(Credentials credentials) throws OperationException {
-                                   showDiff(path, project, credentials.getUsername(), credentials.getPassword());
+                                   showDiff(path, project, credentials);
                                }
                            }).catchError(new Operation<PromiseError>() {
                                @Override

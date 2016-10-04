@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.svn.ide;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.subversion.Credentials;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
@@ -85,17 +86,14 @@ public interface SubversionClientService {
      *         source item path
      * @param destination
      *         destination path
-     * @param username
-     *         the user name for authentication
-     * @param password
-     *         the password for authentication
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
     Promise<CLIOutputResponse> copy(Path project,
                                     Path source,
                                     Path destination,
                                     String comment,
-                                    @Nullable String username,
-                                    @Nullable String password);
+                                    @Nullable Credentials credentials);
 
     /**
      * Merge specified URL with target.
@@ -118,12 +116,10 @@ public interface SubversionClientService {
      *         target to operate
      * @param revision
      *         revision, use HEAD to specify latest revision
-     * @param username
-     *         the user name for authentication
-     * @param password
-     *         the password for authentication
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<InfoResponse> info(Path project, Path target, String revision, boolean children, String username, String password);
+    Promise<InfoResponse> info(Path project, Path target, String revision, boolean children, @Nullable Credentials credentials);
 
     Promise<InfoResponse> info(Path project, String target, String revision, boolean children);
 
@@ -174,10 +170,8 @@ public interface SubversionClientService {
      *         whether or not to ignore externals (--ignore-externals)
      * @param accept
      *         the accept argument (--accept)
-     * @param username
-     *         the user name for authentication
-     * @param password
-     *         the password for authentication
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
     Promise<CLIOutputWithRevisionResponse> update(Path project,
                                                   Path[] paths,
@@ -185,12 +179,11 @@ public interface SubversionClientService {
                                                   String depth,
                                                   boolean ignoreExternals,
                                                   String accept,
-                                                  @Nullable String username,
-                                                  @Nullable String password);
+                                                  @Nullable Credentials credentials);
 
     Promise<CLIOutputResponse> showLog(Path project, Path[] paths, String revision);
 
-    Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision, @Nullable String username, @Nullable String password);
+    Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision, @Nullable Credentials credentials);
 
     /**
      * Locks the given paths.
@@ -202,12 +195,10 @@ public interface SubversionClientService {
      * @param force
      *         if false, will warn if another user already has a lock on a target, leave this target unchanged, and continue.<br>
      *         if true, will steal the lock from the previous owner instead
-     * @param username
-     *         the user name for authentication
-     * @param password
-     *         the password for authentication
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<CLIOutputResponse> lock(Path project, Path[] paths, boolean force, @Nullable String username, @Nullable String password);
+    Promise<CLIOutputResponse> lock(Path project, Path[] paths, boolean force, @Nullable Credentials credentials);
 
     /**
      * Unocks the given paths.
@@ -219,12 +210,10 @@ public interface SubversionClientService {
      * @param force
      *         if false, will warn if another user already has a lock on a target, leave this target unchanged, and continue.<br>
      *         if true, will unlock anyway
-     * @param username
-     *         the user name for authentication
-     * @param password
-     *         the password for authentication
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<CLIOutputResponse> unlock(Path project, Path[] paths, boolean force, @Nullable String username, @Nullable String password);
+    Promise<CLIOutputResponse> unlock(Path project, Path[] paths, boolean force, @Nullable Credentials credentials);
 
     /**
      * Commits the changes in the repository.
@@ -263,17 +252,14 @@ public interface SubversionClientService {
      *         the project path
      * @param source
      *         source item path
-     * @param username
-     *         the user name for authentication
-     * @param password
-     *         the password for authentication
+     * @param credentials
+     *         {@link Credentials} object that contains user name and password for authentication
      */
     Promise<CLIOutputResponse> move(Path project,
                                     Path source,
                                     Path destination,
                                     String comment,
-                                    @Nullable String username,
-                                    @Nullable String password);
+                                    @Nullable Credentials credentials);
 
     /**
      * Set specified property to a path or a target.
