@@ -78,6 +78,16 @@ public class TypeScriptDTOGeneratorMojoITest {
     private Path rootPath;
 
     /**
+     * Linux uid.
+     */
+    private String linuxUID;
+
+    /**
+     * Linux gid.
+     */
+    private String linuxGID;
+
+    /**
      * Init folders
      */
     @BeforeClass
@@ -120,20 +130,11 @@ public class TypeScriptDTOGeneratorMojoITest {
     }
 
     /**
-     * Setup typescript compiler by downloading the dependencies
-     * @throws IOException if unable to start process
-     * @throws InterruptedException if unable to wait the end of the process
+     * Get UID of current user (used on Linux)
      */
-    @Test(groups = {"tools"})
-    protected void installTypeScriptCompiler() throws IOException, InterruptedException {
-
-        // setup command line
-        List<String> command = getDockerExec();
-
-        // avoid root permissions in generated files
-        if (SystemInfo.isLinux()) {
-
-            // grab user id and gid
+    protected String getUid() throws IOException, InterruptedException {
+        if (this.linuxUID == null) {
+            // grab user id
             ProcessBuilder uidProcessBuilder = new ProcessBuilder("id", "-u");
             Process processId = uidProcessBuilder.start();
             int resultId = processId.waitFor();
@@ -153,6 +154,17 @@ public class TypeScriptDTOGeneratorMojoITest {
             } catch (NumberFormatException e) {
                 throw new IllegalStateException("The uid is not a number" + uid);
             }
+            this.linuxUID = uid;
+        }
+
+        return this.linuxUID;
+    }
+
+    /**
+     * Get GID of current user (used on Linux)
+     */
+    protected String getGid() throws IOException, InterruptedException {
+        if (this.linuxGID == null) {
 
             ProcessBuilder gidProcessBuilder = new ProcessBuilder("id", "-g");
             Process processGid = gidProcessBuilder.start();
@@ -174,9 +186,27 @@ public class TypeScriptDTOGeneratorMojoITest {
                 throw new IllegalStateException("The uid is not a number" + gid);
             }
 
-            LOG.info("Using uid '" + uid + "' and gid '" + gid + "'.");
+            this.linuxGID = gid;
+        }
 
-            command.add("groupadd -g " + gid + " user && useradd -u" + uid + " -g user user && (chown --silent -R user.user /usr/src/app || true) && cd /usr/src/app/ && npm install && (chown --silent -R user.user /usr/src/app || true)");
+        return this.linuxGID;
+    }
+
+    /**
+     * Setup typescript compiler by downloading the dependencies
+     * @throws IOException if unable to start process
+     * @throws InterruptedException if unable to wait the end of the process
+     */
+    @Test(groups = {"tools"})
+    protected void installTypeScriptCompiler() throws IOException, InterruptedException {
+
+        // setup command line
+        List<String> command = getDockerExec();
+
+        // avoid root permissions in generated files
+        if (SystemInfo.isLinux()) {
+
+            command.add("groupadd -g " + getGid() + " user && useradd -u" + getUid() + " -g user user && (chown --silent -R user.user /usr/src/app || true) && cd /usr/src/app/ && npm install && (chown --silent -R user.user /usr/src/app || true)");
         } else {
             command.add("npm install");
         }
@@ -223,7 +253,7 @@ public class TypeScriptDTOGeneratorMojoITest {
 
         // avoid root permissions in generated files
         if (SystemInfo.isLinux()) {
-            command.add("groupadd user && useradd -g user user && (chown --silent -R user.user /usr/src/app || true) && npm test && (chown --silent -R user.user /usr/src/app || true)");
+            command.add("groupadd -g " + getGid() + " user && useradd -u" + getUid() + " -g user user && (chown --silent -R user.user /usr/src/app || true) && npm test && (chown --silent -R user.user /usr/src/app || true)");
         } else {
             command.add("npm test");
         }
