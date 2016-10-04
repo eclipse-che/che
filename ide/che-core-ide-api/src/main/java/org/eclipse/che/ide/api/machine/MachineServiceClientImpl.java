@@ -13,7 +13,6 @@ package org.eclipse.che.ide.api.machine;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.model.machine.Command;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -50,24 +49,6 @@ public class MachineServiceClientImpl implements MachineServiceClient {
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
         this.baseHttpUrl = restContext + "/workspace/";
-    }
-
-    @Override
-    public Promise<MachineDto> getMachine(@NotNull final String workspaceId,
-                                          @NotNull final String machineId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId +
-                                                    "/machine/" + machineId)
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting info about machine..."))
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(MachineDto.class));
-    }
-
-    @Override
-    public Promise<List<MachineDto>> getMachines(@NotNull String workspaceId) {
-        return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId + "/machine")
-                                  .header(ACCEPT, APPLICATION_JSON)
-                                  .loader(loaderFactory.newLoader("Getting info about bound machines..."))
-                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(MachineDto.class));
     }
 
     @Override

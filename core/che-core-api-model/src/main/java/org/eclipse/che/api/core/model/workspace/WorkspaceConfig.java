@@ -26,11 +26,8 @@ import java.util.Map;
 public interface WorkspaceConfig {
 
     /**
-     * Optional.
-     * Returns possible name of the workspace created from this configuration.
-     * If name doesn't conflict then the target workspace
-     * will have exactly the same name, but if the name conflicts or it is absent
-     * then any other name will be chose for the workspace.
+     * Returns the name of the current workspace instance.
+     * Workspace name is unique per namespace.
      */
     String getName();
 

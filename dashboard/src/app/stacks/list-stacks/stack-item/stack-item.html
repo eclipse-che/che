@@ -19,9 +19,10 @@
          layout-align="start center"
          class="che-checkbox-area"
          ng-if="stackItemController.isSelectable === true">
-      <che-list-item-checked ng-model="stackItemController.isSelect"
-                             che-aria-label-checkbox="Stack {{stackItemController.stack.name}}"
-                             ng-click="stackItemController.onCheckboxClick()"></che-list-item-checked>
+      <che-list-item-checked ng-show="stackItemController.stack.creator === stackItemController.userId"
+        ng-model="stackItemController.isSelect"
+        che-aria-label-checkbox="Stack {{stackItemController.stack.name}}"
+        ng-click="stackItemController.onCheckboxClick()"></che-list-item-checked>
     </div>
     <div flex
          layout-xs="column" layout-gt-xs="row"
@@ -49,7 +50,8 @@
       <div flex-gt-xs="15">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
         <span class="che-list-actions">
-          <a tooltip="Delete Stack"  ng-click="stackItemController.onDelete(stackItemController.stack);">
+          <a tooltip="Delete Stack" ng-disabled="stackItemController.stack.creator !== stackItemController.userId"
+             ng-click="stackItemController.onDelete(stackItemController.stack);">
             <span class="fa fa-trash-o"></span>
           </a>
           <a tooltip="Duplicate stack" ng-click="stackItemController.onDuplicate(stackItemController.stack);">

@@ -66,13 +66,14 @@
               che-on-checkbox-click="listStacksController.updateSelectionState()"
               che-on-delete="listStacksController.deleteStack(stack)"
               che-on-duplicate="listStacksController.duplicateStack(stack)"
-              che-stack="stack"></stack-item>
+              stack="stack"
+              user-id="listStacksController.userId"></stack-item>
     </che-list>
     <div class="che-list-empty">
         <span ng-show="listStacksController.stacks.length > 0 && (listStacksController.stacks | filter:listStacksController.stackFilter).length === 0">
           No stacks found.
         </span>
-      <span ng-show="listStacksController.stacks.length === 0">There are no stacks yet</span>
+      <span ng-show="listStacksController.stacks.length === 0">There are no stacks.</span>
     </div>
   </md-content>
 </md-content>

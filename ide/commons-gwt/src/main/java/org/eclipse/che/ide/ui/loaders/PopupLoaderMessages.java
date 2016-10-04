@@ -55,4 +55,7 @@ public interface PopupLoaderMessages extends Messages {
     @Key("workspaceStopped.description")
     String workspaceStoppedDescription();
 
+    @Key("downloadOutputs")
+    String downloadOutputs();
+
 }

@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.actions;
 
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.panel.MachinePanelPresenter;
@@ -44,7 +44,7 @@ public class DestroyMachineActionTest {
     private DialogFactory               dialogFactory;
 
     @Mock
-    private MachineDto machine;
+    private MachineEntity machine;
 
     @InjectMocks
     private DestroyMachineAction action;

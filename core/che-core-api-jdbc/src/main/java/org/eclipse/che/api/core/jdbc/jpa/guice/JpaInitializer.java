@@ -11,6 +11,7 @@
 package org.eclipse.che.api.core.jdbc.jpa.guice;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.persist.PersistService;
 
 /**
@@ -18,11 +19,13 @@ import com.google.inject.persist.PersistService;
  * See <a href="https://github.com/google/guice/wiki/JPA">doc</a>
  *
  * @author Yevhenii Voevodin
+ * @author Anton Korneta
  */
+@Singleton
 public class JpaInitializer {
 
     @Inject
-    public JpaInitializer(PersistService persistService) {
+    public void init(PersistService persistService) {
         persistService.start();
     }
 }

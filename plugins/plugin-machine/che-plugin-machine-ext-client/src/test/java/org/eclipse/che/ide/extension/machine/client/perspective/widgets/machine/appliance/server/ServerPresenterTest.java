@@ -12,8 +12,8 @@ package org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -41,12 +41,12 @@ public class ServerPresenterTest {
 
     //additional mocks
     @Mock
-    private Machine          machine;
+    private MachineEntity    machine;
     @Mock
     private AcceptsOneWidget container;
 
     @Captor
-    private ArgumentCaptor<List<Server>> serverListCaptor;
+    private ArgumentCaptor<List<ServerEntity>> serverListCaptor;
 
     @InjectMocks
     private ServerPresenter presenter;
@@ -55,8 +55,8 @@ public class ServerPresenterTest {
     public void serverShouldBeUpdated() {
         presenter.updateInfo(machine);
 
-        verify(machine).getServersList();
-        verify(view).setServers(Matchers.<List<Server>>anyObject());
+        verify(machine).getRuntime();
+        verify(view).setServers(Matchers.<List<ServerEntity>>anyObject());
     }
 
     @Test

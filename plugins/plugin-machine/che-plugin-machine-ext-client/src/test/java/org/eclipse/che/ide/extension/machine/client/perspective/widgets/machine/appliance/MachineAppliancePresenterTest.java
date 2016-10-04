@@ -16,11 +16,11 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.WidgetsFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.Machine;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.container.TerminalContainer;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.recipe.RecipeTabPresenter;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.machine.appliance.server.ServerPresenter;
@@ -107,7 +107,7 @@ public class MachineAppliancePresenterTest {
     @Mock
     private TabContainerView       tabContainerView;
     @Mock
-    private Machine                machine;
+    private MachineEntity          machine;
     @Mock
     private Widget                 widget;
     @Mock
@@ -210,14 +210,14 @@ public class MachineAppliancePresenterTest {
         verify(entityFactory).createTab(eq(tabHeader), eq(terminalContainer), handlerCaptor.capture());
         handlerCaptor.getValue().onTabSelected();
 
-        verify(machine).setActiveTabName(SOME_TEXT);
+        verify(machine, times(2)).getId();
     }
 
     @Test
     public void infoHandlerShouldBePerformed() {
         callAndVerifyHandler();
 
-        verify(locale).tabInfo();
+        verify(locale, times(2)).tabInfo();
     }
 
     @Test
@@ -230,7 +230,6 @@ public class MachineAppliancePresenterTest {
     @Test
     public void infoShouldBeShown() {
         reset(tabContainer);
-        when(machine.getActiveTabName()).thenReturn(SOME_TEXT);
         when(tabContainer.getView()).thenReturn(tabContainerView);
 
         presenter.showAppliance(machine);

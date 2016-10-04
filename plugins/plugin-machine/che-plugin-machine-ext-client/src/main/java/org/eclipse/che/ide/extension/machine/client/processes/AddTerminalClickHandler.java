@@ -25,5 +25,5 @@ public interface AddTerminalClickHandler {
      * @param machineId
      *         id of machine in which the terminal will be added
      */
-    void onAddTerminalClick(@NotNull String workspaceId, @NotNull String machineId);
+    void onAddTerminalClick(@NotNull String machineId);
 }

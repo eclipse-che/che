@@ -17,6 +17,8 @@ import org.eclipse.che.api.git.shared.GitRequest;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.jgit.api.TransportCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.TransportHttp;
@@ -144,5 +146,21 @@ public class JGitConnectionTest {
 
         //then
         verifyZeroInteractions(transportHttp);
+    }
+
+    /**
+     * Check branch using current repository reference is returned
+     * @throws Exception if it fails
+     */
+    @Test
+    public void checkCurrentBranch() throws Exception {
+        String branchTest = "helloWorld";
+        Ref ref = mock(Ref.class);
+        when(repository.exactRef(Constants.HEAD)).thenReturn(ref);
+        when(ref.getLeaf()).thenReturn(ref);
+        when(ref.getName()).thenReturn(branchTest);
+        String branchName = jGitConnection.getCurrentBranch();
+
+        assertEquals(branchTest, branchName);
     }
 }

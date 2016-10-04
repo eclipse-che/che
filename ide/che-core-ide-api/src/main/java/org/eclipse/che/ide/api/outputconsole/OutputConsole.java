@@ -40,17 +40,21 @@ public interface OutputConsole extends Presenter {
     void close();
 
     /**
-     * Listener for new output in the console.
+     * Action Delegate interface.
      */
-    interface ConsoleOutputListener {
+    interface ActionDelegate {
 
+        /** Is called when new is printed */
         void onConsoleOutput(OutputConsole console);
+
+        /** Is called when user asked to download output */
+        void onDownloadOutput(OutputConsole console);
 
     }
 
     /**
-     * Adds an output listener.
+     * Sets action delegate.
      */
-    void addOutputListener(ConsoleOutputListener listener);
+    void addActionDelegate(ActionDelegate actionDelegate);
 
 }

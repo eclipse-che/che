@@ -15,6 +15,8 @@ import io.typefox.lsapi.ServerCapabilities;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -30,8 +32,6 @@ import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenter;
 import org.eclipse.che.plugin.languageserver.ide.location.OpenLocationPresenterFactory;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;

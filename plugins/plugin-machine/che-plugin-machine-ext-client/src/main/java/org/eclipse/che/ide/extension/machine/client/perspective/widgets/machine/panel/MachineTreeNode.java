@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
 import org.eclipse.che.api.core.model.machine.Machine;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
 
@@ -33,9 +32,9 @@ public class MachineTreeNode {
     private final String                      id;
     private final String                      name;
     private final MachineTreeNode             parent;
-    private final Object                      data;
     private final Collection<MachineTreeNode> children;
 
+    private Object                      data;
     private TreeNodeElement<MachineTreeNode> treeNodeElement;
 
     @Inject
@@ -46,10 +45,14 @@ public class MachineTreeNode {
         this.data = data;
         this.children = children;
 
-        boolean isMachine = data instanceof Machine;
-
-        id = isMachine ? ((MachineDto)data).getId() : ROOT;
-        name = isMachine ? ((MachineDto)data).getConfig().getName() : ROOT;
+        if (data instanceof Machine) {
+            Machine machine = (Machine)data;
+            id = machine.getId();
+            name = machine.getConfig().getName();
+        } else {
+            id = ROOT;
+            name = ROOT;
+        }
     }
 
     @NotNull
@@ -70,6 +73,10 @@ public class MachineTreeNode {
     @NotNull
     public Object getData() {
         return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
     }
 
     @Nullable

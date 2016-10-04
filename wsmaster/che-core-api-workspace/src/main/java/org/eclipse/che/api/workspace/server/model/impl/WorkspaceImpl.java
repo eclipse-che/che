@@ -12,6 +12,7 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.jdbc.jpa.eclipselink.DescriptorEventAdapter;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
@@ -19,6 +20,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceEntityListener;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -34,6 +36,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -41,9 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static com.google.common.base.MoreObjects.firstNonNull;
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 
 /**
  * Data object for {@link Workspace}.
@@ -62,7 +63,7 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
                             query = "SELECT w FROM Workspace w")
         }
 )
-@EntityListeners(WorkspaceEntityListener.class)
+@EntityListeners({WorkspaceEntityListener.class, WorkspaceImpl.SyncNameOnUpdateAndPersistEventListener.class})
 public class WorkspaceImpl implements Workspace {
 
     public static WorkspaceImplBuilder builder() {
@@ -72,7 +73,12 @@ public class WorkspaceImpl implements Workspace {
     @Id
     private String id;
 
-    @Column(nullable = false)
+    /**
+     * The original workspace name is workspace.config.name
+     * this attribute is stored for unique constraint with account id.
+     * See {@link #syncName()}.
+     */
+    @Column
     private String name;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -96,7 +102,7 @@ public class WorkspaceImpl implements Workspace {
     private AccountImpl account;
 
     @Transient
-    private WorkspaceStatus status = STOPPED;
+    private WorkspaceStatus status;
 
     @Transient
     private WorkspaceRuntimeImpl runtime;
@@ -104,19 +110,17 @@ public class WorkspaceImpl implements Workspace {
     public WorkspaceImpl() {}
 
     public WorkspaceImpl(String id, Account account, WorkspaceConfig config) {
-        this(id, account, config.getName(), config, null, null, false, STOPPED);
+        this(id, account, config, null, null, false, null);
     }
 
     public WorkspaceImpl(String id,
                          Account account,
-                         String name,
                          WorkspaceConfig config,
                          WorkspaceRuntime runtime,
                          Map<String, String> attributes,
                          boolean isTemporary,
                          WorkspaceStatus status) {
         this.id = id;
-        this.name = name;
         if (account != null) {
             this.account = new AccountImpl(account);
         }
@@ -129,14 +133,13 @@ public class WorkspaceImpl implements Workspace {
         if (attributes != null) {
             this.attributes = new HashMap<>(attributes);
         }
-        this.status = firstNonNull(status, STOPPED);
         this.isTemporary = isTemporary;
+        this.status = status;
     }
 
     public WorkspaceImpl(Workspace workspace, Account account) {
         this(workspace.getId(),
              account,
-             workspace.getConfig().getName(),
              workspace.getConfig(),
              workspace.getRuntime(),
              workspace.getAttributes(),
@@ -167,14 +170,6 @@ public class WorkspaceImpl implements Workspace {
 
     public AccountImpl getAccount() {
         return account;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override
@@ -232,7 +227,6 @@ public class WorkspaceImpl implements Workspace {
         final WorkspaceImpl other = (WorkspaceImpl)obj;
         return Objects.equals(id, other.id)
                && Objects.equals(getNamespace(), other.getNamespace())
-               && Objects.equals(name, other.name)
                && Objects.equals(status, other.status)
                && isTemporary == other.isTemporary
                && getAttributes().equals(other.getAttributes())
@@ -245,7 +239,6 @@ public class WorkspaceImpl implements Workspace {
         int hash = 7;
         hash = 31 * hash + Objects.hashCode(id);
         hash = 31 * hash + Objects.hashCode(getNamespace());
-        hash = 31 * hash + Objects.hashCode(name);
         hash = 31 * hash + Objects.hashCode(status);
         hash = 31 * hash + Objects.hashCode(config);
         hash = 31 * hash + getAttributes().hashCode();
@@ -268,6 +261,33 @@ public class WorkspaceImpl implements Workspace {
                '}';
     }
 
+    /** Syncs {@link #name} with config name. */
+    private void syncName() {
+        name = config == null ? null : config.getName();
+    }
+
+    /**
+     * {@link PreUpdate} and {@link PrePersist} methods are not called when
+     * the configuration is updated and workspace object is not, while listener
+     * methods are always called, even if workspace instance is not changed.
+     */
+    public static class SyncNameOnUpdateAndPersistEventListener extends DescriptorEventAdapter {
+        @Override
+        public void preUpdate(DescriptorEvent event) {
+            ((WorkspaceImpl)event.getObject()).syncName();
+        }
+
+        @Override
+        public void prePersist(DescriptorEvent event) {
+            ((WorkspaceImpl)event.getObject()).syncName();
+        }
+
+        @Override
+        public void preUpdateWithChanges(DescriptorEvent event) {
+            ((WorkspaceImpl)event.getObject()).syncName();
+        }
+    }
+
     /**
      * Helps to build complex {@link WorkspaceImpl workspace} instance.
      *
@@ -277,7 +297,6 @@ public class WorkspaceImpl implements Workspace {
 
         private String              id;
         private Account             account;
-        private String              name;
         private boolean             isTemporary;
         private WorkspaceStatus     status;
         private WorkspaceConfig     config;
@@ -287,7 +306,7 @@ public class WorkspaceImpl implements Workspace {
         private WorkspaceImplBuilder() {}
 
         public WorkspaceImpl build() {
-            return new WorkspaceImpl(id, account, name, config, runtime, attributes, isTemporary, status);
+            return new WorkspaceImpl(id, account, config, runtime, attributes, isTemporary, status);
         }
 
         public WorkspaceImplBuilder generateId() {
@@ -297,7 +316,6 @@ public class WorkspaceImpl implements Workspace {
 
         public WorkspaceImplBuilder setConfig(WorkspaceConfig workspaceConfig) {
             this.config = workspaceConfig;
-            this.name = workspaceConfig.getName();
             return this;
         }
 
@@ -328,11 +346,6 @@ public class WorkspaceImpl implements Workspace {
 
         public WorkspaceImplBuilder setRuntime(WorkspaceRuntime runtime) {
             this.runtime = runtime;
-            return this;
-        }
-
-        public WorkspaceImplBuilder setName(String name) {
-            this.name = name;
             return this;
         }
     }
