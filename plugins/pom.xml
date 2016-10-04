@@ -51,5 +51,6 @@
         <module>plugin-ssh-machine</module>
         <module>plugin-ssh-key</module>
         <module>plugin-languageserver</module>
+        <module>plugin-json</module>
     </modules>
 </project>

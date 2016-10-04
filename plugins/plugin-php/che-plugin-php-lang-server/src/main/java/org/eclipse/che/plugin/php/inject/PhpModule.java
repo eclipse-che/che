@@ -13,8 +13,10 @@ package org.eclipse.che.plugin.php.inject;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
+import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.php.languageserver.PhpLanguageServerLauncher;
 import org.eclipse.che.plugin.php.projecttype.PhpProjectType;
 
 /**
@@ -26,5 +28,7 @@ public class PhpModule extends AbstractModule {
     protected void configure() {
         Multibinder<ProjectTypeDef> projectTypeMultibinder = Multibinder.newSetBinder(binder(), ProjectTypeDef.class);
         projectTypeMultibinder.addBinding().to(PhpProjectType.class);
+
+        Multibinder.newSetBinder(binder(), LanguageServerLauncher.class).addBinding().to(PhpLanguageServerLauncher.class);
     }
 }

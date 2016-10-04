@@ -12,9 +12,9 @@ package org.eclipse.che.plugin.languageserver.ide.location;
 
 import com.google.inject.ImplementedBy;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.LocationDTO;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LocationDTO;
 
 import java.util.List;
 

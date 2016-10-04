@@ -13,9 +13,11 @@ package org.eclipse.che.plugin.csharp.inject;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
+import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.csharp.languageserver.CSharpLanguageServerLauncher;
 import org.eclipse.che.plugin.csharp.projecttype.CSharpProjectType;
 import org.eclipse.che.plugin.csharp.projecttype.CreateNetCoreProjectHandler;
 
@@ -31,5 +33,7 @@ public class CSharpModule extends AbstractModule {
 
         Multibinder<ProjectHandler> projectHandlersMultibinder = Multibinder.newSetBinder(binder(), ProjectHandler.class);
         projectHandlersMultibinder.addBinding().to(CreateNetCoreProjectHandler.class);
+
+        Multibinder.newSetBinder(binder(), LanguageServerLauncher.class).addBinding().to(CSharpLanguageServerLauncher.class);
     }
 }
