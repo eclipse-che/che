@@ -105,6 +105,11 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
     }
 
     @Override
+    public void setOkButtonLabel(String label) {
+        footer.getOkButton().setText(label);
+    }
+
+    @Override
     public String getValue() {
         return value.getValue();
     }

@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ui.loaders;
 
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -53,6 +56,11 @@ public class PopupLoaderImpl extends Composite implements PopupLoader {
     @UiField
     FlowPanel customWidget;
 
+    @UiField
+    Hyperlink downloadOutputs;
+
+    private ActionDelegate actionDelegate;
+
     @AssistedInject
     public PopupLoaderImpl(LoaderPopupImplUiBinder uiBinder,
                            @NotNull @Assisted("title") String title,
@@ -83,6 +91,7 @@ public class PopupLoaderImpl extends Composite implements PopupLoader {
         this(uiBinder, title, description);
 
         if (widget != null) {
+            customWidget.clear();
             customWidget.setVisible(true);
             customWidget.add(widget);
             playTimer.cancel();
@@ -113,6 +122,24 @@ public class PopupLoaderImpl extends Composite implements PopupLoader {
 
         // Reset title
         titleLabel.setText(title);
+    }
+
+    @Override
+    public void showDownloadButton() {
+        customWidget.setVisible(true);
+        downloadOutputs.setVisible(true);
+    }
+
+    @Override
+    public void setDelegate(ActionDelegate actionDelegate) {
+        this.actionDelegate = actionDelegate;
+    }
+
+    @UiHandler("downloadOutputs")
+    void downloadLogsClicked(ClickEvent e) {
+        if (actionDelegate != null) {
+            actionDelegate.onDownloadLogs();
+        }
     }
 
     private Timer playTimer = new Timer() {

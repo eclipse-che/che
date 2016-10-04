@@ -22,6 +22,12 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("button.cancel")
     String cancelButton();
 
+    @Key("button.download")
+    String downloadButton();
+
+    @Key("downloadOutputs")
+    String downloadOutputs();
+
     @Key("main.menu.machine")
     String mainMenuMachine();
 

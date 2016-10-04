@@ -43,6 +43,11 @@ public class FontAwesome {
     public static final String DOT_CIRCLE = "<i class=\"fa fa-dot-circle-o\"></i>";
 
     /**
+     * http://fortawesome.github.io/Font-Awesome/icon/download/
+     */
+    public static final String DOWNLOAD = "<i class=\"fa fa-download\"></i>";
+
+    /**
      * http://fortawesome.github.io/Font-Awesome/icon/expand/
      */
     public static final String EXPAND = "<i class=\"fa fa-expand\"></i>";

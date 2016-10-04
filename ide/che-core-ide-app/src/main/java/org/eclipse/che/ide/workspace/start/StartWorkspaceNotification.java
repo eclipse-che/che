@@ -88,8 +88,7 @@ public class StartWorkspaceNotification {
                 Widget widget = uiBinder.createAndBindUi(StartWorkspaceNotification.this);
 
                 if (snapshots.isEmpty()) {
-                    restore.setValue(false);
-                    restore.setEnabled(false);
+                    restore.setVisible(false);
                 }
 
                 loader.show(LoaderPresenter.Phase.WORKSPACE_STOPPED, widget);

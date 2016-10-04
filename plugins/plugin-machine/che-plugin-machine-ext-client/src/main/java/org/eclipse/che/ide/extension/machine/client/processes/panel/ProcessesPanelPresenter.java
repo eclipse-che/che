@@ -12,6 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
 import com.google.common.base.Strings;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
@@ -54,12 +55,14 @@ import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFac
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
+import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsolePresenter;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.DefaultOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenu;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.ui.loaders.DownloadWorkspaceOutputEvent;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGResource;
@@ -67,6 +70,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,12 +91,13 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
 @Singleton
 public class ProcessesPanelPresenter extends BasePresenter implements ProcessesPanelView.ActionDelegate,
                                                                       ProcessFinishedEvent.Handler,
-                                                                      OutputConsole.ConsoleOutputListener,
+                                                                      OutputConsole.ActionDelegate,
                                                                       WorkspaceStartedEvent.Handler,
                                                                       WorkspaceStoppedEvent.Handler,
                                                                       MachineStateEvent.Handler,
                                                                       WsAgentStateHandler,
-                                                                      EnvironmentOutputEvent.Handler {
+                                                                      EnvironmentOutputEvent.Handler,
+                                                                      DownloadWorkspaceOutputEvent.Handler {
 
     public static final  String SSH_PORT              = "22";
     private static final String DEFAULT_TERMINAL_NAME = "Terminal";
@@ -168,6 +173,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
         eventBus.addHandler(MachineStateEvent.TYPE, this);
         eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
+        eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
     }
 
     @Override
@@ -449,7 +455,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             }
         });
 
-        outputConsole.addOutputListener(this);
+        outputConsole.addActionDelegate(this);
     }
 
     private void refreshStopButtonState(String selectedNodeId) {
@@ -746,7 +752,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                                             .withType(machineProcessDto.getType());
 
                     final CommandType type = commandTypeRegistry.getCommandTypeById(commandDto.getType());
-                    if (type != null ) {
+                    if (type != null) {
                         final CommandConfiguration configuration = type.getConfigurationFactory().createFromDto(commandDto);
                         final CommandOutputConsole console = commandConsoleFactory.create(configuration, machine);
                         console.listenToOutput(machineProcessDto.getOutputChannel());
@@ -802,6 +808,29 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     /**
+     * Returns the console text for the specified machine.
+     *
+     * @param machineId
+     *          machine ID
+     * @return
+     *          console text or NULL if there is no machine with specified ID
+     */
+    public String getText(String machineId) {
+        OutputConsole console = consoles.get(machineId);
+        if (console == null) {
+            return null;
+        }
+
+        if (console instanceof DefaultOutputConsole) {
+            return ((DefaultOutputConsole)console).getText();
+        } else if (console instanceof CommandOutputConsolePresenter) {
+            return ((CommandOutputConsolePresenter)console).getText();
+        }
+
+        return null;
+    }
+
+    /**
      * Returns context selected tree node.
      *
      * @return tree node
@@ -836,4 +865,69 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             }
         });
     }
+
+    @Override
+    public void onDownloadWorkspaceOutput(DownloadWorkspaceOutputEvent event) {
+        Machine devMachine = null;
+
+        for (ProcessTreeNode machineNode : machineNodes.values()) {
+            if (!(machineNode.getData() instanceof Machine)) {
+                continue;
+            }
+
+            Machine machine = (Machine)machineNode.getData();
+            if (!machine.getConfig().isDev()) {
+                continue;
+            }
+
+            devMachine = machine;
+            break;
+        }
+
+        if (devMachine == null) {
+            return;
+        }
+
+        String fileName = appContext.getWorkspace().getNamespace() + "-" + appContext.getWorkspace().getConfig().getName() +
+                " " + DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) +
+                ".log";
+
+        download(fileName, getText(devMachine.getId()));
+    }
+
+    private native void log(String msg) /*-{
+        console.log(msg);
+    }-*/;
+
+    @Override
+    public void onDownloadOutput(OutputConsole console) {
+        String id = consoleCommands.get(console);
+
+        String fileName = appContext.getWorkspace().getNamespace() + "-" + appContext.getWorkspace().getConfig().getName() +
+                " " + DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) +
+                ".log";
+        download(fileName, getText(id));
+    }
+
+    /**
+     * Invokes the browser to download a file.
+     *
+     * @param fileName
+     *          file name
+     * @param text
+     *          file content
+     */
+    private native void download(String fileName, String text) /*-{
+        var element = $doc.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', fileName);
+
+        element.style.display = 'none';
+        $doc.body.appendChild(element);
+
+        element.click();
+
+        $doc.body.removeChild(element);
+    }-*/;
+
 }
