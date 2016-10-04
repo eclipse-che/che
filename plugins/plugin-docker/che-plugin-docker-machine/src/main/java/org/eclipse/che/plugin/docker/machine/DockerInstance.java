@@ -176,7 +176,7 @@ public class DockerInstance extends AbstractInstance {
         List<InstanceProcess> processes = new LinkedList<>();
         try {
             final Exec exec = docker.createExec(CreateExecParams.create(container,
-                                                                        new String[] {"/bin/bash",
+                                                                        new String[] {"/bin/sh",
                                                                                       "-c",
                                                                                       GET_ALIVE_PROCESSES_COMMAND})
                                                                 .withDetach(false));
@@ -328,9 +328,9 @@ public class DockerInstance extends AbstractInstance {
         }
 
         // command sed getting file content from startFrom line to (startFrom + limit)
-        String bashCommand = format("sed -n \'%1$2s, %2$2sp\' %3$2s", startFrom, startFrom + limit, filePath);
+        String shCommand = format("sed -n \'%1$2s, %2$2sp\' %3$2s", startFrom, startFrom + limit, filePath);
 
-        final String[] command = {"/bin/bash", "-c", bashCommand};
+        final String[] command = {"/bin/sh", "-c", shCommand};
 
         ListLineConsumer lines = new ListLineConsumer();
         try {
