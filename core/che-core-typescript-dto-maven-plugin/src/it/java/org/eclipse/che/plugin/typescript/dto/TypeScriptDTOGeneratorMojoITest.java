@@ -16,8 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -25,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Integration test of TypeScriptDTOGeneratorMojo
@@ -128,7 +132,51 @@ public class TypeScriptDTOGeneratorMojoITest {
 
         // avoid root permissions in generated files
         if (SystemInfo.isLinux()) {
-            command.add("groupadd user && useradd -g user user && (chown --silent -R user.user /usr/src/app || true) && cd /usr/src/app/ && npm install && (chown --silent -R user.user /usr/src/app || true)");
+
+            // grab user id and gid
+            ProcessBuilder uidProcessBuilder = new ProcessBuilder("id", "-u");
+            Process processId = uidProcessBuilder.start();
+            int resultId = processId.waitFor();
+            String uid = "";
+            try (BufferedReader outReader = new BufferedReader(new InputStreamReader(processId.getInputStream()))) {
+                uid = String.join(System.lineSeparator(), outReader.lines().collect(toList()));
+            } catch (Exception error) {
+                throw new IllegalStateException("Unable to get uid" + uid);
+            }
+
+            if (resultId != 0) {
+                throw new IllegalStateException("Unable to get uid" + uid);
+            }
+
+            try {
+                Integer.valueOf(uid);
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("The uid is not a number" + uid);
+            }
+
+            ProcessBuilder gidProcessBuilder = new ProcessBuilder("id", "-g");
+            Process processGid = gidProcessBuilder.start();
+            int resultGid = processGid.waitFor();
+            String gid = "";
+            try (BufferedReader outReader = new BufferedReader(new InputStreamReader(processGid.getInputStream()))) {
+                gid = String.join(System.lineSeparator(), outReader.lines().collect(toList()));
+            } catch (Exception error) {
+                throw new IllegalStateException("Unable to get gid" + gid);
+            }
+
+            if (resultGid != 0) {
+                throw new IllegalStateException("Unable to get gid" + gid);
+            }
+
+            try {
+                Integer.valueOf(gid);
+            } catch (NumberFormatException e) {
+                throw new IllegalStateException("The uid is not a number" + gid);
+            }
+
+            LOG.info("Using uid '" + uid + "' and gid '" + gid + "'.");
+
+            command.add("groupadd -g " + gid + " user && useradd -u" + uid + " -g user user && (chown --silent -R user.user /usr/src/app || true) && cd /usr/src/app/ && npm install && (chown --silent -R user.user /usr/src/app || true)");
         } else {
             command.add("npm install");
         }
