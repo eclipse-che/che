@@ -14,7 +14,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.json.ls.JsonLanguageServerLauncher;
+import org.eclipse.che.plugin.json.languageserver.JsonLanguageServerLauncher;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 
 /**

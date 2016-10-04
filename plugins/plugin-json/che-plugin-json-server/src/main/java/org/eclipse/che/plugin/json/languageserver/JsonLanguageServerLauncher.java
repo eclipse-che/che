@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.php.ls;
+package org.eclipse.che.plugin.json.languageserver;
 
 import io.typefox.lsapi.services.json.JsonBasedLanguageServer;
 
@@ -30,17 +30,16 @@ import static java.util.Arrays.asList;
 /**
  * @author Evgen Vidolob
  * @author Anatolii Bazko
- * @author Kaloyan Raev
  */
 @Singleton
-public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
-    private static final String   LANGUAGE_ID = "php";
-    private static final String[] EXTENSIONS  = new String[] {"php"};
-    private static final String[] MIME_TYPES  = new String[] {"text/x-php"};
+public class JsonLanguageServerLauncher extends LanguageServerLauncherTemplate {
+
+    private static final String   LANGUAGE_ID = "json";
+    private static final String[] EXTENSIONS  = new String[] {"json", "bowerrc", "jshintrc", "jscsrc", "eslintrc", "babelrc"};
+    private static final String[] MIME_TYPES  = new String[] {"application/json"};
+    private static final LanguageDescriptionImpl description;
 
     private final Path launchScript;
-
-    private static final LanguageDescriptionImpl description;
 
     static {
         description = new LanguageDescriptionImpl();
@@ -50,8 +49,8 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
     }
 
     @Inject
-    public PhpLanguageServerLauncher() {
-        this.launchScript = Paths.get(System.getenv("HOME"), "che/ls-php/launch.sh");
+    public JsonLanguageServerLauncher() {
+        launchScript = Paths.get(System.getenv("HOME"), "che/ls-json/launch.sh");
     }
 
     @Override
@@ -77,7 +76,7 @@ public class PhpLanguageServerLauncher extends LanguageServerLauncherTemplate {
         try {
             return processBuilder.start();
         } catch (IOException e) {
-            throw new LanguageServerException("Can't start PHP language server", e);
+            throw new LanguageServerException("Can't start JSON language server", e);
         }
     }
 }

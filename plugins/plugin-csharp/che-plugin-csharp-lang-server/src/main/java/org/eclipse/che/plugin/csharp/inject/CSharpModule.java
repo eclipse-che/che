@@ -17,7 +17,7 @@ import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.csharp.ls.CSharpLanguageServerLauncher;
+import org.eclipse.che.plugin.csharp.languageserver.CSharpLanguageServerLauncher;
 import org.eclipse.che.plugin.csharp.projecttype.CSharpProjectType;
 import org.eclipse.che.plugin.csharp.projecttype.CreateNetCoreProjectHandler;
 

@@ -16,7 +16,7 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.languageserver.launcher.LanguageServerLauncher;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.plugin.php.ls.PhpLanguageServerLauncher;
+import org.eclipse.che.plugin.php.languageserver.PhpLanguageServerLauncher;
 import org.eclipse.che.plugin.php.projecttype.PhpProjectType;
 
 /**
