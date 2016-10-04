@@ -108,7 +108,7 @@ public class TypeScriptDTOGeneratorMojoITest {
         command.add(rootPath.toString() + ":/usr/src/app");
         command.add("-w");
         command.add("/usr/src/app");
-        command.add("mhart/alpine-node:6");
+        command.add("node:6");
         command.add("/bin/sh");
         command.add("-c");
 
