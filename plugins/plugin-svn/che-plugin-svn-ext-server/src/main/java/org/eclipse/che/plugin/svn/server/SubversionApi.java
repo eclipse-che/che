@@ -19,6 +19,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.vfs.util.DeleteOnCloseFileInputStream;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -82,6 +83,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.singletonList;
 
 /**
  * Provides Subversion APIs.
@@ -229,7 +231,6 @@ public class SubversionApi {
                          .withErrOutput(result.getStderr());
     }
 
-
     /**
      * Perform an "svn switch" based on the request.
      *
@@ -242,11 +243,6 @@ public class SubversionApi {
      *         if there is a Subversion issue
      */
     public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws IOException, SubversionException {
-        return doSwitch(request, null);
-    }
-
-    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request,
-                                                  final String[] credentials) throws IOException, SubversionException {
 
         final File projectPath = new File(request.getProjectPath());
         final List<String> cliArgs = defaultArgs();
@@ -266,17 +262,13 @@ public class SubversionApi {
         // Command Name
         cliArgs.add("switch");
 
-        // Command Arguments
-        cliArgs.add(request.getUrl());
-        cliArgs.add(projectPath.getAbsolutePath());
-
-        CommandLineResult result = runCommand(null, cliArgs, projectPath, request.getPaths(), credentials, request.getUrl());
+        CommandLineResult result = runCommand(null, cliArgs, projectPath, singletonList(request.getLocation()));
 
         return DtoFactory.getInstance().createDto(CLIOutputWithRevisionResponse.class)
                          .withCommand(result.getCommandLine().toString())
                          .withOutput(result.getStdout())
                          .withErrOutput(result.getStderr())
-                         .withRevision(SubversionUtils.getCheckoutRevision(result.getStdout()));
+                         .withRevision(SubversionUtils.getUpdateRevision(result.getStdout()));
     }
 
     /**
@@ -553,10 +545,7 @@ public class SubversionApi {
 
         args.add("list");
 
-        List<String> paths = new ArrayList<>();
-        paths.add(request.getTarget());
-
-        final CommandLineResult result = runCommand(null, args, projectPath, paths);
+        final CommandLineResult result = runCommand(null, args, projectPath, singletonList(request.getTargetPath()));
 
         return DtoFactory.getInstance().createDto(ListResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -903,7 +892,7 @@ public class SubversionApi {
         return paths;
     }
 
-    private CommandLineResult runCommand(Map<String, String> env,
+    private CommandLineResult runCommand(@Nullable Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths) throws IOException, SubversionException {
@@ -912,11 +901,11 @@ public class SubversionApi {
         return runCommand(env, args, projectPath, paths, credentials, repoUrl);
     }
 
-    private CommandLineResult runCommand(Map<String, String> env,
+    private CommandLineResult runCommand(@Nullable Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths,
-                                         String[] credentials,
+                                         @Nullable String[] credentials,
                                          String repoUrl) throws IOException, SubversionException {
         final List<String> lines = new ArrayList<>();
         final CommandLineResult result;

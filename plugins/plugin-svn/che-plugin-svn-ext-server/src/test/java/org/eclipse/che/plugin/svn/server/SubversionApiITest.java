@@ -15,7 +15,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
 import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
-import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
+import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProviderImpl;
 import org.eclipse.che.plugin.svn.server.utils.TestUtils;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
@@ -58,8 +58,6 @@ public class SubversionApiITest {
     @Mock
     private CredentialsProvider   credentialsProvider;
     @Mock
-    private RepositoryUrlProvider repositoryUrlProvider;
-    @Mock
     private SshKeyProvider sshKeyProvider;
 
     private SubversionApi subversionApi;
@@ -76,7 +74,7 @@ public class SubversionApiITest {
         tmpAbsolutePath = tmpDir.toFile().getAbsolutePath();
         tmpDir.toFile().deleteOnExit();
 
-        this.subversionApi = new SubversionApi(credentialsProvider, repositoryUrlProvider, new SshScriptProvider(sshKeyProvider));
+        this.subversionApi = new SubversionApi(credentialsProvider, new RepositoryUrlProviderImpl(), new SshScriptProvider(sshKeyProvider));
     }
 
     /**
@@ -97,19 +95,72 @@ public class SubversionApiITest {
     }
 
     @Test
-    public void testSwitch() throws Exception {
-        CLIOutputWithRevisionResponse response =
-                this.subversionApi.doSwitch(DtoFactory.getInstance()
-                                                      .createDto(SwitchRequest.class)
-                                                      .withProjectPath(tmpDir.toFile().getAbsolutePath())
-                                                      .withUrl(repoUrl)
-                                                      .withDepth("immediates"));
+    public void testSwitchToBranch() throws Exception {
+        subversionApi.checkout(DtoFactory.getInstance()
+                                         .createDto(CheckoutRequest.class)
+                                         .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                         .withUrl(repoUrl + "/trunk"));
+
+        CLIOutputWithRevisionResponse response = subversionApi.doSwitch(DtoFactory.getInstance()
+                                                                                  .createDto(SwitchRequest.class)
+                                                                                  .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                                                                  .withLocation("^/branches/2.0")
+                                                                                  .withIgnoreAncestry(true));
 
         assertTrue(response.getRevision() > -1);
     }
 
     @Test
-    public void testList() throws Exception {
+    public void testSwitchToTag() throws Exception {
+        subversionApi.checkout(DtoFactory.getInstance()
+                                         .createDto(CheckoutRequest.class)
+                                         .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                         .withUrl(repoUrl + "/trunk"));
+
+        CLIOutputWithRevisionResponse response = this.subversionApi.doSwitch(DtoFactory.getInstance()
+                                                                                       .createDto(SwitchRequest.class)
+                                                                                       .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                                                                       .withLocation("^/tags/1.0")
+                                                                                       .withIgnoreAncestry(true));
+
+        assertTrue(response.getRevision() > -1);
+
+    }
+
+    @Test
+    public void testSwitchToTrunk() throws Exception {
+        subversionApi.checkout(DtoFactory.getInstance()
+                                         .createDto(CheckoutRequest.class)
+                                         .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                         .withUrl(repoUrl + "/tags/1.0"));
+
+
+        CLIOutputWithRevisionResponse response = this.subversionApi.doSwitch(DtoFactory.getInstance()
+                                                                                       .createDto(SwitchRequest.class)
+                                                                                       .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                                                                       .withLocation("^/trunk")
+                                                                                       .withIgnoreAncestry(true));
+
+        assertTrue(response.getRevision() > -1);
+    }
+
+    @Test
+    public void testListBranches() throws Exception {
+        subversionApi.checkout(DtoFactory.getInstance()
+                                         .createDto(CheckoutRequest.class)
+                                         .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                         .withUrl(repoUrl + "/trunk"));
+
+        ListResponse response = subversionApi.list(DtoFactory.getInstance().createDto(ListRequest.class)
+                                                             .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                                             .withTargetPath("^/branches"));
+        List<String> output = response.getOutput();
+        assertEquals(output.size(), 1);
+        assertEquals(output.get(0), "2.0/");
+    }
+
+    @Test
+    public void testListTags() throws Exception {
         subversionApi.checkout(DtoFactory.getInstance()
                                          .createDto(CheckoutRequest.class)
                                          .withProjectPath(tmpDir.toFile().getAbsolutePath())
@@ -117,7 +168,7 @@ public class SubversionApiITest {
 
         ListResponse response = subversionApi.list(DtoFactory.getInstance().createDto(ListRequest.class)
                                                              .withProjectPath(tmpDir.toFile().getAbsolutePath())
-                                                             .withTarget(tmpDir.toFile().getAbsolutePath() + "/branches"));
+                                                             .withTargetPath("^/tags"));
         List<String> output = response.getOutput();
         assertEquals(output.size(), 1);
         assertEquals(output.get(0), "1.0/");
@@ -139,12 +190,12 @@ public class SubversionApiITest {
         CLIOutputResponse response = this.subversionApi.copy(DtoFactory.getInstance()
                                                                        .createDto(CopyRequest.class)
                                                                        .withProjectPath(tmpAbsolutePath)
-                                                                       .withSource("A/B/lambda")
-                                                                       .withDestination("A/B/E/lambda"));
+                                                                       .withSource("trunk/A/B/lambda")
+                                                                       .withDestination("trunk/A/B/E/lambda"));
         assertEquals(response.getOutput().size(), 1);
         assertTrue(response.getErrOutput().isEmpty());
 
-        String expectedPath = "A" + File.separator + "B" + File.separator + "E" + File.separator + "lambda";
+        String expectedPath = "trunk" + File.separator + "A" + File.separator + "B" + File.separator + "E" + File.separator + "lambda";
         assertEquals(response.getOutput().get(0), "A         " + expectedPath);
     }
 
@@ -164,15 +215,15 @@ public class SubversionApiITest {
         CLIOutputResponse response = this.subversionApi.move(DtoFactory.getInstance()
                                                                        .createDto(MoveRequest.class)
                                                                        .withProjectPath(tmpAbsolutePath)
-                                                                       .withSource(Collections.singletonList("A/B/lambda"))
-                                                                       .withDestination("A/B/E/lambda"));
+                                                                       .withSource(Collections.singletonList("trunk/A/B/lambda"))
+                                                                       .withDestination("trunk/A/B/E/lambda"));
         assertEquals(response.getOutput().size(), 2);
         assertTrue(response.getErrOutput().isEmpty());
 
-        String expectedPath1 = "A" + File.separator + "B" + File.separator + "E" + File.separator + "lambda";
+        String expectedPath1 = "trunk" + File.separator + "A" + File.separator + "B" + File.separator + "E" + File.separator + "lambda";
         assertEquals(response.getOutput().get(0), "A         " + expectedPath1);
 
-        String expectedPath2 = "A" + File.separator + "B" + File.separator + "lambda";
+        String expectedPath2 = "trunk" + File.separator + "A" + File.separator + "B" + File.separator + "lambda";
         assertEquals(response.getOutput().get(1), "D         " + expectedPath2);
     }
 
@@ -189,7 +240,7 @@ public class SubversionApiITest {
                                               .createDto(CheckoutRequest.class)
                                               .withProjectPath(tmpDir.toFile().getAbsolutePath())
                                               .withUrl(repoUrl));
-        Response response = this.subversionApi.exportPath(tmpDir.toFile().getAbsolutePath(), "A/B", null);
+        Response response = this.subversionApi.exportPath(tmpDir.toFile().getAbsolutePath(), "trunk/A/B", null);
 
         Collection<String> items = ZipUtils.listEntries((InputStream)response.getEntity());
         assertEquals(items.size(), 3);
@@ -211,13 +262,13 @@ public class SubversionApiITest {
         CLIOutputResponse response = this.subversionApi.propset(DtoFactory.getInstance().createDto(PropertySetRequest.class)
                                                                           .withValue("'*.*'")
                                                                           .withProjectPath(tmpAbsolutePath)
-                                                                          .withPath("A/B")
+                                                                          .withPath("trunk/A/B")
                                                                           .withForce(true)
                                                                           .withDepth(Depth.DIRS_ONLY)
                                                                           .withName("svn:ignore"));
 
         assertEquals(response.getOutput().size(), 1);
-        assertEquals(response.getOutput().get(0), "property 'svn:ignore' set on 'A" + File.separator + "B'");
+        assertEquals(response.getOutput().get(0), "property 'svn:ignore' set on 'trunk" + File.separator + "A" + File.separator + "B'");
     }
 
     /**
@@ -235,13 +286,13 @@ public class SubversionApiITest {
 
         CLIOutputResponse response = this.subversionApi.propdel(DtoFactory.getInstance().createDto(PropertyDeleteRequest.class)
                                                                           .withProjectPath(tmpAbsolutePath)
-                                                                          .withPath("A/B")
+                                                                          .withPath("trunk/A/B")
                                                                           .withForce(true)
                                                                           .withDepth(Depth.DIRS_ONLY)
                                                                           .withName("owner"));
 
         assertEquals(response.getOutput().size(), 1);
-        assertEquals(response.getOutput().get(0), "property 'owner' deleted from 'A" + File.separator + "B'.");
+        assertEquals(response.getOutput().get(0), "property 'owner' deleted from 'trunk" + File.separator + "A" + File.separator + "B'.");
     }
 
     /**

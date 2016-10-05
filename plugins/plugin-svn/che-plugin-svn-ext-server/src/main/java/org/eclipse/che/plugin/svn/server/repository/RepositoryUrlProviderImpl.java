@@ -10,14 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.server.repository;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.eclipse.che.plugin.svn.server.upstream.CommandLineResult;
 import org.eclipse.che.plugin.svn.server.upstream.UpstreamUtils;
 import org.eclipse.che.plugin.svn.server.utils.InfoUtils;
 
+import java.io.File;
+import java.io.IOException;
 
+
+/**
+ * Detects repository url based on location.
+ *
+ * @author Anatolii Bazko
+ */
 public class RepositoryUrlProviderImpl implements RepositoryUrlProvider {
 
     @Override

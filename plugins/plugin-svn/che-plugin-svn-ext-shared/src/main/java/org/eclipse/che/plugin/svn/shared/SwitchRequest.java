@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.svn.shared;
 import org.eclipse.che.dto.shared.DTO;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * DTO for switch requests.
@@ -33,22 +32,13 @@ public interface SwitchRequest {
     SwitchRequest withProjectPath(String projectPath);
 
     /**
-     * @param paths the paths to set
+     * @param location to switch
      */
-    void setPaths(List<String> paths);
+    void setLocation(String location);
 
-    List<String> getPaths();
+    String getLocation();
 
-    SwitchRequest withPaths(List<String> paths);
-
-    /**
-     * Sets url to switch.
-     */
-    void setUrl(String url);
-
-    String getUrl();
-
-    SwitchRequest withUrl(String url);
+    SwitchRequest withLocation(String location);
 
     /**
      * Sets revision.

@@ -12,40 +12,28 @@ package org.eclipse.che.plugin.svn.shared;
 
 import org.eclipse.che.dto.shared.DTO;
 
-import javax.validation.constraints.NotNull;
-
+/**
+ * @author Anatolii Bazko
+ */
 @DTO
 public interface ListRequest {
 
     /**
-     * @return the project path the request is associated with.
+     * Returns the project path.
      */
     String getProjectPath();
 
-    /**
-     * @param projectPath
-     */
-    void setProjectPath(@NotNull final String projectPath);
+    void setProjectPath(String projectPath);
+
+    ListRequest withProjectPath(String projectPath);
 
     /**
-     * @param projectPath project path
+     * Returns the target path to browse.
      */
-    ListRequest withProjectPath(@NotNull final String projectPath);
+    String getTargetPath();
 
+    void setTargetPath(String targetPath);
 
-    /**
-     * @return target URL to list
-     */
-    String getTarget();
-
-    /**
-     * @param target
-     */
-    void setTarget(@NotNull final String target);
-
-    /**
-     * @param target target to list
-     */
-    ListRequest withTarget(@NotNull final String target);
+    ListRequest withTargetPath(String targetPath);
 
 }
