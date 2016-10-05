@@ -1,8 +1,8 @@
 # Eclipse  #
 ###################
 
+*.launch
 .classpath
-.launch
 .project
 .settings/
 target/
