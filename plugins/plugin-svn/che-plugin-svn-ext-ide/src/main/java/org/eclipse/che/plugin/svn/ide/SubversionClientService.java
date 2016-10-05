@@ -169,17 +169,16 @@ public interface SubversionClientService {
      *
      * @see org.eclipse.che.plugin.svn.shared.SwitchRequest
      */
-    Promise<CLIOutputWithRevisionResponse> sw(String url,
-                                              Path project,
-                                              Path[] paths,
-                                              String revision,
-                                              String depth,
-                                              String setDepth,
-                                              String accept,
-                                              boolean ignoreExternals,
-                                              boolean ignoreAncestry,
-                                              boolean relocate,
-                                              boolean force);
+    Promise<CLIOutputWithRevisionResponse> doSwitch(String location,
+                                                    Path project,
+                                                    String revision,
+                                                    String depth,
+                                                    String setDepth,
+                                                    String accept,
+                                                    boolean ignoreExternals,
+                                                    boolean ignoreAncestry,
+                                                    boolean relocate,
+                                                    boolean force);
 
     Promise<CLIOutputResponse> showLog(Path project, Path[] paths, String revision);
 

@@ -28,6 +28,8 @@ import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 
 /**
  * The implementation of {@link SwitchView}.
+ *
+ * @author Anatolii Bazko
  */
 @Singleton
 public class SwitchViewImpl extends Window implements SwitchView {
@@ -74,7 +76,7 @@ public class SwitchViewImpl extends Window implements SwitchView {
         });
         addButtonToFooter(btnCancel);
 
-        btnSwitch = createButton(constants.buttonSwitch(), "svn-switch-checkout", new ClickHandler() {
+        btnSwitch = createButton(constants.buttonSwitch(), "svn-switch-switch", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.onSwitchClicked();

@@ -217,19 +217,18 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     }
 
     @Override
-    public Promise<CLIOutputWithRevisionResponse> sw(String url,
-                                                     Path project,
-                                                     Path[] paths,
-                                                     String revision,
-                                                     String depth,
-                                                     String setDepth,
-                                                     String accept,
-                                                     boolean ignoreExternals,
-                                                     boolean ignoreAncestry,
-                                                     boolean relocate,
-                                                     boolean force) {
+    public Promise<CLIOutputWithRevisionResponse> doSwitch(String location,
+                                                           Path project,
+                                                           String revision,
+                                                           String depth,
+                                                           String setDepth,
+                                                           String accept,
+                                                           boolean ignoreExternals,
+                                                           boolean ignoreAncestry,
+                                                           boolean relocate,
+                                                           boolean force) {
         SwitchRequest request = dtoFactory.createDto(SwitchRequest.class)
-                                          .withPaths(toList(paths))
+                                          .withLocation(location)
                                           .withProjectPath(project.toString())
                                           .withDepth(depth)
                                           .withSetDepth(setDepth)
@@ -238,8 +237,7 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                                           .withIgnoreAncestry(ignoreAncestry)
                                           .withRevision(revision)
                                           .withAccept(accept)
-                                          .withForce(force)
-                                          .withUrl(url);
+                                          .withForce(force);
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/switch", request)
                                   .loader(loader)
@@ -444,7 +442,7 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     public Promise<CLIOutputResponse> list(Path project, Path target) {
         final ListRequest request = dtoFactory.createDto(ListRequest.class)
                                               .withProjectPath(project.toString())
-                                              .withTarget(target.toString());
+                                              .withTargetPath(target.toString());
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/list", request)
                                   .loader(loader)

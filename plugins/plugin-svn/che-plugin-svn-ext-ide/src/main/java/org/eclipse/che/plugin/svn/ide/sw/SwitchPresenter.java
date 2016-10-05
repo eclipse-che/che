@@ -19,11 +19,10 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -41,8 +40,7 @@ public class SwitchPresenter implements SwitchView.ActionDelegate {
     private final SwitchView                               view;
     private final SubversionClientService                  service;
 
-    private List<String> branches;
-    private List<String> tags;
+    private String location;
 
     @Inject
     public SwitchPresenter(AppContext appContext,
@@ -59,10 +57,10 @@ public class SwitchPresenter implements SwitchView.ActionDelegate {
         this.view.setDelegate(this);
     }
 
-    /**
-     * Displays the dialog and resets its state.
-     */
     public void showWindow() {
+        final Project project = appContext.getRootProject();
+        checkState(project != null);
+
         view.showWindow();
     }
 
@@ -73,22 +71,20 @@ public class SwitchPresenter implements SwitchView.ActionDelegate {
 
     @Override
     public void onSwitchClicked() {
-
+        doSwitch();
     }
 
     @Override
     public void onSwitchToTrunkChanged() {
+        location = "^/trunk";
     }
 
     @Override
     public void onSwitchToBranchChanged() {
-        final Project project = appContext.getRootProject();
-        checkState(project != null);
-
-        service.list(project.getLocation(), project.getLocation().append("branches")).then(new Operation<CLIOutputResponse>() {
+        service.list(appContext.getRootProject().getLocation(), Path.valueOf("^/branches")).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse arg) throws OperationException {
-                branches.addAll(arg.getOutput());
+                arg.getOutput();
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -100,20 +96,24 @@ public class SwitchPresenter implements SwitchView.ActionDelegate {
 
     @Override
     public void onSwitchToTagChanged() {
+        service.list(appContext.getRootProject().getLocation(), Path.valueOf("^/tags")).then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse arg) throws OperationException {
+                arg.getOutput();
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError arg) throws OperationException {
+                arg.getMessage();
+            }
+        });
     }
 
     @Override
     public void onSwitchToLocationChanged() {
     }
 
-    protected void doCheckout(final String revision,
-                              final String depth,
-                              final boolean ignoreExternals,
-                              final SwitchView view) {
-
-        final Project project = appContext.getRootProject();
-        checkState(project != null);
-
+    protected void doSwitch() {
 //        final StatusNotification notification = new StatusNotification(constants.updateToRevisionStarted(revision), PROGRESS, FLOAT_MODE);
 //        notificationManager.notify(notification);
 
