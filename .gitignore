@@ -7,6 +7,8 @@
 target/
 bin/
 test-output/
+maven-eclipse.xml
+Maven_Ant_Builder.launch
 
 # Idea #
 ##################
