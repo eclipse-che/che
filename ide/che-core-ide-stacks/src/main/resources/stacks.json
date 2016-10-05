@@ -1933,7 +1933,7 @@
     "id": "zend",
     "creator": "ide",
     "name": "Zend",
-    "description": "Zend Server with PHP 7, Z-Ray, Composer, Git, etc.",
+    "description": "Zend stack with PHP 7, Zend Server 9 and Z-Ray.",
     "scope": "advanced",
     "tags": [
       "PHP",
