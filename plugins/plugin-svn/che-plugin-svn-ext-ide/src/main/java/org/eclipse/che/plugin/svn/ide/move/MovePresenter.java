@@ -117,12 +117,14 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
         }).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
-                notificationManager.notify(locale.moveNotificationSuccessful(), SUCCESS, FLOAT_MODE);
+                notification.setTitle(locale.moveNotificationSuccessful());
+                notification.setStatus(SUCCESS);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
-            public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(locale.moveNotificationFailed(), FAIL, FLOAT_MODE);
+            public void apply(PromiseError arg) throws OperationException {
+                notification.setTitle(locale.moveNotificationFailed());
+                notification.setStatus(FAIL);
             }
         });
 

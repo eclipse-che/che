@@ -24,5 +24,5 @@ public interface Operation<A> {
     /**
      * Apply this operation to the given argument.
      */
-    void apply(A arg) throws Throwable;
+    void apply(A arg) throws OperationException;
 }

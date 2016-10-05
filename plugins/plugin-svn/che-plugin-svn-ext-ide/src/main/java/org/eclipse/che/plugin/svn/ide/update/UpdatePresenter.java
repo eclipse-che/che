@@ -69,7 +69,9 @@ public class UpdatePresenter extends SubversionActionPresenter {
         doUpdate("HEAD", "infinity", false, null);
     }
 
-    void doUpdate(final String revision, final String depth, final boolean ignoreExternals, final UpdateToRevisionView view) {
+    protected void doUpdate(final String revision, final String depth, final boolean ignoreExternals,
+                            final UpdateToRevisionView view) {
+
         final Project project = appContext.getRootProject();
 
         checkState(project != null);
@@ -84,13 +86,14 @@ public class UpdatePresenter extends SubversionActionPresenter {
         performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputWithRevisionResponse>>() {
             @Override
             public Promise<CLIOutputWithRevisionResponse> perform(Credentials credentials) {
-                return service.update(project.getLocation(),
-                                      toRelative(project, resources),
-                                      revision,
-                                      depth,
-                                      ignoreExternals,
-                                      "postpone",
-                                      credentials);
+                Promise<CLIOutputWithRevisionResponse> postpone = service.update(project.getLocation(),
+                                                                                 toRelative(project, resources),
+                                                                                 revision,
+                                                                                 depth,
+                                                                                 ignoreExternals,
+                                                                                 "postpone",
+                                                                                 credentials);
+                return postpone;
             }
         }).then(new Operation<CLIOutputWithRevisionResponse>() {
             @Override

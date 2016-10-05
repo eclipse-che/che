@@ -46,7 +46,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 public class LockUnlockPresenter extends SubversionActionPresenter {
 
     private final NotificationManager                      notificationManager;
-    private final SubversionCredentialsDialog              subversionCredentialsDialog;
     private final SubversionClientService                  service;
     private final SubversionExtensionLocalizationConstants constants;
 
@@ -63,7 +62,6 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                                   SubversionClientService service,
                                   StatusColors statusColors) {
         super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
-        this.subversionCredentialsDialog = subversionCredentialsDialog;
 
         this.service = service;
         this.notificationManager = notificationManager;
@@ -149,44 +147,57 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
     }
 
     private void doAction(final boolean lock, final boolean force, final Path[] paths) {
+        if (lock) {
+            doLockAction(force, paths);
+        } else {
+            doUnlockAction(force, paths);
+        }
+    }
+
+    private void doLockAction(final boolean force, final Path[] paths) {
         final Project project = appContext.getRootProject();
 
         checkState(project != null);
 
-        if (lock) {
-            performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
-                @Override
-                public Promise<CLIOutputResponse> perform(Credentials credentials) {
-                    return service.lock(project.getLocation(), paths, force, credentials);
-                }
-            }).then(new Operation<CLIOutputResponse>() {
-                @Override
-                public void apply(CLIOutputResponse response) throws OperationException {
-                    printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandLock());
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError error) throws OperationException {
-                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                }
-            });
-        } else {
-            performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
-                @Override
-                public Promise<CLIOutputResponse> perform(Credentials credentials) {
-                    return service.unlock(project.getLocation(), paths, force, credentials);
-                }
-            }).then(new Operation<CLIOutputResponse>() {
-                @Override
-                public void apply(CLIOutputResponse response) throws OperationException {
-                    printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandUnlock());
-                }
-            }).catchError(new Operation<PromiseError>() {
-                @Override
-                public void apply(PromiseError error) throws OperationException {
-                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                }
-            });
-        }
+        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.lock(project.getLocation(), paths, force, credentials);
+            }
+        }).then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse response) throws OperationException {
+                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandLock());
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
+    }
+
+    private void doUnlockAction(final boolean force, final Path[] paths) {
+
+        final Project project = appContext.getRootProject();
+
+        checkState(project != null);
+
+        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.unlock(project.getLocation(), paths, force, credentials);
+            }
+        }).then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse response) throws OperationException {
+                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandUnlock());
+            }
+        }).catchError(new Operation<PromiseError>() {
+            @Override
+            public void apply(PromiseError error) throws OperationException {
+                notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+            }
+        });
     }
 }

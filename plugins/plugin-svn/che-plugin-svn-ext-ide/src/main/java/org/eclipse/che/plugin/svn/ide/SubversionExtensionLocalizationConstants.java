@@ -81,9 +81,6 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("action.not.implemented")
     String actionNotImplemented();
 
-    @Key("svn.authentication.failed")
-    String authenticationFailed();
-
     @Key("add.description")
     String addDescription();
 

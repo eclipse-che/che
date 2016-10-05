@@ -10,14 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.common;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.subversion.Credentials;
 import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
@@ -28,6 +32,7 @@ import org.eclipse.che.plugin.svn.ide.action.SubversionAction;
 
 import java.util.List;
 
+import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
@@ -135,8 +140,8 @@ public class SubversionActionPresenter {
      * Performs subversion operation. If this operations fails with authorization error
      * the operation wil be performed with requested credentials
      */
-    protected <Y, T extends Promise<Y>> Promise<Y> performOperationWithRequestingCredentialsIfNeeded(SVNOperation<T> operation) {
-        return operation.perform(null).catchError(new Operation<PromiseError>() {
+    protected <Y, T extends Promise<Y>> Promise<Y> performOperationWithRequestingCredentialsIfNeeded(final SVNOperation<T> operation) {
+        Promise<Y> catchError = operation.perform(null).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) {
                 if (getErrorCode(error.getCause()) == ErrorCodes.UNAUTHORIZED_SVN_OPERATION) {
@@ -156,6 +161,7 @@ public class SubversionActionPresenter {
                 }
             }
         });
+        return catchError;
     }
 
     protected interface SVNOperation<T extends Promise<?>> {

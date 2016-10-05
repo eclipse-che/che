@@ -189,7 +189,7 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
     /** {@inheritDoc} */
     @Override
-    public void showDiff(String path) {
+    public void showDiff(final String path) {
         final Project project = appContext.getRootProject();
 
         checkState(project != null);
@@ -214,8 +214,6 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                 notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
             }
         });
-
-        view.onClose();
     }
 
     private void commitSelection(String message, boolean keepLocks) {

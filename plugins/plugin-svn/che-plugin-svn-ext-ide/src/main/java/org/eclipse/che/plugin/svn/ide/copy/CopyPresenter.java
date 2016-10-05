@@ -50,7 +50,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class CopyPresenter extends SubversionActionPresenter implements CopyView.ActionDelegate {
 
-    private final SubversionCredentialsDialog              subversionCredentialsDialog;
     private final CopyView                                 view;
     private final NotificationManager                      notificationManager;
     private final SubversionClientService                  service;
@@ -72,7 +71,6 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
                             SubversionExtensionLocalizationConstants constants,
                             StatusColors statusColors) {
         super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
-        this.subversionCredentialsDialog = subversionCredentialsDialog;
         this.view = view;
         this.notificationManager = notificationManager;
         this.service = service;
@@ -119,8 +117,9 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
         final Path target = view.isTargetCheckBoxSelected() ? Path.valueOf(view.getTargetUrl()) : toRelative(project, this.target);
         final String comment = view.isTargetCheckBoxSelected() ? view.getComment() : null;
 
-        final StatusNotification notification =
-                new StatusNotification(constants.copyNotificationStarted(src.toString()), PROGRESS, FLOAT_MODE);
+        final StatusNotification notification = new StatusNotification(constants.copyNotificationStarted(src.toString()),
+                                                                       PROGRESS,
+                                                                       FLOAT_MODE);
         notificationManager.notify(notification);
 
         view.hide();
@@ -133,12 +132,16 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
         }).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
-                notificationManager.notify(constants.copyNotificationSuccessful(), SUCCESS, FLOAT_MODE);
+                printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandCopy());
+
+                notification.setTitle(constants.copyNotificationSuccessful());
+                notification.setStatus(SUCCESS);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify(constants.copyNotificationFailed(), FAIL, FLOAT_MODE);
+                notification.setTitle(constants.copyNotificationFailed());
+                notification.setStatus(FAIL);
             }
         });
     }
