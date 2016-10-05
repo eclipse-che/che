@@ -895,10 +895,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         download(fileName, getText(devMachine.getId()));
     }
 
-    private native void log(String msg) /*-{
-        console.log(msg);
-    }-*/;
-
     @Override
     public void onDownloadOutput(OutputConsole console) {
         String id = consoleCommands.get(console);
