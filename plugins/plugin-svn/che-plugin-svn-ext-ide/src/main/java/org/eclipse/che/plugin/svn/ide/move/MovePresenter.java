@@ -109,7 +109,7 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                 new StatusNotification(locale.moveNotificationStarted(source.toString()), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 notification.setStatus(PROGRESS);

@@ -83,7 +83,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
         final StatusNotification notification = new StatusNotification(constants.updateToRevisionStarted(revision), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<CLIOutputWithRevisionResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputWithRevisionResponse>() {
             @Override
             public Promise<CLIOutputWithRevisionResponse> perform(Credentials credentials) {
 

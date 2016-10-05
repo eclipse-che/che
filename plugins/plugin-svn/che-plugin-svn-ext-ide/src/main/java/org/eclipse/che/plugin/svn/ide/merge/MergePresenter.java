@@ -102,7 +102,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
         checkState(resources != null && resources.length == 1);
 
-        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<InfoResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<InfoResponse>() {
             @Override
             public Promise<InfoResponse> perform(Credentials credentials) {
                 return service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials);

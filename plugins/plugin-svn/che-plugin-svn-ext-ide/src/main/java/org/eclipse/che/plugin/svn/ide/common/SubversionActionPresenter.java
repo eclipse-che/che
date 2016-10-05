@@ -13,8 +13,6 @@ package org.eclipse.che.plugin.svn.ide.common;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -148,7 +146,7 @@ public class SubversionActionPresenter {
      * @param notification
      *         progress notification to set operation status
      */
-    protected <Y> Promise<Y> performOperationWithCredentialsRequestIfNeeded(final SubversionOperation<Y> operation,
+    protected <Y> Promise<Y> performOperationWithCredentialsRequestIfNeeded(final RemoteSubversionOperation<Y> operation,
                                                                             @Nullable final StatusNotification notification) {
         return operation.perform(null)
                         .catchErrorPromise(new Function<PromiseError, Promise<Y>>() {
@@ -176,9 +174,9 @@ public class SubversionActionPresenter {
     }
 
     /**
-     * Subversion operation.
+     * Remote Subversion operation that can require credentials.
      */
-    protected interface SubversionOperation<Y> {
+    protected interface RemoteSubversionOperation<Y> {
         Promise<Y> perform(Credentials credentials);
     }
 
