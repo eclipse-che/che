@@ -73,6 +73,8 @@ Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
     dir down                           Stop workspace running in current directory
     dir status                         Display status of ${CHE_MINI_PRODUCT_NAME} in current directory
     dir ssh                            Make SSH connection into workspace mapped to current directory
+    ws list                            List all workspaces
+    ws logs [<ws-id>]                  Get the agent logs for a workspace
     action <action-name> [--help]      Start action on ${CHE_MINI_PRODUCT_NAME} instance
     compile <mvn-command>              SDK - Builds Che source code or modules
     test <test-name> [--help]          Start test on ${CHE_MINI_PRODUCT_NAME} instance
@@ -126,7 +128,7 @@ parse_command_line () {
     CHE_CLI_ACTION="help"
   else
     case $1 in
-      start|stop|restart|update|info|profile|action|dir|mount|compile|test|help|-h|--help)
+      start|stop|restart|update|info|profile|action|dir|ws|mount|compile|test|help|-h|--help)
         CHE_CLI_ACTION=$1
       ;;
       *)
@@ -140,6 +142,7 @@ parse_command_line () {
 execute_cli() {
   case ${CHE_CLI_ACTION} in
     start|stop|restart)
+      # remove "che" arg by shifting it
       shift 
       load_profile
       execute_che_launcher "$@"
@@ -153,6 +156,12 @@ execute_cli() {
       load_profile
       execute_che_dir "$@"
     ;;
+    ws)
+      # remove "ws" arg by shifting it
+      shift
+      load_profile
+      execute_che_ws "$@"
+    ;;    
     action)
       # remove "action" arg by shifting it
       shift
@@ -750,6 +759,70 @@ execute_che_dir() {
   docker_run_with_che_properties -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${CURRENT_DIRECTORY}" "$@"
 }
 
+execute_che_ws() {
+  debug $FUNCNAME
+  if [ -z ${1+x} ]; then 
+    error "${CHE_PRODUCT_NAME} (che ws): No command provided."
+    return
+  fi
+
+  case $1 in
+    list)
+      check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME} ${CHE_UTILITY_VERSION}
+      docker_run_with_che_properties "${CHE_ACTION_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" list-workspaces
+    ;;
+    logs)
+      if [ $# -eq 2 ]; then
+        info "${CHE_PRODUCT_NAME} (che ws): Connecting to workspace with id ${2}"
+        WS_ID=${2}
+
+        # ID not provided, let's do a simple discovery of running workspaces
+      else 
+        info "${CHE_PRODUCT_NAME} (che ws): Searching for running workspaces..."
+
+        CURRENT_WS_INSTANCES=$(docker ps -aq --filter "name=workspace")
+        CURRENT_WS_COUNT=$(echo $CURRENT_WS_INSTANCES | wc -w)
+      
+        # No running workspaces
+        if [ $CURRENT_WS_COUNT -eq 0 ]; then
+          error "${CHE_PRODUCT_NAME} (che ws): We could not find any running workspaces"
+          return
+
+        # Exactly 1 running workspace
+        elif [ $CURRENT_WS_COUNT -eq 1 ]; then
+
+          WS_ID=$CURRENT_WS_INSTANCES
+          info "${CHE_PRODUCT_NAME} (che ws): Connecting to workspace with id ${WS_ID}"
+
+        # 2+ running workspace
+        else 
+          info "${CHE_PRODUCT_NAME} (che ws): Re-run with 'che ws <ws-id>'"
+          IFS=$'\n'
+
+          echo "WS CONTAINER ID    HAS SSH?    SSH PORT"
+          for CHE_WS_CONTAINER_ID in $CURRENT_WS_INSTANCES; do
+            CURRENT_WS_PORT=""
+            if has_ssh ${CHE_WS_CONTAINER_ID}; then 
+              CURRENT_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CHE_WS_CONTAINER_ID})
+            fi
+            echo "$CHE_WS_CONTAINER_ID       $(has_ssh ${CHE_WS_CONTAINER_ID} && echo "y" || echo "n")           $CURRENT_WS_PORT"
+          done
+          return
+        fi
+      fi
+
+      info "Displaying logs for container $WS_ID"
+      docker_exec exec ${WS_ID} find /home/ -iname "catalina-0.log" -exec tail -n200 {} \;
+    ;;
+    *)
+      # unknown option
+    error "${CHE_PRODUCT_NAME} (che ws): You passed an unknown command."
+    return
+  ;;
+  esac
+
+}
+
 execute_che_action() {
   debug $FUNCNAME
   check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME} ${CHE_UTILITY_VERSION}
@@ -779,7 +852,7 @@ execute_che_mount() {
 
   # If extra parameter provided, then this is the port to connect to
   if [ $# -eq 1 ]; then
-    info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to remote workspace on port ${1}"
+    info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to workspace on port ${1}"
     WS_PORT=${1}
 
   # Port not provided, let's do a simple discovery of running workspaces
@@ -799,7 +872,7 @@ execute_che_mount() {
 
       if has_ssh ${CURRENT_WS_INSTANCES}; then
         RUNNING_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CURRENT_WS_INSTANCES})
-        info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to remote workspace on port $RUNNING_WS_PORT"
+        info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to workspace on port $RUNNING_WS_PORT"
         WS_PORT=$RUNNING_WS_PORT
       else
         error "${CHE_MINI_PRODUCT_NAME} mount: We found 1 running workspace, but it does not have an SSH agent"
@@ -843,7 +916,6 @@ execute_che_mount() {
                                    "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" \
                                         "${GLOBAL_GET_DOCKER_HOST_IP}" $WS_PORT
   fi
-
 }
 
 execute_che_compile() {
