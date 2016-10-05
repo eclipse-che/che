@@ -95,6 +95,7 @@ public class ProjectImporterTest {
                                        appContext,
                                        resolver,
                                        null,
+                                       null,
                                        null);
     }
 

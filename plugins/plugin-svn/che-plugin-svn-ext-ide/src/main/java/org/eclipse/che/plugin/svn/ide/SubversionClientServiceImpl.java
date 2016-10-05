@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.subversion.Credentials;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
@@ -44,7 +45,6 @@ import org.eclipse.che.plugin.svn.shared.PropertySetRequest;
 import org.eclipse.che.plugin.svn.shared.RemoveRequest;
 import org.eclipse.che.plugin.svn.shared.ResolveRequest;
 import org.eclipse.che.plugin.svn.shared.RevertRequest;
-import org.eclipse.che.plugin.svn.shared.SaveCredentialsRequest;
 import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
@@ -105,7 +105,7 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
     }
 
-   @Override
+    @Override
     public Promise<CLIOutputResponse> revert(Path project, Path[] paths, String depth) {
         final RevertRequest request = dtoFactory.createDto(RevertRequest.class)
                                                 .withProjectPath(project.toString())
@@ -117,12 +117,16 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     }
 
     @Override
-    public Promise<CLIOutputResponse> copy(Path project, Path source, Path destination, String comment) {
+    public Promise<CLIOutputResponse> copy(Path project, Path source, Path destination, String comment, Credentials credentials) {
         final CopyRequest request = dtoFactory.createDto(CopyRequest.class)
                                               .withProjectPath(project.toString())
                                               .withSource(source.toString())
                                               .withDestination(destination.toString())
                                               .withComment(comment);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/copy", request)
                                   .loader(loader)
@@ -153,25 +157,21 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     }
 
     @Override
-    public Promise<InfoResponse> info(Path project, Path target, String revision, boolean children) {
+    public Promise<InfoResponse> info(Path project, String target, String revision, boolean children) {
+        return info(project, Path.valueOf(target), revision, children, dtoFactory.createDto(Credentials.class));
+    }
+
+    @Override
+    public Promise<InfoResponse> info(Path project, Path target, String revision, boolean children, Credentials credentials) {
         final InfoRequest request = dtoFactory.createDto(InfoRequest.class)
                                               .withProjectPath(project.toString())
                                               .withTarget(target.toString())
                                               .withRevision(revision)
                                               .withChildren(children);
-
-        return asyncRequestFactory.createPostRequest(getBaseUrl() + "/info", request)
-                                  .loader(loader)
-                                  .send(dtoUnmarshallerFactory.newUnmarshaller(InfoResponse.class));
-    }
-
-    @Override
-    public Promise<InfoResponse> info(Path project, String target, String revision, boolean children) {
-        final InfoRequest request = dtoFactory.createDto(InfoRequest.class)
-                                              .withProjectPath(project.toString())
-                                              .withTarget(target)
-                                              .withRevision(revision)
-                                              .withChildren(children);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/info", request)
                                   .loader(loader)
@@ -198,8 +198,13 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     }
 
     @Override
-    public Promise<CLIOutputWithRevisionResponse> update(Path project, Path[] paths, String revision, String depth, boolean ignoreExternals,
-                                                         String accept) {
+    public Promise<CLIOutputWithRevisionResponse> update(Path project,
+                                                         Path[] paths,
+                                                         String revision,
+                                                         String depth,
+                                                         boolean ignoreExternals,
+                                                         String accept,
+                                                         Credentials credentials) {
         final UpdateRequest request =
                 dtoFactory.createDto(UpdateRequest.class)
                           .withProjectPath(project.toString())
@@ -208,6 +213,10 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                           .withDepth(depth)
                           .withIgnoreExternals(ignoreExternals)
                           .withAccept(accept);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/update", request)
                                   .loader(loader)
@@ -227,36 +236,51 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     }
 
     @Override
-    public Promise<CLIOutputResponse> lock(Path project, Path[] paths, boolean force) {
+    public Promise<CLIOutputResponse> lock(Path project, Path[] paths, boolean force, Credentials credentials) {
         final String url = getBaseUrl() + "/lock";
         final LockRequest request = dtoFactory.createDto(LockRequest.class)
                                               .withProjectPath(project.toString())
                                               .withTargets(toList(paths))
                                               .withForce(force);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
         return asyncRequestFactory.createPostRequest(url, request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
     }
 
     @Override
-    public Promise<CLIOutputResponse> unlock(Path project, Path[] paths, boolean force) {
+    public Promise<CLIOutputResponse> unlock(Path project, Path[] paths, boolean force, Credentials credentials) {
         final String url = getBaseUrl() + "/unlock";
         final LockRequest request = dtoFactory.createDto(LockRequest.class)
                                               .withProjectPath(project.toString())
                                               .withTargets(toList(paths))
                                               .withForce(force);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
         return asyncRequestFactory.createPostRequest(url, request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
     }
 
     @Override
-    public Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision) {
+    public Promise<CLIOutputResponse> showDiff(Path project, Path[] paths, String revision, Credentials credentials) {
         final String url = getBaseUrl() + "/showdiff";
         final ShowDiffRequest request = dtoFactory.createDto(ShowDiffRequest.class)
                                                   .withProjectPath(project.toString())
                                                   .withPaths(toList(paths))
                                                   .withRevision(revision);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
         return asyncRequestFactory.createPostRequest(url, request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
@@ -320,23 +344,17 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     }
 
     @Override
-    public Promise<Void> saveCredentials(String repositoryUrl, String username, String password) {
-        final String url = getBaseUrl() + "/saveCredentials";
-        final SaveCredentialsRequest request = dtoFactory.createDto(SaveCredentialsRequest.class)
-                                                         .withUsername(username)
-                                                         .withPassword(password)
-                                                         .withRepositoryUrl(repositoryUrl);
-        return asyncRequestFactory.createPostRequest(url, request).loader(loader).send();
-    }
-
-    @Override
-    public Promise<CLIOutputResponse> move(Path project, Path source, Path destination, String comment) {
+    public Promise<CLIOutputResponse> move(Path project, Path source, Path destination, String comment, Credentials credentials) {
         final MoveRequest request =
                 dtoFactory.createDto(MoveRequest.class)
                           .withProjectPath(project.toString())
                           .withSource(Collections.singletonList(source.toString()))
                           .withDestination(destination.toString())
                           .withComment(comment);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/move", request)
                                   .loader(loader)

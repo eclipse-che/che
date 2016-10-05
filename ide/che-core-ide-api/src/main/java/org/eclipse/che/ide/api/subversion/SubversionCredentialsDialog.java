@@ -8,33 +8,22 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.svn.ide.askcredentials;
+//TODO This is used in wizard/ProjectImporter, find a solution to move it to plugin-svn.
+package org.eclipse.che.ide.api.subversion;
 
-public interface AskCredentialsView {
+import org.eclipse.che.api.promises.client.Promise;
 
-    public interface AskCredentialsDelegate {
+/**
+ * Dialog for retrieving credentials for SVN operations.
+ *
+ * @author Igor Vinokur
+ */
+public interface SubversionCredentialsDialog {
 
-        void onSaveClicked();
-
-        void onCancelClicked();
-
-    }
-
-    void setDelegate(AskCredentialsDelegate delegate);
-
-    void showDialog();
-
-    void close();
-
-    void focusInUserNameField();
-
-    void setRepositoryUrl(String url);
-
-    void clearUsername();
-
-    void clearPassword();
-
-    String getUsername();
-
-    String getPassword();
+    /**
+     * Returns credentials from dialog.
+     *
+     * @return {@link Credentials} that contains user name and password
+     */
+    Promise<Credentials> askCredentials();
 }

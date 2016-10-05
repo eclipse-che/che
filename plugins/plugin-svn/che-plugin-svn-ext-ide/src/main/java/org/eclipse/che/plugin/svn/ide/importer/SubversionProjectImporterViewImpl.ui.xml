@@ -34,20 +34,6 @@
                                  debugId="file-importProject-relativePath" text="{locale.importerDefaultRelativePath}"/>
                 </g:FlowPanel>
 
-                <g:FlowPanel height="50px" addStyleNames="{style.namePanel}">
-                    <g:Label text="{locale.askCredentialsUsername}"
-                             addStyleNames="{style.labelPosition}"/>
-                    <ide:TextBox ui:field="username" addStyleNames="{style.inputField} {style.alignRight}"
-                                 debugId="file-importProject-username"/>
-                </g:FlowPanel>
-
-                <g:FlowPanel height="50px" addStyleNames="{style.namePanel}">
-                    <g:Label text="{locale.askCredentialsPassword}"
-                             addStyleNames="{style.labelPosition}"/>
-                    <g:PasswordTextBox ui:field="password" addStyleNames="{style.inputField} {style.alignRight} {style.passwordField}"
-                                 debugId="file-importProject-password"/>
-                </g:FlowPanel>
-
                 <!-- Project information -->
                 <g:FlowPanel height="0" addStyleNames="{style.horizontalLine}"/>
 

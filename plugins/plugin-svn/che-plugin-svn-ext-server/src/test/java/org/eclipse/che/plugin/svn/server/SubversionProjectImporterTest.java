@@ -25,7 +25,6 @@ import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.VirtualFileSystem;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.utils.TestUtils;
 import org.junit.Before;
@@ -48,9 +47,6 @@ public class SubversionProjectImporterTest {
 
     @Mock
     private ProfileDao userProfileDao;
-
-    @Mock
-    private CredentialsProvider   credentialsProvider;
     @Mock
     private RepositoryUrlProvider repositoryUrlProvider;
     @Mock
@@ -75,7 +71,6 @@ public class SubversionProjectImporterTest {
 
                 bind(SshKeyProvider.class).toInstance(sshKeyProvider);
                 bind(ProfileDao.class).toInstance(userProfileDao);
-                bind(CredentialsProvider.class).toInstance(credentialsProvider);
                 bind(RepositoryUrlProvider.class).toInstance(repositoryUrlProvider);
             }
         });

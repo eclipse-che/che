@@ -24,6 +24,7 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
@@ -54,10 +55,11 @@ public class RevertPresenter extends SubversionActionPresenter {
                               ProcessesPanelPresenter processesPanelPresenter,
                               SubversionClientService service,
                               SubversionExtensionLocalizationConstants constants,
+                              SubversionCredentialsDialog credentialsDialog,
                               NotificationManager notificationManager,
                               DialogFactory dialogFactory,
                               StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, credentialsDialog);
         this.service = service;
         this.constants = constants;
         this.notificationManager = notificationManager;

@@ -14,7 +14,6 @@ import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.utils.TestUtils;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
@@ -52,8 +51,6 @@ import static org.junit.Assert.assertTrue;
 public class SubversionApiITest {
 
     @Mock
-    private CredentialsProvider   credentialsProvider;
-    @Mock
     private RepositoryUrlProvider repositoryUrlProvider;
     @Mock
     private SshKeyProvider sshKeyProvider;
@@ -72,7 +69,7 @@ public class SubversionApiITest {
         tmpAbsolutePath = tmpDir.toFile().getAbsolutePath();
         tmpDir.toFile().deleteOnExit();
 
-        this.subversionApi = new SubversionApi(credentialsProvider, repositoryUrlProvider, new SshScriptProvider(sshKeyProvider));
+        this.subversionApi = new SubversionApi(repositoryUrlProvider, new SshScriptProvider(sshKeyProvider));
     }
 
     /**

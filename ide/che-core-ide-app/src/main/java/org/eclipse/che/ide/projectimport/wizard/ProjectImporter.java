@@ -29,6 +29,8 @@ import org.eclipse.che.ide.api.importer.AbstractImporter;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorUrlProvider;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.wizard.ImportProjectNotificationSubscriberFactory;
 import org.eclipse.che.ide.api.project.wizard.ProjectNotificationSubscriber;
@@ -45,6 +47,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.core.ErrorCodes.UNABLE_GET_PRIVATE_SSH_KEY;
 import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_GIT_OPERATION;
+import static org.eclipse.che.api.core.ErrorCodes.UNAUTHORIZED_SVN_OPERATION;
 import static org.eclipse.che.api.git.shared.ProviderInfo.AUTHENTICATE_URL;
 import static org.eclipse.che.api.git.shared.ProviderInfo.PROVIDER_NAME;
 import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
@@ -60,6 +63,7 @@ public class ProjectImporter extends AbstractImporter {
     private final CoreLocalizationConstant    localizationConstant;
     private final ProjectResolver             projectResolver;
     private final String                      restContext;
+    private final SubversionCredentialsDialog credentialsDialog;
     private final OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry;
 
 
@@ -69,11 +73,13 @@ public class ProjectImporter extends AbstractImporter {
                            AppContext appContext,
                            ProjectResolver projectResolver,
                            @RestContext String restContext,
+                           SubversionCredentialsDialog credentialsDialog,
                            OAuth2AuthenticatorRegistry oAuth2AuthenticatorRegistry) {
         super(appContext, subscriberFactory);
         this.localizationConstant = localizationConstant;
         this.projectResolver = projectResolver;
         this.restContext = restContext;
+        this.credentialsDialog = credentialsDialog;
         this.oAuth2AuthenticatorRegistry = oAuth2AuthenticatorRegistry;
     }
 
@@ -136,6 +142,8 @@ public class ProjectImporter extends AbstractImporter {
                                  switch (getErrorCode(exception.getCause())) {
                                      case UNABLE_GET_PRIVATE_SSH_KEY:
                                          throw new IllegalStateException(localizationConstant.importProjectMessageUnableGetSshKey());
+                                     case UNAUTHORIZED_SVN_OPERATION:
+                                         return recallImportWithCredentials(sourceStorage, path);
                                      case UNAUTHORIZED_GIT_OPERATION:
                                          final Map<String, String> attributes = ExceptionUtils.getAttributes(exception.getCause());
                                          final String providerName = attributes.get(PROVIDER_NAME);
@@ -154,6 +162,32 @@ public class ProjectImporter extends AbstractImporter {
                                  }
                              }
                          });
+    }
+
+    private Promise<Project> recallImportWithCredentials(final SourceStorage sourceStorage, final Path path) {
+        return createFromAsyncRequest(new RequestCall<Project>() {
+            @Override
+            public void makeCall(final AsyncCallback<Project> callback) {
+                credentialsDialog.askCredentials().then(new Operation<Credentials>() {
+                    @Override
+                    public void apply(Credentials credentials) throws OperationException {
+                        sourceStorage.getParameters().put("username", credentials.getUsername());
+                        sourceStorage.getParameters().put("password", credentials.getPassword());
+                        doImport(path, sourceStorage).then(new Operation<Project>() {
+                            @Override
+                            public void apply(Project project) throws OperationException {
+                                callback.onSuccess(project);
+                            }
+                        }).catchError(new Operation<PromiseError>() {
+                            @Override
+                            public void apply(PromiseError error) throws OperationException {
+                                callback.onFailure(error.getCause());
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     private Promise<Project> authUserAndRecallImport(final String providerName,
