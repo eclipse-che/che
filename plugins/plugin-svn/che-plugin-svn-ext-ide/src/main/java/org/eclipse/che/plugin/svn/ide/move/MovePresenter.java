@@ -67,7 +67,7 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                          SubversionClientService service,
                          SubversionExtensionLocalizationConstants locale,
                          StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, locale, notificationManager, subversionCredentialsDialog);
         this.notificationManager = notificationManager;
         this.service = service;
 
@@ -109,9 +109,12 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
                 new StatusNotification(locale.moveNotificationStarted(source.toString()), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                notification.setStatus(PROGRESS);
+                notification.setTitle(locale.moveNotificationStarted(source.toString()));
+
                 return service.move(project.getLocation(), source, getTarget(), comment, credentials);
             }
         }, notification).then(new Operation<CLIOutputResponse>() {

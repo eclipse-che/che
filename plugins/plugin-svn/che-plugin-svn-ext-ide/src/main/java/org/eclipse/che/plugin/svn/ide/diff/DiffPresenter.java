@@ -55,7 +55,7 @@ public class DiffPresenter extends SubversionActionPresenter {
                             final SubversionClientService service,
                             final SubversionExtensionLocalizationConstants constants,
                             final StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
 
         this.service = service;
         this.notificationManager = notificationManager;
@@ -71,7 +71,7 @@ public class DiffPresenter extends SubversionActionPresenter {
 
         checkState(!Arrays.isNullOrEmpty(resources));
 
-        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.showDiff(project.getLocation(), toRelative(project, resources), "HEAD", credentials);

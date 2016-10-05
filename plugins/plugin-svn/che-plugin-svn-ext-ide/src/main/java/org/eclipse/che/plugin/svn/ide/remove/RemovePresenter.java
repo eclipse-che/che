@@ -56,7 +56,7 @@ public class RemovePresenter extends SubversionActionPresenter {
                               SubversionClientService service,
                               ProcessesPanelPresenter processesPanelPresenter,
                               StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, credentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, credentialsDialog);
 
         this.service = service;
         this.notificationManager = notificationManager;

@@ -59,7 +59,7 @@ public class RevertPresenter extends SubversionActionPresenter {
                               NotificationManager notificationManager,
                               DialogFactory dialogFactory,
                               StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, credentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, credentialsDialog);
         this.service = service;
         this.constants = constants;
         this.notificationManager = notificationManager;

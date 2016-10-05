@@ -61,7 +61,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
                                SubversionExtensionLocalizationConstants constants,
                                ShowLogsView view,
                                StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
         this.service = service;
         this.notificationManager = notificationManager;
         this.constants = constants;
@@ -97,7 +97,7 @@ public class ShowLogPresenter extends SubversionActionPresenter {
         checkState(!Arrays.isNullOrEmpty(resources));
         checkState(resources.length == 1);
 
-        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<InfoResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<InfoResponse>() {
             @Override
             public Promise<InfoResponse> perform(Credentials credentials) {
                 return service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials);

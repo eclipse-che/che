@@ -61,7 +61,7 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
                                   SubversionExtensionLocalizationConstants constants,
                                   SubversionClientService service,
                                   StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
 
         this.service = service;
         this.notificationManager = notificationManager;
@@ -159,7 +159,7 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
 
         checkState(project != null);
 
-        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.lock(project.getLocation(), paths, force, credentials);
@@ -183,7 +183,7 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
 
         checkState(project != null);
 
-        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.unlock(project.getLocation(), paths, force, credentials);

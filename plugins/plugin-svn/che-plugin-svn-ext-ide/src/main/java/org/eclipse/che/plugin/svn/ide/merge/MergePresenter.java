@@ -77,7 +77,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
                           NotificationManager notificationManager,
                           SubversionExtensionLocalizationConstants constants,
                           StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
 
         this.view = view;
         this.service = service;
@@ -102,7 +102,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
 
         checkState(resources != null && resources.length == 1);
 
-        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<InfoResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<InfoResponse>() {
             @Override
             public Promise<InfoResponse> perform(Credentials credentials) {
                 return service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials);

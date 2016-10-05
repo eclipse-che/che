@@ -58,7 +58,7 @@ public class UpdatePresenter extends SubversionActionPresenter {
                            SubversionExtensionLocalizationConstants constants,
                            NotificationManager notificationManager,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
 
         this.constants = constants;
         this.notificationManager = notificationManager;
@@ -83,9 +83,13 @@ public class UpdatePresenter extends SubversionActionPresenter {
         final StatusNotification notification = new StatusNotification(constants.updateToRevisionStarted(revision), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputWithRevisionResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<CLIOutputWithRevisionResponse>() {
             @Override
             public Promise<CLIOutputWithRevisionResponse> perform(Credentials credentials) {
+
+                notification.setStatus(PROGRESS);
+                notification.setTitle(constants.updateToRevisionStarted(revision));
+
                 return service.update(project.getLocation(),
                                       toRelative(project, resources),
                                       revision,

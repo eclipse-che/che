@@ -122,9 +122,11 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                                               .withProjectPath(project.toString())
                                               .withSource(source.toString())
                                               .withDestination(destination.toString())
-                                              .withComment(comment)
-                                              .withUsername(credentials.getUsername())
-                                              .withPassword(credentials.getPassword());
+                                              .withComment(comment);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/copy", request)
                                   .loader(loader)
@@ -165,9 +167,11 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                                               .withProjectPath(project.toString())
                                               .withTarget(target.toString())
                                               .withRevision(revision)
-                                              .withChildren(children)
-                                              .withUsername(credentials.getUsername())
-                                              .withPassword(credentials.getPassword());
+                                              .withChildren(children);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/info", request)
                                   .loader(loader)
@@ -208,9 +212,11 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                           .withRevision(revision)
                           .withDepth(depth)
                           .withIgnoreExternals(ignoreExternals)
-                          .withAccept(accept)
-                          .withUsername(credentials.getUsername())
-                          .withPassword(credentials.getPassword());
+                          .withAccept(accept);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/update", request)
                                   .loader(loader)
@@ -235,9 +241,12 @@ public class SubversionClientServiceImpl implements SubversionClientService {
         final LockRequest request = dtoFactory.createDto(LockRequest.class)
                                               .withProjectPath(project.toString())
                                               .withTargets(toList(paths))
-                                              .withForce(force)
-                                              .withUsername(credentials.getUsername())
-                                              .withPassword(credentials.getPassword());
+                                              .withForce(force);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
         return asyncRequestFactory.createPostRequest(url, request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
@@ -249,9 +258,12 @@ public class SubversionClientServiceImpl implements SubversionClientService {
         final LockRequest request = dtoFactory.createDto(LockRequest.class)
                                               .withProjectPath(project.toString())
                                               .withTargets(toList(paths))
-                                              .withForce(force)
-                                              .withUsername(credentials.getUsername())
-                                              .withPassword(credentials.getPassword());
+                                              .withForce(force);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
         return asyncRequestFactory.createPostRequest(url, request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
@@ -263,9 +275,12 @@ public class SubversionClientServiceImpl implements SubversionClientService {
         final ShowDiffRequest request = dtoFactory.createDto(ShowDiffRequest.class)
                                                   .withProjectPath(project.toString())
                                                   .withPaths(toList(paths))
-                                                  .withRevision(revision)
-                                                  .withUsername(credentials.getUsername())
-                                                  .withPassword(credentials.getPassword());
+                                                  .withRevision(revision);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
         return asyncRequestFactory.createPostRequest(url, request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
@@ -335,9 +350,11 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                           .withProjectPath(project.toString())
                           .withSource(Collections.singletonList(source.toString()))
                           .withDestination(destination.toString())
-                          .withComment(comment)
-                          .withUsername(credentials.getUsername())
-                          .withPassword(credentials.getPassword());
+                          .withComment(comment);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/move", request)
                                   .loader(loader)

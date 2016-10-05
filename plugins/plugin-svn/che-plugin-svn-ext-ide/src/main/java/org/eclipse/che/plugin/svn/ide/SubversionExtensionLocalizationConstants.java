@@ -81,6 +81,9 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("action.not.implemented")
     String actionNotImplemented();
 
+    @Key("waiting.credentials")
+    String waitingCredentials();
+
     @Key("add.description")
     String addDescription();
 
@@ -496,18 +499,6 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
 
     @Key("error.unlock.directory.dialog.title")
     String dialogTitleUnlockDirectory();
-
-
-    // save credentials
-
-    @Key("save.credentials.started")
-    String notificationSavingCredentials(String repositoryUrl);
-
-    @Key("save.credentials.finished")
-    String notificationCredentialsSaved(String repositoryUrl);
-
-    @Key("save.credentials.failed")
-    String notificationCredentialsFailed(String repositoryUrl);
 
     /* Export dialog */
 

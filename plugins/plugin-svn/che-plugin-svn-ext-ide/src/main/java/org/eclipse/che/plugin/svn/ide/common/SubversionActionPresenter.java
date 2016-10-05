@@ -29,12 +29,14 @@ import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
+import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.action.SubversionAction;
 
 import java.util.List;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
 
@@ -43,23 +45,26 @@ import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
  */
 public class SubversionActionPresenter {
 
-    protected final AppContext                     appContext;
-    private final   SubversionOutputConsoleFactory consoleFactory;
-    private final   ProcessesPanelPresenter        consolesPanelPresenter;
-    private final   StatusColors                   statusColors;
-    private final   NotificationManager            notificationManager;
-    private final   SubversionCredentialsDialog    credentialsDialog;
+    protected final AppContext                               appContext;
+    private final   SubversionOutputConsoleFactory           consoleFactory;
+    private final   ProcessesPanelPresenter                  consolesPanelPresenter;
+    private final   StatusColors                             statusColors;
+    private final   SubversionExtensionLocalizationConstants locale;
+    private final   NotificationManager                      notificationManager;
+    private final   SubversionCredentialsDialog              credentialsDialog;
 
     protected SubversionActionPresenter(AppContext appContext,
                                         SubversionOutputConsoleFactory consoleFactory,
                                         ProcessesPanelPresenter processesPanelPresenter,
                                         StatusColors statusColors,
+                                        SubversionExtensionLocalizationConstants locale,
                                         NotificationManager notificationManager,
                                         SubversionCredentialsDialog credentialsDialog) {
         this.appContext = appContext;
         this.consoleFactory = consoleFactory;
         this.consolesPanelPresenter = processesPanelPresenter;
         this.statusColors = statusColors;
+        this.locale = locale;
         this.notificationManager = notificationManager;
         this.credentialsDialog = credentialsDialog;
     }
@@ -141,42 +146,39 @@ public class SubversionActionPresenter {
      * the operation will be recalled with requested credentials
      *
      * @param notification
-     *         progress notification that has been notified when operation started
+     *         progress notification to set operation status
      */
-    protected <Y> Promise<Y> performOperationWithCredentialsRequestIfNeeded(final SVNOperation<Y> operation,
+    protected <Y> Promise<Y> performOperationWithCredentialsRequestIfNeeded(final SubversionOperation<Y> operation,
                                                                             @Nullable final StatusNotification notification) {
-        return operation.perform(new Credentials()).catchErrorPromise(new Function<PromiseError, Promise<Y>>() {
-            @Override
-            public Promise<Y> apply(PromiseError error) throws FunctionException {
-                if (getErrorCode(error.getCause()) == ErrorCodes.UNAUTHORIZED_SVN_OPERATION) {
-                    if (notification != null) {
-                        notification.setTitle(error.getMessage());
-                        notification.setStatus(FAIL);
-                    } else {
-                        notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                    }
+        return operation.perform(null)
+                        .catchErrorPromise(new Function<PromiseError, Promise<Y>>() {
+                            @Override
+                            public Promise<Y> apply(PromiseError error) throws FunctionException {
+                                if (getErrorCode(error.getCause()) == ErrorCodes.UNAUTHORIZED_SVN_OPERATION) {
+                                    if (notification != null) {
+                                        notification.setTitle(locale.waitingCredentials());
+                                        notification.setStatus(PROGRESS);
+                                    } else {
+                                        notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                                    }
 
-                    return credentialsDialog.askCredentials().catchError(new Operation<PromiseError>() {
-                        @Override
-                        public void apply(PromiseError error) throws OperationException {
-                            notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
-                        }
-                    }).thenPromise(new Function<Credentials, Promise<Y>>() {
-                        @Override
-                        public Promise<Y> apply(Credentials credentials) throws FunctionException {
-                            return operation.perform(credentials);
-                        }
-                    });
-                }
-                return Promises.reject(error);
-            }
-        });
+                                    return credentialsDialog.askCredentials()
+                                                            .thenPromise(new Function<Credentials, Promise<Y>>() {
+                                                                @Override
+                                                                public Promise<Y> apply(Credentials credentials) throws FunctionException {
+                                                                    return operation.perform(credentials);
+                                                                }
+                                                            });
+                                }
+                                return Promises.reject(error);
+                            }
+                        });
     }
 
     /**
      * Subversion operation.
      */
-    protected interface SVNOperation<Y> {
+    protected interface SubversionOperation<Y> {
         Promise<Y> perform(Credentials credentials);
     }
 

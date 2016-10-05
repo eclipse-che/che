@@ -83,7 +83,7 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                            ProcessesPanelPresenter processesPanelPresenter,
                            DiffViewerPresenter diffViewerPresenter,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
         this.service = service;
         this.view = view;
         this.subversionCredentialsDialog = subversionCredentialsDialog;
@@ -194,7 +194,7 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
         checkState(project != null);
 
-        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.showDiff(project.getLocation(),

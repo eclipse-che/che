@@ -66,7 +66,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
                            NotificationManager notificationManager,
                            SubversionExtensionLocalizationConstants constants,
                            StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, credentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, credentialsDialog);
         this.appContext = appContext;
         this.view = view;
         this.service = service;

@@ -70,7 +70,7 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
                             SubversionClientService service,
                             SubversionExtensionLocalizationConstants constants,
                             StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors, notificationManager, subversionCredentialsDialog);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, subversionCredentialsDialog);
         this.view = view;
         this.notificationManager = notificationManager;
         this.service = service;
@@ -124,9 +124,12 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
 
         view.hide();
 
-        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new SubversionOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                notification.setStatus(PROGRESS);
+                notification.setTitle(constants.copyNotificationStarted(src.toString()));
+
                 return service.copy(project.getLocation(), src, target, comment, credentials);
             }
         }, notification).then(new Operation<CLIOutputResponse>() {
