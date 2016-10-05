@@ -19,6 +19,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -63,10 +64,10 @@ public class ProjectConfigImpl implements ProjectConfig {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private SourceStorageImpl source;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> mixins;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn
     @MapKey(name = "name")
     private Map<String, Attribute> dbAttributes;
@@ -230,7 +231,7 @@ public class ProjectConfigImpl implements ProjectConfig {
         @Basic
         private String name;
 
-        @ElementCollection
+        @ElementCollection(fetch = FetchType.EAGER)
         private List<String> values;
 
         public Attribute() {}
