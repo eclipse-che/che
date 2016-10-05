@@ -10,18 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.ide.common;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
 import org.eclipse.che.api.core.ErrorCodes;
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
+import org.eclipse.che.api.promises.client.js.Promises;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Container;
-import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.subversion.Credentials;
 import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
@@ -32,7 +33,6 @@ import org.eclipse.che.plugin.svn.ide.action.SubversionAction;
 
 import java.util.List;
 
-import static org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper.createFromAsyncRequest;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
@@ -138,34 +138,46 @@ public class SubversionActionPresenter {
 
     /**
      * Performs subversion operation. If this operations fails with authorization error
-     * the operation wil be performed with requested credentials
+     * the operation will be recalled with requested credentials
+     *
+     * @param notification
+     *         progress notification that has been notified when operation started
      */
-    protected <Y, T extends Promise<Y>> Promise<Y> performOperationWithRequestingCredentialsIfNeeded(final SVNOperation<T> operation) {
-        Promise<Y> catchError = operation.perform(null).catchError(new Operation<PromiseError>() {
+    protected <Y> Promise<Y> performOperationWithCredentialsRequestIfNeeded(final SVNOperation<Y> operation,
+                                                                            @Nullable final StatusNotification notification) {
+        return operation.perform(new Credentials()).catchErrorPromise(new Function<PromiseError, Promise<Y>>() {
             @Override
-            public void apply(PromiseError error) {
+            public Promise<Y> apply(PromiseError error) throws FunctionException {
                 if (getErrorCode(error.getCause()) == ErrorCodes.UNAUTHORIZED_SVN_OPERATION) {
-                    notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                    if (notification != null) {
+                        notification.setTitle(error.getMessage());
+                        notification.setStatus(FAIL);
+                    } else {
+                        notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
+                    }
 
-                    credentialsDialog.askCredentials().then(new Operation<Credentials>() {
-                        @Override
-                        public void apply(Credentials credentials) throws OperationException {
-                            operation.perform(credentials);
-                        }
-                    }).catchError(new Operation<PromiseError>() {
+                    return credentialsDialog.askCredentials().catchError(new Operation<PromiseError>() {
                         @Override
                         public void apply(PromiseError error) throws OperationException {
                             notificationManager.notify(error.getMessage(), FAIL, FLOAT_MODE);
                         }
+                    }).thenPromise(new Function<Credentials, Promise<Y>>() {
+                        @Override
+                        public Promise<Y> apply(Credentials credentials) throws FunctionException {
+                            return operation.perform(credentials);
+                        }
                     });
                 }
+                return Promises.reject(error);
             }
         });
-        return catchError;
     }
 
-    protected interface SVNOperation<T extends Promise<?>> {
-        T perform(Credentials credentials);
+    /**
+     * Subversion operation.
+     */
+    protected interface SVNOperation<Y> {
+        Promise<Y> perform(Credentials credentials);
     }
 
     /**

@@ -159,12 +159,12 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
 
         checkState(project != null);
 
-        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.lock(project.getLocation(), paths, force, credentials);
             }
-        }).then(new Operation<CLIOutputResponse>() {
+        }, null).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandLock());
@@ -183,12 +183,12 @@ public class LockUnlockPresenter extends SubversionActionPresenter {
 
         checkState(project != null);
 
-        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.unlock(project.getLocation(), paths, force, credentials);
             }
-        }).then(new Operation<CLIOutputResponse>() {
+        }, null).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandUnlock());

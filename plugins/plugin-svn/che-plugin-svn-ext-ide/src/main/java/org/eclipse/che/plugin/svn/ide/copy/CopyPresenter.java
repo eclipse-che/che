@@ -124,12 +124,12 @@ public class CopyPresenter extends SubversionActionPresenter implements CopyView
 
         view.hide();
 
-        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.copy(project.getLocation(), src, target, comment, credentials);
             }
-        }).then(new Operation<CLIOutputResponse>() {
+        }, notification).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandCopy());

@@ -194,7 +194,7 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
 
         checkState(project != null);
 
-        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.showDiff(project.getLocation(),
@@ -202,7 +202,7 @@ public class CommitPresenter extends SubversionActionPresenter implements Action
                                         "HEAD",
                                         credentials);
             }
-        }).then(new Operation<CLIOutputResponse>() {
+        }, null).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 String content = Joiner.on('\n').join(response.getOutput());

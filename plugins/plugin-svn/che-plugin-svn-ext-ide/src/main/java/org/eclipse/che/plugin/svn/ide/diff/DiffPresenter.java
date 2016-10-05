@@ -71,12 +71,12 @@ public class DiffPresenter extends SubversionActionPresenter {
 
         checkState(!Arrays.isNullOrEmpty(resources));
 
-        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputResponse>>() {
+        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputResponse>() {
             @Override
             public Promise<CLIOutputResponse> perform(Credentials credentials) {
                 return service.showDiff(project.getLocation(), toRelative(project, resources), "HEAD", credentials);
             }
-        }).then(new Operation<CLIOutputResponse>() {
+        }, null).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandDiff());;

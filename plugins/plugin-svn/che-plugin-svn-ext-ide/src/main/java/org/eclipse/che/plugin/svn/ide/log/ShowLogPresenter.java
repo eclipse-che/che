@@ -97,12 +97,12 @@ public class ShowLogPresenter extends SubversionActionPresenter {
         checkState(!Arrays.isNullOrEmpty(resources));
         checkState(resources.length == 1);
 
-        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<InfoResponse>>() {
+        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<InfoResponse>() {
             @Override
             public Promise<InfoResponse> perform(Credentials credentials) {
                 return service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials);
             }
-        }).then(new Operation<InfoResponse>() {
+        }, null).then(new Operation<InfoResponse>() {
             @Override
             public void apply(InfoResponse response) throws OperationException {
                 if (response.getErrorOutput() != null && !response.getErrorOutput().isEmpty()) {

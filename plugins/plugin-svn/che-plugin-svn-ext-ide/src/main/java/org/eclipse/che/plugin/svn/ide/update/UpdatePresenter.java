@@ -83,19 +83,18 @@ public class UpdatePresenter extends SubversionActionPresenter {
         final StatusNotification notification = new StatusNotification(constants.updateToRevisionStarted(revision), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        performOperationWithRequestingCredentialsIfNeeded(new SVNOperation<Promise<CLIOutputWithRevisionResponse>>() {
+        performOperationWithCredentialsRequestIfNeeded(new SVNOperation<CLIOutputWithRevisionResponse>() {
             @Override
             public Promise<CLIOutputWithRevisionResponse> perform(Credentials credentials) {
-                Promise<CLIOutputWithRevisionResponse> postpone = service.update(project.getLocation(),
-                                                                                 toRelative(project, resources),
-                                                                                 revision,
-                                                                                 depth,
-                                                                                 ignoreExternals,
-                                                                                 "postpone",
-                                                                                 credentials);
-                return postpone;
+                return service.update(project.getLocation(),
+                                      toRelative(project, resources),
+                                      revision,
+                                      depth,
+                                      ignoreExternals,
+                                      "postpone",
+                                      credentials);
             }
-        }).then(new Operation<CLIOutputWithRevisionResponse>() {
+        }, notification).then(new Operation<CLIOutputWithRevisionResponse>() {
             @Override
             public void apply(CLIOutputWithRevisionResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(),
