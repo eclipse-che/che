@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.jsonexample.shared;
 
 /**
- * Holds JSON Exapmle related constants used across the server and the IDE bundle.
+ * Holds JSON Example related constants used across the server and the IDE bundle.
  */
 public final class Constants {
 

@@ -18,12 +18,12 @@ import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
-import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 import static org.eclipse.che.plugin.jsonexample.shared.Constants.JSON_EXAMPLE_PROJECT_TYPE_ID;
 
 /**
@@ -49,7 +49,7 @@ public abstract class JsonExampleProjectAction extends AbstractPerspectiveAction
                                     @NotNull String text,
                                     @NotNull String description,
                                     @Nullable SVGResource svgResource) {
-        super(Collections.singletonList(ProjectPerspective.PROJECT_PERSPECTIVE_ID),
+        super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               text,
               description,
               null,
