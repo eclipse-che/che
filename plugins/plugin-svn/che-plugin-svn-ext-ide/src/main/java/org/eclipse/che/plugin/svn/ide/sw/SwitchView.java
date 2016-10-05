@@ -12,88 +12,52 @@ package org.eclipse.che.plugin.svn.ide.sw;
 
 import org.eclipse.che.ide.api.mvp.View;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * The dialog view of {@link SwitchPresenter}.
+ *
+ * @author Anatolii Bazko
  */
 public interface SwitchView extends View<SwitchView.ActionDelegate> {
 
-    // Delegate interface for view actions
     interface ActionDelegate {
         /** Click handler for the 'Cancel' button */
         void onCancelClicked();
 
-        /** Click handler for the 'Checkout' button */
-        void onUpdateClicked();
+        /** Click handler for the 'Switch' button */
+        void onSwitchClicked();
 
-        /** Change handler for 'Revision Type' radio button */
-        void onRevisionTypeChanged();
+        /** Switch to trunk selected */
+        void onSwitchToTrunkChanged();
 
-        /** Change handler for 'Revision' text input */
-        void onRevisionChanged();
+        /** Switch to branch selected */
+        void onSwitchToBranchChanged();
+
+        /** Switch to tag selected */
+        void onSwitchToTagChanged();
+
+        /** Switch to other location selected */
+        void onSwitchToLocationChanged();
     }
 
     /**
-     * @return the depth
+     * Indicates if switch to trunk is selected.
      */
-    @NotNull
-    String getDepth();
+    boolean isSwitchToTrunk();
 
     /**
-     * @param depth the depth to set
+     * Indicates if switch to branch is selected.
      */
-    void setDepth(@NotNull final String depth);
+    boolean isSwitchToBranch();
 
     /**
-     * @return whether or not to ignore externals
+     * Indicates if switch to tag is selected.
      */
-    boolean ignoreExternals();
+    boolean isSwitchToTag();
 
     /**
-     * @param ignoreExternals whether or not to ignore externals
+     * Indicates if switch to other location is selected.
      */
-    void setIgnoreExternals(final boolean ignoreExternals);
-
-    /**
-     * @return whether or not to checkout the HEAD revision
-     */
-    boolean isHeadRevision();
-
-    /**
-     * @param headRevision whether or not to checkout the head revision
-     */
-    void setIsHeadRevision(final boolean headRevision);
-
-    /**
-     * @return whether or not to checkout the custom revision
-     */
-    boolean isCustomRevision();
-
-    /**
-     * @param customRevision whether or not to checkout the custom revision
-     */
-    void setIsCustomRevision(final boolean customRevision);
-
-    /**
-     * @return the revision
-     */
-    String getRevision();
-
-    /**
-     * @param revision the revision to set
-     */
-    void setRevision(final String revision);
-
-    /**
-     * @param enable whether or not to enable the 'Update' button
-     */
-    void setEnableUpdateButton(final boolean enable);
-
-    /**
-     * @param enable whether or not to enable the 'Revision' text box
-     */
-    void setEnableCustomRevision(final boolean enable);
+    boolean isSwitchToLocation();
 
     /**
      * Close the view.

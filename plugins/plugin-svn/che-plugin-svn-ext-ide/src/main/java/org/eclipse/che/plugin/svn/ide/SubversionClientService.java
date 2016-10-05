@@ -317,4 +317,14 @@ public interface SubversionClientService {
      *         the range of revisions to check
      */
     Promise<GetRevisionsResponse> getRevisions(Path project, Path path, String revisionRange);
+
+    /**
+     * Lists directory entries in the repository.
+     *
+     * @param project
+     *      the project path
+     * @param target
+     *      the target path to browse
+     */
+    Promise<CLIOutputResponse> list(Path project, Path target);
 }

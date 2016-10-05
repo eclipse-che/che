@@ -288,6 +288,21 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("switch.title")
     String switchTitle();
 
+    @Key("switch.switchTo.label")
+    String switchToLabel();
+
+    @Key("switch.switchTo.tag")
+    String switchToTag();
+
+    @Key("switch.switchTo.branch")
+    String switchToBranch();
+
+    @Key("switch.switchTo.trunk")
+    String switchToTrunk();
+
+    @Key("switch.switchTo.location")
+    String switchToLocation();
+
     @Key("unlock.description")
     String unlockDescription();
 
@@ -308,12 +323,6 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
 
     @Key("update.to.revision.title")
     String updateToRevisionTitle();
-
-    @Key("checkout.title")
-    String checkoutTitle();
-
-    @Key("checkout.description")
-    String checkoutDescription();
 
     @Key("change.credentials.title")
     String changeCredentialsTitle();
@@ -359,8 +368,8 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("button.update")
     String buttonUpdate();
 
-    @Key("button.checkout")
-    String buttonCheckout();
+    @Key("button.switch")
+    String buttonSwitch();
 
     @Key("button.log")
     String buttonLog();

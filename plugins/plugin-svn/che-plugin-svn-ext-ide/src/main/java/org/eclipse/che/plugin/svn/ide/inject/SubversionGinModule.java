@@ -22,8 +22,6 @@ import org.eclipse.che.plugin.svn.ide.SubversionClientServiceImpl;
 import org.eclipse.che.plugin.svn.ide.askcredentials.AskCredentialsPresenter;
 import org.eclipse.che.plugin.svn.ide.askcredentials.AskCredentialsView;
 import org.eclipse.che.plugin.svn.ide.askcredentials.AskCredentialsViewImpl;
-import org.eclipse.che.plugin.svn.ide.checkout.CheckoutView;
-import org.eclipse.che.plugin.svn.ide.checkout.CheckoutViewImpl;
 import org.eclipse.che.plugin.svn.ide.commit.CommitView;
 import org.eclipse.che.plugin.svn.ide.commit.CommitViewImpl;
 import org.eclipse.che.plugin.svn.ide.commit.diff.DiffViewerView;
@@ -49,6 +47,8 @@ import org.eclipse.che.plugin.svn.ide.property.PropertyEditorView;
 import org.eclipse.che.plugin.svn.ide.property.PropertyEditorViewImpl;
 import org.eclipse.che.plugin.svn.ide.resolve.ResolveView;
 import org.eclipse.che.plugin.svn.ide.resolve.ResolveViewImpl;
+import org.eclipse.che.plugin.svn.ide.sw.SwitchView;
+import org.eclipse.che.plugin.svn.ide.sw.SwitchViewImpl;
 import org.eclipse.che.plugin.svn.ide.update.UpdateToRevisionView;
 import org.eclipse.che.plugin.svn.ide.update.UpdateToRevisionViewImpl;
 
@@ -74,7 +74,7 @@ public class SubversionGinModule extends AbstractGinModule {
 
         bind(SubversionOutputConsoleView.class).to(SubversionOutputConsoleViewImpl.class);
         bind(UpdateToRevisionView.class).to(UpdateToRevisionViewImpl.class).in(Singleton.class);
-        bind(CheckoutView.class).to(CheckoutViewImpl.class).in(Singleton.class);
+        bind(SwitchView.class).to(SwitchViewImpl.class).in(Singleton.class);
         bind(ResolveView.class).to(ResolveViewImpl.class).in(Singleton.class);
         bind(ExportView.class).to(ExportViewImpl.class).in(Singleton.class);
         bind(ShowLogsView.class).to(ShowLogsViewImpl.class).in(Singleton.class);

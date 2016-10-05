@@ -22,6 +22,8 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
 import org.eclipse.che.plugin.svn.shared.CheckoutRequest;
 import org.eclipse.che.plugin.svn.shared.CopyRequest;
 import org.eclipse.che.plugin.svn.shared.Depth;
+import org.eclipse.che.plugin.svn.shared.ListRequest;
+import org.eclipse.che.plugin.svn.shared.ListResponse;
 import org.eclipse.che.plugin.svn.shared.MoveRequest;
 import org.eclipse.che.plugin.svn.shared.PropertyDeleteRequest;
 import org.eclipse.che.plugin.svn.shared.PropertySetRequest;
@@ -41,6 +43,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -103,6 +106,21 @@ public class SubversionApiITest {
                                                       .withDepth("immediates"));
 
         assertTrue(response.getRevision() > -1);
+    }
+
+    @Test
+    public void testList() throws Exception {
+        subversionApi.checkout(DtoFactory.getInstance()
+                                         .createDto(CheckoutRequest.class)
+                                         .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                         .withUrl(repoUrl));
+
+        ListResponse response = subversionApi.list(DtoFactory.getInstance().createDto(ListRequest.class)
+                                                             .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                                             .withTarget(tmpDir.toFile().getAbsolutePath() + "/branches"));
+        List<String> output = response.getOutput();
+        assertEquals(output.size(), 1);
+        assertEquals(output.get(0), "1.0/");
     }
 
     /**

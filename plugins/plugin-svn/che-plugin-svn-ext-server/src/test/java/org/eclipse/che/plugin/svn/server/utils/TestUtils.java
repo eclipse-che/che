@@ -79,6 +79,9 @@ public class TestUtils {
 
     public static final String[] GREEK_TREE = new String[] {
             "/",
+            "/branches/",
+            "/branches/1.0/",
+            "/branches/1.0/a",
             "/iota",
             "/A/",
             "/A/mu",

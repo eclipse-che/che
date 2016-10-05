@@ -13,15 +13,11 @@ package org.eclipse.che.plugin.svn.ide.sw;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,30 +26,27 @@ import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * The implementation of {@link SwitchView}.
  */
 @Singleton
 public class SwitchViewImpl extends Window implements SwitchView {
 
-    interface UpdateToRevisionViewImplUiBinder extends UiBinder<Widget, SwitchViewImpl> { }
+    interface SwitchViewImplUiBinder extends UiBinder<Widget, SwitchViewImpl> {}
 
-    private static UpdateToRevisionViewImplUiBinder ourUiBinder = GWT.create(UpdateToRevisionViewImplUiBinder.class);
+    private static SwitchViewImplUiBinder ourUiBinder = GWT.create(SwitchViewImplUiBinder.class);
 
-    Button btnCancel;
-    Button btnUpdate;
+    private final Button btnCancel;
+    private final Button btnSwitch;
+
     @UiField
-    ListBox     depth;
+    RadioButton switchToTrunk;
     @UiField
-    CheckBox    ignoreExternals;
+    RadioButton switchToBranch;
     @UiField
-    RadioButton headRevision;
+    RadioButton switchToTag;
     @UiField
-    RadioButton customRevision;
-    @UiField
-    TextBox     revision;
+    RadioButton switchToLocation;
 
     @UiField(provided = true)
     SubversionExtensionResources             resources;
@@ -68,18 +61,12 @@ public class SwitchViewImpl extends Window implements SwitchView {
         this.resources = resources;
         this.constants = constants;
 
-        this.ensureDebugId("svn-checkout-window");
+        this.ensureDebugId("svn-switch-window");
 
-        this.setTitle(constants.checkoutTitle());
+        this.setTitle(constants.switchDescription());
         this.setWidget(ourUiBinder.createAndBindUi(this));
 
-        // Populate the 'Checkout Depth' list
-        this.depth.addItem(this.constants.subversionDepthInfinityLabel(), "infinity");
-        this.depth.addItem(this.constants.subversionDepthImmediatesLabel(), "immediates");
-        this.depth.addItem(this.constants.subversionDepthFilesLabel(), "files");
-        this.depth.addItem(this.constants.subversionDepthEmptyLabel(), "empty");
-
-        btnCancel = createButton(constants.buttonCancel(), "svn-checkout-cancel", new ClickHandler() {
+        btnCancel = createButton(constants.buttonCancel(), "svn-switch-cancel", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.onCancelClicked();
@@ -87,13 +74,13 @@ public class SwitchViewImpl extends Window implements SwitchView {
         });
         addButtonToFooter(btnCancel);
 
-        btnUpdate = createButton(constants.buttonCheckout(), "svn-checkout-checkout", new ClickHandler() {
+        btnSwitch = createButton(constants.buttonSwitch(), "svn-switch-checkout", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                delegate.onUpdateClicked();
+                delegate.onSwitchClicked();
             }
         });
-        addButtonToFooter(btnUpdate);
+        addButtonToFooter(btnSwitch);
     }
 
     @Override
@@ -102,70 +89,23 @@ public class SwitchViewImpl extends Window implements SwitchView {
     }
 
     @Override
-    public String getDepth() {
-        final int sIndex = this.depth.getSelectedIndex();
-
-        return sIndex > -1 ? this.depth.getValue(sIndex) : "";
+    public boolean isSwitchToTrunk() {
+        return switchToTrunk.getValue();
     }
 
     @Override
-    public void setDepth(@NotNull String depth) {
-        for (int i = 0; i < this.depth.getItemCount(); i++) {
-            if (this.depth.getValue(i).equals(depth)) {
-                this.depth.setSelectedIndex(i);
-                break;
-            }
-        }
+    public boolean isSwitchToBranch() {
+        return switchToBranch.getValue();
     }
 
     @Override
-    public boolean ignoreExternals() {
-        return this.ignoreExternals.getValue();
+    public boolean isSwitchToTag() {
+        return switchToTag.getValue();
     }
 
     @Override
-    public void setIgnoreExternals(boolean ignoreExternals) {
-        this.ignoreExternals.setValue(ignoreExternals);
-    }
-
-    @Override
-    public boolean isHeadRevision() {
-        return this.headRevision.getValue();
-    }
-
-    @Override
-    public void setIsHeadRevision(boolean headRevision) {
-        this.headRevision.setValue(headRevision);
-    }
-
-    @Override
-    public boolean isCustomRevision() {
-        return this.customRevision.getValue();
-    }
-
-    @Override
-    public void setIsCustomRevision(boolean customRevision) {
-        this.customRevision.setValue(customRevision);
-    }
-
-    @Override
-    public String getRevision() {
-        return this.revision.getText();
-    }
-
-    @Override
-    public void setRevision(String revision) {
-        this.revision.setText(revision);
-    }
-
-    @Override
-    public void setEnableUpdateButton(boolean enable) {
-        this.btnUpdate.setEnabled(enable);
-    }
-
-    @Override
-    public void setEnableCustomRevision(boolean enable) {
-        this.revision.setEnabled(enable);
+    public boolean isSwitchToLocation() {
+        return switchToLocation.getValue();
     }
 
     @Override
@@ -178,37 +118,24 @@ public class SwitchViewImpl extends Window implements SwitchView {
         this.show();
     }
 
-    /**
-     * @see ActionDelegate#onRevisionTypeChanged()
-     *
-     * @param event the click event
-     */
-    @UiHandler("headRevision")
-    public void onHeadRevisionClicked(final ClickEvent event) {
-        delegate.onRevisionTypeChanged();
-    }
-
-    /**
-     * @see ActionDelegate#onRevisionTypeChanged()
-     *
-     * @param event the click event
-     */
-    @UiHandler("customRevision")
-    public void onCustomRevisionClicked(final ClickEvent event) {
-        delegate.onRevisionTypeChanged();
-    }
-
-    /**
-     * @see ActionDelegate#onRevisionChanged() ()
-     *
-     * @param event the change event
-     */
-    @UiHandler("revision")
-    public void onRevisionChanged(final KeyUpEvent event) {
-        delegate.onRevisionChanged();
-    }
-
     @Override
     protected void onClose() { }
 
+    @UiHandler("switchToBranch")
+    public void onSwitchToBranchClicked(final ClickEvent event) { delegate.onSwitchToBranchChanged(); }
+
+    @UiHandler("switchToTrunk")
+    public void onSwitchToTrunkClicked(final ClickEvent event) {
+        delegate.onSwitchToTrunkChanged();
+    }
+
+    @UiHandler("switchToTag")
+    public void onSwitchToTagClicked(final ClickEvent event) {
+        delegate.onSwitchToTagChanged();
+    }
+
+    @UiHandler("switchToLocation")
+    public void onSwitchToLocationClicked(final ClickEvent event) {
+        delegate.onSwitchToLocationChanged();
+    }
 }

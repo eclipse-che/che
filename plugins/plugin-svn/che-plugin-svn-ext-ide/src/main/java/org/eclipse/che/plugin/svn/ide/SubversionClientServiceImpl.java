@@ -33,6 +33,7 @@ import org.eclipse.che.plugin.svn.shared.GetRevisionsRequest;
 import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoRequest;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
+import org.eclipse.che.plugin.svn.shared.ListRequest;
 import org.eclipse.che.plugin.svn.shared.LockRequest;
 import org.eclipse.che.plugin.svn.shared.MergeRequest;
 import org.eclipse.che.plugin.svn.shared.MoveRequest;
@@ -435,6 +436,17 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                                                   .withPath(path.toString());
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/proplist", request)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
+    }
+
+    @Override
+    public Promise<CLIOutputResponse> list(Path project, Path target) {
+        final ListRequest request = dtoFactory.createDto(ListRequest.class)
+                                              .withProjectPath(project.toString())
+                                              .withTarget(target.toString());
+
+        return asyncRequestFactory.createPostRequest(getBaseUrl() + "/list", request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
     }

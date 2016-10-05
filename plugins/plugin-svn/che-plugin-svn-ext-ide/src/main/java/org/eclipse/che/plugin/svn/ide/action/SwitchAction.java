@@ -32,7 +32,7 @@ public class SwitchAction extends SubversionAction {
                         AppContext appContext,
                         SubversionExtensionLocalizationConstants constants,
                         SubversionExtensionResources resources) {
-        super(constants.switchTitle(), constants.switchDescription(), resources.switchLocation(), appContext, constants, resources);
+        super(constants.switchTitle(), constants.switchDescription(), resources.sw(), appContext, constants, resources);
         this.presenter = presenter;
     }
 
