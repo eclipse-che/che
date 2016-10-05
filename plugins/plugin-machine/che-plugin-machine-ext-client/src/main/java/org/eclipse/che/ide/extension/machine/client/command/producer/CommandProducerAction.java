@@ -13,9 +13,9 @@ package org.eclipse.che.ide.extension.machine.client.command.producer;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
 import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
 
@@ -27,30 +27,30 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
  */
 public class CommandProducerAction extends Action {
 
-    private final CommandProducer       commandProducer;
-    private final CommandManager        commandManager;
-    private final SelectCommandComboBox machineSelector;
+    private final CommandProducer commandProducer;
+    private final Machine         machine;
+    private final CommandManager  commandManager;
 
     @Inject
-    public CommandProducerAction(@Assisted CommandProducer commandProducer,
-                                 CommandManager commandManager,
-                                 SelectCommandComboBox machineSelector) {
-        super();
+    public CommandProducerAction(@Assisted String name,
+                                 @Assisted CommandProducer commandProducer,
+                                 @Assisted Machine machine,
+                                 CommandManager commandManager) {
+        super(name);
 
         this.commandProducer = commandProducer;
+        this.machine = machine;
         this.commandManager = commandManager;
-        this.machineSelector = machineSelector;
     }
 
     @Override
     public void update(ActionEvent e) {
-        e.getPresentation().setText(commandProducer.getName());
         e.getPresentation().setEnabledAndVisible(commandProducer.isApplicable());
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        CommandConfiguration command = commandProducer.createCommand();
-        commandManager.executeCommand(command, machineSelector.getSelectedMachine());
+        CommandConfiguration command = commandProducer.createCommand(machine);
+        commandManager.executeCommand(command, machine);
     }
 }

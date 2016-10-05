@@ -43,8 +43,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
-import org.eclipse.che.ide.extension.machine.client.command.producer.CommandProducer;
-import org.eclipse.che.ide.extension.machine.client.command.producer.CommandProducerActionFactory;
+import org.eclipse.che.ide.extension.machine.client.command.producer.CommandProducerActionManager;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
@@ -55,11 +54,7 @@ import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
-import java.util.Set;
-
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
@@ -152,7 +147,8 @@ public class MachineExtension {
                                 MachineResources machineResources,
                                 ReRunProcessAction reRunProcessAction,
                                 StopProcessAction stopProcessAction,
-                                CloseConsoleAction closeConsoleAction) {
+                                CloseConsoleAction closeConsoleAction,
+                                CommandProducerActionManager commandProducerActionManager) {
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
 
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);
@@ -229,22 +225,5 @@ public class MachineExtension {
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");
 
         iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
-    }
-
-    @Inject(optional = true)
-    private void registerActionsForCommandProducers(ActionManager actionManager,
-                                                    CommandProducerActionFactory commandProducerActionFactory,
-                                                    Set<CommandProducer> commandProducers) {
-        DefaultActionGroup commandActionsGroup = new DefaultActionGroup(actionManager);
-
-        for (CommandProducer commandProducer : commandProducers) {
-            commandActionsGroup.add(commandProducerActionFactory.create(commandProducer));
-        }
-
-        DefaultActionGroup mainContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-        mainContextMenu.add(commandActionsGroup);
-
-        DefaultActionGroup editorTabContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
-        editorTabContextMenu.add(commandActionsGroup);
     }
 }
