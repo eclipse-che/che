@@ -25,6 +25,7 @@ import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -380,5 +381,12 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                    .send(newCallback(callback));
             }
         });
+    }
+
+    @Override
+    public Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId) {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + workspaceId + "/check")
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WsAgentHealthStateDto.class));
     }
 }
