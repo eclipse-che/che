@@ -17,8 +17,9 @@ import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 
 import java.util.List;
 
@@ -282,5 +283,15 @@ public interface WorkspaceServiceClient {
      * @see WorkspaceService#createSnapshot(String)
      */
     Promise<Void> createSnapshot(String workspaceId);
+
+    /**
+     * Gets state of the workspace agent.
+     *
+     * @param workspaceId
+     *         workspace ID
+     * @return a promise that will resolve when the snapshot has been created, or rejects with an error
+     * @see WorkspaceService#checkAgentHealth(String)
+     */
+    Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId);
 
 }
