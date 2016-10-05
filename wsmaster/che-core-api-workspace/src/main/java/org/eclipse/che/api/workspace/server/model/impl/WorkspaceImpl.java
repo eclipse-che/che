@@ -84,7 +84,7 @@ public class WorkspaceImpl implements Workspace {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private WorkspaceConfigImpl config;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Map<String, String> attributes;
 
     @Basic
