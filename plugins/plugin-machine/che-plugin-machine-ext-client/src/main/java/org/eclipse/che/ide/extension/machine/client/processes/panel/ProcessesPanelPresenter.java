@@ -657,10 +657,23 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
+    //TODO: need to improve this method. Avoid duplicate for(;;). 
+    //Then we get output form machine it must be added to process tree already.                                                                      
     public void onEnvironmentOutputEvent(EnvironmentOutputEvent event) {
+        final String content = event.getContent();
+        final String machineName = event.getMachineName();
         for (ProcessTreeNode machineNode : machineNodes.values()) {
-            if (machineNode.getName().equals(event.getMachineName())) {
-                printMachineOutput(machineNode.getId(), event.getContent());
+            if (machineName.equals(machineNode.getName())) {
+                printMachineOutput(machineNode.getId(), content);
+                return;
+            }
+        }
+
+        final List<MachineEntity> machines = getMachines(appContext.getWorkspace());
+        for (MachineEntity machineEntity : machines) {
+            if (machineName.equals(machineEntity.getDisplayName())) {
+                ProcessTreeNode machineNode = addMachineNode(machineEntity);
+                printMachineOutput(machineNode.getId(), content);
             }
         }
     }
@@ -707,6 +720,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         rootNode.getChildren().clear();
         rootNodes.clear();
+        machineNodes.clear();
 
         view.clear();
         view.selectNode(null);
