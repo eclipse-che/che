@@ -80,7 +80,6 @@ public class SubversionExtension {
                                final SubversionExtensionResources resources) {
         SVN_GROUP_MAIN_MENU = constants.subversionLabel();
 
-        final Constraints beforeWindow = new Constraints(Anchor.BEFORE, IdeActions.GROUP_HELP);
         final DefaultActionGroup addCommandGroup = new DefaultActionGroup(ADD_COMMAND_GROUP, false, actionManager);
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_MENU);
         final DefaultActionGroup fileCommandGroup = new DefaultActionGroup(FILE_COMMAND_GROUP, false, actionManager);
@@ -98,7 +97,7 @@ public class SubversionExtension {
 
         // Register action groups
         actionManager.registerAction(SVN_GROUP_MAIN_MENU, svnMenu);
-        mainMenu.add(svnMenu, beforeWindow);
+        mainMenu.add(svnMenu, new Constraints(Anchor.BEFORE, IdeActions.GROUP_PROFILE));
 
         actionManager.registerAction(REMOTE_COMMAND_GROUP, remoteCommandGroup);
         svnMenu.add(remoteCommandGroup);
