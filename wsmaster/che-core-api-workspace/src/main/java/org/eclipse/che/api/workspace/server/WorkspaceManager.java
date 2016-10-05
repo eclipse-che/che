@@ -404,8 +404,10 @@ public class WorkspaceManager {
     /**
      * Starts machine in running workspace
      *
-     * @param machineConfig configuration of machine to start
-     * @param workspaceId id of workspace in which machine should be started
+     * @param machineConfig
+     *         configuration of machine to start
+     * @param workspaceId
+     *         id of workspace in which machine should be started
      * @throws NotFoundException
      *         if machine type from recipe is unsupported
      * @throws NotFoundException
@@ -516,7 +518,8 @@ public class WorkspaceManager {
      * Removes all snapshots of workspace machines.
      * Continues to remove snapshots even when removal of some of them fails.
      *
-     * @param workspaceId workspace id to remove machine snapshots
+     * @param workspaceId
+     *         workspace id to remove machine snapshots
      * @throws NotFoundException
      *         when workspace with given id doesn't exists
      * @throws ServerException
@@ -737,8 +740,18 @@ public class WorkspaceManager {
                 snapshot = runtimes.saveMachine(namespace,
                                                 machine.getWorkspaceId(),
                                                 machine.getId());
-
-                snapshotDao.saveSnapshot(snapshot);
+                // check if the workspace exists before creating a snapshot,
+                // if it is not an integrity constraint violation exception will occur,
+                // this may happen when workspace stop called simultaneously.
+                // The issue https://github.com/eclipse/che/issues/2683 should fix it
+                // in a way that it won't be possible to snapshot workspace simultaneously.
+                if (exists(machine.getWorkspaceId())) {
+                    snapshotDao.saveSnapshot(snapshot);
+                } else {
+                    LOG.warn("Snapshot for a workspace '{}' won't be saved, as the workspace doesn't exist anymore",
+                             machine.getWorkspaceId());
+                    runtimes.removeSnapshot(snapshot);
+                }
             } catch (ApiException e) {
                 if (snapshot != null) {
                     try {
@@ -838,5 +851,15 @@ public class WorkspaceManager {
         final String wsName = parts[1];
         final String namespace = nsPart.isEmpty() ? sessionUser().getUserName() : nsPart;
         return workspaceDao.get(wsName, namespace);
+    }
+
+    /** Returns true if workspace exists and false otherwise. */
+    private boolean exists(String workspaceId) throws ServerException {
+        try {
+            workspaceDao.get(workspaceId);
+        } catch (NotFoundException x) {
+            return false;
+        }
+        return true;
     }
 }
