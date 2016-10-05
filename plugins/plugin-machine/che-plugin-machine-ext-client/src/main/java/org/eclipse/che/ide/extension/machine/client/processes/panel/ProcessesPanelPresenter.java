@@ -657,6 +657,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     }
 
     @Override
+    //TODO: need to improve this method. Avoid duplicate for(;;). 
+    //Then we get output form machine it must be added to process tree already.                                                                      
     public void onEnvironmentOutputEvent(EnvironmentOutputEvent event) {
         final String content = event.getContent();
         final String machineName = event.getMachineName();
