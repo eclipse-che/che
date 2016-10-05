@@ -205,11 +205,11 @@ public class TypeScriptDTOGeneratorMojoITest {
 
         // avoid root permissions in generated files
         if (SystemInfo.isLinux()) {
-
-            command.add("groupadd -g " + getGid() + " user && useradd -u" + getUid() + " -g user user && (chown --silent -R user.user /usr/src/app || true) && cd /usr/src/app/ && npm install && (chown --silent -R user.user /usr/src/app || true)");
+            command.add(wrapLinuxCommand("npm install"));
         } else {
             command.add("npm install");
         }
+
         // setup typescript compiler
         ProcessBuilder processBuilder = new ProcessBuilder().command(command).directory(rootPath.toFile()).redirectErrorStream(true).inheritIO();
         Process process = processBuilder.start();
@@ -223,6 +223,21 @@ public class TypeScriptDTOGeneratorMojoITest {
         LOG.info("TypeScript compiler installed.");
 
     }
+
+
+    /**
+     * Wrap the given command into a command with chown. Also add group/user that match host environment if not exists
+     * @param command the command to wrap
+     * @return an updated command with chown applied on it
+     */
+    protected String wrapLinuxCommand(String command) throws IOException, InterruptedException {
+
+        String setGroup = "export GROUP_NAME=`(getent group " + getGid() + " || (groupadd -g " + getGid() + " user && echo user:x:" + getGid() +")) | cut -d: -f1`";
+        String setUser = "export USER_NAME=`(getent passwd " + getUid() + " || (useradd -u " + getUid() + " -g ${GROUP_NAME} user && echo user:x:" + getGid() +")) | cut -d: -f1`";
+        String chownCommand= "chown --silent -R ${USER_NAME}.${GROUP_NAME} /usr/src/app || true";
+        return setGroup + " && " + setUser + " && " + chownCommand + " && " + command + " && " + chownCommand;
+    }
+
 
     /**
      * Starts tests by compiling first generated DTO from maven plugin
@@ -253,7 +268,7 @@ public class TypeScriptDTOGeneratorMojoITest {
 
         // avoid root permissions in generated files
         if (SystemInfo.isLinux()) {
-            command.add("groupadd -g " + getGid() + " user && useradd -u" + getUid() + " -g user user && (chown --silent -R user.user /usr/src/app || true) && npm test && (chown --silent -R user.user /usr/src/app || true)");
+            command.add(wrapLinuxCommand("npm test"));
         } else {
             command.add("npm test");
         }
