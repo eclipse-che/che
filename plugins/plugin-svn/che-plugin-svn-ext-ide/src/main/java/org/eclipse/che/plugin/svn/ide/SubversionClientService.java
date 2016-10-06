@@ -326,4 +326,20 @@ public interface SubversionClientService {
      *      the target path to browse
      */
     Promise<CLIOutputResponse> list(Path project, Path target);
+
+    /**
+     * Returns list of the branches of the project.
+     *
+     * @param project
+     *      the project path
+     */
+    Promise<CLIOutputResponse> listBranches(Path project);
+
+    /**
+     * Returns list of the tags of the project.
+     *
+     * @param project
+     *      the project path
+     */
+    Promise<CLIOutputResponse> listTags(Path project);
 }

@@ -448,4 +448,15 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
     }
+
+    @Override
+    public Promise<CLIOutputResponse> listBranches(Path project) {
+        final ListRequest request = dtoFactory.createDto(ListRequest.class)
+                                              .withProjectPath(project.toString());
+
+        return asyncRequestFactory.createGetRequest(getBaseUrl() + "/list", request)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
+    }
+
 }

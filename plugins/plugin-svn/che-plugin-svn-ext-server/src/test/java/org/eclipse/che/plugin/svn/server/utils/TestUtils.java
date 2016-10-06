@@ -72,7 +72,7 @@ public class TestUtils {
         }
     }, new RepositoryUrlProvider() {
         @Override
-        public String getRepositoryUrl(final String projectPath) throws IOException {
+        public String getRepositoryUrl(final String projectPath){
             return "";
         }
     }, null);

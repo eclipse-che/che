@@ -45,7 +45,6 @@ import org.eclipse.che.plugin.svn.shared.GetRevisionsRequest;
 import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoRequest;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
-import org.eclipse.che.plugin.svn.shared.ListRequest;
 import org.eclipse.che.plugin.svn.shared.ListResponse;
 import org.eclipse.che.plugin.svn.shared.LockRequest;
 import org.eclipse.che.plugin.svn.shared.MergeRequest;
@@ -535,17 +534,89 @@ public class SubversionApi {
     }
 
     /**
+     * Returns list of the branches of the project.
+     *
+     * @see #list(String, String)
+     * @see #info(InfoRequest)
+     */
+    public ListResponse listBranches(final String projectPath) throws SubversionException {
+        InfoResponse info = info(DtoFactory.getInstance()
+                                           .createDto(InfoRequest.class)
+                                           .withProjectPath(projectPath)
+                                           .withTarget("."));
+
+        String repositoryRoot = InfoUtils.getRepositoryRoot(info.getOutput());
+        String projectRelativeUrl = InfoUtils.getRelativeUrl(info.getOutput());
+        String projectUri = SubversionUtils.recognizeProjectUri(repositoryRoot, projectRelativeUrl);
+
+        final List<String> args = defaultArgs();
+        args.add("list");
+
+        String branchesPath = projectUri + "/branches";
+
+        final CommandLineResult result = runCommand(null,
+                                                    args,
+                                                    new File(projectPath),
+                                                    singletonList(branchesPath));
+
+        return DtoFactory.getInstance().createDto(ListResponse.class)
+                         .withCommand(result.getCommandLine().toString())
+                         .withOutput(result.getStdout()
+                                           .stream()
+                                           .map(s -> s.substring(0, s.length() - 1))
+                                           .collect(Collectors.toList()))
+                         .withErrorOutput(result.getStderr());
+    }
+
+    /**
+     * Returns list of the tags of the project.
+     *
+     * @see #list(String, String)
+     * @see #info(InfoRequest)
+     */
+    public ListResponse listTags(final String projectPath) throws SubversionException {
+        InfoResponse info = info(DtoFactory.getInstance()
+                                           .createDto(InfoRequest.class)
+                                           .withProjectPath(projectPath)
+                                           .withTarget("."));
+
+        String repositoryRoot = InfoUtils.getRepositoryRoot(info.getOutput());
+        String projectRelativeUrl = InfoUtils.getRelativeUrl(info.getOutput());
+        String projectUri = SubversionUtils.recognizeProjectUri(repositoryRoot, projectRelativeUrl);
+
+        final List<String> args = defaultArgs();
+        args.add("list");
+
+        String branchesPath = projectUri + "/tags";
+
+        final CommandLineResult result = runCommand(null,
+                                                    args,
+                                                    new File(projectPath),
+                                                    singletonList(branchesPath));
+
+        return DtoFactory.getInstance().createDto(ListResponse.class)
+                         .withCommand(result.getCommandLine().toString())
+                         .withOutput(result.getStdout()
+                                           .stream()
+                                           .map(s -> s.substring(0, s.length() - 1))
+                                           .collect(Collectors.toList()))
+                         .withErrorOutput(result.getStderr());
+    }
+
+
+    /**
      * List remote subversion directory.
      *
      * @return the response containing target children
      */
-    public ListResponse list(final ListRequest request) throws IOException, SubversionException {
-        final File projectPath = new File(request.getProjectPath());
+    public ListResponse list(final String projectPath, final String targetPath) throws SubversionException {
         final List<String> args = defaultArgs();
-
         args.add("list");
 
-        final CommandLineResult result = runCommand(null, args, projectPath, singletonList(request.getTargetPath()));
+        final CommandLineResult result = runCommand(null,
+                                                    args,
+                                                    new File(projectPath),
+                                                    singletonList(targetPath));
 
         return DtoFactory.getInstance().createDto(ListResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -895,7 +966,7 @@ public class SubversionApi {
     private CommandLineResult runCommand(@Nullable Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
-                                         List<String> paths) throws IOException, SubversionException {
+                                         List<String> paths) throws SubversionException {
         String[] credentials = getCredentialArgs(projectPath.getAbsolutePath());
         String repoUrl = getRepositoryUrl(projectPath.getAbsolutePath());
         return runCommand(env, args, projectPath, paths, credentials, repoUrl);
@@ -906,7 +977,7 @@ public class SubversionApi {
                                          File projectPath,
                                          List<String> paths,
                                          @Nullable String[] credentials,
-                                         String repoUrl) throws IOException, SubversionException {
+                                         String repoUrl) throws SubversionException {
         final List<String> lines = new ArrayList<>();
         final CommandLineResult result;
         final StringBuffer buffer;
@@ -941,6 +1012,8 @@ public class SubversionApi {
                                                       -1,
                                                       projectPath,
                                                       svnOutputPublisherFactory);
+        } catch (IOException e) {
+            throw new SubversionException(e);
         } finally {
             if (sshEnvironment != null) {
                 sshEnvironment.cleanUp();
@@ -971,7 +1044,7 @@ public class SubversionApi {
         return result;
     }
 
-    private String[] getCredentialArgs(final String projectPath) throws SubversionException, IOException {
+    private String[] getCredentialArgs(final String projectPath) throws SubversionException {
         Credentials credentials;
         try {
             credentials = this.credentialsProvider.getCredentials(getRepositoryUrl(projectPath));
@@ -985,7 +1058,7 @@ public class SubversionApi {
         }
     }
 
-    public String getRepositoryUrl(final String projectPath) throws SubversionException, IOException {
+    public String getRepositoryUrl(final String projectPath) throws SubversionException {
         return this.repositoryUrlProvider.getRepositoryUrl(projectPath);
     }
 
@@ -998,7 +1071,7 @@ public class SubversionApi {
      * @throws SubversionException
      * @throws IOException
      */
-    public InfoResponse info(final InfoRequest request) throws SubversionException, IOException {
+    public InfoResponse info(final InfoRequest request) throws SubversionException {
         final List<String> args = defaultArgs();
 
         if (request.getRevision() != null && !request.getRevision().trim().isEmpty()) {

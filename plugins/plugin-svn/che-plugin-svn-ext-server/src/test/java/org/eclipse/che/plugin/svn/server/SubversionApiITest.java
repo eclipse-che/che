@@ -22,7 +22,6 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
 import org.eclipse.che.plugin.svn.shared.CheckoutRequest;
 import org.eclipse.che.plugin.svn.shared.CopyRequest;
 import org.eclipse.che.plugin.svn.shared.Depth;
-import org.eclipse.che.plugin.svn.shared.ListRequest;
 import org.eclipse.che.plugin.svn.shared.ListResponse;
 import org.eclipse.che.plugin.svn.shared.MoveRequest;
 import org.eclipse.che.plugin.svn.shared.PropertyDeleteRequest;
@@ -47,7 +46,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 
 /**
  * Integration tests for {@link SubversionApi}.
@@ -151,12 +149,16 @@ public class SubversionApiITest {
                                          .withProjectPath(tmpDir.toFile().getAbsolutePath())
                                          .withUrl(repoUrl + "/trunk"));
 
-        ListResponse response = subversionApi.list(DtoFactory.getInstance().createDto(ListRequest.class)
-                                                             .withProjectPath(tmpDir.toFile().getAbsolutePath())
-                                                             .withTargetPath("^/branches"));
+        ListResponse response = subversionApi.list(tmpDir.toFile().getAbsolutePath(), "^/branches");
         List<String> output = response.getOutput();
         assertEquals(output.size(), 1);
         assertEquals(output.get(0), "2.0/");
+
+        response = subversionApi.listBranches(tmpDir.toFile().getAbsolutePath());
+
+        output = response.getOutput();
+        assertEquals(output.size(), 1);
+        assertEquals(output.get(0), "2.0");
     }
 
     @Test
@@ -166,12 +168,16 @@ public class SubversionApiITest {
                                          .withProjectPath(tmpDir.toFile().getAbsolutePath())
                                          .withUrl(repoUrl));
 
-        ListResponse response = subversionApi.list(DtoFactory.getInstance().createDto(ListRequest.class)
-                                                             .withProjectPath(tmpDir.toFile().getAbsolutePath())
-                                                             .withTargetPath("^/tags"));
+        ListResponse response = subversionApi.list(tmpDir.toFile().getAbsolutePath(), "^/tags");
         List<String> output = response.getOutput();
         assertEquals(output.size(), 1);
         assertEquals(output.get(0), "1.0/");
+
+        response = subversionApi.listTags(tmpDir.toFile().getAbsolutePath());
+
+        output = response.getOutput();
+        assertEquals(output.size(), 1);
+        assertEquals(output.get(0), "1.0");
     }
 
     /**
