@@ -13,7 +13,6 @@ package org.eclipse.che.api.workspace.server.model.impl;
 
 import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.model.project.SourceStorage;
-import org.eclipse.persistence.internal.descriptors.changetracking.ObjectChangeListener;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -31,14 +30,11 @@ import javax.persistence.PostLoad;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Transient;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
 
