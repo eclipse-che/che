@@ -157,7 +157,7 @@ public class LanguageServerFormatter implements ContentFormatter {
             if (undoRedo != null) {
                 undoRedo.beginCompoundChange();
             }
-            
+
             // convert line-character ranges to LinearRanges
             LinearTextEdit[] linearEdits = new LinearTextEdit[edits.size()];
             for (int i = 0; i < linearEdits.length; i++) {
@@ -168,18 +168,19 @@ public class LanguageServerFormatter implements ContentFormatter {
                 LinearRange linearRange = LinearRange.createWithStart(startOffset).andEnd(endOffset);
                 linearEdits[i] = new LinearTextEdit(change.getNewText(), linearRange);
             }
-            
+
             // apply each of the edits to the document
-            for (int i = 0; i < linearEdits.length; i++) {
-                LinearTextEdit edit = linearEdits[i];
-                document.replace(edit.range.getStartOffset(), edit.range.getLength(), edit.newText);
-                
-                // shift the remaining ranges
-                int shift = edit.newText.length() - edit.range.getLength();
-                for (int j = i + 1; j < linearEdits.length; j++) {
-                    LinearRange oldRange = linearEdits[j].range;
-                    linearEdits[j].range = LinearRange.createWithStart(oldRange.getStartOffset() + shift).andLength(oldRange.getLength());
+            int shift = 0;
+            for (LinearTextEdit edit : linearEdits) {
+                // shift the edit range if necessary
+                if (shift != 0) {
+                    LinearRange oldRange = edit.range;
+                    edit.range = LinearRange.createWithStart(oldRange.getStartOffset() + shift).andLength(oldRange.getLength());
                 }
+                // apply the edit
+                document.replace(edit.range.getStartOffset(), edit.range.getLength(), edit.newText);
+                // accumulate the necessary shift
+                shift += edit.newText.length() - edit.range.getLength();
             }
         } catch (final Exception e) {
             Log.error(getClass(), e);
