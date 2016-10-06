@@ -233,7 +233,7 @@ public class ProjectConfigImpl implements ProjectConfig {
     }
 
     @PostLoad
-    private void postLoadAttribute() {
+    private void postLoadAttributes() {
         attributes = dbAttributes.values()
                                  .stream()
                                  .collect(toMap(attr -> attr.name, attr -> attr.values));
