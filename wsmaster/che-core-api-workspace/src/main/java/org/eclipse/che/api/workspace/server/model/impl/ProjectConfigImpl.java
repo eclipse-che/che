@@ -11,8 +11,8 @@
 package org.eclipse.che.api.workspace.server.model.impl;
 
 
-import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
+import org.eclipse.che.api.core.model.project.SourceStorage;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -27,7 +27,9 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
+import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
+import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,10 +74,9 @@ public class ProjectConfigImpl implements ProjectConfig {
     @MapKey(name = "name")
     private Map<String, Attribute> dbAttributes;
 
-    // TODO consider using List<Attribute> or Map<String, Attribute> on model level instead
     // Mapping delegated to 'dbAttributes' field
     // as it is impossible to map nested list directly
-    @Column(insertable = false, updatable = false)
+    @Transient
     private Map<String, List<String>> attributes;
 
     public ProjectConfigImpl() {}
@@ -207,15 +208,32 @@ public class ProjectConfigImpl implements ProjectConfig {
                '}';
     }
 
-    @PreUpdate
-    public void syncDbAttributes() {
-        dbAttributes = getAttributes().entrySet()
-                                      .stream()
-                                      .collect(toMap(Map.Entry::getKey, e -> new Attribute(e.getKey(), e.getValue())));
+    /**
+     * Synchronizes instance attribute with db attributes,
+     * should be called by internal components in needed places,
+     * this can't be done neither by {@link PrePersist} nor by {@link PreUpdate}
+     * as when the entity is merged the transient attribute won't be passed
+     * to event handlers.
+     */
+    public void prePersistAttributes() {
+        if (dbAttributes == null) {
+            dbAttributes = new HashMap<>();
+        }
+        final Map<String, Attribute> dbAttrsCopy = new HashMap<>(dbAttributes);
+        dbAttributes.clear();
+        for (Map.Entry<String, List<String>> entry : getAttributes().entrySet()) {
+            Attribute attribute = dbAttrsCopy.get(entry.getKey());
+            if (attribute == null) {
+                attribute = new Attribute(entry.getKey(), entry.getValue());
+            } else if (!Objects.equals(attribute.values, entry.getValue())) {
+                attribute.values = entry.getValue();
+            }
+            dbAttributes.put(entry.getKey(), attribute);
+        }
     }
 
     @PostLoad
-    private void initEntityAttributes() {
+    private void postLoadAttributes() {
         attributes = dbAttributes.values()
                                  .stream()
                                  .collect(toMap(attr -> attr.name, attr -> attr.values));

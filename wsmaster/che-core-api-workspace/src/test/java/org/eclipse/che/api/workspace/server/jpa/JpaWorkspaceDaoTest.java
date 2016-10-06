@@ -11,10 +11,10 @@
 package org.eclipse.che.api.workspace.server.jpa;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.testng.annotations.AfterMethod;
@@ -23,10 +23,10 @@ import org.testng.annotations.Test;
 
 import javax.persistence.EntityManager;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspace;
 import static org.testng.Assert.assertEquals;
 
@@ -37,18 +37,25 @@ import static org.testng.Assert.assertEquals;
  */
 public class JpaWorkspaceDaoTest {
 
-    private EntityManager manager;
+    private EntityManager   manager;
+    private JpaWorkspaceDao workspaceDao;
 
     @BeforeMethod
     private void setUpManager() {
-        manager = Guice.createInjector(new WorkspaceTckModule()).getInstance(EntityManager.class);
+        final Injector injector = Guice.createInjector(new WorkspaceTckModule());
+        manager = injector.getInstance(EntityManager.class);
+        workspaceDao = injector.getInstance(JpaWorkspaceDao.class);
     }
 
     @AfterMethod
     private void cleanup() {
         manager.getTransaction().begin();
-        manager.createQuery("DELETE FROM Workspace workspaces");
-        manager.createQuery("DELETE FROM Account accounts");
+        final List<Object> entities = new ArrayList<>();
+        entities.addAll(manager.createQuery("SELECT w FROM Workspace w").getResultList());
+        entities.addAll(manager.createQuery("SELECT a FROM Account a").getResultList());
+        for (Object entity : entities) {
+            manager.remove(entity);
+        }
         manager.getTransaction().commit();
         manager.getEntityManagerFactory().close();
     }
@@ -105,6 +112,37 @@ public class JpaWorkspaceDaoTest {
         manager.getTransaction().begin();
         manager.merge(workspace2);
         manager.getTransaction().commit();
+    }
+
+    @Test
+    public void shouldSyncDbAttributesWhileUpdatingWorkspace() throws Exception {
+        final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+        final WorkspaceImpl workspace = createWorkspace("id", account, "name");
+
+        // persist the workspace
+        manager.getTransaction().begin();
+        manager.persist(account);
+        manager.persist(workspace);
+        manager.getTransaction().commit();
+        manager.clear();
+
+        // put a new attribute
+        workspace.getConfig()
+                 .getProjects()
+                 .get(0)
+                 .getAttributes()
+                 .put("new-attr", singletonList("value"));
+        workspaceDao.update(workspace);
+
+        manager.clear();
+
+        // check it's okay
+        assertEquals(workspaceDao.get(workspace.getId())
+                                 .getConfig()
+                                 .getProjects()
+                                 .get(0)
+                                 .getAttributes()
+                                 .size(), 3);
     }
 
     private long asLong(String query) {

@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
@@ -141,6 +142,9 @@ public class JpaFactoryDao implements FactoryDao {
     @Transactional
     protected void doCreate(FactoryImpl factory) {
         final EntityManager manager = managerProvider.get();
+        if (factory.getWorkspace() != null) {
+            factory.getWorkspace().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
         manager.persist(factory);
     }
 
@@ -149,6 +153,9 @@ public class JpaFactoryDao implements FactoryDao {
         final EntityManager manager = managerProvider.get();
         if (manager.find(FactoryImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Could not update factory with id %s because it doesn't exist", update.getId()));
+        }
+        if (update.getWorkspace() != null) {
+            update.getWorkspace().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
         }
         return manager.merge(update);
     }

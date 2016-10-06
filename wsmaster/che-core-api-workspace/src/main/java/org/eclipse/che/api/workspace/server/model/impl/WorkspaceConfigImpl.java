@@ -214,12 +214,6 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
                '}';
     }
 
-    @PreUpdate
-    @PrePersist
-    public void syncProjects() {
-        getProjects().forEach(ProjectConfigImpl::syncDbAttributes);
-    }
-
     /**
      * Helps to build complex {@link WorkspaceConfigImpl users workspace instance}.
      *

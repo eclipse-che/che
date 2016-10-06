@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.slf4j.Logger;
@@ -154,6 +155,9 @@ public class JpaWorkspaceDao implements WorkspaceDao {
 
     @Transactional
     protected void doCreate(WorkspaceImpl workspace) {
+        if (workspace.getConfig() != null) {
+            workspace.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
         manager.get().persist(workspace);
     }
 
@@ -169,6 +173,9 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     protected WorkspaceImpl doUpdate(WorkspaceImpl update) throws NotFoundException {
         if (manager.get().find(WorkspaceImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Workspace with id '%s' doesn't exist", update.getId()));
+        }
+        if (update.getConfig() != null) {
+            update.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
         }
         return manager.get().merge(update);
     }
