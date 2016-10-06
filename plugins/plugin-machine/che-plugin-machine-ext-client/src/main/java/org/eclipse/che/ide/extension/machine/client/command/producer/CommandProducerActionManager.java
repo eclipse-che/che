@@ -38,9 +38,14 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_TAB_CONTEXT
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
 
 /**
- * Manages actions for contextual commands.
+ * Manages actions for the contextual commands.
+ * <p>Manager gets all registered {@link CommandProducer}s and creates related actions in context menus.
+ * <p>Manager listens all machines's state (running/destroyed) in order to
+ * create/remove actions for the related {@link CommandProducer}s in case
+ * they are applicable only for the certain machine types.
  *
  * @author Artem Zatsarynnyi
+ * @see CommandProducer
  */
 @Singleton
 public class CommandProducerActionManager implements MachineStateEvent.Handler, WsAgentStateHandler {
@@ -133,6 +138,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
     public void onWsAgentStopped(WsAgentStateEvent event) {
     }
 
+    /** Creates actions for the given {@link CommandProducer}. */
     private void createActionsForProducer(CommandProducer producer) {
         Action action;
 
@@ -155,6 +161,10 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
         commandProducersActionsGroup.add(action);
     }
 
+    /**
+     * Creates actions for that {@link CommandProducer}s
+     * which are applicable for the given machine's type.
+     */
     private void createActionsForMachine(Machine machine) {
         for (CommandProducer commandProducer : commandProducers) {
             if (commandProducer.getMachineTypes().contains(machine.getConfig().getType())) {
@@ -180,6 +190,10 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
         }
     }
 
+    /**
+     * Removes actions for that {@link CommandProducer}s
+     * which are applicable for the given machine's type.
+     */
     private void removeActionsForMachine(Machine machine) {
         List<Action> actions = actionsByMachines.remove(machine);
         if (actions != null) {
