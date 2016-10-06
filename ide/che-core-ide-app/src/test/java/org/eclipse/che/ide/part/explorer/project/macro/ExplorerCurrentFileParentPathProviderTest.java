@@ -70,5 +70,4 @@ public class ExplorerCurrentFileParentPathProviderTest extends AbstractExplorerM
 
         verify(promiseProvider).resolve(eq(""));
     }
-
 }
