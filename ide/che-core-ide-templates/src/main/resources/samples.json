@@ -671,7 +671,7 @@
       {
         "name": "install dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && npm install --no-bin-links && bower install",
+        "commandLine": "cd ${current.project.path} && npm install && bower install",
         "attributes": {
           "previewUrl": ""
         }
