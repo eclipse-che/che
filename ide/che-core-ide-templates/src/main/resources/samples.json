@@ -994,7 +994,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample.git",
       "parameters": {
         "keepVcs": "false"
       }
@@ -1003,24 +1003,24 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && npm install express@4.13.4 && express -f . && cp -rn /bitnami/mongodb/conf ${current.project.path} && npm install mongodb@2.1.18 --save && npm install && counter=0; until nc -z localhost 27017; do counter=$((counter+1)); if [ $counter == 10 ]; then echo \"Error: Couldn't connect to MongoDB.\"; exit 1; fi; echo \"Trying to connect to MongoDB at localhost. Attempt $counter.\"; sleep 5; done; echo \"Connected to MongoDB database. Starting application server.\" && npm start",
+        "commandLine": "print-help && cd ${current.project.path} && npm install express@4.13.4 && express -f . && cp -rn /bitnami/mongodb/conf ${current.project.path} && npm install mongodb@2.1.18 --save && npm install && counter=0; until nc -z localhost 27017; do counter=$((counter+1)); if [ $counter == 10 ]; then echo \"Error: Couldn't connect to MongoDB.\"; exit 1; fi; echo \"Trying to connect to MongoDB at localhost. Attempt $counter.\"; sleep 5; done; echo \"Connected to MongoDB database. Starting application server.\" && npm start",
         "attributes": {
           "previewUrl": "http://${server.port.3000}"
         }
       },
       {
-        "name": "2. Run",
+        "name": "2. Stop",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && npm start",
-        "attributes": {
-          "previewUrl": "http://${server.port.3000}"
-        }
-      },
-      {
-        "name": "3. Stop",
-        "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && pkill -u bitnami node && echo \"Web server stopped.\"",
+        "commandLine": "print-help && cd ${current.project.path} && pkill -u bitnami node && echo \"Web server stopped.\"",
         "attributes": {}
+      },
+      {
+        "name": "3. Run",
+        "type": "custom",
+        "commandLine": "print-help && cd ${current.project.path} && npm start",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}"
+        }
       }
     ],
     "links": [],
@@ -1045,7 +1045,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample.git",
       "parameters": {
         "keepVcs": "false"
       }
@@ -1054,13 +1054,13 @@
       {
         "name": "1. Create project",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && mkdir ${current.project.path}/app_template && cd ${current.project.path}/app_template && swift-package init --type executable && swift build && echo \"Project built successfully.\"",
+        "commandLine": "print-help && mkdir ${current.project.path}/app_template && cd ${current.project.path}/app_template && swift-package init --type executable 2>&1 | grep -v \"no version information available\"; swift build 2>&1 | grep -v \"no version information available\"; echo \"Project built successfully.\"",
         "attributes": {}
       },
       {
         "name": "2. Run",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path}/app_template && swift build && ./.build/debug/app_template",
+        "commandLine": "print-help && cd ${current.project.path}/app_template && swift build 2>&1 | grep -v \"no version information available\"; ./.build/debug/app_template",
         "attributes": {}
       }
     ],
@@ -1086,7 +1086,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample.git",
       "parameters": {
         "keepVcs": "false"
       }
@@ -1095,24 +1095,24 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cp -a /tmp/laravel-sample/. ${current.project.path} && cd ${current.project.path} && composer update && php artisan migrate && php artisan serve --host=0.0.0.0 --port=3000",
+        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cp -a /tmp/laravel-sample/. ${current.project.path} && cd ${current.project.path} && composer update && php artisan migrate && php artisan serve --host=0.0.0.0 --port=3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/"
         }
       },
       {
-        "name": "2. Run",
+        "name": "2. Stop",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && php artisan serve --host=0.0.0.0 --port=3000",
-        "attributes": {
-          "previewUrl": "http://${server.port.3000}/"
-        }
-      },
-      {
-        "name": "3. Stop",
-        "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && pkill -u bitnami php && echo \"Web server stopped.\"",
+        "commandLine": "print-help && cd ${current.project.path} && pkill -u bitnami php && echo \"Web server stopped.\"",
         "attributes": {}
+      },
+      {
+        "name": "3. Run",
+        "type": "custom",
+        "commandLine": "print-help && cd ${current.project.path} && php artisan serve --host=0.0.0.0 --port=3000",
+        "attributes": {
+          "previewUrl": "http://${server.port.3000}/"
+        }
       }
     ],
     "links": [],
@@ -1137,7 +1137,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample.git",
       "parameters": {
         "keepVcs": "false"
       }
@@ -1146,7 +1146,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cd ${current.project.path} && mv README.md README-CHE.md && rails new . --skip-bundle --database mysql && sed -Ei 's/\\s*#\\s*gem(.*)therubyracer/gem\\1therubyracer/' Gemfile && bundle install && bundle exec rails db:create && bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p 3000",
+        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami start mariadb && cd ${current.project.path} && mv README.md README-CHE.md && rails new . --skip-bundle --database mysql && sed -Ei 's/\\s*#\\s*gem(.*)therubyracer/gem\\1therubyracer/' Gemfile && bundle install && bundle exec rails db:create && bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0 -p 3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/"
         }
@@ -1154,7 +1154,7 @@
       {
         "name": "2. Run",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && bundle exec rails server -b 0.0.0.0 -p 3000",
+        "commandLine": "print-help && cd ${current.project.path} && bundle exec rails server -b 0.0.0.0 -p 3000",
         "attributes": {
           "previewUrl": "http://${server.port.3000}/"
         }
@@ -1170,7 +1170,7 @@
     "name": "codeigniter",
     "displayName": "codeigniter",
     "path": "/codeigniter",
-    "description": "A simple application created by Codeigniter. Execute the '1. Create and run project' command to create the sample project.",
+    "description": "A simple application created by CodeIgniter. Execute the '1. Create and run project' command to create the sample project.",
     "projectType": "php",
     "mixins": [],
     "attributes": {
@@ -1182,7 +1182,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample.git",
       "parameters": {
         "keepVcs": "false"
       }
@@ -1191,7 +1191,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root /opt/bitnami/nami/bin/nami execute codeigniter createProject --force codeigniter | grep -v undefined && php -S 0.0.0.0:8000 -t ${current.project.path}",
+        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami execute codeigniter createProject --force $(basename ${current.project.path}) | grep -v undefined && php -S 0.0.0.0:8000 -t ${current.project.path}",
         "attributes": {
            "previewUrl": "http://${server.port.8000}/"
         }
@@ -1199,7 +1199,7 @@
       {
         "name": "2. Run",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && php -S 0.0.0.0:8000 -t ${current.project.path}",
+        "commandLine": "print-help && php -S 0.0.0.0:8000 -t ${current.project.path}",
         "attributes": {
            "previewUrl": "http://${server.port.8000}/"
         }
@@ -1227,7 +1227,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample.git",
       "parameters": {
         "keepVcs": "false"
       }
@@ -1236,7 +1236,7 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root nami execute symfony createProject --force symfony | grep -v undefined && ln -fs ${current.project.path}/web/app.php ${current.project.path}/web/index.php && php -S 0.0.0.0:8000 -t ${current.project.path}/web",
+        "commandLine": "print-help && sudo HOME=/root nami execute symfony createProject --force $(basename ${current.project.path}) | grep -v undefined && ln -fs ${current.project.path}/web/app.php ${current.project.path}/web/index.php && php -S 0.0.0.0:8000 -t ${current.project.path}/web",
         "attributes": {
            "previewUrl": "http://${server.port.8000}/"
         }
@@ -1244,7 +1244,7 @@
       {
         "name": "2. Run",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && php -S 0.0.0.0:8000 -t ${current.project.path}/web",
+        "commandLine": "print-help && php -S 0.0.0.0:8000 -t ${current.project.path}/web",
         "attributes": {
            "previewUrl": "http://${server.port.8000}/"
         }
@@ -1272,7 +1272,7 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample",
+      "location": "https://github.com/bitnami/bitnami-docker-che-blank-sample.git",
       "parameters": {
         "keepVcs": "false"
       }
@@ -1281,24 +1281,24 @@
       {
         "name": "1. Create and run project",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && sudo HOME=/root /opt/bitnami/nami/bin/nami execute activator createProject --force $(basename ${current.project.path}) play-java | grep -v undefined && cd ${current.project.path} && /opt/bitnami/activator/bin/activator -Dsbt.log.noformat=true -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 ~run",
+        "commandLine": "print-help && sudo HOME=/root /opt/bitnami/nami/bin/nami execute activator createProject --force $(basename ${current.project.path}) play-java | grep -v undefined && cd ${current.project.path} && /opt/bitnami/activator/bin/activator -Dsbt.log.noformat=true -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 ~run",
         "attributes": {
            "previewUrl": "http://${server.port.9000}/"
         }
       },
       {
-        "name": "2. Run",
+        "name": "2. Stop",
         "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && /opt/bitnami/activator/bin/activator -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 -Dsbt.log.noformat=true ~run",
-        "attributes": {
-           "previewUrl": "http://${server.port.9000}/"
-        }
-      },
-      {
-        "name": "3. Stop",
-        "type": "custom",
-        "commandLine": "source /opt/bitnami/stacksmith-utils.sh && print_welcome_page && cd ${current.project.path} && pkill -u bitnami activator && echo \"Web server stopped.\"",
+        "commandLine": "print-help && cd ${current.project.path} && pkill -u bitnami -n java && echo \"Web server stopped.\"",
         "attributes": {}
+      },
+      {
+        "name": "3. Run",
+        "type": "custom",
+        "commandLine": "print-help && cd ${current.project.path} && /opt/bitnami/activator/bin/activator -Doffline=true -Dhttp.host=0.0.0.0 -Dhttp.port=9000 -Dsbt.log.noformat=true ~run",
+        "attributes": {
+           "previewUrl": "http://${server.port.9000}/"
+        }
       }
     ],
     "links": [],
