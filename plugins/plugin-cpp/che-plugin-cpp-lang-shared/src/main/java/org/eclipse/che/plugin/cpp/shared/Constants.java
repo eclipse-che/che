@@ -49,6 +49,9 @@ public final class Constants {
      */
     public static String CPP_EXT             = "cpp";
 
+    public static final String BINARY_NAME_ATTRIBUTE         = "binaryName";
+    public static final String COMPILATION_OPTIONS_ATTRIBUTE = "compilationOptions";
+
     private Constants() {}
 
 }

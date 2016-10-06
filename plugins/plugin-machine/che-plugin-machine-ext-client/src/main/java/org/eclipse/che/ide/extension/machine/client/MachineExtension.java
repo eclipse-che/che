@@ -43,6 +43,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
+import org.eclipse.che.ide.extension.machine.client.command.producer.CommandProducerActionManager;
 import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusNotifier;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
@@ -146,7 +147,8 @@ public class MachineExtension {
                                 MachineResources machineResources,
                                 ReRunProcessAction reRunProcessAction,
                                 StopProcessAction stopProcessAction,
-                                CloseConsoleAction closeConsoleAction) {
+                                CloseConsoleAction closeConsoleAction,
+                                CommandProducerActionManager commandProducerActionManager) {
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_MENU);
 
         final DefaultActionGroup workspaceMenu = (DefaultActionGroup)actionManager.getAction(GROUP_WORKSPACE);

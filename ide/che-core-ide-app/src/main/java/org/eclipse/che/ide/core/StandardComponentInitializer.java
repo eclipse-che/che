@@ -621,6 +621,7 @@ public class StandardComponentInitializer {
         editorTabContextMenu.add(splitVerticallyAction);
         actionManager.registerAction("splitHorizontally", splitHorizontallyAction);
         editorTabContextMenu.add(splitHorizontallyAction);
+        editorTabContextMenu.addSeparator();
 
         final DefaultActionGroup loaderToolbarGroup = new DefaultActionGroup("loader", false, actionManager);
         actionManager.registerAction("loader", loaderToolbarGroup);
