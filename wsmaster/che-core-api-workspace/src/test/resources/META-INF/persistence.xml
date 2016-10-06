@@ -43,6 +43,7 @@
             <property name="eclipselink.ddl-generation.output-mode" value="database"/>
             <property name="eclipselink.logging.logger" value="DefaultLogger"/>
             <property name="eclipselink.logging.level" value="SEVERE"/>
+            <!--<property name="eclipselink.cache.shared.default" value="false"/>-->
         </properties>
     </persistence-unit>
 </persistence>
