@@ -73,8 +73,6 @@ Usage: ${CHE_MINI_PRODUCT_NAME} [COMMAND]
     dir down                           Stop workspace running in current directory
     dir status                         Display status of ${CHE_MINI_PRODUCT_NAME} in current directory
     dir ssh                            Make SSH connection into workspace mapped to current directory
-    ws list                            List all workspaces
-    ws logs [<ws-id>]                  Get the agent logs for a workspace
     action <action-name> [--help]      Start action on ${CHE_MINI_PRODUCT_NAME} instance
     compile <mvn-command>              SDK - Builds Che source code or modules
     test <test-name> [--help]          Start test on ${CHE_MINI_PRODUCT_NAME} instance
@@ -128,7 +126,7 @@ parse_command_line () {
     CHE_CLI_ACTION="help"
   else
     case $1 in
-      start|stop|restart|update|info|profile|action|dir|ws|mount|compile|test|help|-h|--help)
+      start|stop|restart|update|info|profile|action|dir|mount|compile|test|help|-h|--help)
         CHE_CLI_ACTION=$1
       ;;
       *)
@@ -142,7 +140,6 @@ parse_command_line () {
 execute_cli() {
   case ${CHE_CLI_ACTION} in
     start|stop|restart)
-      # remove "che" arg by shifting it
       shift 
       load_profile
       execute_che_launcher "$@"
@@ -156,12 +153,6 @@ execute_cli() {
       load_profile
       execute_che_dir "$@"
     ;;
-    ws)
-      # remove "ws" arg by shifting it
-      shift
-      load_profile
-      execute_che_ws "$@"
-    ;;    
     action)
       # remove "action" arg by shifting it
       shift
@@ -606,7 +597,6 @@ load_profile() {
     fi
 
     source ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${CHE_PROFILE}"
-    info "${CHE_PRODUCT_NAME}: Loaded profile ${CHE_PROFILE}"
   fi
 }
 
@@ -632,20 +622,20 @@ execute_profile(){
   debug $FUNCNAME
 
   if [ ! $# -ge 2 ]; then 
-    error "${CHE_MINI_PRODUCT_NAME} profile: Wrong number of arguments."
+    error "Wrong number of arguments."
     return
   fi
 
   case ${2} in
     add|rm|set|info|update)
     if [ ! $# -eq 3 ]; then 
-      error "${CHE_MINI_PRODUCT_NAME} profile: Wrong number of arguments."
+      error "Wrong number of arguments."
       return
     fi
     ;;
     unset|list)
     if [ ! $# -eq 2 ]; then 
-      error "${CHE_MINI_PRODUCT_NAME} profile: Wrong number of arguments."
+      error "Wrong number of arguments."
       return
     fi
     ;;
@@ -681,7 +671,7 @@ execute_profile(){
       mv -f "${PROFILE_DIR}"/tmp "${PROFILE_FILE}"
 
 
-      info "Added new ${CHE_MINI_PRODUCT_NAME} CLI profile ${PROFILE_FILE}."
+      info "profile" "Added new ${CHE_MINI_PRODUCT_NAME} CLI profile ${PROFILE_FILE}."
     ;;
     update)
       if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}" ]; then
@@ -700,7 +690,7 @@ execute_profile(){
 
       rm ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}" > /dev/null
 
-      info "Removed ${CHE_MINI_PRODUCT_NAME} CLI profile ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3}."
+      info "profile" "Removed ${CHE_MINI_PRODUCT_NAME} CLI profile ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3}."
     ;;
     info)
       if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}" ]; then
@@ -711,7 +701,7 @@ execute_profile(){
       while IFS= read line
       do
         # display $line or do somthing with $line
-        info "$line"
+        info "profile" "$line"
       done <~/."${CHE_MINI_PRODUCT_NAME}"/profiles/"${3}"
     ;;
     set)
@@ -722,7 +712,7 @@ execute_profile(){
       
       echo "CHE_PROFILE=${3}" > ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
 
-      info "Set active ${CHE_MINI_PRODUCT_NAME} CLI profile to ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3}."
+      info "profile" "Set active ${CHE_MINI_PRODUCT_NAME} CLI profile to ~/.${CHE_MINI_PRODUCT_NAME}/profiles/${3}."
     ;;
     unset)
       if [ ! -f ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile ]; then
@@ -732,21 +722,21 @@ execute_profile(){
       
       rm -rf ~/."${CHE_MINI_PRODUCT_NAME}"/profiles/.profile
 
-      info "Unset the default ${CHE_MINI_PRODUCT_NAME} CLI profile. No profile currently set."
+      info "profile" "Unset the default ${CHE_MINI_PRODUCT_NAME} CLI profile. No profile currently set."
     ;;
     list)
       if [ -d ~/."${CHE_MINI_PRODUCT_NAME}"/profiles ]; then
-        info "Available ${CHE_MINI_PRODUCT_NAME} CLI profiles:"
+        info "profile" "Available ${CHE_MINI_PRODUCT_NAME} CLI profiles:"
         ls ~/."${CHE_MINI_PRODUCT_NAME}"/profiles
       else
-        info "No ${CHE_MINI_PRODUCT_NAME} CLI profiles currently set."
+        info "profile" "No ${CHE_MINI_PRODUCT_NAME} CLI profiles currently set."
       fi
 
       if has_default_profile; then
-        info "Default profile set to:"
+        info "profile" "Default profile set to:"
         get_default_profile
       else
-        info "Default profile currently unset."
+        info "profile" "Default profile currently unset."
       fi
     ;;
   esac
@@ -759,70 +749,6 @@ execute_che_dir() {
   docker_run_with_che_properties -v "$CURRENT_DIRECTORY":"$CURRENT_DIRECTORY" "${CHE_DIR_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" "${CURRENT_DIRECTORY}" "$@"
 }
 
-execute_che_ws() {
-  debug $FUNCNAME
-  if [ -z ${1+x} ]; then 
-    error "${CHE_PRODUCT_NAME} (che ws): No command provided."
-    return
-  fi
-
-  case $1 in
-    list)
-      check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME} ${CHE_UTILITY_VERSION}
-      docker_run_with_che_properties "${CHE_ACTION_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" list-workspaces
-    ;;
-    logs)
-      if [ $# -eq 2 ]; then
-        info "${CHE_PRODUCT_NAME} (che ws): Connecting to workspace with id ${2}"
-        WS_ID=${2}
-
-        # ID not provided, let's do a simple discovery of running workspaces
-      else 
-        info "${CHE_PRODUCT_NAME} (che ws): Searching for running workspaces..."
-
-        CURRENT_WS_INSTANCES=$(docker ps -aq --filter "name=workspace")
-        CURRENT_WS_COUNT=$(echo $CURRENT_WS_INSTANCES | wc -w)
-      
-        # No running workspaces
-        if [ $CURRENT_WS_COUNT -eq 0 ]; then
-          error "${CHE_PRODUCT_NAME} (che ws): We could not find any running workspaces"
-          return
-
-        # Exactly 1 running workspace
-        elif [ $CURRENT_WS_COUNT -eq 1 ]; then
-
-          WS_ID=$CURRENT_WS_INSTANCES
-          info "${CHE_PRODUCT_NAME} (che ws): Connecting to workspace with id ${WS_ID}"
-
-        # 2+ running workspace
-        else 
-          info "${CHE_PRODUCT_NAME} (che ws): Re-run with 'che ws <ws-id>'"
-          IFS=$'\n'
-
-          echo "WS CONTAINER ID    HAS SSH?    SSH PORT"
-          for CHE_WS_CONTAINER_ID in $CURRENT_WS_INSTANCES; do
-            CURRENT_WS_PORT=""
-            if has_ssh ${CHE_WS_CONTAINER_ID}; then 
-              CURRENT_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CHE_WS_CONTAINER_ID})
-            fi
-            echo "$CHE_WS_CONTAINER_ID       $(has_ssh ${CHE_WS_CONTAINER_ID} && echo "y" || echo "n")           $CURRENT_WS_PORT"
-          done
-          return
-        fi
-      fi
-
-      info "Displaying logs for container $WS_ID"
-      docker_exec exec ${WS_ID} find /home/ -iname "catalina-0.log" -exec tail -n200 {} \;
-    ;;
-    *)
-      # unknown option
-    error "${CHE_PRODUCT_NAME} (che ws): You passed an unknown command."
-    return
-  ;;
-  esac
-
-}
-
 execute_che_action() {
   debug $FUNCNAME
   check_current_image_and_update_if_not_found ${CHE_ACTION_IMAGE_NAME} ${CHE_UTILITY_VERSION}
@@ -833,11 +759,11 @@ update_che_image() {
   debug $FUNCNAME
   if [ "${1}" == "--force" ]; then
     shift
-    info "${CHE_PRODUCT_NAME}: Removing image $1:$2"
+    info "update" "Removing image $1:$2"
     docker rmi -f $1:$2 > /dev/null
   fi
 
-  info "${CHE_PRODUCT_NAME}: Pulling image $1:$2"
+  info "update" "Pulling image $1:$2"
   docker pull $1:$2
   echo ""
 }
@@ -846,25 +772,25 @@ execute_che_mount() {
   debug $FUNCNAME
 
   # Determine the mount path to do the mount
-  info "${CHE_MINI_PRODUCT_NAME} mount: Setting local mount path to ${PWD}"
+  info "mount" "Setting local mount path to ${PWD}"
   MOUNT_PATH=$(get_mount_path "${PWD}")
   HOME_PATH=$(get_mount_path "${HOME}")
 
   # If extra parameter provided, then this is the port to connect to
   if [ $# -eq 1 ]; then
-    info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to workspace on port ${1}"
+    info "mount" "Connecting to remote workspace on port ${1}"
     WS_PORT=${1}
 
   # Port not provided, let's do a simple discovery of running workspaces
   else 
-    info "${CHE_MINI_PRODUCT_NAME} mount: Searching for running workspaces with open SSH port..."
+    info "mount" "Searching for running workspaces with open SSH port..."
 
     CURRENT_WS_INSTANCES=$(docker ps -aq --filter "name=workspace")
     CURRENT_WS_COUNT=$(echo $CURRENT_WS_INSTANCES | wc -w)
     
     # No running workspaces
     if [ $CURRENT_WS_COUNT -eq 0 ]; then
-      error "${CHE_MINI_PRODUCT_NAME} mount: We could not find any running workspaces"
+      error "We could not find any running workspaces"
       return
 
     # Exactly 1 running workspace
@@ -872,16 +798,16 @@ execute_che_mount() {
 
       if has_ssh ${CURRENT_WS_INSTANCES}; then
         RUNNING_WS_PORT=$(docker inspect --format='{{ (index (index .NetworkSettings.Ports "22/tcp") 0).HostPort }}' ${CURRENT_WS_INSTANCES})
-        info "${CHE_MINI_PRODUCT_NAME} mount: Connecting to workspace on port $RUNNING_WS_PORT"
+        info "mount" "Connecting to remote workspace on port $RUNNING_WS_PORT"
         WS_PORT=$RUNNING_WS_PORT
       else
-        error "${CHE_MINI_PRODUCT_NAME} mount: We found 1 running workspace, but it does not have an SSH agent"
+        error "We found 1 running workspace, but it does not have an SSH agent"
         return
       fi
 
     # 2+ running workspace
     else 
-      info "${CHE_MINI_PRODUCT_NAME} mount: Re-run with 'che mount <ssh-port>'"
+      info "mount" "Re-run with 'che mount <ssh-port>'"
       IFS=$'\n'
 
       echo "WS CONTAINER ID    HAS SSH?    SSH PORT"
@@ -921,7 +847,7 @@ execute_che_mount() {
 execute_che_compile() {
   debug $FUNCNAME
   if [ $# -eq 0 ]; then 
-    error "${CHE_MINI_PRODUCT_NAME} compile: Missing argument - pass compilation command as paramters."
+    error "Missing argument - pass compilation command as paramters."
     return
   fi
 
@@ -968,7 +894,7 @@ execute_che_info() {
       execute_che_test "$@"
     ;;
     *)
-      info "Unknown info flag passed: $2. Exiting."
+      error "Unknown info flag passed: $2. Exiting."
     ;;
   esac
 }
@@ -1021,9 +947,9 @@ run_connectivity_tests() {
                           --write-out "%{http_code}") || echo "28" > /dev/null
 
   if [ "${HTTP_CODE}" = "200" ]; then
-      info "Browser             => Workspace Agent (Hostname)   : Connection succeeded"
+      info "Browser    => Workspace Agent (Hostname)   : Connection succeeded"
   else
-      info "Browser             => Workspace Agent (Hostname)   : Connection failed"
+      info "Browser    => Workspace Agent (Hostname)   : Connection failed"
   fi
 
   ### TEST 1a: Simulate browser ==> workspace agent HTTP connectivity
@@ -1032,9 +958,9 @@ run_connectivity_tests() {
                           --write-out "%{http_code}") || echo "28" > /dev/null
 
   if [ "${HTTP_CODE}" = "200" ]; then
-      info "Browser             => Workspace Agent (External IP): Connection succeeded"
+      info "Browser    => Workspace Agent (External IP): Connection succeeded"
   else
-      info "Browser             => Workspace Agent (External IP): Connection failed"
+      info "Browser    => Workspace Agent (External IP): Connection failed"
   fi
 
   ### TEST 2: Simulate Che server ==> workspace agent (external IP) connectivity 
@@ -1046,9 +972,9 @@ run_connectivity_tests() {
                                   --write-out "%{http_code}")
   
   if [ "${HTTP_CODE}" = "200" ]; then
-      info "Che Server          => Workspace Agent (External IP): Connection succeeded"
+      info "Che Server => Workspace Agent (External IP): Connection succeeded"
   else
-      info "Che Server          => Workspace Agent (External IP): Connection failed"
+      info "Che Server => Workspace Agent (External IP): Connection failed"
   fi
 
   ### TEST 3: Simulate Che server ==> workspace agent (internal IP) connectivity 
@@ -1060,9 +986,9 @@ run_connectivity_tests() {
                                   --write-out "%{http_code}")
 
   if [ "${HTTP_CODE}" = "200" ]; then
-      info "Che Server          => Workspace Agent (Internal IP): Connection succeeded"
+      info "Che Server => Workspace Agent (Internal IP): Connection succeeded"
   else
-      info "Che Server          => Workspace Agent (Internal IP): Connection failed"
+      info "Che Server => Workspace Agent (Internal IP): Connection failed"
   fi
 
   docker rm -f fakeagent > /dev/null
