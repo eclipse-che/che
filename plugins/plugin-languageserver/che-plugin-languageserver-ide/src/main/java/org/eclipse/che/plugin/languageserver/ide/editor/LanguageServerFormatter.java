@@ -31,7 +31,6 @@ import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeEvent;
 import org.eclipse.che.ide.api.editor.events.DocumentChangeHandler;
 import org.eclipse.che.ide.api.editor.formatter.ContentFormatter;
-import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.text.TextRange;
 import org.eclipse.che.ide.api.editor.texteditor.HandlesUndoRedo;
@@ -42,6 +41,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -157,30 +157,13 @@ public class LanguageServerFormatter implements ContentFormatter {
             if (undoRedo != null) {
                 undoRedo.beginCompoundChange();
             }
-
-            // convert line-character ranges to LinearRanges
-            LinearTextEdit[] linearEdits = new LinearTextEdit[edits.size()];
-            for (int i = 0; i < linearEdits.length; i++) {
-                TextEditDTO change = edits.get(i);
+            
+            // #2437: apply the text edits from last to first to avoid messing up the document
+            Collections.reverse(edits);
+            for (TextEditDTO change : edits) {
                 RangeDTO range = change.getRange();
-                int startOffset = document.getLineStart(range.getStart().getLine()) + range.getStart().getCharacter();
-                int endOffset = document.getLineStart(range.getEnd().getLine()) + range.getEnd().getCharacter();
-                LinearRange linearRange = LinearRange.createWithStart(startOffset).andEnd(endOffset);
-                linearEdits[i] = new LinearTextEdit(change.getNewText(), linearRange);
-            }
-
-            // apply each of the edits to the document
-            int shift = 0;
-            for (LinearTextEdit edit : linearEdits) {
-                // shift the edit range if necessary
-                if (shift != 0) {
-                    LinearRange oldRange = edit.range;
-                    edit.range = LinearRange.createWithStart(oldRange.getStartOffset() + shift).andLength(oldRange.getLength());
-                }
-                // apply the edit
-                document.replace(edit.range.getStartOffset(), edit.range.getLength(), edit.newText);
-                // accumulate the necessary shift
-                shift += edit.newText.length() - edit.range.getLength();
+                document.replace(range.getStart().getLine(), range.getStart().getCharacter(),
+                                 range.getEnd().getLine(), range.getEnd().getCharacter(), change.getNewText());
             }
         } catch (final Exception e) {
             Log.error(getClass(), e);
@@ -224,21 +207,6 @@ public class LanguageServerFormatter implements ContentFormatter {
 
         Promise<List<TextEditDTO>> promise = client.rangeFormatting(params);
         handleFormatting(promise, document);
-    }
-    
-    /**
-     * Helper class that aggregates a text change and a linear range in a pair.
-     */
-    private static class LinearTextEdit {
-
-        private String newText;
-        private LinearRange range;
-
-        public LinearTextEdit(String newText, LinearRange range) {
-            this.newText = newText;
-            this.range = range;
-        }
-
     }
 
 }
