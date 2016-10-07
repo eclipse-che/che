@@ -49,6 +49,7 @@ export class ListAgentsController {
       this.agents.splice(this.agents.indexOf(agent.id), 1);
     }
     this.agentsOnChange();
+    this.buildAgentsList();
   }
 
   /**

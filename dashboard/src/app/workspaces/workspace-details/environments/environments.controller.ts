@@ -174,9 +174,8 @@ export class WorkspaceEnvironmentsController {
     this.workspaceConfig.environments[this.environmentName] = newEnvironment;
     this.environment = newEnvironment;
 
-    return this.doUpdateEnvironments().then(() => {
-      this.init();
-    });
+    this.doUpdateEnvironments();
+    this.init();
   }
 
   /**
@@ -205,9 +204,8 @@ export class WorkspaceEnvironmentsController {
     this.machinesViewStatus[this.newEnvironmentName][newName] = this.machinesViewStatus[this.newEnvironmentName][oldName];
     delete this.machinesViewStatus[this.newEnvironmentName][oldName];
 
-    return this.doUpdateEnvironments().then(() => {
-      this.init();
-    });
+    this.doUpdateEnvironments();
+    this.init();
   }
 
   /**
@@ -219,6 +217,9 @@ export class WorkspaceEnvironmentsController {
   deleteMachine(name: string): ng.IPromise<any> {
     let newEnvironment = this.environmentManager.deleteMachine(this.environment, name);
     this.workspaceConfig.environments[this.newEnvironmentName] = newEnvironment;
+
+    this.doUpdateEnvironments();
+    this.init();
     return this.doUpdateEnvironments().then(() => {
       this.init();
     });

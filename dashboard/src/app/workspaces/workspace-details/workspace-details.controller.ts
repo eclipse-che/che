@@ -254,7 +254,7 @@ export class WorkspaceDetailsController {
    *
    * @returns {ng.IPromise<any>}
    */
-  updateWorkspaceConfig(): ng.IPromise<any> {
+  updateWorkspaceConfig(): void {
     if (!this.isCreationFlow) {
       this.editMode = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
 
@@ -265,10 +265,6 @@ export class WorkspaceDetailsController {
         this.showApplyMessage = true;
       }
     }
-
-    let defer = this.$q.defer();
-    defer.resolve();
-    return defer.promise;
   }
 
   /**

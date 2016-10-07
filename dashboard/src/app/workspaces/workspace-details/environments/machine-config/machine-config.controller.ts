@@ -134,10 +134,8 @@ export class WorkspaceMachineConfigController {
    */
   updateEnvVariables() {
     this.environmentManager.setEnvVariables(this.machine, this.machineConfig.envVariables);
-
-    return this.doUpdateConfig().then(() => {
-      this.init();
-    });
+    this.doUpdateConfig()
+    this.init();
   }
 
   /**
@@ -184,9 +182,8 @@ export class WorkspaceMachineConfigController {
     return this.machineNameOnChange({
       oldName: this.machineName,
       newName: newMachineName
-    }).then(() => {
-      this.init();
     });
+    this.init();
   }
 
   /**
