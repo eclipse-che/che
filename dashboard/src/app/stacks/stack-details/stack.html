@@ -14,6 +14,7 @@
       <ng-form flex layout="column" name="stackForm">
         <che-input che-form="stackForm"
                    che-name="name"
+                   aria-label="Name of the stack"
                    che-place-holder="Name of the stack"
                    ng-model="stackController.stackName"
                    unique-stack-name="stackController.stack.name"
@@ -36,7 +37,9 @@
   <che-label-container che-label-name="Configuration">
     <div class="stack-editor">
       <textarea ui-codemirror="stackController.editorOptions"
-                ng-model="stackController.stackContent"
+                ng-model="stackController.stackJson"
+                ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 } }"
+                ng-change="stackController.updateStackFromJson()"
                 aria-label="Stack configuration editor">
       </textarea>
       <a target="_blank" ng-href="https://eclipse-che.readme.io/docs/stacks">Docs: Stack Structure</a>
@@ -48,15 +51,15 @@
   </che-label-container>
 
   <!-- stack's tags -->
-  <che-label-container class="stack-tags-label"
-                       che-label-name="Tags"
-                       che-label-description="Tags define the templates available for workspace">
+  <che-label-container ng-if="stackController.stack && stackController.stack.tags"
+                       che-label-description="Tags define the templates available for workspace"
+                       che-label-name="Tags">
     <div layout="column" flex="100" class="stack-tags">
       <md-chips flex name="stack's tags"
                 ng-model="stackController.stack.tags"
                 md-transform-chip="stackController.handleTagAdding($chip)"
-                md-on-add="stackController.updateEditorContent()"
-                md-on-remove="stackController.updateEditorContent()"
+                md-on-add="stackController.saveStack()"
+                md-on-remove="stackController.saveStack()"
                 secondary-placeholder="Enter stack's tags">
         <md-chip-template>
           <div class="stack-library-text">{{$chip | uppercase}}</div>
@@ -66,11 +69,24 @@
         </md-chip-template>
       </md-chips>
       <div flex>
-        <div class="stack-tags-reset" data-ng-click="stackController.stack.tags.length = 0">Reset</div>
+        <div class="stack-tags-reset" data-ng-click="stackController.resetTags()">Reset</div>
       </div>
     </div>
   </che-label-container>
-
+  <!-- stack's environment -->
+  <che-label-container che-label-name="Environments">
+    <workspace-environments ng-repeat="(environmentName, environmentValue) in stackController.stack.workspaceConfig.environments"
+                            environment-name="environmentName"
+                            workspace-config="stackController.stack.workspaceConfig"
+                            machines-view-status="stackController.machinesViewStatus"
+                            environment-on-change="stackController.saveStack()"></workspace-environments>
+  </che-label-container>
+  <!-- Commands -->
+  <che-label-container che-label-name="Commands"
+                       che-label-description="Commands define the commands available for workspace">
+    <list-commands commands-on-change="stackController.saveStack()"
+                   commands="stackController.stack.workspaceConfig.commands"></list-commands>
+  </che-label-container>
   <!-- Delete stack -->
   <che-label-container class="stack-delete-label"
                        ng-if="!stackController.isCreation"
@@ -86,5 +102,3 @@
 <md-content ng-show="stackController.invalidStack">
   {{stackController.invalidStack}}
 </md-content>
-
-

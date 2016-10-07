@@ -62,6 +62,11 @@ import {ListPorts} from './workspace-details/environments/list-ports/list-ports.
 import {AddPortDialogController} from  './workspace-details/environments/list-ports/add-port-dialog/add-port-dialog.controller';
 import {EditPortDialogController} from  './workspace-details/environments/list-ports/edit-port-dialog/edit-port-dialog.controller';
 
+import {ListCommandsController} from './workspace-details/list-commands/list-commands.controller';
+import {ListCommands} from './workspace-details/list-commands/list-commands.directive';
+import {AddCommandDialogController} from  './workspace-details/list-commands/add-command-dialog/add-command-dialog.controller';
+import {EditCommandDialogController} from  './workspace-details/list-commands/edit-command-dialog/edit-command-dialog.controller';
+
 import {ListAgentsController} from  './workspace-details/environments/list-agents/list-agents.controller';
 import {ListAgents} from  './workspace-details/environments/list-agents/list-agents.directive';
 
@@ -139,6 +144,11 @@ export class WorkspacesConfig {
     register.directive('listPorts', ListPorts);
     register.controller('AddPortDialogController', AddPortDialogController);
     register.controller('EditPortDialogController', EditPortDialogController);
+
+    register.controller('ListCommandsController', ListCommandsController);
+    register.directive('listCommands', ListCommands);
+    register.controller('AddCommandDialogController', AddCommandDialogController);
+    register.controller('EditCommandDialogController', EditCommandDialogController);
 
     register.controller('ListAgentsController', ListAgentsController);
     register.directive('listAgents', ListAgents);

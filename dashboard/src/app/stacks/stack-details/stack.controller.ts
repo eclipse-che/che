@@ -9,18 +9,21 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheStack} from "../../../components/api/che-stack.factory";
+import {CheNotification} from "../../../components/notification/che-notification.factory";
 
 /**
  * Controller for stack management - creation or edit.
  *
  * @author Ann Shumilova
+ * @author Oleksii Orel
  */
 export class StackController {
   $log: ng.ILogService;
   $filter: ng.IFilterService;
   $timeout: ng.ITimeoutService;
   $location: ng.ILocationService;
-  $mdDialog: angular.material.IDialogService;
+  $mdDialog: ng.material.IDialogService;
 
   loading: boolean;
   isLoading: boolean;
@@ -28,15 +31,16 @@ export class StackController {
 
   stackId: string;
   stackName: string;
-  stackContent: string;
+  stackJson: string;
   invalidStack: string;
 
   stack: any;
   editorOptions: any;
-  changesPromise: any;
+  changesPromise: ng.IPromise;
+  machinesViewStatus: any;
 
-  cheStack;
-  cheNotification;
+  cheStack: CheStack;
+  cheNotification: CheNotification;
 
   /**
    * Default constructor that is using resource injection
@@ -62,6 +66,8 @@ export class StackController {
         }, 1000);
       }
     };
+
+    this.machinesViewStatus = {};
 
     //Checking creation mode:
     this.isCreation = $route.current.params.stackId === 'create';
@@ -139,10 +145,29 @@ export class StackController {
   }
 
   /**
-   * Update stack's editor content.
+   * Reset stack's tags.
    */
-  updateEditorContent(): void {
-    this.stackContent = this.$filter('json')(this.stack);
+  resetTags(): void {
+    if (!this.stack || !this.stack.tags) {
+      return;
+    }
+    this.stack.tags.length = 0;
+    this.updateJsonFromStack();
+  }
+
+  /**
+   * Update stack's editor json from stack.
+   */
+  updateJsonFromStack(): void {
+    this.stackJson = angular.toJson(this.stack, true);
+  }
+
+  /**
+   * Update stack from stack's editor json.
+   */
+  updateStackFromJson(): void {
+    this.stack = angular.fromJson(this.stackJson);
+    this.stackName = angular.copy(this.stack.name);
   }
 
   /**
@@ -155,7 +180,7 @@ export class StackController {
 
     delete this.stack.links;
     this.stackName = angular.copy(this.stack.name);
-    this.stackContent = this.$filter('json')(this.stack);
+    this.updateJsonFromStack();
   }
 
   /**
@@ -165,66 +190,53 @@ export class StackController {
   updateStack(isFormValid: boolean) {
     if (this.isCreation) {
       this.stack.name = this.stackName;
-      this.updateEditorContent();
+      this.updateJsonFromStack();
       return;
-    }
-
-    this.updateEditorContent();
-
-    if (this.changesPromise) {
-      this.$timeout.cancel(this.changesPromise);
     }
 
     if (isFormValid === false || this.stack.name === this.stackName) {
-      return;
+      this.updateJsonFromStack();
+      if (this.changesPromise) {
+        this.$timeout.cancel(this.changesPromise);
+      }
+    } else {
+      this.stack.name = this.stackName;
+      this.saveStack();
     }
-
-    this.changesPromise = this.$timeout(() => {
-      this.isLoading = true;
-      let stackData = angular.copy(this.stack);
-      stackData.name = this.stackName;
-
-      this.cheStack.updateStack(this.stack.id, stackData).then((stack) => {
-        this.cheNotification.showInfo('Stack is successfully updated.');
-        this.stack = stack;
-        this.isLoading = false;
-        this.prepareStackData();
-        this.cheStack.fetchStacks();
-      }, (error) => {
-        this.isLoading = false;
-        this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update stack failed.');
-        this.$log.error(error);
-      });
-    }, 1000);
   }
 
   /**
    * Saves stack configuration - creates new one or updates existing.
    */
   saveStack(): void {
+    this.updateJsonFromStack();
     if (this.isCreation) {
       this.createStack();
       return;
     }
-
-    this.cheStack.updateStack(this.stack.id, this.stackContent).then((stack) => {
-      this.cheNotification.showInfo('Stack is successfully updated.');
-      this.stack = stack;
-      this.isLoading = false;
-      this.cheStack.fetchStacks();
-      this.prepareStackData();
-    }, (error) => {
-      this.isLoading = false;
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update stack failed.');
-      this.$log.error(error);
-    });
+    if (this.changesPromise) {
+      this.$timeout.cancel(this.changesPromise);
+    }
+    this.changesPromise = this.$timeout(() => {
+      this.cheStack.updateStack(this.stack.id, this.stackJson).then(() => {
+        this.cheNotification.showInfo('Stack is successfully updated.');
+        this.isLoading = false;
+        this.cheStack.fetchStacks();
+      }, (error) => {
+        this.isLoading = false;
+        this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update stack failed.');
+        this.$log.error(error);
+        this.stack = this.cheStack.getStackById(this.stackId);
+        this.prepareStackData();
+      });
+    }, 1000);
   }
 
   /**
    * Creates new stack.
    */
   createStack(): void {
-    this.cheStack.createStack(this.stackContent).then((stack) => {
+    this.cheStack.createStack(this.stackJson).then((stack) => {
       this.stack = stack;
       this.isLoading = false;
       this.cheStack.fetchStacks();

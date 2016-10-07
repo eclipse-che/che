@@ -1,0 +1,117 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<div class="list-commands"
+     layout="column">
+
+  <div ng-if="listCommandsController.commands.length > 0">
+
+    <che-list-header>
+      <div flex="100"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="row"
+             layout-align="start center"
+             class="che-checkbox-area">
+          <div layout="row" layout-align="start center" class="che-list-item-checkbox-main">
+            <md-checkbox class="che-list-item-checkbox"
+                         aria-label="All commands"
+                         md-theme="default"
+                         ng-checked="listCommandsController.isBulkChecked"
+                         ng-click="listCommandsController.changeBulkSelection()"></md-checkbox>
+          </div>
+        </div>
+        <div flex hide-xs layout-gt-xs="row"
+             layout-align="start center"
+             class="che-list-item-details">
+          <che-list-header-column flex="25"
+                                  che-sort-value="listCommandsController.commandsOrderBy"
+                                  che-sort-item="name"
+                                  che-column-title='Name'></che-list-header-column>
+          <che-list-header-column flex="10"
+                                  che-sort-value="listCommandsController.commandsOrderBy"
+                                  che-sort-item="type"
+                                  che-column-title='Type'></che-list-header-column>
+          <che-list-header-column flex="40"
+                                  che-sort-value="listCommandsController.commandsOrderBy"
+                                  che-sort-item="commandLine"
+                                  che-column-title='Command Line'></che-list-header-column>
+          <che-list-header-column flex="20"
+                                  che-sort-value="listCommandsController.commandsOrderBy"
+                                  che-sort-item="attributes.previewUrl"
+                                  che-column-title='Preview URL'></che-list-header-column>
+          <che-list-header-column flex="5"
+                                  che-column-title='Action'></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+
+    <che-list flex>
+      <che-list-item ng-mouseover="hover=true" ng-mouseout="hover=false"
+                     ng-repeat="command in listCommandsController.commands | orderBy:listCommandsController.commandsOrderBy">
+        <div flex="100"
+             layout="row"
+             layout-align="start stretch"
+             class="command-item-row">
+          <div layout="row"
+               layout-align="start center"
+               class="che-checkbox-area">
+            <che-list-item-checked ng-model="listCommandsController.commandsSelectedStatus[command.name]"
+                                   che-aria-label-checkbox="Command {{command.name}}"
+                                   ng-click="listCommandsController.updateSelectedStatus()"></che-list-item-checked>
+          </div>
+          <div flex
+               layout-xs="column" layout-gt-xs="row"
+               layout-align-gt-xs="start center"
+               layout-align-xs="start start"
+               class="che-list-item-details">
+            <div flex="25" class="che-list-item-name">
+              <span class="che-hover">{{command.name}}</span>
+            </div>
+            <div flex="10" class="che-list-item-name">
+              <span class="che-hover">{{command.type}}</span>
+            </div>
+            <div flex="40" class="che-list-item-name">
+              <span class="che-hover">{{command.commandLine}}</span>
+            </div>
+            <div flex="20" class="che-list-item-name">
+              <span class="che-hover">
+                {{command.attributes && command.attributes.previewUrl ? command.attributes.previewUrl : ''}}
+              </span>
+            </div>
+            <div flex="5">
+              <div class="che-list-actions"
+                   ng-click="listCommandsController.showEditDialog($event,listCommandsController.commands.indexOf(command))">
+                <i class="fa fa-pencil" tooltip="Edit"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </che-list-item>
+    </che-list>
+  </div>
+
+  <!-- buttons -->
+  <div layout="row" flex>
+    <div flex>
+      <che-button-default class="che-list-add-button"
+                          che-button-title="Add" name="addButton"
+                          ng-click="listCommandsController.showAddDialog($event)"></che-button-default>
+    </div>
+    <div flex-offset="5" ng-if="listCommandsController.commands.length > 0">
+      <che-button-primary-flat ng-disabled="!listCommandsController.selectedCommandsNumber"
+                               che-button-title="Delete" name="deleteButton"
+                               ng-click="listCommandsController.deleteSelectedCommands()"></che-button-primary-flat>
+    </div>
+  </div>
+</div>

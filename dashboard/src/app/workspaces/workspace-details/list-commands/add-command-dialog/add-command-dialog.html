@@ -1,0 +1,44 @@
+<ng-form name="addCommandForm" class="add-command-form">
+  <div class="form-input-fields">
+    <che-input type="text"
+               che-form="addCommandForm"
+               che-label-name="Name"
+               che-name="name"
+               che-place-holder="enter command's name"
+               custom-validator="addCommandDialogController.isUnique($value)"
+               ng-model="addCommandDialogController.name"
+               ng-maxlength="256"
+               required>
+      <div ng-message="required">Command's name is required.</div>
+      <div ng-message="customValidator">This command's name is already in use.</div>
+      <div ng-message="maxlength">Command's name should be less than 256 characters long.</div>
+    </che-input>
+    <che-input che-form="addCommandForm"
+               che-label-name="Command"
+               che-name="command"
+               che-place-holder="enter command's line"
+               type="text"
+               ng-model="addCommandDialogController.commandLine"
+               ng-maxlength="256"
+               required>
+      <div ng-message="required">Command's line is required.</div>
+      <div ng-message="maxlength">Command's line should be less than 256 characters long.</div>
+    </che-input>
+    <che-input che-form="addCommandForm"
+               che-name="previewUrl"
+               che-label-name="Preview URL"
+               che-place-holder="enter preview URL"
+               ng-maxlength="256"
+               type="text"
+               ng-model="addCommandDialogController.previewUrl">
+      <div ng-message="maxlength">Command's preview URL should be less than 256 characters long.</div>
+    </che-input>
+  </div>
+  <che-button-primary che-button-title="Add"
+                      ng-click="addCommandDialogController.addCommand()"
+                      ng-disabled="addCommandForm.$invalid">
+  </che-button-primary>
+  <che-button-notice che-button-title="Cancel"
+                     ng-click="addCommandDialogController.hide()">
+  </che-button-notice>
+</ng-form>
