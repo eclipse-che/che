@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.part.widgets.listtab;
+package org.eclipse.che.ide.part.widgets.panemenu;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -22,49 +22,42 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.parts.EditorTab;
-import org.eclipse.che.ide.part.widgets.editortab.EditorTabWidget;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
+ * Menu for managing opened editors for corresponding {@link EditorPartStack}.
+ *
  * @author Dmitry Shnurenko
  * @author Vitaliy Guliy
+ * @author Roman Nikitenko
  */
-public class ListButtonWidget extends Composite implements ListButton {
+public class EditorPaneMenuWidget extends Composite implements EditorPaneMenu {
 
-    interface ListButtonWidgetUiBinder extends UiBinder<Widget, ListButtonWidget> {
+    interface EditorPaneMenuWidgetUiBinder extends UiBinder<Widget, EditorPaneMenuWidget> {
     }
 
     private static final String GWT_POPUP_STANDARD_STYLE = "gwt-PopupPanel";
 
-    private static final ListButtonWidgetUiBinder UI_BINDER = GWT.create(ListButtonWidgetUiBinder.class);
+    private static final EditorPaneMenuWidgetUiBinder UI_BINDER = GWT.create(EditorPaneMenuWidgetUiBinder.class);
 
-    private final PopupPanel     popupPanel;
+    private final PopupPanel popupPanel;
 
-    private final FlowPanel      listPanel;
-
-    private final List<ListItem> items = new ArrayList<>();
+    private final FlowPanel actionsPanel;
+    private final FlowPanel itemsPanel;
 
     @UiField(provided = true)
     final Resources resources;
-    private EventBus eventBus;
-
-    private ActionDelegate delegate;
 
     private long closeTime;
 
     @Inject
-    public ListButtonWidget(Resources resources,
-                            EventBus eventBus) {
+    public EditorPaneMenuWidget(Resources resources) {
         this.resources = resources;
-        this.eventBus = eventBus;
+
         initWidget(UI_BINDER.createAndBindUi(this));
 
         closeTime = System.currentTimeMillis();
@@ -75,17 +68,24 @@ public class ListButtonWidget extends Composite implements ListButton {
                 if (time - closeTime < 100) {
                     return;
                 }
-                showList();
+                show();
             }
         }, MouseDownEvent.getType());
 
-        listPanel = new FlowPanel();
-        listPanel.addStyleName(resources.partStackCss().listItemPanel());
+        FlowPanel rootPanel = new FlowPanel();
+        rootPanel.addStyleName(resources.partStackCss().listItemPanel());
+
+        itemsPanel = new FlowPanel();
+        actionsPanel = new FlowPanel();
 
         popupPanel = new PopupPanel();
         popupPanel.setAutoHideEnabled(true);
         popupPanel.removeStyleName(GWT_POPUP_STANDARD_STYLE);
-        popupPanel.add(listPanel);
+
+        popupPanel.add(rootPanel);
+        rootPanel.add(itemsPanel);
+        rootPanel.add(getDelimiter());
+        rootPanel.add(actionsPanel);
 
         popupPanel.addCloseHandler(new CloseHandler<PopupPanel>() {
             @Override
@@ -95,8 +95,8 @@ public class ListButtonWidget extends Composite implements ListButton {
         });
     }
 
-    /** {@inheritDoc} */
-    public void showList() {
+    @Override
+    public void show() {
         int x = getAbsoluteLeft() + getOffsetWidth() - 6;
         int y = getAbsoluteTop() + 19;
 
@@ -107,44 +107,37 @@ public class ListButtonWidget extends Composite implements ListButton {
         popupPanel.getElement().getStyle().setProperty("top", "" + y + "px");
     }
 
-    private ListItem.ActionDelegate itemDelegate = new ListItem.ActionDelegate() {
-        @Override
-        public void onItemClicked(@NotNull ListItem listItem) {
-            popupPanel.hide();
-            if (delegate != null) {
-                delegate.onTabClicked(listItem.getTabItem());
-            }
+    @Override
+    public void hide() {
+        popupPanel.hide();
+    }
+
+    @Override
+    public void addItem(@NotNull EditorPaneMenuItem item) {
+        addItem(item, false);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void addItem(@NotNull EditorPaneMenuItem item, boolean isSeparated) {
+        FlowPanel targetPanel = item instanceof PaneMenuActionItemWidget ? actionsPanel : itemsPanel;
+        targetPanel.add(item);
+
+        if (isSeparated) {
+            targetPanel.add(getDelimiter());
         }
-
-        @Override
-        public void onCloseButtonClicked(@NotNull ListItem listItem) {
-            popupPanel.hide();
-            if (delegate != null && listItem.getTabItem() instanceof EditorTabWidget) {
-                EditorTab editorTab = (EditorTabWidget)listItem.getTabItem();
-                eventBus.fireEvent(FileEvent.createCloseFileEvent(editorTab));
-            }
-        }
-    };
-
-    /** {@inheritDoc} */
-    @Override
-    public void addListItem(@NotNull ListItem listItem) {
-        items.add(listItem);
-        listPanel.add(listItem);
-        listItem.setDelegate(itemDelegate);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void removeListItem(@NotNull ListItem listItem) {
-        items.remove(listItem);
-        listPanel.remove(listItem);
+    public void removeItem(@NotNull EditorPaneMenuItem item) {
+        FlowPanel targetPanel = item instanceof PaneMenuActionItemWidget ? actionsPanel : itemsPanel;
+        targetPanel.remove(item);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void setDelegate(@NotNull ActionDelegate delegate) {
-        this.delegate = delegate;
+    private FlowPanel getDelimiter() {
+        final FlowPanel delimiter = new FlowPanel();
+        delimiter.addStyleName(resources.coreCss().editorPaneMenuDelimiter());
+        return delimiter;
     }
-
 }

@@ -35,8 +35,10 @@ import java.util.LinkedList;
  * @author Roman Nikitenko
  */
 @Singleton
-public class EditorMultiPartStackPresenter implements EditorMultiPartStack, ActivePartChangedHandler {
-    private PartPresenter activeEditor;
+public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
+                                                      ActivePartChangedHandler {
+    private PartPresenter   activeEditor;
+    private EditorPartStack activeEditorPartStack;
 
     private final EditorPartStackFactory      editorPartStackFactory;
     private final EditorMultiPartStackView    view;
@@ -72,10 +74,9 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack, Acti
     /** {@inheritDoc} */
     @Override
     public void addPart(@NotNull PartPresenter part) {
-        EditorPartStack editorPartStack = getPartStackByPart(activeEditor);
-        if (editorPartStack != null) {
-            //open the part in the same editorPartStack as the activeEditor
-            editorPartStack.addPart(part);
+        if (activeEditorPartStack != null) {
+            //open the part in the active editorPartStack
+            activeEditorPartStack.addPart(part);
             return;
         }
 
@@ -103,14 +104,16 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack, Acti
         partStackPresenters.add(editorPartStack);
 
         view.addPartStack(editorPartStack, relativePartStack, constraints);
-        editorPartStack.addPart(part);
+
+        if (part != null) {
+            editorPartStack.addPart(part);
+        }
     }
 
     @Override
     public void setFocus(boolean focused) {
-        EditorPartStack editorPartStack = getPartStackByPart(activeEditor);
-        if (editorPartStack != null) {
-            editorPartStack.setFocus(focused);
+        if (activeEditorPartStack != null) {
+            activeEditorPartStack.setFocus(focused);
         }
     }
 
@@ -126,6 +129,7 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack, Acti
         activeEditor = part;
         EditorPartStack editorPartStack = getPartStackByPart(part);
         if (editorPartStack != null) {
+            activeEditorPartStack = editorPartStack;
             editorPartStack.setActivePart(part);
         }
     }
@@ -148,8 +152,14 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack, Acti
 
         editorPartStack.removePart(part);
 
-        if (editorPartStack.getActivePart() != null) {
-            return;
+        if (editorPartStack.getActivePart() == null) {
+            removePartStack(editorPartStack);
+        }
+    }
+
+    private void removePartStack(EditorPartStack editorPartStack) {
+        if (activeEditorPartStack == editorPartStack) {
+            activeEditorPartStack = null;
         }
 
         view.removePartStack(editorPartStack);
@@ -173,6 +183,11 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack, Acti
         for (EditorPartStack editorPartStack : partStackPresenters) {
             editorPartStack.updateStack();
         }
+    }
+
+    @Override
+    public EditorPartStack getActivePartStack() {
+        return activeEditorPartStack;
     }
 
     @Nullable
@@ -243,19 +258,11 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack, Acti
     }
 
     @Override
-    public EditorPartPresenter getLastClosedBasedOn(EditorPartPresenter editorPart) {
-        for (EditorPartStack editorPartStack : partStackPresenters) {
-            if (editorPartStack.containsPart(editorPart)) {
-                return editorPartStack.getLastClosed();
-            }
-        }
-        return null;
-    }
-
-    @Override
     public void onActivePartChanged(ActivePartChangedEvent event) {
-        if (event.getActivePart() instanceof EditorPartPresenter) {
-            activeEditor = event.getActivePart();
+        PartPresenter activePart = event.getActivePart();
+        if (activePart instanceof EditorPartPresenter) {
+            activeEditor = activePart;
+            activeEditorPartStack = getPartStackByPart(activePart);
         }
     }
 }

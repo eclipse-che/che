@@ -699,6 +699,18 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("open.recent.file.clear.description")
     String openRecentFileClearDescription();
 
+    @Key("editor.pane.menu.close.pane")
+    String editorClosePane();
+
+    @Key("editor.pane.menu.close.pane.description")
+    String editorClosePaneDescription();
+
+    @Key("editor.pane.menu.close.all.in.pane")
+    String editorCloseAllTabsInPane();
+
+    @Key("editor.pane.menu.close.all.in.pane.description")
+    String editorCloseAllTabsInPaneDescription();
+
     @Key("editor.tab.context.menu.split.vertically")
     String editorTabSplitVertically();
 

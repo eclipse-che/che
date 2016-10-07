@@ -16,10 +16,10 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.AsyncEditorProvider;
@@ -31,7 +31,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter.EditorPartCloseHandler
 import org.eclipse.che.ide.api.editor.EditorProvider;
 import org.eclipse.che.ide.api.editor.EditorRegistry;
 import org.eclipse.che.ide.api.editor.OpenEditorCallbackImpl;
-import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.api.editor.texteditor.HasReadOnlyProperty;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
@@ -44,12 +43,14 @@ import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.api.parts.PropertyListener;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.part.editor.multipart.EditorMultiPartStackPresenter;
 import org.eclipse.che.ide.resource.Path;
 
@@ -76,12 +77,12 @@ public class EditorAgentImpl implements EditorAgent,
                                         WindowActionHandler,
                                         WsAgentStateHandler {
 
-    private final EventBus                      eventBus;
-    private final WorkspaceAgent                workspaceAgent;
-    private final FileTypeRegistry              fileTypeRegistry;
-    private final EditorRegistry                editorRegistry;
-    private final CoreLocalizationConstant      coreLocalizationConstant;
-    private final EditorMultiPartStackPresenter editorMultiPartStack;
+    private final EventBus                 eventBus;
+    private final WorkspaceAgent           workspaceAgent;
+    private final FileTypeRegistry         fileTypeRegistry;
+    private final EditorRegistry           editorRegistry;
+    private final CoreLocalizationConstant coreLocalizationConstant;
+    private final EditorMultiPartStack     editorMultiPartStack;
 
     private final List<EditorPartPresenter>           openedEditors;
     private final Provider<EditorContentSynchronizer> editorContentSynchronizerProvider;
@@ -172,9 +173,25 @@ public class EditorAgentImpl implements EditorAgent,
         doOpen(file, new OpenEditorCallbackImpl(), constraints);
     }
 
-    public void closeEditor(EditorTab tab) {
+    private void closeEditor(EditorTab tab) {
         checkArgument(tab != null, "Null editor tab occurred");
-        doClose(tab.getRelativeEditorPart());
+
+        EditorPartPresenter editor = tab.getRelativeEditorPart();
+        if (editor == null) {
+            return;
+        }
+
+        openedEditors.remove(editor);
+
+        editor.close(false);
+
+        if (editor instanceof TextEditor) {
+            editorContentSynchronizerProvider.get().unTrackEditor(editor);
+        }
+
+        if (activeEditor != null && activeEditor == editor) {
+            activeEditor = null;
+        }
     }
 
     @Override
@@ -194,32 +211,13 @@ public class EditorAgentImpl implements EditorAgent,
         eventBus.fireEvent(FileEvent.createCloseFileEvent(editorTab));
     }
 
-    private void doClose(EditorPartPresenter editor) {
-        if (editor == null) {
-            return;
-        }
-
-        openedEditors.remove(editor);
-
-        editor.close(true);
-
-        if (editor instanceof TextEditor) {
-            editorContentSynchronizerProvider.get().unTrackEditor(editor);
-        }
-
-        if (activeEditor != null && activeEditor == editor) {
-            activeEditor = null;
-        }
-    }
-
     @Override
     public void openEditor(@NotNull VirtualFile file, @NotNull OpenEditorCallback callback) {
         doOpen(file, callback, null);
     }
 
     private void doOpen(final VirtualFile file, final OpenEditorCallback callback, final Constraints constraints) {
-        PartPresenter activePart = editorMultiPartStack.getActivePart();
-        EditorPartStack activePartStack = editorMultiPartStack.getPartStackByPart(activePart);
+        EditorPartStack activePartStack = editorMultiPartStack.getActivePartStack();
         if (constraints == null && activePartStack != null) {
             PartPresenter partPresenter = activePartStack.getPartByPath(file.getLocation());
             if (partPresenter != null) {
@@ -299,13 +297,8 @@ public class EditorAgentImpl implements EditorAgent,
     }
 
     @Override
-    public List<EditorPartPresenter> getOpenedEditorsBasedOn(EditorPartPresenter editorPart) {
+    public List<EditorPartPresenter> getOpenedEditorsFor(EditorPartStack editorPartStack) {
         List<EditorPartPresenter> result = newArrayList();
-        EditorPartStack editorPartStack = editorMultiPartStack.getPartStackByPart(editorPart);
-        if (editorPartStack == null) {
-            return result;
-        }
-
         for (EditorPartPresenter editor : openedEditors) {
             if (editorPartStack.containsPart(editor)) {
                 result.add(editor);
@@ -365,10 +358,5 @@ public class EditorAgentImpl implements EditorAgent,
     @Override
     public EditorPartPresenter getPreviousFor(EditorPartPresenter editorPart) {
         return editorMultiPartStack.getPreviousFor(editorPart);
-    }
-
-    @Override
-    public EditorPartPresenter getLastClosedBasedOn(EditorPartPresenter editorPart) {
-        return editorMultiPartStack.getLastClosedBasedOn(editorPart);
     }
 }

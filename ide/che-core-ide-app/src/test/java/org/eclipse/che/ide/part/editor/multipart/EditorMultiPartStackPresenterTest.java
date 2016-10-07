@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.part.editor.EditorPartStackFactory;
 import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
 import org.junit.Before;
@@ -156,7 +157,6 @@ public class EditorMultiPartStackPresenterTest {
 
         verify(editorPartStack).containsPart(partPresenter1);
         verify(editorPartStack).removePart(partPresenter1);
-        verify(view, never()).removePartStack(editorPartStack);
     }
 
     @Test
@@ -172,15 +172,26 @@ public class EditorMultiPartStackPresenterTest {
     }
 
     @Test
-    public void shouldOpenPreviousActivePartStack() {
-        when(editorPartStack.getActivePart()).thenReturn(null);
+    public void shouldNotRemovePartStackWhenPartStackIsNotEmpty() {
+        when(editorPartStack.getActivePart()).thenReturn(partPresenter2);
 
-        presenter.addPart(partPresenter2);
         presenter.addPart(partPresenter1);
         presenter.removePart(partPresenter1);
 
         verify(editorPartStack).containsPart(partPresenter1);
         verify(editorPartStack).removePart(partPresenter1);
+        verify(view, never()).removePartStack(editorPartStack);
+    }
+
+    @Test
+    public void shouldOpenPreviousActivePartStack() {
+        when(editorPartStack.containsPart(partPresenter1)).thenReturn(true);
+        presenter.addPart(partPresenter1);
+        presenter.addPart(partPresenter2);
+
+        presenter.removePart(partPresenter1);
+
+        verify(editorPartStack).containsPart((PartPresenter)anyObject());
         verify(view).removePartStack(editorPartStack);
         verify(editorPartStack).openPreviousActivePart();
     }
