@@ -96,6 +96,14 @@ import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL_EXCEPT_PINNED;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_OTHER;
+import static org.eclipse.che.ide.actions.EditorActions.PIN_TAB;
+import static org.eclipse.che.ide.actions.EditorActions.REOPEN_CLOSED;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
 import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
@@ -620,23 +628,23 @@ public class StandardComponentInitializer {
         DefaultActionGroup editorTabContextMenu =
                 (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU);
         editorTabContextMenu.add(closeAction);
-        actionManager.registerAction("closeEditor", closeAction);
+        actionManager.registerAction(CLOSE, closeAction);
         editorTabContextMenu.add(closeAllAction);
-        actionManager.registerAction("closeAllEditors", closeAllAction);
+        actionManager.registerAction(CLOSE_ALL, closeAllAction);
         editorTabContextMenu.add(closeOtherAction);
-        actionManager.registerAction("closeOtherEditorExceptCurrent", closeOtherAction);
+        actionManager.registerAction(CLOSE_OTHER, closeOtherAction);
         editorTabContextMenu.add(closeAllExceptPinnedAction);
-        actionManager.registerAction("closeAllEditorExceptPinned", closeAllExceptPinnedAction);
+        actionManager.registerAction(CLOSE_ALL_EXCEPT_PINNED, closeAllExceptPinnedAction);
         editorTabContextMenu.addSeparator();
         editorTabContextMenu.add(reopenClosedFileAction);
-        actionManager.registerAction("reopenClosedEditorTab", reopenClosedFileAction);
+        actionManager.registerAction(REOPEN_CLOSED, reopenClosedFileAction);
         editorTabContextMenu.add(pinEditorTabAction);
-        actionManager.registerAction("pinEditorTab", pinEditorTabAction);
+        actionManager.registerAction(PIN_TAB, pinEditorTabAction);
         editorTabContextMenu.addSeparator();
-        actionManager.registerAction("splitVertically", splitVerticallyAction);
-        editorTabContextMenu.add(splitVerticallyAction);
-        actionManager.registerAction("splitHorizontally", splitHorizontallyAction);
+        actionManager.registerAction(SPLIT_HORIZONTALLY, splitHorizontallyAction);
         editorTabContextMenu.add(splitHorizontallyAction);
+        actionManager.registerAction(SPLIT_VERTICALLY, splitVerticallyAction);
+        editorTabContextMenu.add(splitVerticallyAction);
 
         actionManager.registerAction("noOpAction", new NoOpAction());
         actionManager.registerAction("signatureHelp", signatureHelpAction);

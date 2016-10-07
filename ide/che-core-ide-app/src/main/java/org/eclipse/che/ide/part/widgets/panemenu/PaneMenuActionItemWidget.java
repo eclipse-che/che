@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.part.widgets.listtab;
+package org.eclipse.che.ide.part.widgets.panemenu;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,22 +19,25 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import org.eclipse.che.ide.api.parts.PartStackView;
+
+import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.Presentation;
 
 import javax.validation.constraints.NotNull;
 
 /**
- * @author Dmitry Shnurenko
- * @author Vitaliy Guliy
+ * Implementation of {@link EditorPaneMenuItem} to displaying editor's actions in {@link EditorPaneMenu}
+ *
+ * @author Roman Nikitenko
  */
-public class ListItemWidget extends Composite implements ListItem {
+public class PaneMenuActionItemWidget extends Composite implements EditorPaneMenuItem<Action> {
 
-    interface ListItemWidgetUiBinder extends UiBinder<Widget, ListItemWidget> {
+    interface PaneMenuActionItemWidgetUiBinder extends UiBinder<Widget, PaneMenuActionItemWidget> {
     }
 
-    private static final ListItemWidgetUiBinder UI_BINDER = GWT.create(ListItemWidgetUiBinder.class);
+    private static final PaneMenuActionItemWidgetUiBinder UI_BINDER = GWT.create(PaneMenuActionItemWidgetUiBinder.class);
 
-    private PartStackView.TabItem tabItem;
+    private Action action;
 
     @UiField
     FlowPanel iconPanel;
@@ -42,38 +45,19 @@ public class ListItemWidget extends Composite implements ListItem {
     @UiField
     Label title;
 
-    @UiField
-    FlowPanel closeButton;
+    private ActionDelegate<Action> delegate;
 
-    private ActionDelegate delegate;
-
-    public ListItemWidget(@NotNull PartStackView.TabItem tabItem) {
+    public PaneMenuActionItemWidget(@NotNull Action action) {
         initWidget(UI_BINDER.createAndBindUi(this));
-        this.tabItem = tabItem;
-
-        Widget icon = tabItem.getIcon();
-        if (icon != null) {
-            iconPanel.add(icon);
-        }
-        title.setText(tabItem.getTitle());
+        this.action = action;
+        Presentation presentation = action.getTemplatePresentation();
+        title.setText(presentation.getText());
 
         addDomHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 if (delegate != null) {
-                    delegate.onItemClicked(ListItemWidget.this);
-                }
-            }
-        }, ClickEvent.getType());
-
-        closeButton.addDomHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                clickEvent.stopPropagation();
-                clickEvent.preventDefault();
-
-                if (delegate != null) {
-                    delegate.onCloseButtonClicked(ListItemWidget.this);
+                    delegate.onItemClicked(PaneMenuActionItemWidget.this);
                 }
             }
         }, ClickEvent.getType());
@@ -81,13 +65,12 @@ public class ListItemWidget extends Composite implements ListItem {
 
     /** {@inheritDoc} */
     @Override
-    public void setDelegate(ActionDelegate delegate) {
+    public void setDelegate(ActionDelegate<Action> delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public PartStackView.TabItem getTabItem() {
-        return tabItem;
+    public Action getData() {
+        return action;
     }
-
 }

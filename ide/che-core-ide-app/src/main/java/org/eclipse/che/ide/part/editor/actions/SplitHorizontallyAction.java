@@ -18,6 +18,7 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 
 import static org.eclipse.che.ide.api.constraints.Direction.HORIZONTALLY;
 
@@ -38,8 +39,11 @@ public class SplitHorizontallyAction extends EditorAbstractAction {
 
     /** {@inheritDoc} */
     @Override
-    public void actionPerformed(ActionEvent e) {
-        Constraints constraints = new Constraints(HORIZONTALLY, getEditorTab(e).getId());
-        editorAgent.openEditor(getEditorFile(e), constraints);
+    public void actionPerformed(ActionEvent event) {
+        final String tabId = getEditorTab(event).getId();
+        final VirtualFile file = getEditorFile(event);
+        final Constraints constraints = new Constraints(HORIZONTALLY, tabId);
+
+        editorAgent.openEditor(file, constraints);
     }
 }
