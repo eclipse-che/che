@@ -172,15 +172,22 @@ public class JpaUserDao implements UserDao {
 
     @Override
     @Transactional
-    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException {
+    public Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException {
         // TODO need to ensure that 'getAll' query works with same data as 'getTotalCount'
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
+
+        /* 'managerProvider.get().setFirstResult(int)' requires int value in its parameters
+         but 'skipCount' have to be 'long' because it can be received from 'getAll()' method that returns long. */
+        if (skipCount > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("Skip count parameter must not be more than " + Integer.MAX_VALUE);
+        }
+
         try {
             final List<UserImpl> list = managerProvider.get()
                                                        .createNamedQuery("User.getAll", UserImpl.class)
                                                        .setMaxResults(maxItems)
-                                                       .setFirstResult(skipCount)
+                                                       .setFirstResult((int)skipCount)
                                                        .getResultList()
                                                        .stream()
                                                        .map(JpaUserDao::erasePassword)
