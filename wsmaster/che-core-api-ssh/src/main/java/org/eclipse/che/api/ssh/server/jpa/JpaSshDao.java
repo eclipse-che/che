@@ -16,13 +16,11 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -43,8 +41,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaSshDao implements SshDao {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaSshDao.class);
 
     @Inject
     private Provider<EntityManager> managerProvider;
@@ -138,7 +134,8 @@ public class JpaSshDao implements SshDao {
     }
 
     @Singleton
-    public static class RemoveSshKeysBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveSshKeysBeforeUserRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private SshDao       sshDao;
         @Inject
@@ -146,22 +143,18 @@ public class JpaSshDao implements SshDao {
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                for (SshPairImpl sshPair : sshDao.get(event.getUser().getId())) {
-                    sshDao.remove(sshPair.getOwner(), sshPair.getService(), sshPair.getName());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove ssh keys before user '%s' is removed", event.getUser().getId()), x);
+        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+            for (SshPairImpl sshPair : sshDao.get(event.getUser().getId())) {
+                sshDao.remove(sshPair.getOwner(), sshPair.getService(), sshPair.getName());
             }
         }
     }

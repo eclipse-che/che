@@ -157,4 +157,65 @@ public class EventServiceTest {
         bus.publish(new Event());
         Assert.assertEquals(events.size(), 0);
     }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldNotDetermineTheTypeOfEventOnSubscribe() {
+        bus.subscribe(new CustomEventSubscriber<>());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldNotDetermineTheTypeOfEventOnUnsubscribe() {
+        final CustomEventSubscriber<CustomEventImpl> sb = new CustomEventSubscriber<>();
+        bus.subscribe(sb, CustomEventImpl.class);
+        bus.unsubscribe(sb);
+    }
+
+    @Test
+    public void shouldSubscribeOnCustomEventSubscriber() {
+        bus.subscribe(new CustomEventSubscriber<>(), CustomEventImpl.class);
+    }
+
+    @Test
+    public void shouldUnsubscribeOnCustomEventSubscriber() {
+        final CustomEventSubscriber<CustomEventImpl> sb = new CustomEventSubscriber<>();
+        bus.subscribe(sb, CustomEventImpl.class);
+        bus.unsubscribe(sb, CustomEventImpl.class);
+    }
+
+    @Test
+    public void shouldSendEventsThroughCustomEventSubscriber() {
+        final CustomEventSubscriber<CustomEventImpl> sb = new CustomEventSubscriber<>();
+        bus.subscribe(sb, CustomEventImpl.class);
+        bus.publish(new CustomEventImpl());
+        Assert.assertEquals(sb.events.size(), 1);
+        bus.unsubscribe(sb, CustomEventImpl.class);
+    }
+
+    static class CustomEventSubscriber<T extends CustomEvent> implements EventSubscriber<T> {
+        final List<String> events = new ArrayList<>();
+
+        @Override
+        public void onEvent(T event) {
+            events.add(event.getMessage());
+        }
+    }
+
+    static abstract class CustomEvent {
+        private final String message;
+
+        public CustomEvent(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    static class CustomEventImpl extends CustomEvent {
+
+        public CustomEventImpl() {
+            super("message");
+        }
+    }
 }

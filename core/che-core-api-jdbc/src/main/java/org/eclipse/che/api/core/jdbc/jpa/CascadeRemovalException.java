@@ -8,24 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.event;
+package org.eclipse.che.api.core.jdbc.jpa;
 
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import javax.persistence.RollbackException;
 
 /**
- * Pre-removal event of {@link RecipeImpl}.
+ * Throws when any exception during cascade remove occurs.
  *
- * @author Max Shaposhnik
+ * <p>Note that in case of throwing this type of exception,
+ * cascade removal transaction will be rolled back.
+ *
+ * @author Anton Korneta
  */
-public class BeforeRecipeRemovedEvent extends CascadeRemovalEvent {
-    private final RecipeImpl recipe;
+public class CascadeRemovalException extends RollbackException {
 
-    public BeforeRecipeRemovedEvent(RecipeImpl recipe) {
-        this.recipe = recipe;
-    }
-
-    public RecipeImpl getRecipe() {
-        return recipe;
+    public CascadeRemovalException(Throwable cause) {
+        super(cause);
     }
 }

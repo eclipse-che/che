@@ -14,15 +14,20 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
+import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.api.AccountModule;
+import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.factory.server.jpa.FactoryJpaModule;
 import org.eclipse.che.api.factory.server.jpa.JpaFactoryDao.RemoveFactoriesBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
@@ -34,6 +39,7 @@ import org.eclipse.che.api.ssh.server.jpa.JpaSshDao.RemoveSshKeysBeforeUserRemov
 import org.eclipse.che.api.ssh.server.jpa.SshJpaModule;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.ssh.server.spi.SshDao;
+import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao.RemovePreferencesBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.user.server.jpa.JpaProfileDao.RemoveProfileBeforeUserRemovedEventSubscriber;
 import org.eclipse.che.api.user.server.jpa.UserJpaModule;
@@ -42,7 +48,9 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
@@ -50,6 +58,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.inject.lifecycle.InitModule;
+import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -69,6 +78,7 @@ import static org.eclipse.che.api.TestObjectsFactory.createSnapshot;
 import static org.eclipse.che.api.TestObjectsFactory.createSshPair;
 import static org.eclipse.che.api.TestObjectsFactory.createUser;
 import static org.eclipse.che.api.TestObjectsFactory.createWorkspace;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -83,7 +93,7 @@ import static org.testng.Assert.fail;
 public class JpaEntitiesCascadeRemovalTest {
 
     private Injector      injector;
-    private EventService eventService;
+    private EventService  eventService;
     private PreferenceDao preferenceDao;
     private UserDao       userDao;
     private ProfileDao    profileDao;
@@ -131,10 +141,18 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new InitModule(PostConstruct.class));
                 install(new JpaPersistModule("test"));
                 install(new UserJpaModule());
+                install(new AccountModule());
                 install(new SshJpaModule());
                 install(new WorkspaceJpaModule());
                 install(new MachineJpaModule());
                 install(new FactoryJpaModule());
+                bind(WorkspaceManager.class);
+                final WorkspaceRuntimes wR = Mockito.mock(WorkspaceRuntimes.class);
+                when(wR.hasRuntime(Mockito.anyString())).thenReturn(false);
+                bind(WorkspaceRuntimes.class).toInstance(wR);
+                bind(AccountManager.class);
+                bind(Boolean.class).annotatedWith(Names.named("workspace.runtime.auto_snapshot")).toInstance(false);
+                bind(Boolean.class).annotatedWith(Names.named("workspace.runtime.auto_restore")).toInstance(false);
             }
         });
 
@@ -172,9 +190,11 @@ public class JpaEntitiesCascadeRemovalTest {
     }
 
     @Test(dataProvider = "beforeRemoveRollbackActions")
-    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntries(Class<EventSubscriber> eventSubscriber) throws Exception {
+    public void shouldRollbackTransactionWhenFailedToRemoveAnyOfEntries(
+            Class<CascadeRemovalEventSubscriber<CascadeRemovalEvent>> subscriberClass,
+            Class<CascadeRemovalEvent> eventClass) throws Exception {
         createTestData();
-        eventService.unsubscribe(injector.getInstance(eventSubscriber));
+        eventService.unsubscribe(injector.getInstance(subscriberClass), eventClass);
 
         // Remove the user, all entries must be rolled back after fail
         try {
@@ -198,12 +218,12 @@ public class JpaEntitiesCascadeRemovalTest {
     @DataProvider(name = "beforeRemoveRollbackActions")
     public Object[][] beforeRemoveActions() {
         return new Class[][] {
-                {RemovePreferencesBeforeUserRemovedEventSubscriber.class},
-                {RemoveProfileBeforeUserRemovedEventSubscriber.class},
-                {RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class},
-                {RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class},
-                {RemoveSshKeysBeforeUserRemovedEventSubscriber.class},
-                {RemoveFactoriesBeforeUserRemovedEventSubscriber.class}
+                {RemovePreferencesBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
+                {RemoveProfileBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
+                {RemoveWorkspaceBeforeAccountRemovedEventSubscriber.class, BeforeAccountRemovedEvent.class},
+                {RemoveSnapshotsBeforeWorkspaceRemovedEventSubscriber.class, BeforeWorkspaceRemovedEvent.class},
+                {RemoveSshKeysBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
+                {RemoveFactoriesBeforeUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class}
         };
     }
 
