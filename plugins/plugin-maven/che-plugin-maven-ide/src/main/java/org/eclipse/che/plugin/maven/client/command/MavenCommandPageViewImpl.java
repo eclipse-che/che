@@ -35,9 +35,10 @@ public class MavenCommandPageViewImpl implements MavenCommandPageView {
     private final FlowPanel rootElement;
 
     @UiField
-    TextBox                   workingDirectory;
+    TextBox workingDirectory;
     @UiField
-    TextBox                   commandLine;
+    TextBox arguments;
+
     @UiField(provided = true)
     MavenLocalizationConstant locale;
 
@@ -71,19 +72,19 @@ public class MavenCommandPageViewImpl implements MavenCommandPageView {
     }
 
     @Override
-    public String getCommandLine() {
-        return commandLine.getValue();
+    public String getArguments() {
+        return arguments.getValue();
     }
 
     @Override
-    public void setCommandLine(String commandLine) {
-        this.commandLine.setValue(commandLine);
+    public void setArguments(String arguments) {
+        this.arguments.setValue(arguments);
     }
 
     @UiHandler({"workingDirectory"})
     void onWorkingDirectoryChanged(KeyUpEvent event) {
-        // commandLine value may not be updated immediately after keyUp
-        // therefore use the timer with delay=0
+        // workingDirectory value may not be updated immediately after keyUp
+        // therefore use the timer with zero delay
         new Timer() {
             @Override
             public void run() {
@@ -92,14 +93,14 @@ public class MavenCommandPageViewImpl implements MavenCommandPageView {
         }.schedule(0);
     }
 
-    @UiHandler({"commandLine"})
-    void onCommandLineChanged(KeyUpEvent event) {
-        // commandLine value may not be updated immediately after keyUp
-        // therefore use the timer with delay=0
+    @UiHandler({"arguments"})
+    void onArgumentsChanged(KeyUpEvent event) {
+        // arguments value may not be updated immediately after keyUp
+        // therefore use the timer with zero delay
         new Timer() {
             @Override
             public void run() {
-                delegate.onCommandLineChanged();
+                delegate.onArgumentsChanged();
             }
         }.schedule(0);
     }

@@ -20,10 +20,10 @@ import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.Machine;
+import org.eclipse.che.api.core.model.machine.MachineProcess;
 import org.eclipse.che.api.core.model.machine.Server;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Operation;
@@ -31,6 +31,8 @@ import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.MachineEntity;
@@ -44,15 +46,11 @@ import org.eclipse.che.ide.api.parts.base.BasePresenter;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
-import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsolePresenter;
@@ -117,9 +115,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final TerminalFactory               terminalFactory;
     private final CommandConsoleFactory         commandConsoleFactory;
     private final DialogFactory                 dialogFactory;
-    private final DtoFactory                    dtoFactory;
-    private final CommandTypeRegistry           commandTypeRegistry;
     private final ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
+    private final CommandTypeRegistry           commandTypeRegistry;
     private final Map<String, ProcessTreeNode>  machineNodes;
 
     ProcessTreeNode rootNode;
@@ -140,9 +137,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                                    TerminalFactory terminalFactory,
                                    CommandConsoleFactory commandConsoleFactory,
                                    DialogFactory dialogFactory,
-                                   DtoFactory dtoFactory,
-                                   CommandTypeRegistry commandTypeRegistry,
-                                   ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory) {
+                                   ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory,
+                                   CommandTypeRegistry commandTypeRegistry) {
         this.view = view;
         this.localizationConstant = localizationConstant;
         this.resources = resources;
@@ -154,9 +150,8 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.terminalFactory = terminalFactory;
         this.commandConsoleFactory = commandConsoleFactory;
         this.dialogFactory = dialogFactory;
-        this.dtoFactory = dtoFactory;
-        this.commandTypeRegistry = commandTypeRegistry;
         this.consoleTreeContextMenuFactory = consoleTreeContextMenuFactory;
+        this.commandTypeRegistry = commandTypeRegistry;
 
         machineNodes = new HashMap<>();
         rootNodes = new ArrayList<>();
@@ -772,25 +767,19 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                     /**
                      * Do not show the process if the command line has prefix #hidden
                      */
-                    if (!Strings.isNullOrEmpty(machineProcessDto.getCommandLine()) && machineProcessDto.getCommandLine().startsWith("#hidden")) {
+                    if (!Strings.isNullOrEmpty(machineProcessDto.getCommandLine()) &&
+                        machineProcessDto.getCommandLine().startsWith("#hidden")) {
                         continue;
                     }
 
-                    final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
-                                                            .withName(machineProcessDto.getName())
-                                                            .withAttributes(machineProcessDto.getAttributes())
-                                                            .withCommandLine(machineProcessDto.getCommandLine())
-                                                            .withType(machineProcessDto.getType());
-
-                    final CommandType type = commandTypeRegistry.getCommandTypeById(commandDto.getType());
-                    if (type != null) {
-                        final CommandConfiguration configuration = type.getConfigurationFactory().createFromDto(commandDto);
-                        final CommandOutputConsole console = commandConsoleFactory.create(configuration, machine);
+                    // hide the processes which are launched by command of unknown type
+                    if (isProcessLaunchedByCommandOfKnownType(machineProcessDto)) {
+                        final CommandOutputConsole console = commandConsoleFactory.create(new CommandImpl(machineProcessDto), machine);
                         console.listenToOutput(machineProcessDto.getOutputChannel());
                         console.attachToProcess(machineProcessDto);
+
                         addCommandOutput(machine.getId(), console);
                     }
-
                 }
             }
         }).catchError(new Operation<PromiseError>() {
@@ -799,6 +788,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 notificationManager.notify(localizationConstant.failedToGetProcesses(machine.getId()));
             }
         });
+    }
+
+    private boolean isProcessLaunchedByCommandOfKnownType(MachineProcess machineProcess) {
+        return commandTypeRegistry.getCommandTypeById(machineProcess.getType()) != null;
     }
 
     @Override

@@ -98,9 +98,6 @@ public interface MachineLocalizationConstant extends Messages {
     String connectViaSSH();
 
     /* Messages */
-    @Key("messages.noDevMachine")
-    String noDevMachine();
-
     @Key("messages.machine.not.found")
     String machineNotFound(String machineId);
 

@@ -15,7 +15,7 @@ import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.ext.plugins.client.command.GwtCheCommandType;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandType;
 
 /**
  * GIN module for 'Che Plugins Development' extension.

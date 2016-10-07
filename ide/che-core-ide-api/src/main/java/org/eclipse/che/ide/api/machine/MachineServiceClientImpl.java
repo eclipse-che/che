@@ -13,9 +13,12 @@ package org.eclipse.che.ide.api.machine;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.model.machine.Command;
+import org.eclipse.che.api.machine.shared.dto.CommandDto;
+import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.rest.RestContext;
@@ -39,16 +42,27 @@ public class MachineServiceClientImpl implements MachineServiceClient {
     private final AsyncRequestFactory    asyncRequestFactory;
     private final LoaderFactory          loaderFactory;
     private final String                 baseHttpUrl;
+    private final DtoFactory             dtoFactory;
 
     @Inject
     protected MachineServiceClientImpl(@RestContext String restContext,
                                        DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                        AsyncRequestFactory asyncRequestFactory,
-                                       LoaderFactory loaderFactory) {
+                                       LoaderFactory loaderFactory,
+                                       DtoFactory dtoFactory) {
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.loaderFactory = loaderFactory;
         this.baseHttpUrl = restContext + "/workspace/";
+        this.dtoFactory = dtoFactory;
+    }
+
+    @Override
+    public Promise<List<MachineDto>> getMachines(String workspaceId) {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + workspaceId + "/machine")
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .loader(loaderFactory.newLoader("Getting info about bound machines..."))
+                                  .send(dtoUnmarshallerFactory.newListUnmarshaller(MachineDto.class));
     }
 
     @Override
@@ -68,10 +82,16 @@ public class MachineServiceClientImpl implements MachineServiceClient {
                                                      @NotNull final String machineId,
                                                      @NotNull final Command command,
                                                      @Nullable final String outputChannel) {
+        final CommandDto commandDto = dtoFactory.createDto(CommandDto.class)
+                                                .withType(command.getType())
+                                                .withName(command.getName())
+                                                .withCommandLine(command.getCommandLine())
+                                                .withAttributes(command.getAttributes());
+
         return asyncRequestFactory.createPostRequest(baseHttpUrl + workspaceId +
                                                      "/machine/" + machineId +
                                                      "/command?outputChannel=" + outputChannel,
-                                                     command)
+                                                     commandDto)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Executing command..."))
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(MachineProcessDto.class));

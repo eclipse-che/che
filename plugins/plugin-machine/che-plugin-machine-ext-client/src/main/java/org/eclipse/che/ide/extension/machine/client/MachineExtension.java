@@ -44,8 +44,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
 import org.eclipse.che.ide.extension.machine.client.actions.SwitchPerspectiveAction;
-import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.ServerPortProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.ServerPortProvider;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineStatusHandler;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.CloseConsoleAction;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ReRunProcessAction;
@@ -56,6 +55,7 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RUN;
@@ -90,8 +90,6 @@ public class MachineExtension {
                             final ProcessesPanelPresenter processesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
-                            final IconRegistry iconRegistry,
-                            final CustomCommandType arbitraryCommandType,
                             final Provider<MachineStatusHandler> machineStatusHandlerProvider,
                             final ProjectExplorerPresenter projectExplorerPresenter) {
         this.perspectiveManager = perspectiveManager;
@@ -107,7 +105,12 @@ public class MachineExtension {
                 machinePortProvider.get();
                 /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
-                    processesPanelPresenter.newTerminal();
+                    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                        @Override
+                        public void execute() {
+                            processesPanelPresenter.newTerminal();
+                        }
+                    });
                     workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 }
 
@@ -137,8 +140,6 @@ public class MachineExtension {
                 }
             }
         });
-
-        iconRegistry.registerIcon(new Icon(arbitraryCommandType.getId() + ".commands.category.icon", machineResources.customCommandType()));
     }
 
     /**
@@ -251,8 +252,7 @@ public class MachineExtension {
 
 
         // Consoles tree context menu group
-        DefaultActionGroup consolesTreeContextMenu =
-                (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU);
+        DefaultActionGroup consolesTreeContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_CONSOLES_TREE_CONTEXT_MENU);
 
         consolesTreeContextMenu.add(reRunProcessAction);
         consolesTreeContextMenu.add(stopProcessAction);

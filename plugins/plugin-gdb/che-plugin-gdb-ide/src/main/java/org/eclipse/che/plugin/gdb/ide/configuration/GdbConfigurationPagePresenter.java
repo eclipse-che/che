@@ -28,8 +28,8 @@ import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
+import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 import org.eclipse.che.ide.json.JsonHelper;
 
 import java.util.ArrayList;
@@ -50,12 +50,12 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
     public static final String BIN_PATH_CONNECTION_PROPERTY   = "BINARY";
     public static final String DEFAULT_EXECUTABLE_TARGET_NAME = "a.out";
 
-    private final GdbConfigurationPageView   view;
-    private final AppContext                 appContext;
-    private final EntityFactory              entityFactory;
-    private final RecipeServiceClient        recipeServiceClient;
-    private final DtoFactory                 dtoFactory;
-    private final CurrentProjectPathProvider currentProjectPathProvider;
+    private final GdbConfigurationPageView view;
+    private final AppContext               appContext;
+    private final EntityFactory            entityFactory;
+    private final RecipeServiceClient      recipeServiceClient;
+    private final DtoFactory               dtoFactory;
+    private final CurrentProjectPathMacro  currentProjectPathMacro;
 
     private DebugConfiguration editedConfiguration;
     private String             originHost;
@@ -69,13 +69,13 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
                                          DtoFactory dtoFactory,
                                          EntityFactory entityFactory,
                                          RecipeServiceClient recipeServiceClient,
-                                         CurrentProjectPathProvider currentProjectPathProvider) {
+                                         CurrentProjectPathMacro currentProjectPathMacro) {
         this.view = view;
         this.appContext = appContext;
         this.entityFactory = entityFactory;
         this.recipeServiceClient = recipeServiceClient;
         this.dtoFactory = dtoFactory;
-        this.currentProjectPathProvider = currentProjectPathProvider;
+        this.currentProjectPathMacro = currentProjectPathMacro;
 
         view.setDelegate(this);
     }
@@ -101,7 +101,7 @@ public class GdbConfigurationPagePresenter implements GdbConfigurationPageView.A
     }
 
     private String getDefaultBinaryPath() {
-        return currentProjectPathProvider.getKey() + "/" + DEFAULT_EXECUTABLE_TARGET_NAME;
+        return currentProjectPathMacro.getName() + "/" + DEFAULT_EXECUTABLE_TARGET_NAME;
     }
 
     @Override

@@ -16,7 +16,6 @@ import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.core.model.machine.MachineStatus;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
@@ -26,6 +25,8 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.dialogs.ConfirmDialog;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.DevMachine;
@@ -39,16 +40,11 @@ import org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.workspace.event.EnvironmentOutputEvent;
-import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationFactory;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
-import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.perspective.terminal.TerminalPresenter;
@@ -71,7 +67,6 @@ import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTree
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.ROOT_NODE;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -95,13 +90,11 @@ public class ProcessesPanelPresenterTest {
     private static final int    PID            = 101;
 
     @Mock
-    private DtoFactory                    dtoFactory;
-    @Mock
     private CommandConsoleFactory         commandConsoleFactory;
     @Mock
-    private CommandTypeRegistry           commandTypeRegistry;
-    @Mock
     private ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
+    @Mock
+    private CommandTypeRegistry           commandTypeRegistry;
     @Mock
     private DialogFactory                 dialogFactory;
     @Mock
@@ -173,9 +166,8 @@ public class ProcessesPanelPresenterTest {
                                                 terminalFactory,
                                                 commandConsoleFactory,
                                                 dialogFactory,
-                                                dtoFactory,
-                                                commandTypeRegistry,
-                                                consoleTreeContextMenuFactory);
+                                                consoleTreeContextMenuFactory,
+                                                commandTypeRegistry);
     }
 
     @Test
@@ -591,8 +583,6 @@ public class ProcessesPanelPresenterTest {
     @Test
     public void commandShouldBeRestoredWhenWsAgentIsStarted() throws Exception {
         WsAgentStateEvent event = mock(WsAgentStateEvent.class);
-        CommandConfigurationFactory commandConfigurationFactory = mock(CommandConfigurationFactory.class);
-        CommandConfiguration commandConfiguration = mock(CommandConfiguration.class);
 
         MachineEntity machineEntity = mock(MachineEntity.class);
         MachineDto machine = mock(MachineDto.class);
@@ -613,20 +603,12 @@ public class ProcessesPanelPresenterTest {
         List<MachineProcessDto> processes = new ArrayList<>(1);
         processes.add(machineProcessDto);
 
-        CommandDto commandDto = mock(CommandDto.class);
-        when(dtoFactory.createDto(anyObject())).thenReturn(commandDto);
-        when(commandDto.withName(anyString())).thenReturn(commandDto);
-        when(commandDto.withCommandLine(anyString())).thenReturn(commandDto);
-        when(commandDto.withType(anyString())).thenReturn(commandDto);
-        when(commandDto.withAttributes(anyMap())).thenReturn(commandDto);
         CommandOutputConsole outputConsole = mock(CommandOutputConsole.class);
 
         CommandType commandType = mock(CommandType.class);
         when(commandTypeRegistry.getCommandTypeById(anyString())).thenReturn(commandType);
-        when(commandConsoleFactory.create(anyObject(), any(org.eclipse.che.api.core.model.machine.Machine.class)))
-                .thenReturn(outputConsole);
-        when(commandType.getConfigurationFactory()).thenReturn(commandConfigurationFactory);
-        when(commandConfigurationFactory.createFromDto(anyObject())).thenReturn(commandConfiguration);
+        when(commandConsoleFactory.create(anyObject(),
+                                          any(org.eclipse.che.api.core.model.machine.Machine.class))).thenReturn(outputConsole);
 
         presenter.onWsAgentStarted(event);
 

@@ -12,7 +12,8 @@ package org.eclipse.che.plugin.maven.client.command;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage;
+import org.eclipse.che.ide.api.command.CommandPage;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,69 +32,65 @@ import static org.mockito.Mockito.when;
 public class MavenPagePresenterTest {
 
     private static final String WORK_DIR     = "project";
-    private static final String COMMAND_LINE = "mvn clean install";
+    private static final String ARGUMENTS    = "clean install";
+    private static final String COMMAND_LINE = "mvn -f " + WORK_DIR + ' ' + ARGUMENTS;
 
     @Mock
-    private MavenCommandPageView      mavenCommandPageView;
+    private MavenCommandPageView view;
     @Mock
-    private MavenCommandConfiguration configuration;
+    private CommandImpl          command;
 
     @InjectMocks
-    private MavenCommandPagePresenter mavenCommandPagePresenter;
+    private MavenCommandPagePresenter presenter;
 
     @Before
     public void setUp() {
-        when(configuration.getWorkingDirectory()).thenReturn(WORK_DIR);
-        when(configuration.getCommandLine()).thenReturn(COMMAND_LINE);
+        when(command.getCommandLine()).thenReturn(COMMAND_LINE);
 
-        mavenCommandPagePresenter.resetFrom(configuration);
+        presenter.resetFrom(command);
     }
 
     @Test
     public void testResetting() throws Exception {
-        verify(configuration).getCommandLine();
+        verify(command).getCommandLine();
     }
 
     @Test
     public void testGo() throws Exception {
         AcceptsOneWidget container = Mockito.mock(AcceptsOneWidget.class);
 
-        mavenCommandPagePresenter.go(container);
+        presenter.go(container);
 
-        verify(container).setWidget(eq(mavenCommandPageView));
-        verify(configuration, times(2)).getWorkingDirectory();
-        verify(configuration, times(2)).getCommandLine();
-        verify(mavenCommandPageView).setWorkingDirectory(eq(WORK_DIR));
-        verify(mavenCommandPageView).setCommandLine(eq(COMMAND_LINE));
+        verify(container).setWidget(eq(view));
+        verify(view).setWorkingDirectory(eq(WORK_DIR));
+        verify(view).setArguments(eq(ARGUMENTS));
     }
 
     @Test
     public void testOnWorkingDirectoryChanged() throws Exception {
-        String workDir = "project";
-        when(mavenCommandPageView.getWorkingDirectory()).thenReturn(workDir);
+        when(view.getWorkingDirectory()).thenReturn(WORK_DIR);
 
-        final CommandConfigurationPage.DirtyStateListener listener = mock(CommandConfigurationPage.DirtyStateListener.class);
-        mavenCommandPagePresenter.setDirtyStateListener(listener);
+        final CommandPage.DirtyStateListener listener = mock(CommandPage.DirtyStateListener.class);
+        presenter.setDirtyStateListener(listener);
 
-        mavenCommandPagePresenter.onWorkingDirectoryChanged();
+        presenter.onWorkingDirectoryChanged();
 
-        verify(mavenCommandPageView).getWorkingDirectory();
-        verify(configuration).setWorkingDirectory(eq(workDir));
+        verify(view).getWorkingDirectory();
+        verify(command).setCommandLine(eq(COMMAND_LINE));
         verify(listener).onDirtyStateChanged();
     }
 
     @Test
-    public void testOnCommandLineChanged() throws Exception {
-        String commandLine = "commandLine";
-        when(mavenCommandPageView.getCommandLine()).thenReturn(commandLine);
+    public void testOnArgumentsChanged() throws Exception {
+        when(view.getArguments()).thenReturn(ARGUMENTS);
 
-        final CommandConfigurationPage.DirtyStateListener listener = mock(CommandConfigurationPage.DirtyStateListener.class);
-        mavenCommandPagePresenter.setDirtyStateListener(listener);
+        final CommandPage.DirtyStateListener listener = mock(CommandPage.DirtyStateListener.class);
+        presenter.setDirtyStateListener(listener);
 
-        mavenCommandPagePresenter.onCommandLineChanged();
+        presenter.onArgumentsChanged();
 
-        verify(mavenCommandPageView).getCommandLine();
-        verify(configuration).setCommandLine(eq(commandLine));
+        verify(view).getArguments();
+        verify(command).setCommandLine(eq(COMMAND_LINE));
         verify(listener).onDirtyStateChanged();
     }
 }
