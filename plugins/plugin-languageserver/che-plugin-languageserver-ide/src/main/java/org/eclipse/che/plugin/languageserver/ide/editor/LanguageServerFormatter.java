@@ -180,7 +180,7 @@ public class LanguageServerFormatter implements ContentFormatter {
         options.setTabSize(Integer.parseInt(getEditorProperty(EditorProperties.TAB_SIZE)));
         return options;
     }
-    
+
     private String getEditorProperty(EditorProperties property) {
         return editorPropertiesManager.getEditorProperties().get(property.toString()).toString();
     }
