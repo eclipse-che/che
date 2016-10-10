@@ -139,6 +139,10 @@ public class ServerInitializerImpl implements ServerInitializer {
         server.getTextDocumentService().onPublishDiagnostics(publishDiagnosticsParamsMessenger::onEvent);
         server.getWindowService().onLogMessage(messageParams -> LOG.error(messageParams.getType() + " " + messageParams.getMessage()));
         server.onTelemetryEvent(o -> LOG.error(o.toString()));
+        
+        if (server instanceof ServerInitializerObserver) {
+            addObserver((ServerInitializerObserver) server);
+        }
     }
 
     protected InitializeParamsImpl prepareInitializeParams(String projectPath) {

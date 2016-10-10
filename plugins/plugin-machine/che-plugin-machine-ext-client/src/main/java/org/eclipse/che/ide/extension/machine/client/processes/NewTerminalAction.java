@@ -8,11 +8,12 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.machine.client.actions;
+package org.eclipse.che.ide.extension.machine.client.processes;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
@@ -29,14 +30,17 @@ import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspect
  * @author Vitaliy Guliy
  */
 @Singleton
-public class NewTerminalAction extends AbstractPerspectiveAction {
+public class NewTerminalAction extends AbstractPerspectiveAction implements ProcessTreeNodeSelectedEvent.Handler {
 
     private final ProcessesPanelPresenter processesPanelPresenter;
+
+    private ProcessTreeNode selectedNode;
 
     @Inject
     public NewTerminalAction(MachineLocalizationConstant locale,
                              MachineResources machineResources,
-                             ProcessesPanelPresenter processesPanelPresenter) {
+                             ProcessesPanelPresenter processesPanelPresenter,
+                             EventBus eventBus) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               locale.newTerminal(),
               locale.newTerminalDescription(),
@@ -44,14 +48,42 @@ public class NewTerminalAction extends AbstractPerspectiveAction {
               machineResources.addTerminalIcon());
 
         this.processesPanelPresenter = processesPanelPresenter;
+
+        eventBus.addHandler(ProcessTreeNodeSelectedEvent.TYPE, this);
     }
 
     @Override
     public void updateInPerspective(ActionEvent event) {
+        if (selectedNode == null) {
+            event.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+
+        event.getPresentation().setVisible(true);
+
+        ProcessTreeNode node = selectedNode;
+
+        if (ProcessTreeNode.ProcessNodeType.TERMINAL_NODE == node.getType() ||
+                ProcessTreeNode.ProcessNodeType.COMMAND_NODE == node.getType()) {
+            node = node.getParent();
+        }
+
+        if (ProcessTreeNode.ProcessNodeType.MACHINE_NODE == node.getType()) {
+            event.getPresentation().setEnabled(node.hasTerminalAgent());
+            return;
+        }
+
+        event.getPresentation().setEnabled(false);
     }
 
     @Override
     public void actionPerformed(ActionEvent event) {
         processesPanelPresenter.newTerminal();
     }
+
+    @Override
+    public void onProcessTreeNodeSelected(ProcessTreeNodeSelectedEvent event) {
+        selectedNode = event.getProcessTreeNode();
+    }
+
 }
