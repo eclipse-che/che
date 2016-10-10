@@ -82,7 +82,7 @@ public class ExplorerCurrentFileParentPathProvider implements CommandPropertyVal
 
             final Optional<Container> parentOptional = input.getParent();
             if (!parentOptional.isPresent()) {
-                throw new IllegalStateException(input.getLocation() + " doesn't have a parent");
+                return "";
             }
 
             Path location = parentOptional.get().getLocation();
