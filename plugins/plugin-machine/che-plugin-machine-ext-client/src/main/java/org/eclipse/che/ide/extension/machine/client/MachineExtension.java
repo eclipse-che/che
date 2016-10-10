@@ -39,7 +39,7 @@ import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.EditCommandsAction;
 import org.eclipse.che.ide.extension.machine.client.actions.ExecuteSelectedCommandAction;
-import org.eclipse.che.ide.extension.machine.client.actions.NewTerminalAction;
+import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RestartMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.RunCommandAction;
 import org.eclipse.che.ide.extension.machine.client.actions.SelectCommandComboBox;
@@ -107,6 +107,7 @@ public class MachineExtension {
                 machinePortProvider.get();
                 /* Do not show terminal on factories by default */
                 if (appContext.getFactory() == null) {
+                    processesPanelPresenter.selectDevMachine();
                     processesPanelPresenter.newTerminal();
                     workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 }
