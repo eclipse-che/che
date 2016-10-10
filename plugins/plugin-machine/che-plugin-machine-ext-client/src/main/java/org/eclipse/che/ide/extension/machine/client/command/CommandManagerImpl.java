@@ -158,10 +158,9 @@ public class CommandManagerImpl implements CommandManager {
         return workspaceServiceClient.addCommand(appContext.getWorkspaceId(), commandDto).then(new Function<WorkspaceDto, CommandImpl>() {
             @Override
             public CommandImpl apply(WorkspaceDto arg) throws FunctionException {
-                final CommandImpl newCommand = new CommandImpl(commandDto.getName(),
-                                                               command.getCommandLine(),
-                                                               command.getType(),
-                                                               command.getAttributes());
+                final CommandImpl newCommand = new CommandImpl(command);
+                newCommand.setName(commandDto.getName());
+
                 commands.put(newCommand.getName(), newCommand);
 
                 fireCommandAdded(newCommand);

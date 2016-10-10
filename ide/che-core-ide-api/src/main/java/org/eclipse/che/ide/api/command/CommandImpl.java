@@ -12,9 +12,11 @@ package org.eclipse.che.ide.api.command;
 
 import org.eclipse.che.api.core.model.machine.Command;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
 
 /**
  * Model of the command.
@@ -39,24 +41,22 @@ public class CommandImpl implements Command {
      *         type of the command
      */
     public CommandImpl(String name, String commandLine, String type) {
-        this.name = name;
-        this.commandLine = commandLine;
-        this.type = type;
+        this(name, commandLine, type, emptyMap());
     }
 
     public CommandImpl(String name, String commandLine, String type, Map<String, String> attributes) {
         this.name = name;
         this.commandLine = commandLine;
         this.type = type;
-        this.attributes = new HashMap<>(attributes);
+        this.attributes = unmodifiableMap(attributes);
     }
 
     /** Creates copy of the given {@link Command}. */
     public CommandImpl(Command command) {
-        this.name = command.getName();
-        this.commandLine = command.getCommandLine();
-        this.type = command.getType();
-        this.attributes = new HashMap<>(command.getAttributes());
+        this(command.getName(),
+             command.getCommandLine(),
+             command.getType(),
+             unmodifiableMap(command.getAttributes()));
     }
 
     @Override
@@ -84,14 +84,11 @@ public class CommandImpl implements Command {
 
     @Override
     public Map<String, String> getAttributes() {
-        if (attributes == null) {
-            attributes = new HashMap<>();
-        }
         return attributes;
     }
 
     public void setAttributes(Map<String, String> attributes) {
-        this.attributes = attributes;
+        this.attributes = unmodifiableMap(attributes);
     }
 
     @Override

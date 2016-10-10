@@ -36,7 +36,7 @@ public interface CommandPage extends Presenter {
      * <p>{@inheritDoc}
      */
     @Override
-    void go(final AcceptsOneWidget container);
+    void go(AcceptsOneWidget container);
 
     /** Called when currently edited command has been saved. */
     void onSave();

@@ -76,7 +76,7 @@ public class MacroProcessorImpl implements MacroProcessor {
         };
     }
 
-    private class StringContainer {
+    private static class StringContainer {
         String commandLine;
 
         StringContainer(String commandLine) {
