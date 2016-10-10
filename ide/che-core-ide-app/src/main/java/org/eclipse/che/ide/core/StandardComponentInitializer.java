@@ -62,12 +62,12 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.connection.WsConnectionListener;
+import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.macro.ServerHostNameMacro;
 import org.eclipse.che.ide.macro.ServerMacro;
 import org.eclipse.che.ide.macro.ServerPortMacro;
 import org.eclipse.che.ide.macro.ServerProtocolMacro;
-import org.eclipse.che.ide.connection.WsConnectionListener;
-import org.eclipse.che.ide.imageviewer.ImageViewerProvider;
 import org.eclipse.che.ide.newresource.NewFileAction;
 import org.eclipse.che.ide.newresource.NewFolderAction;
 import org.eclipse.che.ide.part.editor.actions.CloseAction;
@@ -80,6 +80,7 @@ import org.eclipse.che.ide.part.editor.actions.SplitHorizontallyAction;
 import org.eclipse.che.ide.part.editor.actions.SplitVerticallyAction;
 import org.eclipse.che.ide.part.editor.actions.SwitchNextEditorAction;
 import org.eclipse.che.ide.part.editor.actions.SwitchPreviousEditorAction;
+import org.eclipse.che.ide.part.editor.recent.ClearRecentListAction;
 import org.eclipse.che.ide.part.editor.recent.OpenRecentFilesAction;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
 import org.eclipse.che.ide.resources.action.CopyResourceAction;
@@ -95,8 +96,18 @@ import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.ide.xml.NewXmlFileAction;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_ALL_EXCEPT_PINNED;
+import static org.eclipse.che.ide.actions.EditorActions.CLOSE_OTHER;
+import static org.eclipse.che.ide.actions.EditorActions.PIN_TAB;
+import static org.eclipse.che.ide.actions.EditorActions.REOPEN_CLOSED;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
+import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
+import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
+import static org.eclipse.che.ide.part.editor.recent.RecentFileStore.RECENT_GROUP_ID;
 import static org.eclipse.che.ide.projecttype.BlankProjectWizardRegistrar.BLANK_CATEGORY;
 
 /**
@@ -269,6 +280,9 @@ public class StandardComponentInitializer {
 
     @Inject
     private OpenRecentFilesAction openRecentFilesAction;
+
+    @Inject
+    private ClearRecentListAction clearRecentFilesAction;
 
     @Inject
     private CloseActiveEditorAction closeActiveEditorAction;
@@ -465,7 +479,12 @@ public class StandardComponentInitializer {
 
         // Edit (New Menu)
         DefaultActionGroup editGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDIT);
-
+        DefaultActionGroup recentGroup = new DefaultActionGroup(RECENT_GROUP_ID, true, actionManager);
+        actionManager.registerAction(IdeActions.GROUP_RECENT_FILES, recentGroup);
+        actionManager.registerAction("clearRecentList", clearRecentFilesAction);
+        recentGroup.addSeparator();
+        recentGroup.add(clearRecentFilesAction, LAST);
+        editGroup.add(recentGroup);
         actionManager.registerAction("openRecentFiles", openRecentFilesAction);
         editGroup.add(openRecentFilesAction);
 
@@ -609,24 +628,23 @@ public class StandardComponentInitializer {
         DefaultActionGroup editorTabContextMenu =
                 (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU);
         editorTabContextMenu.add(closeAction);
-        actionManager.registerAction("closeEditor", closeAction);
+        actionManager.registerAction(CLOSE, closeAction);
         editorTabContextMenu.add(closeAllAction);
-        actionManager.registerAction("closeAllEditors", closeAllAction);
+        actionManager.registerAction(CLOSE_ALL, closeAllAction);
         editorTabContextMenu.add(closeOtherAction);
-        actionManager.registerAction("closeOtherEditorExceptCurrent", closeOtherAction);
+        actionManager.registerAction(CLOSE_OTHER, closeOtherAction);
         editorTabContextMenu.add(closeAllExceptPinnedAction);
-        actionManager.registerAction("closeAllEditorExceptPinned", closeAllExceptPinnedAction);
+        actionManager.registerAction(CLOSE_ALL_EXCEPT_PINNED, closeAllExceptPinnedAction);
         editorTabContextMenu.addSeparator();
         editorTabContextMenu.add(reopenClosedFileAction);
-        actionManager.registerAction("reopenClosedEditorTab", reopenClosedFileAction);
+        actionManager.registerAction(REOPEN_CLOSED, reopenClosedFileAction);
         editorTabContextMenu.add(pinEditorTabAction);
-        actionManager.registerAction("pinEditorTab", pinEditorTabAction);
+        actionManager.registerAction(PIN_TAB, pinEditorTabAction);
         editorTabContextMenu.addSeparator();
-        actionManager.registerAction("splitVertically", splitVerticallyAction);
-        editorTabContextMenu.add(splitVerticallyAction);
-        actionManager.registerAction("splitHorizontally", splitHorizontallyAction);
+        actionManager.registerAction(SPLIT_HORIZONTALLY, splitHorizontallyAction);
         editorTabContextMenu.add(splitHorizontallyAction);
-        editorTabContextMenu.addSeparator();
+        actionManager.registerAction(SPLIT_VERTICALLY, splitVerticallyAction);
+        editorTabContextMenu.add(splitVerticallyAction);
 
         actionManager.registerAction("noOpAction", new NoOpAction());
         actionManager.registerAction("signatureHelp", signatureHelpAction);

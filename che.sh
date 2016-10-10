@@ -20,6 +20,9 @@ init_logging() {
   DEFAULT_CHE_CLI_VERSION="latest"
   CHE_CLI_VERSION=${CHE_CLI_VERSION:-${DEFAULT_CHE_CLI_VERSION}}
 
+  DEFAULT_CHE_PRODUCT_NAME="ECLIPSE CHE"
+  CHE_PRODUCT_NAME=${CHE_PRODUCT_NAME:-${DEFAULT_CHE_PRODUCT_NAME}}
+
   # Name used in CLI statements
   DEFAULT_CHE_MINI_PRODUCT_NAME="che"
   CHE_MINI_PRODUCT_NAME=${CHE_MINI_PRODUCT_NAME:-${DEFAULT_CHE_MINI_PRODUCT_NAME}}
@@ -45,7 +48,16 @@ warning() {
 
 info() {
   if is_info; then
-    printf  "${GREEN}INFO:${NC} %s\n" "${1}"
+    if [ -z ${2+x} ]; then 
+      PRINT_COMMAND=""
+      PRINT_STATEMENT=$1
+    else
+      PRINT_COMMAND="($CHE_MINI_PRODUCT_NAME $1):"
+      PRINT_STATEMENT=$2
+    fi
+    printf  "${GREEN}INFO:${NC} %s %s\n" \
+              "${PRINT_COMMAND}" \
+              "${PRINT_STATEMENT}"
   fi
 }
 
@@ -112,7 +124,7 @@ check_docker() {
 }
 
 curl () {
-  docker run --rm appropriate/curl "$@"
+  docker run --rm --net=host appropriate/curl "$@"
 }
 
 update_che_cli() {

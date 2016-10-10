@@ -17,32 +17,30 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
-import org.eclipse.che.ide.api.event.FileEvent;
-import org.eclipse.che.ide.api.parts.EditorTab;
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 
 /**
- * Performs closing selected editor.
- * Note: the pane which contains this editor will be closed when the pane doesn't contains editors anymore.
+ * Performs closing pane and all opened editors for current pane.
  *
- * @author Vlad Zhukovskiy
+ * @author Roman Nikitenko
  */
 @Singleton
-public class CloseAction extends EditorAbstractAction {
+public class CloseAllTabsPaneAction extends EditorAbstractAction {
 
     @Inject
-    public CloseAction(EditorAgent editorAgent,
-                       EventBus eventBus,
-                       CoreLocalizationConstant locale) {
-        super(locale.editorTabClose(), locale.editorTabCloseDescription(), null, editorAgent, eventBus);
+    public CloseAllTabsPaneAction(EditorAgent editorAgent,
+                                  EventBus eventBus,
+                                  CoreLocalizationConstant locale) {
+        super(locale.editorCloseAllTabsInPane(), locale.editorCloseAllTabsInPaneDescription(), null, editorAgent, eventBus);
     }
 
     /** {@inheritDoc} */
     @Override
-    public void actionPerformed(ActionEvent e) {
-        EditorTab editorTab = getEditorTab(e);
-        if (editorTab == null) {
-            return;
+    public void actionPerformed(ActionEvent event) {
+        EditorPartStack currentPartStack = getEditorPane(event);
+        for (EditorPartPresenter editorPart : editorAgent.getOpenedEditorsFor(currentPartStack)) {
+            editorAgent.closeEditor(editorPart);
         }
-        eventBus.fireEvent(FileEvent.createCloseFileEvent(editorTab));
     }
 }
