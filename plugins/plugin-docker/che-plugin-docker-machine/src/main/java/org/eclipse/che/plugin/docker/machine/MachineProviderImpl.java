@@ -402,7 +402,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                             .withAuthConfigs(dockerCredentials.getCredentials())
                             .withDoForcePull(doForcePullOnBuild)
                             .withMemoryLimit(service.getMemLimit())
-                            .withMemorySwapLimit(-1);
+                            .withMemorySwapLimit(-1)
+                            .withBuildArgs(service.getBuild().getArgs());
 
             docker.buildImage(buildImageParams, progressMonitor);
         } catch (IOException e) {
