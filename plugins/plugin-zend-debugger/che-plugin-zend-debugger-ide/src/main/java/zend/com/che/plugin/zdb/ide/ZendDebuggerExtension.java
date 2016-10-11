@@ -14,9 +14,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import zend.com.che.plugin.zdb.ide.debug.ZendDebugger;
+import zend.com.che.plugin.zdb.ide.fqn.ZendFqnResolver;
 
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.debug.DebuggerManager;
+import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
 
 /**
  * Extension allows debug PHP applications with the use of Zend Debugger.
@@ -29,8 +31,11 @@ public class ZendDebuggerExtension {
 
     @Inject
     public ZendDebuggerExtension(DebuggerManager debuggerManager,
-                                 ZendDebugger zendDebugger) {
+                                 ZendDebugger zendDebugger,
+                                 FqnResolverFactory resolverFactory,
+                                 ZendFqnResolver zendFqnResolver) {
         debuggerManager.registeredDebugger(ZendDebugger.ID, zendDebugger);
+        resolverFactory.addResolver("php", zendFqnResolver);
     }
     
 }

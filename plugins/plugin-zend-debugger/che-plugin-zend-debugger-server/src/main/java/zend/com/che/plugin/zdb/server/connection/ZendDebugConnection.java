@@ -11,309 +11,265 @@
 package zend.com.che.plugin.zdb.server.connection;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-
-import org.eclipse.core.runtime.*;
-import org.eclipse.core.runtime.jobs.Job;
+import java.util.concurrent.ThreadFactory;
 
 import zend.com.che.plugin.zdb.server.ZendDebugger;
+import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.CloseMessageHandlerNotification;
+
+import static zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.*;
 
 /**
- * The debug connection is responsible of initializing and handle a single debug
- * session that was triggered by a remote or local debugger.
+ * The debug connection is responsible for initializing and handling a debug
+ * session that was triggered by debugger engine.
  * 
  * @author Bartlomiej Laczkowski
  */
 public class ZendDebugConnection {
 
-	/**
-	 * This job handles the requests and notification that are inserted into the
-	 * queues by the message receiver job.
-	 */
-	private class MessageHandler extends Job {
+	private final class EngineConnectionRunnable implements Runnable {
 
-		private BlockingQueue<IDebugMessage> messageQueue = new ArrayBlockingQueue<IDebugMessage>(100);
+		private DataInputStream inputStream;
+		private DataOutputStream outputStream;
 
-		public MessageHandler() {
-			super("Debug Message Handler"); //$NON-NLS-1$
-			setSystem(true);
-			setUser(false);
-			setPriority(LONG);
+		@Override
+		public void run() {
+			while (!debugSocket.isClosed()) {
+				try (Socket socket = debugSocket.accept();
+						DataInputStream inputStream = new DataInputStream(socket.getInputStream());
+						DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());) {
+					socket.setReceiveBufferSize(1024 * 128);
+					socket.setSendBufferSize(1024 * 128);
+					socket.setTcpNoDelay(true);
+					this.inputStream = inputStream;
+					this.outputStream = outputStream;
+					read();
+				} catch (IOException e) {
+					if (debugSocket.isClosed()) {
+						break;
+					}
+					ZendDebugger.LOG.error(e.getMessage(), e);
+				}
+			}
+			engineNotificationRunnable.queue(new CloseMessageHandlerNotification());
+		}
+
+		private void read() {
+			isConnected = true;
+			while (true) {
+				try {
+					// Reads the length
+					int length = inputStream.readInt();
+					if (length < 0) {
+						ZendDebugger.LOG.error("Socket error: (length is negative)");
+						break;
+					}
+					// Engine message arrived. read its type identifier.
+					int messageType = inputStream.readShort();
+					IDebugEngineMessage engineMessage = ZendEngineMessages.create(messageType);
+					engineMessage.deserialize(inputStream);
+					if (engineMessage instanceof IDebugEngineNotification) {
+						engineNotificationRunnable.queue((IDebugEngineNotification) engineMessage);
+					} else if (engineMessage instanceof IDebugEngineResponse) {
+						IDebugEngineResponse response = (IDebugEngineResponse) engineMessage;
+						EngineSyncResponse<IDebugEngineResponse> syncResponse = (EngineSyncResponse<IDebugEngineResponse>) engineSyncResponses
+								.remove(response.getID());
+						if (syncResponse != null) {
+							// Set response and release waiting request provider
+							syncResponse.set(response);
+							continue;
+						}
+					}
+				} catch (EOFException e) {
+					// Engine closed the session
+					break;
+				} catch (Exception e) {
+					ZendDebugger.LOG.error(e.getMessage(), e);
+					break;
+				}
+			}
+			isConnected = false;
+		}
+
+		private void write(IDebugClientMessage clientMessage) {
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+			try {
+				clientMessage.serialize(dataOutputStream);
+				int messageSize = byteArrayOutputStream.size();
+				// Write to connection output
+				outputStream.writeInt(messageSize);
+				byteArrayOutputStream.writeTo(outputStream);
+				outputStream.flush();
+			} catch (IOException e) {
+				ZendDebugger.LOG.error(e.getMessage(), e);
+			}
+		}
+
+	}
+
+	private static final class EngineNotificationRunnable implements Runnable {
+
+		private IEngineNotificationHandler handler;
+		private BlockingQueue<IDebugEngineNotification> messageQueue = new ArrayBlockingQueue<IDebugEngineNotification>(
+				100);
+
+		private EngineNotificationRunnable(IEngineNotificationHandler handler) {
+			this.handler = handler;
 		}
 
 		@Override
-		public IStatus run(IProgressMonitor monitor) {
+		public void run() {
 			while (true) {
-				if (monitor.isCanceled())
-					return Status.OK_STATUS;
 				try {
-					IDebugMessage message = messageQueue.take();
+					IDebugEngineNotification message = messageQueue.take();
+					if (message.getType() == NOTIFICATION_CLOSE_MESSAGE_HANDLER)
+						break;
 					try {
-						debugSession.handle(message);
+						handler.handle(message);
 					} catch (Exception e) {
 						ZendDebugger.LOG.error(e.getMessage(), e);
 					}
 				} catch (Exception e) {
 					ZendDebugger.LOG.error(e.getMessage(), e);
-					shutdown();
 				}
 			}
 		}
 
-		public void queue(IDebugMessage m) {
+		private void queue(IDebugEngineNotification m) {
 			messageQueue.offer(m);
 		}
 
-		void shutdown() {
-			cancel();
-			messageQueue.clear();
+	}
+
+	private static final class EngineSyncResponse<T extends IDebugEngineResponse> {
+
+		private final Semaphore semaphore = new Semaphore(0);;
+		private T response;
+
+		void set(T response) {
+			this.response = response;
+			semaphore.release();
+		}
+
+		T get() {
+			try {
+				semaphore.acquire();
+			} catch (InterruptedException e) {
+				// TODO
+			}
+			return this.response;
 		}
 
 	}
 
-	/**
-	 * This job manages the communication initiated by the peer. All the
-	 * messages that arrive from the peer are read by the receiver that will
-	 * then handle the message by the message type.
-	 */
-	private class MessageReceiver extends Job {
+	interface IEngineNotificationHandler {
 
-		// Phantom message used to notify that connection was closed
-		private final IDebugMessage INTERRUPT = new AbstractDebugMessage() {
-
-			@Override
-			public void deserialize(DataInputStream in) throws IOException {
-			}
-
-			@Override
-			public int getType() {
-				return 0;
-			}
-
-			@Override
-			public void serialize(DataOutputStream out) throws IOException {
-			}
-
-		};
-
-		public MessageReceiver() {
-			super("Debug Message Receiver"); //$NON-NLS-1$
-			setSystem(true);
-			setUser(false);
-			setPriority(LONG);
-		}
-
-		@Override
-		public IStatus run(IProgressMonitor monitor) {
-			// 'while(true)' is OK here since we use blocking read
-			while (true) {
-				try {
-					if (monitor.isCanceled())
-						return Status.OK_STATUS;
-					// Reads the length
-					int length = connectionIn.readInt();
-					if (length < 0) {
-						String message = "Socket error (length is negative): possibly Server is SSL, Client is not."; //$NON-NLS-1$
-						ZendDebugger.LOG.error(message);
-						shutdown();
-						continue;
-					}
-					// Message arrived. read its type identifier.
-					int messageType = connectionIn.readShort();
-					IDebugMessage message = ZendDebugMessageFactory.create(messageType);
-					// Hard-coded encoding for now... (should be
-					// preference/setting)
-					message.setTransferEncoding(ENCODING);
-					message.deserialize(connectionIn);
-					if (message instanceof IDebugResponse) {
-						IDebugResponse response = (IDebugResponse) message;
-						if (syncQuery != null && syncQuery.request.getID() == response.getID()) {
-							syncQuery.response = response;
-							syncQuerySemaphore.release();
-							// Continue, don't pass it to handler
-							continue;
-						}
-					}
-					messageHandler.queue(message);
-				} catch (IOException e) {
-					// Probably, the connection was dumped
-					shutdown();
-					continue;
-				} catch (Exception e) {
-					ZendDebugger.LOG.error(e.getMessage(), e);
-					shutdown();
-				}
-			}
-		}
-
-		void shutdown() {
-			cancel();
-			// Shutdown message handler
-			messageHandler.queue(INTERRUPT);
-			// Have to be here as well as in message handler
-			ZendDebugConnection.this.terminate();
-		}
+		void handle(IDebugEngineNotification notification);
 
 	}
 
-	private static class SyncQuery {
-
-		IDebugRequest request;
-		IDebugResponse response;
-
-	}
-
-	public static final String ENCODING = "UTF-8";
-	
+	private EngineConnectionRunnable engineConnectionRunnable;
+	private ExecutorService engineConnectionRunnableExecutor;
+	private EngineNotificationRunnable engineNotificationRunnable;
+	private ExecutorService engineNotificationRunnableExecutor;
+	private Map<Integer, EngineSyncResponse<IDebugEngineResponse>> engineSyncResponses = new HashMap<>();
+	private int debugPort;
 	private ZendDebugSession debugSession;
-	private Socket socket;
-	private DataInputStream connectionIn;
-	private DataOutputStream connectionOut;
-	private MessageReceiver messageReceiver;
-	private MessageHandler messageHandler;
-	private boolean isConnected;
-	private Semaphore syncQuerySemaphore = new Semaphore(0);
-	private SyncQuery syncQuery;
-	private int lastRequestId = 1000;
+	private ServerSocket debugSocket;
+	private int debugRequestId = 1000;
+	private boolean isConnected = false;
 
 	/**
 	 * Constructs a new DebugConnectionThread with a given Socket.
 	 * 
 	 * @param socket
 	 */
-	public ZendDebugConnection(ZendDebugSession debugSession, Socket socket) {
+	public ZendDebugConnection(ZendDebugSession debugSession, int debugPort) {
 		this.debugSession = debugSession;
-		this.socket = socket;
-		connect();
-	}
-
-	public synchronized IDebugResponse syncRequest(IDebugRequest request) {
-		if (!isConnected)
-			// Skip if already disconnected
-			return null;
-		try {
-			request.setID(lastRequestId++);
-			syncQuery = new SyncQuery();
-			syncQuery.request = request;
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-			request.serialize(dataOutputStream);
-			int messageSize = byteArrayOutputStream.size();
-			// Write to connection output
-			connectionOut.writeInt(messageSize);
-			byteArrayOutputStream.writeTo(connectionOut);
-			connectionOut.flush();
-			// Wait for response
-			syncQuerySemaphore.acquire();
-			return syncQuery.response;
-		} catch (Exception e) {
-			// Return null for any exception
-			String message = "Exception for request NO." + request.getType() //$NON-NLS-1$
-					+ e.toString();
-			ZendDebugger.LOG.error(message, e);
-		}
-		return null;
-	}
-
-	public synchronized void asyncRequest(IDebugRequest request) {
-		if (!isConnected)
-			// Skip if already disconnected
-			return;
-		try {
-			request.setID(lastRequestId++);
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-			request.serialize(dataOutputStream);
-			int messageSize = byteArrayOutputStream.size();
-			// Write to connection output
-			connectionOut.writeInt(messageSize);
-			byteArrayOutputStream.writeTo(connectionOut);
-			connectionOut.flush();
-		} catch (Exception e) {
-			// Return null for any exception
-			String message = "Exception for request NO." + request.getType() //$NON-NLS-1$
-					+ e.toString();
-			ZendDebugger.LOG.error(message, e);
-		}
-	}
-
-	/**
-	 * Closes the connection. Causes message receiver & handler to be shutdown.
-	 */
-	public synchronized void disconnect() {
-		messageReceiver.shutdown();
+		this.debugPort = debugPort;
 	}
 
 	/**
 	 * Start the connection with debugger.
 	 */
-	private void connect() {
+	void connect() {
 		try {
-			socket.setTcpNoDelay(true);
-			this.connectionIn = new DataInputStream(socket.getInputStream());
-			this.connectionOut = new DataOutputStream(socket.getOutputStream());
-			messageHandler = new MessageHandler();
-			messageReceiver = new MessageReceiver();
-			// Start message receiver
-			messageReceiver.schedule();
-			// Start message handler
-			messageHandler.schedule();
-			isConnected = true;
+			this.debugSocket = new ServerSocket(debugPort);
+			engineConnectionRunnableExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+				@Override
+				public Thread newThread(Runnable r) {
+					final Thread thread = new Thread(r, "ZendDbgClient:" + debugPort);
+					thread.setDaemon(true);
+					return thread;
+				}
+			});
+			engineNotificationRunnableExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+				@Override
+				public Thread newThread(Runnable r) {
+					final Thread thread = new Thread(r, "ZendDbgMsgHandler");
+					thread.setDaemon(true);
+					return thread;
+				}
+			});
+			engineConnectionRunnable = new EngineConnectionRunnable();
+			engineNotificationRunnable = new EngineNotificationRunnable(debugSession);
+			engineConnectionRunnableExecutor.execute(engineConnectionRunnable);
+			engineNotificationRunnableExecutor.execute(engineNotificationRunnable);
 		} catch (Exception e) {
 			ZendDebugger.LOG.error(e.getMessage(), e);
 		}
 	}
 
 	/**
-	 * Terminates connection completely.
+	 * Closes the connection. Causes message receiver & handler to be shutdown.
 	 */
-	private void terminate() {
-		if (!isConnected)
+	void disconnect() {
+		if (debugSocket != null) {
+			try {
+				debugSocket.close();
+			} catch (IOException e) {
+				// ignore
+			}
+		}
+		engineConnectionRunnableExecutor.shutdown();
+		engineNotificationRunnableExecutor.shutdown();
+	}
+
+	@SuppressWarnings("unchecked")
+	public synchronized <T extends IDebugEngineResponse> T sendRequest(IDebugClientRequest<T> request) {
+		if (!isConnected) {
+			return null;
+		}
+		try {
+			request.setID(debugRequestId++);
+			EngineSyncResponse<T> syncResponse = new EngineSyncResponse<T>();
+			engineSyncResponses.put(request.getID(), (EngineSyncResponse<IDebugEngineResponse>) syncResponse);
+			engineConnectionRunnable.write(request);
+			// Wait for response
+			return syncResponse.get();
+		} catch (Exception e) {
+			ZendDebugger.LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
+
+	public synchronized void sendNotification(IDebugClientNotification request) {
+		if (!isConnected) {
 			return;
-		// Mark it as closed already
-		isConnected = false;
-		// Clean socket
-		if (socket != null) {
-			try {
-				socket.shutdownInput();
-			} catch (Exception exc) {
-				// ignore
-			}
-			try {
-				socket.shutdownOutput();
-			} catch (Exception exc) {
-				// ignore
-			}
 		}
-		if (socket != null) {
-			try {
-				socket.close();
-			} catch (Exception exc) {
-				// ignore
-			} finally {
-				socket = null;
-			}
-		}
-		if (connectionIn != null) {
-			try {
-				connectionIn.close();
-			} catch (Exception exc) {
-				// ignore
-			} finally {
-				connectionIn = null;
-			}
-		}
-		if (connectionOut != null) {
-			try {
-				connectionOut.close();
-			} catch (Exception exc) {
-				// ignore
-			} finally {
-				connectionOut = null;
-			}
+		try {
+			engineConnectionRunnable.write(request);
+		} catch (Exception e) {
+			ZendDebugger.LOG.error(e.getMessage(), e);
 		}
 	}
 

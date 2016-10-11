@@ -15,22 +15,12 @@ package zend.com.che.plugin.zdb.server.connection;
  * 
  * @author Bartlomiej Laczkowski
  */
-public interface IDebugResponse extends IDebugMessage {
-
-	/**
-	 * Set the response id.
-	 */
-	public void setID(int id);
+public interface IDebugEngineResponse extends IDebugEngineMessage {
 
 	/**
 	 * Return the response id.
 	 */
 	public int getID();
-
-	/**
-	 * Set the response status.
-	 */
-	public void setStatus(int status);
 
 	/**
 	 * Return the response status.
