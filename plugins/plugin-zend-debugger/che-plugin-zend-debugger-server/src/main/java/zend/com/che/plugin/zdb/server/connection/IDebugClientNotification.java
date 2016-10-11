@@ -11,33 +11,8 @@
 package zend.com.che.plugin.zdb.server.connection;
 
 /**
- * Abstract Zend debug response.
+ * Marker interface for Zend debug client notification messages.
  * 
  * @author Bartlomiej Laczkowski
  */
-public abstract class AbstractDebugResponse extends AbstractDebugMessage implements IDebugResponse {
-
-	private int id;
-	private int status;
-
-	@Override
-	public void setID(int id) {
-		this.id = id;
-	}
-
-	@Override
-	public int getID() {
-		return this.id;
-	}
-
-	@Override
-	public void setStatus(int status) {
-		this.status = status;
-	}
-
-	@Override
-	public int getStatus() {
-		return this.status;
-	}
-	
-}
+public interface IDebugClientNotification extends IDebugClientMessage {}

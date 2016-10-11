@@ -19,6 +19,7 @@ import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
+import org.eclipse.che.api.debug.shared.model.action.StartAction;
 import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
@@ -34,6 +35,18 @@ import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
  */
 public interface IDebuggerDelegate {
 
+    /**
+     * Starts debugger when connection is established.
+     * Some implementations might not required it.
+     * When process stops then {@link SuspendEvent} must be fired.
+     *
+     * @param action
+     *      contains specific parameters
+     * @throws DebuggerException
+     *      if any error occur
+     */
+    void start(StartAction action) throws DebuggerException;
+	
    /**
     * Disconnects from the process is being debugged.
     * Must be fired {@link DisconnectEvent} if succeeded.

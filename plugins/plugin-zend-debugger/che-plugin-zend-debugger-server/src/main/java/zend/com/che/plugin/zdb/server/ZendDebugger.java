@@ -68,28 +68,27 @@ public class ZendDebugger implements Debugger {
 
 	@Override
 	public void start(StartAction action) throws DebuggerException {
-		// TODO Auto-generated method stub
+		debugDelegate.start(action);
 	}
 
 	@Override
 	public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
-		// TODO Auto-generated method stub
+		debugDelegate.addBreakpoint(breakpoint);
 	}
 
 	@Override
 	public void deleteBreakpoint(Location location) throws DebuggerException {
-		// TODO Auto-generated method stub
+		debugDelegate.deleteBreakpoint(location);
 	}
 
 	@Override
 	public void deleteAllBreakpoints() throws DebuggerException {
-		// TODO Auto-generated method stub
+		debugDelegate.deleteAllBreakpoints();
 	}
 
 	@Override
 	public List<Breakpoint> getAllBreakpoints() throws DebuggerException {
-		// TODO Auto-generated method stub
-		return null;
+		return debugDelegate.getAllBreakpoints();
 	}
 
 	@Override
@@ -99,13 +98,12 @@ public class ZendDebugger implements Debugger {
 
 	@Override
 	public void setValue(Variable variable) throws DebuggerException {
-		// TODO Auto-generated method stub
+		debugDelegate.setValue(variable);
 	}
 
 	@Override
 	public String evaluate(String expression) throws DebuggerException {
-		// TODO Auto-generated method stub
-		return null;
+		return debugDelegate.evaluate(expression);
 	}
 
 	@Override
