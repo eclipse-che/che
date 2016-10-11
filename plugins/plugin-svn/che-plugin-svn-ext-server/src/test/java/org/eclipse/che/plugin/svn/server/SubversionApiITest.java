@@ -22,10 +22,13 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
 import org.eclipse.che.plugin.svn.shared.CheckoutRequest;
 import org.eclipse.che.plugin.svn.shared.CopyRequest;
 import org.eclipse.che.plugin.svn.shared.Depth;
+import org.eclipse.che.plugin.svn.shared.InfoRequest;
+import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.ListResponse;
 import org.eclipse.che.plugin.svn.shared.MoveRequest;
 import org.eclipse.che.plugin.svn.shared.PropertyDeleteRequest;
 import org.eclipse.che.plugin.svn.shared.PropertySetRequest;
+import org.eclipse.che.plugin.svn.shared.SubversionItem;
 import org.eclipse.che.plugin.svn.shared.SwitchRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
 import org.junit.Before;
@@ -326,4 +329,22 @@ public class SubversionApiITest {
         assertTrue(coRevision <= response.getRevision());
     }
 
+    @Test
+    public void testInfo() throws Exception {
+        subversionApi.checkout(DtoFactory.getInstance()
+                                         .createDto(CheckoutRequest.class)
+                                         .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                         .withUrl(repoUrl)
+                                         .withDepth("immediates"));
+
+        InfoResponse response = subversionApi.info(DtoFactory.getInstance()
+                                                             .createDto(InfoRequest.class)
+                                                             .withProjectPath(tmpDir.toFile().getAbsolutePath())
+                                                             .withTarget(".")
+                                                             .withRevision("HEAD"));
+        assertEquals(response.getItems().size(), 1);
+
+        SubversionItem subversionItem = response.getItems().get(0);
+        assertEquals(subversionItem.getProjectUri(), repoUrl.substring(0, repoUrl.length() - 1));
+    }
 }

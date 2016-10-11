@@ -26,7 +26,6 @@ import org.eclipse.che.plugin.svn.shared.AddRequest;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
 import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
-import org.eclipse.che.plugin.svn.shared.CheckoutRequest;
 import org.eclipse.che.plugin.svn.shared.CleanupRequest;
 import org.eclipse.che.plugin.svn.shared.CommitRequest;
 import org.eclipse.che.plugin.svn.shared.CopyRequest;
@@ -238,33 +237,11 @@ public class SubversionService extends Service {
     }
 
     /**
-     * Check out a working copy from a repository.
-     *
-     * @param request
-     *         the checkout request
-     * @return the checkout response
-     * @throws IOException
-     *         if there is a problem executing the command
-     * @throws SubversionException
-     *         if there is a Subversion issue
-     */
-    @Path("checkout")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public CLIOutputWithRevisionResponse checkout(final CheckoutRequest request) throws ApiException, IOException {
-        request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
-        return subversionApi.checkout(request);
-    }
-
-    /**
      * Update the working copy to a different URL within the same repository.
      *
      * @param request
-     *         the checkout request
-     * @return the checkout response
-     * @throws IOException
-     *         if there is a problem executing the command
+     *         the switch request
+     * @return the switch response
      * @throws SubversionException
      *         if there is a Subversion issue
      */
@@ -272,7 +249,7 @@ public class SubversionService extends Service {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public CLIOutputWithRevisionResponse doCheckout(final SwitchRequest request) throws ApiException, IOException {
+    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws SubversionException {
         request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
         return subversionApi.doSwitch(request);
     }
@@ -347,7 +324,6 @@ public class SubversionService extends Service {
      */
     @Path("branches")
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     public ListResponse listBranches(final @QueryParam("project") String projectPath) throws SubversionException {
         return this.subversionApi.listBranches(getAbsoluteProjectPath(projectPath));

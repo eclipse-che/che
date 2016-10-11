@@ -325,7 +325,7 @@ public interface SubversionClientService {
      * @param target
      *      the target path to browse
      */
-    Promise<CLIOutputResponse> list(Path project, Path target);
+    Promise<CLIOutputResponse> list(Path project, String target);
 
     /**
      * Returns list of the branches of the project.

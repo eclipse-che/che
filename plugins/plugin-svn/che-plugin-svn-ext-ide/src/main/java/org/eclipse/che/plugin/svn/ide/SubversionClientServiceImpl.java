@@ -33,7 +33,6 @@ import org.eclipse.che.plugin.svn.shared.GetRevisionsRequest;
 import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoRequest;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
-import org.eclipse.che.plugin.svn.shared.ListRequest;
 import org.eclipse.che.plugin.svn.shared.LockRequest;
 import org.eclipse.che.plugin.svn.shared.MergeRequest;
 import org.eclipse.che.plugin.svn.shared.MoveRequest;
@@ -439,24 +438,26 @@ public class SubversionClientServiceImpl implements SubversionClientService {
     }
 
     @Override
-    public Promise<CLIOutputResponse> list(Path project, Path target) {
-        final ListRequest request = dtoFactory.createDto(ListRequest.class)
-                                              .withProjectPath(project.toString())
-                                              .withTargetPath(target.toString());
-
-        return asyncRequestFactory.createPostRequest(getBaseUrl() + "/list", request)
+    public Promise<CLIOutputResponse> list(Path project, String target) {
+        final String path = getBaseUrl() + "/list?project=" + project.toString() + "&target=" + target;
+        return asyncRequestFactory.createGetRequest(path)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
     }
 
     @Override
     public Promise<CLIOutputResponse> listBranches(Path project) {
-        final ListRequest request = dtoFactory.createDto(ListRequest.class)
-                                              .withProjectPath(project.toString());
-
-        return asyncRequestFactory.createGetRequest(getBaseUrl() + "/list", request)
+        final String path = getBaseUrl() + "/branches?project=" + project.toString();
+        return asyncRequestFactory.createGetRequest(path)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
     }
 
+    @Override
+    public Promise<CLIOutputResponse> listTags(Path project) {
+        final String path = getBaseUrl() + "/tags?project=" + project.toString();
+        return asyncRequestFactory.createGetRequest(path)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
+    }
 }

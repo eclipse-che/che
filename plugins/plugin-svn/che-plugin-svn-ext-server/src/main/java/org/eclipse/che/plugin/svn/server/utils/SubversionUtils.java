@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.server.utils;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 /**
  * Subversion utilities.
@@ -116,7 +119,14 @@ public class SubversionUtils {
      *      the relative project path
      * @return absolute project uri
      */
-    public static String recognizeProjectUri(final String repoRoot, final String relativeProjectPath) {
+    @Nullable
+    public static String recognizeProjectUri(@Nullable final String repoRoot,
+                                             @Nullable final String relativeProjectPath) {
+
+        if (isNullOrEmpty(repoRoot) || isNullOrEmpty(relativeProjectPath)) {
+            return null;
+        }
+
         checkState(isRelativePath(relativeProjectPath), "Illegal relative project path " + relativeProjectPath);
 
         String[] entries = relativeProjectPath.split("/");

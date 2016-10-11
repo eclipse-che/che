@@ -11,13 +11,18 @@
 package org.eclipse.che.plugin.svn.ide.sw;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -25,6 +30,8 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.ui.window.Window;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionResources;
+
+import java.util.List;
 
 /**
  * The implementation of {@link SwitchView}.
@@ -48,7 +55,34 @@ public class SwitchViewImpl extends Window implements SwitchView {
     @UiField
     RadioButton switchToTag;
     @UiField
-    RadioButton switchToLocation;
+    RadioButton switchToOtherLocation;
+    @UiField
+    ListBox     switchToLocation;
+    @UiField
+    TextBox     location;
+    @UiField
+    Button      selectOtherLocation;
+
+    @UiField
+    CheckBox ignoreAncestry;
+    @UiField
+    CheckBox force;
+    @UiField
+    CheckBox ignoreExternals;
+
+    @UiField
+    RadioButton switchToHeadRevision;
+    @UiField
+    RadioButton switchToRevision;
+    @UiField
+    TextBox     revision;
+
+    @UiField
+    ListBox depth;
+    @UiField
+    ListBox workingCopyDepth;
+    @UiField
+    ListBox accept;
 
     @UiField(provided = true)
     SubversionExtensionResources             resources;
@@ -58,8 +92,7 @@ public class SwitchViewImpl extends Window implements SwitchView {
     private ActionDelegate delegate;
 
     @Inject
-    public SwitchViewImpl(final SubversionExtensionResources resources,
-                          final SubversionExtensionLocalizationConstants constants) {
+    public SwitchViewImpl(SubversionExtensionResources resources, SubversionExtensionLocalizationConstants constants) {
         this.resources = resources;
         this.constants = constants;
 
@@ -67,6 +100,24 @@ public class SwitchViewImpl extends Window implements SwitchView {
 
         this.setTitle(constants.switchDescription());
         this.setWidget(ourUiBinder.createAndBindUi(this));
+
+        this.depth.addItem("", "");
+        this.depth.addItem(this.constants.subversionDepthInfinityLabel(), "infinity");
+        this.depth.addItem(this.constants.subversionDepthImmediatesLabel(), "immediates");
+        this.depth.addItem(this.constants.subversionDepthFilesLabel(), "files");
+        this.depth.addItem(this.constants.subversionDepthEmptyLabel(), "empty");
+        this.depth.setSelectedIndex(1);
+
+        this.workingCopyDepth.addItem("", "");
+        this.workingCopyDepth.addItem(this.constants.subversionWorkingCopyDepthInfinityLabel(), "infinity");
+        this.workingCopyDepth.addItem(this.constants.subversionWorkingCopyDepthImmediatesLabel(), "immediates");
+        this.workingCopyDepth.addItem(this.constants.subversionWorkingCopyDepthFilesLabel(), "files");
+        this.workingCopyDepth.addItem(this.constants.subversionWorkingCopyDepthEmptyLabel(), "empty");
+        this.workingCopyDepth.setSelectedIndex(0);
+
+        this.accept.addItem(this.constants.subversionAcceptPostponeLabel(), "postpone");
+        this.accept.addItem(this.constants.subversionAcceptMineFullLabel(), "mine-full");
+        this.accept.addItem(this.constants.subversionAcceptTheirsFullLabel(), "theirs-full");
 
         btnCancel = createButton(constants.buttonCancel(), "svn-switch-cancel", new ClickHandler() {
             @Override
@@ -76,7 +127,7 @@ public class SwitchViewImpl extends Window implements SwitchView {
         });
         addButtonToFooter(btnCancel);
 
-        btnSwitch = createButton(constants.buttonSwitch(), "svn-switch-switch", new ClickHandler() {
+        btnSwitch = createPrimaryButton(constants.buttonSwitch(), "svn-switch-switch", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 delegate.onSwitchClicked();
@@ -106,8 +157,8 @@ public class SwitchViewImpl extends Window implements SwitchView {
     }
 
     @Override
-    public boolean isSwitchToLocation() {
-        return switchToLocation.getValue();
+    public boolean isSwitchToOtherLocation() {
+        return switchToOtherLocation.getValue();
     }
 
     @Override
@@ -118,6 +169,109 @@ public class SwitchViewImpl extends Window implements SwitchView {
     @Override
     public void showWindow() {
         this.show();
+    }
+
+    @Override
+    public void setPredefinedLocations(List<String> locations) {
+        switchToLocation.clear();
+        for (String l : locations) {
+            switchToLocation.addItem(l);
+        }
+    }
+
+    @Override
+    public String getSwitchToLocation() {
+        return switchToLocation.getSelectedValue();
+    }
+
+    @Override
+    public void setLocation(String location) {
+        this.location.setValue(location);
+    }
+
+    @Override
+    public void setLocationEnabled(boolean enabled) {
+        location.setEnabled(enabled);
+    }
+
+    @Override
+    public String getLocation() {
+        return location.getValue();
+    }
+
+    @Override
+    public void setSwitchToLocationEnabled(boolean enabled) {
+        switchToLocation.setEnabled(enabled);
+    }
+
+    @Override
+    public boolean isIgnoreAncestry() {
+        return ignoreAncestry.getValue();
+    }
+
+    @Override
+    public boolean isForce() {
+        return force.getValue();
+    }
+
+    @Override
+    public boolean isIgnoreExternals() {
+        return ignoreExternals.getValue();
+    }
+
+    @Override
+    public void setSwitchRevisionEnabled(boolean enabled) {
+        revision.setEnabled(enabled);
+    }
+
+    @Override
+    public String getRevision() {
+        return revision.getText();
+    }
+
+    @Override
+    public boolean isSwitchToRevision() {
+        return switchToRevision.getValue();
+    }
+
+    @Override
+    public boolean isSwitchToHeadRevision() {
+        return switchToHeadRevision.getValue();
+    }
+
+    @Override
+    public void setSwitchButtonEnabled(boolean enabled) {
+        btnSwitch.setEnabled(enabled);
+    }
+
+    @Override
+    public void setSelectOtherLocationButtonEnabled(boolean enabled) {
+        selectOtherLocation.setEnabled(enabled);
+    }
+
+    @Override
+    public String getDepth() {
+        return depth.getSelectedValue();
+    }
+
+    @Override
+    public String getWorkingCopyDepth() {
+        return workingCopyDepth.getSelectedValue();
+    }
+
+    @Override
+    public String getAccept() {
+        return accept.getSelectedValue();
+    }
+
+    @Override
+    public void setDepthEnabled(boolean enabled) {
+        depth.setEnabled(enabled);
+    }
+
+    @Override
+    public void setWorkingCopyDepthEnabled(boolean enabled) {
+        workingCopyDepth.setEnabled(enabled);
     }
 
     @Override
@@ -136,8 +290,46 @@ public class SwitchViewImpl extends Window implements SwitchView {
         delegate.onSwitchToTagChanged();
     }
 
-    @UiHandler("switchToLocation")
+    @UiHandler("switchToOtherLocation")
     public void onSwitchToLocationClicked(final ClickEvent event) {
-        delegate.onSwitchToLocationChanged();
+        delegate.onSwitchToOtherLocationChanged();
     }
+
+    @UiHandler("switchToLocation")
+    public void onSwitchLocationChanged(final ChangeEvent event) {
+        delegate.onSwitchLocationChanged();
+    }
+
+    @UiHandler("switchToHeadRevision")
+    public void onSwitchToHeadRevisionClicked(final ClickEvent event) {
+        delegate.onSwitchToHeadRevisionChanged();
+    }
+
+    @UiHandler("switchToRevision")
+    public void onSwitchToRevisionClicked(final ClickEvent event) {
+        delegate.onSwitchToRevisionChanged();
+    }
+
+    @UiHandler("revision")
+    public void onSwitchRevisionChanged(final KeyUpEvent event) {
+        delegate.onRevisionUpdated();
+    }
+
+    @UiHandler("selectOtherLocation")
+    public void onSelectOtherLocationClicked(final ClickEvent event) {
+        delegate.onSelectOtherLocationClicked();
+    }
+
+
+    @UiHandler("depth")
+    public void onDepthChanged(final ChangeEvent event) {
+        delegate.onDepthChanged();
+    }
+
+    @UiHandler("workingCopyDepth")
+    public void onWorkingCopyDepthChanged(final ChangeEvent event) {
+        delegate.onWorkingCopyDepthChanged();
+    }
+
+
 }

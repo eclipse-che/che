@@ -74,6 +74,9 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("command.status")
     String commandStatus();
 
+    @Key("command.switch")
+    String commandSwitch();
+
     @Key("command.update")
     String commandUpdate();
 
@@ -291,17 +294,50 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("switch.switchTo.label")
     String switchToLabel();
 
+    @Key("switch.location.label")
+    String switchLocationLabel();
+
     @Key("switch.switchTo.tag")
     String switchToTag();
 
     @Key("switch.switchTo.branch")
     String switchToBranch();
 
+    @Key("switch.ignoreAncestry")
+    String switchIgnoreAncestry();
+
+    @Key("switch.force")
+    String switchForce();
+
+    @Key("switch.ignoreExternals")
+    String switchIgnoreExternals();
+
     @Key("switch.switchTo.trunk")
     String switchToTrunk();
 
-    @Key("switch.switchTo.location")
-    String switchToLocation();
+    @Key("switch.switchTo.otherLocation")
+    String switchToOtherLocation();
+
+    @Key("switch.depth.label")
+    String switchDepthLabel();
+
+    @Key("switch.workingCopyDepth.label")
+    String switchWorkingCopyDepthLabel();
+
+    @Key("switch.conflictResolution.label")
+    String switchConflictResolutionLabel();
+
+    @Key("switch.revision.head")
+    String switchRevisionHead();
+
+    @Key("switch.revision.at.label")
+    String switchRevisionAtLabel();
+
+    @Key("switch.revision.revision")
+    String switchRevisionRevision();
+
+    @Key("switch.selectLocation.title")
+    String switchSelectLocationTitle();
 
     @Key("unlock.description")
     String unlockDescription();
@@ -352,6 +388,27 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("subversion.depth.empty.label")
     String subversionDepthEmptyLabel();
 
+    @Key("subversion.workingCopyDepth.empty.label")
+    String subversionWorkingCopyDepthEmptyLabel();
+
+    @Key("subversion.workingCopyDepth.files.label")
+    String subversionWorkingCopyDepthFilesLabel();
+
+    @Key("subversion.workingCopyDepth.immediates.label")
+    String subversionWorkingCopyDepthImmediatesLabel();
+
+    @Key("subversion.workingCopyDepth.infinity.label")
+    String subversionWorkingCopyDepthInfinityLabel();
+
+    @Key("subversion.accept.postpone.label")
+    String subversionAcceptPostponeLabel();
+
+    @Key("subversion.accept.mineFull.label")
+    String subversionAcceptMineFullLabel();
+
+    @Key("subversion.accept.theirsFull.label")
+    String subversionAcceptTheirsFullLabel();
+
     /** View Constants */
     @Key("button.cancel")
     String buttonCancel();
@@ -373,6 +430,9 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
 
     @Key("button.log")
     String buttonLog();
+
+    @Key("button.select")
+    String buttonSelect();
 
     @Key("update.depth.label")
     String updateDepthLabel();

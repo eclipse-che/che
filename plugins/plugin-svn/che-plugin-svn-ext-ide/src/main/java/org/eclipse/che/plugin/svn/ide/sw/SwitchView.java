@@ -12,6 +12,8 @@ package org.eclipse.che.plugin.svn.ide.sw;
 
 import org.eclipse.che.ide.api.mvp.View;
 
+import java.util.List;
+
 /**
  * The dialog view of {@link SwitchPresenter}.
  *
@@ -36,8 +38,39 @@ public interface SwitchView extends View<SwitchView.ActionDelegate> {
         void onSwitchToTagChanged();
 
         /** Switch to other location selected */
-        void onSwitchToLocationChanged();
+        void onSwitchToOtherLocationChanged();
+
+        /** Switch to head revision selected */
+        void onSwitchToHeadRevisionChanged();
+
+        /** Switch to specific revision selected */
+        void onSwitchToRevisionChanged();
+
+        /** Switch revision changed */
+        void onRevisionUpdated();
+
+        /** Switch location changed */
+        void onSwitchLocationChanged();
+
+        /** Clicked button to select other location */
+        void onSelectOtherLocationClicked();
+
+        /** Depth value changed */
+        void onDepthChanged();
+
+        /** Working copy depth changed */
+        void onWorkingCopyDepthChanged();
     }
+
+    /**
+     * Close the view.
+     */
+    void close();
+
+    /**
+     * Show the view.
+     */
+    void showWindow();
 
     /**
      * Indicates if switch to trunk is selected.
@@ -57,16 +90,105 @@ public interface SwitchView extends View<SwitchView.ActionDelegate> {
     /**
      * Indicates if switch to other location is selected.
      */
-    boolean isSwitchToLocation();
+    boolean isSwitchToOtherLocation();
 
     /**
-     * Close the view.
+     * Add available locations to choose.
      */
-    void close();
+    void setPredefinedLocations(List<String> locations);
 
     /**
-     * Show the view.
+     * Returns location.
      */
-    void showWindow();
+    String getSwitchToLocation();
 
+    /**
+     * Sets location to switch.
+     */
+    void setLocation(String location);
+
+    /**
+     * Sets if location can be modified.
+     */
+    void setLocationEnabled(boolean enabled);
+
+    /**
+     * Returns location to switch.
+     */
+    String getLocation();
+
+    /**
+     * Sets if switch location can be modified.
+     */
+    void setSwitchToLocationEnabled(boolean enabled);
+
+    /**
+     * Indicates if ignore ancestry option is selected.
+     */
+    boolean isIgnoreAncestry();
+
+    /**
+     * Indicates if force option is selected.
+     */
+    boolean isForce();
+
+    /**
+     * Indicates if ignore externals option is selected.
+     */
+    boolean isIgnoreExternals();
+
+    /**
+     * Sets if user can enter switch revision.
+     */
+    void setSwitchRevisionEnabled(boolean enabled);
+
+    /**
+     * Returns entered switch revision.
+     */
+    String getRevision();
+
+    /**
+     * Indicates if switch to revision is selected.
+     */
+    boolean isSwitchToRevision();
+
+    /**
+     * Indicates if switch to head revision is selected.
+     */
+    boolean isSwitchToHeadRevision();
+
+    /**
+     * Sets if it is possible to click switch button.
+     */
+    void setSwitchButtonEnabled(boolean enabled);
+
+    /**
+     * Sets if it is possible to click button to show svn structure.
+     */
+    void setSelectOtherLocationButtonEnabled(boolean enabled);
+
+    /**
+     * Returns switch depth.
+     */
+    String getDepth();
+
+    /**
+     * Returns working copy depth.
+     */
+    String getWorkingCopyDepth();
+
+    /**
+     * Returns conflict resolution approach.
+     */
+    String getAccept();
+
+    /**
+     * Sets if it is possible to change depth.
+     */
+    void setDepthEnabled(boolean enabled);
+
+    /**
+     * Sets if it is possible to change working copy depth.
+     */
+    void setWorkingCopyDepthEnabled(boolean enabled);
 }

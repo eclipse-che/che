@@ -83,6 +83,9 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.plugin.svn.server.utils.InfoUtils.getRelativeUrl;
+import static org.eclipse.che.plugin.svn.server.utils.InfoUtils.getRepositoryRoot;
+import static org.eclipse.che.plugin.svn.server.utils.SubversionUtils.recognizeProjectUri;
 
 /**
  * Provides Subversion APIs.
@@ -231,17 +234,15 @@ public class SubversionApi {
     }
 
     /**
-     * Perform an "svn switch" based on the request.
+     * Perform a "svn switch" based on the request.
      *
      * @param request
-     *         the request
+     *         the switch request
      * @return the response
-     * @throws IOException
-     *         if there is a problem executing the command
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws IOException, SubversionException {
+    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws SubversionException {
 
         final File projectPath = new File(request.getProjectPath());
         final List<String> cliArgs = defaultArgs();
@@ -536,6 +537,9 @@ public class SubversionApi {
     /**
      * Returns list of the branches of the project.
      *
+     * @param projectPath
+     *      the absolute path to the project
+     *
      * @see #list(String, String)
      * @see #info(InfoRequest)
      */
@@ -545,24 +549,26 @@ public class SubversionApi {
                                            .withProjectPath(projectPath)
                                            .withTarget("."));
 
-        String repositoryRoot = InfoUtils.getRepositoryRoot(info.getOutput());
-        String projectRelativeUrl = InfoUtils.getRelativeUrl(info.getOutput());
-        String projectUri = SubversionUtils.recognizeProjectUri(repositoryRoot, projectRelativeUrl);
-
         final List<String> args = defaultArgs();
         args.add("list");
 
-        String branchesPath = projectUri + "/branches";
+        String repositoryRoot = getRepositoryRoot(info.getOutput());
+        String projectRelativeUrl = getRelativeUrl(info.getOutput());
+        String projectUri = recognizeProjectUri(repositoryRoot, projectRelativeUrl);
+
+        String path = projectUri == null ? "^/branches"
+                                         : (projectUri + "/branches");
 
         final CommandLineResult result = runCommand(null,
                                                     args,
                                                     new File(projectPath),
-                                                    singletonList(branchesPath));
+                                                    singletonList(path));
 
         return DtoFactory.getInstance().createDto(ListResponse.class)
                          .withCommand(result.getCommandLine().toString())
                          .withOutput(result.getStdout()
                                            .stream()
+                                           .filter(s -> s.endsWith("/"))
                                            .map(s -> s.substring(0, s.length() - 1))
                                            .collect(Collectors.toList()))
                          .withErrorOutput(result.getStderr());
@@ -570,6 +576,9 @@ public class SubversionApi {
 
     /**
      * Returns list of the tags of the project.
+     *
+     * @param projectPath
+     *      the absolute path to the project
      *
      * @see #list(String, String)
      * @see #info(InfoRequest)
@@ -579,15 +588,15 @@ public class SubversionApi {
                                            .createDto(InfoRequest.class)
                                            .withProjectPath(projectPath)
                                            .withTarget("."));
-
-        String repositoryRoot = InfoUtils.getRepositoryRoot(info.getOutput());
-        String projectRelativeUrl = InfoUtils.getRelativeUrl(info.getOutput());
-        String projectUri = SubversionUtils.recognizeProjectUri(repositoryRoot, projectRelativeUrl);
-
         final List<String> args = defaultArgs();
         args.add("list");
 
-        String branchesPath = projectUri + "/tags";
+        String repositoryRoot = getRepositoryRoot(info.getOutput());
+        String projectRelativeUrl = getRelativeUrl(info.getOutput());
+        String projectUri = recognizeProjectUri(repositoryRoot, projectRelativeUrl);
+
+        String branchesPath = projectUri == null ? "^/tags"
+                                                 : (projectUri + "/tags");
 
         final CommandLineResult result = runCommand(null,
                                                     args,
@@ -598,6 +607,7 @@ public class SubversionApi {
                          .withCommand(result.getCommandLine().toString())
                          .withOutput(result.getStdout()
                                            .stream()
+                                           .filter(s -> s.endsWith("/"))
                                            .map(s -> s.substring(0, s.length() - 1))
                                            .collect(Collectors.toList()))
                          .withErrorOutput(result.getStderr());
@@ -606,6 +616,11 @@ public class SubversionApi {
 
     /**
      * List remote subversion directory.
+     *
+     * @param projectPath
+     *      the absolute path to the project
+     * @param targetPath
+     *      the target path to browse
      *
      * @return the response containing target children
      */
@@ -1106,18 +1121,21 @@ public class SubversionApi {
 
                 if (propertyLine.isEmpty()) {
                     // create Subversion item filling properties from the list
+                    String repositoryRoot = getRepositoryRoot(itemProperties);
+                    String relativeUrl = getRelativeUrl(itemProperties);
                     final SubversionItem item = DtoFactory.getInstance().createDto(SubversionItem.class)
                                                           .withPath(InfoUtils.getPath(itemProperties))
                                                           .withName(InfoUtils.getName(itemProperties))
                                                           .withURL(InfoUtils.getUrl(itemProperties))
-                                                          .withRelativeURL(InfoUtils.getRelativeUrl(itemProperties))
-                                                          .withRepositoryRoot(InfoUtils.getRepositoryRoot(itemProperties))
+                                                          .withRelativeURL(relativeUrl)
+                                                          .withRepositoryRoot(repositoryRoot)
                                                           .withRepositoryUUID(InfoUtils.getRepositoryUUID(itemProperties))
                                                           .withRevision(InfoUtils.getRevision(itemProperties))
                                                           .withNodeKind(InfoUtils.getNodeKind(itemProperties))
                                                           .withSchedule(InfoUtils.getSchedule(itemProperties))
                                                           .withLastChangedRev(InfoUtils.getLastChangedRev(itemProperties))
-                                                          .withLastChangedDate(InfoUtils.getLastChangedDate(itemProperties));
+                                                          .withLastChangedDate(InfoUtils.getLastChangedDate(itemProperties))
+                                                          .withProjectUri(recognizeProjectUri(repositoryRoot, relativeUrl));
                     items.add(item);
 
                     // clear item properties

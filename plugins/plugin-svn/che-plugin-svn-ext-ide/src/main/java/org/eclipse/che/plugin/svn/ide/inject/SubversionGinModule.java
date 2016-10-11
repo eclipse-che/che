@@ -47,6 +47,8 @@ import org.eclipse.che.plugin.svn.ide.property.PropertyEditorView;
 import org.eclipse.che.plugin.svn.ide.property.PropertyEditorViewImpl;
 import org.eclipse.che.plugin.svn.ide.resolve.ResolveView;
 import org.eclipse.che.plugin.svn.ide.resolve.ResolveViewImpl;
+import org.eclipse.che.plugin.svn.ide.sw.LocationSelectorView;
+import org.eclipse.che.plugin.svn.ide.sw.LocationSelectorViewImpl;
 import org.eclipse.che.plugin.svn.ide.sw.SwitchView;
 import org.eclipse.che.plugin.svn.ide.sw.SwitchViewImpl;
 import org.eclipse.che.plugin.svn.ide.update.UpdateToRevisionView;
@@ -75,6 +77,7 @@ public class SubversionGinModule extends AbstractGinModule {
         bind(SubversionOutputConsoleView.class).to(SubversionOutputConsoleViewImpl.class);
         bind(UpdateToRevisionView.class).to(UpdateToRevisionViewImpl.class).in(Singleton.class);
         bind(SwitchView.class).to(SwitchViewImpl.class).in(Singleton.class);
+        bind(LocationSelectorView.class).to(LocationSelectorViewImpl.class).in(Singleton.class);
         bind(ResolveView.class).to(ResolveViewImpl.class).in(Singleton.class);
         bind(ExportView.class).to(ExportViewImpl.class).in(Singleton.class);
         bind(ShowLogsView.class).to(ShowLogsViewImpl.class).in(Singleton.class);
