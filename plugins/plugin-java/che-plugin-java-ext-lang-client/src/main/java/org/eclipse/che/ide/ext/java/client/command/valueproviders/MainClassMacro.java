@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.command.JavaCommandModel;
 import org.eclipse.che.ide.ext.java.client.command.JavaCommandPagePresenter;
 
@@ -30,10 +31,12 @@ public class MainClassMacro implements Macro {
     private static final String KEY = "${java.main.class}";
 
     private final JavaCommandPagePresenter javaCommandPagePresenter;
+    private final JavaLocalizationConstant localizationConstants;
 
     @Inject
-    public MainClassMacro(JavaCommandPagePresenter javaCommandPagePresenter) {
+    public MainClassMacro(JavaCommandPagePresenter javaCommandPagePresenter, JavaLocalizationConstant localizationConstants) {
         this.javaCommandPagePresenter = javaCommandPagePresenter;
+        this.localizationConstants = localizationConstants;
     }
 
     @Override
@@ -43,7 +46,7 @@ public class MainClassMacro implements Macro {
 
     @Override
     public String getDescription() {
-        return "Path to the Main class";
+        return localizationConstants.macroJavaMainClassDescription();
     }
 
     @Override

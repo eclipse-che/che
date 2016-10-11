@@ -14,6 +14,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.resources.Container;
@@ -54,6 +55,9 @@ public class AbstractExplorerMacroTest {
 
     @Mock
     ProjectExplorerPresenter projectExplorer;
+
+    @Mock
+    CoreLocalizationConstant localizationConstants;
 
     @Mock
     Tree tree;

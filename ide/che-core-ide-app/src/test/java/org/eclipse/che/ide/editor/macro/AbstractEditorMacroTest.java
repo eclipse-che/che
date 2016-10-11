@@ -13,6 +13,7 @@ package org.eclipse.che.ide.editor.macro;
 import com.google.common.base.Optional;
 
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorInput;
@@ -52,6 +53,9 @@ public abstract class AbstractEditorMacroTest {
 
     @Mock
     protected AppContext appContext;
+
+    @Mock
+    protected CoreLocalizationConstant localizationConstants;
 
     @Mock
     protected Project project;

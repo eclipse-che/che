@@ -37,7 +37,7 @@ public class EditorCurrentFilePathMacroTest extends AbstractEditorMacroTest {
 
     @Before
     public void init() throws Exception {
-        provider = new EditorCurrentFilePathMacro(editorAgent, promiseProvider, appContext);
+        provider = new EditorCurrentFilePathMacro(editorAgent, promiseProvider, appContext, localizationConstants);
     }
 
     @Test

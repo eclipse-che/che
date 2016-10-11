@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -38,14 +39,17 @@ public class EditorCurrentFilePathMacro extends AbstractEditorMacro {
 
     private PromiseProvider promises;
     private AppContext      appContext;
+    private final CoreLocalizationConstant localizationConstants;
 
     @Inject
     public EditorCurrentFilePathMacro(EditorAgent editorAgent,
                                       PromiseProvider promises,
-                                      AppContext appContext) {
+                                      AppContext appContext,
+                                      CoreLocalizationConstant localizationConstants) {
         super(editorAgent);
         this.promises = promises;
         this.appContext = appContext;
+        this.localizationConstants = localizationConstants;
     }
 
     /** {@inheritDoc} */
@@ -56,7 +60,7 @@ public class EditorCurrentFilePathMacro extends AbstractEditorMacro {
 
     @Override
     public String getDescription() {
-        return "Absolute path to the selected file in editor";
+        return localizationConstants.macroEditorCurrentFilePathDescription();
     }
 
     /** {@inheritDoc} */

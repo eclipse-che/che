@@ -20,6 +20,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.macro.Macro;
@@ -76,6 +77,7 @@ public class ExplorerCurrentFileParentPathMacro implements Macro {
     private ProjectExplorerPresenter projectExplorer;
     private PromiseProvider          promises;
     private AppContext               appContext;
+    private final CoreLocalizationConstant localizationConstants;
     private Function<Resource, String> resourceToAbsoluteParentPathFun = new Function<Resource, String>() {
         @Nullable
         @Override
@@ -95,10 +97,12 @@ public class ExplorerCurrentFileParentPathMacro implements Macro {
     @Inject
     public ExplorerCurrentFileParentPathMacro(ProjectExplorerPresenter projectExplorer,
                                               PromiseProvider promises,
-                                              AppContext appContext) {
+                                              AppContext appContext,
+                                              CoreLocalizationConstant localizationConstants) {
         this.projectExplorer = projectExplorer;
         this.promises = promises;
         this.appContext = appContext;
+        this.localizationConstants = localizationConstants;
     }
 
     @Override
@@ -108,7 +112,7 @@ public class ExplorerCurrentFileParentPathMacro implements Macro {
 
     @Override
     public String getDescription() {
-        return "Absolute path to the selected file's parent in project tree";
+        return localizationConstants.macroExplorerCurrentFileParentPathDescription();
     }
 
     @Override

@@ -23,6 +23,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 
 import javax.validation.constraints.NotNull;
 
@@ -40,13 +41,18 @@ public class CurrentProjectPathMacro implements Macro, WsAgentStateHandler {
 
     private final AppContext      appContext;
     private final PromiseProvider promises;
+    private final MachineLocalizationConstant localizationConstants;
 
     private String value;
 
     @Inject
-    public CurrentProjectPathMacro(EventBus eventBus, AppContext appContext, PromiseProvider promises) {
+    public CurrentProjectPathMacro(EventBus eventBus,
+                                   AppContext appContext,
+                                   PromiseProvider promises,
+                                   MachineLocalizationConstant localizationConstants) {
         this.appContext = appContext;
         this.promises = promises;
+        this.localizationConstants = localizationConstants;
         value = "";
 
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
@@ -60,7 +66,7 @@ public class CurrentProjectPathMacro implements Macro, WsAgentStateHandler {
 
     @Override
     public String getDescription() {
-        return "Absolute path to the project or module currently selected in the project explorer tree";
+        return localizationConstants.macroCurrentProjectPathDescription();
     }
 
     @NotNull

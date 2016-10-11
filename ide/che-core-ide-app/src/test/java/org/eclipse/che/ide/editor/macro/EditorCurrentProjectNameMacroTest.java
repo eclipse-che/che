@@ -36,7 +36,7 @@ public class EditorCurrentProjectNameMacroTest extends AbstractEditorMacroTest {
 
     @Before
     public void init() throws Exception {
-        provider = new EditorCurrentProjectNameMacro(editorAgent, promiseProvider);
+        provider = new EditorCurrentProjectNameMacro(editorAgent, promiseProvider, localizationConstants);
     }
 
     @Test

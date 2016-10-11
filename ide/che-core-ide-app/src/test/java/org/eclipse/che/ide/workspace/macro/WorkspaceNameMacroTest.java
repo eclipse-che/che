@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.workspace.macro;
 
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,13 +40,16 @@ public class WorkspaceNameMacroTest {
     @Mock
     PromiseProvider promiseProvider;
 
+    @Mock
+    CoreLocalizationConstant localizationConstants;
+
     private WorkspaceNameMacro provider;
 
     @Before
     public void init() throws Exception {
         when(appContext.getWorkspaceName()).thenReturn(WS_NAME);
 
-        provider = new WorkspaceNameMacro(appContext, promiseProvider);
+        provider = new WorkspaceNameMacro(appContext, promiseProvider, localizationConstants);
     }
 
     @Test

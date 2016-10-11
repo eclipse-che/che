@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.resources.Project;
@@ -39,12 +40,15 @@ public class EditorCurrentProjectNameMacro extends AbstractEditorMacro {
     public static final String KEY = "${editor.current.project.name}";
 
     private PromiseProvider promises;
+    private final CoreLocalizationConstant localizationConstants;
 
     @Inject
     public EditorCurrentProjectNameMacro(EditorAgent editorAgent,
-                                         PromiseProvider promises) {
+                                         PromiseProvider promises,
+                                         CoreLocalizationConstant localizationConstants) {
         super(editorAgent);
         this.promises = promises;
+        this.localizationConstants = localizationConstants;
     }
 
     /** {@inheritDoc} */
@@ -55,7 +59,7 @@ public class EditorCurrentProjectNameMacro extends AbstractEditorMacro {
 
     @Override
     public String getDescription() {
-        return "Project name of the file currently selected in editor";
+        return localizationConstants.macroEditorCurrentProjectNameDescription();
     }
 
     /** {@inheritDoc} */

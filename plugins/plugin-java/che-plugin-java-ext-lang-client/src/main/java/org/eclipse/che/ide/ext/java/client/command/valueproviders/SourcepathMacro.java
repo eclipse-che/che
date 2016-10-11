@@ -22,6 +22,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
@@ -44,16 +45,19 @@ public class SourcepathMacro implements Macro {
     private final ClasspathResolver  classpathResolver;
     private final AppContext         appContext;
     private final PromiseProvider    promises;
+    private final JavaLocalizationConstant localizationConstants;
 
     @Inject
     public SourcepathMacro(ClasspathContainer classpathContainer,
                            ClasspathResolver classpathResolver,
                            AppContext appContext,
-                           PromiseProvider promises) {
+                           PromiseProvider promises,
+                           JavaLocalizationConstant localizationConstants) {
         this.classpathContainer = classpathContainer;
         this.classpathResolver = classpathResolver;
         this.appContext = appContext;
         this.promises = promises;
+        this.localizationConstants = localizationConstants;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class SourcepathMacro implements Macro {
 
     @Override
     public String getDescription() {
-        return "Project sourcepath";
+        return localizationConstants.macroProjectJavaSourcePathDescription();
     }
 
     @Override

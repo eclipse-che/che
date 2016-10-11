@@ -36,10 +36,12 @@ public class CurrentClassFQN_Macro implements Macro {
 
     private static final String KEY = "${current.class.fqn}";
     private final AppContext appContext;
+    private final JavaLocalizationConstant localizationConstants;
 
     @Inject
-    public CurrentClassFQN_Macro(AppContext appContext) {
+    public CurrentClassFQN_Macro(AppContext appContext, JavaLocalizationConstant localizationConstants) {
         this.appContext = appContext;
+        this.localizationConstants = localizationConstants;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class CurrentClassFQN_Macro implements Macro {
 
     @Override
     public String getDescription() {
-        return "The fully qualified name of the Java class currently active in the editor";
+        return localizationConstants.macroCurrentClassFQN_Description();
     }
 
     @Override

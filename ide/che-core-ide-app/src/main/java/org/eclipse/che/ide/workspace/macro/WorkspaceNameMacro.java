@@ -16,6 +16,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.Macro;
 
@@ -36,11 +37,13 @@ public class WorkspaceNameMacro implements Macro {
 
     private final AppContext      appContext;
     private final PromiseProvider promises;
+    private final CoreLocalizationConstant localizationConstants;
 
     @Inject
-    public WorkspaceNameMacro(AppContext appContext, PromiseProvider promises) {
+    public WorkspaceNameMacro(AppContext appContext, PromiseProvider promises, CoreLocalizationConstant localizationConstants) {
         this.appContext = appContext;
         this.promises = promises;
+        this.localizationConstants = localizationConstants;
     }
 
     /** {@inheritDoc} */
@@ -51,7 +54,7 @@ public class WorkspaceNameMacro implements Macro {
 
     @Override
     public String getDescription() {
-        return "Returns the name of the workspace";
+        return localizationConstants.macroWorkspaceNameDescription();
     }
 
     /** {@inheritDoc} */

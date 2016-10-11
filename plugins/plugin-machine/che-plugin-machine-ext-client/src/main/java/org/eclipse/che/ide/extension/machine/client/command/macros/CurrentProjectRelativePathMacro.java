@@ -18,11 +18,12 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 
 /**
  * Provides relative path to specific project. Path to project resolves from current workspace root.
  * e.g. /project_name.
- *
+ * <p>
  * Need for IDEX-3924 as intermediate solution.
  *
  * @author Vlad Zhukovskiy
@@ -32,13 +33,18 @@ public class CurrentProjectRelativePathMacro implements Macro {
 
     private static final String KEY = "${current.project.relpath}";
 
-    private       AppContext      appContext;
-    private final PromiseProvider promises;
+    private final PromiseProvider             promises;
+    private final MachineLocalizationConstant localizationConstants;
+
+    private AppContext appContext;
 
     @Inject
-    public CurrentProjectRelativePathMacro(AppContext appContext, PromiseProvider promises) {
+    public CurrentProjectRelativePathMacro(AppContext appContext,
+                                           PromiseProvider promises,
+                                           MachineLocalizationConstant localizationConstants) {
         this.appContext = appContext;
         this.promises = promises;
+        this.localizationConstants = localizationConstants;
     }
 
     @Override
@@ -48,7 +54,7 @@ public class CurrentProjectRelativePathMacro implements Macro {
 
     @Override
     public String getDescription() {
-        return "The path to the currently selected project relative to /projects. Effectively removes the /projects path from any project reference";
+        return localizationConstants.macroCurrentProjectRelpathDescription();
     }
 
     @Override

@@ -471,4 +471,14 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("ssh.connect.info")
     String sshConnectInfo(String machineName, String machineHost, String machinePort);
+
+
+    @Key("macro.current.project.relpath.description")
+    String macroCurrentProjectRelpathDescription();
+
+    @Key("macro.current.project.path.description")
+    String macroCurrentProjectPathDescription();
+
+    @Key("macro.machine.dev.hostname.description")
+    String macroMachineDevHostnameDescription();
 }

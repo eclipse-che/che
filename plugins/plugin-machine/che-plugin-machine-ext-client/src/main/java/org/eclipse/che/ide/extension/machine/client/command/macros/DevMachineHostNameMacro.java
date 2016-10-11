@@ -17,9 +17,10 @@ import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
+import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 
 import javax.validation.constraints.NotNull;
 
@@ -33,13 +34,15 @@ public class DevMachineHostNameMacro implements Macro, WsAgentStateHandler {
 
     private static final String KEY = "${machine.dev.hostname}";
 
-    private final AppContext appContext;
+    private final AppContext                  appContext;
+    private final MachineLocalizationConstant localizationConstants;
 
     private String value;
 
     @Inject
-    public DevMachineHostNameMacro(EventBus eventBus, AppContext appContext) {
+    public DevMachineHostNameMacro(EventBus eventBus, AppContext appContext, MachineLocalizationConstant localizationConstants) {
         this.appContext = appContext;
+        this.localizationConstants = localizationConstants;
         this.value = "";
         eventBus.addHandler(WsAgentStateEvent.TYPE, this);
     }
@@ -52,7 +55,7 @@ public class DevMachineHostNameMacro implements Macro, WsAgentStateHandler {
 
     @Override
     public String getDescription() {
-        return "Dev-machine's host name";
+        return localizationConstants.macroMachineDevHostnameDescription();
     }
 
     @NotNull

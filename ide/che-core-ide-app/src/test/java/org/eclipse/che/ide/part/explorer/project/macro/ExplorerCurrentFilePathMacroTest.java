@@ -35,7 +35,7 @@ public class ExplorerCurrentFilePathMacroTest extends AbstractExplorerMacroTest 
     @Before
     public void init() throws Exception {
         super.init();
-        provider = new ExplorerCurrentFilePathMacro(projectExplorer, promiseProvider, appContext);
+        provider = new ExplorerCurrentFilePathMacro(projectExplorer, promiseProvider, appContext, localizationConstants);
     }
 
     @Test

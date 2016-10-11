@@ -33,7 +33,7 @@ public class ExplorerCurrentProjectTypeMacroTest extends AbstractExplorerMacroTe
     @Before
     public void init() throws Exception {
         super.init();
-        provider = new ExplorerCurrentProjectTypeMacro(projectExplorer, promiseProvider);
+        provider = new ExplorerCurrentProjectTypeMacro(projectExplorer, promiseProvider, localizationConstants);
     }
 
     @Test

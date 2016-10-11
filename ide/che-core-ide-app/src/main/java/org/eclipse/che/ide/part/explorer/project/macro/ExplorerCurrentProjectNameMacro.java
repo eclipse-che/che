@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.resources.Project;
@@ -43,12 +44,15 @@ public class ExplorerCurrentProjectNameMacro implements Macro {
 
     private ProjectExplorerPresenter projectExplorer;
     private PromiseProvider          promises;
+    private final CoreLocalizationConstant localizationConstants;
 
     @Inject
     public ExplorerCurrentProjectNameMacro(ProjectExplorerPresenter projectExplorer,
-                                           PromiseProvider promises) {
+                                           PromiseProvider promises,
+                                           CoreLocalizationConstant localizationConstants) {
         this.projectExplorer = projectExplorer;
         this.promises = promises;
+        this.localizationConstants = localizationConstants;
     }
 
     /** {@inheritDoc} */
@@ -59,7 +63,7 @@ public class ExplorerCurrentProjectNameMacro implements Macro {
 
     @Override
     public String getDescription() {
-        return "Project name of the file currently selected in explorer";
+        return localizationConstants.macroExplorerCurrentProjectNameDescription();
     }
 
     /** {@inheritDoc} */

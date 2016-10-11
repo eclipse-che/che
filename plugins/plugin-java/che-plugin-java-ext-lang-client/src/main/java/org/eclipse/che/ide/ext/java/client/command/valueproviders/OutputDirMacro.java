@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 
 import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
@@ -36,11 +37,13 @@ public class OutputDirMacro implements Macro {
 
     private final AppContext      appContext;
     private final PromiseProvider promises;
+    private final JavaLocalizationConstant localizationConstants;
 
     @Inject
-    public OutputDirMacro(AppContext appContext, PromiseProvider promises) {
+    public OutputDirMacro(AppContext appContext, PromiseProvider promises, JavaLocalizationConstant localizationConstants) {
         this.appContext = appContext;
         this.promises = promises;
+        this.localizationConstants = localizationConstants;
     }
 
     @Override
@@ -50,7 +53,7 @@ public class OutputDirMacro implements Macro {
 
     @Override
     public String getDescription() {
-        return "Path to the project's output directory";
+        return localizationConstants.macroProjectJavaOutputDirDescription();
     }
 
     @Override
