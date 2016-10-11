@@ -10,39 +10,22 @@
  *******************************************************************************/
 package zend.com.che.plugin.zdb.server.connection;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 /**
  * Common Zend debug message interface.
  * 
  * @author Bartlomiej Laczkowski
  */
-public interface IDebugMessage extends IDebugMessageType {
+public interface IDebugMessage {
 
+	// UTF-8 only for now (preference in the future?)
+	public static final String ENCODING = "UTF-8";
+	
 	/**
 	 * Return unique type of this debug message
 	 * 
 	 * @return message type
 	 */
 	public int getType();
-
-	/**
-	 * Serialize this debug message to an output stream
-	 * 
-	 * @param out
-	 *            output stream this message is going to be written to
-	 */
-	public void serialize(DataOutputStream out) throws IOException;
-
-	/**
-	 * De-serialize this debug message from an input stream
-	 * 
-	 * @param in
-	 *            input stream this message is going to be read from
-	 */
-	public void deserialize(DataInputStream in) throws IOException;
 
 	/**
 	 * Sets the debug transfer encoding for this message

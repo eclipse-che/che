@@ -10,12 +10,15 @@
  *******************************************************************************/
 package zend.com.che.plugin.zdb.server.utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.search.QueryExpression;
 import org.eclipse.che.api.vfs.search.SearchResult;
@@ -69,8 +72,8 @@ public class ZendDebugUtils {
 		ZendDebugUtils.projectManager = projectManager;
 	}
 
-	public static Path getLocalFilePath(String remoteLocation) {
-		Path remoteFilePath = Path.of(remoteLocation);
+	public static String getLocalPath(String remotePath) {
+		Path remoteFilePath = Path.of(remotePath);
 		String remoteFileName = remoteFilePath.getName();
 		SearchResult searchResult = null;
 		try {
@@ -104,7 +107,29 @@ public class ZendDebugUtils {
 			}
 			i++;
 		}
-		return bestMatchPath;
+		return bestMatchPath != null ? bestMatchPath.toString() : null;
+	}
+	
+	public static String getAbsolutePath(String vfsPath) {
+		VirtualFileEntry virtualFileEntry = getVirtualFileEntry(vfsPath);
+		if (virtualFileEntry != null) {
+			File ioFile = virtualFileEntry.getVirtualFile().toIoFile();
+			if (ioFile != null) {
+				return ioFile.getAbsolutePath();
+			}
+			return virtualFileEntry.getVirtualFile().getPath().toString();
+		}
+		return vfsPath;
+	}
+	
+	public static VirtualFileEntry getVirtualFileEntry(String path) {
+		VirtualFileEntry virtualFileEntry = null;
+		try {
+			virtualFileEntry = projectManager.getProjectsRoot().getChild(path);
+		} catch (ServerException e) {
+			// TODO handle exception
+		}
+		return virtualFileEntry;
 	}
 
 }
