@@ -437,4 +437,20 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("code.assist.errorMessage.resolvingProject")
     String codeAssistErrorMessageResolvingProject();
+
+
+    @Key("macro.current.class.fqn.description")
+    String macroCurrentClassFQN_Description();
+
+    @Key("macro.project.java.sourcepath.description")
+    String macroProjectJavaSourcePathDescription();
+
+    @Key("macro.java.main.class.description")
+    String macroJavaMainClassDescription();
+
+    @Key("macro.project.java.output.dir.description")
+    String macroProjectJavaOutputDirDescription();
+
+    @Key("macro.project.java.classpath.description")
+    String macroProjectJavaClasspathDescription();
 }
