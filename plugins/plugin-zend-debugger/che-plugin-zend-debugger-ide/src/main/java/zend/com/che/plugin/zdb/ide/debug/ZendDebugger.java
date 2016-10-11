@@ -73,7 +73,7 @@ public class ZendDebugger extends AbstractDebugger {
 
 	@Override
 	protected DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties) {
-		return new DebuggerDescriptor("Zend Debugger", "Zend Debugger client, listening on port: "
+		return new DebuggerDescriptor("Zend Debugger", "Zend Debugger client, port: "
 				+ connectionProperties.get(ZendDebugConfigurationType.ATTR_DEBUG_PORT));
 	}
 

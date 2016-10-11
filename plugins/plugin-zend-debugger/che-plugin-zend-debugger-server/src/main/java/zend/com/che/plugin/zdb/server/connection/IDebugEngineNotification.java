@@ -11,8 +11,8 @@
 package zend.com.che.plugin.zdb.server.connection;
 
 /**
- * Abstract Zend debug notification (empty for now).
+ * Marker interface for Zend debug notification messages.
  * 
  * @author Bartlomiej Laczkowski
  */
-public abstract class AbstractDebugNotification extends AbstractDebugMessage implements IDebugNotification {}
+public interface IDebugEngineNotification extends IDebugEngineMessage {}

@@ -17,10 +17,11 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import zend.com.che.plugin.zdb.server.connection.ZendDebugRequests.GetVariableValueRequest;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugResponses.GetVariableValueResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendClientMessages.GetVariableValueRequest;
+import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.GetVariableValueResponse;
 
 /**
  * Zend debug expressions resolver.
@@ -186,7 +187,8 @@ public class ZendDebugExpressionResolver {
 
 		String readString() {
 			int length = readInt();
-			while ((char) super.read() != '"');
+			while ((char) super.read() != '"')
+				;
 			byte[] bytes = new byte[length];
 			read(bytes, 0, length);
 			super.read(); // read '"'
@@ -222,7 +224,7 @@ public class ZendDebugExpressionResolver {
 
 		String getText(byte[] buf) {
 			try {
-				return new String(buf, ZendDebugConnection.ENCODING);
+				return new String(buf, IDebugMessage.ENCODING);
 			} catch (UnsupportedEncodingException e) {
 			}
 			return new String(buf, Charset.defaultCharset());
@@ -249,18 +251,13 @@ public class ZendDebugExpressionResolver {
 		expression.setValue(expressionValue);
 	}
 
-	private byte[] requestVariableValue(String variable, int depth, String[] parentPath) {
-		GetVariableValueRequest request = (GetVariableValueRequest) ZendDebugMessageFactory
-				.create(IDebugMessageType.REQUEST_GET_VARIABLE_VALUE);
-		request.setVar(variable);
-		request.setDepth(depth);
-		request.setPath(parentPath);
-		GetVariableValueResponse response = null;
-		response = (GetVariableValueResponse) debugConnection.syncRequest(request);
-		if (response == null || response.getStatus() != 0) {
-			return null;
+	private byte[] requestVariableValue(String variable, int depth, List<String> parentPath) {
+		GetVariableValueResponse response = debugConnection
+				.sendRequest(new GetVariableValueRequest(variable, depth, parentPath));
+		if (response != null && response.getStatus() == 0) {
+			return response.getVariableValue();
 		}
-		return response.getVarResult();
+		return null;
 	}
 
 	private byte[] read(IDebugExpression expression, int depth) {
@@ -268,7 +265,7 @@ public class ZendDebugExpressionResolver {
 		String[] parentPath = new String[path.length - 1];
 		System.arraycopy(path, 1, parentPath, 0, path.length - 1);
 		String variable = path[0];
-		byte[] value = requestVariableValue(variable, depth, parentPath);
+		byte[] value = requestVariableValue(variable, depth, Arrays.asList(parentPath));
 		if (value == null) {
 			value = new byte[] { 'N' };
 		}

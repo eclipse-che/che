@@ -13,12 +13,14 @@ package zend.com.che.plugin.zdb.server.connection;
 import static zend.com.che.plugin.zdb.server.connection.IDebugDataFacet.Facet.KIND_LOCAL;
 import static zend.com.che.plugin.zdb.server.connection.IDebugDataFacet.Facet.KIND_SUPER_GLOBAL;
 import static zend.com.che.plugin.zdb.server.connection.IDebugDataFacet.Facet.KIND_THIS;
-import static zend.com.che.plugin.zdb.server.connection.IDebugMessageType.*;
 
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.che.api.debug.shared.model.Breakpoint;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -27,6 +29,7 @@ import org.eclipse.che.api.debug.shared.model.StackFrameDump;
 import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.action.ResumeAction;
+import org.eclipse.che.api.debug.shared.model.action.StartAction;
 import org.eclipse.che.api.debug.shared.model.action.StepIntoAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOutAction;
 import org.eclipse.che.api.debug.shared.model.action.StepOverAction;
@@ -34,42 +37,36 @@ import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.debug.shared.model.impl.SimpleValueImpl;
 import org.eclipse.che.api.debug.shared.model.impl.StackFrameDumpImpl;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
+import org.eclipse.che.api.debug.shared.model.impl.event.BreakpointActivatedEventImpl;
 import org.eclipse.che.api.debug.shared.model.impl.event.SuspendEventImpl;
 import org.eclipse.che.api.debugger.server.Debugger.DebuggerCallback;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
-import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.project.server.VirtualFileEntry;
 
 import zend.com.che.plugin.zdb.server.IDebuggerDelegate;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugNotifications.ReadyNotification;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugNotifications.SessionStartedNotification;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugNotifications.StartProcessFileNotification;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugRequests.CloseSessionRequest;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugRequests.ContinueProcessFileRequest;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugRequests.GoRequest;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugRequests.SetProtocolRequest;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugRequests.StartRequest;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugRequests.StepIntoRequest;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugRequests.StepOutRequest;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugRequests.StepOverRequest;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugResponses.SetProtocolResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendClientMessages.*;
+import zend.com.che.plugin.zdb.server.connection.ZendDebugConnection.IEngineNotificationHandler;
+import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.*;
 import zend.com.che.plugin.zdb.server.utils.ZendDebugUtils;
 import zend.com.che.plugin.zdb.server.variables.ZendDebugVariable;
+
+import static zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.*;
 
 /**
  * Zend debug session.
  * 
  * @author Bartlomiej Laczkowski
  */
-public class ZendDebugSession implements IDebuggerDelegate {
+public class ZendDebugSession implements IDebuggerDelegate, IEngineNotificationHandler {
 
-	private static class DumpVariablesExpression extends ZendDebugExpression {
+	private static class StackVariablesExpression extends ZendDebugExpression {
 
 		private final static String DUMP_VARIABLES_EXPRESSION = "eval('if (isset($this)) {$this;}; return get_defined_vars();')";
 
 		/**
 		 * Creates new current context expression.
 		 */
-		private DumpVariablesExpression() {
+		private StackVariablesExpression() {
 			super(DUMP_VARIABLES_EXPRESSION);
 		}
 
@@ -89,33 +86,37 @@ public class ZendDebugSession implements IDebuggerDelegate {
 	private static final int SUPPORTED_PROTOCOL_ID = 2012121702;
 
 	private final DebuggerCallback debuggerCallback;
-	private ZendDebugExpressionResolver debugExpressionResolver;
-	private ZendDebugConnection debugConnection;
-	private List<Variable> debugStackVariables;
+	private final ZendDebugConnection connection;
+
+	private final ZendDebugExpressionResolver expressionResolver;
+	private List<Variable> stackVariables;
+	private List<Breakpoint> breakpoints;
+	private Map<Breakpoint, Integer> breakpointIds = new HashMap<>();
 
 	public ZendDebugSession(int debugPort, DebuggerCallback debuggerCallback) {
 		this.debuggerCallback = debuggerCallback;
-		this.debugStackVariables = new ArrayList<>();
-		(new ZendDebugDaemon(this, debugPort)).startListen();
+		this.stackVariables = new ArrayList<>();
+		this.connection = new ZendDebugConnection(this, debugPort);
+		this.expressionResolver = new ZendDebugExpressionResolver(connection);
 	}
 
-	void connect(Socket socket) {
-		this.debugConnection = new ZendDebugConnection(this, socket);
-		this.debugExpressionResolver = new ZendDebugExpressionResolver(debugConnection);
-	}
-
-	void handle(IDebugMessage message) {
-		switch (message.getType()) {
+	@Override
+	public void handle(IDebugEngineNotification notification) {
+		switch (notification.getType()) {
 		case NOTIFICATION_SESSION_STARTED: {
-			handleSessionStarted((SessionStartedNotification) message);
+			handleSessionStarted((SessionStartedNotification) notification);
 			break;
 		}
 		case NOTIFICATION_START_PROCESS_FILE: {
-			handleStartProcessFile((StartProcessFileNotification) message);
+			handleStartProcessFile((StartProcessFileNotification) notification);
 			break;
 		}
 		case NOTIFICATION_READY: {
-			handleReady((ReadyNotification) message);
+			handleReady((ReadyNotification) notification);
+			break;
+		}
+		case NOTIFICATION_SRIPT_ENDED: {
+			handleScriptEnded((ScriptEndedNotification) notification);
 			break;
 		}
 		default:
@@ -124,14 +125,20 @@ public class ZendDebugSession implements IDebuggerDelegate {
 	}
 
 	@Override
+	public void start(StartAction action) throws DebuggerException {
+		breakpoints = new ArrayList<>(action.getBreakpoints());
+		connection.connect();
+	}
+
+	@Override
 	public StackFrameDump dumpStackFrame() {
-		fetchVariables();
-		return new StackFrameDumpImpl(Collections.emptyList(), debugStackVariables);
+		sendGetVariables();
+		return new StackFrameDumpImpl(Collections.emptyList(), stackVariables);
 	}
 
 	@Override
 	public SimpleValue getValue(VariablePath variablePath) {
-		List<Variable> currentVariables = debugStackVariables;
+		List<Variable> currentVariables = stackVariables;
 		Variable matchingVariable = null;
 		for (String variableName : variablePath.getPath()) {
 			for (Variable currentVariable : currentVariables) {
@@ -147,115 +154,189 @@ public class ZendDebugSession implements IDebuggerDelegate {
 
 	@Override
 	public void addBreakpoint(Breakpoint breakpoint) throws DebuggerException {
-		// TODO Auto-generated method stub
-
+		breakpoints.add(breakpoint);
+		sendAddBreakpoint(breakpoint);
 	}
 
 	@Override
 	public void deleteBreakpoint(Location location) throws DebuggerException {
-		// TODO Auto-generated method stub
-
+		int breakpointLine = location.getLineNumber();
+		String breakpointTarget = location.getTarget();
+		Breakpoint matchingBreakpoint = null;
+		for (Breakpoint breakpoint : breakpoints) {
+			if (breakpointLine == breakpoint.getLocation().getLineNumber()
+					&& breakpointTarget.equals(breakpoint.getLocation().getTarget())) {
+				matchingBreakpoint = breakpoint;
+				break;
+			}
+		}
+		if (matchingBreakpoint == null) {
+			return;
+		}
+		breakpoints.remove(matchingBreakpoint);
+		int breakpointId = breakpointIds.remove(matchingBreakpoint);
+		sendDeleteBreakpoint(breakpointId);
 	}
 
 	@Override
 	public void deleteAllBreakpoints() throws DebuggerException {
-		// TODO Auto-generated method stub
-
+		breakpoints.clear();
+		breakpointIds.clear();
+		sendDeleteAllBreakpoints();
 	}
 
 	@Override
 	public List<Breakpoint> getAllBreakpoints() throws DebuggerException {
-		// TODO Auto-generated method stub
-		return null;
+		return breakpoints;
 	}
 
 	@Override
 	public void setValue(Variable variable) throws DebuggerException {
-		// TODO Auto-generated method stub
+		// TODO - not supported yet...
 	}
 
 	@Override
 	public String evaluate(String expression) throws DebuggerException {
-		// TODO Auto-generated method stub
+		// TODO - not supported yet...
 		return null;
 	}
 
 	@Override
 	public void stepOver(StepOverAction action) throws DebuggerException {
-		StepOverRequest stepOverRequest = (StepOverRequest) ZendDebugMessageFactory.create(REQUEST_STEP_OVER);
-		debugConnection.syncRequest(stepOverRequest);
+		connection.sendRequest(new StepOverRequest());
 	}
 
 	@Override
 	public void stepInto(StepIntoAction action) throws DebuggerException {
-		StepIntoRequest stepIntoRequest = (StepIntoRequest) ZendDebugMessageFactory.create(REQUEST_STEP_INTO);
-		debugConnection.syncRequest(stepIntoRequest);
+		connection.sendRequest(new StepIntoRequest());
 	}
 
 	@Override
 	public void stepOut(StepOutAction action) throws DebuggerException {
-		StepOutRequest stepOutRequest = (StepOutRequest) ZendDebugMessageFactory.create(REQUEST_STEP_OUT);
-		debugConnection.syncRequest(stepOutRequest);
+		connection.sendRequest(new StepOutRequest());
 	}
 
 	@Override
 	public void resume(ResumeAction action) throws DebuggerException {
-		GoRequest goRequest = (GoRequest) ZendDebugMessageFactory.create(REQUEST_GO);
-		debugConnection.syncRequest(goRequest);
+		connection.sendRequest(new GoRequest());
 	}
 
 	@Override
 	public void disconnect() throws DebuggerException {
-		CloseSessionRequest closeSessionRequest = (CloseSessionRequest) ZendDebugMessageFactory.create(REQUEST_CLOSE_SESSION);
-		debugConnection.asyncRequest(closeSessionRequest);
+		connection.disconnect();
 	}
 
 	private void handleSessionStarted(SessionStartedNotification notification) {
-		// Nothing special to do with session started notification for now...
-		// Check if debugger protocol can be supported
-		SetProtocolRequest setProtocolRequest = (SetProtocolRequest) ZendDebugMessageFactory
-				.create(REQUEST_SET_PROTOCOL);
-		setProtocolRequest.setProtocolID(SUPPORTED_PROTOCOL_ID);
-		IDebugResponse setProtocolResponse = debugConnection.syncRequest(setProtocolRequest);
-		if (setProtocolResponse != null && setProtocolResponse instanceof SetProtocolResponse) {
-			int responseProtocolId = ((SetProtocolResponse) setProtocolResponse).getProtocolID();
-			if (responseProtocolId < SUPPORTED_PROTOCOL_ID) {
-				// TODO - throw exception here...
-			}
+		if (!sendSetProtocol()) {
+			sendCloseSession();
+			// TODO - log info here about unsupported protocol
 		}
-		StartRequest startRequest = (StartRequest) ZendDebugMessageFactory.create(REQUEST_START);
-		debugConnection.asyncRequest(startRequest);
+		sendAddBreakpointFiles();
+		sendStartSession();
 	}
 
 	private void handleStartProcessFile(StartProcessFileNotification notification) {
-		// TODO - Find breakpoints in corresponding local files and send to
-		// engine
-		// Send continue file processing request
-		ContinueProcessFileRequest continueProcessFileNotification = (ContinueProcessFileRequest) ZendDebugMessageFactory
-				.create(REQUEST_CONTINUE_PROCESS_FILE);
-		debugConnection.asyncRequest(continueProcessFileNotification);
+		sendAddBreakpoints(notification.getFileName());
+		sendContinueProcessFile();
 	}
 
 	private void handleReady(ReadyNotification notification) {
-		Path localFilePath = ZendDebugUtils.getLocalFilePath(notification.getFileName());
-		String projectPath = localFilePath.element(0);
-		String target = localFilePath.getName();
+		String localFilePath = ZendDebugUtils.getLocalPath(notification.getFileName());
+		VirtualFileEntry localFileEntry = ZendDebugUtils.getVirtualFileEntry(localFilePath);
+		if (localFileEntry == null) {
+			// TODO - no local corresponding file found, log info
+			sendCloseSession();
+			return;
+		}
+		String projectPath = localFileEntry.getProject();
+		String fileName = localFileEntry.getName();
+		String filePath = localFileEntry.getPath().toString();
 		int lineNumber = notification.getLineNumber();
-		Location location = new LocationImpl(target, lineNumber, localFilePath.toString(), false, -1, projectPath);
+		Location location = new LocationImpl(fileName, lineNumber, filePath, false, -1, projectPath);
 		// Send suspend event
 		debuggerCallback.onEvent(new SuspendEventImpl(location));
 	}
 
-	private void fetchVariables() {
-		List<IDebugExpression> zendVariables = new ArrayList<>();
-		IDebugExpression zendVariablesExpression = new DumpVariablesExpression();
-		debugExpressionResolver.resolve(zendVariablesExpression, 1);
-		zendVariables = zendVariablesExpression.getValue().getChildren();
-		debugStackVariables.clear();
-		for (IDebugExpression zendVariable : zendVariables) {
-			debugStackVariables.add(new ZendDebugVariable(new VariablePathImpl(zendVariable.getName()), zendVariable,
-					debugExpressionResolver));
+	private void handleScriptEnded(ScriptEndedNotification notification) {
+		sendCloseSession();
+	}
+
+	private boolean sendSetProtocol() {
+		SetProtocolResponse response = connection.sendRequest(new SetProtocolRequest(SUPPORTED_PROTOCOL_ID));
+		if (response != null && response.getProtocolID() < SUPPORTED_PROTOCOL_ID) {
+			return false;
 		}
+		return true;
+	}
+
+	private void sendContinueProcessFile() {
+		connection.sendNotification(new ContinueProcessFileNotification());
+	}
+
+	private void sendStartSession() {
+		connection.sendRequest(new StartRequest());
+	}
+
+	private void sendGetVariables() {
+		List<IDebugExpression> variables = new ArrayList<>();
+		IDebugExpression stackVariablesExpression = new StackVariablesExpression();
+		expressionResolver.resolve(stackVariablesExpression, 1);
+		variables = stackVariablesExpression.getValue().getChildren();
+		stackVariables.clear();
+		for (IDebugExpression variable : variables) {
+			stackVariables
+					.add(new ZendDebugVariable(new VariablePathImpl(variable.getName()), variable, expressionResolver));
+		}
+	}
+
+	private void sendAddBreakpointFiles() {
+		Set<String> breakpointFiles = new HashSet<>();
+		for (Breakpoint breakpoint : breakpoints) {
+			String absolutePath = ZendDebugUtils.getAbsolutePath(breakpoint.getLocation().getResourcePath());
+			breakpointFiles.add(absolutePath);
+		}
+		connection.sendRequest(new AddFilesRequest(breakpointFiles));
+	}
+
+	private void sendAddBreakpoints(String remoteFilePath) {
+		String localFilePath = ZendDebugUtils.getLocalPath(remoteFilePath);
+		List<Breakpoint> fileBreakpoints = new ArrayList<>();
+		for (Breakpoint breakpoint : breakpoints) {
+			if (breakpoint.getLocation().getResourcePath().equals(localFilePath)) {
+				fileBreakpoints.add(breakpoint);
+			}
+		}
+		for (Breakpoint breakpoint : fileBreakpoints) {
+			AddBreakpointResponse response = connection.sendRequest(
+					new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
+			if (response != null && response.getStatus() == 0) {
+				breakpointIds.put(breakpoint, response.getBreakpointID());
+				// Send breakpoint activated event
+				debuggerCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
+			}
+		}
+	}
+
+	private void sendAddBreakpoint(Breakpoint breakpoint) {
+		String remoteFilePath = ZendDebugUtils.getAbsolutePath(breakpoint.getLocation().getResourcePath());
+		AddBreakpointResponse response = connection
+				.sendRequest(new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
+		if (response != null && response.getStatus() == 0) {
+			breakpointIds.put(breakpoint, response.getBreakpointID());
+			debuggerCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
+		}
+	}
+
+	private void sendDeleteBreakpoint(int breakpointId) {
+		connection.sendRequest(new DeleteBreakpointRequest(breakpointId));
+	}
+
+	private void sendDeleteAllBreakpoints() {
+		connection.sendRequest(new DeleteAllBreakpointsRequest());
+	}
+
+	private void sendCloseSession() {
+		connection.sendRequest(new CloseSessionRequest());
 	}
 
 }
