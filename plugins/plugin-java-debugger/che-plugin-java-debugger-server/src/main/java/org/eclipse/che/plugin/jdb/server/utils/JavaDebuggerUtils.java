@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jdb.server.utils;
 
-import com.sun.istack.internal.NotNull;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;

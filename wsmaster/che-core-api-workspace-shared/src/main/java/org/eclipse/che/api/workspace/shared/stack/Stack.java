@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.shared.stack;
 
-import com.sun.istack.internal.Nullable;
+import org.eclipse.che.commons.annotation.Nullable;
 
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 
