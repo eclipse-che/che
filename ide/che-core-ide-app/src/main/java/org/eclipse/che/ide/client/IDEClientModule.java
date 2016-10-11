@@ -16,13 +16,13 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
+import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.part.editor.EditorPartStackFactory;
 import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
-import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartViewFactory;
 import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartView;
+import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartViewFactory;
 import org.eclipse.che.ide.part.editor.multipart.SplitEditorPartViewImpl;
 import org.eclipse.che.ide.part.widgets.TabItemFactory;
-import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.part.widgets.editortab.EditorTabWidget;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButtonWidget;

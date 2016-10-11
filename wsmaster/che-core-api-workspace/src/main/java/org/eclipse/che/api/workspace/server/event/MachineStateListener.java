@@ -59,8 +59,9 @@ public class MachineStateListener implements EventSubscriber<MachineStatusEvent>
                     workspaceManager.stopWorkspace(workspaceId);
                 }
 
-            } catch (NotFoundException | ServerException | ConflictException exception) {
+            } catch (ServerException | ConflictException exception) {
                 LOG.error(exception.getLocalizedMessage(), exception);
+            } catch (NotFoundException ignored) {
             }
         }
     }

@@ -47,6 +47,30 @@
     </div>
   </che-label-container>
 
+  <!-- stack's tags -->
+  <che-label-container class="stack-tags-label"
+                       che-label-name="Tags"
+                       che-label-description="Tags define the templates available for workspace">
+    <div layout="column" flex="100" class="stack-tags">
+      <md-chips flex name="stack's tags"
+                ng-model="stackController.stack.tags"
+                md-transform-chip="stackController.handleTagAdding($chip)"
+                md-on-add="stackController.updateEditorContent()"
+                md-on-remove="stackController.updateEditorContent()"
+                secondary-placeholder="Enter stack's tags">
+        <md-chip-template>
+          <div class="stack-library-text">{{$chip | uppercase}}</div>
+          <div class="stack-library-btn">
+            <i class="fa fa-close"></i>
+          </div>
+        </md-chip-template>
+      </md-chips>
+      <div flex>
+        <div class="stack-tags-reset" data-ng-click="stackController.stack.tags.length = 0">Reset</div>
+      </div>
+    </div>
+  </che-label-container>
+
   <!-- Delete stack -->
   <che-label-container class="stack-delete-label"
                        ng-if="!stackController.isCreation"

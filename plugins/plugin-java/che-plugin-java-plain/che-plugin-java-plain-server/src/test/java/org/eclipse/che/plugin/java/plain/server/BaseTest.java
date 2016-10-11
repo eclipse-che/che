@@ -51,6 +51,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mockito.Mockito.mock;
+
 /**
  * @author Valeriy Svydenko
  */
@@ -62,7 +64,6 @@ public abstract class BaseTest {
     protected ProjectRegistry                projectRegistry;
     protected ProjectManager                 projectManager;
     protected LocalVirtualFileSystemProvider vfsProvider;
-    protected ProjectTreeChangesDetector     projectTreeChangesDetector;
 
     @BeforeClass
     protected void initProjectApi() throws Exception {
@@ -105,8 +106,6 @@ public abstract class BaseTest {
         FileWatcherNotificationHandler fileWatcherNotificationHandler = new DefaultFileWatcherNotificationHandler(vfsProvider);
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
-        projectTreeChangesDetector = new ProjectTreeChangesDetector(null);
-
         projectManager = new ProjectManager(vfsProvider,
                                             eventService,
                                             projectTypeRegistry,
@@ -115,7 +114,8 @@ public abstract class BaseTest {
                                             importerRegistry,
                                             fileWatcherNotificationHandler,
                                             fileTreeWatcher,
-                                            new TestWorkspaceHolder(new ArrayList<>()), projectTreeChangesDetector);
+                                            new TestWorkspaceHolder(new ArrayList<>()),
+                                            mock(ProjectTreeChangesDetector.class));
 
         ResourcesPlugin plugin = new ResourcesPlugin("target/index", wsPath, () -> projectRegistry, () -> projectManager);
 

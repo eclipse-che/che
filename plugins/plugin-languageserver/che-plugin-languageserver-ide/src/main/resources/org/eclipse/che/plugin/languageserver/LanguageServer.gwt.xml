@@ -27,5 +27,4 @@
     <inherits name="org.eclipse.che.api.promises.Promises"/>
 
     <source path="ide"/>
-    <source path="shared"/>
 </module>

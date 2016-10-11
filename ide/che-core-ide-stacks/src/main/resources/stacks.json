@@ -1928,5 +1928,92 @@
       "name": "type-bitnami.svg",
       "mediaType": "image/svg+xml"
     }
+  },
+  {
+    "id": "zend",
+    "creator": "ide",
+    "name": "Zend",
+    "description": "Zend stack with PHP 7, Zend Server 9 and Z-Ray.",
+    "scope": "advanced",
+    "tags": [
+      "PHP",
+      "Zend",
+      "Z-Ray",
+      "Composer",
+      "Ubuntu",
+      "Git"
+    ],
+    "components": [
+      {
+        "name": "PHP",
+        "version": "7.0.6"
+      },
+      {
+        "name": "Zend Server",
+        "version": "9.0.0"
+      },
+      {
+        "name": "Composer",
+        "version": "---"
+      }
+    ],
+    "source": {
+      "type": "image",
+      "origin": "kaloyanraev/che-zendserver"
+    },
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "agents": [
+                "org.eclipse.che.terminal", "org.eclipse.che.ws-agent", "org.eclipse.che.ssh", "org.eclipse.che.ls.php", "org.eclipse.che.ls.json"
+              ],
+              "servers": {},
+              "attributes" : {
+                "memoryLimitBytes": "2147483648"
+              }
+            }
+          },
+          "recipe": {
+            "location": "kaloyanraev/che-zendserver",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [  
+        {
+          "name": "restart zend server",
+          "type": "custom",
+          "commandLine": "sudo sed -i 's#zray.zendserver_ui_url=.*#zray.zendserver_ui_url=http://${server.port.10081}/ZendServer#g' /usr/local/zend/etc/conf.d/zray.ini && sudo /usr/local/zend/bin/zendctl.sh restart",
+          "attributes": {
+            "previewUrl": "http://${server.port.80}"
+          }
+        },
+        {
+          "name": "stop zend server",
+          "type": "custom",
+          "commandLine": "sudo /usr/local/zend/bin/zendctl.sh stop",
+          "attributes": {
+            "previewUrl": ""
+          }
+        },
+        {
+          "name": "show admin password",
+          "type": "custom",
+          "commandLine": "echo \"Zend Server admin password is `sudo cat /root/zend-password`\"",
+          "attributes": {
+            "previewUrl": "http://${server.port.10081}"
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-zend.svg",
+      "mediaType": "image/svg+xml"
+    }
   }
 ]

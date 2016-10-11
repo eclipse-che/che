@@ -16,12 +16,12 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.0.0-M5-SNAPSHOT</version>
+        <version>5.0.0-M6-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-agent-parent</artifactId>
-    <version>5.0.0-M5-SNAPSHOT</version>
+    <version>5.0.0-M6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Agent Parent</name>
     <modules>
@@ -32,6 +32,8 @@
         <module>che-core-git-impl-jgit</module>
         <module>che-core-api-debug</module>
         <module>che-core-api-debug-shared</module>
+        <module>che-core-api-languageserver</module>
+        <module>che-core-api-languageserver-shared</module>
         <module>wsagent-local</module>
     </modules>
 </project>

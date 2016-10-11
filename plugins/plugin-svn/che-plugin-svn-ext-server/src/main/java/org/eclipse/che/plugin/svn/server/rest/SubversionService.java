@@ -19,9 +19,6 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.svn.server.SubversionApi;
 import org.eclipse.che.plugin.svn.server.SubversionException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider.Credentials;
 import org.eclipse.che.plugin.svn.shared.AddRequest;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponse;
 import org.eclipse.che.plugin.svn.shared.CLIOutputResponseList;
@@ -44,7 +41,6 @@ import org.eclipse.che.plugin.svn.shared.PropertySetRequest;
 import org.eclipse.che.plugin.svn.shared.RemoveRequest;
 import org.eclipse.che.plugin.svn.shared.ResolveRequest;
 import org.eclipse.che.plugin.svn.shared.RevertRequest;
-import org.eclipse.che.plugin.svn.shared.SaveCredentialsRequest;
 import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
@@ -77,9 +73,6 @@ public class SubversionService extends Service {
 
     @Inject
     private SubversionApi subversionApi;
-
-    @Inject
-    private CredentialsProvider credentialsProvider;
 
 
     /**
@@ -242,14 +235,14 @@ public class SubversionService extends Service {
      * @param request
      *         the switch request
      * @return the switch response
-     * @throws SubversionException
+     * @throws ApiException
      *         if there is a Subversion issue
      */
     @Path("switch")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws SubversionException {
+    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws ApiException {
         request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
         return subversionApi.doSwitch(request);
     }
@@ -303,14 +296,14 @@ public class SubversionService extends Service {
      * @param targetPath
      *      the requested directory to browse
      * @return children of the requested target path
-     * @throws SubversionException
+     * @throws ApiException
      *       if there is a Subversion issue
      */
     @Path("list")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     public ListResponse list(final @QueryParam("project") String projectPath,
-                             final @QueryParam("target") String targetPath) throws SubversionException {
+                             final @QueryParam("target") String targetPath) throws ApiException {
         return subversionApi.list(getAbsoluteProjectPath(projectPath), targetPath);
     }
 
@@ -319,13 +312,13 @@ public class SubversionService extends Service {
      *
      * @param projectPath
      *      the project path
-     * @throws SubversionException
+     * @throws ApiException
      *         if there is a Subversion issue
      */
     @Path("branches")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public ListResponse listBranches(final @QueryParam("project") String projectPath) throws SubversionException {
+    public ListResponse listBranches(final @QueryParam("project") String projectPath) throws ApiException {
         return this.subversionApi.listBranches(getAbsoluteProjectPath(projectPath));
     }
 
@@ -334,13 +327,13 @@ public class SubversionService extends Service {
      *
      * @param projectPath
      *      the project path
-     * @throws SubversionException
+     * @throws ApiException
      *         if there is a Subversion issue
      */
     @Path("tags")
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public ListResponse listTags(final @QueryParam("project") String projectPath) throws SubversionException {
+    public ListResponse listTags(final @QueryParam("project") String projectPath) throws ApiException {
         return subversionApi.listTags(getAbsoluteProjectPath(projectPath));
     }
 
@@ -416,19 +409,6 @@ public class SubversionService extends Service {
     public CLIOutputResponse unlock(final LockRequest request) throws ApiException, IOException {
         request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
         return this.subversionApi.lockUnlock(request, false);
-    }
-
-    @Path("saveCredentials")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public void saveCredentials(final SaveCredentialsRequest request) throws ServerException, IOException {
-        try {
-            this.credentialsProvider.storeCredential(request.getRepositoryUrl(),
-                                                     new Credentials(request.getUsername(), request.getPassword()));
-        } catch (final CredentialsException e) {
-            throw new ServerException(e.getMessage());
-        }
     }
 
     @Path("export/{projectPath:.*}")

@@ -16,17 +16,16 @@ import com.google.common.io.Files;
 import com.google.common.net.MediaType;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.vfs.util.DeleteOnCloseFileInputStream;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.ssh.key.script.SshScriptProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider.Credentials;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.upstream.CommandLineResult;
 import org.eclipse.che.plugin.svn.server.upstream.UpstreamUtils;
@@ -95,16 +94,13 @@ public class SubversionApi {
 
     private static Logger LOG = LoggerFactory.getLogger(SubversionApi.class);
 
-    private final CredentialsProvider   credentialsProvider;
     private final RepositoryUrlProvider repositoryUrlProvider;
     private final SshScriptProvider     sshScriptProvider;
     protected     LineConsumerFactory   svnOutputPublisherFactory;
 
     @Inject
-    public SubversionApi(CredentialsProvider credentialsProvider,
-                         RepositoryUrlProvider repositoryUrlProvider,
+    public SubversionApi(RepositoryUrlProvider repositoryUrlProvider,
                          SshScriptProvider sshScriptProvider) {
-        this.credentialsProvider = credentialsProvider;
         this.repositoryUrlProvider = repositoryUrlProvider;
         this.sshScriptProvider = sshScriptProvider;
     }
@@ -130,7 +126,7 @@ public class SubversionApi {
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse add(final AddRequest request) throws IOException, SubversionException {
+    public CLIOutputResponse add(final AddRequest request) throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> args = defaultArgs();
@@ -176,7 +172,7 @@ public class SubversionApi {
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse revert(RevertRequest request) throws IOException, SubversionException {
+    public CLIOutputResponse revert(RevertRequest request) throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> cliArgs = defaultArgs();
@@ -205,7 +201,7 @@ public class SubversionApi {
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse copy(final CopyRequest request) throws IOException, SubversionException {
+    public CLIOutputResponse copy(final CopyRequest request) throws IOException, SubversionException, UnauthorizedException {
 
         //for security reason we should forbid file protocol
         if (request.getSource().startsWith("file://") || request.getDestination().startsWith("file://")) {
@@ -223,8 +219,12 @@ public class SubversionApi {
         // Command Name
         cliArgs.add("copy");
 
-        final CommandLineResult result =
-                runCommand(null, cliArgs, projectPath, Arrays.asList(request.getSource(), request.getDestination()));
+        final CommandLineResult result = runCommand(null,
+                                                    cliArgs,
+                                                    projectPath,
+                                                    Arrays.asList(request.getSource(), request.getDestination()),
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
         return DtoFactory.getInstance()
                          .createDto(CLIOutputResponse.class)
@@ -242,7 +242,7 @@ public class SubversionApi {
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws SubversionException {
+    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws ApiException {
 
         final File projectPath = new File(request.getProjectPath());
         final List<String> cliArgs = defaultArgs();
@@ -283,12 +283,7 @@ public class SubversionApi {
      *         if there is a Subversion issue
      */
     public CLIOutputWithRevisionResponse checkout(final CheckoutRequest request)
-            throws IOException, SubversionException {
-        return checkout(request, null);
-    }
-
-    public CLIOutputWithRevisionResponse checkout(final CheckoutRequest request, final String[] credentials)
-            throws IOException, SubversionException {
+            throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
         final List<String> cliArgs = defaultArgs();
 
@@ -306,7 +301,13 @@ public class SubversionApi {
         cliArgs.add(request.getUrl());
         cliArgs.add(projectPath.getAbsolutePath());
 
-        CommandLineResult result = runCommand(null, cliArgs, projectPath, request.getPaths(), credentials, request.getUrl());
+        CommandLineResult result = runCommand(null,
+                                              cliArgs,
+                                              projectPath,
+                                              request.getPaths(),
+                                              request.getUsername(),
+                                              request.getPassword(),
+                                              request.getUrl());
 
         return DtoFactory.getInstance().createDto(CLIOutputWithRevisionResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -327,7 +328,7 @@ public class SubversionApi {
      *         if there is a Subversion issue
      */
     public CLIOutputWithRevisionResponse commit(final CommitRequest request)
-            throws IOException, SubversionException {
+            throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> cliArgs = defaultArgs();
@@ -365,7 +366,7 @@ public class SubversionApi {
      *         if there is a Subversion issue
      */
     public CLIOutputResponse remove(final RemoveRequest request)
-            throws IOException, SubversionException {
+            throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> cliArgs = defaultArgs();
@@ -392,7 +393,7 @@ public class SubversionApi {
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse status(final StatusRequest request) throws IOException, SubversionException {
+    public CLIOutputResponse status(final StatusRequest request) throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> cliArgs = defaultArgs();
@@ -432,7 +433,7 @@ public class SubversionApi {
      *         if there is a Subversion issue
      */
     public CLIOutputWithRevisionResponse update(final UpdateRequest request)
-            throws IOException, SubversionException {
+            throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> uArgs = defaultArgs();
@@ -447,8 +448,12 @@ public class SubversionApi {
         // Command Name
         uArgs.add("update");
 
-        final CommandLineResult result = runCommand(null, uArgs, projectPath,
-                                                    addWorkingCopyPathIfNecessary(request.getPaths()));
+        final CommandLineResult result = runCommand(null,
+                                                    uArgs,
+                                                    projectPath,
+                                                    addWorkingCopyPathIfNecessary(request.getPaths()),
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
         return DtoFactory.getInstance().createDto(CLIOutputWithRevisionResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -468,7 +473,7 @@ public class SubversionApi {
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse showLog(final ShowLogRequest request) throws IOException, SubversionException {
+    public CLIOutputResponse showLog(final ShowLogRequest request) throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> uArgs = defaultArgs();
@@ -484,7 +489,9 @@ public class SubversionApi {
                          .withErrOutput(result.getStderr());
     }
 
-    public CLIOutputResponse lockUnlock(final LockRequest request, final boolean lock) throws IOException, SubversionException {
+    public CLIOutputResponse lockUnlock(final LockRequest request, final boolean lock) throws IOException,
+                                                                                              SubversionException,
+                                                                                              UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> args = defaultArgs();
@@ -498,7 +505,12 @@ public class SubversionApi {
             args.add("unlock");
         }
 
-        final CommandLineResult result = runCommand(null, args, projectPath, request.getTargets());
+        final CommandLineResult result = runCommand(null,
+                                                    args,
+                                                    projectPath,
+                                                    request.getTargets(),
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
         return DtoFactory.getInstance()
                          .createDto(CLIOutputResponse.class)
@@ -518,7 +530,7 @@ public class SubversionApi {
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse showDiff(final ShowDiffRequest request) throws IOException, SubversionException {
+    public CLIOutputResponse showDiff(final ShowDiffRequest request) throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> uArgs = defaultArgs();
@@ -526,7 +538,12 @@ public class SubversionApi {
         addOption(uArgs, "--revision", request.getRevision());
         uArgs.add("diff");
 
-        final CommandLineResult result = runCommand(null, uArgs, projectPath, request.getPaths());
+        final CommandLineResult result = runCommand(null,
+                                                    uArgs,
+                                                    projectPath,
+                                                    request.getPaths(),
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
         return DtoFactory.getInstance().createDto(CLIOutputResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -543,7 +560,7 @@ public class SubversionApi {
      * @see #list(String, String)
      * @see #info(InfoRequest)
      */
-    public ListResponse listBranches(final String projectPath) throws SubversionException {
+    public ListResponse listBranches(final String projectPath) throws ApiException {
         InfoResponse info = info(DtoFactory.getInstance()
                                            .createDto(InfoRequest.class)
                                            .withProjectPath(projectPath)
@@ -583,7 +600,7 @@ public class SubversionApi {
      * @see #list(String, String)
      * @see #info(InfoRequest)
      */
-    public ListResponse listTags(final String projectPath) throws SubversionException {
+    public ListResponse listTags(final String projectPath) throws ApiException {
         InfoResponse info = info(DtoFactory.getInstance()
                                            .createDto(InfoRequest.class)
                                            .withProjectPath(projectPath)
@@ -624,7 +641,7 @@ public class SubversionApi {
      *
      * @return the response containing target children
      */
-    public ListResponse list(final String projectPath, final String targetPath) throws SubversionException {
+    public ListResponse list(final String projectPath, final String targetPath) throws ApiException {
         final List<String> args = defaultArgs();
         args.add("list");
 
@@ -650,7 +667,7 @@ public class SubversionApi {
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponseList resolve(final ResolveRequest request) throws IOException, SubversionException {
+    public CLIOutputResponseList resolve(final ResolveRequest request) throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         Map<String, String> resolutions = request.getConflictResolutions();
@@ -692,7 +709,7 @@ public class SubversionApi {
      *         if there is an exporting issue
      */
     public Response exportPath(@NotNull final String projectPath, @NotNull final String path, String revision)
-            throws IOException, ServerException {
+            throws IOException, ServerException, UnauthorizedException {
 
         final File project = new File(projectPath);
 
@@ -744,7 +761,7 @@ public class SubversionApi {
      * @throws SubversionException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse move(final MoveRequest request) throws IOException, SubversionException {
+    public CLIOutputResponse move(final MoveRequest request) throws IOException, SubversionException, UnauthorizedException {
 
         Predicate<String> sourcePredicate = new Predicate<String>() {
             @Override
@@ -773,7 +790,12 @@ public class SubversionApi {
         paths.addAll(request.getSource());
         paths.add(request.getDestination());
 
-        final CommandLineResult result = runCommand(null, cliArgs, projectPath, paths);
+        final CommandLineResult result = runCommand(null,
+                                                    cliArgs,
+                                                    projectPath,
+                                                    paths,
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
         return DtoFactory.getInstance().createDto(CLIOutputResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -792,7 +814,7 @@ public class SubversionApi {
      * @throws ServerException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse propset(final PropertySetRequest request) throws IOException, ServerException {
+    public CLIOutputResponse propset(final PropertySetRequest request) throws IOException, ServerException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> uArgs = defaultArgs();
@@ -840,7 +862,7 @@ public class SubversionApi {
      * @throws ServerException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse propdel(final PropertyDeleteRequest request) throws IOException, ServerException {
+    public CLIOutputResponse propdel(final PropertyDeleteRequest request) throws IOException, ServerException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> uArgs = defaultArgs();
@@ -869,7 +891,7 @@ public class SubversionApi {
      * @throws ServerException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse propget(final PropertyGetRequest request) throws IOException, ServerException {
+    public CLIOutputResponse propget(final PropertyGetRequest request) throws IOException, ServerException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> uArgs = defaultArgs();
@@ -896,7 +918,7 @@ public class SubversionApi {
      * @throws ServerException
      *         if there is a Subversion issue
      */
-    public CLIOutputResponse proplist(final PropertyListRequest request) throws IOException, ServerException {
+    public CLIOutputResponse proplist(final PropertyListRequest request) throws IOException, ServerException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> uArgs = defaultArgs();
@@ -956,9 +978,8 @@ public class SubversionApi {
      * @return list of arguments
      */
     private List<String> defaultArgs() {
-        List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<>();
 
-        args.add("--no-auth-cache");
         args.add("--non-interactive");
         args.add("--trust-server-cert");
 
@@ -978,21 +999,31 @@ public class SubversionApi {
         return paths;
     }
 
-    private CommandLineResult runCommand(@Nullable Map<String, String> env,
+    private CommandLineResult runCommand(Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
-                                         List<String> paths) throws SubversionException {
-        String[] credentials = getCredentialArgs(projectPath.getAbsolutePath());
+                                         List<String> paths) throws SubversionException, UnauthorizedException {
         String repoUrl = getRepositoryUrl(projectPath.getAbsolutePath());
-        return runCommand(env, args, projectPath, paths, credentials, repoUrl);
+        return runCommand(env, args, projectPath, paths, null, null, repoUrl);
     }
 
-    private CommandLineResult runCommand(@Nullable Map<String, String> env,
+    private CommandLineResult runCommand(Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths,
-                                         @Nullable String[] credentials,
-                                         String repoUrl) throws SubversionException {
+                                         String username,
+                                         String password) throws SubversionException, UnauthorizedException {
+        String repoUrl = getRepositoryUrl(projectPath.getAbsolutePath());
+        return runCommand(env, args, projectPath, paths, username, password, repoUrl);
+    }
+
+    private CommandLineResult runCommand(Map<String, String> env,
+                                         List<String> args,
+                                         File projectPath,
+                                         List<String> paths,
+                                         String username,
+                                         String password,
+                                         String repoUrl) throws SubversionException, UnauthorizedException {
         final List<String> lines = new ArrayList<>();
         final CommandLineResult result;
         final StringBuffer buffer;
@@ -1004,8 +1035,8 @@ public class SubversionApi {
         }
 
         String[] credentialsArgs;
-        if (credentials != null && credentials.length == 2) {
-            credentialsArgs = new String[]{"--username", credentials[0], "--password", credentials[1]};
+        if (!isNullOrEmpty(username) && !isNullOrEmpty(password)) {
+            credentialsArgs = new String[] {"--username", username, "--password", password};
         } else {
             credentialsArgs = null;
         }
@@ -1052,29 +1083,20 @@ public class SubversionApi {
             }
 
             if (!isWarning) {
-                throw new SubversionException(buffer.toString());
+                String errorMessage = buffer.toString();
+                if (errorMessage.endsWith("Authentication failed\n")) {
+                    throw new UnauthorizedException("Authentication failed", ErrorCodes.UNAUTHORIZED_SVN_OPERATION);
+                } else {
+                    throw new SubversionException(errorMessage);
+                }
             }
         }
 
         return result;
     }
 
-    private String[] getCredentialArgs(final String projectPath) throws SubversionException {
-        Credentials credentials;
-        try {
-            credentials = this.credentialsProvider.getCredentials(getRepositoryUrl(projectPath));
-        } catch (final CredentialsException e) {
-            credentials = null;
-        }
-        if (credentials != null) {
-            return new String[]{credentials.getUsername(), credentials.getPassword()};
-        } else {
-            return null;
-        }
-    }
-
     public String getRepositoryUrl(final String projectPath) throws SubversionException {
-        return this.repositoryUrlProvider.getRepositoryUrl(projectPath);
+        return repositoryUrlProvider.getRepositoryUrl(projectPath);
     }
 
     /**
@@ -1084,9 +1106,8 @@ public class SubversionApi {
      *         request
      * @return response containing list of subversion items
      * @throws SubversionException
-     * @throws IOException
      */
-    public InfoResponse info(final InfoRequest request) throws SubversionException {
+    public InfoResponse info(final InfoRequest request) throws SubversionException, UnauthorizedException {
         final List<String> args = defaultArgs();
 
         if (request.getRevision() != null && !request.getRevision().trim().isEmpty()) {
@@ -1099,10 +1120,14 @@ public class SubversionApi {
 
         args.add("info");
 
-        List<String> paths = new ArrayList<String>();
+        List<String> paths = new ArrayList<>();
         paths.add(request.getTarget());
-        final CommandLineResult result = runCommand(null, args, new File(request.getProjectPath()),
-                                                    addWorkingCopyPathIfNecessary(paths));
+        final CommandLineResult result = runCommand(null,
+                                                    args,
+                                                    new File(request.getProjectPath()),
+                                                    addWorkingCopyPathIfNecessary(paths),
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
         final InfoResponse response = DtoFactory.getInstance().createDto(InfoResponse.class)
                                                 .withCommand(result.getCommandLine().toString())
@@ -1110,11 +1135,11 @@ public class SubversionApi {
                                                 .withErrorOutput(result.getStderr());
 
         if (result.getExitCode() == 0) {
-            List<SubversionItem> items = new ArrayList<SubversionItem>();
+            List<SubversionItem> items = new ArrayList<>();
             response.withItems(items);
 
             Iterator<String> iterator = result.getStdout().iterator();
-            List<String> itemProperties = new ArrayList<String>();
+            List<String> itemProperties = new ArrayList<>();
 
             while (iterator.hasNext()) {
                 String propertyLine = iterator.next();
@@ -1162,7 +1187,7 @@ public class SubversionApi {
      * @throws IOException
      * @throws SubversionException
      */
-    public CLIOutputResponse merge(final MergeRequest request) throws IOException, SubversionException {
+    public CLIOutputResponse merge(final MergeRequest request) throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> cliArgs = defaultArgs();
@@ -1183,7 +1208,7 @@ public class SubversionApi {
                          .withErrOutput(result.getStderr());
     }
 
-    public CLIOutputResponse cleanup(final CleanupRequest request) throws SubversionException, IOException {
+    public CLIOutputResponse cleanup(final CleanupRequest request) throws SubversionException, IOException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> cliArgs = defaultArgs();
@@ -1198,7 +1223,7 @@ public class SubversionApi {
                          .withOutput(result.getStdout());
     }
 
-    public GetRevisionsResponse getRevisions(GetRevisionsRequest request) throws IOException, SubversionException {
+    public GetRevisionsResponse getRevisions(GetRevisionsRequest request) throws IOException, SubversionException, UnauthorizedException {
         final File projectPath = new File(request.getProjectPath());
 
         final List<String> uArgs = defaultArgs();
@@ -1209,9 +1234,9 @@ public class SubversionApi {
         final CommandLineResult result = runCommand(null, uArgs, projectPath, Arrays.asList(request.getPath()));
 
         final GetRevisionsResponse response = DtoFactory.getInstance().createDto(GetRevisionsResponse.class)
-                                                .withCommand(result.getCommandLine().toString())
-                                                .withOutput(result.getStdout())
-                                                .withErrOutput(result.getStderr());
+                                                        .withCommand(result.getCommandLine().toString())
+                                                        .withOutput(result.getStdout())
+                                                        .withErrOutput(result.getStderr());
 
         if (result.getExitCode() == 0) {
             List<String> revisions = result.getStdout().parallelStream()

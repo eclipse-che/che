@@ -23,11 +23,12 @@ import org.eclipse.che.api.machine.shared.dto.event.MachineProcessEvent;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.macro.MacroProcessor;
 import org.eclipse.che.ide.api.machine.CommandOutputMessageUnmarshaller;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
-import org.eclipse.che.ide.extension.machine.client.command.CommandManager;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessFinishedEvent;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -59,10 +60,10 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     private final MachineServiceClient   machineServiceClient;
     private final MachineResources       resources;
     private final AsyncRequestFactory    asyncRequestFactory;
-    private final CommandConfiguration commandConfiguration;
-    private final EventBus       eventBus;
-    private final Machine        machine;
-    private final CommandManager commandManager;
+    private final CommandImpl            command;
+    private final EventBus               eventBus;
+    private final Machine                machine;
+    private final CommandManager         commandManager;
 
     private MessageBus     messageBus;
     private int            pid;
@@ -76,7 +77,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     /** Follow output when printing text */
     private boolean followOutput = true;
 
-    private List<ConsoleOutputListener> outputListenes = new ArrayList<>();
+    private final List<ActionDelegate> actionDelegates = new ArrayList<>();
 
     @Inject
     public CommandOutputConsolePresenter(final OutputConsoleView view,
@@ -85,16 +86,17 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
                                          MachineServiceClient machineServiceClient,
                                          MachineResources resources,
                                          CommandManager commandManager,
+                                         MacroProcessor macroProcessor,
                                          EventBus eventBus,
                                          AsyncRequestFactory asyncRequestFactory,
-                                         @Assisted CommandConfiguration commandConfiguration,
+                                         @Assisted CommandImpl command,
                                          @Assisted Machine machine) {
         this.view = view;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
         this.machineServiceClient = machineServiceClient;
         this.resources = resources;
         this.asyncRequestFactory = asyncRequestFactory;
-        this.commandConfiguration = commandConfiguration;
+        this.command = command;
         this.machine = machine;
         this.messageBus = messageBusProvider.getMessageBus();
         this.eventBus = eventBus;
@@ -102,9 +104,9 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
         view.setDelegate(this);
 
-        final String previewUrl = commandConfiguration.getAttributes().get(PREVIEW_URL_ATTR);
+        final String previewUrl = command.getAttributes().get(PREVIEW_URL_ATTR);
         if (!isNullOrEmpty(previewUrl)) {
-            commandManager.substituteProperties(previewUrl).then(new Operation<String>() {
+            macroProcessor.expandMacros(previewUrl).then(new Operation<String>() {
                 @Override
                 public void apply(String arg) throws OperationException {
                     view.showPreviewUrl(arg);
@@ -121,13 +123,13 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     }
 
     @Override
-    public CommandConfiguration getCommand() {
-        return commandConfiguration;
+    public CommandImpl getCommand() {
+        return command;
     }
 
     @Override
     public String getTitle() {
-        return commandConfiguration.getName();
+        return command.getName();
     }
 
     @Override
@@ -146,8 +148,8 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
             protected void onMessageReceived(String result) {
                 view.print(result, result.endsWith("\r"));
 
-                for (ConsoleOutputListener listener : outputListenes) {
-                    listener.onConsoleOutput(CommandOutputConsolePresenter.this);
+                for (ActionDelegate actionDelegate : actionDelegates) {
+                    actionDelegate.onConsoleOutput(CommandOutputConsolePresenter.this);
                 }
             }
 
@@ -161,7 +163,7 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     }
 
     @Override
-    public void attachToProcess(final MachineProcessDto process) {
+    public void attachToProcess(MachineProcessDto process) {
         this.pid = process.getPid();
         view.showCommandLine(process.getCommandLine());
         //try to restore previous log of the process
@@ -260,25 +262,25 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
 
     @Override
     public void close() {
-        outputListenes.clear();
+        actionDelegates.clear();
     }
 
     @Override
-    public void addOutputListener(ConsoleOutputListener listener) {
-        outputListenes.add(listener);
+    public void addActionDelegate(ActionDelegate actionDelegate) {
+        actionDelegates.add(actionDelegate);
     }
 
     @Override
     public void reRunProcessButtonClicked() {
         if (isFinished()) {
-            commandManager.executeCommand(commandConfiguration, machine);
+            commandManager.executeCommand(command, machine);
         } else {
             machineServiceClient.stopProcess(machine.getWorkspaceId(),
                                              machine.getId(),
                                              pid).then(new Operation<Void>() {
                 @Override
                 public void apply(Void arg) throws OperationException {
-                    commandManager.executeCommand(commandConfiguration, machine);
+                    commandManager.executeCommand(command, machine);
                 }
             });
         }
@@ -292,6 +294,13 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     @Override
     public void clearOutputsButtonClicked() {
         view.clearConsole();
+    }
+
+    @Override
+    public void downloadOutputsButtonClicked() {
+        for (ActionDelegate actionDelegate : actionDelegates) {
+            actionDelegate.onDownloadOutput(this);
+        }
     }
 
     @Override
@@ -313,6 +322,16 @@ public class CommandOutputConsolePresenter implements CommandOutputConsole, Outp
     public void onOutputScrolled(boolean bottomReached) {
         followOutput = bottomReached;
         view.toggleScrollToEndButton(bottomReached);
+    }
+
+    /**
+     * Returns the console text.
+     *
+     * @return
+     *          console text
+     */
+    public String getText() {
+        return view.getText();
     }
 
 }

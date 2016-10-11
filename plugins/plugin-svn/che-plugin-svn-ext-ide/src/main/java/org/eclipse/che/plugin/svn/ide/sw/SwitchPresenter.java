@@ -19,9 +19,9 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.project.shared.NodesResources;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -71,8 +71,10 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
                            SubversionOutputConsoleFactory consoleFactory,
                            ProcessesPanelPresenter processesPanelPresenter,
                            StatusColors statusColors,
-                           NodesResources resources) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+                           NodesResources resources,
+                           SubversionExtensionLocalizationConstants locale,
+                           SubversionCredentialsDialog credentialsDialog) {
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, locale, notificationManager, credentialsDialog);
 
         this.notificationManager = notificationManager;
         this.constants = constants;
@@ -91,7 +93,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
 
         invalidateLoadedData();
 
-        service.info(appContext.getRootProject().getLocation(), Path.valueOf("."), "HEAD", false).then(new Operation<InfoResponse>() {
+        service.info(appContext.getRootProject().getLocation(), ".", "HEAD", false).then(new Operation<InfoResponse>() {
             @Override
             public void apply(InfoResponse response) throws OperationException {
                 if (!response.getItems().isEmpty()) {

@@ -44,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.mockito.Mockito.mock;
+
 /**
  * @author gazarenkov
  */
@@ -120,11 +122,10 @@ public class WsAgentTestBase {
 
         TestWorkspaceHolder wsHolder = new  TestWorkspaceHolder();
 
-        projectTreeChangesDetector = new ProjectTreeChangesDetector(null);
 
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
                                 importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, wsHolder,
-                                projectTreeChangesDetector);
+                                mock(ProjectTreeChangesDetector.class));
         pm.initWatcher();
     }
 

@@ -14,9 +14,8 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage;
-
-import javax.validation.constraints.NotNull;
+import org.eclipse.che.ide.api.command.CommandPage;
+import org.eclipse.che.ide.api.command.CommandImpl;
 
 /**
  * Page allows to edit arbitrary command.
@@ -24,52 +23,60 @@ import javax.validation.constraints.NotNull;
  * @author Artem Zatsarynnyi
  */
 @Singleton
-public class CustomPagePresenter implements CustomPageView.ActionDelegate, CommandConfigurationPage<CustomCommandConfiguration> {
+public class CustomPagePresenter implements CustomPageView.ActionDelegate, CommandPage {
 
     private final CustomPageView view;
 
-    private CustomCommandConfiguration editedConfiguration;
-    private String                     originCommandLine;
-    private DirtyStateListener         listener;
-    private FieldStateActionDelegate   delegate;
+    private CommandImpl editedCommand;
+
+    // initial value of the 'command line' parameter
+    private String commandLineInitial;
+
+    private DirtyStateListener listener;
 
     @Inject
     public CustomPagePresenter(CustomPageView view) {
         this.view = view;
+
         view.setDelegate(this);
     }
 
     @Override
-    public void resetFrom(@NotNull CustomCommandConfiguration configuration) {
-        editedConfiguration = configuration;
-        originCommandLine = configuration.getCommandLine();
+    public void resetFrom(CommandImpl command) {
+        editedCommand = command;
+        commandLineInitial = command.getCommandLine();
     }
 
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
 
-        view.setCommandLine(editedConfiguration.getCommandLine());
+        view.setCommandLine(editedCommand.getCommandLine());
+    }
+
+    @Override
+    public void onSave() {
+        commandLineInitial = editedCommand.getCommandLine();
     }
 
     @Override
     public boolean isDirty() {
-        return !originCommandLine.equals(editedConfiguration.getCommandLine());
+        return !commandLineInitial.equals(editedCommand.getCommandLine());
     }
 
     @Override
-    public void setDirtyStateListener(@NotNull DirtyStateListener listener) {
+    public void setDirtyStateListener(DirtyStateListener listener) {
         this.listener = listener;
     }
 
     @Override
     public void setFieldStateActionDelegate(FieldStateActionDelegate delegate) {
-        this.delegate = delegate;
     }
 
     @Override
     public void onCommandLineChanged() {
-        editedConfiguration.setCommandLine(view.getCommandLine());
+        editedCommand.setCommandLine(view.getCommandLine());
+
         listener.onDirtyStateChanged();
     }
 }

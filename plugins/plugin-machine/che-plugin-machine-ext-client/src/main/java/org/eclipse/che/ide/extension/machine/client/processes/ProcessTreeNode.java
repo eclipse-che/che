@@ -49,15 +49,16 @@ public class ProcessTreeNode {
     private       TreeNodeElement<ProcessTreeNode> treeNodeElement;
 
     private boolean                                hasUnreadContent;
+    private boolean                                hasTerminalAgent;
+    private boolean                                hasSSHAgent;
 
     private boolean                                running;
 
-    @Inject
-    public ProcessTreeNode(@Assisted ProcessNodeType type,
-                           @Assisted ProcessTreeNode parent,
-                           @Assisted("data") Object data,
-                           @Assisted SVGResource icon,
-                           @Assisted Collection<ProcessTreeNode> children) {
+    public ProcessTreeNode(ProcessNodeType type,
+                           ProcessTreeNode parent,
+                           Object data,
+                           SVGResource icon,
+                           Collection<ProcessTreeNode> children) {
         this.type = type;
         this.parent = parent;
         this.data = data;
@@ -141,6 +142,22 @@ public class ProcessTreeNode {
         this.hasUnreadContent = hasUnreadContent;
     }
 
+    public boolean hasTerminalAgent() {
+        return hasTerminalAgent;
+    }
+
+    public void setHasTerminalAgent(boolean hasTerminalAgent) {
+        this.hasTerminalAgent = hasTerminalAgent;
+    }
+
+    public boolean hasSSHAgent() {
+        return hasSSHAgent;
+    }
+
+    public void setHasSSHAgent(boolean hasSSHAgent) {
+        this.hasSSHAgent = hasSSHAgent;
+    }
+
     public boolean isRunning() {
         return running;
     }
@@ -157,11 +174,11 @@ public class ProcessTreeNode {
         ProcessTreeNode that = (ProcessTreeNode)o;
 
         return id.equals(that.id);
-
     }
 
     @Override
     public int hashCode() {
         return id.hashCode();
     }
+
 }

@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
@@ -34,11 +35,12 @@ public class UpdateToRevisionPresenter extends UpdatePresenter implements Update
                                      NotificationManager notificationManager,
                                      SubversionOutputConsoleFactory consoleFactory,
                                      SubversionClientService service,
+                                     SubversionCredentialsDialog credentialsDialog,
                                      SubversionExtensionLocalizationConstants constants,
                                      ProcessesPanelPresenter processesPanelPresenter,
                                      UpdateToRevisionView view,
                                      StatusColors statusColors) {
-        super(appContext, consoleFactory, service, processesPanelPresenter, constants, notificationManager, statusColors);
+        super(appContext, consoleFactory, service, credentialsDialog, processesPanelPresenter, constants, notificationManager, statusColors);
 
         this.view = view;
 

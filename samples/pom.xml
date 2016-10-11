@@ -16,17 +16,21 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>5.0.0-M5-SNAPSHOT</version>
+        <version>5.0.0-M6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.sample</groupId>
     <artifactId>che-sample-parent</artifactId>
-    <version>5.0.0-M5-SNAPSHOT</version>
+    <version>5.0.0-M6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Sample :: Parent</name>
     <modules>
+        <module>sample-plugin-embedjs</module>
         <module>sample-plugin-json</module>
         <module>sample-plugin-filetype</module>
         <module>sample-plugin-wizard</module>
+        <module>sample-plugin-nativeaccess</module>
+        <module>sample-plugin-parts</module>
+        <module>sample-plugin-serverservice</module>
     </modules>
 </project>

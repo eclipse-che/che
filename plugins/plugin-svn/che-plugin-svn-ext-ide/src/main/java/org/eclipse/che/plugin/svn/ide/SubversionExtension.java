@@ -20,7 +20,6 @@ import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.plugin.svn.ide.action.AddAction;
-import org.eclipse.che.plugin.svn.ide.action.ChangeCredentialsAction;
 import org.eclipse.che.plugin.svn.ide.action.CleanupAction;
 import org.eclipse.che.plugin.svn.ide.action.CommitAction;
 import org.eclipse.che.plugin.svn.ide.action.CopyAction;
@@ -61,7 +60,6 @@ public class SubversionExtension {
     @Inject
     public SubversionExtension(final ActionManager actionManager,
                                final AddAction addAction,
-                               final ChangeCredentialsAction changeCredentialsAction,
                                final CleanupAction cleanupAction,
                                final CommitAction commitAction,
                                final DiffAction diffAction,
@@ -84,7 +82,6 @@ public class SubversionExtension {
                                final SubversionExtensionResources resources) {
         SVN_GROUP_MAIN_MENU = constants.subversionLabel();
 
-        final Constraints beforeWindow = new Constraints(Anchor.BEFORE, IdeActions.GROUP_HELP);
         final DefaultActionGroup addCommandGroup = new DefaultActionGroup(ADD_COMMAND_GROUP, false, actionManager);
         final DefaultActionGroup mainMenu = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_MAIN_MENU);
         final DefaultActionGroup fileCommandGroup = new DefaultActionGroup(FILE_COMMAND_GROUP, false, actionManager);
@@ -102,7 +99,7 @@ public class SubversionExtension {
 
         // Register action groups
         actionManager.registerAction(SVN_GROUP_MAIN_MENU, svnMenu);
-        mainMenu.add(svnMenu, beforeWindow);
+        mainMenu.add(svnMenu, new Constraints(Anchor.BEFORE, IdeActions.GROUP_PROFILE));
 
         actionManager.registerAction(REMOTE_COMMAND_GROUP, remoteCommandGroup);
         svnMenu.add(remoteCommandGroup);
@@ -177,9 +174,6 @@ public class SubversionExtension {
         addCommandGroup.add(unlockAction);
         actionManager.registerAction("SvnCleanup", cleanupAction);
         addCommandGroup.add(cleanupAction);
-
-        actionManager.registerAction("SvnChangeCredentials", changeCredentialsAction);
-        credentialsCommandGroup.add(changeCredentialsAction);
 
         //context menu
         DefaultActionGroup contextGroup = new DefaultActionGroup("Subversion", true, actionManager);

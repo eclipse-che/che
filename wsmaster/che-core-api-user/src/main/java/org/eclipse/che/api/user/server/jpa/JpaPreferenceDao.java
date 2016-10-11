@@ -13,12 +13,10 @@ package org.eclipse.che.api.user.server.jpa;
 import com.google.inject.persist.Transactional;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -31,7 +29,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -41,8 +38,6 @@ import static java.util.Objects.requireNonNull;
  */
 @Singleton
 public class JpaPreferenceDao implements PreferenceDao {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaPreferenceDao.class);
 
     @Inject
     private Provider<EntityManager> managerProvider;
@@ -134,7 +129,8 @@ public class JpaPreferenceDao implements PreferenceDao {
     }
 
     @Singleton
-    public static class RemovePreferencesBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemovePreferencesBeforeUserRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
 
         @Inject
         private EventService     eventService;
@@ -143,21 +139,17 @@ public class JpaPreferenceDao implements PreferenceDao {
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                preferenceDao.remove(event.getUser().getId());
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove preferences before user '%s' is removed", event.getUser().getId()), x);
-            }
+        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+            preferenceDao.remove(event.getUser().getId());
         }
     }
 }

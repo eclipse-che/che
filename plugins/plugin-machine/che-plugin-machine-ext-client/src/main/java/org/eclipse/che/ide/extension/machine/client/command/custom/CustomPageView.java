@@ -22,16 +22,16 @@ import org.eclipse.che.ide.api.mvp.View;
 @ImplementedBy(CustomPageViewImpl.class)
 public interface CustomPageView extends View<CustomPageView.ActionDelegate> {
 
-    /** Returns command line. */
+    /** Returns value of the 'Command line' field. */
     String getCommandLine();
 
-    /** Sets command line. */
+    /** Sets value of the 'Command line' field. */
     void setCommandLine(String commandLine);
 
     /** Action handler for the view actions/controls. */
     interface ActionDelegate {
 
-        /** Called when command line has been changed. */
+        /** Called when value of the 'Command line' field has been changed. */
         void onCommandLineChanged();
     }
 }

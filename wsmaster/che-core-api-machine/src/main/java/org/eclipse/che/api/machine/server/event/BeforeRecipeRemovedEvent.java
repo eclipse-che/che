@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.event;
 
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
 
 /**
@@ -17,7 +18,7 @@ import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
  *
  * @author Max Shaposhnik
  */
-public class BeforeRecipeRemovedEvent {
+public class BeforeRecipeRemovedEvent extends CascadeRemovalEvent {
     private final RecipeImpl recipe;
 
     public BeforeRecipeRemovedEvent(RecipeImpl recipe) {

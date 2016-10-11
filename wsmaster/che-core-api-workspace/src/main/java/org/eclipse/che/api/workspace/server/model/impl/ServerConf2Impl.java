@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import javax.persistence.Basic;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.util.HashMap;
@@ -37,7 +38,7 @@ public class ServerConf2Impl implements ServerConf2 {
     @Basic
     private String protocol;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Map<String, String> properties;
 
     public ServerConf2Impl() {}
