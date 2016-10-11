@@ -25,7 +25,6 @@ import com.google.inject.persist.jpa.JpaPersistModule;
 
 import org.eclipse.che.api.core.jdbc.jpa.eclipselink.EntityListenerInjectionManagerInitializer;
 import org.eclipse.che.api.core.jdbc.jpa.guice.JpaInitializer;
-import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.local.storage.stack.StackLocalStorage;
 import org.eclipse.che.api.machine.server.jpa.MachineJpaModule;
@@ -43,6 +42,7 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
+import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -50,13 +50,12 @@ import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.stack.StackJsonAdapter;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.persistence.internal.sessions.cdi.EntityListenerInjectionManager;
+import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.inject.Singleton;
 import javax.persistence.EntityManagerFactory;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -116,6 +115,7 @@ public class LocalToJpaDataMigratorTest {
                 install(new WorkspaceJpaModule());
                 install(new MachineJpaModule());
                 bind(StackJsonAdapter.class);
+                bind(WorkspaceManager.class).toInstance(Mockito.mock(WorkspaceManager.class));
             }
         });
 

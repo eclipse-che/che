@@ -154,6 +154,14 @@ public class EventService {
      */
     public void unsubscribe(EventSubscriber<?> subscriber) {
         final Class<?> eventType = getEventType(subscriber);
+        doUnsubscribe(subscriber, eventType);
+    }
+
+    public <T> void unsubscribe(EventSubscriber<T> subscriber, Class<T> eventType) {
+        doUnsubscribe(subscriber, eventType);
+    }
+
+    private void doUnsubscribe(EventSubscriber<?> subscriber, Class<?> eventType) {
         final Set<EventSubscriber> entries = subscribersByEventType.get(eventType);
         if (entries != null && !entries.isEmpty()) {
             boolean changed = entries.remove(subscriber);

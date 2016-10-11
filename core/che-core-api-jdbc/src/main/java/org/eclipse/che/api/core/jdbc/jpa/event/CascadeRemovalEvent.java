@@ -8,24 +8,18 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.machine.server.event;
-
-import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+package org.eclipse.che.api.core.jdbc.jpa.event;
 
 /**
- * Pre-removal event of {@link RecipeImpl}.
+ * Special event type which is needed only for
+ * notification in the process of cascade removing.
  *
- * @author Max Shaposhnik
+ * @author Anton Korneta
  */
-public class BeforeRecipeRemovedEvent extends CascadeRemovalEvent {
-    private final RecipeImpl recipe;
+public abstract class CascadeRemovalEvent {
+    private final RemovalContext context = new RemovalContext();
 
-    public BeforeRecipeRemovedEvent(RecipeImpl recipe) {
-        this.recipe = recipe;
-    }
-
-    public RecipeImpl getRecipe() {
-        return recipe;
+    public RemovalContext getContext() {
+        return context;
     }
 }

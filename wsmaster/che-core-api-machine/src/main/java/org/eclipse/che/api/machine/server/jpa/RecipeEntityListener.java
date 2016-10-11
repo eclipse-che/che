@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.jpa;
 
+import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.event.BeforeRecipeRemovedEvent;
 import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
@@ -31,6 +32,10 @@ public class RecipeEntityListener {
 
     @PreRemove
     private void preRemove(RecipeImpl recipe) {
-        eventService.publish(new BeforeRecipeRemovedEvent(recipe));
+        final BeforeRecipeRemovedEvent event = new BeforeRecipeRemovedEvent(recipe);
+        eventService.publish(event);
+        if (event.getContext().isFailed()) {
+            throw new CascadeRemovalException(event.getContext().getCause());
+        }
     }
 }
