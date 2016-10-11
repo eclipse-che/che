@@ -11,20 +11,20 @@
 package zend.com.che.plugin.zdb.server.connection;
 
 /**
- * Interface for Zend debug requests.
+ * Abstract Zend debug message.
  * 
  * @author Bartlomiej Laczkowski
  */
-public interface IDebugRequest extends IDebugMessage {
+public abstract class AbstractMessage implements IDebugMessage {
 
-	/**
-	 * Set the request id.
-	 */
-	public void setID(int id);
+	@Override
+	public String getTransferEncoding() {
+		return ENCODING;
+	}
 
-	/**
-	 * Return the request id.
-	 */
-	public int getID();
-	
+	@Override
+	public void setTransferEncoding(String encoding) {
+		// TODO - support user preferred encoding
+	}
+
 }
