@@ -16,8 +16,6 @@ import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
-import org.eclipse.che.plugin.jsonexample.ide.editor.JsonExampleCodeAssistProcessorFactory;
-import org.eclipse.che.plugin.jsonexample.ide.editor.JsonExampleEditorConfigurationFactory;
 import org.eclipse.che.plugin.jsonexample.ide.project.JsonExampleProjectWizardRegistrar;
 
 /**
