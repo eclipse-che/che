@@ -99,8 +99,8 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
         final Project project = appContext.getRootProject();
         checkState(project != null);
 
+        switchView.setSwitchButtonEnabled(false);
         invalidateLoadedData();
-
 
         performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<InfoResponse>() {
             @Override
@@ -114,14 +114,22 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
                     SubversionItem subversionItem = response.getItems().get(0);
                     projectUri = subversionItem.getProjectUri();
                 }
+
+                defaultViewInitialization();
+                handleSwitchButton();
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
                 notificationManager.notify("Error retrieving svn info", error.getMessage(), FAIL, EMERGE_MODE);
+
+                defaultViewInitialization();
+                handleSwitchButton();
             }
         });
+    }
 
+    private void defaultViewInitialization() {
         switchView.showWindow();
         switchView.setSwitchRevisionEnabled(switchView.isSwitchToRevision());
         switchView.setLocationEnabled(switchView.isSwitchToOtherLocation());
@@ -129,8 +137,6 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
         switchView.setSelectOtherLocationButtonEnabled(switchView.isSwitchToOtherLocation());
         switchView.setWorkingCopyDepthEnabled(switchView.getDepth().isEmpty());
         switchView.setDepthEnabled(switchView.getWorkingCopyDepth().isEmpty());
-
-        handleSwitchButton();
     }
 
     @Override

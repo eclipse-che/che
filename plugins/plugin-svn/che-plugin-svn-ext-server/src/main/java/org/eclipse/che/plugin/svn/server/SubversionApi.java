@@ -84,6 +84,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.plugin.svn.server.utils.InfoUtils.getRelativeUrl;
 import static org.eclipse.che.plugin.svn.server.utils.InfoUtils.getRepositoryRoot;
 import static org.eclipse.che.plugin.svn.server.utils.SubversionUtils.recognizeProjectUri;
@@ -241,7 +242,7 @@ public class SubversionApi {
      * @param request
      *         the switch request
      * @return the response
-     * @throws SubversionException
+     * @throws ApiException
      *         if there is a Subversion issue
      */
     public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws ApiException {
@@ -271,11 +272,10 @@ public class SubversionApi {
                                               request.getUsername(),
                                               request.getPassword());
 
-        return DtoFactory.getInstance().createDto(CLIOutputWithRevisionResponse.class)
-                         .withCommand(result.getCommandLine().toString())
-                         .withOutput(result.getStdout())
-                         .withErrOutput(result.getStderr())
-                         .withRevision(SubversionUtils.getUpdateRevision(result.getStdout()));
+        return newDto(CLIOutputWithRevisionResponse.class).withCommand(result.getCommandLine().toString())
+                                                          .withOutput(result.getStdout())
+                                                          .withErrOutput(result.getStderr())
+                                                          .withRevision(SubversionUtils.getUpdateRevision(result.getStdout()));
     }
 
     /**
@@ -568,12 +568,10 @@ public class SubversionApi {
      * @see #info(InfoRequest)
      */
     public ListResponse listBranches(final ListRequest request) throws ApiException {
-        InfoResponse info = info(DtoFactory.getInstance()
-                                           .createDto(InfoRequest.class)
-                                           .withProjectPath(request.getProjectPath())
-                                           .withTarget(".")
-                                           .withPassword(request.getPassword())
-                                           .withUsername(request.getUsername()));
+        InfoResponse info = info(newDto(InfoRequest.class).withProjectPath(request.getProjectPath())
+                                                          .withTarget(".")
+                                                          .withPassword(request.getPassword())
+                                                          .withUsername(request.getUsername()));
 
         final List<String> args = defaultArgs();
         args.add("list");
@@ -592,14 +590,13 @@ public class SubversionApi {
                                                     request.getUsername(),
                                                     request.getPassword());
 
-        return DtoFactory.getInstance().createDto(ListResponse.class)
-                         .withCommand(result.getCommandLine().toString())
-                         .withOutput(result.getStdout()
-                                           .stream()
-                                           .filter(s -> s.endsWith("/"))
-                                           .map(s -> s.substring(0, s.length() - 1))
-                                           .collect(Collectors.toList()))
-                         .withErrorOutput(result.getStderr());
+        return newDto(ListResponse.class).withCommand(result.getCommandLine().toString())
+                                         .withOutput(result.getStdout()
+                                                           .stream()
+                                                           .filter(s -> s.endsWith("/"))
+                                                           .map(s -> s.substring(0, s.length() - 1))
+                                                           .collect(Collectors.toList()))
+                                         .withErrorOutput(result.getStderr());
     }
 
     /**
@@ -612,12 +609,10 @@ public class SubversionApi {
      * @see #info(InfoRequest)
      */
     public ListResponse listTags(final ListRequest request) throws ApiException {
-        InfoResponse info = info(DtoFactory.getInstance()
-                                           .createDto(InfoRequest.class)
-                                           .withProjectPath(request.getProjectPath())
-                                           .withTarget(".")
-                                           .withPassword(request.getPassword())
-                                           .withUsername(request.getUsername()));
+        InfoResponse info = info(newDto(InfoRequest.class).withProjectPath(request.getProjectPath())
+                                                          .withTarget(".")
+                                                          .withPassword(request.getPassword())
+                                                          .withUsername(request.getUsername()));
 
         final List<String> args = defaultArgs();
         args.add("list");
@@ -636,14 +631,13 @@ public class SubversionApi {
                                                     request.getUsername(),
                                                     request.getPassword());
 
-        return DtoFactory.getInstance().createDto(ListResponse.class)
-                         .withCommand(result.getCommandLine().toString())
-                         .withOutput(result.getStdout()
-                                           .stream()
-                                           .filter(s -> s.endsWith("/"))
-                                           .map(s -> s.substring(0, s.length() - 1))
-                                           .collect(Collectors.toList()))
-                         .withErrorOutput(result.getStderr());
+        return newDto(ListResponse.class).withCommand(result.getCommandLine().toString())
+                                         .withOutput(result.getStdout()
+                                                           .stream()
+                                                           .filter(s -> s.endsWith("/"))
+                                                           .map(s -> s.substring(0, s.length() - 1))
+                                                           .collect(Collectors.toList()))
+                                         .withErrorOutput(result.getStderr());
     }
 
 
@@ -666,10 +660,9 @@ public class SubversionApi {
                                                     request.getUsername(),
                                                     request.getPassword());
 
-        return DtoFactory.getInstance().createDto(ListResponse.class)
-                         .withCommand(result.getCommandLine().toString())
-                         .withOutput(result.getStdout())
-                         .withErrorOutput(result.getStderr());
+        return newDto(ListResponse.class).withCommand(result.getCommandLine().toString())
+                                         .withOutput(result.getStdout())
+                                         .withErrorOutput(result.getStderr());
     }
 
     /**

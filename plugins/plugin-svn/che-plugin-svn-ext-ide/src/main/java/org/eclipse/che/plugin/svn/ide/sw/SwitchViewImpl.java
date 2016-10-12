@@ -278,7 +278,9 @@ public class SwitchViewImpl extends Window implements SwitchView {
     protected void onClose() { }
 
     @UiHandler("switchToBranch")
-    public void onSwitchToBranchClicked(final ClickEvent event) { delegate.onSwitchToBranchChanged(); }
+    public void onSwitchToBranchClicked(final ClickEvent event) {
+        delegate.onSwitchToBranchChanged();
+    }
 
     @UiHandler("switchToTrunk")
     public void onSwitchToTrunkClicked(final ClickEvent event) {
@@ -320,7 +322,6 @@ public class SwitchViewImpl extends Window implements SwitchView {
         delegate.onSelectOtherLocationClicked();
     }
 
-
     @UiHandler("depth")
     public void onDepthChanged(final ChangeEvent event) {
         delegate.onDepthChanged();
@@ -330,6 +331,5 @@ public class SwitchViewImpl extends Window implements SwitchView {
     public void onWorkingCopyDepthChanged(final ChangeEvent event) {
         delegate.onWorkingCopyDepthChanged();
     }
-
 
 }
