@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.shared;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -36,4 +37,20 @@ public interface ListRequest {
 
     ListRequest withTargetPath(String targetPath);
 
+
+    /**************************************************************************
+     * Credentials
+     **************************************************************************/
+
+    String getUsername();
+
+    void setUsername(@Nullable final String username);
+
+    ListRequest withUsername(@Nullable final String username);
+
+    String getPassword();
+
+    void setPassword(@Nullable final String password);
+
+    ListRequest withPassword(@Nullable final String password);
 }

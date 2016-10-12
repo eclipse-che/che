@@ -119,7 +119,7 @@ public interface SubversionClientService {
      * @param credentials
      *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<InfoResponse> info(Path project, Path target, String revision, boolean children, @Nullable Credentials credentials);
+    Promise<InfoResponse> info(Path project, String target, String revision, boolean children, @Nullable Credentials credentials);
 
     Promise<InfoResponse> info(Path project, String target, String revision, boolean children);
 
@@ -195,7 +195,8 @@ public interface SubversionClientService {
                                                     boolean ignoreExternals,
                                                     boolean ignoreAncestry,
                                                     boolean relocate,
-                                                    boolean force);
+                                                    boolean force,
+                                                    @Nullable Credentials credentials);
 
     Promise<CLIOutputResponse> showLog(Path project, Path[] paths, String revision);
 
@@ -353,7 +354,7 @@ public interface SubversionClientService {
      * @param target
      *      the target path to browse
      */
-    Promise<CLIOutputResponse> list(Path project, String target);
+    Promise<CLIOutputResponse> list(Path project, String target, @Nullable Credentials credentials);
 
     /**
      * Returns list of the branches of the project.
@@ -361,7 +362,7 @@ public interface SubversionClientService {
      * @param project
      *      the project path
      */
-    Promise<CLIOutputResponse> listBranches(Path project);
+    Promise<CLIOutputResponse> listBranches(Path project, @Nullable Credentials credentials);
 
     /**
      * Returns list of the tags of the project.
@@ -369,5 +370,5 @@ public interface SubversionClientService {
      * @param project
      *      the project path
      */
-    Promise<CLIOutputResponse> listTags(Path project);
+    Promise<CLIOutputResponse> listTags(Path project, @Nullable Credentials credentials);
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.shared;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
 import javax.validation.constraints.NotNull;
@@ -113,4 +114,20 @@ public interface SwitchRequest {
     String getAccept();
 
     SwitchRequest withAccept(String accept);
+
+    /**************************************************************************
+     * Credentials
+     **************************************************************************/
+
+    String getUsername();
+
+    void setUsername(@Nullable final String username);
+
+    SwitchRequest withUsername(@Nullable final String username);
+
+    String getPassword();
+
+    void setPassword(@Nullable final String password);
+
+    SwitchRequest withPassword(@Nullable final String password);
 }

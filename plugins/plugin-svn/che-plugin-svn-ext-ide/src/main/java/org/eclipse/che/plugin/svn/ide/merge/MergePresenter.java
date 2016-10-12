@@ -105,7 +105,7 @@ public class MergePresenter extends SubversionActionPresenter implements MergeVi
         performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<InfoResponse>() {
             @Override
             public Promise<InfoResponse> perform(Credentials credentials) {
-                return service.info(project.getLocation(), toRelative(project, resources[0]), "HEAD", false, credentials);
+                return service.info(project.getLocation(), toRelative(project, resources[0]).toString(), "HEAD", false, credentials);
             }
         }, null).then(new Operation<InfoResponse>() {
             @Override

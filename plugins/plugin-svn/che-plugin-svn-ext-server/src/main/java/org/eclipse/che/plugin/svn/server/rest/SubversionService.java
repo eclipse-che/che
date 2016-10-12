@@ -30,6 +30,7 @@ import org.eclipse.che.plugin.svn.shared.GetRevisionsRequest;
 import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoRequest;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
+import org.eclipse.che.plugin.svn.shared.ListRequest;
 import org.eclipse.che.plugin.svn.shared.ListResponse;
 import org.eclipse.che.plugin.svn.shared.LockRequest;
 import org.eclipse.che.plugin.svn.shared.MergeRequest;
@@ -291,50 +292,53 @@ public class SubversionService extends Service {
     /**
      * Lists remote directory.
      *
-     * @param projectPath
-     *      the project path
-     * @param targetPath
-     *      the requested directory to browse
+     * @param request
+     *      the list request
      * @return children of the requested target path
      * @throws ApiException
      *       if there is a Subversion issue
      */
     @Path("list")
-    @GET
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public ListResponse list(final @QueryParam("project") String projectPath,
-                             final @QueryParam("target") String targetPath) throws ApiException {
-        return subversionApi.list(getAbsoluteProjectPath(projectPath), targetPath);
+    public ListResponse list(final ListRequest request) throws ApiException {
+        request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
+        return subversionApi.list(request);
     }
 
     /**
      * Returns list of the branches of the project.
      *
-     * @param projectPath
-     *      the project path
+     * @param request
+     *      the list request
      * @throws ApiException
      *         if there is a Subversion issue
      */
     @Path("branches")
-    @GET
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public ListResponse listBranches(final @QueryParam("project") String projectPath) throws ApiException {
-        return this.subversionApi.listBranches(getAbsoluteProjectPath(projectPath));
+    public ListResponse listBranches(final ListRequest request) throws ApiException {
+        request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
+        return this.subversionApi.listBranches(request);
     }
 
     /**
      * Returns list of the tags of the project.
      *
-     * @param projectPath
-     *      the project path
+     * @param request
+     *      the list request
      * @throws ApiException
      *         if there is a Subversion issue
      */
     @Path("tags")
-    @GET
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public ListResponse listTags(final @QueryParam("project") String projectPath) throws ApiException {
-        return subversionApi.listTags(getAbsoluteProjectPath(projectPath));
+    public ListResponse listTags(final ListRequest request) throws ApiException {
+        request.setProjectPath(getAbsoluteProjectPath(request.getProjectPath()));
+        return subversionApi.listTags(request);
     }
 
     /**

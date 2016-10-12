@@ -13,12 +13,17 @@ package org.eclipse.che.plugin.svn.ide.sw;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.promises.client.Function;
+import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.data.tree.Node;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
+import org.eclipse.che.ide.api.subversion.Credentials;
 import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.project.shared.NodesResources;
@@ -32,12 +37,14 @@ import org.eclipse.che.plugin.svn.shared.CLIOutputWithRevisionResponse;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
 import org.eclipse.che.plugin.svn.shared.SubversionItem;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.util.StringUtils.isNullOrEmpty;
 
 /**
  * Handler for the {@link org.eclipse.che.plugin.svn.ide.action.SwitchAction} action.
@@ -46,7 +53,8 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  */
 @Singleton
 public class SwitchPresenter extends SubversionActionPresenter implements SwitchView.ActionDelegate,
-                                                                          LocationSelectorView.ActionDelegate {
+                                                                          LocationSelectorView.ActionDelegate,
+                                                                          SvnNode.ActionDelegate {
 
     private final NotificationManager                      notificationManager;
     private final SubversionExtensionLocalizationConstants constants;
@@ -93,7 +101,13 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
 
         invalidateLoadedData();
 
-        service.info(appContext.getRootProject().getLocation(), ".", "HEAD", false).then(new Operation<InfoResponse>() {
+
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<InfoResponse>() {
+            @Override
+            public Promise<InfoResponse> perform(Credentials credentials) {
+                return service.info(appContext.getRootProject().getLocation(), ".", "HEAD", false, credentials);
+            }
+        }, null).then(new Operation<InfoResponse>() {
             @Override
             public void apply(InfoResponse response) throws OperationException {
                 if (!response.getItems().isEmpty()) {
@@ -127,16 +141,22 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
 
     @Override
     public void onSwitchClicked() {
-        service.doSwitch(switchView.getLocation(),
-                         appContext.getRootProject().getLocation(),
-                         switchView.isSwitchToHeadRevision() ? "HEAD" : switchView.getRevision(),
-                         switchView.getDepth(),
-                         switchView.getWorkingCopyDepth(),
-                         switchView.getAccept(),
-                         switchView.isIgnoreExternals(),
-                         switchView.isIgnoreAncestry(),
-                         false,
-                         switchView.isForce()).then(new Operation<CLIOutputWithRevisionResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputWithRevisionResponse>() {
+            @Override
+            public Promise<CLIOutputWithRevisionResponse> perform(Credentials credentials) {
+                return service.doSwitch(switchView.getLocation(),
+                                        appContext.getRootProject().getLocation(),
+                                        switchView.isSwitchToHeadRevision() ? "HEAD" : switchView.getRevision(),
+                                        switchView.getDepth(),
+                                        switchView.getWorkingCopyDepth(),
+                                        switchView.getAccept(),
+                                        switchView.isIgnoreExternals(),
+                                        switchView.isIgnoreAncestry(),
+                                        false,
+                                        switchView.isForce(),
+                                        credentials);
+            }
+        }, null).then(new Operation<CLIOutputWithRevisionResponse>() {
             @Override
             public void apply(CLIOutputWithRevisionResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandSwitch());
@@ -173,7 +193,12 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
             return;
         }
 
-        service.listBranches(appContext.getRootProject().getLocation()).then(new Operation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputResponse>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.listBranches(appContext.getRootProject().getLocation(), credentials);
+            }
+        }, null).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 branches = response.getOutput();
@@ -207,10 +232,15 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
             return;
         }
 
-        service.listTags(appContext.getRootProject().getLocation()).then(new Operation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputResponse>() {
             @Override
-            public void apply(CLIOutputResponse arg) throws OperationException {
-                tags = arg.getOutput();
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.listTags(appContext.getRootProject().getLocation(), credentials);
+            }
+        }, null).then(new Operation<CLIOutputResponse>() {
+            @Override
+            public void apply(CLIOutputResponse response) throws OperationException {
+                tags = response.getOutput();
                 switchView.setPredefinedLocations(tags);
                 switchView.setLocation(composeSwitchLocation());
                 handleSwitchButton();
@@ -266,11 +296,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
     public void onSelectOtherLocationClicked() {
         selectorView.showWindow();
 
-        SvnNode rootNode = new SvnNode(appContext.getRootProject().getLocation(),
-                                       projectUri == null ? "^" : projectUri,
-                                       service,
-                                       notificationManager,
-                                       resources);
+        SvnNode rootNode = new SvnNode(projectUri == null ? "^" : projectUri, resources, this);
         selectorView.setRootNode(rootNode);
     }
 
@@ -290,11 +316,16 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
 
         } else if (switchView.isSwitchToBranch()) {
             return (projectUri == null ? "^/branches/"
-                                       : (projectUri + "/branches/")) + switchView.getSwitchToLocation();
+                                       : (projectUri + "/branches/"))
+                   + (isNullOrEmpty(switchView.getSwitchToLocation()) ? ""
+                                                                      : switchView.getSwitchToLocation());
 
         } else if (switchView.isSwitchToTag()) {
             return (projectUri == null ? "^/tags/"
-                                       : (projectUri + "/tags/")) + switchView.getSwitchToLocation();
+                                       : (projectUri + "/tags/"))
+                   + (isNullOrEmpty(switchView.getSwitchToLocation()) ? ""
+                                                                      : switchView.getSwitchToLocation());
+
         } else {
             return switchView.getLocation();
         }
@@ -321,5 +352,36 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
     @Override
     public void setSelectedNode(SvnNode node) {
         switchView.setLocation(node.getLocation());
+    }
+
+    @Override
+    public Promise<List<Node>> list(final String location) {
+        return performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputResponse>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                return service.list(appContext.getRootProject().getLocation(), location, credentials);
+            }
+        }, null).then(new Function<CLIOutputResponse, List<Node>>() {
+            @Override
+            public List<Node> apply(CLIOutputResponse response) throws FunctionException {
+                List<Node> nodes = new ArrayList<>();
+
+                List<String> output = response.getOutput();
+                for (String item : output) {
+                    if (item.endsWith("/")) {
+                        String nodeLocation = location + "/" + item.substring(0, item.length() - 1);
+                        nodes.add(new SvnNode(nodeLocation, resources, SwitchPresenter.this));
+                    }
+                }
+
+                return nodes;
+            }
+        }).catchError(new Function<PromiseError, List<Node>>() {
+            @Override
+            public List<Node> apply(PromiseError error) throws FunctionException {
+                notificationManager.notify("Error retrieving children nodes. " + error.getMessage(), FAIL, EMERGE_MODE);
+                return Collections.emptyList();
+            }
+        });
     }
 }

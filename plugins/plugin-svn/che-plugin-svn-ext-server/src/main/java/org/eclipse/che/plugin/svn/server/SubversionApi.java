@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.vfs.util.DeleteOnCloseFileInputStream;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -44,6 +45,7 @@ import org.eclipse.che.plugin.svn.shared.GetRevisionsRequest;
 import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoRequest;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
+import org.eclipse.che.plugin.svn.shared.ListRequest;
 import org.eclipse.che.plugin.svn.shared.ListResponse;
 import org.eclipse.che.plugin.svn.shared.LockRequest;
 import org.eclipse.che.plugin.svn.shared.MergeRequest;
@@ -262,7 +264,12 @@ public class SubversionApi {
         // Command Name
         cliArgs.add("switch");
 
-        CommandLineResult result = runCommand(null, cliArgs, projectPath, singletonList(request.getLocation()));
+        CommandLineResult result = runCommand(null,
+                                              cliArgs,
+                                              projectPath,
+                                              singletonList(request.getLocation()),
+                                              request.getUsername(),
+                                              request.getPassword());
 
         return DtoFactory.getInstance().createDto(CLIOutputWithRevisionResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -554,17 +561,19 @@ public class SubversionApi {
     /**
      * Returns list of the branches of the project.
      *
-     * @param projectPath
-     *      the absolute path to the project
+     * * @param request
+     *         the request
      *
-     * @see #list(String, String)
+     * @see #list(ListRequest)
      * @see #info(InfoRequest)
      */
-    public ListResponse listBranches(final String projectPath) throws ApiException {
+    public ListResponse listBranches(final ListRequest request) throws ApiException {
         InfoResponse info = info(DtoFactory.getInstance()
                                            .createDto(InfoRequest.class)
-                                           .withProjectPath(projectPath)
-                                           .withTarget("."));
+                                           .withProjectPath(request.getProjectPath())
+                                           .withTarget(".")
+                                           .withPassword(request.getPassword())
+                                           .withUsername(request.getUsername()));
 
         final List<String> args = defaultArgs();
         args.add("list");
@@ -578,8 +587,10 @@ public class SubversionApi {
 
         final CommandLineResult result = runCommand(null,
                                                     args,
-                                                    new File(projectPath),
-                                                    singletonList(path));
+                                                    new File(request.getProjectPath()),
+                                                    singletonList(path),
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
         return DtoFactory.getInstance().createDto(ListResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -594,17 +605,20 @@ public class SubversionApi {
     /**
      * Returns list of the tags of the project.
      *
-     * @param projectPath
-     *      the absolute path to the project
+     * @param request
+     *         the request
      *
-     * @see #list(String, String)
+     * @see #list(ListRequest)
      * @see #info(InfoRequest)
      */
-    public ListResponse listTags(final String projectPath) throws ApiException {
+    public ListResponse listTags(final ListRequest request) throws ApiException {
         InfoResponse info = info(DtoFactory.getInstance()
                                            .createDto(InfoRequest.class)
-                                           .withProjectPath(projectPath)
-                                           .withTarget("."));
+                                           .withProjectPath(request.getProjectPath())
+                                           .withTarget(".")
+                                           .withPassword(request.getPassword())
+                                           .withUsername(request.getUsername()));
+
         final List<String> args = defaultArgs();
         args.add("list");
 
@@ -617,8 +631,10 @@ public class SubversionApi {
 
         final CommandLineResult result = runCommand(null,
                                                     args,
-                                                    new File(projectPath),
-                                                    singletonList(branchesPath));
+                                                    new File(request.getProjectPath()),
+                                                    singletonList(branchesPath),
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
         return DtoFactory.getInstance().createDto(ListResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -634,21 +650,21 @@ public class SubversionApi {
     /**
      * List remote subversion directory.
      *
-     * @param projectPath
-     *      the absolute path to the project
-     * @param targetPath
-     *      the target path to browse
+     * @param request
+     *         the request
      *
      * @return the response containing target children
      */
-    public ListResponse list(final String projectPath, final String targetPath) throws ApiException {
+    public ListResponse list(final ListRequest request) throws ApiException {
         final List<String> args = defaultArgs();
         args.add("list");
 
         final CommandLineResult result = runCommand(null,
                                                     args,
-                                                    new File(projectPath),
-                                                    singletonList(targetPath));
+                                                    new File(request.getProjectPath()),
+                                                    singletonList(request.getTargetPath()),
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
         return DtoFactory.getInstance().createDto(ListResponse.class)
                          .withCommand(result.getCommandLine().toString())
@@ -999,7 +1015,7 @@ public class SubversionApi {
         return paths;
     }
 
-    private CommandLineResult runCommand(Map<String, String> env,
+    private CommandLineResult runCommand(@Nullable Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths) throws SubversionException, UnauthorizedException {
@@ -1007,22 +1023,22 @@ public class SubversionApi {
         return runCommand(env, args, projectPath, paths, null, null, repoUrl);
     }
 
-    private CommandLineResult runCommand(Map<String, String> env,
+    private CommandLineResult runCommand(@Nullable Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths,
-                                         String username,
-                                         String password) throws SubversionException, UnauthorizedException {
+                                         @Nullable String username,
+                                         @Nullable String password) throws SubversionException, UnauthorizedException {
         String repoUrl = getRepositoryUrl(projectPath.getAbsolutePath());
         return runCommand(env, args, projectPath, paths, username, password, repoUrl);
     }
 
-    private CommandLineResult runCommand(Map<String, String> env,
+    private CommandLineResult runCommand(@Nullable Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths,
-                                         String username,
-                                         String password,
+                                         @Nullable String username,
+                                         @Nullable String password,
                                          String repoUrl) throws SubversionException, UnauthorizedException {
         final List<String> lines = new ArrayList<>();
         final CommandLineResult result;
