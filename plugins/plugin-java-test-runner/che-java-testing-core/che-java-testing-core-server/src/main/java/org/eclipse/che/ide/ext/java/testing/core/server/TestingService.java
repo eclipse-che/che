@@ -53,7 +53,6 @@ public class TestingService {
         this.projectManager = projectManager;
         this.frameworkRegistry = frameworkRegistry;
         this.classpathRegistry = classpathRegistry;
-        System.out.println("inititilaized TestingService");
     }
 
     /**
@@ -75,17 +74,12 @@ public class TestingService {
         String projectPath = queryParameters.get("projectPath");
         String absoluteProjectPath = ResourcesPlugin.getPathToWorkspace() + projectPath;
         queryParameters.put("absoluteProjectPath", absoluteProjectPath);
-        System.out.println(projectManager);
-        System.out.println(absoluteProjectPath);
-        System.out.println(projectPath);
 
         String projectType = "";
         if (projectManager != null) {
             projectType = projectManager.getProject(projectPath).getType();
-            System.out.println(projectType);
         }
         String testFramework = queryParameters.get("testFramework");
-        System.out.println(queryParameters.toString());
 
         TestRunner runner = frameworkRegistry.getTestRunner(testFramework);
 
@@ -93,10 +87,8 @@ public class TestingService {
             throw new Exception("No test frameworks found: " + testFramework);
         }
 
-        System.out.println(runner);
         TestResult result = frameworkRegistry.getTestRunner(testFramework).execute(queryParameters,
                 classpathRegistry.getTestClasspathProvider(projectType));
-        System.out.println(result);
         return result;
     }
 

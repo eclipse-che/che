@@ -31,9 +31,6 @@ public class TestClasspathRegistry {
 
     @Inject
     public TestClasspathRegistry(Set<TestClasspathProvider> testClasspathProviders) {
-        System.out.println("inititilaized TestClasspathRegistry " + testClasspathProviders.size() + " wkwkwkwkwk " +
-                testClasspathProviders.toString());
-
         testClasspathProviders.forEach(this::register);
     }
 

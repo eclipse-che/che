@@ -106,8 +106,6 @@ public class RunClassTestAction extends JavaEditorAction {
                 notification.setStatus(FAIL);
             }
         });
-
-//        presenter.showDialog();
     }
 
     @Override

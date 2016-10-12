@@ -155,7 +155,6 @@ public class JUnitTestRunner implements TestRunner {
     private TestResult run3x(String testClass) throws Exception {
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTest = Class.forName(testClass, true, classLoader);
-//        Result r = JUnitCore.runClasses(clsTest);
         return run3xTestClasses(clsTest);
 
     }

@@ -96,7 +96,6 @@ public class RunAllTestAction extends JavaEditorAction {
             }
         });
 
-//        presenter.handleResponse(null);
     }
 
     @Override

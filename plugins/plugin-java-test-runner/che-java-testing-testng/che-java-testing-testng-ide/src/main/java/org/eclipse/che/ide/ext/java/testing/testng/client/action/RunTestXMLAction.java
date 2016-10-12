@@ -98,8 +98,6 @@ public class RunTestXMLAction extends JavaEditorAction {
                         notification.setStatus(FAIL);
             }
         });
-
-//        presenter.handleResponse(null);
     }
 
     @Override

@@ -201,7 +201,6 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
                 if (file.isPresent()) {
 
                     eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
-//
                     Timer t = new Timer() {
                         @Override
                         public void run() {

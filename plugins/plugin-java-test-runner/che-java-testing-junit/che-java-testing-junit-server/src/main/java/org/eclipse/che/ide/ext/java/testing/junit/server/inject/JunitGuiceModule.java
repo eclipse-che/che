@@ -24,7 +24,6 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 public class JunitGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
-        System.out.println("JunitGuiceModule binder");
         newSetBinder(binder(), TestRunner.class).addBinding().to(JUnitTestRunner.class);
     }
 }

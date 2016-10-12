@@ -24,7 +24,6 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 public class TestMavenClasspathGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
-        System.out.println("TestMavenClasspathGuiceModule binder");
         newSetBinder(binder(), TestClasspathProvider.class).addBinding().to(MavenTestClasspathProvider.class);
     }
 }

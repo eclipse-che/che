@@ -31,8 +31,6 @@ public class TestFrameworkRegistry {
 
     @Inject
     public TestFrameworkRegistry(Set<TestRunner> runners) {
-        System.out.println("inititilaized TestFrameworkRegistry " + runners.size() + " fefef " + runners.toString());
-
         runners.forEach(this::register);
     }
 

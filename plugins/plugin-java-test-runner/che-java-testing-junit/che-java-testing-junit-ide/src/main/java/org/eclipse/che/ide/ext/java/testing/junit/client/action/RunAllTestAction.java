@@ -95,8 +95,6 @@ public class RunAllTestAction extends JavaEditorAction {
                 notification.setStatus(FAIL);
             }
         });
-
-//        presenter.handleResponse(null);
     }
 
     @Override

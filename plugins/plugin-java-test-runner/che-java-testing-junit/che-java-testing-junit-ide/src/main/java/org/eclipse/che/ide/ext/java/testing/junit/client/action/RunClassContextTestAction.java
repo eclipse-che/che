@@ -82,7 +82,6 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
 
         final Selection<?> selection = selectionAgent.getSelection();
         final Object possibleNode = selection.getHeadElement();
-        //Log.info(RunClassContextTestAction.class, possibleNode.toString());
         if (possibleNode instanceof FileNode) {
             VirtualFile file = ((FileNode) possibleNode).getData();
 
@@ -120,7 +119,6 @@ public class RunClassContextTestAction extends AbstractPerspectiveAction {
                 }
             });
         }
-//        presenter.showDialog();
     }
 
     @Override

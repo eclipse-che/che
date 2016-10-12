@@ -24,7 +24,6 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 public class TestNGGuiceModule extends AbstractModule {
     @Override
     protected void configure() {
-        System.out.println("TestNGGuiceModule binder");
         newSetBinder(binder(), TestRunner.class).addBinding().to(TestNGRunner.class);
     }
 }
