@@ -39,6 +39,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Yevhenii Voevodin
  * @author Anton Korneta
+ * @author Igor Vinokur
  */
 @Singleton
 public class JpaUserDao implements UserDao {
@@ -179,10 +180,7 @@ public class JpaUserDao implements UserDao {
         // TODO need to ensure that 'getAll' query works with same data as 'getTotalCount'
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
         checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
-
-        /* 'managerProvider.get().setFirstResult(int)' requires int value in its parameters
-         but 'skipCount' have to be 'long' because it can be received from 'getAll()' method that returns long. */
-        checkArgument(skipCount > Integer.MAX_VALUE, "Skip count parameter must not be more than " + Integer.MAX_VALUE);
+        checkArgument(skipCount <= Integer.MAX_VALUE, "Skip count parameter must not be greater than " + Integer.MAX_VALUE);
 
         try {
             final List<UserImpl> list = managerProvider.get()

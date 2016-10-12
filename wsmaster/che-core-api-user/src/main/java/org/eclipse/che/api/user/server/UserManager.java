@@ -47,6 +47,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
  *
  * @author Max Shaposhnik (mshaposhnik@codenvy.com)
  * @author Yevhenii Voevodin
+ * @author Igor Vinokur
  */
 @Singleton
 public class UserManager {
