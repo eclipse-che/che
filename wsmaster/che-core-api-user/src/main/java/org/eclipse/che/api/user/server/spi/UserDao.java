@@ -29,7 +29,6 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
  * such kind of inconsistencies are expected by design and may be treated further.
  *
  * @author Yevhenii Voevodin
- * @author Igor Vinokur
  */
 public interface UserDao {
 

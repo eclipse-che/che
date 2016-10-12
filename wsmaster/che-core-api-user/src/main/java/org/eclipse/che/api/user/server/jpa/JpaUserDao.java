@@ -179,9 +179,8 @@ public class JpaUserDao implements UserDao {
     public Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException {
         // TODO need to ensure that 'getAll' query works with same data as 'getTotalCount'
         checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
-        checkArgument(skipCount >= 0, "The number of items to skip can't be negative.");
-        checkArgument(skipCount <= Integer.MAX_VALUE, "Skip count parameter must not be greater than " + Integer.MAX_VALUE);
-
+        checkArgument(skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+                      "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
         try {
             final List<UserImpl> list = managerProvider.get()
                                                        .createNamedQuery("User.getAll", UserImpl.class)

@@ -48,7 +48,6 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Anton Korneta
  * @author Yevhenii Voevodin
- * @author Igor Vinokur
  */
 @Singleton
 public class LocalUserDaoImpl implements UserDao {

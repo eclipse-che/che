@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.user.server.jpa;
 
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
@@ -20,7 +21,6 @@ import org.testng.annotations.Test;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.lang.reflect.Field;
 import java.util.Collections;
 
 import static org.mockito.Matchers.anyInt;
@@ -42,15 +42,13 @@ public class JpaUserDaoTest {
     Provider   managerProvider;
     @Mock
     TypedQuery typedQuery;
+
     @Spy
+    @InjectMocks
     JpaUserDao userDao;
 
     @BeforeMethod
     public void setup() throws Exception {
-        Field field = JpaUserDao.class.getDeclaredField("managerProvider");
-        field.setAccessible(true);
-        field.set(userDao, managerProvider);
-
         EntityManager entityManager = mock(EntityManager.class);
         when(entityManager.createNamedQuery(anyString(), anyObject())).thenReturn(typedQuery);
         when(managerProvider.get()).thenReturn(entityManager);
@@ -64,11 +62,11 @@ public class JpaUserDaoTest {
         when(typedQuery.getResultList()).thenReturn(Collections.emptyList());
         doReturn(1L).when(userDao).getTotalCount();
 
-        userDao.getAll(5, Integer.MAX_VALUE);
+        userDao.getAll(30, Integer.MAX_VALUE);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Skip count parameter must not be greater than 2147483647")
+          expectedExceptionsMessageRegExp = "The number of items to skip can't be negative or greater than 2147483647")
     public void shouldThrowExceptionOnGetAllWithGraterThanMaximumIntegerValueAsSkipCountParameter() throws Exception {
         userDao.getAll(30, Integer.MAX_VALUE + 1L);
     }
