@@ -342,6 +342,21 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("switch.selectLocation.title")
     String switchSelectLocationTitle();
 
+    @Key("switch.request.error")
+    String switchRequestError(String location);
+
+    @Key("list.request.error")
+    String listRequestError(String location);
+
+    @Key("list.branches.request.error")
+    String listBranchesRequestError(String location);
+
+    @Key("list.tags.request.error")
+    String listTagsRequestError(String location);
+
+    @Key("info.request.error")
+    String infoRequestError(String project);
+
     @Key("unlock.description")
     String unlockDescription();
 

@@ -26,5 +26,8 @@ public interface LocationSelectorView extends View<LocationSelectorView.ActionDe
     /** Show the view. */
     void showWindow();
 
+    /**
+     * Initialize tree with root node.
+     */
     void setRootNode(SvnNode rootNode);
 }

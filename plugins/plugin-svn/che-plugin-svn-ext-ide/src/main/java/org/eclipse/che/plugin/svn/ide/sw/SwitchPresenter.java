@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.subversion.Credentials;
 import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.project.shared.NodesResources;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
 import org.eclipse.che.plugin.svn.ide.SubversionExtensionLocalizationConstants;
 import org.eclipse.che.plugin.svn.ide.common.StatusColors;
@@ -122,7 +123,10 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify("Error retrieving svn info", error.getMessage(), FAIL, EMERGE_MODE);
+                projectUri = "^";
+
+                Path location = appContext.getRootProject().getLocation();
+                notificationManager.notify(constants.infoRequestError(location.toString()), error.getMessage(), FAIL, EMERGE_MODE);
 
                 defaultViewInitialization();
                 handleSwitchButton();
@@ -170,7 +174,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError error) throws OperationException {
-                notificationManager.notify("Error execution svn switch", error.getMessage(), FAIL, EMERGE_MODE);
+                notificationManager.notify(constants.switchRequestError(switchView.getLocation()), error.getMessage(), FAIL, EMERGE_MODE);
             }
         });
     }
@@ -220,7 +224,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
                 switchView.setLocation(composeSwitchLocation());
                 handleSwitchButton();
 
-                notificationManager.notify("Error retrieving list of branches.", error.getMessage(), FAIL, EMERGE_MODE);
+                notificationManager.notify(constants.listBranchesRequestError(projectUri), error.getMessage(), FAIL, EMERGE_MODE);
             }
         });
     }
@@ -259,7 +263,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
                 switchView.setLocation(composeSwitchLocation());
                 handleSwitchButton();
 
-                notificationManager.notify("Error retrieving list of tags.", error.getMessage(), FAIL, EMERGE_MODE);
+                notificationManager.notify(constants.listTagsRequestError(projectUri), error.getMessage(), FAIL, EMERGE_MODE);
             }
         });
     }
@@ -302,7 +306,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
     public void onSelectOtherLocationClicked() {
         selectorView.showWindow();
 
-        SvnNode rootNode = new SvnNode(projectUri == null ? "^" : projectUri, resources, this);
+        SvnNode rootNode = new SvnNode(projectUri, resources, this);
         selectorView.setRootNode(rootNode);
     }
 
@@ -318,19 +322,13 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
 
     private String composeSwitchLocation() {
         if (switchView.isSwitchToTrunk()) {
-            return projectUri == null ? "^/trunk" : (projectUri + "/trunk");
+            return projectUri + "/trunk";
 
         } else if (switchView.isSwitchToBranch()) {
-            return (projectUri == null ? "^/branches/"
-                                       : (projectUri + "/branches/"))
-                   + (isNullOrEmpty(switchView.getSwitchToLocation()) ? ""
-                                                                      : switchView.getSwitchToLocation());
+            return projectUri + "/branches/" + (isNullOrEmpty(switchView.getSwitchToLocation()) ? "" : switchView.getSwitchToLocation());
 
         } else if (switchView.isSwitchToTag()) {
-            return (projectUri == null ? "^/tags/"
-                                       : (projectUri + "/tags/"))
-                   + (isNullOrEmpty(switchView.getSwitchToLocation()) ? ""
-                                                                      : switchView.getSwitchToLocation());
+            return projectUri + "/tags/" + (isNullOrEmpty(switchView.getSwitchToLocation()) ? "" : switchView.getSwitchToLocation());
 
         } else {
             return switchView.getLocation();
@@ -385,7 +383,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
         }).catchError(new Function<PromiseError, List<Node>>() {
             @Override
             public List<Node> apply(PromiseError error) throws FunctionException {
-                notificationManager.notify("Error retrieving children nodes. " + error.getMessage(), FAIL, EMERGE_MODE);
+                notificationManager.notify(constants.listRequestError(location), error.getMessage(), FAIL, EMERGE_MODE);
                 return Collections.emptyList();
             }
         });

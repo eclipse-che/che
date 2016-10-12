@@ -14,6 +14,8 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
+ * DTO object for {@code svn list} requests.
+ *
  * @author Anatolii Bazko
  */
 @DTO

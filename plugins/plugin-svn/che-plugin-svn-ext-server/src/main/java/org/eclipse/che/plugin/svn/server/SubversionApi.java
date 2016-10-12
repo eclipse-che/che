@@ -561,7 +561,7 @@ public class SubversionApi {
     /**
      * Returns list of the branches of the project.
      *
-     * * @param request
+     * @param request
      *         the request
      *
      * @see #list(ListRequest)
