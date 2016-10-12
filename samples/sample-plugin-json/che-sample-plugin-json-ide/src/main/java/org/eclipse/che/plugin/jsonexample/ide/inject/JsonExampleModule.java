@@ -11,7 +11,6 @@
 package org.eclipse.che.plugin.jsonexample.ide.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
-import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
@@ -31,8 +30,5 @@ public class JsonExampleModule extends AbstractGinModule {
                 .addBinding()
                 .to(JsonExampleProjectWizardRegistrar.class);
 
-        // TODO: remove if not required, currently unclear
-        install(new GinFactoryModuleBuilder().build(JsonExampleCodeAssistProcessorFactory.class));
-        install(new GinFactoryModuleBuilder().build(JsonExampleEditorConfigurationFactory.class));
     }
 }
