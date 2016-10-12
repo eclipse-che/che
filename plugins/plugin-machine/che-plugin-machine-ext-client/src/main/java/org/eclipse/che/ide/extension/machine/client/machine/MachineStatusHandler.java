@@ -21,6 +21,7 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceRuntimeDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.machine.MachineEntity;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.MachineStatusChangedEvent;
@@ -29,8 +30,8 @@ import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFacto
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent.MachineAction.CREATING;
-import static org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent.MachineAction.RUNNING;
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.CREATING;
+import static org.eclipse.che.ide.api.machine.events.MachineStateEvent.MachineAction.RUNNING;
 
 /**
  * Notifies about changing machine state.

@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
@@ -102,6 +103,8 @@ public class JpaUserDao implements UserDao {
         requireNonNull(id, "Required non-null id");
         try {
             doRemove(id);
+        } catch (CascadeRemovalException removeEx) {
+            throw new ServerException(removeEx.getCause().getLocalizedMessage(), removeEx.getCause());
         } catch (RuntimeException x) {
             throw new ServerException(x.getLocalizedMessage(), x);
         }

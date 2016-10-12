@@ -16,7 +16,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 
 import java.util.Map;
 
@@ -34,7 +34,7 @@ public class NodeJsDebuggerConfigurationPagePresenter implements NodeJsDebuggerC
     private static final String DEFAULT_SCRIPT_NAME = "app.js";
 
     private final NodeJsDebuggerConfigurationPageView view;
-    private final CurrentProjectPathProvider          currentProjectPathProvider;
+    private final CurrentProjectPathMacro             currentProjectPathMacro;
 
     private DebugConfiguration editedConfiguration;
     private String             originScriptPath;
@@ -42,9 +42,9 @@ public class NodeJsDebuggerConfigurationPagePresenter implements NodeJsDebuggerC
 
     @Inject
     public NodeJsDebuggerConfigurationPagePresenter(NodeJsDebuggerConfigurationPageView view,
-                                                    CurrentProjectPathProvider currentProjectPathProvider) {
+                                                    CurrentProjectPathMacro currentProjectPathMacro) {
         this.view = view;
-        this.currentProjectPathProvider = currentProjectPathProvider;
+        this.currentProjectPathMacro = currentProjectPathMacro;
 
         view.setDelegate(this);
     }
@@ -67,7 +67,7 @@ public class NodeJsDebuggerConfigurationPagePresenter implements NodeJsDebuggerC
     }
 
     private String getDefaultBinaryPath() {
-        return currentProjectPathProvider.getKey() + "/" + DEFAULT_SCRIPT_NAME;
+        return currentProjectPathMacro.getName() + "/" + DEFAULT_SCRIPT_NAME;
     }
 
     @Override

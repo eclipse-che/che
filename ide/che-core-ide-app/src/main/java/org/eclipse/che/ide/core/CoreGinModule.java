@@ -29,6 +29,7 @@ import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.auth.OAuthServiceClient;
 import org.eclipse.che.ide.api.auth.OAuthServiceClientImpl;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.data.tree.NodeInterceptor;
@@ -58,13 +59,13 @@ import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
-import org.eclipse.che.ide.api.machine.CommandPropertyValueProvider;
-import org.eclipse.che.ide.api.machine.CommandPropertyValueProviderRegistry;
 import org.eclipse.che.ide.api.machine.MachineServiceClient;
 import org.eclipse.che.ide.api.machine.MachineServiceClientImpl;
 import org.eclipse.che.ide.api.machine.RecipeServiceClient;
 import org.eclipse.che.ide.api.machine.RecipeServiceClientImpl;
-import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
+import org.eclipse.che.ide.api.macro.Macro;
+import org.eclipse.che.ide.api.macro.MacroProcessor;
+import org.eclipse.che.ide.api.macro.MacroRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.oauth.OAuth2Authenticator;
 import org.eclipse.che.ide.api.oauth.OAuth2AuthenticatorRegistry;
@@ -113,14 +114,17 @@ import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClientImpl;
 import org.eclipse.che.ide.client.StartUpActionsProcessor;
 import org.eclipse.che.ide.client.WorkspaceStateRestorer;
+import org.eclipse.che.ide.command.CommandProducerActionFactory;
+import org.eclipse.che.ide.command.CommandProducerActionManager;
+import org.eclipse.che.ide.command.CommandTypeRegistryImpl;
 import org.eclipse.che.ide.context.AppContextImpl;
 import org.eclipse.che.ide.editor.EditorAgentImpl;
 import org.eclipse.che.ide.editor.EditorRegistryImpl;
-import org.eclipse.che.ide.editor.macro.EditorCurrentFileNameProvider;
-import org.eclipse.che.ide.editor.macro.EditorCurrentFilePathProvider;
-import org.eclipse.che.ide.editor.macro.EditorCurrentFileRelativePathProvider;
-import org.eclipse.che.ide.editor.macro.EditorCurrentProjectNameProvider;
-import org.eclipse.che.ide.editor.macro.EditorCurrentProjectTypeProvider;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFileNameMacro;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFilePathMacro;
+import org.eclipse.che.ide.editor.macro.EditorCurrentFileRelativePathMacro;
+import org.eclipse.che.ide.editor.macro.EditorCurrentProjectNameMacro;
+import org.eclipse.che.ide.editor.macro.EditorCurrentProjectTypeMacro;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizer;
 import org.eclipse.che.ide.editor.synchronization.EditorContentSynchronizerImpl;
 import org.eclipse.che.ide.editor.synchronization.EditorGroupSychronizationFactory;
@@ -146,7 +150,8 @@ import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcRequestTransmitter;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseDispatcher;
 import org.eclipse.che.ide.jsonrpc.impl.WebSocketJsonRpcResponseTransmitter;
 import org.eclipse.che.ide.keybinding.KeyBindingManager;
-import org.eclipse.che.ide.machine.CommandPropertyValueProviderRegistryImpl;
+import org.eclipse.che.ide.macro.MacroProcessorImpl;
+import org.eclipse.che.ide.macro.MacroRegistryImpl;
 import org.eclipse.che.ide.menu.MainMenuView;
 import org.eclipse.che.ide.menu.MainMenuViewImpl;
 import org.eclipse.che.ide.menu.StatusPanelGroupView;
@@ -174,11 +179,12 @@ import org.eclipse.che.ide.part.explorer.project.ProjectExplorerView;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerViewImpl;
 import org.eclipse.che.ide.part.explorer.project.RevealNodesPersistenceComponent;
 import org.eclipse.che.ide.part.explorer.project.TreeResourceRevealer;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileNameProvider;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFilePathProvider;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileRelativePathProvider;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectNameProvider;
-import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectTypeProvider;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileNameMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileParentPathMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFilePathMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentFileRelativePathMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectNameMacro;
+import org.eclipse.che.ide.part.explorer.project.macro.ExplorerCurrentProjectTypeMacro;
 import org.eclipse.che.ide.preferences.PreferencesComponent;
 import org.eclipse.che.ide.preferences.PreferencesManagerImpl;
 import org.eclipse.che.ide.preferences.PreferencesView;
@@ -239,6 +245,7 @@ import org.eclipse.che.ide.ui.dialogs.message.MessageDialogViewImpl;
 import org.eclipse.che.ide.ui.dropdown.DropDownListFactory;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidgetImpl;
+import org.eclipse.che.ide.ui.loaders.PopupLoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
@@ -284,7 +291,7 @@ import org.eclipse.che.ide.workspace.WorkspaceViewImpl;
 import org.eclipse.che.ide.workspace.WorkspaceWidgetFactory;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidget;
 import org.eclipse.che.ide.workspace.create.recipewidget.RecipeWidgetImpl;
-import org.eclipse.che.ide.workspace.macro.WorkspaceNameMacroProvider;
+import org.eclipse.che.ide.workspace.macro.WorkspaceNameMacro;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
 import org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective;
 import org.eclipse.che.ide.workspace.start.workspacewidget.WorkspaceWidget;
@@ -322,9 +329,9 @@ public class CoreGinModule extends AbstractGinModule {
 
         bind(AppContext.class).to(AppContextImpl.class);
 
+        install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
         install(new GinFactoryModuleBuilder().build(PopupLoaderFactory.class));
 
-        install(new GinFactoryModuleBuilder().build(LoaderFactory.class));
         install(new GinFactoryModuleBuilder().implement(PartStackView.class, PartStackViewImpl.class).build(PartStackViewFactory.class));
         install(new GinFactoryModuleBuilder().implement(PartStack.class, PartStackPresenter.class).build(PartStackPresenterFactory.class));
 
@@ -427,6 +434,7 @@ public class CoreGinModule extends AbstractGinModule {
         componentsBinder.addBinding("Project templates").to(ProjectTemplatesComponent.class);
         componentsBinder.addBinding("Workspace").toProvider(WorkspaceComponentProvider.class);
         componentsBinder.addBinding("Standard components").to(StandardComponent.class);
+        componentsBinder.addBinding("Contextual Commands").to(CommandProducerActionManager.class);
 
         GinMapBinder<String, WsAgentComponent> wsAgentComponentsBinder =
                 GinMapBinder.newMapBinder(binder(), String.class, WsAgentComponent.class);
@@ -478,6 +486,7 @@ public class CoreGinModule extends AbstractGinModule {
         bind(SelectionAgent.class).to(SelectionAgentImpl.class).asEagerSingleton();
         bind(WorkspaceAgent.class).to(WorkspacePresenter.class).in(Singleton.class);
         bind(IconRegistry.class).to(IconRegistryImpl.class).in(Singleton.class);
+
         // UI Model
         bind(EditorMultiPartStack.class).to(EditorMultiPartStackPresenter.class).in(Singleton.class);
         bind(ActionManager.class).to(ActionManagerImpl.class).in(Singleton.class);
@@ -485,20 +494,26 @@ public class CoreGinModule extends AbstractGinModule {
         GinMultibinder<NodeInterceptor> nodeInterceptors = GinMultibinder.newSetBinder(binder(), NodeInterceptor.class);
         nodeInterceptors.addBinding().to(DefaultNodeInterceptor.class);
 
-        // Machine
-        bind(CommandPropertyValueProviderRegistry.class).to(CommandPropertyValueProviderRegistryImpl.class).in(Singleton.class);
-        GinMultibinder<CommandPropertyValueProvider> macroProviders = GinMultibinder.newSetBinder(binder(), CommandPropertyValueProvider.class);
-        macroProviders.addBinding().to(EditorCurrentFileNameProvider.class);
-        macroProviders.addBinding().to(EditorCurrentFilePathProvider.class);
-        macroProviders.addBinding().to(EditorCurrentFileRelativePathProvider.class);
-        macroProviders.addBinding().to(EditorCurrentProjectNameProvider.class);
-        macroProviders.addBinding().to(EditorCurrentProjectTypeProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentFileNameProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentFilePathProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentFileRelativePathProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentProjectNameProvider.class);
-        macroProviders.addBinding().to(ExplorerCurrentProjectTypeProvider.class);
-        macroProviders.addBinding().to(WorkspaceNameMacroProvider.class);
+        // Command API
+        bind(CommandTypeRegistry.class).to(CommandTypeRegistryImpl.class).in(Singleton.class);
+
+        bind(MacroRegistry.class).to(MacroRegistryImpl.class).in(Singleton.class);
+
+        bind(MacroProcessor.class).to(MacroProcessorImpl.class).in(Singleton.class);
+
+        GinMultibinder<Macro> macrosBinder = GinMultibinder.newSetBinder(binder(), Macro.class);
+        macrosBinder.addBinding().to(EditorCurrentFileNameMacro.class);
+        macrosBinder.addBinding().to(EditorCurrentFilePathMacro.class);
+        macrosBinder.addBinding().to(EditorCurrentFileRelativePathMacro.class);
+        macrosBinder.addBinding().to(EditorCurrentProjectNameMacro.class);
+        macrosBinder.addBinding().to(EditorCurrentProjectTypeMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentFileNameMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentFilePathMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentFileParentPathMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentFileRelativePathMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentProjectNameMacro.class);
+        macrosBinder.addBinding().to(ExplorerCurrentProjectTypeMacro.class);
+        macrosBinder.addBinding().to(WorkspaceNameMacro.class);
     }
 
     /** Configure Core UI components, resources and views */
@@ -577,6 +592,8 @@ public class CoreGinModule extends AbstractGinModule {
         bind(RecentFileList.class).to(RecentFileStore.class).in(Singleton.class);
 
         install(new GinFactoryModuleBuilder().build(RecentFileActionFactory.class));
+
+        install(new GinFactoryModuleBuilder().build(CommandProducerActionFactory.class));
     }
 
     /** Configures binding for Editor API */

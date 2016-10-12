@@ -851,4 +851,41 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("signature.description")
     String signatureDescription();
+
+
+    @Key("macro.editor.current.project.name.description")
+    String macroEditorCurrentProjectNameDescription();
+
+    @Key("macro.editor.current.project.type.description")
+    String macroEditorCurrentProjectTypeDescription();
+
+    @Key("macro.editor.current.file.relpath.description")
+    String macroEditorCurrentFileRelpathDescription();
+
+    @Key("macro.editor.current.file.name.description")
+    String macroEditorCurrentFileNameDescription();
+
+    @Key("macro.editor.current.file.path.description")
+    String macroEditorCurrentFilePathDescription();
+
+    @Key("macro.workspace.name.description")
+    String macroWorkspaceNameDescription();
+
+    @Key("macro.explorer.current.file.name.description")
+    String macroExplorerCurrentFileNameDescription();
+
+    @Key("macro.explorer.current.project.name.description")
+    String macroExplorerCurrentProjectNameDescription();
+
+    @Key("macro.explorer.current.file.relpath.description")
+    String macroExplorerCurrentFileRelpathDescription();
+
+    @Key("macro.explorer.current.project.type.description")
+    String macroExplorerCurrentProjectTypeDescription();
+
+    @Key("macro.explorer.current.file.parent.path.description")
+    String macroExplorerCurrentFileParentPathDescription();
+
+    @Key("macro.explorer.current.file.path.description")
+    String macroExplorerCurrentFilePathDescription();
 }

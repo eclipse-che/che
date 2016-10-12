@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.event;
 
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 
 /**
@@ -17,7 +18,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
  *
  * @author Yevhenii Voevodin
  */
-public class BeforeWorkspaceRemovedEvent {
+public class BeforeWorkspaceRemovedEvent extends CascadeRemovalEvent {
 
     private final WorkspaceImpl workspace;
 
