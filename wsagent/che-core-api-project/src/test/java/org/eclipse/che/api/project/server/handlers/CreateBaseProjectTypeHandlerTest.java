@@ -11,6 +11,7 @@
 package org.eclipse.che.api.project.server.handlers;
 
 import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -21,6 +22,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.Map;
+
 /**
  *  @author Vitalii Parfonov
  */
@@ -30,7 +33,7 @@ public class CreateBaseProjectTypeHandlerTest {
     public void testCreateProject() throws Exception {
         FolderEntry folderEntry = mock(FolderEntry.class);
         CreateBaseProjectTypeHandler createBaseProjectTypeHandler = new CreateBaseProjectTypeHandler();
-        createBaseProjectTypeHandler.onCreateProject(folderEntry, null, null);
+        createBaseProjectTypeHandler.onCreateProject(folderEntry, (Map<String,AttributeValue>)null, null);
         verify(folderEntry).createFile(anyString(), any(byte[].class));
     }
 }

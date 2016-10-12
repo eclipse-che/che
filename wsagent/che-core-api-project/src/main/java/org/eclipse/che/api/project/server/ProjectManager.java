@@ -27,7 +27,6 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.importer.ProjectImportOutputWSLineConsumer;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
-import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
@@ -45,6 +44,7 @@ import org.eclipse.che.api.vfs.impl.file.event.LoEvent;
 import org.eclipse.che.api.vfs.impl.file.event.detectors.ProjectTreeChangesDetector;
 import org.eclipse.che.api.vfs.search.Searcher;
 import org.eclipse.che.api.vfs.search.SearcherProvider;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,19 +240,11 @@ public final class ProjectManager {
             final CreateProjectHandler generator = handlers.getCreateProjectHandler(projectConfig.getType());
 
             if (generator != null) {
-                Map<String, AttributeValue> valueMap = new HashMap<>();
-                Map<String, List<String>> attributes = projectConfig.getAttributes();
-
-                if (attributes != null) {
-                    for (Map.Entry<String, List<String>> entry : attributes.entrySet()) {
-                        valueMap.put(entry.getKey(), new AttributeValue(entry.getValue()));
-                    }
-                }
-
+                ProjectConfigImpl configCopy = new ProjectConfigImpl(projectConfig);
                 if (options == null) {
                     options = new HashMap<>();
                 }
-                generator.onCreateProject(projectFolder, valueMap, options);
+                generator.onCreateProject(projectFolder, configCopy, options);
             }
 
             final RegisteredProject project;
