@@ -99,6 +99,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
         final Project project = appContext.getRootProject();
         checkState(project != null);
 
+        switchView.showWindow();
         switchView.setSwitchButtonEnabled(false);
         invalidateLoadedData();
 
@@ -130,7 +131,6 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
     }
 
     private void defaultViewInitialization() {
-        switchView.showWindow();
         switchView.setSwitchRevisionEnabled(switchView.isSwitchToRevision());
         switchView.setLocationEnabled(switchView.isSwitchToOtherLocation());
         switchView.setLocation(composeSwitchLocation());
