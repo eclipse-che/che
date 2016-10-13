@@ -667,6 +667,7 @@ public class CheEnvironmentEngine {
         try {
             machineProvider.createNetwork(networkId);
 
+            final List<CheServiceImpl> launchedServices = new ArrayList<>();
             String machineName = queuePeekOrFail(workspaceId);
             while (machineName != null) {
                 boolean isDev = devMachineName.equals(machineName);
@@ -691,15 +692,16 @@ public class CheEnvironmentEngine {
                             format("Environment of workspace with ID '%s' failed due to internal error", workspaceId));
                 }
 
-                final String finalMachineName = machineName;
+                service.setName(machineName);
                 // needed to reuse startInstance method and
                 // create machine instances by different implementation-specific providers
                 MachineStarter machineStarter = (machineLogger, machineSource) -> {
                     CheServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(service, machineSource);
+                    correctLinks(serviceWithCorrectSource, launchedServices);
                     return machineProvider.startService(namespace,
                                                         workspaceId,
                                                         envName,
-                                                        finalMachineName,
+                                                        serviceWithCorrectSource.getName(),
                                                         isDev,
                                                         networkId,
                                                         serviceWithCorrectSource,
@@ -775,6 +777,7 @@ public class CheEnvironmentEngine {
                                               "' start interrupted. Workspace stopped before all its machines started");
                 }
 
+                launchedServices.add(service);
                 machineName = queuePeekOrFail(workspaceId);
             }
         } catch (RuntimeException | ServerException e) {
@@ -926,6 +929,41 @@ public class CheEnvironmentEngine {
 
         }
         return machineWithCorrectSource;
+    }
+
+    /**
+     * Set correct values to docker compose links fields.
+     * The problem is that a user writes names of other services in links section in compose file.
+     * But actually links are constraints and its values should be names of containers (not services) to be linked.
+     *
+     * @param serviceWithCorrectSource
+     *         service which is starting now
+     * @param launchedServices
+     *         already running services
+     */
+    private void correctLinks(CheServiceImpl serviceWithCorrectSource, List<CheServiceImpl> launchedServices) {
+        final List<String> containerLinks = serviceWithCorrectSource.getLinks();
+        for (int i = 0;  i < containerLinks.size(); i++) {
+            String link = containerLinks.get(i);
+            String serviceName;
+            String serviceAlias;
+            int colonIndex = link.indexOf(':');
+            if (colonIndex != -1) {
+                serviceName = link.substring(0, colonIndex);
+                serviceAlias = link.substring(colonIndex + 1);
+            } else {
+                serviceName = link;
+                serviceAlias = null;
+            }
+            for (CheServiceImpl launchedService : launchedServices) {
+                if (serviceName.equals(launchedService.getName())) {
+                    containerLinks.set(i, (serviceAlias == null) ?
+                                          launchedService.getContainerName() + ':' + serviceName :
+                                          launchedService.getContainerName() + ':' + serviceAlias);
+                    break;
+                }
+            }
+        }
     }
 
     private void addMachine(MachineImpl machine) throws ServerException {

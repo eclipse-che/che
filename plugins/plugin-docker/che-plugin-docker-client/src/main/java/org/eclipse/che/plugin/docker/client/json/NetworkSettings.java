@@ -17,7 +17,7 @@ import java.util.Map;
 
 /** @author andrew00x */
 public class NetworkSettings {
-    private String   ipAddress;
+    private String   iPAddress;
     private int      iPPrefixLen;
     private String   gateway;
     private String   bridge;
@@ -32,11 +32,11 @@ public class NetworkSettings {
     private Map<String, List<PortBinding>> ports = new HashMap<>();
 
     public String getIpAddress() {
-        return ipAddress;
+        return iPAddress;
     }
 
     public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
+        this.iPAddress = ipAddress;
     }
 
     public int getIpPrefixLen() {
@@ -130,7 +130,7 @@ public class NetworkSettings {
     @Override
     public String toString() {
         return "NetworkSettings{" +
-               "ipAddress='" + ipAddress + '\'' +
+               "ipAddress='" + iPAddress + '\'' +
                ", iPPrefixLen=" + iPPrefixLen +
                ", gateway='" + gateway + '\'' +
                ", bridge='" + bridge + '\'' +

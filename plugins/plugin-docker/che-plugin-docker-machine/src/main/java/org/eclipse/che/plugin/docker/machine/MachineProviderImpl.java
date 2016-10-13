@@ -41,7 +41,6 @@ import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
-import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
