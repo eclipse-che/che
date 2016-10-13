@@ -50,7 +50,7 @@ mvn clean install
 ### 4- Run Eclipse Che
 
 ```Shell
-#start Che using the CLI with your new assembly
+# Start Che using the CLI with your new assembly
 # Replace <version> with the actual directory name
 export CHE_LOCAL_BINARY=path_to_che_sources/assembly/assembly-main/target/eclipse-che-<version>/eclipse-che-<version>
 che start
