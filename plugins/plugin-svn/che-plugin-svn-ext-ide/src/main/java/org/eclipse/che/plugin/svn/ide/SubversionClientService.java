@@ -119,7 +119,7 @@ public interface SubversionClientService {
      * @param credentials
      *         {@link Credentials} object that contains user name and password for authentication
      */
-    Promise<InfoResponse> info(Path project, Path target, String revision, boolean children, @Nullable Credentials credentials);
+    Promise<InfoResponse> info(Path project, String target, String revision, boolean children, @Nullable Credentials credentials);
 
     Promise<InfoResponse> info(Path project, String target, String revision, boolean children);
 
@@ -180,6 +180,23 @@ public interface SubversionClientService {
                                                   boolean ignoreExternals,
                                                   String accept,
                                                   @Nullable Credentials credentials);
+
+    /**
+     * Update the working copy to a different URL within the same repository.
+     *
+     * @see org.eclipse.che.plugin.svn.shared.SwitchRequest
+     */
+    Promise<CLIOutputWithRevisionResponse> doSwitch(String location,
+                                                    Path project,
+                                                    String revision,
+                                                    String depth,
+                                                    String setDepth,
+                                                    String accept,
+                                                    boolean ignoreExternals,
+                                                    boolean ignoreAncestry,
+                                                    boolean relocate,
+                                                    boolean force,
+                                                    @Nullable Credentials credentials);
 
     Promise<CLIOutputResponse> showLog(Path project, Path[] paths, String revision);
 
@@ -328,4 +345,30 @@ public interface SubversionClientService {
      *         the range of revisions to check
      */
     Promise<GetRevisionsResponse> getRevisions(Path project, Path path, String revisionRange);
+
+    /**
+     * Lists directory entries in the repository.
+     *
+     * @param project
+     *      the project path
+     * @param target
+     *      the target path to browse
+     */
+    Promise<CLIOutputResponse> list(Path project, String target, @Nullable Credentials credentials);
+
+    /**
+     * Returns list of the branches of the project.
+     *
+     * @param project
+     *      the project path
+     */
+    Promise<CLIOutputResponse> listBranches(Path project, @Nullable Credentials credentials);
+
+    /**
+     * Returns list of the tags of the project.
+     *
+     * @param project
+     *      the project path
+     */
+    Promise<CLIOutputResponse> listTags(Path project, @Nullable Credentials credentials);
 }

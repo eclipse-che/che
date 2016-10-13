@@ -8,25 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.svn.server.repository;
+package org.eclipse.che.plugin.svn.ide.sw;
 
-import org.eclipse.che.plugin.svn.server.SubversionException;
+import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * Detects repository url based on location.
+ * The dialog to select custom location to switch.
  *
  * @author Anatolii Bazko
  */
-public interface RepositoryUrlProvider {
+public interface LocationSelectorView extends View<LocationSelectorView.ActionDelegate> {
+
+    interface ActionDelegate {
+        void setSelectedNode(SvnNode node);
+    }
+
+    /** Show the view. */
+    void showWindow();
 
     /**
-     * Detects repository url based on location.
-     *
-     * @param projectPath
-     *      the absolute project path
-     * @return the repository url of the given project
-     * @throws SubversionException
-     *      if any error occurs
+     * Initialize tree with root node.
      */
-    String getRepositoryUrl(String projectPath) throws SubversionException;
+    void setRootNode(SvnNode rootNode);
 }

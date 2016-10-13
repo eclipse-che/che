@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.subversion.Credentials;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -34,6 +35,7 @@ import org.eclipse.che.plugin.svn.shared.GetRevisionsRequest;
 import org.eclipse.che.plugin.svn.shared.GetRevisionsResponse;
 import org.eclipse.che.plugin.svn.shared.InfoRequest;
 import org.eclipse.che.plugin.svn.shared.InfoResponse;
+import org.eclipse.che.plugin.svn.shared.ListRequest;
 import org.eclipse.che.plugin.svn.shared.LockRequest;
 import org.eclipse.che.plugin.svn.shared.MergeRequest;
 import org.eclipse.che.plugin.svn.shared.MoveRequest;
@@ -48,6 +50,7 @@ import org.eclipse.che.plugin.svn.shared.RevertRequest;
 import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
+import org.eclipse.che.plugin.svn.shared.SwitchRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
 
 import java.util.Collections;
@@ -158,14 +161,14 @@ public class SubversionClientServiceImpl implements SubversionClientService {
 
     @Override
     public Promise<InfoResponse> info(Path project, String target, String revision, boolean children) {
-        return info(project, Path.valueOf(target), revision, children, dtoFactory.createDto(Credentials.class));
+        return info(project, target, revision, children, dtoFactory.createDto(Credentials.class));
     }
 
     @Override
-    public Promise<InfoResponse> info(Path project, Path target, String revision, boolean children, Credentials credentials) {
+    public Promise<InfoResponse> info(Path project, String target, String revision, boolean children, Credentials credentials) {
         final InfoRequest request = dtoFactory.createDto(InfoRequest.class)
                                               .withProjectPath(project.toString())
-                                              .withTarget(target.toString())
+                                              .withTarget(target)
                                               .withRevision(revision)
                                               .withChildren(children);
         if (credentials != null) {
@@ -219,6 +222,40 @@ public class SubversionClientServiceImpl implements SubversionClientService {
         }
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/update", request)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputWithRevisionResponse.class));
+    }
+
+    @Override
+    public Promise<CLIOutputWithRevisionResponse> doSwitch(String location,
+                                                           Path project,
+                                                           String revision,
+                                                           String depth,
+                                                           String setDepth,
+                                                           String accept,
+                                                           boolean ignoreExternals,
+                                                           boolean ignoreAncestry,
+                                                           boolean relocate,
+                                                           boolean force,
+                                                           @Nullable Credentials credentials) {
+        SwitchRequest request = dtoFactory.createDto(SwitchRequest.class)
+                                          .withLocation(location)
+                                          .withProjectPath(project.toString())
+                                          .withDepth(depth)
+                                          .withSetDepth(setDepth)
+                                          .withRelocate(relocate)
+                                          .withIgnoreExternals(ignoreExternals)
+                                          .withIgnoreAncestry(ignoreAncestry)
+                                          .withRevision(revision)
+                                          .withAccept(accept)
+                                          .withForce(force);
+
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
+        return asyncRequestFactory.createPostRequest(getBaseUrl() + "/switch", request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputWithRevisionResponse.class));
     }
@@ -422,6 +459,49 @@ public class SubversionClientServiceImpl implements SubversionClientService {
                                                   .withPath(path.toString());
 
         return asyncRequestFactory.createPostRequest(getBaseUrl() + "/proplist", request)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
+    }
+
+    @Override
+    public Promise<CLIOutputResponse> list(Path project, String target, @Nullable Credentials credentials) {
+        ListRequest request = dtoFactory.createDto(ListRequest.class)
+                                        .withProjectPath(project.toString())
+                                        .withTargetPath(target);
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
+        return asyncRequestFactory.createPostRequest(getBaseUrl() + "/list", request)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
+    }
+
+    @Override
+    public Promise<CLIOutputResponse> listBranches(Path project, @Nullable Credentials credentials) {
+        ListRequest request = dtoFactory.createDto(ListRequest.class)
+                                        .withProjectPath(project.toString());
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
+        return asyncRequestFactory.createPostRequest(getBaseUrl() + "/branches", request)
+                                  .loader(loader)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
+    }
+
+    @Override
+    public Promise<CLIOutputResponse> listTags(Path project, @Nullable Credentials credentials) {
+        ListRequest request = dtoFactory.createDto(ListRequest.class)
+                                        .withProjectPath(project.toString());
+        if (credentials != null) {
+            request.setUsername(credentials.getUsername());
+            request.setPassword(credentials.getPassword());
+        }
+
+        return asyncRequestFactory.createPostRequest(getBaseUrl() + "/tags", request)
                                   .loader(loader)
                                   .send(dtoUnmarshallerFactory.newUnmarshaller(CLIOutputResponse.class));
     }
