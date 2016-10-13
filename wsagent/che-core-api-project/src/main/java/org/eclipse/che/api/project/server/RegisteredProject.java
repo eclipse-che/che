@@ -75,7 +75,6 @@ public class RegisteredProject implements ProjectConfig {
         problems = new ArrayList<>();
         attributes = new HashMap<>();
 
-
         Path path;
         if (folder != null) {
             path = folder.getPath();
@@ -86,7 +85,7 @@ public class RegisteredProject implements ProjectConfig {
         }
 
         this.folder = folder;
-        this.config = (config == null) ? new NewProjectConfig(/*folder.getPath()*/ path) : config;
+        this.config = (config == null) ? new NewProjectConfig(path) : config;
         this.updated = updated;
         this.detected = detected;
 
@@ -239,13 +238,12 @@ public class RegisteredProject implements ProjectConfig {
      * @return list of Problems as a String
      */
     public String getProblemsStr() {
-        String problemsStr = "";
-        int i = 1;
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
         for( RegisteredProject.Problem prb : problems ) {
-            problemsStr += "["+i+"] : " + prb.message + "\n";
-            i++;
+            builder.append("[").append(i++).append("] : ").append(prb.message).append("\n");
         }
-        return problemsStr;
+        return builder.toString();
     }
 
     /**

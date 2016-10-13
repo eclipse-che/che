@@ -52,12 +52,9 @@ public class ProjectTypes {
 
         ProjectTypeDef tmpPrimary;
         if (type == null) {
-
             problems.add(new Problem(12, "No primary type defined for " + projectPath + " Base Project Type assigned."));
             tmpPrimary = ProjectTypeRegistry.BASE_TYPE;
-
         } else {
-
             try {
                 tmpPrimary = projectTypeRegistry.getProjectType(type);
             } catch (NotFoundException e) {
@@ -114,9 +111,7 @@ public class ProjectTypes {
                                                  " Attribute " + attr.getName() + " declared in " + mixin.getId() + " already declared in " +
                                                  attributeDefs.get(attr.getName()).getProjectType()+" Skipped."));
                     continue;
-
                 }
-
                 attributeDefs.put(attr.getName(), attr);
             }
 
@@ -153,13 +148,11 @@ public class ProjectTypes {
 
         Set<String> ptsToDel = new HashSet<>();
         for(Attribute attr : attributesToDel) {
-
             ptsToDel.add(attr.getProjectType());
         }
 
         Set <String>attrNamesToDel = new HashSet<>();
         for(String pt : ptsToDel) {
-
             ProjectTypeDef typeDef = all.get(pt);
             for(Attribute attrDef: typeDef.getAttributes()) {
                 attrNamesToDel.add(attrDef.getName());
@@ -168,7 +161,6 @@ public class ProjectTypes {
 
         // remove project types
         for(String typeId : ptsToDel) {
-
             this.all.remove(typeId);
             if(this.primary.getId().equals(typeId)) {
                 this.primary = ProjectTypeRegistry.BASE_TYPE;
@@ -182,8 +174,6 @@ public class ProjectTypes {
         for(String attr : attrNamesToDel) {
             this.attributeDefs.remove(attr);
         }
-
-
     }
 
     void addTransient(FolderEntry projectFolder) throws ServerException,
