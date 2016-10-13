@@ -8,22 +8,26 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.jsonexample.ide.editor;
+package org.eclipse.che.plugin.svn.ide.sw;
 
-import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
+import org.eclipse.che.ide.api.mvp.View;
 
 /**
- * Helper factory for creating the JSON Example specific editor configuraiton.
+ * The dialog to select custom location to switch.
+ *
+ * @author Anatolii Bazko
  */
-// TODO: remove, if unused
-public interface JsonExampleEditorConfigurationFactory {
+public interface LocationSelectorView extends View<LocationSelectorView.ActionDelegate> {
+
+    interface ActionDelegate {
+        void setSelectedNode(SvnNode node);
+    }
+
+    /** Show the view. */
+    void showWindow();
 
     /**
-     * Create a {@link JsonExampleEditorConfiguration}.
-     *
-     * @param editor
-     *         the editor
-     * @return the JSON Example editor configuration
+     * Initialize tree with root node.
      */
-    JsonExampleEditorConfiguration create(TextEditor editor);
+    void setRootNode(SvnNode rootNode);
 }

@@ -10,21 +10,32 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.jsonexample.ide.editor;
 
-import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import com.google.inject.Inject;
+
+import javax.inject.Provider;
+import java.util.Set;
 
 /**
- * Helper factory for creating the JSON Example specific
- * {@link org.eclipse.che.ide.api.editor.codeassist.CodeAssistProcessor}.
+ * Guice Provider for HTML Editor configuration.
+ *
+ * @author Florent Benoit
  */
-// TODO: remove, if unused
-public interface JsonExampleCodeAssistProcessorFactory {
+
+public class JsonExampleEditorConfigurationProvider implements Provider<JsonExampleEditorConfiguration> {
+
+
+
+    @Inject
+    private JsonExampleCodeAssistProcessor jsonExampleCodeAssistProcessor;
+
 
     /**
-     * Create a {@link JsonExampleCodeAssistProcessor}.
+     * Build a new instance of HtmlEditor Configuration
      *
-     * @param editor
-     *         the editor
-     * @return the JSON Example specific code assist processor
+     * @return
      */
-    JsonExampleCodeAssistProcessor create(EditorPartPresenter editor);
+    @Override
+    public JsonExampleEditorConfiguration get() {
+        return new JsonExampleEditorConfiguration(jsonExampleCodeAssistProcessor);
+    }
 }
