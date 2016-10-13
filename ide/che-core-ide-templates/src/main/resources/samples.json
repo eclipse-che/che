@@ -1276,15 +1276,15 @@
     "modules": [],
     "problems": [],
     "source": {
-      "type": "git",
-      "location": "https://github.com/kaloyan-raev/AstroSplash.git",
+      "type": "composer",
+      "location": "kaloyan-raev/astrosplash",
       "parameters": {}
     },
     "commands": [
       {
         "name": "configure",
         "type": "custom",
-        "commandLine": "chmod 777 ${current.project.path}/data; echo -e \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; composer --working-dir=${current.project.path} install && cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo -e \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
+        "commandLine": "chmod 777 ${current.project.path}/data; echo -e \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo -e \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
         "attributes": {
           "previewUrl": ""
         }
