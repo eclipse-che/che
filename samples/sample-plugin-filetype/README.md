@@ -1,9 +1,8 @@
 ## Description
 
-This sample extension illustrate how to extend the Eclipse Che code editor to support a new language. It starts with defining a custom file type and associating it with the specific editor to be opened. We also  describe how to adapt and enhance the syntax highlighting as well as the code completion of the code editor.
- all the code base related to: 
+This sample extension illustrate how to extend the Eclipse Che code editor by defining a custom file type and associating it with the specific editor to be opened. 
 
-Read more at: https://eclipse-che.readme.io/v5.0/docs/code-editors#section-file-types
+Read the tutorial at: https://eclipse-che.readme.io/v5.0/docs/code-editors#section-file-types
 
 
 
