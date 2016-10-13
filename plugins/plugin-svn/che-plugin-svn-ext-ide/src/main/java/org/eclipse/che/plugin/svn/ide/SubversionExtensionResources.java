@@ -100,7 +100,7 @@ public interface SubversionExtensionResources extends ClientBundle {
     SVGResource status();
 
     @Source("actions/switch.svg")
-    SVGResource sw();
+    SVGResource switchLocation();
 
     @Source("actions/unlock.svg")
     SVGResource unlock();

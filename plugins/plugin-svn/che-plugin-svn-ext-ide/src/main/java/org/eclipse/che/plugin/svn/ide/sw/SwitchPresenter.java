@@ -137,6 +137,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
     private void defaultViewInitialization() {
         switchView.setSwitchRevisionEnabled(switchView.isSwitchToRevision());
         switchView.setLocationEnabled(switchView.isSwitchToOtherLocation());
+        switchView.setSwitchToLocationEnabled(switchView.isSwitchToBranch() || switchView.isSwitchToTag());
         switchView.setLocation(composeSwitchLocation());
         switchView.setSelectOtherLocationButtonEnabled(switchView.isSwitchToOtherLocation());
         switchView.setWorkingCopyDepthEnabled(switchView.getDepth().isEmpty());
@@ -170,6 +171,7 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
             @Override
             public void apply(CLIOutputWithRevisionResponse response) throws OperationException {
                 printResponse(response.getCommand(), response.getOutput(), response.getErrOutput(), constants.commandSwitch());
+                SwitchPresenter.this.switchView.close();
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -324,14 +326,17 @@ public class SwitchPresenter extends SubversionActionPresenter implements Switch
         if (switchView.isSwitchToTrunk()) {
             return projectUri + "/trunk";
 
-        } else if (switchView.isSwitchToBranch()) {
-            return projectUri + "/branches/" + (isNullOrEmpty(switchView.getSwitchToLocation()) ? "" : switchView.getSwitchToLocation());
-
-        } else if (switchView.isSwitchToTag()) {
-            return projectUri + "/tags/" + (isNullOrEmpty(switchView.getSwitchToLocation()) ? "" : switchView.getSwitchToLocation());
-
         } else {
-            return switchView.getLocation();
+            String switchToLocation = switchView.getSwitchToLocation();
+            if (switchView.isSwitchToBranch()) {
+                return projectUri + "/branches/" + (isNullOrEmpty(switchToLocation) ? "" : switchToLocation);
+
+            } else if (switchView.isSwitchToTag()) {
+                return projectUri + "/tags/" + (isNullOrEmpty(switchToLocation) ? "" : switchToLocation);
+
+            } else {
+                return switchView.getLocation();
+            }
         }
     }
 
