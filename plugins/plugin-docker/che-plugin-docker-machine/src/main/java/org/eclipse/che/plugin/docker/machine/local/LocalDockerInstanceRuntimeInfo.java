@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.NetworkSettings;
 import org.eclipse.che.plugin.docker.machine.DockerInstanceRuntimeInfo;
 
 import javax.inject.Inject;
@@ -23,32 +24,24 @@ import javax.inject.Named;
 import java.util.Set;
 
 /**
- * Gets predefined docker containers host (internal and external addresses) for machine servers instead of evaluating it
+ * By default, gets predefined docker containers host (internal and external addresses) for machine servers instead of evaluating it
  * from docker configuration. External address is needed when clients (UD, IDE, etc...) can't ping machine servers
  * directly (e.g. when running on Docker for Mac or behind a NAT). If the external address is not provided it defaults
  * to the internal one.
  *
- * <p>Value of host can be retrieved from property ${code machine.docker.local_node_host} or
- * from environment variable {@code CHE_DOCKER_MACHINE_HOST}.<br>
- * <p>Value of external hostname can be retrieved from property ${code machine.docker.local_node_host.external} or
- * from environment variable {@code CHE_DOCKER_MACHINE_HOST_EXTERNAL}.<br>
- * Environment variables have higher priority.
+ * <p>If environment variable {@code CHE_DOCKER_IP_USE__INTERNAL__ADDRESS} or
+ * property {@code che.docker.ip.use_internal_address} is true, is true, the IP Address from
+ * {@link ContainerInfo}, if available, is used for internal address instead.<br>
+ * <p>Value of host can be retrieved from property {@code che.docker.ip} or
+ * from environment variable {@code CHE_DOCKER_IP}.<br>
+ * <p>Value of external hostname can be retrieved from property {@code che.docker.ip.external} or
+ * from environment variable {@code CHE_DOCKER_IP_EXTERNAL}.<br>
+ * Environment variables override properties.
  *
  * @author Alexander Garagatyi
  * @see org.eclipse.che.api.core.model.machine.ServerConf
  */
 public class LocalDockerInstanceRuntimeInfo extends DockerInstanceRuntimeInfo {
-    /**
-     * Env variable that provides host (or IP) of the Docker host.
-     * This value is used by wsmaster to communicate with servers running inside containers.
-     */
-    public static final String CHE_DOCKER_MACHINE_HOST_INTERNAL = "CHE_DOCKER_MACHINE_HOST";
-
-    /**
-     * Env variable that provides the external host (or IP) of the Docker host.
-     * The value is used by UD, IDE and other clients to communicate with the servers running inside containers.
-     */
-    public static final String CHE_DOCKER_MACHINE_HOST_EXTERNAL = "CHE_DOCKER_MACHINE_HOST_EXTERNAL";
 
     @Inject
     public LocalDockerInstanceRuntimeInfo(@Assisted ContainerInfo containerInfo,
@@ -58,45 +51,57 @@ public class LocalDockerInstanceRuntimeInfo extends DockerInstanceRuntimeInfo {
                                           @Nullable @Named("che.docker.ip") String dockerNodeInternalHostname,
                                           @Nullable @Named("che.docker.ip.external") String dockerNodeExternalHostname,
                                           @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineServers,
-                                          @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers) {
-
+                                          @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
+                                          @Named("che.docker.ip.use_internal_address") boolean useInternalAddress) {
 
         super(containerInfo,
               externalHostnameWithPrecedence(dockerNodeExternalHostname,
-                                           containerExternalHostname,
-                                           dockerNodeInternalHostname,
-                                           containerInternalHostname),
+                                             containerExternalHostname,
+                                             dockerNodeInternalHostname,
+                                             containerInternalHostname),
               internalHostnameWithPrecedence(dockerNodeInternalHostname,
-                                           containerInternalHostname),
+                                             containerInternalHostname,
+                                             containerInfo.getNetworkSettings(),
+                                             useInternalAddress),
               machineConfig,
               devMachineServers,
-              allMachinesServers);
+              allMachinesServers,
+              useInternalAddress);
     }
 
     private static String externalHostnameWithPrecedence(String externalHostnameProperty,
-                                                              String externalHostnameAssisted,
-                                                              String internalHostnameProperty,
-                                                              String internalHostnameAssisted) {
+                                                         String externalHostnameAssisted,
+                                                         String internalHostnameProperty,
+                                                         String internalHostnameAssisted) {
 
-        String externalHostnameEnvVar = System.getenv(CHE_DOCKER_MACHINE_HOST_EXTERNAL);
-        if (externalHostnameEnvVar != null) {
-            return externalHostnameEnvVar;
-        } else if (externalHostnameProperty != null) {
+        if (externalHostnameProperty != null) {
             return externalHostnameProperty;
         } else if (externalHostnameAssisted != null) {
             return externalHostnameAssisted;
         } else {
-            return internalHostnameWithPrecedence(internalHostnameProperty,internalHostnameAssisted);
+            return internalHostnameWithPrecedence(internalHostnameProperty,
+                                                  internalHostnameAssisted,
+                                                  null,
+                                                  false);
         }
     }
 
     private static String internalHostnameWithPrecedence(String internalHostnameProperty,
-                                                              String internalHostnameAssisted) {
+                                                         String internalHostnameAssisted,
+                                                         NetworkSettings networkSettings,
+                                                         boolean useInternalAddress) {
 
-        String internalHostNameEnvVariable = System.getenv(CHE_DOCKER_MACHINE_HOST_INTERNAL);
-        if (internalHostNameEnvVariable != null) {
-            return internalHostNameEnvVariable;
-        } else if (internalHostnameProperty != null) {
+        if (useInternalAddress) {
+            String containerHostName = null;
+            if (networkSettings != null) {
+                containerHostName = networkSettings.getIpAddress();
+            }
+            if (containerHostName != null && !containerHostName.isEmpty()) {
+                return containerHostName;
+            }
+        }
+
+        if (internalHostnameProperty != null) {
             return internalHostnameProperty;
         } else {
             return internalHostnameAssisted;

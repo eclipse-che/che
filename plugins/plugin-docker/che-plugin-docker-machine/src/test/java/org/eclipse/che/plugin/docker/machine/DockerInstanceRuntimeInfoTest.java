@@ -47,6 +47,7 @@ public class DockerInstanceRuntimeInfoTest {
     private static final String CONTAINER_HOST           = "container-host.com";
     private static final String CONTAINER_HOST_EXTERNAL  = "container-host-ext.com";
     private static final String DEFAULT_ADDRESS          = "192.168.1.1";
+    private static final String DEFAULT_ADDRESS_INTERNAL = "172.17.0.1";
 
     @Mock
     private ContainerInfo   containerInfo;
@@ -66,7 +67,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                     CONTAINER_HOST,
                                                     machineConfig,
                                                     Collections.emptySet(),
-                                                    Collections.emptySet());
+                                                    Collections.emptySet(),
+                                                    false);
 
         when(containerInfo.getConfig()).thenReturn(containerConfig);
         when(containerInfo.getNetworkSettings()).thenReturn(networkSettings);
@@ -208,7 +210,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                     CONTAINER_HOST,
                                                     machineConfig,
                                                     Collections.emptySet(),
-                                                    Collections.emptySet());
+                                                    Collections.emptySet(),
+                                                    false);
         final HashMap<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("8080/tcp", new ServerImpl("myserv1",
                                                        "http",
@@ -264,7 +267,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                     CONTAINER_HOST,
                                                     machineConfig,
                                                     Collections.emptySet(),
-                                                    Collections.emptySet());
+                                                    Collections.emptySet(),
+                                                    false);
         final HashMap<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("8080/tcp", new ServerImpl("myserv1",
                                                        "http",
@@ -296,7 +300,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                     CONTAINER_HOST,
                                                     machineConfig,
                                                     Collections.emptySet(),
-                                                    Collections.emptySet());
+                                                    Collections.emptySet(),
+                                                    false);
         Map<String, List<PortBinding>> ports = new HashMap<>();
         when(networkSettings.getPorts()).thenReturn(ports);
         Map<String, String> labels = new HashMap<>();
@@ -363,7 +368,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                     CONTAINER_HOST,
                                                     machineConfig,
                                                     Collections.emptySet(),
-                                                    Collections.emptySet());
+                                                    Collections.emptySet(),
+                                                    false);
         Map<String, List<PortBinding>> ports = new HashMap<>();
         when(networkSettings.getPorts()).thenReturn(ports);
         Map<String, String> labels = new HashMap<>();
@@ -439,7 +445,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                     CONTAINER_HOST,
                                                     machineConfig,
                                                     Collections.emptySet(),
-                                                    Collections.emptySet());
+                                                    Collections.emptySet(),
+                                                    false);
         final HashMap<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("8080/tcp", new ServerImpl("myserv1conf",
                                                        "http",
@@ -494,7 +501,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                     CONTAINER_HOST,
                                                     machineConfig,
                                                     devSystemServersConfigs,
-                                                    commonSystemServersConfigs);
+                                                    commonSystemServersConfigs,
+                                                    false);
         final HashMap<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("4301/tcp", new ServerImpl("sysServer1-tcp",
                                                        "http",
@@ -555,7 +563,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                     CONTAINER_HOST,
                                                     machineConfig,
                                                     devSystemServersConfigs,
-                                                    commonSystemServersConfigs);
+                                                    commonSystemServersConfigs,
+                                                    false);
         final HashMap<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("4301/tcp", new ServerImpl("sysServer1-tcp",
                                                        "http",
@@ -612,7 +621,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                            CONTAINER_HOST,
                                                            machineConfig,
                                                            devSystemServersConfigs,
-                                                           commonSystemServersConfigs);
+                                                           commonSystemServersConfigs,
+                                                           false);
         final HashMap<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("4301/tcp", new ServerImpl("sysServer1-tcp",
                                                               "http",
@@ -655,7 +665,8 @@ public class DockerInstanceRuntimeInfoTest {
                                                            CONTAINER_HOST,
                                                            machineConfig,
                                                            devSystemServersConfigs,
-                                                           commonSystemServersConfigs);
+                                                           commonSystemServersConfigs,
+                                                           false);
         final HashMap<String, ServerImpl> expectedServers = new HashMap<>();
         expectedServers.put("4301/tcp", new ServerImpl("sysServer1-tcp",
                                                               "http",
@@ -677,5 +688,99 @@ public class DockerInstanceRuntimeInfoTest {
 
         // then
         assertEquals(servers, expectedServers);
+    }
+
+    @Test
+    public void shouldUseUnmappedPortsWhenUsingInternalAddresses() throws Exception {
+        //given
+        when(networkSettings.getIpAddress()).thenReturn(DEFAULT_ADDRESS_INTERNAL);
+        Map<String, List<PortBinding>> ports = new HashMap<>();
+        when(networkSettings.getPorts()).thenReturn(ports);
+        ports.put("4301/tcp", Collections.singletonList(new PortBinding().withHostIp(DEFAULT_ADDRESS)
+                                                                .withHostPort("32100")));
+        ports.put("4305/udp", Collections.singletonList(new PortBinding().withHostIp(DEFAULT_ADDRESS)
+                                                                .withHostPort("32103")));
+        Set<ServerConf> commonSystemServersConfigs = new HashSet<>();
+        commonSystemServersConfigs.add(new ServerConfImpl("sysServer1-tcp", "4301/tcp", "http", "/some/path1"));
+        Set<ServerConf> devSystemServersConfigs = new HashSet<>();
+        devSystemServersConfigs.add(new ServerConfImpl("devSysServer1-udp", "4305/udp", null, "some/path4"));
+        when(machineConfig.isDev()).thenReturn(true);
+
+        runtimeInfo = new DockerInstanceRuntimeInfo(containerInfo,
+                                                    DEFAULT_ADDRESS,
+                                                    DEFAULT_ADDRESS_INTERNAL,
+                                                    machineConfig,
+                                                    devSystemServersConfigs,
+                                                    commonSystemServersConfigs,
+                                                    true);
+
+        final HashMap<String, ServerImpl> expectedServers = new HashMap<>();
+        expectedServers.put("4301/tcp", new ServerImpl("sysServer1-tcp",
+                                                       "http",
+                                                       DEFAULT_ADDRESS + ":32100",
+                                                       "http://" + DEFAULT_ADDRESS + ":32100/some/path1",
+                                                       new ServerPropertiesImpl("/some/path1",
+                                                                                DEFAULT_ADDRESS_INTERNAL + ":4301",
+                                                                                "http://" + DEFAULT_ADDRESS_INTERNAL + ":4301/some/path1")));
+        expectedServers.put("4305/udp", new ServerImpl("devSysServer1-udp",
+                                                       null,
+                                                       DEFAULT_ADDRESS + ":32103",
+                                                       null,
+                                                       new ServerPropertiesImpl("some/path4",
+                                                                                DEFAULT_ADDRESS_INTERNAL + ":4305",
+                                                                                null)));
+
+        //when
+        final Map<String, ServerImpl> servers = runtimeInfo.getServers();
+
+        //then
+        assertEquals(servers, expectedServers, "Expected servers to use internal container address and ports");
+    }
+
+    @Test
+    public void shouldUseMappedPortsWhenNotUsingInternalAddresses() throws Exception {
+        //given
+        when(networkSettings.getIpAddress()).thenReturn(DEFAULT_ADDRESS_INTERNAL);
+        Map<String, List<PortBinding>> ports = new HashMap<>();
+        when(networkSettings.getPorts()).thenReturn(ports);
+        ports.put("4301/tcp", Collections.singletonList(new PortBinding().withHostIp(DEFAULT_ADDRESS)
+                                                                .withHostPort("32100")));
+        ports.put("4305/udp", Collections.singletonList(new PortBinding().withHostIp(DEFAULT_ADDRESS)
+                                                                .withHostPort("32103")));
+        Set<ServerConf> commonSystemServersConfigs = new HashSet<>();
+        commonSystemServersConfigs.add(new ServerConfImpl("sysServer1-tcp", "4301/tcp", "http", "/some/path1"));
+        Set<ServerConf> devSystemServersConfigs = new HashSet<>();
+        devSystemServersConfigs.add(new ServerConfImpl("devSysServer1-udp", "4305/udp", null, "some/path4"));
+        when(machineConfig.isDev()).thenReturn(true);
+
+        runtimeInfo = new DockerInstanceRuntimeInfo(containerInfo,
+                                                    DEFAULT_ADDRESS,
+                                                    DEFAULT_ADDRESS_INTERNAL,
+                                                    machineConfig,
+                                                    devSystemServersConfigs,
+                                                    commonSystemServersConfigs,
+                                                    false);
+
+        final HashMap<String, ServerImpl> expectedServers = new HashMap<>();
+        expectedServers.put("4301/tcp", new ServerImpl("sysServer1-tcp",
+                                                       "http",
+                                                       DEFAULT_ADDRESS + ":32100",
+                                                       "http://" + DEFAULT_ADDRESS + ":32100/some/path1",
+                                                       new ServerPropertiesImpl("/some/path1",
+                                                                                DEFAULT_ADDRESS_INTERNAL + ":32100",
+                                                                                "http://" + DEFAULT_ADDRESS_INTERNAL + ":32100/some/path1")));
+        expectedServers.put("4305/udp", new ServerImpl("devSysServer1-udp",
+                                                       null,
+                                                       DEFAULT_ADDRESS + ":32103",
+                                                       null,
+                                                       new ServerPropertiesImpl("some/path4",
+                                                                                DEFAULT_ADDRESS_INTERNAL + ":32103",
+                                                                                null)));
+
+        //when
+        final Map<String, ServerImpl> servers = runtimeInfo.getServers();
+
+        //then
+        assertEquals(servers, expectedServers, "Expected servers to not use internal container address and ports");
     }
 }
