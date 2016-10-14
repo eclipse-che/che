@@ -55,7 +55,7 @@ public class ComposerProjectImporter implements ProjectImporter {
 
     @Override
     public ImporterCategory getCategory() {
-        return ImporterCategory.ARCHIVE;
+        return ImporterCategory.PACKAGE;
     }
 
     @Override

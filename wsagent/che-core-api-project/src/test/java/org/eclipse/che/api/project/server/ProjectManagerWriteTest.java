@@ -556,7 +556,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
 
             @Override
             public ImporterCategory getCategory() {
-                return ProjectImporter.ImporterCategory.ARCHIVE;
+                return ProjectImporter.ImporterCategory.PACKAGE;
             }
         });
     }
