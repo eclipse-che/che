@@ -1284,7 +1284,7 @@
       {
         "name": "configure",
         "type": "custom",
-        "commandLine": "chmod 777 ${current.project.path}/data; echo -e \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo -e \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
+        "commandLine": "chmod 777 ${current.project.path}/data; echo \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
         "attributes": {
           "previewUrl": ""
         }
@@ -1292,7 +1292,7 @@
       {
         "name": "update images",
         "type": "custom",
-        "commandLine": "cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo -e \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
+        "commandLine": "cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
         "attributes": {
           "previewUrl": ""
         }
@@ -1301,6 +1301,76 @@
         "name": "clean doctrine cache",
         "type": "custom",
         "commandLine": "sudo rm -rf ${current.project.path}/data/doctrine-cache",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Zend"
+    ]
+  },
+  {
+    "name": "zend-expressive",
+    "displayName": "zend-expressive",
+    "path": "/zend-expressive",
+    "description": "A skeleton application using the Zend Exressive framework. Expressive is a minimalist PSR-7 middleware framework for PHP with routing, DI container, optional templating, and optional error handling capabilities.",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "composer",
+      "location": "zendframework/zend-expressive-skeleton",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "configure",
+        "type": "custom",
+        "commandLine": "chmod 777 ${current.project.path}/data/cache; echo \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Zend"
+    ]
+  },
+  {
+    "name": "zend-framework",
+    "displayName": "zend-framework",
+    "path": "/zend-framework",
+    "description": "A skeleton application using the Zend Framework MVC layer and module systems. It is meant to be used as a starting place for those looking to get their feet wet with Zend Framework.",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "composer",
+      "location": "zendframework/skeleton-application",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "configure",
+        "type": "custom",
+        "commandLine": "chmod 777 ${current.project.path}/data/cache; echo \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf",
         "attributes": {
           "previewUrl": ""
         }
