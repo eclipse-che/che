@@ -19,6 +19,7 @@ import org.eclipse.che.ide.ext.java.testing.core.shared.Failure;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
@@ -53,8 +54,7 @@ public class TestNGRunner implements TestRunner {
         Files.walk(Paths.get(projectPath, "target", "test-classes")).forEach(filePath -> {
             if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {
                 String path = Paths.get(projectPath, "target", "test-classes").relativize(filePath).toString();
-                String className = path.replace('/', '.');
-                className = className.replace('\\', '.');
+                String className = path.replace(File.separatorChar, '.');
                 className = className.substring(0, className.length() - 6);
                 testClassNames.add(className);
             }

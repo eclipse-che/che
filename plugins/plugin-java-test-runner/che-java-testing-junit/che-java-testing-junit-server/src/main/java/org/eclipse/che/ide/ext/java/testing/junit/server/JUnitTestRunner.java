@@ -19,6 +19,7 @@ import org.eclipse.che.ide.ext.java.testing.junit4x.shared.JUnitTestResult;
 import org.eclipse.che.ide.ext.java.testing.core.shared.Failure;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -54,8 +55,7 @@ public class JUnitTestRunner implements TestRunner {
         Files.walk(Paths.get(projectPath, "target", "test-classes")).forEach(filePath -> {
             if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {
                 String path = Paths.get(projectPath, "target", "test-classes").relativize(filePath).toString();
-                String className = path.replace('/', '.');
-                className = className.replace('\\', '.');
+                String className = path.replace(File.separatorChar, '.');
                 className = className.substring(0, className.length() - 6);
                 testClassNames.add(className);
             }
@@ -164,8 +164,7 @@ public class JUnitTestRunner implements TestRunner {
         Files.walk(Paths.get(projectPath, "target", "test-classes")).forEach(filePath -> {
             if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {
                 String path = Paths.get(projectPath, "target", "test-classes").relativize(filePath).toString();
-                String className = path.replace('/', '.');
-                className = className.replace('\\', '.');
+                String className = path.replace(File.separatorChar, '.');
                 className = className.substring(0, className.length() - 6);
                 testClassNames.add(className);
             }
