@@ -23,7 +23,7 @@ import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 /**
- *
+ * Tree (root) node for display the failing tests.
  * @author Mirage Abeysekara
  */
 public class TestResultClassNode extends AbstractTreeNode implements HasPresentation {

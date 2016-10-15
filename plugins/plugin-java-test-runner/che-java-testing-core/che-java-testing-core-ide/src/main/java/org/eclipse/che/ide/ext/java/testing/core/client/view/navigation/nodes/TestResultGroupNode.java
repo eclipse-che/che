@@ -24,7 +24,7 @@ import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 /**
- *
+ * Tree node for display the failing class.
  * @author Mirage Abeysekara
  */
 public class TestResultGroupNode extends AbstractTreeNode implements HasPresentation {

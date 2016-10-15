@@ -11,7 +11,7 @@
 package org.eclipse.che.ide.ext.java.testing.core.client.view.navigation;
 
 /**
- *
+ * Enables navigation to the failed test class.
  * @author Mirage Abeysekara
  */
 public interface TestClassNavigation {

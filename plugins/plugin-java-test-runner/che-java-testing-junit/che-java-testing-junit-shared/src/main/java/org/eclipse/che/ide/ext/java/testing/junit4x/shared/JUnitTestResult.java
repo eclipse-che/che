@@ -16,13 +16,21 @@ import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 
 import java.util.List;
 /**
- *
+ * TestResult dto for JUnit
  * @author Mirage Abeysekara
  */
 @DTO
 public interface JUnitTestResult extends TestResult {
+    /**
+     * Get the running JUnit framework version.
+     * @return JUnit framework version.
+     */
     String getFrameworkVersion();
 
+    /**
+     * Sets the JUnit framework version.
+     * @param framework framework version string
+     */
     void setFrameworkVersion(String framework);
 
 }

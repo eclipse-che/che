@@ -17,7 +17,7 @@ import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.nodes.Te
 import org.eclipse.che.ide.ext.java.testing.core.client.view.navigation.nodes.TestResultMethodNode;
 import org.eclipse.che.ide.ext.java.testing.core.shared.TestResult;
 /**
- *
+ * Factory for providing test navigation tree nodes.
  * @author Mirage Abeysekara
  */
 public interface TestResultNodeFactory {
