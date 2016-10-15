@@ -29,7 +29,9 @@ import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGLocalizationCons
 import org.eclipse.che.ide.ext.java.testing.testng.client.TestNGResources;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,7 +74,8 @@ public class RunTestXMLAction extends JavaEditorAction {
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("updateClasspath", "true");
-        parameters.put("testngXML", project.getPath() + "/src/test/resources/testng.xml");
+        parameters.put("testngXML", project.getPath() + "/" +
+                MavenAttributes.DEFAULT_TEST_RESOURCES_FOLDER + "/testng.xml");
 
         Promise<TestResult> testResultPromise = service.getTestResult(project.getPath(), "testng", parameters);
         testResultPromise.then(new Operation<TestResult>() {

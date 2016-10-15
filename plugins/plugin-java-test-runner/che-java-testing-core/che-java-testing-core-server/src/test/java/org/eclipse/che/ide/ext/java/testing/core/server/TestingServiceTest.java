@@ -97,7 +97,7 @@ public class TestingServiceTest {
 
         when(classpathRegistry.getTestClasspathProvider(PROJECT_TYPE_MAVEN)).thenReturn(classpathProviderMaven);
 
-        projectManager = new ProjectManager(vfsProvider, null, null, projectRegistry, null, null, null, null, null);
+        projectManager = new ProjectManager(vfsProvider, null, null, projectRegistry, null, null, null, null, null,null);
         resourcesPlugin = new ResourcesPlugin(null, wsPath, null, null);
 
 

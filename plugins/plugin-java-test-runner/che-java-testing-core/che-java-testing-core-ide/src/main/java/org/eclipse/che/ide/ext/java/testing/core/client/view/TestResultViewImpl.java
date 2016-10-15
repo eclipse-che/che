@@ -52,8 +52,10 @@ import org.eclipse.che.ide.ui.smartTree.NodeStorage;
 import org.eclipse.che.ide.ui.smartTree.NodeUniqueKeyProvider;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 import javax.validation.constraints.NotNull;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -193,7 +195,7 @@ class TestResultViewImpl extends BaseView<TestResultView.ActionDelegate> impleme
         final Project project = appContext.getRootProject();
 
 
-        String testSrcPath = project.getPath() + "/src/test/java/";
+        String testSrcPath = Paths.get(project.getPath(), MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER).toString();
 
         appContext.getWorkspaceRoot().getFile(testSrcPath + packagePath).then(new Operation<Optional<File>>() {
             @Override
