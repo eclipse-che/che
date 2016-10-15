@@ -51,6 +51,7 @@ public class JUnitTestRunner implements TestRunner {
     }
 
     private TestResult runAll4x() throws Exception {
+
         List<String> testClassNames = new ArrayList<>();
         Files.walk(Paths.get(projectPath, "target", "test-classes")).forEach(filePath -> {
             if (Files.isRegularFile(filePath) && filePath.toString().toLowerCase().endsWith(".class")) {
@@ -68,9 +69,7 @@ public class JUnitTestRunner implements TestRunner {
                 testableClasses.add(clazz);
             }
         }
-
         return run4xTestClasses(testableClasses.toArray(new Class[testableClasses.size()]));
-
     }
 
 
@@ -87,6 +86,7 @@ public class JUnitTestRunner implements TestRunner {
 
 
     private TestResult run4xTestClasses(Class<?>... classes) throws Exception {
+
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsJUnitCore = Class.forName("org.junit.runner.JUnitCore", true, classLoader);
         Class<?> clsResult = Class.forName("org.junit.runner.Result", true, classLoader);
@@ -94,27 +94,23 @@ public class JUnitTestRunner implements TestRunner {
         Class<?> clsDescription = Class.forName("org.junit.runner.Description", true, classLoader);
         Class<?> clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
         Class<?> clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
-
         Object result = clsJUnitCore.getMethod("runClasses", Class[].class).invoke(null, new Object[]{classes});
-
         JUnitTestResult dtoResult = DtoFactory.getInstance().createDto(JUnitTestResult.class);
-
-
         boolean isSuccess = (Boolean) clsResult.getMethod("wasSuccessful").invoke(result);
         List failures = (List) clsResult.getMethod("getFailures").invoke(result);
         List<Failure> jUnitFailures = new ArrayList<>();
+
         for (Object failure : failures) {
             Failure dtoFailure = DtoFactory.getInstance().createDto(Failure.class);
 
             String message = (String) clsFailure.getMethod("getMessage").invoke(failure);
             Object description = clsFailure.getMethod("getDescription").invoke(failure);
             String failClassName = (String) clsDescription.getMethod("getClassName").invoke(description);
-
             Object exception = clsFailure.getMethod("getException").invoke(failure);
             Object stackTrace = clsThrowable.getMethod("getStackTrace").invoke(exception);
-
             String failMethod = "";
             Integer failLine = null;
+
             if (stackTrace.getClass().isArray()) {
                 int length = Array.getLength(stackTrace);
                 for (int i = 0; i < length; i++) {
@@ -127,19 +123,14 @@ public class JUnitTestRunner implements TestRunner {
                     }
                 }
             }
-
             String trace = (String) clsFailure.getMethod("getTrace").invoke(failure);
-
-
             dtoFailure.setFailingClass(failClassName);
             dtoFailure.setFailingMethod(failMethod);
             dtoFailure.setFailingLine(failLine);
             dtoFailure.setMessage(message);
             dtoFailure.setTrace(trace);
-
             jUnitFailures.add(dtoFailure);
         }
-
         dtoResult.setTestFramework("JUnit4x");
         dtoResult.setSuccess(isSuccess);
         dtoResult.setFailureCount(jUnitFailures.size());
@@ -194,48 +185,36 @@ public class JUnitTestRunner implements TestRunner {
 
         ClassLoader classLoader = projectClassLoader;
         Class<?> clsTestSuite = Class.forName("junit.framework.TestSuite", true, classLoader);
-
         Class<?> clsTestResult = Class.forName("junit.framework.TestResult", true, classLoader);
         Class<?> clsThrowable = Class.forName("java.lang.Throwable", true, classLoader);
         Class<?> clsStackTraceElement = Class.forName("java.lang.StackTraceElement", true, classLoader);
         Class<?> clsFailure = Class.forName("junit.framework.TestFailure", true, classLoader);
-
         Object testSuite = clsTestSuite.newInstance();
         Object testResult = clsTestResult.newInstance();
 
         for(Class testClass : classes){
-            clsTestSuite.getMethod("addTestSuite", Class.class)
-                    .invoke(testSuite, testClass);
+            clsTestSuite.getMethod("addTestSuite", Class.class).invoke(testSuite, testClass);
         }
 
-
-        clsTestSuite.getMethod("run", clsTestResult)
-                .invoke(testSuite, testResult);
+        clsTestSuite.getMethod("run", clsTestResult).invoke(testSuite, testResult);
 
         JUnitTestResult dtoResult = DtoFactory.getInstance().createDto(JUnitTestResult.class);
-
-
-
         boolean isSuccess = (Boolean) clsTestResult.getMethod("wasSuccessful").invoke(testResult);
         Enumeration failures = (Enumeration) clsTestResult.getMethod("failures").invoke(testResult);
         List<Failure> jUnitFailures = new ArrayList<>();
 
         while(failures.hasMoreElements()){
             Failure dtoFailure = DtoFactory.getInstance().createDto(Failure.class);
-
             Object failure =  failures.nextElement();
             String message = (String) clsFailure.getMethod("exceptionMessage").invoke(failure);
             String trace = (String) clsFailure.getMethod("trace").invoke(failure);
-
             Object failClassObject = clsFailure.getMethod("failedTest").invoke(failure);
             String failClassName = failClassObject.getClass().getName();
-
-
             Object exception = clsFailure.getMethod("thrownException").invoke(failure);
             Object stackTrace = clsThrowable.getMethod("getStackTrace").invoke(exception);
-
             String failMethod = "";
             Integer failLine = null;
+
             if (stackTrace.getClass().isArray()) {
                 int length = Array.getLength(stackTrace);
                 for (int i = 0; i < length; i ++) {
@@ -253,9 +232,7 @@ public class JUnitTestRunner implements TestRunner {
             dtoFailure.setFailingLine(failLine);
             dtoFailure.setMessage(message);
             dtoFailure.setTrace(trace);
-
             jUnitFailures.add(dtoFailure);
-
         }
 
         dtoResult.setTestFramework("JUnit3x");
@@ -302,8 +279,6 @@ public class JUnitTestRunner implements TestRunner {
             return testResult;
         } catch (Exception ignored) {
         }
-
-
         return null;
     }
 
