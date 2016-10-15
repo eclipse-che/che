@@ -1,42 +1,21 @@
-.workspace-item-row
-  min-height 56px
-
-.workspace-item-row div
-  outline none
-
-.workspace-item-details
-  cursor pointer
-
-.workspace-item-name
-  font-size 1em
-  color $label-primary-color
-  margin 5px 12px
-
-.workspace-item-status
-  font-size 12px
-  margin 5px
-  color $label-info-color
-  text-align center
+.che-list-actions .fa-plus-square-o:before
+    position relative
+    top .5px
 
 .workspace-item-temp
   color $label-info-color
 
 .workspace-resources-locked
-  background-color  $error-color
+  background-color $error-color
   color $white-color
   padding 5px 10px
   border-radius 5px
 
-.workspace-consumed-value, .workspace-no-consumed-value
+.workspace-consumed-value
+  line-height initial
   font-size 12px
   font-weight bold
-
-.workspace-consumed-value
-  color #4e5a96
-
-.workspace-no-consumed-value
-  color $label-info-color
-
+  color $che-medium-blue-color
 
 .workspace-list-item-arrow md-icon
   height 32px !important
@@ -44,15 +23,5 @@
   width 36px !important
   font-size 32px !important
 
-
 .workspace-list-item-arrow button
   font-size 11px !important
-
-.workspace-list-item-checkbox
-  .che-list-item-checkbox-main md-checkbox.che-list-item-checkbox
-    display inline-block
-  .che-list-item-checkbox-main md-icon
-    display none
-
-.workspace-list-item-checkbox > div
-  width 100px

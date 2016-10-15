@@ -51,19 +51,19 @@ public class WebSocketConnection {
         webSocket = webSocketCreator.create(url, delay);
         webSocket.open();
 
-        Log.info(getClass(), "Opening connection. Url: " + url);
+        Log.debug(getClass(), "Opening connection. Url: " + url);
     }
 
     public void close() {
         webSocket.close();
 
-        Log.info(WebSocketConnection.class, "Closing connection.");
+        Log.debug(WebSocketConnection.class, "Closing connection.");
     }
 
     public void send(WebSocketTransmission message) {
         webSocket.send(message.toString());
 
-        Log.info(getClass(), "Sending message: " + message);
+        Log.debug(getClass(), "Sending message: " + message);
     }
 
     public boolean isOpen() {

@@ -17,6 +17,8 @@ import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerState;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -82,17 +85,21 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     protected static final String SERVER_CONF_LABEL_PATH_SUFFIX     = ":path";
 
     private final ContainerInfo               info;
-    private final String                      containerHost;
+    private final String                      containerExternalHostname;
+    private final String                      containerInternalHostname;
     private final Map<String, ServerConfImpl> serversConf;
 
     @Inject
     public DockerInstanceRuntimeInfo(@Assisted ContainerInfo containerInfo,
-                                     @Assisted String containerHost,
+                                     @Assisted("externalhost") @Nullable String containerExternalHostname,
+                                     @Assisted("internalhost") String containerInternalHostname,
                                      @Assisted MachineConfig machineConfig,
                                      @Named("machine.docker.dev_machine.machine_servers") Set<ServerConf> devMachineSystemServers,
                                      @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesSystemServers) {
         this.info = containerInfo;
-        this.containerHost = containerHost;
+        this.containerExternalHostname = containerExternalHostname == null ?
+                                                    containerInternalHostname : containerExternalHostname;
+        this.containerInternalHostname = containerInternalHostname;
         Stream<ServerConf> confStream = Stream.concat(machineConfig.getServers().stream(), allMachinesSystemServers.stream());
         if (machineConfig.isDev()) {
             confStream = Stream.concat(confStream, devMachineSystemServers.stream());
@@ -243,7 +250,8 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
         }
         return addDefaultReferenceForServersWithoutReference(
                 addRefAndUrlToServers(
-                        getServersWithFilledPorts(containerHost,
+                        getServersWithFilledPorts(containerExternalHostname,
+                                                  containerInternalHostname,
                                                   ports),
                         labels));
     }
@@ -263,33 +271,44 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     protected Map<String, ServerImpl> addRefAndUrlToServers(final Map<String, ServerImpl> servers, final Map<String, String> labels) {
         final Map<String, ServerConfImpl> serversConfFromLabels = getServersConfFromLabels(servers.keySet(), labels);
         for (Map.Entry<String, ServerImpl> serverEntry : servers.entrySet()) {
+            ServerPropertiesImpl serverProperties = new ServerPropertiesImpl(serverEntry.getValue().getProperties());
             ServerConf serverConf = serversConf.getOrDefault(serverEntry.getKey(), serversConfFromLabels.get(serverEntry.getKey()));
             if (serverConf != null) {
                 if (serverConf.getRef() != null) {
                     serverEntry.getValue().setRef(serverConf.getRef());
                 }
                 if (serverConf.getPath() != null) {
-                    serverEntry.getValue().setPath(serverConf.getPath());
+                    serverProperties.setPath(serverConf.getPath());
                 }
                 if (serverConf.getProtocol() != null) {
                     serverEntry.getValue().setProtocol(serverConf.getProtocol());
 
-                    String url = serverConf.getProtocol() + "://" + serverEntry.getValue().getAddress();
+                    String externalUrl = serverConf.getProtocol() + "://" + serverEntry.getValue().getAddress();
+                    if (!isNullOrEmpty(serverConf.getPath())) {
+                        if (serverConf.getPath().charAt(0) != '/') {
+                            externalUrl = externalUrl + '/';
+                        }
+                        externalUrl = externalUrl + serverConf.getPath();
+                    }
+                    serverEntry.getValue().setUrl(externalUrl);
+
+                    String internalUrl = serverConf.getProtocol() + "://" + serverProperties.getInternalAddress();
                     if (serverConf.getPath() != null) {
                         if (serverConf.getPath().charAt(0) != '/') {
-                            url = url + '/';
+                            internalUrl = internalUrl + '/';
                         }
-                        url = url + serverConf.getPath();
+                        internalUrl = internalUrl + serverConf.getPath();
                     }
-                    serverEntry.getValue().setUrl(url);
+                    serverProperties.setInternalUrl(internalUrl);
                 }
+                serverEntry.getValue().setProperties(serverProperties);
             }
         }
 
         return servers;
     }
 
-    protected Map<String, ServerImpl> getServersWithFilledPorts(final String host, final Map<String, List<PortBinding>> exposedPorts) {
+    protected Map<String, ServerImpl> getServersWithFilledPorts(final String externalHostame, final String internalHostname, final Map<String, List<PortBinding>> exposedPorts) {
         final HashMap<String, ServerImpl> servers = new LinkedHashMap<>();
 
         for (Map.Entry<String, List<PortBinding>> portEntry : exposedPorts.entrySet()) {
@@ -299,9 +318,9 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             String externalPort = portEntry.getValue().get(0).getHostPort();
             servers.put(portProtocol, new ServerImpl(null,
                                                      null,
-                                                     host + ":" + externalPort,
+                                                     externalHostame + ":" + externalPort,
                                                      null,
-                                                     null));
+                                                     new ServerPropertiesImpl(null, internalHostname + ":" + externalPort, null)));
         }
 
         return servers;

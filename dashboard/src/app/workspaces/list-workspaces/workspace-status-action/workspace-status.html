@@ -1,0 +1,24 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<div class="workspaces-status" ng-class="{'workspaces-busy' : workspaceStatusController.workspace.status === 'STARTING'}">
+  <span class="fa fa-play"
+        data-ng-click="workspaceStatusController.startWorkspace()"
+        ng-show="(workspaceStatusController.workspace.status === 'STOPPED' || workspaceStatusController.workspace.status === 'STARTING')"
+        ng-class="{'disabled' : workspaceStatusController.workspace.status !== 'STOPPED'}"
+        tooltip="Run workspace"></span>
+  <span class="fa fa-stop"
+        data-ng-click="workspaceStatusController.stopWorkspace()"
+        ng-show="(workspaceStatusController.workspace.status === 'RUNNING' || workspaceStatusController.workspace.status === 'STOPPING')"
+        ng-class="{'disabled' : workspaceStatusController.workspace.status !== 'RUNNING'}"
+        tooltip="Stop workspace"></span>
+</div>

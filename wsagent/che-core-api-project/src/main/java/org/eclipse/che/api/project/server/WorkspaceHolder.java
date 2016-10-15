@@ -36,7 +36,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
 
     private String apiEndpoint;
 
-    private final String workspaceId;
+    private String workspaceId;
 
     private HttpJsonRequestFactory httpJsonRequestFactory;
 
@@ -61,12 +61,10 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
     }
 
 
-
-
     @Override
     public List<? extends ProjectConfig> getProjects() throws ServerException {
 
-        return  workspaceDto(workspaceId).getConfig().getProjects();
+        return workspaceDto(workspaceId).getConfig().getProjects();
     }
 
     @Override
@@ -108,7 +106,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class)
                                       .path(WorkspaceService.class, "updateProject")
-                                      .build(new String[] {workspaceId, project.getPath()}, false).toString();
+                                      .build(new String[]{workspaceId, project.getPath()}, false).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).usePutMethod().setBody(asDto(project)).request();
         } catch (IOException | ApiException e) {
@@ -120,10 +118,10 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
 
     protected void removeProject(ProjectConfig project) throws ServerException {
 
-         final String href = UriBuilder.fromUri(apiEndpoint)
+        final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class)
                                       .path(WorkspaceService.class, "deleteProject")
-                                      .build(new String[] {workspaceId, project.getPath()}, false).toString();
+                                      .build(new String[]{workspaceId, project.getPath()}, false).toString();
         try {
             httpJsonRequestFactory.fromUrl(href).useDeleteMethod().request();
         } catch (IOException | ApiException e) {
@@ -137,6 +135,7 @@ public class WorkspaceHolder extends WorkspaceProjectsSyncer {
      * @throws ServerException
      */
     private WorkspaceDto workspaceDto(String wsId) throws ServerException {
+
         final String href = UriBuilder.fromUri(apiEndpoint)
                                       .path(WorkspaceService.class).path(WorkspaceService.class, "getByKey")
                                       .build(wsId).toString();

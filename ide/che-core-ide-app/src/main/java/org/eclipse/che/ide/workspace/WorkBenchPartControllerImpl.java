@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace;
 
+import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.inject.Inject;
@@ -22,6 +23,7 @@ import com.google.inject.assistedinject.Assisted;
  * @author Dmitry Shnurenko
  */
 public class WorkBenchPartControllerImpl implements WorkBenchPartController {
+
     public static final int DURATION = 200;
 
     private final SplitLayoutPanel splitLayoutPanel;
@@ -49,6 +51,22 @@ public class WorkBenchPartControllerImpl implements WorkBenchPartController {
     public void setSize(double size) {
         splitLayoutPanel.setWidgetSize(widget, size);
         splitLayoutPanel.animate(DURATION);
+    }
+
+    @Override
+    public void maximize() {
+        DockLayoutPanel.Direction direction = splitLayoutPanel.getWidgetDirection(widget);
+
+        if (DockLayoutPanel.Direction.NORTH == direction || DockLayoutPanel.Direction.SOUTH == direction) {
+            int maxHeight = splitLayoutPanel.getOffsetHeight() - splitLayoutPanel.getSplitterSize();
+            splitLayoutPanel.setWidgetSize(widget, maxHeight);
+            splitLayoutPanel.animate(DURATION);
+
+        } else if (DockLayoutPanel.Direction.WEST == direction || DockLayoutPanel.Direction.EAST == direction) {
+            int maxWidth = splitLayoutPanel.getOffsetWidth() - splitLayoutPanel.getSplitterSize();
+            splitLayoutPanel.setWidgetSize(widget, maxWidth);
+            splitLayoutPanel.animate(DURATION);
+        }
     }
 
     /** {@inheritDoc} */

@@ -14,8 +14,13 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.local.StackDeserializer;
+import org.eclipse.che.api.local.WorkspaceConfigDeserializer;
 import org.eclipse.che.api.local.storage.LocalStorage;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
+import org.eclipse.che.api.workspace.server.stack.StackJsonAdapter;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +35,7 @@ import java.util.Map;
 import static java.lang.String.format;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.util.Collections.singletonMap;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
 
 /**
@@ -42,15 +48,18 @@ public class StackLocalStorage {
 
     private static final Logger LOG = LoggerFactory.getLogger(StackLocalStorage.class);
 
-    private static final String STACK_STORAGE_FILE = "stacks.json";
+    public static final String STACK_STORAGE_FILE = "stacks.json";
     private static final String ICON_FOLDER_NAME   = "images";
 
     private final LocalStorage localStorage;
     private final Path         iconFolderPath;
 
     @Inject
-    public StackLocalStorage(@Named("che.conf.storage") String pathToStorage) throws IOException {
-        this.localStorage = new LocalStorage(pathToStorage, STACK_STORAGE_FILE);
+    public StackLocalStorage(@Named("che.conf.storage") String pathToStorage,
+                             StackJsonAdapter stackJsonAdapter) throws IOException {
+        this.localStorage = new LocalStorage(pathToStorage,
+                                             STACK_STORAGE_FILE,
+                                             singletonMap(StackImpl.class, new StackDeserializer(stackJsonAdapter)));
         this.iconFolderPath = Paths.get(pathToStorage, ICON_FOLDER_NAME);
     }
 
@@ -84,13 +93,12 @@ public class StackLocalStorage {
      * Icon data stores in the local storage by path:
      * {@code stackIconFolderPath}/stackId/IconName.
      *
-     * @see StackImpl
-     * @see StackIcon
-     *
      * @param stack
      *         stack to update stack icon data
      * @param stackIconFolderPath
      *         path to the folder with stack icons
+     * @see StackImpl
+     * @see StackIcon
      */
     private void setIconData(StackImpl stack, Path stackIconFolderPath) {
         StackIcon stackIcon = stack.getStackIcon();

@@ -1,0 +1,31 @@
+<div class="che-list-header">
+  <div class="che-list-header-additional">
+    <che-button-primary class="che-list-add-button"
+                        ng-if="onAdd"
+                        che-button-title="{{addButtonTitle}}"
+                        ng-click="onAdd()"></che-button-primary>
+    <che-button-primary class="che-list-add-button"
+                        ng-if="addButtonHref"
+                        che-button-title="{{addButtonTitle}}"
+                        ng-href="{{addButtonHref}}"></che-button-primary>
+    <div class="che-list-search"
+         ng-show="inputPlaceholder && !hideSearch">
+      <div flex="100" layout="row">
+        <div flex="15" class="header-search-icon" ng-show="!inputValue"><i class="fa fa-search"></i></div>
+        <div flex class="header-search-input">
+          <input type="text" maxlength="128" placeholder="{{inputPlaceholder}}" data-ng-model="inputValue">
+        </div>
+        <div flex="10" class="header-close-icon" ng-click="inputValue=''" ng-show="inputValue"><i class="fa fa-close"></i></div>
+      </div>
+    </div>
+    <che-button-primary class="che-list-delete-button"
+                        ng-show="deleteButtonTitle && !hideDelete"
+                        che-button-title="{{deleteButtonTitle}}"
+                        ng-click="onDelete()"></che-button-primary>
+  </div>
+  <md-item class="noselect">
+    <md-item-content>
+      <ng-transclude class="che-list-header-content" ng-hide="hideHeader"></ng-transclude>
+    </md-item-content>
+  </md-item>
+</div>

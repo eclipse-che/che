@@ -15,6 +15,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.response.Response;
 
+import org.eclipse.che.account.api.AccountManager;
+import org.eclipse.che.account.spi.AccountValidator;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -70,6 +72,8 @@ public class UserServiceTest {
     @Mock(answer = Answers.RETURNS_MOCKS)
     private UserManager          userManager;
     @Mock
+    private AccountManager       accountManager;
+    @Mock
     private TokenValidator       tokenValidator;
     @Mock
     private UserLinksInjector    linksInjector;
@@ -82,7 +86,7 @@ public class UserServiceTest {
     public void initService() {
         initMocks(this);
 
-        userValidator = new UserValidator(userManager);
+        userValidator = new UserValidator(new AccountValidator(accountManager));
 
         // Return the incoming instance when injectLinks is called
         when(linksInjector.injectLinks(any(), any())).thenAnswer(inv -> inv.getArguments()[0]);

@@ -433,6 +433,8 @@ get_docker_ready () {
     rm -rf ${CHE_HOME}/lib-copy/*
     mkdir -p ${CHE_HOME}/lib-copy
     cp -rf ${CHE_HOME}/lib/* ${CHE_HOME}/lib-copy
+
+    export JAVA_OPTS="${JAVA_OPTS} -Dche.docker.che_host_network=bridge"
   fi 
 }
 

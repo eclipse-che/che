@@ -22,6 +22,12 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("button.cancel")
     String cancelButton();
 
+    @Key("button.download")
+    String downloadButton();
+
+    @Key("downloadOutputs")
+    String downloadOutputs();
+
     @Key("main.menu.machine")
     String mainMenuMachine();
 
@@ -92,9 +98,6 @@ public interface MachineLocalizationConstant extends Messages {
     String connectViaSSH();
 
     /* Messages */
-    @Key("messages.noDevMachine")
-    String noDevMachine();
-
     @Key("messages.machine.not.found")
     String machineNotFound(String machineId);
 
@@ -415,6 +418,11 @@ public interface MachineLocalizationConstant extends Messages {
     @Key("consoles.autoScrollButton.tooltip")
     String consolesAutoScrollButtonTooltip();
 
+    @Key("view.processes.title")
+    String viewProcessesTitle();
+
+    @Key("view.processes.tooltip")
+    String viewProcessesTooltip();
 
     @Key("consoles.defaultMode.tooltip")
     String consolesDefaultModeTooltip();
@@ -424,9 +432,6 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("consoles.splitVertically.tooltip")
     String consolesSplitVerticallyTooltip();
-
-    @Key("view.processes.tooltip")
-    String viewProcessesTooltip();
 
     @Key("view.processes.dev.title")
     String viewProcessesDevTitle();
@@ -466,4 +471,14 @@ public interface MachineLocalizationConstant extends Messages {
 
     @Key("ssh.connect.info")
     String sshConnectInfo(String machineName, String machineHost, String machinePort);
+
+
+    @Key("macro.current.project.relpath.description")
+    String macroCurrentProjectRelpathDescription();
+
+    @Key("macro.current.project.path.description")
+    String macroCurrentProjectPathDescription();
+
+    @Key("macro.machine.dev.hostname.description")
+    String macroMachineDevHostnameDescription();
 }

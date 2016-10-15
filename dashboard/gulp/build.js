@@ -30,9 +30,9 @@ var options = minimist(process.argv.slice(2), serverOptions);
 
 gulp.task('partials', function () {
   return gulp.src([
-    path.join(conf.paths.src, '/{app,components}/**/*.html'),
-    path.join(conf.paths.tmp, '/serve/{app,components}/**/*.html')
-  ])
+      path.join(conf.paths.src, '/{app,components}/**/*.html'),
+      path.join(conf.paths.tmp, '/serve/{app,components}/**/*.html')
+    ])
     .pipe($.minifyHtml({
       empty: true,
       spare: true,
@@ -125,40 +125,40 @@ gulp.task('fonts', ['colors', 'outputcolors', 'proxySettings', 'existingfonts'],
 
 var fs = require('fs');
 gulp.task('colorstemplate', function () {
-  return gulp.src('src/app/colors/che-color.constant.js.template')
+  return gulp.src('src/app/colors/che-color.constant.ts.template')
     .pipe($.replace('%CONTENT%', fs.readFileSync('src/app/colors/che-colors.json')))
     .pipe($.replace('\"', '\''))
     .pipe(gulp.dest('src/app/colors/template'));
 });
 
 gulp.task('colors', ['colorstemplate'], function () {
-  return gulp.src("src/app/colors/template/che-color.constant.js.template")
-    .pipe($.rename("che-color.constant.js"))
+  return gulp.src("src/app/colors/template/che-color.constant.ts.template")
+    .pipe($.rename("che-color.constant.ts"))
     .pipe(gulp.dest("src/app/colors"));
 });
 
 gulp.task('outputcolorstemplate', function () {
-  return gulp.src('src/app/colors/che-output-colors.constant.js.template')
+  return gulp.src('src/app/colors/che-output-colors.constant.ts.template')
     .pipe($.replace('%CONTENT%', fs.readFileSync('src/app/colors/che-output-colors.json')))
     .pipe($.replace('\"', '\''))
     .pipe(gulp.dest('src/app/colors/template'));
 });
 
 gulp.task('outputcolors', ['outputcolorstemplate'], function () {
-  return gulp.src("src/app/colors/template/che-output-colors.constant.js.template")
-    .pipe($.rename("che-output-colors.constant.js"))
+  return gulp.src("src/app/colors/template/che-output-colors.constant.ts.template")
+    .pipe($.rename("che-output-colors.constant.ts"))
     .pipe(gulp.dest("src/app/colors"));
 });
 
 gulp.task('proxySettingsTemplate', function () {
-  return gulp.src("src/app/proxy/proxy-settings.constant.js.template")
+  return gulp.src("src/app/proxy/proxy-settings.constant.ts.template")
     .pipe($.replace('%CONTENT%', options.server))
     .pipe(gulp.dest('src/app/proxy/template'));
 });
 
 gulp.task('proxySettings', ['proxySettingsTemplate'], function () {
-  return gulp.src("src/app/proxy/template/proxy-settings.constant.js.template")
-    .pipe($.rename("proxy-settings.constant.js"))
+  return gulp.src("src/app/proxy/template/proxy-settings.constant.ts.template")
+    .pipe($.rename("proxy-settings.constant.ts"))
     .pipe(gulp.dest("src/app/proxy"));
 });
 
@@ -169,9 +169,9 @@ gulp.task('other', function () {
   });
 
   return gulp.src([
-    path.join(conf.paths.src, '/**/*'),
-    path.join('!' + conf.paths.src, '/**/*.{html,css,js,styl}')
-  ])
+      path.join(conf.paths.src, '/**/*'),
+      path.join('!' + conf.paths.src, '/**/*.{html,css,js,styl}')
+    ])
     .pipe(fileFilter)
     .pipe(gulp.dest(path.join(conf.paths.dist, '/')));
 });

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.inject;
 
+import com.google.common.base.Splitter;
+import com.google.common.io.Files;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -35,13 +37,20 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * CheBootstrap is entry point of Che application implemented as ServletContextListener.
@@ -85,24 +94,20 @@ import java.util.regex.Pattern;
  * @author Florent Benoit
  */
 public class CheBootstrap extends EverrestGuiceContextListener {
-
-    /**
-     * Path to the internal folder that is expected in WEB-INF/classes
-     */
-    private static final String WEB_INF_RESOURCES = "che";
-
-    /**
-     * Backward compliant path to the internal folder that is expected in WEB-INF/classes
-     */
-    private static final String COMPLIANT_WEB_INF_RESOURCES = "codenvy";
-
     private static final Logger LOG = LoggerFactory.getLogger(CheBootstrap.class);
 
-    /**
-     * Environment variable that is used to override some Che settings properties.
-     */
+    /** Environment variable that is used to override some Che settings properties. */
     public static final String CHE_LOCAL_CONF_DIR = "CHE_LOCAL_CONF_DIR";
 
+    public static final String PROPERTIES_ALIASES_CONFIG_FILE = "che_aliases.properties";
+
+    /** Path to the internal folder that is expected in WEB-INF/classes */
+    private static final String WEB_INF_RESOURCES = "che";
+
+    /** Backward compliant path to the internal folder that is expected in WEB-INF/classes */
+    private static final String COMPLIANT_WEB_INF_RESOURCES = "codenvy";
+
+    private static final String NULL = "NULL";
 
     private final List<Module> modules = new ArrayList<>();
 
@@ -129,8 +134,32 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         modules.add(new PairConverter());
         modules.add(new PairArrayConverter());
         modules.addAll(ModuleScanner.findModules());
-        modules.add(Modules.override(new WebInfConfiguration()).with(new ExtConfiguration()));
+        Map<String, Set<String>> aliases = readConfigurationAliases();
+        Module firstConfigurationPermutation = Modules.override(new WebInfConfiguration(aliases)).with(new ExtConfiguration(aliases));
+        Module secondConfigurationPermutation = Modules.override(firstConfigurationPermutation).with(new CheSystemPropertiesConfigurationModule(aliases));
+        Module lastConfigurationPermutation = Modules.override(secondConfigurationPermutation).with(new CheEnvironmentVariablesConfigurationModule(aliases));
+        modules.add(lastConfigurationPermutation);
         return modules;
+    }
+
+    private Map<String, Set<String>> readConfigurationAliases() {
+        URL aliasesResource = getClass().getClassLoader().getResource(PROPERTIES_ALIASES_CONFIG_FILE);
+        Map<String, Set<String>> aliases = new HashMap<>();
+        if (aliasesResource != null) {
+            Properties properties = new Properties();
+            File aliasesFile = new File(aliasesResource.getFile());
+            try (Reader reader = Files.newReader(aliasesFile, Charset.forName("UTF-8"))) {
+                properties.load(reader);
+            } catch (IOException e) {
+                throw new IllegalStateException(String.format("Unable to read configuration aliases from file %s", aliasesFile), e);
+            }
+            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+                String value = (String)entry.getValue();
+                aliases.put((String)entry.getKey(),
+                            Splitter.on(',').splitToList(value).stream().map(String::trim).collect(toSet()));
+            }
+        }
+        return aliases;
     }
 
     /** see http://google-guice.googlecode.com/git/javadoc/com/google/inject/servlet/ServletModule.html */
@@ -142,12 +171,16 @@ public class CheBootstrap extends EverrestGuiceContextListener {
 
     /** ConfigurationModule binding configuration located in <i>/WEB-INF/classes/che</i> directory */
     static class WebInfConfiguration extends AbstractConfigurationModule {
+        WebInfConfiguration(Map<String, Set<String>> aliases) {
+            super(aliases);
+        }
+
         protected void configure() {
-            URL compliantWebInfConf = this.getClass().getClassLoader().getResource(COMPLIANT_WEB_INF_RESOURCES);
+            URL compliantWebInfConf = getClass().getClassLoader().getResource(COMPLIANT_WEB_INF_RESOURCES);
             if (compliantWebInfConf != null) {
                 bindConf(new File(compliantWebInfConf.getFile()));
             }
-            URL webInfConf = this.getClass().getClassLoader().getResource(WEB_INF_RESOURCES);
+            URL webInfConf = getClass().getClassLoader().getResource(WEB_INF_RESOURCES);
             if (webInfConf != null) {
                 bindConf(new File(webInfConf.getFile()));
             }
@@ -159,11 +192,13 @@ public class CheBootstrap extends EverrestGuiceContextListener {
      * <i>CHE_LOCAL_CONF_DIR</i> Env variable.
      */
     static class ExtConfiguration extends AbstractConfigurationModule {
+        ExtConfiguration(Map<String, Set<String>> aliases) {
+            super(aliases);
+        }
+
         @Override
         protected void configure() {
-            // binds environment variables visible as prefixed with "env."
-            bindEnvProperties("env.", System.getenv());
-            // binds system properties visible as prefixed with "sys."
+            bindProperties("env.", System.getenv());
             bindProperties("sys.", System.getProperties());
             String extConfig = System.getenv(CHE_LOCAL_CONF_DIR);
             if (extConfig != null) {
@@ -172,35 +207,99 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         }
     }
 
-    private static final Pattern PATTERN = Pattern.compile("\\$\\{[^\\}^\\$\\{]+\\}");
+    static class CheSystemPropertiesConfigurationModule extends AbstractConfigurationModule {
+        CheSystemPropertiesConfigurationModule(Map<String, Set<String>> aliases) {
+            super(aliases);
+        }
+
+        @Override
+        protected void configure() {
+            Iterable<Map.Entry<String, Object>> cheProperties = System.getProperties().entrySet().stream()
+                                                                      .filter(new PropertyNamePrefixPredicate<>("che."))
+                                                                      .map(new PropertyNamePrefixRemover<>(4))
+                                                                      .collect(toList());
+            bindProperties(null, cheProperties);
+        }
+    }
+
+    static class CheEnvironmentVariablesConfigurationModule extends AbstractConfigurationModule {
+        CheEnvironmentVariablesConfigurationModule(Map<String, Set<String>> aliases) {
+            super(aliases);
+        }
+
+        @Override
+        protected void configure() {
+            Iterable<Map.Entry<String, String>> cheProperties = System.getenv().entrySet().stream()
+                                                                      .filter(new PropertyNamePrefixPredicate<>("CHE_"))
+                                                                      .map(new PropertyNamePrefixRemover<>(4))
+                                                                      .map(new EnvironmentVariableToSystemPropertyFormatNameConverter())
+                                                                      .collect(toList());
+            bindProperties(null, cheProperties);
+        }
+    }
+
+    static class PropertyNamePrefixPredicate<K, V> implements Predicate<Map.Entry<K, V>> {
+        final String prefix;
+
+        PropertyNamePrefixPredicate(String prefix) {
+            this.prefix = prefix;
+        }
+
+        @Override
+        public boolean test(Map.Entry<K, V> entry) {
+            return ((String)entry.getKey()).startsWith(prefix);
+        }
+    }
+
+    static class PropertyNamePrefixRemover<K, V> implements Function<Map.Entry<K, V>, Map.Entry<String, V>> {
+        final int prefixLength;
+
+        PropertyNamePrefixRemover(int prefixLength) {
+            this.prefixLength = prefixLength;
+        }
+
+        @Override
+        public Map.Entry<String, V> apply(Map.Entry<K, V> entry) {
+            return new SimpleEntry<>(((String)entry.getKey()).substring(prefixLength), entry.getValue());
+        }
+    }
+
+    static class EnvironmentVariableToSystemPropertyFormatNameConverter implements Function<Map.Entry<String, String>, Map.Entry<String, String>> {
+        @Override
+        public Map.Entry<String, String> apply(Map.Entry<String, String> entry) {
+            String name = entry.getKey();
+            name = name.toLowerCase();
+            name = name.replace('_', '.');
+            return new SimpleEntry<>(name, entry.getValue());
+        }
+    }
+
+    private static final Pattern PROPERTIES_PLACE_HOLDER_PATTERN = Pattern.compile("\\$\\{[^\\}^\\$\\{]+\\}");
 
     static abstract class AbstractConfigurationModule extends AbstractModule {
+        final Map<String, Set<String>> aliases;
+
+        AbstractConfigurationModule(Map<String, Set<String>> aliases) {
+            this.aliases = aliases;
+        }
+
         protected void bindConf(File confDir) {
             final File[] files = confDir.listFiles();
             if (files != null) {
-                for (File f : files) {
-                    if (!f.isDirectory()) {
-                        if ("properties".equals(ext(f.getName()))) {
+                for (File file : files) {
+                    if (!file.isDirectory()) {
+                        if ("properties".equals(Files.getFileExtension(file.getName()))) {
                             Properties properties = new Properties();
-                            try (Reader reader = Files.newBufferedReader(f.toPath(), Charset.forName("UTF-8"))) {
+                            try (Reader reader = Files.newReader(file, Charset.forName("UTF-8"))) {
                                 properties.load(reader);
                             } catch (IOException e) {
-                                throw new IllegalStateException(String.format("Unable to read configuration file %s", f), e);
+                                throw new IllegalStateException(String.format("Unable to read configuration file %s", file), e);
                             }
                             bindProperties(properties);
                         }
                     }
                 }
             }
-        }
-
-        private String ext(String fileName) {
-            String extension = "";
-            int i = fileName.lastIndexOf('.');
-            if (i > 0) {
-                extension = fileName.substring(i + 1);
-            }
-            return extension;
         }
 
         protected void bindProperties(Properties properties) {
@@ -211,23 +310,23 @@ public class CheBootstrap extends EverrestGuiceContextListener {
             bindProperties(prefix, properties.entrySet());
         }
 
-        protected void bindEnvProperties(String prefix, Map<String, String> properties) {
+        protected void bindProperties(String prefix, Map<String, String> properties) {
             bindProperties(prefix, properties.entrySet(), true);
         }
 
         protected <K, V> void bindProperties(String prefix, Iterable<Map.Entry<K, V>> properties) {
-           bindProperties(prefix, properties, false);
+            bindProperties(prefix, properties, false);
         }
 
         protected <K, V> void bindProperties(String prefix, Iterable<Map.Entry<K, V>> properties, boolean skipUnresolved) {
             StringBuilder buf = null;
             for (Map.Entry<K, V> e : properties) {
-                String pValue = (String)e.getValue();
-                if ("NULL".equals(pValue)) {
-                    bind(String.class).annotatedWith(Names.named(prefix == null ? (String)e.getKey() : (prefix + e.getKey())))
-                                      .toProvider(Providers.<String>of(null));
+                String name = (String)e.getKey();
+                String value = (String)e.getValue();
+                if (NULL.equals(value)) {
+                    bindProperty(prefix, name, null);
                 } else {
-                    final Matcher matcher = PATTERN.matcher(pValue);
+                    final Matcher matcher = PROPERTIES_PLACE_HOLDER_PATTERN.matcher(value);
                     if (matcher.find()) {
                         int start = 0;
                         if (buf == null) {
@@ -236,32 +335,60 @@ public class CheBootstrap extends EverrestGuiceContextListener {
                             buf.setLength(0);
                         }
                         do {
-                            final int i = matcher.start();
-                            final int j = matcher.end();
-                            buf.append(pValue.substring(start, i));
-                            final String name = pValue.substring(i + 2, j - 1);
-                            String actual = System.getProperty(name);
-                            if (actual == null) {
-                                actual = System.getenv(name);
-                            }
-                            if (actual != null) {
-                                buf.append(actual);
+                            buf.append(value.substring(start, matcher.start()));
+                            final String placeholder = value.substring(matcher.start(), matcher.end());
+                            final String placeholderName = removePlaceholderFormatting(placeholder);
+                            String resolvedPlaceholder = resolvePlaceholder(placeholderName);
+                            if (resolvedPlaceholder != null) {
+                                buf.append(resolvedPlaceholder);
                             } else if (skipUnresolved) {
-                                buf.append(pValue.substring(i, j));
-                                LOG.warn("Environment variable " + name + " cannot be resolved, leaving as is.");
+                                buf.append(placeholder);
+                                LOG.warn("Placeholder {} cannot be resolved neither from environment variable nor from system property, leaving as is.", placeholderName);
                             } else {
                                 throw new ConfigurationException(
-                                        "Property " + name + " is not found as system property or environment variable.");
+                                        String.format("Property %s is not found as system property or environment variable.", placeholderName));
                             }
 
                             start = matcher.end();
                         } while (matcher.find());
-                        buf.append(pValue.substring(start));
-                        pValue = buf.toString();
+                        buf.append(value.substring(start));
+                        value = buf.toString();
                     }
-                    bindConstant().annotatedWith(Names.named(prefix == null ? (String)e.getKey() : (prefix + e.getKey()))).to(pValue);
+                    bindProperty(prefix, name, value);
                 }
             }
+        }
+
+        private void bindProperty(String prefix, String name, String value) {
+            String key = prefix == null ? name : (prefix + name);
+            Set<String> aliasesForName = aliases.get(name);
+            if (value == null) {
+                bind(String.class).annotatedWith(Names.named(key)).toProvider(Providers.<String>of(null));
+                if (aliasesForName != null) {
+                    for (String alias : aliasesForName) {
+                        bind(String.class).annotatedWith(Names.named(alias)).toProvider(Providers.<String>of(null));
+                    }
+                }
+            } else {
+                bindConstant().annotatedWith(Names.named(key)).to(value);
+                if (aliasesForName != null) {
+                    for (String alias : aliasesForName) {
+                        bindConstant().annotatedWith(Names.named(alias)).to(value);
+                    }
+                }
+            }
+        }
+
+        private String removePlaceholderFormatting(String placeholder) {
+            return placeholder.substring(2, placeholder.length() - 1);
+        }
+
+        private String resolvePlaceholder(String placeholderName) {
+            String resolved = System.getProperty(placeholderName);
+            if (resolved == null) {
+                resolved = System.getenv(placeholderName);
+            }
+            return resolved;
         }
     }
 }

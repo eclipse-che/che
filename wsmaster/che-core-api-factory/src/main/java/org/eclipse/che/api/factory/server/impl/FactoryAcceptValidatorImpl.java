@@ -12,7 +12,7 @@ package org.eclipse.che.api.factory.server.impl;
 
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 
 import javax.inject.Inject;
@@ -23,13 +23,9 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class FactoryAcceptValidatorImpl extends FactoryBaseValidator implements FactoryAcceptValidator {
-    @Inject
-    public FactoryAcceptValidatorImpl(PreferenceDao preferenceDao) {
-        super(preferenceDao);
-    }
 
     @Override
-    public void validateOnAccept(Factory factory) throws BadRequestException {
+    public void validateOnAccept(FactoryDto factory) throws BadRequestException {
         validateCurrentTimeBetweenSinceUntil(factory);
         validateProjectActions(factory);
     }

@@ -18,25 +18,27 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.shared.Constants;
+import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.MachineManager;
+import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClient;
 import org.eclipse.che.ide.extension.machine.client.RecipeScriptDownloadServiceClientImpl;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
+import org.eclipse.che.ide.extension.machine.client.command.CommandManagerImpl;
 import org.eclipse.che.ide.extension.machine.client.command.custom.CustomCommandType;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsView;
 import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsViewImpl;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProvider;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProviderRegistry;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CommandPropertyValueProviderRegistryImpl;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectRelativePathProvider;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.DevMachineHostNameProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
+import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectRelativePathMacro;
+import org.eclipse.che.ide.extension.machine.client.command.macros.DevMachineHostNameMacro;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.TerminalFactory;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.WidgetsFactory;
+import org.eclipse.che.ide.extension.machine.client.machine.MachineEntityImpl;
 import org.eclipse.che.ide.extension.machine.client.machine.MachineManagerImpl;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineView;
 import org.eclipse.che.ide.extension.machine.client.machine.create.CreateMachineViewImpl;
@@ -53,11 +55,9 @@ import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.Tab;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.TabImpl;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeader;
 import org.eclipse.che.ide.extension.machine.client.perspective.widgets.tab.header.TabHeaderImpl;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelView;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelViewImpl;
-import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerView;
-import org.eclipse.che.ide.extension.machine.client.processes.container.ConsolesContainerViewImpl;
 import org.eclipse.che.ide.extension.machine.client.processes.actions.ConsoleTreeContextMenuFactory;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelView;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelViewImpl;
 import org.eclipse.che.ide.extension.machine.client.targets.BaseTarget;
 import org.eclipse.che.ide.extension.machine.client.targets.CategoryPage;
 import org.eclipse.che.ide.extension.machine.client.targets.Target;
@@ -85,11 +85,11 @@ import static org.eclipse.che.ide.extension.machine.client.perspective.Operation
 @ExtensionGinModule
 public class MachineGinModule extends AbstractGinModule {
 
-    /** {@inheritDoc} */
     @Override
     protected void configure() {
-        GinMapBinder<String, Perspective> perspectiveBinder = GinMapBinder.newMapBinder(binder(), String.class, Perspective.class);
-        perspectiveBinder.addBinding(OPERATIONS_PERSPECTIVE_ID).to(OperationsPerspective.class);
+        GinMapBinder.newMapBinder(binder(), String.class, Perspective.class)
+                    .addBinding(OPERATIONS_PERSPECTIVE_ID)
+                    .to(OperationsPerspective.class);
 
         bind(CreateMachineView.class).to(CreateMachineViewImpl.class);
         bind(OutputConsoleView.class).to(OutputConsoleViewImpl.class);
@@ -98,27 +98,26 @@ public class MachineGinModule extends AbstractGinModule {
                         .implement(OutputConsole.class, Names.named("default"), DefaultOutputConsole.class)
                         .build(CommandConsoleFactory.class));
 
-        bind(ConsolesPanelView.class).to(ConsolesPanelViewImpl.class);
-        bind(ConsolesContainerView.class).to(ConsolesContainerViewImpl.class).in(Singleton.class);
+        bind(ProcessesPanelView.class).to(ProcessesPanelViewImpl.class).in(Singleton.class);
 
+        bind(CommandManager.class).to(CommandManagerImpl.class).in(Singleton.class);
         bind(EditCommandsView.class).to(EditCommandsViewImpl.class).in(Singleton.class);
 
         bind(TargetsView.class).to(TargetsViewImpl.class).in(Singleton.class);
 
         GinMultibinder.newSetBinder(binder(), CommandType.class).addBinding().to(CustomCommandType.class);
 
-        bind(CommandPropertyValueProviderRegistry.class).to(CommandPropertyValueProviderRegistryImpl.class).in(Singleton.class);
-
-        final GinMultibinder<CommandPropertyValueProvider> valueProviderBinder =
-                GinMultibinder.newSetBinder(binder(), CommandPropertyValueProvider.class);
-        valueProviderBinder.addBinding().to(DevMachineHostNameProvider.class);
-        valueProviderBinder.addBinding().to(CurrentProjectPathProvider.class);
-        valueProviderBinder.addBinding().to(CurrentProjectRelativePathProvider.class);
+        final GinMultibinder<Macro> macrosBinder = GinMultibinder.newSetBinder(binder(), Macro.class);
+        macrosBinder.addBinding().to(DevMachineHostNameMacro.class);
+        macrosBinder.addBinding().to(CurrentProjectPathMacro.class);
+        macrosBinder.addBinding().to(CurrentProjectRelativePathMacro.class);
 
         install(new GinFactoryModuleBuilder().implement(TabHeader.class, TabHeaderImpl.class)
                                              .implement(EditorButtonWidget.class, EditorButtonWidgetImpl.class)
                                              .build(WidgetsFactory.class));
-        install(new GinFactoryModuleBuilder().implement(Tab.class, TabImpl.class).build(EntityFactory.class));
+        install(new GinFactoryModuleBuilder().implement(Tab.class, TabImpl.class)
+                                             .implement(MachineEntity.class, MachineEntityImpl.class)
+                                             .build(EntityFactory.class));
         install(new GinFactoryModuleBuilder().build(TerminalFactory.class));
 
         bind(MachineManager.class).to(MachineManagerImpl.class).in(Singleton.class);

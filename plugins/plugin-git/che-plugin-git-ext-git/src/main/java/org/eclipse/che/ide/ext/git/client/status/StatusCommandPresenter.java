@@ -13,18 +13,18 @@ package org.eclipse.che.ide.ext.git.client.status;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +46,7 @@ public class StatusCommandPresenter {
     private final GitServiceClient        service;
     private final AppContext              appContext;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
     private final GitLocalizationConstant constant;
     private final NotificationManager     notificationManager;
 
@@ -57,13 +57,13 @@ public class StatusCommandPresenter {
     public StatusCommandPresenter(GitServiceClient service,
                                   AppContext appContext,
                                   GitOutputConsoleFactory gitOutputConsoleFactory,
-                                  ConsolesPanelPresenter consolesPanelPresenter,
+                                  ProcessesPanelPresenter processesPanelPresenter,
                                   GitLocalizationConstant constant,
                                   NotificationManager notificationManager) {
         this.service = service;
         this.appContext = appContext;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.consolesPanelPresenter = processesPanelPresenter;
         this.constant = constant;
         this.notificationManager = notificationManager;
     }

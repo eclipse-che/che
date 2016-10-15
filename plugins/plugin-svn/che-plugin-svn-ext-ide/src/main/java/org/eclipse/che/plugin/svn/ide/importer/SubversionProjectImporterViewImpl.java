@@ -50,10 +50,6 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
     @UiField
     TextBox     projectRelativePath;
     @UiField
-    TextBox     username;
-    @UiField
-    TextBox     password;
-    @UiField
     TextBox     projectName;
     @UiField
     TextArea    projectDescription;
@@ -163,27 +159,6 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
         }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public String getUserName() {
-        return username.getText();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public String getPassword() {
-        return password.getText();
-    }
-
-    /**
-     * Clean username and password fields
-     */
-    @Override
-    public void cleanCredentials() {
-        username.setText("");
-        password.setText("");
-    }
-
     @UiHandler("projectUrl")
     void onProjectUrlChanged(KeyUpEvent event) {
         delegate.onProjectUrlChanged(projectUrl.getValue());
@@ -195,11 +170,6 @@ public class SubversionProjectImporterViewImpl extends Composite implements Subv
             return;
         }
         delegate.onProjectRelativePathChanged(projectRelativePath.getValue());
-    }
-
-    @UiHandler({"username", "password"})
-    void credentialChangeHandler(final ValueChangeEvent<String> event) {
-        delegate.onCredentialsChanged();
     }
 
     @UiHandler("projectName")

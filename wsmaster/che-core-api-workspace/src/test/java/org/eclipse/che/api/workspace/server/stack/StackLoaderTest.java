@@ -19,16 +19,14 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
-import org.eclipse.che.api.machine.shared.dto.LimitsDto;
-import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineSourceDto;
-import org.eclipse.che.api.machine.shared.dto.ServerConfDto;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.EnvironmentRecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.ExtendedMachineDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectProblemDto;
-import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
+import org.eclipse.che.api.workspace.shared.dto.ServerConf2Dto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
@@ -45,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -70,10 +69,10 @@ public class StackLoaderTest {
         URL url = Resources.getResource("stacks.json");
         URL urlFolder = Thread.currentThread().getContextClassLoader().getResource("stack_img");
 
-        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
+        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao, null);
 
         stackLoader.start();
-        verify(stackDao, times(2)).update(any());
+        verify(stackDao, times(5)).update(any());
         verify(stackDao, never()).create(any());
     }
 
@@ -84,11 +83,11 @@ public class StackLoaderTest {
 
         doThrow(new NotFoundException("Stack is already exist")).when(stackDao).update(any());
 
-        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
+        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao, null);
 
         stackLoader.start();
-        verify(stackDao, times(2)).update(any());
-        verify(stackDao, times(2)).create(any());
+        verify(stackDao, times(5)).update(any());
+        verify(stackDao, times(5)).create(any());
     }
 
     @Test
@@ -98,11 +97,11 @@ public class StackLoaderTest {
 
         doThrow(new ServerException("Internal server error")).when(stackDao).update(any());
 
-        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao);
+        stackLoader = new StackLoader(url.getPath(), urlFolder.getPath(), stackDao, null);
 
         stackLoader.start();
-        verify(stackDao, times(2)).update(any());
-        verify(stackDao, times(2)).create(any());
+        verify(stackDao, times(5)).update(any());
+        verify(stackDao, times(5)).create(any());
     }
 
     @Test
@@ -146,30 +145,21 @@ public class StackLoaderTest {
                                                                           .withSource(sourceStorageDto);
 
 
-        RecipeDto recipeDto = newDto(RecipeDto.class).withType("type").withScript("script");
+        EnvironmentRecipeDto environmentRecipe = newDto(EnvironmentRecipeDto.class).withContent("some content")
+                                                                                   .withContentType("some content type")
+                                                                                   .withType("someType");
 
-        LimitsDto limitsDto = newDto(LimitsDto.class).withRam(100);
+        Map<String, ServerConf2Dto> servers = new HashMap<>();
+        servers.put("server1Ref", newDto(ServerConf2Dto.class).withPort("8080/tcp")
+                                                              .withProtocol("http")
+                                                              .withProperties(singletonMap("key", "value")));
+        Map<String, ExtendedMachineDto> machines = new HashMap<>();
+        machines.put("someMachineName", newDto(ExtendedMachineDto.class).withAgents(Arrays.asList("agent1", "agent2"))
+                                                                        .withServers(servers)
+                                                                        .withAttributes(singletonMap("memoryLimitBytes", "" + 512L * 1024L * 1024L)));
 
-        MachineSourceDto machineSourceDto = newDto(MachineSourceDto.class).withLocation("location").withType("type");
-
-        MachineConfigDto machineConfig =
-                newDto(MachineConfigDto.class).withDev(true)
-                                              .withName("machine config name")
-                                              .withType("type")
-                                              .withLimits(limitsDto)
-                                              .withSource(machineSourceDto)
-                                              .withServers(Arrays.asList(newDto(ServerConfDto.class).withRef("ref1")
-                                                                                                    .withPort("8080")
-                                                                                                    .withProtocol("https")
-                                                                                                    .withPath("some/path"),
-                                                                         newDto(ServerConfDto.class).withRef("ref2")
-                                                                                                    .withPort("9090/udp")
-                                                                                                    .withProtocol("someprotocol")
-                                                                                                    .withPath("/some/path")));
-
-        EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withName("name")
-                                                                    .withRecipe(recipeDto)
-                                                                    .withMachineConfigs(Collections.singletonList(machineConfig));
+        EnvironmentDto environmentDto = newDto(EnvironmentDto.class).withRecipe(environmentRecipe)
+                                                                    .withMachines(machines);
 
         CommandDto commandDto = newDto(CommandDto.class).withType("command type")
                                                         .withName("command name")
@@ -180,7 +170,7 @@ public class StackLoaderTest {
                                                                                 .withLinks(Collections.singletonList(link))
                                                                                 .withDefaultEnv("some Default Env name")
                                                                                 .withProjects(Collections.singletonList(projectConfigDto))
-                                                                                .withEnvironments(Collections.singletonList(environmentDto))
+                                                                                .withEnvironments(singletonMap("name", environmentDto))
                                                                                 .withCommands(Collections.singletonList(commandDto));
 
         stackDtoDescriptor.setWorkspaceConfig(workspaceConfigDto);

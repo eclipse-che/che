@@ -26,6 +26,5 @@ public class LocalEnvironmentGinModule extends AbstractGinModule {
     @Override
     protected void configure() {
         bind(ConnectionClosedInformer.class).to(CheConnectionClosedInformer.class).in(Singleton.class);
-        bind(CheWorkspaceStoppedHandler.class).asEagerSingleton();
     }
 }

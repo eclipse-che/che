@@ -10,12 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.ide.editor.orion.client.inject;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.editor.orion.client.jso.OrionCodeEditWidgetOverlay;
 import org.eclipse.che.ide.requirejs.ModuleHolder;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Provider of Orion CodeEdit widget instance.
@@ -26,18 +32,32 @@ import org.eclipse.che.ide.requirejs.ModuleHolder;
 public class OrionCodeEditWidgetProvider implements Provider<OrionCodeEditWidgetOverlay> {
 
     private final ModuleHolder               moduleHolder;
+    private final Set<OrionPlugin>           orionPlugins;
     private       OrionCodeEditWidgetOverlay orionCodeEditWidgetOverlay;
 
     @Inject
     public OrionCodeEditWidgetProvider(ModuleHolder moduleHolder) {
         this.moduleHolder = moduleHolder;
+        orionPlugins = new HashSet<>();
+    }
+
+    @Inject(optional = true)
+    private void registerPlugins(Set<OrionPlugin> plugins) {
+        for (OrionPlugin registrar : plugins) {
+            orionPlugins.add(registrar);
+        }
     }
 
     @Override
     public OrionCodeEditWidgetOverlay get() {
         if (orionCodeEditWidgetOverlay == null) {
+            JsArrayString plugins = JavaScriptObject.createArray().cast();
+            for (OrionPlugin orionPlugin : orionPlugins) {
+                plugins.push(GWT.getModuleBaseURL() + orionPlugin.getRelPath());
+            }
+
             OrionCodeEditWidgetOverlay codeEditWidgetModule = moduleHolder.getModule("CodeEditWidget").cast();
-            orionCodeEditWidgetOverlay = codeEditWidgetModule.create();
+            orionCodeEditWidgetOverlay = codeEditWidgetModule.create(plugins);
         }
         return orionCodeEditWidgetOverlay;
     }

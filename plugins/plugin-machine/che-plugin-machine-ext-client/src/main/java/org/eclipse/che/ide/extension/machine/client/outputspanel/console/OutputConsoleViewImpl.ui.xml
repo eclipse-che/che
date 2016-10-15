@@ -139,7 +139,6 @@
          */
         .consolePanel {
             background-color: outputBackgroundColor;
-            border-top: 1px solid separatorColor;
             position: absolute;
             overflow: hidden;
         }
@@ -196,6 +195,7 @@
                 <g:FlowPanel ui:field="reRunProcessButton" styleName="{style.toolbarButton}" />
                 <g:FlowPanel ui:field="stopProcessButton" styleName="{style.toolbarButton}" />
                 <g:FlowPanel ui:field="clearOutputsButton" styleName="{style.toolbarButton}" />
+                <g:FlowPanel ui:field="downloadOutputsButton" styleName="{style.toolbarButton}" />
                 <g:FlowPanel ui:field="wrapTextButton" styleName="{style.toolbarButton}" addStyleNames="{style.wrapTextButton}" />
                 <g:FlowPanel ui:field="scrollToBottomButton" styleName="{style.toolbarButton}" addStyleNames="{style.scrollToEndButton}" />
             </g:FlowPanel>

@@ -1,12 +1,14 @@
 # Eclipse  #
 ###################
 
+*.launch
 .classpath
 .project
 .settings/
 target/
 bin/
 test-output/
+maven-eclipse.xml
 
 # Idea #
 ##################
@@ -55,3 +57,6 @@ Icon?
 Thumbs.db
 */overlays
 *~
+
+# Che files
+.che

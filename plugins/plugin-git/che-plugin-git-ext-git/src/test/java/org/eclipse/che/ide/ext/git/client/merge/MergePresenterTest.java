@@ -76,7 +76,7 @@ public class MergePresenterTest extends BaseTest {
                                        notificationManager,
                                        dialogFactory,
                                        gitOutputConsoleFactory,
-                                       consolesPanelPresenter);
+                                       processesPanelPresenter);
 
         when(mergeResult.getMergeStatus()).thenReturn(ALREADY_UP_TO_DATE);
         when(selectedReference.getDisplayName()).thenReturn(DISPLAY_NAME);

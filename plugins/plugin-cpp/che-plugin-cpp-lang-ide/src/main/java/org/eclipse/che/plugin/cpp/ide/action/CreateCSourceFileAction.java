@@ -48,7 +48,12 @@ public class CreateCSourceFileAction extends NewClikeResourceAction {
                                    NotificationManager notificationManager) {
         super(localizationConstant.createCFileActionTitle(),
               localizationConstant.createCFileActionDescription(),
-              cppResources.cFile(), dialogFactory, coreLocalizationConstant, eventBus, appContext, notificationManager);
+              cppResources.cFile(),
+              dialogFactory,
+              coreLocalizationConstant,
+              eventBus,
+              appContext,
+              notificationManager);
     }
 
     @Override

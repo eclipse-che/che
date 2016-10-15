@@ -90,7 +90,7 @@ public class BranchPresenterTest extends BaseTest {
                                         appContext,
                                         notificationManager,
                                         gitOutputConsoleFactory,
-                                        consolesPanelPresenter,
+                                        processesPanelPresenter,
                                         dialogFactory);
 
         when(selectedBranch.getDisplayName()).thenReturn(BRANCH_NAME);

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.inject;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Module;
 
 import org.slf4j.Logger;
@@ -28,7 +29,8 @@ import java.util.Set;
 public class ModuleScanner implements ServletContainerInitializer {
     private static final Logger LOG = LoggerFactory.getLogger(ModuleScanner.class);
 
-    private static final List<Module> modules = new ArrayList<>();
+    @VisibleForTesting
+    static final List<Module> modules = new ArrayList<>();
 
     public static List<Module> findModules() {
         return new ArrayList<>(modules);

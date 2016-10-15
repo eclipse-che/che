@@ -48,4 +48,5 @@ public class EditorPreferenceViewImpl extends Composite implements EditorPrefere
     /** UI binder interface for the {@link EditorPreferenceViewImpl} component. */
     interface EditorPreferenceViewImplUiBinder extends UiBinder<ScrollPanel, EditorPreferenceViewImpl> {
     }
+
 }

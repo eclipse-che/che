@@ -134,7 +134,7 @@ public class KeysInjectorTest {
     @Test
     public void shouldNotInjectSshKeysWhenThereAreNotAnyPairWithPublicKey() throws Exception {
         when(sshManager.getPairs(anyString(), anyString()))
-                .thenReturn(Collections.singletonList(new SshPairImpl("machine", "myPair", null, null)));
+                .thenReturn(Collections.singletonList(new SshPairImpl(OWNER_ID, "machine", "myPair", null, null)));
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
                                                            .withMachineId(MACHINE_ID)
@@ -148,8 +148,8 @@ public class KeysInjectorTest {
     @Test
     public void shouldInjectSshKeysWhenThereAreAnyPairWithNotNullPublicKey() throws Exception {
         when(sshManager.getPairs(anyString(), anyString()))
-                .thenReturn(Arrays.asList(new SshPairImpl("machine", "myPair", "publicKey1", null),
-                                          new SshPairImpl("machine", "myPair", "publicKey2", null)));
+                .thenReturn(Arrays.asList(new SshPairImpl(OWNER_ID, "machine", "myPair", "publicKey1", null),
+                                          new SshPairImpl(OWNER_ID, "machine", "myPair", "publicKey2", null)));
 
         subscriber.onEvent(newDto(MachineStatusEvent.class).withEventType(MachineStatusEvent.EventType.RUNNING)
                                                            .withMachineId(MACHINE_ID)
@@ -170,7 +170,7 @@ public class KeysInjectorTest {
     @Test
     public void shouldSendMessageInMachineLoggerWhenSomeErrorOcursOnKeysInjection() throws Exception {
         when(sshManager.getPairs(anyString(), anyString()))
-                .thenReturn(Collections.singletonList(new SshPairImpl("machine", "myPair", "publicKey1", null)));
+                .thenReturn(Collections.singletonList(new SshPairImpl(OWNER_ID, "machine", "myPair", "publicKey1", null)));
         when(logMessage.getType()).thenReturn(LogMessage.Type.STDERR);
         when(logMessage.getContent()).thenReturn("FAILED");
 

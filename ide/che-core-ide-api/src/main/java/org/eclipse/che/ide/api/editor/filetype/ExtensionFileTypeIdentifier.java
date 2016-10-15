@@ -59,6 +59,7 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         this.mappings.put("C", makeList("text/x-c++src"));
         this.mappings.put("cc", makeList("text/x-c++src"));
         this.mappings.put("cpp", makeList("text/x-c++src"));
+        this.mappings.put("ino", makeList("text/x-c++src"));
         this.mappings.put("h", makeList("text/x-chdr"));
         this.mappings.put("hh", makeList("text/x-c++hdr"));
         this.mappings.put("c++", Collections.singletonList("text/x-c++src"));
@@ -123,6 +124,7 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         this.mappings.put("pm", makeList("text/x-perl"));// perl module
 
         this.mappings.put("php", makeList("text/x-php"));
+        this.mappings.put("phtml", makeList("text/x-php"));
         this.mappings.put("ejs", makeList("application/x-ejs"));
         this.mappings.put("jsp", makeList("application/x-jsp"));
         this.mappings.put("asp", makeList("application/x-aspx"));

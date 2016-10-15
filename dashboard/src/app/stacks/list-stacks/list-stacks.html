@@ -1,0 +1,80 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-toolbar che-title="Stacks" border-none></che-toolbar>
+<che-description che-link-title="Learn more." che-link="https://eclipse-che.readme.io/docs/stack">
+  A stack is environment configuration for workspace defined by its runtime recipe. Create workspaces from stacks that define projects, runtimes
+  and commands.
+</che-description>
+<md-content md-scroll-y flex layout="column" md-theme="maincontent-theme">
+  <md-progress-linear md-mode="indeterminate" class="stacks-list-progress"
+                      ng-show="listStacksController.isLoading"></md-progress-linear>
+  <md-content flex class="stacks-list-content" ng-hide="listStacksController.isLoading">
+    <che-list-header che-input-placeholder="Search"
+                     che-search-model="listStacksController.stackFilter.name"
+                     che-hide-search="listStacksController.stacks.length === 0"
+                     che-add-button-title="Add Stack"
+                     che-add-button-href="#stack/create"
+                     che-delete-button-title="Delete"
+                     che-on-delete="listStacksController.deleteSelectedStacks()"
+                     che-hide-delete="listStacksController.isNoSelected"
+                     che-hide-header="(listStacksController.stacks | filter:listStacksController.stackFilter).length === 0">
+      <div flex="100"
+           layout="row"
+           layout-align="start stretch"
+           class="che-list-item-row">
+        <div layout="column" layout-gt-xs="row"
+             layout-align="start center"
+             class="che-checkbox-area">
+          <div layout="row" layout-align="center center" class="che-list-item-checkbox-main">
+            <md-checkbox class="che-list-item-checkbox"
+                         aria-label="Stack list"
+                         ng-checked="listStacksController.isAllChecked"
+                         ng-click="listStacksController.changeSelectionState()"></md-checkbox>
+          </div>
+        </div>
+        <div flex hide-xs layout-gt-xs="row"
+             layout-align="start center"
+             class="che-list-item-details">
+          <che-list-header-column flex-gt-xs="20"
+                                  che-sort-value='listStacksController.stackOrderBy'
+                                  che-sort-item='name'
+                                  che-column-title='Name'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="35"
+                                  che-column-title='Description'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="30"
+                                  che-column-title='Components'></che-list-header-column>
+          <che-list-header-column flex-gt-xs="18"
+                                  che-column-title='Actions'></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+    <che-list ng-show="(listStacksController.stacks | filter:listStacksController.stackFilter).length > 0" class="stack-list">
+      <stack-item
+              ng-repeat="stack in listStacksController.stacks | orderBy:[listStacksController.stackOrderBy, 'name'] | filter:listStacksController.stackFilter"
+              ng-model="listStacksController.stackSelectionState[stack.id]"
+              che-selectable="true"
+              che-on-checkbox-click="listStacksController.updateSelectionState()"
+              che-on-delete="listStacksController.deleteStack(stack)"
+              che-on-duplicate="listStacksController.duplicateStack(stack)"
+              stack="stack"
+              user-id="listStacksController.userId"></stack-item>
+    </che-list>
+    <div class="che-list-empty">
+        <span ng-show="listStacksController.stacks.length > 0 && (listStacksController.stacks | filter:listStacksController.stackFilter).length === 0">
+          No stacks found.
+        </span>
+      <span ng-show="listStacksController.stacks.length === 0">There are no stacks.</span>
+    </div>
+  </md-content>
+</md-content>
+

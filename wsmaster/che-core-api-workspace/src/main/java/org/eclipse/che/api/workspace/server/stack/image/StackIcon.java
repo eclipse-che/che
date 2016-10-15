@@ -14,46 +14,38 @@ import com.google.common.base.Objects;
 
 import org.eclipse.che.commons.annotation.Nullable;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import java.util.Arrays;
-import java.util.Set;
-
-import static com.google.common.collect.ImmutableSet.of;
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
 
 /**
  * Class for storing {@link org.eclipse.che.api.workspace.shared.stack.Stack} icon data
  *
  * @author Alexander Andrienko
  */
+@Embeddable
 public class StackIcon {
 
-    private static final Set<String> VALID_MEDIA_TYPES = of("image/jpeg", "image/png", "image/gif", "image/svg+xml");
-    private static final int         LIMIT_SIZE        = 1024 * 1024;
-
+    @Column(name = "icon_name")
     private String name;
+
+    @Basic
     private String mediaType;
+
+    @Basic
     private byte[] data;
 
+    public StackIcon() {}
+
     public StackIcon(String name, String mediaType, @Nullable byte[] data) {
-        if (data != null) {
-            if (data.length == 0) {
-                throw new IllegalArgumentException("Incorrect icon data or icon was not attached");
-            }
-            if (data.length > LIMIT_SIZE) {
-                throw new IllegalArgumentException("Maximum upload size exceeded 1 Mb limit");
-            }
-        }
         this.data = data;
-
-        requireNonNull(mediaType, "Icon media type required");
-        if (!VALID_MEDIA_TYPES.stream().anyMatch(elem -> elem.equals(mediaType))) {
-            String errorMessage = format("Media type '%s' is unsupported. Supported media types: '%s'", mediaType, VALID_MEDIA_TYPES);
-            throw new IllegalArgumentException(errorMessage);
-        }
         this.mediaType = mediaType;
+        this.name = name;
+    }
 
-        this.name = requireNonNull(name, "Icon name required");
+    public StackIcon(StackIcon icon) {
+        this(icon.name, icon.mediaType, Arrays.copyOf(icon.data, icon.data.length));
     }
 
     public String getName() {
@@ -89,5 +81,14 @@ public class StackIcon {
         hash = 31 * hash + Objects.hashCode(mediaType);
         hash = 31 * hash + Arrays.hashCode(data);
         return hash;
+    }
+
+    @Override
+    public String toString() {
+        return "StackIcon{" +
+               "name='" + name + '\'' +
+               ", mediaType='" + mediaType + '\'' +
+               ", data=[byte array]" +
+               '}';
     }
 }

@@ -23,6 +23,24 @@ import javax.validation.constraints.NotNull;
 public interface EditorMultiPartStack extends PartStack {
 
     /**
+     * Get active {@link EditorPartStack}
+     *
+     * @return active editor part stack or null if this one is absent
+     */
+    @Nullable
+    EditorPartStack getActivePartStack();
+
+    /**
+     * Get {@link EditorPartStack} for given {@code part}
+     *
+     * @param part
+     *         editor part to find corresponding editor part stack
+     * @return editor part stack which contains given {@code part} or null if this one is not found in any {@link EditorPartStack}
+     */
+    @Nullable
+    EditorPartStack getPartStackByPart(PartPresenter part);
+
+    /**
      * Get editor part which associated with given {@code tabId}
      *
      * @param tabId
@@ -61,14 +79,4 @@ public interface EditorMultiPartStack extends PartStack {
      */
     @Nullable
     EditorPartPresenter getPreviousFor(EditorPartPresenter editorPart);
-
-    /**
-     * Get last closed editor for {@link EditorPartStack} which contains given {@code editorPart}
-     *
-     * @param editorPart
-     *         the starting point to evaluate last closed editor
-     * @return opened editor or null if it does not exist
-     */
-    @Nullable
-    EditorPartPresenter getLastClosedBasedOn(EditorPartPresenter editorPart);
 }

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.editor.orion.client.jso;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.dom.client.Element;
 
 import org.eclipse.che.api.promises.client.Promise;
@@ -25,9 +26,14 @@ public class OrionCodeEditWidgetOverlay extends JavaScriptObject {
     protected OrionCodeEditWidgetOverlay() {
     }
 
-    /** Creates an Orion CodeEdit widget instance. */
-    public final native OrionCodeEditWidgetOverlay create() /*-{
-        return new this();
+    /**
+     * Creates an Orion CodeEdit widget instance.
+     *
+     * @param plugins
+     *         array of URLs of plugins that should be installed before CodeEdit widget initialization
+     */
+    public final native OrionCodeEditWidgetOverlay create(JsArrayString plugins) /*-{
+        return new this({userPlugins: plugins});
     }-*/;
 
     /**
@@ -43,10 +49,10 @@ public class OrionCodeEditWidgetOverlay extends JavaScriptObject {
         options.parent = element;
         return this.create(options);
     }-*/;
-    
+
     /**
      * Provides Access to Orion's service registry.
-     * 
+     *
      * @return the service registry
      */
     public final native OrionServiceRegistryOverlay getServiceRegistry() /*-{

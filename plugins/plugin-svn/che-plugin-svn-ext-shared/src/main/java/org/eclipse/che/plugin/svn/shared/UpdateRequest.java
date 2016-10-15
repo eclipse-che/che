@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.shared;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
 import javax.validation.constraints.NotNull;
@@ -118,5 +119,23 @@ public interface UpdateRequest {
      * @return the request
      */
     UpdateRequest withRevision(@NotNull final String revision);
+
+    /** @return user name for authentication */
+    String getUsername();
+
+    /** Set user name for authentication. */
+    void setUsername(@Nullable final String username);
+
+    /** @return {@link CheckoutRequest} with specified user name for authentication */
+    UpdateRequest withUsername(@Nullable final String username);
+
+    /** @return password for authentication */
+    String getPassword();
+
+    /** Set password for authentication. */
+    void setPassword(@Nullable final String password);
+
+    /** @return {@link CheckoutRequest} with specified password for authentication */
+    UpdateRequest withPassword(@Nullable final String password);
 
 }

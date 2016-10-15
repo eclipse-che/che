@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.git.client.init;
 
 import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.resource.Path;
@@ -44,7 +43,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
         presenter = new InitRepositoryPresenter(constant,
                                                 notificationManager,
                                                 gitOutputConsoleFactory,
-                                                consolesPanelPresenter,
+                                                processesPanelPresenter,
                                                 service,
                                                 appContext);
 
@@ -62,7 +61,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
 
         verify(gitOutputConsoleFactory).create(eq(INIT_COMMAND_NAME));
         verify(console).print(eq(constant.initSuccess()));
-        verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
+        verify(processesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString());
 
         verify(project).synchronize();
@@ -78,7 +77,7 @@ public class InitRepositoryPresenterTest extends BaseTest {
         verify(constant).initFailed();
         verify(gitOutputConsoleFactory).create(INIT_COMMAND_NAME);
         verify(console).printError(anyObject());
-        verify(consolesPanelPresenter).addCommandOutput(anyString(), eq(console));
+        verify(processesPanelPresenter).addCommandOutput(anyString(), eq(console));
         verify(notificationManager).notify(anyString(), any(StatusNotification.Status.class), anyObject());
     }
 }

@@ -16,12 +16,17 @@ import com.google.gson.GsonBuilder;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.che.api.local.storage.stack.StackLocalStorage;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackSourceImpl;
+import org.eclipse.che.api.workspace.server.stack.StackJsonAdapter;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.api.workspace.shared.stack.StackSource;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -38,6 +43,9 @@ import java.util.Map;
 import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.Files.write;
 import static java.util.Arrays.asList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -71,7 +79,8 @@ public class LocalStackDaoTest {
         stackJsonPath = storageRoot.resolve("stacks.json");
         parentIconFolder = storageRoot.resolve("images").resolve("stackdskhfdskf");
         pathToIcon = parentIconFolder.resolve("java-type.svg");
-        stackDao = new LocalStackDaoImpl(new StackLocalStorage(storageRoot.toString()));
+        StackJsonAdapter adapter = mock(StackJsonAdapter.class);
+        stackDao = new LocalStackDaoImpl(new StackLocalStorage(storageRoot.toString(), adapter));
     }
 
     @AfterMethod
@@ -85,7 +94,7 @@ public class LocalStackDaoTest {
         StackImpl stack = createStack();
 
         stackDao.create(stack);
-        stackDao.stop();
+        stackDao.saveStacks();
 
         assertEquals(GSON.toJson(ImmutableMap.of("stackdskhfdskf", stack)), new String(readAllBytes(stackJsonPath)));
         //check icon content
@@ -102,6 +111,26 @@ public class LocalStackDaoTest {
 
         Stack result = stackDao.getById("stackdskhfdskf");
         assertEquals(result, stack);
+    }
+
+    @Test
+    public void testOldFormatIsAdaptedWhenStacksAreLoaded() throws Exception {
+        final URL rootUrl = Thread.currentThread().getContextClassLoader().getResource(".");
+        assertNotNull(rootUrl);
+        final String path = Paths.get(rootUrl.toURI()).toString();
+        final StackJsonAdapter workspaceAdapter = new StackJsonAdapter(new WorkspaceConfigJsonAdapter());
+        final StackLocalStorage storageFactory = new StackLocalStorage(path, workspaceAdapter);
+        final LocalStackDaoImpl stackDao = new LocalStackDaoImpl(storageFactory);
+
+        stackDao.start();
+
+        final StackImpl test = stackDao.getById("test");
+        final EnvironmentImpl environment = test.getWorkspaceConfig()
+                                                .getEnvironments()
+                                                .get(test.getWorkspaceConfig().getDefaultEnv());
+        assertEquals(environment.getRecipe().getType(), "dockerimage");
+        assertEquals(environment.getRecipe().getLocation(), "codenvy/ubuntu_jdk8");
+        assertEquals(environment.getMachines().size(), 1);
     }
 
     private void createStackIcon() throws IOException {

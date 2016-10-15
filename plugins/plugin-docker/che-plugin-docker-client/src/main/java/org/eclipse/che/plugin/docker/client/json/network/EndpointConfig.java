@@ -53,11 +53,11 @@ public class EndpointConfig {
         return aliases;
     }
 
-    public void setAliases(String[] aliases) {
+    public void setAliases(String... aliases) {
         this.aliases = aliases;
     }
 
-    public EndpointConfig withAliases(String[] aliases) {
+    public EndpointConfig withAliases(String... aliases) {
         this.aliases = aliases;
         return this;
     }

@@ -37,7 +37,7 @@ public class BasicWebSocketEndpoint implements WebSocketEndpoint {
 
     @Override
     public void onOpen() {
-        Log.info(getClass(), "Session opened.");
+        Log.debug(getClass(), "Session opened.");
 
         sustainer.reset();
         reSender.resend();
@@ -45,7 +45,7 @@ public class BasicWebSocketEndpoint implements WebSocketEndpoint {
 
     @Override
     public void onClose() {
-        Log.info(getClass(), "Session closed.");
+        Log.debug(getClass(), "Session closed.");
 
         sustainer.sustain();
     }
@@ -57,7 +57,7 @@ public class BasicWebSocketEndpoint implements WebSocketEndpoint {
 
     @Override
     public void onMessage(String message) {
-        Log.info(getClass(), "Message received: " + message);
+        Log.debug(getClass(), "Message received: " + message);
 
         dispatcher.dispatch(message);
     }

@@ -10,23 +10,27 @@
  *******************************************************************************/
 package org.eclipse.che.api.factory.server;
 
-import org.eclipse.che.api.core.ConflictException;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.persistence.Basic;
+import javax.persistence.Embeddable;
 import java.util.Arrays;
+import java.util.Objects;
 
 /** Class to hold image information such as data, name, media type */
+@Embeddable
 public class FactoryImage {
+
+    @Basic
     private byte[] imageData;
+
+    @Basic
     private String mediaType;
+
+    @Basic
     private String name;
 
-    public FactoryImage() {
-    }
+    public FactoryImage() {}
 
-    public FactoryImage(byte[] data, String mediaType, String name) throws IOException {
+    public FactoryImage(byte[] data, String mediaType, String name) {
         setMediaType(mediaType);
         this.name = name;
         setImageData(data);
@@ -36,7 +40,7 @@ public class FactoryImage {
         return imageData;
     }
 
-    public void setImageData(byte[] imageData) throws IOException {
+    public void setImageData(byte[] imageData) {
         this.imageData = imageData;
     }
 
@@ -44,7 +48,7 @@ public class FactoryImage {
         return mediaType;
     }
 
-    public void setMediaType(String mediaType) throws IOException {
+    public void setMediaType(String mediaType) {
         if (mediaType != null) {
             switch (mediaType) {
                 case "image/jpeg":
@@ -53,10 +57,10 @@ public class FactoryImage {
                     this.mediaType = mediaType;
                     return;
                 default:
-                    throw new IOException("Image media type '" + mediaType + "' is unsupported.");
+                    throw new IllegalArgumentException("Image media type '" + mediaType + "' is unsupported.");
             }
         }
-        throw new IOException("Image media type 'null' is unsupported.");
+        throw new IllegalArgumentException("Image media type 'null' is unsupported.");
     }
 
     public String getName() {
@@ -72,60 +76,21 @@ public class FactoryImage {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FactoryImage)) return false;
-
-        FactoryImage that = (FactoryImage)o;
-
-        if (!Arrays.equals(imageData, that.imageData)) return false;
-        if (mediaType != null ? !mediaType.equals(that.mediaType) : that.mediaType != null) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-
-        return true;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof FactoryImage)) return false;
+        final FactoryImage other = (FactoryImage)obj;
+        return Arrays.equals(imageData, other.imageData)
+               && Objects.equals(mediaType, other.mediaType)
+               && Objects.equals(name, other.name);
     }
 
     @Override
     public int hashCode() {
-        int result = imageData != null ? Arrays.hashCode(imageData) : 0;
-        result = 31 * result + (mediaType != null ? mediaType.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        return result;
-    }
-
-    /**
-     * Creates {@code FactoryImage}.
-     * InputStream should be closed manually.
-     *
-     * @param is
-     *         - input stream with image data
-     * @param mediaType
-     *         - media type of image
-     * @param name
-     *         - image name
-     * @return - {@code FactoryImage} if {@code FactoryImage} was created, null if input stream has no content
-     * @throws org.eclipse.che.api.core.ConflictException
-     */
-    public static FactoryImage createImage(InputStream is, String mediaType, String name) throws ConflictException {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = is.read(buffer, 0, buffer.length)) != -1) {
-                baos.write(buffer, 0, read);
-                if (baos.size() > 1024 * 1024) {
-                    throw new ConflictException("Maximum upload size exceeded.");
-                }
-            }
-
-            if (baos.size() == 0) {
-                return new FactoryImage();
-            }
-            baos.flush();
-
-            return new FactoryImage(baos.toByteArray(), mediaType, name);
-        } catch (IOException e) {
-            throw new ConflictException(e.getLocalizedMessage());
-        }
+        int hash = 7;
+        hash = 31 * hash + Arrays.hashCode(imageData);
+        hash = 31 * hash + Objects.hashCode(mediaType);
+        hash = 31 * hash + Objects.hashCode(name);
+        return hash;
     }
 }

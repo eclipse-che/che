@@ -147,8 +147,9 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         }
     }
 
-    /** Expands all editors parts. */
-    public void collapseParts() {
+    /** {@inheritDoc} */
+    @Override
+    public void maximizeCentralPart() {
         leftPartSize = leftPartController.getSize();
         rightPartSize = rightPartController.getSize();
         belowPartSize = belowPartController.getSize();
@@ -158,8 +159,21 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         belowPartController.setHidden(true);
     }
 
-    /** Restores editor parts. */
-    public void expandParts() {
+    /** {@inheritDoc} */
+    @Override
+    public void maximizeBottomPart() {
+        leftPartSize = leftPartController.getSize();
+        rightPartSize = rightPartController.getSize();
+        belowPartSize = belowPartController.getSize();
+
+        leftPartController.setHidden(true);
+        rightPartController.setHidden(true);
+        belowPartController.maximize();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void restoreParts() {
         leftPartController.setSize(leftPartSize);
         rightPartController.setSize(rightPartSize);
         belowPartController.setSize(belowPartSize);

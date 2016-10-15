@@ -13,8 +13,8 @@ package org.eclipse.che.api.factory.server.impl;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
-import org.eclipse.che.api.factory.shared.dto.Author;
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.core.model.factory.Author;
+import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 import javax.inject.Singleton;
@@ -42,7 +42,7 @@ public class FactoryEditValidatorImpl implements FactoryEditValidator {
     @Override
     public void validate(Factory factory) throws ForbiddenException, ServerException {
         // Checks if there is an author from the factory (It may be missing for some old factories)
-        Author author = factory.getCreator();
+        final Author author = factory.getCreator();
         if (author == null || author.getUserId() == null) {
             throw new ServerException(format("Invalid factory without author stored. Please contact the support about the factory ID '%s'",
                                              factory.getId()));
@@ -51,7 +51,7 @@ public class FactoryEditValidatorImpl implements FactoryEditValidator {
         final String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
         if (!author.getUserId().equals(userId)) {
             throw new ForbiddenException(format("You are not authorized for the factory '%s'",
-                                             factory.getId()));
+                                                factory.getId()));
         }
     }
 }

@@ -18,6 +18,7 @@
     <source path="machine"/>
     <source path="project"/>
     <source path="workspace"/>
+    <source path="factory"/>
     <source path="user"/>
 
 </module>

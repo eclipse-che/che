@@ -10,61 +10,42 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<che-list-item flex-gt-xs="100" flex="33"
-               ng-mouseover="hover=true" ng-mouseout="hover=false">
+<che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
   <div flex="100"
-       layout="column" layout-gt-xs="row"
+       layout="row"
        layout-align="start stretch"
-       class="project-list-row">
-
+       class="project-item-row">
     <div layout="row"
-         layout-align="center center"
-         class="project-list-static-icon">
-      <che-list-item-checked class="project-type-checked"
-                              ng-model="projectItemCtrl.isSelect"
-                              ng-show="projectItemCtrl.isSelectable"
-                              che-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank"
-                              che-aria-label-checkbox="Project {{projectItemCtrl.project.name}}"></che-list-item-checked>
-      <md-icon layout="row" layout-align="center center"
-               ng-hide="projectItemCtrl.isSelectable"
-               class="project-type-icon"
-               md-font-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank"></md-icon>
+         layout-align="start center"
+         class="che-checkbox-area">
+      <che-list-item-checked ng-model="projectItemCtrl.isSelect"
+                             che-icon="chefont cheico-type-{{projectItemCtrl.project.type}} cheico-type-blank"
+                             che-aria-label-checkbox="Project {{projectItemCtrl.project.name}}"
+                             ng-click="projectItemCtrl.onCheckboxClick()"></che-list-item-checked>
     </div>
-
     <div flex
-         layout="column"
-         layout-align-xs="center center" layout-align-gt-xs="center start"
-         ng-click="projectItemCtrl.redirectToProjectDetails()">
-      <div class="project-name che-hover">
-        {{projectItemCtrl.project.name}}
+         layout-xs="column" layout-gt-xs="row"
+         layout-align-gt-xs="start center"
+         layout-align-xs="start start"
+         class="che-list-item-details">
+      <div flex-gt-xs="30" ng-click="projectItemCtrl.redirectToProjectDetails()"
+           class="che-list-item-name"
+           ng-click="workspaceItemCtrl.redirectToWorkspaceDetails();">
+        <span class="che-xs-header noselect" hide-gt-xs>Name</span>
+        <span class="che-hover">{{projectItemCtrl.project.name}}</span>
       </div>
-      <div class="project-details che-hover" ng-show="projectItemCtrl.isDisplayWorkspace">
-        {{projectItemCtrl.project.workspaceName}}</span></div>
-      <div class="project-details">
-        {{projectItemCtrl.project.description}}
+      <div flex-gt-xs="50" ng-click="projectItemCtrl.redirectToProjectDetails()">
+        <span class="che-xs-header noselect" hide-gt-xs>Description</span>
+        <span class="che-hover project-name">{{projectItemCtrl.project.description}}</span>
       </div>
-    </div>
-
-    <div flex flex-gt-xs="15"
-         layout="column"
-         layout-align="center center"
-         class="project-details"
-         ng-click="projectItemCtrl.redirectToProjectDetails()"
-         ng-if="projectItemCtrl.getProjectModificationDate()">
-        <span class="che-hover"
-              tooltip="Last modified: {{projectItemCtrl.getProjectModificationDate() | amDateFormat:'dddd, MMMM Do, YYYY'}}"
-              am-time-ago="projectItemCtrl.getProjectModificationDate()"></span>
-    </div>
-
-    <div flex="none"
-         layout="row"
-         layout-align="center center"
-         ng-show="hover">
-      <a ng-href="#/ide/{{projectItemCtrl.workspace.namespace}}/{{projectItemCtrl.workspace.config.name}}">
-        <che-button-default class="che-hover project-list-details-arrow"
-                            che-button-icon="fa fa fa-chevron-circle-right"
-                            che-button-title="Open in IDE"></che-button-default>
-      </a>
+      <div flex-gt-xs="20">
+        <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
+        <span class="che-list-actions">
+          <a tooltip="Open in IDE" ng-href="#/ide/{{projectItemCtrl.workspace.namespace}}/{{projectItemCtrl.workspace.config.name}}">
+            <span class="fa fa-chevron-circle-right"></span>
+          </a>
+        </span>
+      </div>
     </div>
   </div>
 </che-list-item>

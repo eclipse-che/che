@@ -12,10 +12,9 @@ package org.eclipse.che.plugin.maven.client.command;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
+import org.eclipse.che.ide.api.command.CommandPage;
 import org.eclipse.che.ide.api.icon.IconRegistry;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage;
-import org.eclipse.che.ide.extension.machine.client.command.valueproviders.CurrentProjectPathProvider;
+import org.eclipse.che.ide.extension.machine.client.command.macros.CurrentProjectPathMacro;
 import org.eclipse.che.plugin.maven.client.MavenResources;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,35 +31,28 @@ import static org.mockito.Mockito.verify;
 public class MavenCommandTypeTest {
 
     @Mock
-    private MavenResources             mavenResources;
+    private MavenResources            mavenResources;
     @Mock
-    private MavenCommandPagePresenter  mavenCommandPagePresenter;
+    private MavenCommandPagePresenter mavenCommandPagePresenter;
     @Mock
-    private CurrentProjectPathProvider currentProjectPathProvider;
+    private CurrentProjectPathMacro   currentProjectPathMacro;
     @Mock
-    private IconRegistry               iconRegistry;
+    private IconRegistry              iconRegistry;
 
     @InjectMocks
     private MavenCommandType mavenCommandType;
 
     @Test
-    public void shouldReturnIcon() throws Exception {
-        mavenCommandType.getIcon();
-
-        verify(mavenResources).mavenCommandType();
-    }
-
-    @Test
     public void shouldReturnPages() throws Exception {
-        final Collection<CommandConfigurationPage<? extends CommandConfiguration>> pages = mavenCommandType.getConfigurationPages();
+        final Collection<CommandPage> pages = mavenCommandType.getPages();
 
         assertTrue(pages.contains(mavenCommandPagePresenter));
     }
 
     @Test
     public void testGettingCommandTemplate() throws Exception {
-        mavenCommandType.getCommandTemplate();
+        mavenCommandType.getCommandLineTemplate();
 
-        verify(currentProjectPathProvider).getKey();
+        verify(currentProjectPathMacro).getName();
     }
 }

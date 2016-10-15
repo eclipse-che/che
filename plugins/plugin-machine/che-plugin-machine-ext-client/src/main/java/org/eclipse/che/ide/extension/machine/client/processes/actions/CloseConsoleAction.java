@@ -12,16 +12,16 @@ package org.eclipse.che.ide.extension.machine.client.processes.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import static java.util.Collections.singletonList;
+
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
-import javax.validation.constraints.NotNull;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Stop selected process and close the console action.
@@ -31,10 +31,10 @@ import javax.validation.constraints.NotNull;
 @Singleton
 public class CloseConsoleAction extends AbstractPerspectiveAction {
 
-    private final ConsolesPanelPresenter consolesPanelPresenter;
+    private final ProcessesPanelPresenter processesPanelPresenter;
 
     @Inject
-    public CloseConsoleAction(ConsolesPanelPresenter consolesPanelPresenter,
+    public CloseConsoleAction(ProcessesPanelPresenter processesPanelPresenter,
                               MachineLocalizationConstant locale,
                               PartStackUIResources partStackUIResources) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
@@ -42,25 +42,25 @@ public class CloseConsoleAction extends AbstractPerspectiveAction {
                 locale.closeControlDescription(),
                 null,
                 partStackUIResources.closeIcon());
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.processesPanelPresenter = processesPanelPresenter;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (consolesPanelPresenter.getContextTreeNode() == null) {
+        if (processesPanelPresenter.getContextTreeNode() == null) {
             return;
         }
 
-        if (ProcessTreeNode.ProcessNodeType.COMMAND_NODE == consolesPanelPresenter.getContextTreeNode().getType()) {
-            consolesPanelPresenter.onCloseCommandOutputClick(consolesPanelPresenter.getContextTreeNode());
-        } else if (ProcessTreeNode.ProcessNodeType.TERMINAL_NODE == consolesPanelPresenter.getContextTreeNode().getType()) {
-            consolesPanelPresenter.onCloseTerminal(consolesPanelPresenter.getContextTreeNode());
+        if (ProcessTreeNode.ProcessNodeType.COMMAND_NODE == processesPanelPresenter.getContextTreeNode().getType()) {
+            processesPanelPresenter.onCloseCommandOutputClick(processesPanelPresenter.getContextTreeNode());
+        } else if (ProcessTreeNode.ProcessNodeType.TERMINAL_NODE == processesPanelPresenter.getContextTreeNode().getType()) {
+            processesPanelPresenter.onCloseTerminal(processesPanelPresenter.getContextTreeNode());
         }
     }
 
     @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        ProcessTreeNode processTreeNode = consolesPanelPresenter.getContextTreeNode();
+    public void updateInPerspective(ActionEvent event) {
+        ProcessTreeNode processTreeNode = processesPanelPresenter.getContextTreeNode();
 
         if (processTreeNode == null) {
             event.getPresentation().setEnabled(false);
@@ -69,7 +69,7 @@ public class CloseConsoleAction extends AbstractPerspectiveAction {
         }
 
         if (ProcessTreeNode.ProcessNodeType.COMMAND_NODE == processTreeNode.getType() ||
-                ProcessTreeNode.ProcessNodeType.TERMINAL_NODE == processTreeNode.getType()) {
+            ProcessTreeNode.ProcessNodeType.TERMINAL_NODE == processTreeNode.getType()) {
             event.getPresentation().setEnabled(true);
             event.getPresentation().setVisible(true);
             return;

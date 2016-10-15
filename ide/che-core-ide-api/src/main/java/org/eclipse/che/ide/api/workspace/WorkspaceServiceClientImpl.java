@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -26,6 +25,7 @@ import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -33,7 +33,6 @@ import org.eclipse.che.ide.rest.RestContext;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 
 import javax.validation.constraints.NotNull;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -302,8 +301,8 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<WorkspaceDto> addEnvironment(String wsId, EnvironmentDto newEnv) {
-        return asyncRequestFactory.createPostRequest(baseHttpUrl + '/' + wsId + "/environment", newEnv)
+    public Promise<WorkspaceDto> addEnvironment(String wsId, String envName, EnvironmentDto newEnv) {
+        return asyncRequestFactory.createPostRequest(baseHttpUrl + '/' + wsId + "/environment?name=" + envName, newEnv)
                                   .header(ACCEPT, APPLICATION_JSON)
                                   .header(CONTENT_TYPE, APPLICATION_JSON)
                                   .loader(loaderFactory.newLoader("Adding environment..."))
@@ -336,10 +335,10 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
     }
 
     @Override
-    public Promise<MachineDto> createMachine(final String wsId, final MachineConfigDto machineConfig) {
-        return newPromise(new RequestCall<MachineDto>() {
+    public Promise<Void> createMachine(final String wsId, final MachineConfigDto machineConfig) {
+        return newPromise(new RequestCall<Void>() {
             @Override
-            public void makeCall(AsyncCallback<MachineDto> callback) {
+            public void makeCall(AsyncCallback<Void> callback) {
                 createMachine(wsId, machineConfig, callback);
             }
         });
@@ -347,13 +346,13 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
 
     private void createMachine(@NotNull String wsId,
                                @NotNull MachineConfigDto newMachine,
-                               @NotNull AsyncCallback<MachineDto> callback) {
+                               @NotNull AsyncCallback<Void> callback) {
         String url = baseHttpUrl + '/' + wsId + "/machine";
         asyncRequestFactory.createPostRequest(url, newMachine)
                            .header(ACCEPT, APPLICATION_JSON)
                            .header(CONTENT_TYPE, APPLICATION_JSON)
                            .loader(loaderFactory.newLoader("Creating machine..."))
-                           .send(newCallback(callback, dtoUnmarshallerFactory.newUnmarshaller(MachineDto.class)));
+                           .send(newCallback(callback));
     }
 
     @Override
@@ -382,5 +381,12 @@ public class WorkspaceServiceClientImpl implements WorkspaceServiceClient {
                                    .send(newCallback(callback));
             }
         });
+    }
+
+    @Override
+    public Promise<WsAgentHealthStateDto> getWsAgentState(String workspaceId) {
+        return asyncRequestFactory.createGetRequest(baseHttpUrl + '/' + workspaceId + "/check")
+                                  .header(ACCEPT, APPLICATION_JSON)
+                                  .send(dtoUnmarshallerFactory.newUnmarshaller(WsAgentHealthStateDto.class));
     }
 }

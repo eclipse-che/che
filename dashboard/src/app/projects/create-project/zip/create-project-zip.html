@@ -10,21 +10,24 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<form name="createProjectZipForm" layout="column">
+<form name="createProjectZipForm" layout="column" class="create-project-zip">
   <div layout="row" flex ng-init="createProjectCtrl.setForm(createProjectZipForm, 'zip');"></div>
-  <che-input che-form="createProjectZipForm"
-             che-name="remotezipURL"
-             che-label-name="Zip URL"
-             che-place-holder="Url of the zip file"
-             ng-model="createProjectCtrl.importProjectData.source.location"
-             required>
-    <div ng-message="required">A zip URL is required.</div>
-  </che-input>
-  <div flex-offset-gt-xs="15">
-    <md-checkbox ng-model="createProjectCtrl.importProjectData.source.parameters.skipFirstLevel"
-                 aria-label="Skip the root folder of the archive"
-                 class="create-project-zip-checkbox">
-      Skip the root folder of the archive
-    </md-checkbox>
-  </div>
+  <che-label-container che-label-name="Zip URL">
+    <div class="create-project-zip-input">
+      <che-input che-form="createProjectZipForm"
+                 che-name="remotezipURL"
+                 che-place-holder="Url of the zip file"
+                 aria-label="Url of the zip file"
+                 che-width="auto"
+                 ng-model="createProjectCtrl.importProjectData.source.location"
+                 required>
+        <div ng-message="required">A zip URL is required.</div>
+      </che-input>
+      <md-checkbox ng-model="createProjectCtrl.importProjectData.source.parameters.skipFirstLevel"
+                   aria-label="Skip the root folder of the archive"
+                   class="create-project-zip-checkbox">
+        Skip the root folder of the archive
+      </md-checkbox>
+    </div>
+  </che-label-container>
 </form>

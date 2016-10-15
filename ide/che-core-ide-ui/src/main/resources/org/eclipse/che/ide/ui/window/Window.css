@@ -223,12 +223,6 @@
     color: primaryButtonDisabledFontColor;
 }
 
-.label {
-    font-family: mainFontFamily;
-    font-size: fontSize;
-    color: mainFontColor;
-}
-
 svg.image {
     fill: mainFontColor;
     width: 56px;

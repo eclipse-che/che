@@ -28,17 +28,6 @@ import java.util.List;
 public interface MachineServiceClient {
 
     /**
-     * Get machine information by it's id.
-     *
-     * @param workspaceId
-     *         ID of workspace
-     * @param machineId
-     *         ID of the machine
-     * @return a promise that resolves to the {@link MachineDto}, or rejects with an error
-     */
-    Promise<MachineDto> getMachine(@NotNull String workspaceId, @NotNull String machineId);
-
-    /**
      * Returns list of machines which are bounded to the specified workspace.
      *
      * @param workspaceId

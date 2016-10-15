@@ -1,0 +1,45 @@
+{
+  "test": {
+    "id": "test",
+    "creator": "test",
+    "name": "test",
+    "description": "Test",
+    "scope": "general",
+    "tags": [
+      "java"
+    ],
+    "source": {
+      "type": "image",
+      "origin": "codenvy/ubuntu_jdk8"
+    },
+    "workspaceConfig": {
+      "defaultEnv": "demo-workspace",
+      "environments": [
+        {
+          "name": "demo-workspace",
+          "machineConfigs": [
+            {
+              "limits": {
+                "ram": 1000
+              },
+              "name": "ws-machine",
+              "type": "docker",
+              "source": {
+                "location": "stub",
+                "type": "dockerfile"
+              },
+              "dev": true,
+              "servers": [
+              ],
+              "envVariables": {
+              },
+              "links": [
+              ]
+            }
+          ]
+        }
+      ],
+      "name": "demo-workspace_1"
+    }
+  }
+}

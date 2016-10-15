@@ -15,8 +15,10 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.Resources;
-import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Action fo find action action
@@ -24,20 +26,25 @@ import org.eclipse.che.ide.api.action.ActionEvent;
  * @author Evgen Vidolob
  */
 @Singleton
-public class FindActionAction extends Action {
+public class FindActionAction extends AbstractPerspectiveAction {
 
-    private       FindActionPresenter  presenter;
+    private FindActionPresenter presenter;
 
     @Inject
     public FindActionAction(FindActionPresenter presenter,
                             CoreLocalizationConstant localization,
                             Resources resources) {
-        super(localization.actionFindActionDescription(), localization.actionFindActionTitle(), null, resources.findActions());
+        super(null, localization.actionFindActionDescription(), localization.actionFindActionTitle(), null, resources.findActions());
         this.presenter = presenter;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         presenter.show();
+    }
+
+    @Override
+    public void updateInPerspective(@NotNull ActionEvent event) {
+        event.getPresentation().setEnabledAndVisible(true);
     }
 }

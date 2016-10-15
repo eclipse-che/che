@@ -1,17 +1,12 @@
 <div>
-  <md-tabs md-dynamic-height md-stretch-tabs="always">
+  <md-tabs md-dynamic-height md-stretch-tabs="auto">
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('ready-to-go')">
       <md-tab-label>
         <md-icon md-font-icon="fa-magic" class="fa che-tab-label-icon"></md-icon>
         <span class="che-tab-label-title">Ready-to-go Stacks</span>
       </md-tab-label>
       <md-tab-body>
-        <ready-to-go-stacks class="projects-create-project-tab"
-                            layout="row"
-                            layout-wrap
-                            che-stack="workspaceSelectStackCtrl.readyToGoStack"
-                            che-on-change="workspaceSelectStackCtrl.onStackSelect(workspaceSelectStackCtrl.readyToGoStack)">
-        </ready-to-go-stacks>
+        <ready-to-go-stacks che-tab-name="ready-to-go"></ready-to-go-stacks>
       </md-tab-body>
     </md-tab>
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-library')">
@@ -20,7 +15,7 @@
         <span class="che-tab-label-title">Stack library</span>
       </md-tab-label>
       <md-tab-body>
-        <create-project-stack-library></create-project-stack-library>
+        <create-project-stack-library che-tab-name="stack-library"></create-project-stack-library>
       </md-tab-body>
     </md-tab>
     <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('custom-stack')">
@@ -30,7 +25,8 @@
       </md-tab-label>
       <md-tab-body>
         <che-workspace-recipe che-recipe-script="workspaceSelectStackCtrl.recipeScript"
-                              che-recipe-url="workspaceSelectStackCtrl.recipeUrl"></che-workspace-recipe>
+                              che-recipe-url="workspaceSelectStackCtrl.recipeUrl"
+                              che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe>
       </md-tab-body>
     </md-tab>
   </md-tabs>

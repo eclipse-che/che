@@ -74,9 +74,6 @@ class StartWorkspaceViewImpl extends Window implements StartWorkspaceView {
 
         workspaces.getElement().setPropertyString("placeholder", locale.placeholderSelectWsToStart());
 
-        hideCrossButton();
-        setHideOnEscapeEnabled(false);
-
         startButton = createButton(locale.startWsButton(), "start-workspace-button", new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {

@@ -33,7 +33,7 @@ public class NodeJsProjectGenerator implements CreateProjectHandler {
     public void onCreateProject(FolderEntry baseFolder,
                                 Map<String, AttributeValue> attributes,
                                 Map<String, String> options) throws ForbiddenException, ConflictException, ServerException {
-        baseFolder.createFile(FILE_NAME, getClass().getClassLoader().getResourceAsStream("files/default_content"));
+        baseFolder.createFile(FILE_NAME, getClass().getClassLoader().getResourceAsStream("files/default_node_content"));
     }
 
     @Override
@@ -41,3 +41,4 @@ public class NodeJsProjectGenerator implements CreateProjectHandler {
         return Constants.NODE_JS_PROJECT_TYPE_ID;
     }
 }
+

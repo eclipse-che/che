@@ -1,11 +1,15 @@
 .create-project-workspace-list
   padding-left 30px
+  max-height 400px
 
   .samples-list
     box-sizing content-box
     max-height 205px
     overflow-y auto
-    margin 0px 2px 2px 0px
+    margin 0
+
+    .che-list-item:first-child
+      border-top 1px solid $list-separator-color
 
   .list-item
     outline none
@@ -15,10 +19,12 @@
 
   .list-item-name
     font-size 12px
+    line-height initial
     color $label-primary-color
 
   .list-item-description
     font-size 10px
+    line-height initial
     color $label-info-color
 
   .list-item-active

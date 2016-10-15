@@ -25,12 +25,22 @@ public class FileContentUpdateEvent extends GwtEvent<FileContentUpdateHandler> {
     private final String filePath;
 
     /**
+     * Encoded content.
+     */
+    private String modificationStamp;
+
+    /**
      * Constructor.
      * 
      * @param filePath the path of the file that changed
      */
     public FileContentUpdateEvent(final String filePath) {
         this.filePath = filePath;
+    }
+
+    public FileContentUpdateEvent(final String filePath, final String contentStamp) {
+        this.filePath = filePath;
+        this.modificationStamp = contentStamp;
     }
 
     @Override
@@ -50,5 +60,14 @@ public class FileContentUpdateEvent extends GwtEvent<FileContentUpdateHandler> {
      */
     public String getFilePath() {
         return filePath;
+    }
+
+    /**
+     * Returns content's stamp of the file that had changes.
+     *
+     * @return the path
+     */
+    public String getModificationStamp() {
+        return modificationStamp;
     }
 }

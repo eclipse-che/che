@@ -12,18 +12,18 @@ package org.eclipse.che.ide.extension.machine.client.processes.actions;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import static java.util.Collections.singletonList;
+
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsolePresenter;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
-import javax.validation.constraints.NotNull;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Stop selected process action.
@@ -33,10 +33,10 @@ import javax.validation.constraints.NotNull;
 @Singleton
 public class StopProcessAction extends AbstractPerspectiveAction {
 
-    private ConsolesPanelPresenter consolesPanelPresenter;
+    private ProcessesPanelPresenter processesPanelPresenter;
 
     @Inject
-    public StopProcessAction(ConsolesPanelPresenter consolesPanelPresenter,
+    public StopProcessAction(ProcessesPanelPresenter processesPanelPresenter,
                              MachineLocalizationConstant locale,
                              MachineResources machineResources) {
         super(singletonList(PROJECT_PERSPECTIVE_ID),
@@ -44,12 +44,12 @@ public class StopProcessAction extends AbstractPerspectiveAction {
                 locale.stopControlDescription(),
                 null,
                 machineResources.stopIcon());
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.processesPanelPresenter = processesPanelPresenter;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        OutputConsole outputConsole = consolesPanelPresenter.getContextOutputConsole();
+        OutputConsole outputConsole = processesPanelPresenter.getContextOutputConsole();
         if (outputConsole != null && outputConsole instanceof CommandOutputConsolePresenter) {
             CommandOutputConsolePresenter commandOutputConsolePresenter = (CommandOutputConsolePresenter)outputConsole;
             commandOutputConsolePresenter.stopProcessButtonClicked();
@@ -57,8 +57,8 @@ public class StopProcessAction extends AbstractPerspectiveAction {
     }
 
     @Override
-    public void updateInPerspective(@NotNull ActionEvent event) {
-        ProcessTreeNode processTreeNode = consolesPanelPresenter.getContextTreeNode();
+    public void updateInPerspective(ActionEvent event) {
+        ProcessTreeNode processTreeNode = processesPanelPresenter.getContextTreeNode();
 
         if (processTreeNode == null) {
             event.getPresentation().setEnabled(false);
@@ -66,8 +66,8 @@ public class StopProcessAction extends AbstractPerspectiveAction {
             return;
         }
 
-        if (consolesPanelPresenter.getContextOutputConsole() instanceof CommandOutputConsolePresenter &&
-                !consolesPanelPresenter.getContextOutputConsole().isFinished()) {
+        if (processesPanelPresenter.getContextOutputConsole() instanceof CommandOutputConsolePresenter &&
+            !processesPanelPresenter.getContextOutputConsole().isFinished()) {
             event.getPresentation().setEnabled(true);
             event.getPresentation().setVisible(true);
             return;

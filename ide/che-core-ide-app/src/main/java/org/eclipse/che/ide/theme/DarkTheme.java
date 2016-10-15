@@ -10,9 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.theme;
 
-import org.eclipse.che.ide.api.theme.Theme;
-
 import com.google.inject.Singleton;
+
+import org.eclipse.che.ide.api.theme.Theme;
 
 /**
  * @author Evgen Vidolob
@@ -30,6 +30,11 @@ public class DarkTheme implements Theme {
     @Override
     public String getDescription() {
         return "Dark Theme";
+    }
+
+    @Override
+    public String backgroundColor() {
+        return "#21252b";
     }
 
     @Override
@@ -75,12 +80,12 @@ public class DarkTheme implements Theme {
 
     @Override
     public String tabBorderColor() {
-        return "#121416";
+        return "#33373b";
     }
 
     @Override
     public String inactiveTabBorderColor() {
-        return "#353535";
+        return "#33373b";
     }
 
     @Override
@@ -111,7 +116,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String activeTabBorderColor() {
-        return "#121416";
+        return tabBorderColor();
     }
 
     @Override
@@ -347,6 +352,11 @@ public class DarkTheme implements Theme {
     }
 
     @Override
+    public String editorPanelBorderColor() {
+        return getEditorBackgroundColor();
+    }
+
+    @Override
     public String getEditorBackgroundColor() {
         return "#272b33";
     }
@@ -494,6 +504,11 @@ public class DarkTheme implements Theme {
     @Override
     public String completionPopupItemSubtitleTextColor() {
         return "#727272";
+    }
+
+    @Override
+    public String completionPopupItemHighlightTextColor() {
+        return "#4EABFF";
     }
 
     @Override
@@ -778,7 +793,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String consolesToolbarButtonColor() {
-        return "#aaaaaa";
+        return "#808080";
     }
 
     @Override
@@ -863,7 +878,7 @@ public class DarkTheme implements Theme {
 
     @Override
     public String getSplitterSmallBorderColor() {
-        return "#0D0F10";
+        return "#21252b";
     }
 
     @Override
@@ -886,6 +901,7 @@ public class DarkTheme implements Theme {
         return "#292C2F";
     }
 
+    @Override
     public String getPopupBkgColor() {
         return "#292c2f";
     }
@@ -1511,4 +1527,34 @@ public class DarkTheme implements Theme {
         return "rgb(76, 76, 76)";
     }
 
+    /********************************************************************************************
+     *
+     * Popup Loader
+     *
+     ********************************************************************************************/
+
+    @Override
+    public String popupLoaderBackgroundColor() {
+        return "#212325";
+    }
+
+    @Override
+    public String popupLoaderBorderColor() {
+        return "#466695";
+    }
+
+    @Override
+    public String popupLoaderShadow() {
+        return "0 0 10px rgba(0,0,0,0.6)";
+    }
+
+    @Override
+    public String popupLoaderTitleColor() {
+        return "white";
+    }
+
+    @Override
+    public String popupLoaderTextColor() {
+        return "#999999";
+    }
 }

@@ -2,30 +2,32 @@
   flex-wrap wrap
 
 .workspace-list-content
-  padding 15px
-
-.workspace-list-content .workspace-empty-list
-  overflow visible
-  min-height calc(100vh - 246px)
-
-.workspace-list-title md-icon
-  font-size 24px
-  height auto
-  width auto
-  color $label-info-color
-  line-height 24px
+  margin 0
 
 md-progress-linear.workspaces-list-progress
   height 10px
-
-.workspace-list-title
-  margin-left 12px
-
-.workspace-list-empty
-  font-size 12px
 
 .workspace-resources-locked
   background-color red
 
 .che-list che-workspace-item:not(:last-of-type) .che-list-item
   border-bottom 1px solid $list-separator-color
+
+.header-column
+  margin-left 12px
+  text-transform uppercase
+  color $frame-subscription-color
+
+.sort-direction
+  position relative
+  text-align center
+  display inline
+  top 4px
+
+.sort-direction *:first-child
+  position relative
+  top 3px
+
+.sort-direction *::before
+  font-size 20px
+  color $menu-bg-color

@@ -29,12 +29,6 @@ public interface Snapshot {
     String getType();
 
     /**
-     * Snapshot namespace, which allows snapshot to be
-     * related to the certain workspace machine.
-     */
-    String getNamespace();
-
-    /**
      * Creation date of the snapshot
      */
     long getCreationDate();

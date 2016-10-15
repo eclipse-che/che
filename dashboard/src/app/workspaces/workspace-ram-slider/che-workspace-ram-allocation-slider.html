@@ -1,25 +1,28 @@
 <div class="che-ram-allocation-slider">
-    <che-label-container che-label-name="RAM" ng-init="cheWorkspaceRamAllocationSliderCtrl.inputVal = cheWorkspaceRamAllocationSliderCtrl.ngModel / 1000">
-        <div layout="row" flex="100" layout-align="space-between center">
-            <div layout="column" layout-align="start start" class="slider-actual-ram-caption">
-                <div>{{cheWorkspaceRamAllocationSliderCtrl.ngModel / 1000}} GB</div>
-            </div>
-            <div flex class="slider-holder">
-                <md-slider min="1" max="32" step="0.5"
-                           ng-model="cheWorkspaceRamAllocationSliderCtrl.inputVal"></md-slider>
-            </div>
-            <div layout="column" layout-align="start end">
-                <div class="slider-max-ram-caption">32 GB</div>
-            </div>
-            <div flex-gt-md="15" layout="column" layout-align-sm="center start" layout-align-md="center-start" layout-align-gt-md="center end" class="slider-input">
-                <md-input-container>
-                    <input type="number" min="1" max="100" step="0.5"
-                           ng-model="cheWorkspaceRamAllocationSliderCtrl.inputVal"/>
-                </md-input-container>
-            </div>
-            <div flex layout="column" layout-aling="center start">
-                <span class="slider-max-ram-subtitle">Up to 100 GB</span>
-            </div>
-        </div>
-    </che-label-container>
+  <div layout="row" flex="100" layout-align="space-between center"
+       class="slider-wrapper">
+    <div layout="column" layout-align="start start" class="slider-actual-ram-caption">
+      <div>{{cheWorkspaceRamAllocationSliderController.inputVal}} GB</div>
+    </div>
+    <div flex class="slider-holder">
+      <md-slider min="1" max="32" step="0.5"
+                 ng-model="cheWorkspaceRamAllocationSliderController.inputVal"
+                 aria-label="Amount of RAM"
+                 ng-change="cheWorkspaceRamAllocationSliderController.onChange()"></md-slider>
+    </div>
+    <div layout="column" layout-align="start end">
+      <div class="slider-max-ram-caption">32 GB</div>
+    </div>
+    <div layout="column" layout-align="center start" class="slider-input">
+      <md-input-container>
+        <input type="number" min="1" max="100" step="0.5"
+               ng-model="cheWorkspaceRamAllocationSliderController.inputVal"
+               aria-label="Amount of RAM"
+               ng-change="cheWorkspaceRamAllocationSliderController.onChange()"/>
+      </md-input-container>
+    </div>
+    <div flex layout="column" layout-aling="center start">
+      <span class="slider-max-ram-subtitle">Up to 100 GB</span>
+    </div>
+  </div>
 </div>

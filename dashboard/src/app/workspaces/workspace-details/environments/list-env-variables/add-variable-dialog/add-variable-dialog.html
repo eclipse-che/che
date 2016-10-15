@@ -1,0 +1,42 @@
+<md-dialog flex="50"
+           class="add-variable-dialog-content">
+  <ng-form flex layout="column" name="envVariableForm">
+    <che-label-container che-label-name="Name">
+      <div class="add-variable-dialog-input">
+        <che-input che-form="envVariableForm"
+                   che-name="name"
+                   che-place-holder="New environment variable name"
+                   ng-model="addVariableDialogController.name"
+                   custom-validator="addVariableDialogController.isUnique($value)"
+                   aria-label="New environment variable name"
+                   required>
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="customValidator">This environment variable name is already used.</div>
+        </che-input>
+      </div>
+    </che-label-container>
+    <che-label-container che-label-name="Value">
+      <div class="add-variable-dialog-textarea">
+        <che-textarea che-form="envVariableForm"
+                      che-name="value"
+                      che-place-holder="New environment variable value"
+                      ng-model="addVariableDialogController.value"
+                      aria-label="New environment variable value"
+                      required>
+          <div ng-message="required">A value is required.</div>
+        </che-textarea>
+      </div>
+    </che-label-container>
+
+    <che-label-container>
+      <div layout="row">
+        <che-button-primary che-button-title="Add"
+                            ng-disabled="envVariableForm.$invalid || addVariableDialogController.updateInProgress"
+                            ng-click="addVariableDialogController.addVariable()"></che-button-primary>
+        <che-button-notice che-button-title="Cancel"
+                           ng-click="addVariableDialogController.hide()"
+                           tabindex="0"></che-button-notice>
+      </div>
+    </che-label-container>
+  </ng-form>
+</md-dialog>

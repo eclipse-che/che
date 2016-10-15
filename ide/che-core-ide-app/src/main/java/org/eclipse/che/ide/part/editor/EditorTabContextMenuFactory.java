@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.part.editor;
 
+import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 
 /**
@@ -25,5 +27,5 @@ public interface EditorTabContextMenuFactory {
      *         editor tab item
      * @return new context menu
      */
-    EditorTabContextMenu newContextMenu(EditorTab editorTab);
+    EditorTabContextMenu newContextMenu(EditorTab editorTab, EditorPartPresenter editorPart, EditorPartStack editorPartStack);
 }

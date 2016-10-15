@@ -174,6 +174,8 @@ public interface Resources extends Tree.Resources,
 
     /** Interface for css resources. */
     interface CoreCss extends CssResource {
+        String editorPaneMenuDelimiter();
+
         String simpleListContainer();
 
         String mainText();

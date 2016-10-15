@@ -12,7 +12,7 @@ package org.eclipse.che.api.factory.server;
 
 
 import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.factory.shared.dto.Factory;
+import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 
 /**
  * Interface for validations of factory urls on accept stage.
@@ -28,5 +28,5 @@ public interface FactoryAcceptValidator {
      * @throws BadRequestException
      *         in case if factory is not valid
      */
-    void validateOnAccept(Factory factory) throws BadRequestException;
+    void validateOnAccept(FactoryDto factory) throws BadRequestException;
 }

@@ -31,14 +31,14 @@ public class WebSocketJsonRpcInitializer implements JsonRpcInitializer {
 
     @Override
     public void initialize(Map<String, String> properties) {
-        Log.info(getClass(), "Initializing with properties: " + properties);
+        Log.debug(getClass(), "Initializing with properties: " + properties);
 
         webSocketInitializer.initialize(properties);
     }
 
     @Override
     public void terminate() {
-        Log.info(getClass(), "Terminating");
+        Log.debug(getClass(), "Terminating");
 
         webSocketInitializer.terminate();
     }

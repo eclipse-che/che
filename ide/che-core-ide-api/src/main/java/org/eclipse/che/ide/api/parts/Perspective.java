@@ -25,11 +25,14 @@ import javax.validation.constraints.NotNull;
  */
 public interface Perspective {
 
-    /** Restores editor parts state with saving of parts sizes. */
-    void expandParts();
+    /** Maximizes central part */
+    void maximizeCentralPart();
 
-    /** Hides editor parts. */
-    void collapseParts();
+    /** Maximizes bottom part */
+    void maximizeBottomPart();
+
+    /** Restores parts to their states before maximizing */
+    void restoreParts();
 
     /** Store perspective state before changing. */
     void storeState();

@@ -60,7 +60,7 @@ public class ResetFilesPresenterTest extends BaseTest {
                                             dtoFactory,
                                             dialogFactory,
                                             gitOutputConsoleFactory,
-                                            consolesPanelPresenter);
+                                            processesPanelPresenter);
 
         when(dtoFactory.createDto(IndexFile.class)).thenReturn(indexFile);
         when(indexFile.withIndexed(anyBoolean())).thenReturn(indexFile);

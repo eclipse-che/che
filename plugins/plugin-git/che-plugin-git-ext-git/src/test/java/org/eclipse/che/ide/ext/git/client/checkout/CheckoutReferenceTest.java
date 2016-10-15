@@ -56,7 +56,7 @@ public class CheckoutReferenceTest extends BaseTest {
                                                    constant,
                                                    notificationManager,
                                                    gitOutputConsoleFactory,
-                                                   consolesPanelPresenter,
+                                                   processesPanelPresenter,
                                                    dtoFactory);
     }
 

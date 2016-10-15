@@ -11,96 +11,64 @@
 
 <md-content md-scroll-y flex class="projects-details-project"
             ng-show="projectDetailsController.projectDetails"
-            ng-if="projectDetailsController.getWorkspaceStatus() === 'RUNNING' || projectDetailsController.getWorkspaceStatus() === 'STARTING'"
-            md-theme="maincontent-theme">
-  <md-tabs md-dynamic-height md-stretch-tabs="always" md-selected="selectedIndex" class="project-details-menu">
-    <md-tab>
-      <md-tab-label>
-        <md-icon md-font-icon="material-design icon-ic_settings_24px" class="che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Settings</span>
-      </md-tab-label>
-      <md-tab-body>
-        <che-panel che-title="Project Information">
-          <ng-form name="projectInformationForm">
-            <che-input  che-form="projectInformationForm"
-                        che-name="name"
-                        che-label-name="Name"
-                        che-place-holder="Name of the project"
-                        ng-model="projectDetailsController.projectDetails.name"
-                        required
-                        unique-project-name="projectDetailsController.getWorkspaceProjects()"
-                        ng-maxlength="128"
-                        ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
-                        readonly>
-              <div ng-message="required">A name is required.</div>
-              <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
-              <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-              <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-              <div ng-message="uniqueProjectName">This project name is already used.</div>
-            </che-input>
-            <che-input che-form="projectInformationForm"
-                        che-name="description"
-                        che-label-name="Description"
-                        che-place-holder="Description of the project"
-                        ng-model="projectDetailsController.projectDetails.description"
-                        ng-maxlength="256">
-              <div ng-message="maxlength">The name has to be less than 256 characters long.</div>
-              <div ng-message="md-maxlength">The name has to be less than 256 characters long.</div>
-            </che-input>
-          </ng-form>
-          <che-button-primary
-            ng-disabled="projectInformationForm.$invalid || !(projectDetailsController.isNameChanged() || projectDetailsController.isDescriptionChanged())"
-            che-button-title="Update" name="updateButton" ng-click="projectDetailsController.updateInfo(projectInformationForm.$valid)"/>
-        </che-panel>
-        <che-panel che-title="Workspace">
-          <div layout="column" flex layout-align="space-around start">
-            <che-label che-label-text="{{projectDetailsController.workspaceName}}"></che-label>
-          </div>
-        </che-panel>
-        <che-panel che-title="Delete Project">
-          <div layout="row" flex layout-align="space-around start">
-            <label flex flex-gt-xs="15"></label>
+            ng-if="projectDetailsController.getWorkspaceStatus() === 'RUNNING' || projectDetailsController.getWorkspaceStatus() === 'STARTING'">
 
-            <div layout="column" flex-xs="none" flex-gt-xs="85">
-              <che-button-danger che-button-title="Delete" ng-click="projectDetailsController.deleteProject($event)"/>
-            </div>
-          </div>
-        </che-panel>
-      </md-tab-body>
-    </md-tab>
+  <!-- Name -->
+  <che-label-container che-label-name="Name">
+    <div class="project-details-input">
+      <che-input che-form="projectInformationForm"
+                 che-name="name"
+                 che-place-holder="Name of the project"
+                 ng-model="projectDetailsController.projectName"
+                 required
+                 unique-project-name="projectDetailsController.getWorkspaceProjects()"
+                 ng-maxlength="128"
+                 ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
+                 readonly>
+        <div ng-message="required">A name is required.</div>
+        <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
+        <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+        <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+        <div ng-message="uniqueProjectName">This project name is already used.</div>
+      </che-input>
+    </div>
+  </che-label-container>
 
-    <md-tab>
-      <md-tab-label>
-        <md-icon md-font-icon="fa-code-fork" class="fa che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Repository</span>
-      </md-tab-label>
-      <md-tab-body>
-        <project-repository></project-repository>
-      </md-tab-body>
-    </md-tab>
+  <!-- Description -->
+  <che-label-container che-label-name="Description">
+    <div class="project-details-input">
+      <ng-form name="projectInformationForm">
+        <che-input che-form="projectInformationForm"
+                   che-name="description"
+                   che-place-holder="Description of the project"
+                   che-width="auto"
+                   ng-model="projectDetailsController.projectDescription"
+                   ng-change="projectDetailsController.updateInfo(projectInformationForm.$valid)"
+                   ng-maxlength="256">
+          <div ng-message="maxlength">The name has to be less than 256 characters long.</div>
+          <div ng-message="md-maxlength">The name has to be less than 256 characters long.</div>
+        </che-input>
+      </ng-form>
+    </div>
+  </che-label-container>
 
-    <!--
-    <md-tab>
-      <md-tab-label>
-        <md-icon md-font-icon="fa-cube" class="fa che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Machines</span>
-      </md-tab-label>
-      <md-tab-body>
-      </md-tab-body>
-    </md-tab>
-    -->
-    <!--
-    <md-tab>
-      <md-tab-label>
-        <md-icon md-font-icon="fa-rocket" class="fa che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Factories</span>
-      </md-tab-label>
-      <md-tab-body>
-      </md-tab-body>
-    </md-tab>
-    -->
+  <!-- Workspace -->
+  <che-label-container che-label-name="Workspace">
+    <div class="project-details-input">
+      <che-input ng-model="projectDetailsController.workspaceName"
+                 readonly></che-input>
+    </div>
+  </che-label-container>
 
-  </md-tabs>
+  <!-- Repositories -->
+  <project-repository></project-repository>
+
+  <!-- Delete project -->
+  <che-label-container class="workspace-delete-label"
+                       che-label-name="Delete project">
+    <che-button-danger che-button-title="Delete" ng-click="projectDetailsController.deleteProject($event)"/>
+  </che-label-container>
+
 </md-content>
 
 
@@ -109,11 +77,15 @@
 </md-content>
 
 <md-content md-scroll-y flex class="projects-details-project"
-            ng-show="(projectDetailsController.getWorkspaceStatus() !== 'RUNNING')" layout="column" layout-align="center center" md-theme="maincontent-theme">
-    <che-empty-state che-value="This project's workspace is not currently running."
-                     che-icon-class="fa fa-folder-open"></che-empty-state>
+            ng-if="(projectDetailsController.getWorkspaceStatus() !== 'RUNNING')"
+            layout="column"
+            layout-align="center center">
+  <che-empty-state che-value="This project's workspace is not currently running."
+                   che-icon-class="fa fa-folder-open"></che-empty-state>
 
-  <che-link class="projects-details-project-ws-not-started" ng-href="#/workspace/{{projectDetailsController.namespace}}/{{projectDetailsController.workspaceName}}" che-link-text="Start workspace"></che-link>
+  <che-link class="projects-details-project-ws-not-started"
+            ng-href="#/workspace/{{projectDetailsController.namespace}}/{{projectDetailsController.workspaceName}}"
+            che-link-text="Start workspace"></che-link>
 
 </md-content>
 

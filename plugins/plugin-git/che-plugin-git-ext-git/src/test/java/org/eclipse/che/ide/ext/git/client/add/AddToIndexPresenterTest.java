@@ -53,7 +53,7 @@ public class AddToIndexPresenterTest extends BaseTest {
                                             appContext,
                                             constant,
                                             gitOutputConsoleFactory,
-                                            consolesPanelPresenter,
+                                            processesPanelPresenter,
                                             service,
                                             notificationManager);
     }

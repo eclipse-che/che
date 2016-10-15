@@ -1,33 +1,15 @@
-.docker-registry-list md-content
+.docker-registry-panel > div
+  margin-bottom 0
+
+.registry-management-content
   overflow visible
   min-height 110px
-  padding 15px 0 15px 0
+  padding 0 0 15px 0
 
-  .registry-row
-    min-height 56px
+  .registry-url,
+  .registry-user-data
+    margin 0
+    width 100%
 
-    .registry-actions
-      color $default-color
-
-      & > *
-        outline none
-
-      *:before
-        font-size 20px
-
-    .registry-url
-      margin 0 10px 0 10px
-      color $link-color
-
-    .registry-user-data
-      margin 0 10px 0 10px
-
-.add-registry-button-container
-  width 50px
-
-.add-registry-button-container button
-  position absolute
-  margin-right -15px
-  margin-top 5px
-  top 10px
-  right 0
+  .registry-url
+    color $link-color

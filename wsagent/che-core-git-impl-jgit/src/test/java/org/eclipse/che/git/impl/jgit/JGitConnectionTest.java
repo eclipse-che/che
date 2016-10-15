@@ -13,9 +13,15 @@ package org.eclipse.che.git.impl.jgit;
 
 import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.GitUserResolver;
+import org.eclipse.che.api.git.shared.GitRequest;
 import org.eclipse.che.plugin.ssh.key.script.SshKeyProvider;
 import org.eclipse.jgit.api.TransportCommand;
+import org.eclipse.jgit.api.TransportConfigCallback;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.SshTransport;
+import org.eclipse.jgit.transport.TransportHttp;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -28,8 +34,13 @@ import org.testng.annotations.Test;
 import java.lang.reflect.Field;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
@@ -50,7 +61,8 @@ public class JGitConnectionTest {
     private GitUserResolver gitUserResolver;
     @Mock
     private TransportCommand transportCommand;
-
+    @Mock
+    private GitRequest request;
     @InjectMocks
     private JGitConnection jGitConnection;
 
@@ -80,7 +92,7 @@ public class JGitConnectionTest {
         passwordField.setAccessible(true);
 
         //when
-        jGitConnection.executeRemoteCommand(url, transportCommand);
+        jGitConnection.executeRemoteCommand(url, transportCommand, request);
 
         //then
         verify(transportCommand).setCredentialsProvider(captor.capture());
@@ -94,9 +106,61 @@ public class JGitConnectionTest {
     @Test(dataProvider = "gitUrlsWithoutOrWrongCredentials")
     public void shouldNotSetCredentialsProviderIfUrlDoesNotContainCredentials(String url) throws Exception{
         //when
-        jGitConnection.executeRemoteCommand(url, transportCommand);
+        jGitConnection.executeRemoteCommand(url, transportCommand, request);
 
         //then
         verify(transportCommand, never()).setCredentialsProvider(any());
+    }
+
+    @Test
+    public void shouldSetSshSessionFactoryWhenSshTransportReceived() throws Exception{
+        //given
+        SshTransport sshTransport = mock(SshTransport.class);
+        when(sshKeyProvider.getPrivateKey(anyString())).thenReturn(new byte[0]);
+        doAnswer(invocation -> {
+            TransportConfigCallback callback = (TransportConfigCallback)invocation.getArguments()[0];
+            callback.configure(sshTransport);
+            return null;
+        }).when(transportCommand).setTransportConfigCallback(any());
+
+        //when
+        jGitConnection.executeRemoteCommand("ssh://host.xz/repo.git", transportCommand, null);
+
+        //then
+        verify(sshTransport).setSshSessionFactory(any());
+    }
+
+    @Test
+    public void shouldDoNothingWhenTransportHttpReceived() throws Exception{
+        //given
+        TransportHttp transportHttp = mock(TransportHttp.class);
+        when(sshKeyProvider.getPrivateKey(anyString())).thenReturn(new byte[0]);
+        doAnswer(invocation -> {
+            TransportConfigCallback callback = (TransportConfigCallback)invocation.getArguments()[0];
+            callback.configure(transportHttp);
+            return null;
+        }).when(transportCommand).setTransportConfigCallback(any());
+
+        //when
+        jGitConnection.executeRemoteCommand("ssh://host.xz/repo.git", transportCommand, null);
+
+        //then
+        verifyZeroInteractions(transportHttp);
+    }
+
+    /**
+     * Check branch using current repository reference is returned
+     * @throws Exception if it fails
+     */
+    @Test
+    public void checkCurrentBranch() throws Exception {
+        String branchTest = "helloWorld";
+        Ref ref = mock(Ref.class);
+        when(repository.exactRef(Constants.HEAD)).thenReturn(ref);
+        when(ref.getLeaf()).thenReturn(ref);
+        when(ref.getName()).thenReturn(branchTest);
+        String branchName = jGitConnection.getCurrentBranch();
+
+        assertEquals(branchTest, branchName);
     }
 }

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server;
 
-import com.google.common.collect.ImmutableList;
-
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
@@ -19,18 +17,20 @@ import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.model.project.type.Attribute;
 import org.eclipse.che.api.core.model.project.type.Value;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-import org.eclipse.che.api.project.server.type.BaseProjectType;
 import org.eclipse.che.api.project.server.type.ProjectTypeConstraintException;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.project.server.type.Variable;
+import org.eclipse.che.api.vfs.Path;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -75,8 +75,17 @@ public class RegisteredProject implements ProjectConfig {
         problems = new ArrayList<>();
         attributes = new HashMap<>();
 
+        Path path;
+        if (folder != null) {
+            path = folder.getPath();
+        } else if (config != null) {
+            path = Path.of(config.getPath());
+        } else {
+            throw new ServerException("Invalid Project Configuration. Path undefined.");
+        }
+
         this.folder = folder;
-        this.config = (config == null) ? new NewProjectConfig(folder.getPath()) : config;
+        this.config = (config == null) ? new NewProjectConfig(path) : config;
         this.updated = updated;
         this.detected = detected;
 
@@ -89,45 +98,13 @@ public class RegisteredProject implements ProjectConfig {
         }
 
         // 1. init project types
-        this.types = new ProjectTypes(this.config.getPath(), this.config.getType(), this.config.getMixins(), projectTypeRegistry);
+        this.types = new ProjectTypes(this.config.getPath(), this.config.getType(), this.config.getMixins(), projectTypeRegistry, problems);
 
         // 2. init transient (implicit, like git) project types.
         types.addTransient(folder);
 
         // 3. initialize attributes
         initAttributes();
-    }
-
-
-    /**
-     * Either root folder in this case Project not configure well.
-     * Use it if can't initialize project correct, project type will be BLANK
-     *
-     * @param folder
-     *         root local folder or null
-     * @param updated
-     *         if this object was updated, i.e. no more synchronized with workspace master
-     * @param detected
-     *         if this project was detected, initialized when "parent" project initialized
-     * @param problem
-     *         project problem
-     */
-    RegisteredProject(FolderEntry folder,
-                      boolean updated,
-                      boolean detected,
-                      ProjectTypeRegistry projectTypeRegistry,
-                      Problem problem) throws NotFoundException,
-                                                                      ProjectTypeConstraintException,
-                                                                      ServerException,
-                                                                      ValueStorageException {
-        attributes = new HashMap<>();
-
-        this.folder = folder;
-        this.config = new NewProjectConfig(folder.getPath());
-        this.updated = updated;
-        this.detected = detected;
-        types = new ProjectTypes(folder.getPath().toString(), BaseProjectType.ID, null, projectTypeRegistry);
-        problems = ImmutableList.of(problem);
     }
 
 
@@ -140,6 +117,9 @@ public class RegisteredProject implements ProjectConfig {
      * @throws NotFoundException
      */
     private void initAttributes() throws ValueStorageException, ProjectTypeConstraintException, ServerException, NotFoundException {
+
+        Set<Attribute> invalidAttributes = new HashSet<>();
+
         // we take only defined attributes, others ignored
         for (Map.Entry<String, Attribute> entry : types.getAttributeDefs().entrySet()) {
             final Attribute definition = entry.getValue();
@@ -174,7 +154,9 @@ public class RegisteredProject implements ProjectConfig {
                 }
 
                 if (value.isEmpty() && variable.isRequired()) {
-                    throw new ProjectTypeConstraintException("Value for required attribute is not initialized " + variable.getId());
+                    this.problems.add(new Problem(13, "Value for required attribute is not initialized " + variable.getId()));
+                    invalidAttributes.add(variable);
+                    //throw new ProjectTypeConstraintException("Value for required attribute is not initialized " + variable.getId());
                 }
 
                 if (!value.isEmpty()) {
@@ -182,6 +164,9 @@ public class RegisteredProject implements ProjectConfig {
                 }
             }
         }
+
+        types.reset(invalidAttributes);
+
     }
 
     /**
@@ -247,6 +232,18 @@ public class RegisteredProject implements ProjectConfig {
      */
     public List<Problem> getProblems() {
         return problems;
+    }
+
+    /**
+     * @return list of Problems as a String
+     */
+    public String getProblemsStr() {
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
+        for( RegisteredProject.Problem prb : problems ) {
+            builder.append("[").append(i++).append("] : ").append(prb.message).append("\n");
+        }
+        return builder.toString();
     }
 
     /**

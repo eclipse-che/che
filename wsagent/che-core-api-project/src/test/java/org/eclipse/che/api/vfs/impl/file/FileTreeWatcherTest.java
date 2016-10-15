@@ -189,6 +189,61 @@ public class FileTreeWatcherTest {
     }
 
     @Test
+    public void watchesFolderModifiedOnDelete() throws Exception {
+        final String watchedDir = fileWatcherTestTree.createDirectory("", "watched");
+        final String notifiedFile = fileWatcherTestTree.createFile("watched");
+        final Set<String> deleted = newHashSet(notifiedFile);
+        final Set<String> modified = newHashSet(watchedDir);
+
+        final FileWatcherNotificationHandler notificationHandler = aNotificationHandler();
+        fileWatcher = new FileTreeWatcher(testDirectory, newHashSet(), notificationHandler);
+        fileWatcher.startup();
+
+        Thread.sleep(1000);
+
+        fileWatcherTestTree.delete(notifiedFile);
+
+        Thread.sleep(5000);
+
+        verify(notificationHandler, never()).errorOccurred(eq(testDirectory), any(Throwable.class));
+
+        final ArgumentCaptor<String> deletedEvents = ArgumentCaptor.forClass(String.class);
+        verify(notificationHandler, times(1)).handleFileWatcherEvent(eq(DELETED), eq(testDirectory), deletedEvents.capture(), anyBoolean());
+        assertEquals(deleted, newHashSet(deletedEvents.getAllValues()));
+
+        final ArgumentCaptor<String> modifiedEvents = ArgumentCaptor.forClass(String.class);
+        verify(notificationHandler, times(1)).handleFileWatcherEvent(eq(MODIFIED), eq(testDirectory), modifiedEvents.capture(), anyBoolean());
+        assertEquals(modified, newHashSet(modifiedEvents.getAllValues()));
+    }
+
+    @Test
+    public void watchesFolderModifiedOnCreate() throws Exception {
+        final String watchedDir = fileWatcherTestTree.createDirectory("", "watched");
+        final Set<String> modified = newHashSet(watchedDir);
+
+        final FileWatcherNotificationHandler notificationHandler = aNotificationHandler();
+        fileWatcher = new FileTreeWatcher(testDirectory, newHashSet(), notificationHandler);
+        fileWatcher.startup();
+
+        Thread.sleep(1000);
+
+        final String notifiedFile = fileWatcherTestTree.createFile("watched");
+        final Set<String> created = newHashSet(notifiedFile);
+
+        Thread.sleep(5000);
+
+        verify(notificationHandler, never()).errorOccurred(eq(testDirectory), any(Throwable.class));
+
+        final ArgumentCaptor<String> deletedEvents = ArgumentCaptor.forClass(String.class);
+        verify(notificationHandler, times(1)).handleFileWatcherEvent(eq(CREATED), eq(testDirectory), deletedEvents.capture(), anyBoolean());
+        assertEquals(created, newHashSet(deletedEvents.getAllValues()));
+
+        final ArgumentCaptor<String> modifiedEvents = ArgumentCaptor.forClass(String.class);
+        verify(notificationHandler, times(1)).handleFileWatcherEvent(eq(MODIFIED), eq(testDirectory), modifiedEvents.capture(), anyBoolean());
+        assertEquals(modified, newHashSet(modifiedEvents.getAllValues()));
+    }
+
+    @Test
     public void watchesDelete() throws Exception {
         fileWatcherTestTree.createDirectory("", "watched");
         String deletedDir1 = fileWatcherTestTree.createDirectory("watched");

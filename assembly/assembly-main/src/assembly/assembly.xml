@@ -59,36 +59,28 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>lib</outputDirectory>
-            <outputFileNameMapping>ws-agent.zip</outputFileNameMapping>
+            <outputFileNameMapping>ws-agent.tar.gz</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che:assembly-wsagent-server</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
-            <outputDirectory>lib/linux_amd64</outputDirectory>
+            <unpack>false</unpack>
+            <outputDirectory>lib/linux_amd64/terminal</outputDirectory>
+            <outputFileNameMapping>websocket-terminal-linux_amd64.tar.gz</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.lib:che-websocket-terminal:zip:linux_amd64</include>
+                <include>org.eclipse.che.lib:che-websocket-terminal:tar.gz:linux_amd64</include>
             </includes>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
-            <outputDirectory>lib/linux_arm7</outputDirectory>
+            <unpack>false</unpack>
+            <outputDirectory>lib/linux_arm7/terminal</outputDirectory>
+            <outputFileNameMapping>websocket-terminal-linux_arm7.tar.gz</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che.lib:che-websocket-terminal:zip:linux_arm7</include>
+                <include>org.eclipse.che.lib:che-websocket-terminal:tar.gz:linux_arm7</include>
             </includes>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -120,19 +112,6 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>true</unpack>
-            <outputDirectory>stacks</outputDirectory>
-            <includes>
-                <include>org.eclipse.che.core:che-core-ide-stacks</include>
-            </includes>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
             <outputDirectory>templates</outputDirectory>
             <includes>
                 <include>org.eclipse.che.core:che-core-ide-templates</include>
@@ -145,6 +124,13 @@
         </dependencySet>
     </dependencySets>
     <fileSets>
+        <fileSet>
+            <directory>${project.build.directory}/stacks/</directory>
+            <outputDirectory>stacks/</outputDirectory>
+            <excludes>
+                <exclude>META-INF/**</exclude>
+            </excludes>
+        </fileSet>
         <fileSet>
             <directory>${project.build.directory}/dependency/</directory>
             <outputDirectory>tomcat/</outputDirectory>

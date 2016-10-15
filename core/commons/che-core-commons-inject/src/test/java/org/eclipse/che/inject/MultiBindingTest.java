@@ -89,11 +89,12 @@ public class MultiBindingTest {
         }
     }
 
-    public static interface Service {
+    public interface Service {
     }
 
     @Singleton
     public static class Service1 implements Service {
+        @Override
         public String toString() {
             return "Service1";
         }
@@ -101,6 +102,7 @@ public class MultiBindingTest {
 
     @Singleton
     public static class Service2 implements Service {
+        @Override
         public String toString() {
             return "Service2";
         }
@@ -108,6 +110,7 @@ public class MultiBindingTest {
 
     @Singleton
     public static class Service3 implements Service {
+        @Override
         public String toString() {
             return "Service3";
         }

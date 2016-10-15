@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.svn.shared;
 
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.shared.DTO;
 
 import java.util.List;
@@ -53,4 +54,22 @@ public interface LockRequest {
     LockRequest withForce(boolean force);
 
     void setForce(boolean force);
+
+    /** @return user name for authentication */
+    String getUsername();
+
+    /** Set user name for authentication. */
+    void setUsername(@Nullable final String username);
+
+    /** @return {@link CheckoutRequest} with specified user name for authentication */
+    LockRequest withUsername(@Nullable final String username);
+
+    /** @return password for authentication */
+    String getPassword();
+
+    /** Set password for authentication. */
+    void setPassword(@Nullable final String password);
+
+    /** @return {@link CheckoutRequest} with specified password for authentication */
+    LockRequest withPassword(@Nullable final String password);
 }

@@ -13,18 +13,18 @@ package org.eclipse.che.api.local;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.local.storage.LocalStorageFactory;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
-import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
-import org.eclipse.che.api.machine.server.recipe.RecipeImpl;
+import org.eclipse.che.api.workspace.server.WorkspaceConfigJsonAdapter;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,8 +32,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +39,11 @@ import java.util.Map;
 import static java.nio.file.Files.readAllBytes;
 import static java.nio.file.Files.write;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -64,7 +64,8 @@ public class LocalWorkspaceDaoTest {
         final Path targetDir = Paths.get(url.toURI()).getParent();
         final Path storageRoot = targetDir.resolve("workspaces");
         workspacesPath = storageRoot.resolve("workspaces.json");
-        workspaceDao = new LocalWorkspaceDaoImpl(new LocalStorageFactory(storageRoot.toString()));
+        final WorkspaceConfigJsonAdapter adapter = mock(WorkspaceConfigJsonAdapter.class);
+        workspaceDao = new LocalWorkspaceDaoImpl(new LocalStorageFactory(storageRoot.toString()), adapter);
     }
 
     @Test
@@ -88,48 +89,93 @@ public class LocalWorkspaceDaoTest {
         assertEquals(result, workspace);
     }
 
+    @Test
+    public void testOldFormatIsAdaptedWhenWorkspaceIsLoaded() throws Exception {
+        final URL rootUrl = Thread.currentThread().getContextClassLoader().getResource(".");
+        assertNotNull(rootUrl);
+        final String path = Paths.get(rootUrl.toURI()).toString();
+        final LocalStorageFactory storageFactory = new LocalStorageFactory(path);
+        final WorkspaceConfigJsonAdapter workspaceAdapter = new WorkspaceConfigJsonAdapter();
+        final LocalWorkspaceDaoImpl workspaceDao = new LocalWorkspaceDaoImpl(storageFactory, workspaceAdapter);
+
+        workspaceDao.loadWorkspaces();
+
+        final WorkspaceImpl test = workspaceDao.get("test");
+        final EnvironmentImpl environment = test.getConfig().getEnvironments().get(test.getConfig().getDefaultEnv());
+        assertEquals(environment.getRecipe().getType(), "dockerfile");
+        assertEquals(environment.getRecipe().getLocation(), "host/api/recipe/recipew7j6ebw6or6rqu2t/script");
+        assertEquals(environment.getMachines().size(), 1);
+    }
+
     private static WorkspaceImpl createWorkspace() {
         // environments
-        final RecipeImpl recipe = new RecipeImpl();
-        recipe.setType("dockerfile");
-        recipe.setScript("FROM codenvy/jdk7\nCMD tail -f /dev/null");
+        Map<String, EnvironmentImpl> environments = new HashMap<>();
 
-        final MachineSourceImpl machineSource = new MachineSourceImpl("recipe").setLocation("recipe-url");
-        final MachineConfigImpl machineCfg1 = new MachineConfigImpl(true,
-                                                                    "dev-machine",
-                                                                    "machine-type",
-                                                                    machineSource,
-                                                                    new LimitsImpl(512),
-                                                                    Arrays.asList(new ServerConfImpl("ref1",
-                                                                                                     "8080",
-                                                                                                     "https",
-                                                                                                     "some/path"),
-                                                                                  new ServerConfImpl("ref2",
-                                                                                                     "9090/udp",
-                                                                                                     "someprotocol",
-                                                                                                     "/some/path")),
-                                                                    Collections.singletonMap("key1", "value1"));
-        final MachineConfigImpl machineCfg2 = new MachineConfigImpl(false,
-                                                                    "non-dev-machine",
-                                                                    "machine-type-2",
-                                                                    machineSource,
-                                                                    new LimitsImpl(2048),
-                                                                    Arrays.asList(new ServerConfImpl("ref1",
-                                                                                                     "8080",
-                                                                                                     "https",
-                                                                                                     "some/path"),
-                                                                                  new ServerConfImpl("ref2",
-                                                                                                     "9090/udp",
-                                                                                                     "someprotocol",
-                                                                                                     "/some/path")),
-                                                                    Collections.singletonMap("key1", "value1"));
+        Map<String, ExtendedMachineImpl> machines;
+        Map<String, ServerConf2Impl> servers;
+        Map<String, String> properties;
+        EnvironmentImpl env;
 
-        final EnvironmentImpl env1 = new EnvironmentImpl("my-environment", recipe, asList(machineCfg1, machineCfg2));
-        final EnvironmentImpl env2 = new EnvironmentImpl("my-environment-2", recipe, singletonList(machineCfg1));
+        servers = new HashMap<>();
+        properties = new HashMap<>();
+        properties.put("prop1", "value1");
+        properties.put("prop2", "value2");
+        servers.put("ref1", new ServerConf2Impl("port1", "proto1", properties));
+        properties = new HashMap<>();
+        properties.put("prop3", "value3");
+        properties.put("prop4", "value4");
+        servers.put("ref2", new ServerConf2Impl("port2", "proto2", properties));
+        machines = new HashMap<>();
+        machines.put("machine1", new ExtendedMachineImpl(asList("org.eclipse.che.ws-agent", "someAgent"),
+                                                         servers,
+                                                         singletonMap("memoryLimitBytes", "10000")));
+        servers = new HashMap<>();
+        properties = new HashMap<>();
+        properties.put("prop5", "value5");
+        properties.put("prop6", "value6");
+        servers.put("ref3", new ServerConf2Impl("port3", "proto3", properties));
+        properties = new HashMap<>();
+        properties.put("prop7", "value7");
+        properties.put("prop8", "value8");
+        servers.put("ref4", new ServerConf2Impl("port4", "proto4", properties));
+        machines = new HashMap<>();
+        machines.put("machine2", new ExtendedMachineImpl(asList("ws-agent2", "someAgent2"),
+                                                         servers,
+                                                         singletonMap("memoryLimitBytes", "10000")));
+        env = new EnvironmentImpl();
+        env.setRecipe(new EnvironmentRecipeImpl("type", "contentType", "content", null));
+        env.setMachines(machines);
 
-        final List<EnvironmentImpl> environments = new ArrayList<>();
-        environments.add(env1);
-        environments.add(env2);
+        environments.put("my-environment", env);
+
+        env = new EnvironmentImpl();
+        servers = new HashMap<>();
+        properties = new HashMap<>();
+        servers.put("ref11", new ServerConf2Impl("port11", "proto11", properties));
+        servers.put("ref12", new ServerConf2Impl("port12", "proto12", null));
+        machines = new HashMap<>();
+        machines.put("machine11", new ExtendedMachineImpl(emptyList(),
+                                                          servers,
+                                                          singletonMap("memoryLimitBytes", "10000")));
+        servers.put("ref13", new ServerConf2Impl("port13", "proto13", singletonMap("prop11", "value11")));
+        servers.put("ref14", new ServerConf2Impl("port4", null, null));
+        servers.put("ref15", new ServerConf2Impl(null, null, null));
+        machines.put("machine12", new ExtendedMachineImpl(null,
+                                                          servers,
+                                                          singletonMap("memoryLimitBytes", "10000")));
+        machines.put("machine13", new ExtendedMachineImpl(null,
+                                                          null,
+                                                          singletonMap("memoryLimitBytes", "10000")));
+        env.setRecipe(new EnvironmentRecipeImpl("type", "contentType", "content", null));
+        env.setMachines(machines);
+
+        environments.put("my-environment-2", env);
+
+        env = new EnvironmentImpl();
+        env.setRecipe(new EnvironmentRecipeImpl(null, null, null, null));
+        env.setMachines(null);
+
+        environments.put("my-environment-3", env);
 
         // projects
         final ProjectConfigImpl project1 = new ProjectConfigImpl();
@@ -167,11 +213,11 @@ public class LocalWorkspaceDaoTest {
                             .setId(generate("workspace", 16))
                             .setConfig(new WorkspaceConfigImpl("test-workspace-name",
                                                                "This is test workspace",
-                                                               env1.getName(),
+                                                               null,
                                                                commands,
                                                                projects,
                                                                environments))
-                            .setNamespace("user123")
+                            .setAccount(new AccountImpl("accountId", "user123", "test"))
                             .build();
     }
 }

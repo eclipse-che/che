@@ -23,7 +23,7 @@ import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
 
@@ -42,7 +42,7 @@ public class InitRepositoryPresenter {
     public static final String INIT_COMMAND_NAME = "Git init";
 
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
     private final GitServiceClient        service;
     private final GitLocalizationConstant constant;
     private final NotificationManager     notificationManager;
@@ -52,7 +52,7 @@ public class InitRepositoryPresenter {
     public InitRepositoryPresenter(GitLocalizationConstant constant,
                                    NotificationManager notificationManager,
                                    GitOutputConsoleFactory gitOutputConsoleFactory,
-                                   ConsolesPanelPresenter consolesPanelPresenter,
+                                   ProcessesPanelPresenter consolesPanelPresenter,
                                    GitServiceClient service,
                                    AppContext appContext) {
         this.constant = constant;

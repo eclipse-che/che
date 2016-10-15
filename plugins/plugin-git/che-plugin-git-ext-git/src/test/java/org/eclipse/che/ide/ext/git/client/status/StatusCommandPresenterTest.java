@@ -16,7 +16,7 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.ext.git.client.BaseTest;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -46,7 +46,7 @@ public class StatusCommandPresenterTest extends BaseTest {
     private GitOutputConsoleFactory gitOutputConsoleFactory;
 
     @Mock
-    private ConsolesPanelPresenter consolesPanelPresenter;
+    private ProcessesPanelPresenter processesPanelPresenter;
 
     @Override
     public void disarm() {
@@ -55,7 +55,7 @@ public class StatusCommandPresenterTest extends BaseTest {
         presenter = new StatusCommandPresenter(service,
                                                appContext,
                                                gitOutputConsoleFactory,
-                                               consolesPanelPresenter,
+                                               processesPanelPresenter,
                                                constant,
                                                notificationManager);
 
@@ -74,7 +74,7 @@ public class StatusCommandPresenterTest extends BaseTest {
         stringCaptor.getValue().apply("");
 
         verify(console, times(2)).print(anyString());
-        verify(consolesPanelPresenter).addCommandOutput(anyString(), anyObject());
+        verify(processesPanelPresenter).addCommandOutput(anyString(), anyObject());
     }
 
     @Test

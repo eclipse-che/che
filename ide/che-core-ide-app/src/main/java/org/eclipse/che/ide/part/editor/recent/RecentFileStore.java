@@ -14,31 +14,22 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.CoreLocalizationConstant;
-import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
-import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
-import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.event.FileEvent.FileEventHandler;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.util.Pair;
 
-import javax.validation.constraints.NotNull;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.util.Collections.singletonList;
-import static org.eclipse.che.ide.api.constraints.Anchor.BEFORE;
 import static org.eclipse.che.ide.api.constraints.Constraints.FIRST;
-import static org.eclipse.che.ide.api.constraints.Constraints.LAST;
 import static org.eclipse.che.ide.api.event.FileEvent.FileOperation.OPEN;
-import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
  * Default implementation of Recent File List.
@@ -55,9 +46,8 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
     private final OpenRecentFilesPresenter openRecentFilesPresenter;
     private final ActionManager            actionManager;
     private final RecentFileActionFactory  recentFileActionFactory;
-    private final CoreLocalizationConstant locale;
-    private final DefaultActionGroup       recentGroup;
 
+    private DefaultActionGroup                       recentGroup;
     private LinkedList<File>                         recentStorage = newLinkedList();
     private LinkedList<Pair<File, RecentFileAction>> fileToAction  = newLinkedList();
 
@@ -65,26 +55,18 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
     public RecentFileStore(EventBus eventBus,
                            OpenRecentFilesPresenter openRecentFilesPresenter,
                            ActionManager actionManager,
-                           RecentFileActionFactory recentFileActionFactory,
-                           CoreLocalizationConstant locale) {
+                           RecentFileActionFactory recentFileActionFactory) {
         this.openRecentFilesPresenter = openRecentFilesPresenter;
         this.actionManager = actionManager;
         this.recentFileActionFactory = recentFileActionFactory;
-        this.locale = locale;
-
-        ClearRecentListAction action = new ClearRecentListAction();
-
-        recentGroup = new DefaultActionGroup(RECENT_GROUP_ID, true, actionManager);
-        actionManager.registerAction(IdeActions.GROUP_RECENT_FILES, recentGroup);
-
-        actionManager.registerAction("clearRecentList", action);
-        recentGroup.addSeparator();
-        recentGroup.add(action, LAST);
-
-        DefaultActionGroup editGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_EDIT);
-        editGroup.add(recentGroup, new Constraints(BEFORE, "openRecentFiles"));
 
         eventBus.addHandler(FileEvent.TYPE, this);
+    }
+
+    private void ensureGroupExist() {
+        if (recentGroup == null) {
+            recentGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RECENT_FILES);
+        }
     }
 
     /** {@inheritDoc} */
@@ -107,7 +89,9 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
     /** {@inheritDoc} */
     @Override
     public boolean add(final File item) {
-        if (item == null) {
+        ensureGroupExist();
+
+        if (item == null || recentGroup == null) {
             return false;
         }
 
@@ -133,6 +117,10 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
     /** {@inheritDoc} */
     @Override
     public boolean remove(File item) {
+        if (recentGroup == null) {
+            return false;
+        }
+
         recentStorage.remove(item);
         openRecentFilesPresenter.setRecentFiles(getAll());
 
@@ -166,8 +154,11 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
     /** {@inheritDoc} */
     @Override
     public void clear() {
-        openRecentFilesPresenter.clearRecentFiles();
+        if (recentGroup == null) {
+            return;
+        }
 
+        openRecentFilesPresenter.clearRecentFiles();
         recentStorage.clear();
 
         //de-register all previously registered actions
@@ -208,23 +199,5 @@ public class RecentFileStore implements RecentFileList, FileEventHandler {
         raw = "..." + raw;
 
         return raw;
-    }
-
-    private class ClearRecentListAction extends AbstractPerspectiveAction {
-
-        public ClearRecentListAction() {
-            super(singletonList(PROJECT_PERSPECTIVE_ID), locale.openRecentFileClearTitle(), locale.openRecentFileClearDescription(), null,
-                  null);
-        }
-
-        @Override
-        public void updateInPerspective(@NotNull ActionEvent event) {
-            event.getPresentation().setEnabledAndVisible(!isEmpty());
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            clear();
-        }
     }
 }

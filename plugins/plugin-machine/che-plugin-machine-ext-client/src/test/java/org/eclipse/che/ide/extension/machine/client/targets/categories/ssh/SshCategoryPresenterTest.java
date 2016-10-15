@@ -27,9 +27,8 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
+import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
 import org.eclipse.che.ide.extension.machine.client.targets.TargetsTreeManager;
-import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,10 +71,12 @@ public class SshCategoryPresenterTest {
     private MachineServiceClient        machineService;
     @Mock
     private EventBus                    eventBus;
+    @Mock
+    private EntityFactory               entityFactory;
 
     //additional mocks
     @Mock
-    private SshMachineTarget target;
+    private SshMachineTarget   target;
     @Mock
     private TargetsTreeManager targetsTreeManager;
 
@@ -108,6 +109,7 @@ public class SshCategoryPresenterTest {
                                                               recipeServiceClient,
                                                               dtoFactory,
                                                               dialogFactory,
+                                                              entityFactory,
                                                               notificationManager,
                                                               machineLocale,
                                                               workspaceServiceClient,
@@ -314,5 +316,4 @@ public class SshCategoryPresenterTest {
 
         verify(container).setWidget(eq(sshView));
     }
-
 }

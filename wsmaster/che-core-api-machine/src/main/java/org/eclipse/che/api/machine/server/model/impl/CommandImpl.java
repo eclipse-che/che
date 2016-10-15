@@ -10,23 +10,46 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.model.impl;
 
+import org.eclipse.che.api.core.model.machine.Command;
+
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.MapKeyColumn;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import org.eclipse.che.api.core.model.machine.Command;
 
 /**
  * Data object for {@link Command}.
  *
  * @author Eugene Voevodin
  */
+@Entity(name = "Command")
 public class CommandImpl implements Command {
 
-    private String              name;
-    private String              commandLine;
-    private String              type;
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String commandLine;
+
+    @Column(nullable = false)
+    private String type;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @MapKeyColumn(name = "name")
+    @Column(name = "value", columnDefinition = "TEXT")
     private Map<String, String> attributes;
+
+    public CommandImpl() {}
 
     public CommandImpl(String name, String commandLine, String type) {
         this.name = name;

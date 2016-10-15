@@ -24,7 +24,7 @@ public class DevelopmentMachineTarget  extends BaseTarget {
     private String type;
     private String owner;
     private String sourceType;
-    private String sourceUrl;
+    private String source;
     private String sourceContent;
 
 
@@ -52,12 +52,12 @@ public class DevelopmentMachineTarget  extends BaseTarget {
         return sourceType;
     }
 
-    public void setSourceUrl(String sourceUrl) {
-        this.sourceUrl = sourceUrl;
+    public void setSource(String source) {
+        this.source = source;
     }
 
-    public String getSourceUrl() {
-        return sourceUrl;
+    public String getSource() {
+        return source;
     }
 
     public void setSourceContent(String sourceContent) {
@@ -87,11 +87,11 @@ public class DevelopmentMachineTarget  extends BaseTarget {
                && Objects.equals(getOwner(), other.getOwner())
                && Objects.equals(getSourceType(), other.getSourceType())
                && Objects.equals(getSourceContent(), other.getSourceContent())
-               && Objects.equals(getSourceUrl(), other.getSourceUrl());
+               && Objects.equals(getSource(), other.getSource());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), getCategory(), getRecipe(), getType(), getOwner(), getSourceType(), getSourceUrl(), getSourceContent());
+        return Objects.hash(getName(), getCategory(), getRecipe(), getType(), getOwner(), getSourceType(), getSource(), getSourceContent());
     }
 }

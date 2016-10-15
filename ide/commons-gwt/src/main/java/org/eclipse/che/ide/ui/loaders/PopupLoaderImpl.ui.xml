@@ -1,0 +1,92 @@
+<!--
+
+    Copyright (c) 2012-2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <ui:with field='messages' type='org.eclipse.che.ide.ui.loaders.PopupLoaderMessages'/>
+
+    <ui:style>
+
+        @eval popupLoaderBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.popupLoaderBackgroundColor();
+        @eval popupLoaderBorderColor org.eclipse.che.ide.api.theme.Style.theme.popupLoaderBorderColor();
+        @eval popupLoaderShadow org.eclipse.che.ide.api.theme.Style.theme.popupLoaderShadow();
+        @eval popupLoaderTitleColor org.eclipse.che.ide.api.theme.Style.theme.popupLoaderTitleColor();
+
+        .main {
+            width: 450px;
+            height: 57px;
+            position: fixed;
+            left: 50%;
+            margin-left: -225px;
+            top: 1px;
+            z-index: 99999;
+            background-color: popupLoaderBackgroundColor;
+            border: 1px solid popupLoaderBorderColor;
+            box-sizing: border-box;
+            -moz-box-shadow: popupLoaderShadow;
+            box-shadow: popupLoaderShadow;
+        }
+
+        .title {
+            position: absolute;
+            left: 40px;
+            top: 10px;
+            height: 20px;
+            line-height: 20px;
+            font-size: 12px;
+            color: popupLoaderTitleColor;
+            margin: 0px;
+        }
+
+        .description {
+            position: absolute;
+            left: 40px;
+            top: 28px;
+            height: 16px;
+            line-height: 16px;
+            font-weight: normal;
+            margin: 0px;
+        }
+
+        .customWidget {
+            width: 150px;
+            bottom: 0px;
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            overflow: hidden;
+        }
+
+        .hyperlink {
+            position: absolute;
+            top: 25px;
+            left: 15px;
+        }
+
+        .hyperlink a {
+            font-size: 11px;
+            color: #94b6d4;
+        }
+
+    </ui:style>
+
+    <g:FlowPanel styleName="{style.main}">
+        <g:Label ui:field="titleLabel" addStyleNames="{style.title}" />
+        <g:Label ui:field="descriptionLabel" addStyleNames="{style.description}" />
+        <g:FlowPanel ui:field="customWidget" styleName="{style.customWidget}" visible="false">
+            <g:Hyperlink ui:field="downloadOutputs" styleName="{style.hyperlink}" visible="false" text="{messages.downloadOutputs}" ></g:Hyperlink>
+        </g:FlowPanel>
+    </g:FlowPanel>
+
+</ui:UiBinder>

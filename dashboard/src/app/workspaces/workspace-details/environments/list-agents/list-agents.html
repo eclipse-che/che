@@ -1,0 +1,64 @@
+<!--
+
+    Copyright (c) 2016 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<div class="list-agents" layout="column">
+
+  <div ng-if="listAgentsController.agentsList.length > 0">
+
+    <che-list-header>
+      <div flex="100" layout="row" layout-align="start stretch" class="che-list-item-row">
+        <div layout="row" layout-align="start center">
+        </div>
+        <div flex hide-xs layout-gt-xs="row" layout-align="start center" class="che-list-item-details">
+          <che-list-header-column flex="30" che-column-title='AGENT'></che-list-header-column>
+          <che-list-header-column flex="20" che-column-title='STATE'></che-list-header-column>
+          <che-list-header-column flex="50" che-column-title='DESCRIPTION'></che-list-header-column>
+        </div>
+      </div>
+    </che-list-header>
+
+    <che-list flex>
+      <che-list-item ng-repeat="agent in listAgentsController.agentsList">
+        <div flex="100" layout="row" layout-align="start stretch" class="agent-item-row">
+          <div layout="row" layout-align="start center">
+          </div>
+          <div flex layout-xs="column" layout-gt-xs="row" layout-align-gt-xs="start center" layout-align-xs="start start" class="che-list-item-details">
+            <div flex="30" class="che-agent-item-name">
+              <span>{{agent.name}}</span>
+            </div>
+            <div flex="20">
+              <div>
+                <md-switch ng-model="agent.isEnabled"
+                           ng-disabled="listAgentsController.needToDisable(agent.name)"
+                           ng-change="listAgentsController.updateAgent(agent)"
+                           aria-label="Agent">
+                  <span ng-if="agent.isEnabled === true">ACTIVE</span>
+                  <span ng-if="agent.isEnabled === false">INACTIVE</span>
+                </md-switch>
+              </div>
+            </div>
+            <div flex="50" class="agent-description">
+              <span>No Description Available</span>
+            </div>
+          </div>
+        </div>
+      </che-list-item>
+    </che-list>
+
+  </div>
+
+  <div class="che-list-empty">
+    <span ng-show="listAgentsController.agentsList.length === 0">There are no available agents.</span>
+  </div>
+
+</div>
+

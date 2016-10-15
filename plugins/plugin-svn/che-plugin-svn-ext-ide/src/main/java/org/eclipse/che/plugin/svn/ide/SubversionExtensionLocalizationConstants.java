@@ -74,12 +74,18 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("command.status")
     String commandStatus();
 
+    @Key("command.switch")
+    String commandSwitch();
+
     @Key("command.update")
     String commandUpdate();
 
     /** Action Constants */
     @Key("action.not.implemented")
     String actionNotImplemented();
+
+    @Key("waiting.credentials")
+    String waitingCredentials();
 
     @Key("add.description")
     String addDescription();
@@ -288,6 +294,69 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("switch.title")
     String switchTitle();
 
+    @Key("switch.switchTo.label")
+    String switchToLabel();
+
+    @Key("switch.location.label")
+    String switchLocationLabel();
+
+    @Key("switch.switchTo.tag")
+    String switchToTag();
+
+    @Key("switch.switchTo.branch")
+    String switchToBranch();
+
+    @Key("switch.ignoreAncestry")
+    String switchIgnoreAncestry();
+
+    @Key("switch.force")
+    String switchForce();
+
+    @Key("switch.ignoreExternals")
+    String switchIgnoreExternals();
+
+    @Key("switch.switchTo.trunk")
+    String switchToTrunk();
+
+    @Key("switch.switchTo.otherLocation")
+    String switchToOtherLocation();
+
+    @Key("switch.depth.label")
+    String switchDepthLabel();
+
+    @Key("switch.workingCopyDepth.label")
+    String switchWorkingCopyDepthLabel();
+
+    @Key("switch.conflictResolution.label")
+    String switchConflictResolutionLabel();
+
+    @Key("switch.revision.head")
+    String switchRevisionHead();
+
+    @Key("switch.revision.at.label")
+    String switchRevisionAtLabel();
+
+    @Key("switch.revision.revision")
+    String switchRevisionRevision();
+
+    @Key("switch.selectLocation.title")
+    String switchSelectLocationTitle();
+
+    @Key("switch.request.error")
+    String switchRequestError(String location);
+
+    @Key("list.request.error")
+    String listRequestError(String location);
+
+    @Key("list.branches.request.error")
+    String listBranchesRequestError(String location);
+
+    @Key("list.tags.request.error")
+    String listTagsRequestError(String location);
+
+    @Key("info.request.error")
+    String infoRequestError(String project);
+
     @Key("unlock.description")
     String unlockDescription();
 
@@ -337,6 +406,27 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("subversion.depth.empty.label")
     String subversionDepthEmptyLabel();
 
+    @Key("subversion.workingCopyDepth.empty.label")
+    String subversionWorkingCopyDepthEmptyLabel();
+
+    @Key("subversion.workingCopyDepth.files.label")
+    String subversionWorkingCopyDepthFilesLabel();
+
+    @Key("subversion.workingCopyDepth.immediates.label")
+    String subversionWorkingCopyDepthImmediatesLabel();
+
+    @Key("subversion.workingCopyDepth.infinity.label")
+    String subversionWorkingCopyDepthInfinityLabel();
+
+    @Key("subversion.accept.postpone.label")
+    String subversionAcceptPostponeLabel();
+
+    @Key("subversion.accept.mineFull.label")
+    String subversionAcceptMineFullLabel();
+
+    @Key("subversion.accept.theirsFull.label")
+    String subversionAcceptTheirsFullLabel();
+
     /** View Constants */
     @Key("button.cancel")
     String buttonCancel();
@@ -353,8 +443,14 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("button.update")
     String buttonUpdate();
 
+    @Key("button.switch")
+    String buttonSwitch();
+
     @Key("button.log")
     String buttonLog();
+
+    @Key("button.select")
+    String buttonSelect();
 
     @Key("update.depth.label")
     String updateDepthLabel();
@@ -497,18 +593,6 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("error.unlock.directory.dialog.title")
     String dialogTitleUnlockDirectory();
 
-
-    // save credentials
-
-    @Key("save.credentials.started")
-    String notificationSavingCredentials(String repositoryUrl);
-
-    @Key("save.credentials.finished")
-    String notificationCredentialsSaved(String repositoryUrl);
-
-    @Key("save.credentials.failed")
-    String notificationCredentialsFailed(String repositoryUrl);
-
     /* Export dialog */
 
     @Key("download.title")
@@ -580,6 +664,22 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
 
     @Key("move.item.child.detect")
     String moveItemChildDetected();
+
+    /* Credentials dialog */
+    @Key("credentials.dialog.title")
+    String credentialsDialogTitle();
+
+    @Key("credentials.dialog.username")
+    String credentialsDialogUsername();
+
+    @Key("credentials.dialog.password")
+    String credentialsDialogPassword();
+
+    @Key("credentials.dialog.authenticate.button")
+    String credentialsDialogAuthenticateButton();
+
+    @Key("credentials.dialog.cancel.button")
+    String credentialsDialogCancelButton();
 
     /** Property */
     @Key("property.modify.start")

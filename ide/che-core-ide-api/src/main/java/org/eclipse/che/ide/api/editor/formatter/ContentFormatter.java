@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.editor.formatter;
 
 import org.eclipse.che.ide.api.editor.document.Document;
+import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 
 /**
  * The interface of a document content formatter. The formatter formats ranges within documents.
@@ -24,4 +25,7 @@ public interface ContentFormatter {
      *         the document to be formatted
      */
     void format(Document document);
+
+    void install(TextEditor editor);
+
 }

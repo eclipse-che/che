@@ -559,6 +559,9 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("workspace.recovering.dialog.text")
     String workspaceRecoveringDialogText();
 
+    @Key("workspace.restore.snapshot")
+    String restoreWorkspaceFromSnapshot();
+
     @Key("workspace.subscribe.on.events.failed")
     String workspaceSubscribeOnEventsFailed();
 
@@ -696,6 +699,18 @@ public interface CoreLocalizationConstant extends Messages {
     @Key("open.recent.file.clear.description")
     String openRecentFileClearDescription();
 
+    @Key("editor.pane.menu.close.pane")
+    String editorClosePane();
+
+    @Key("editor.pane.menu.close.pane.description")
+    String editorClosePaneDescription();
+
+    @Key("editor.pane.menu.close.all.in.pane")
+    String editorCloseAllTabsInPane();
+
+    @Key("editor.pane.menu.close.all.in.pane.description")
+    String editorCloseAllTabsInPaneDescription();
+
     @Key("editor.tab.context.menu.split.vertically")
     String editorTabSplitVertically();
 
@@ -830,4 +845,47 @@ public interface CoreLocalizationConstant extends Messages {
 
     @Key("action.convert.folder.to.project.description")
     String actionConvertFolderToProjectDescription();
+
+    @Key("signature.name")
+    String signatureName();
+
+    @Key("signature.description")
+    String signatureDescription();
+
+
+    @Key("macro.editor.current.project.name.description")
+    String macroEditorCurrentProjectNameDescription();
+
+    @Key("macro.editor.current.project.type.description")
+    String macroEditorCurrentProjectTypeDescription();
+
+    @Key("macro.editor.current.file.relpath.description")
+    String macroEditorCurrentFileRelpathDescription();
+
+    @Key("macro.editor.current.file.name.description")
+    String macroEditorCurrentFileNameDescription();
+
+    @Key("macro.editor.current.file.path.description")
+    String macroEditorCurrentFilePathDescription();
+
+    @Key("macro.workspace.name.description")
+    String macroWorkspaceNameDescription();
+
+    @Key("macro.explorer.current.file.name.description")
+    String macroExplorerCurrentFileNameDescription();
+
+    @Key("macro.explorer.current.project.name.description")
+    String macroExplorerCurrentProjectNameDescription();
+
+    @Key("macro.explorer.current.file.relpath.description")
+    String macroExplorerCurrentFileRelpathDescription();
+
+    @Key("macro.explorer.current.project.type.description")
+    String macroExplorerCurrentProjectTypeDescription();
+
+    @Key("macro.explorer.current.file.parent.path.description")
+    String macroExplorerCurrentFileParentPathDescription();
+
+    @Key("macro.explorer.current.file.path.description")
+    String macroExplorerCurrentFilePathDescription();
 }

@@ -1,0 +1,90 @@
+<che-toolbar che-title="{{stackController.stack ? stackController.stack.name : stackController.stackId}}"
+             che-title-icons-controller="stackController"
+             che-breadcrumb-title="All stacks"
+             che-breadcrumb-href="#/stacks"
+             che-subheader-title="{{stackController.stack.type}}">
+</che-toolbar>
+<md-progress-linear md-mode="indeterminate" ng-show="stackController.loading"></md-progress-linear>
+
+<md-content md-scroll-y flex class="stack-content">
+
+  <!-- Name -->
+  <che-label-container che-label-name="Name">
+    <div layout="column" class="stack-details-input">
+      <ng-form flex layout="column" name="stackForm">
+        <che-input che-form="stackForm"
+                   che-name="name"
+                   che-place-holder="Name of the stack"
+                   ng-model="stackController.stackName"
+                   unique-stack-name="stackController.stack.name"
+                   ng-change="stackController.updateStack(stackForm.$valid)"
+                   required
+                   ng-maxlength="128"
+                   ng-pattern="/^[A-Za-z0-9_\s\-\.\+]+$/">
+          <div ng-message="required">A name is required.</div>
+          <div ng-message="pattern">The name should not contain special characters like dollar, etc.
+          </div>
+          <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
+          <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
+          <div ng-message="uniqueStackName">This stack name is already used.</div>
+        </che-input>
+      </ng-form>
+    </div>
+  </che-label-container>
+
+  <!-- Configuration -->
+  <che-label-container che-label-name="Configuration">
+    <div class="stack-editor">
+      <textarea ui-codemirror="stackController.editorOptions"
+                ng-model="stackController.stackContent"
+                aria-label="Stack configuration editor">
+      </textarea>
+      <a target="_blank" ng-href="https://eclipse-che.readme.io/docs/stacks">Docs: Stack Structure</a>
+    </div>
+    <div layout="row" layout-align="start center" class="stack-editor-footer">
+      <che-button-primary che-button-title="Save"
+                          ng-click="stackController.saveStack()"></che-button-primary>
+    </div>
+  </che-label-container>
+
+  <!-- stack's tags -->
+  <che-label-container class="stack-tags-label"
+                       che-label-name="Tags"
+                       che-label-description="Tags define the templates available for workspace">
+    <div layout="column" flex="100" class="stack-tags">
+      <md-chips flex name="stack's tags"
+                ng-model="stackController.stack.tags"
+                md-transform-chip="stackController.handleTagAdding($chip)"
+                md-on-add="stackController.updateEditorContent()"
+                md-on-remove="stackController.updateEditorContent()"
+                secondary-placeholder="Enter stack's tags">
+        <md-chip-template>
+          <div class="stack-library-text">{{$chip | uppercase}}</div>
+          <div class="stack-library-btn">
+            <i class="fa fa-close"></i>
+          </div>
+        </md-chip-template>
+      </md-chips>
+      <div flex>
+        <div class="stack-tags-reset" data-ng-click="stackController.stack.tags.length = 0">Reset</div>
+      </div>
+    </div>
+  </che-label-container>
+
+  <!-- Delete stack -->
+  <che-label-container class="stack-delete-label"
+                       ng-if="!stackController.isCreation"
+                       che-label-name="Delete stack"
+                       che-label-description="This is irreversible. This stack will not be available when creating a workspace.">
+    <che-button-danger che-button-title="Delete"
+                       ng-click="stackController.deleteStack()"></che-button-danger>
+  </che-label-container>
+
+</md-content>
+
+
+<md-content ng-show="stackController.invalidStack">
+  {{stackController.invalidStack}}
+</md-content>
+
+

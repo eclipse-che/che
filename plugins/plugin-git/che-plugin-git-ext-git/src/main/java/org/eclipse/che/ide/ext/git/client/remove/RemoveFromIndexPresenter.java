@@ -12,25 +12,25 @@ package org.eclipse.che.ide.ext.git.client.remove;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.git.client.GitLocalizationConstant;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 
 import javax.validation.constraints.NotNull;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.util.Arrays.isNullOrEmpty;
 
 /**
@@ -48,7 +48,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
     private final AppContext              appContext;
     private final NotificationManager     notificationManager;
     private final GitOutputConsoleFactory gitOutputConsoleFactory;
-    private final ConsolesPanelPresenter  consolesPanelPresenter;
+    private final ProcessesPanelPresenter consolesPanelPresenter;
 
     private Project project;
 
@@ -59,10 +59,10 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
                                     AppContext appContext,
                                     NotificationManager notificationManager,
                                     GitOutputConsoleFactory gitOutputConsoleFactory,
-                                    ConsolesPanelPresenter consolesPanelPresenter) {
+                                    ProcessesPanelPresenter processesPanelPresenter) {
         this.view = view;
         this.gitOutputConsoleFactory = gitOutputConsoleFactory;
-        this.consolesPanelPresenter = consolesPanelPresenter;
+        this.consolesPanelPresenter = processesPanelPresenter;
         this.view.setDelegate(this);
         this.service = service;
         this.constant = constant;

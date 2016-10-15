@@ -12,11 +12,10 @@ package org.eclipse.che.ide.extension.machine.client.command.edit;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
-
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.mvp.View;
 
 import java.util.List;
 import java.util.Map;
@@ -34,34 +33,37 @@ public interface EditCommandsView extends View<EditCommandsView.ActionDelegate> 
     /** Close view. */
     void close();
 
-    /** Select next configuration. */
-    void selectNextItem();
+    /** Select the neighbor command of the same type that the current command. */
+    void selectNeighborCommand(CommandImpl command);
 
-    /** Returns the component used for command configurations display. */
-    AcceptsOneWidget getCommandConfigurationsContainer();
+    /** Returns the container for displaying page for editing command. */
+    AcceptsOneWidget getCommandPageContainer();
 
-    /** Clear command configurations panel. */
-    void clearCommandConfigurationsContainer();
+    /** Clear the container for displaying page for editing command. */
+    void clearCommandPageContainer();
+
+    /** Select the specified command. */
+    void selectCommand(CommandImpl command);
 
     /**
-     * Sets command types and command configurations to display.
+     * Sets commands grouped by types to display in the view.
      *
-     * @param categories
-     *         available command type and list of configuration
+     * @param commandsByTypes
+     *         available commands grouped by types
      */
-    void setData(Map<CommandType, List<CommandConfiguration>> categories);
+    void setData(Map<CommandType, List<CommandImpl>> commandsByTypes);
 
     /** Returns command name. */
-    String getConfigurationName();
+    String getCommandName();
 
     /** Sets command name. */
-    void setConfigurationName(String name);
-
-    /** Sets preview Url. */
-    void setConfigurationPreviewUrl(String previewUrl);
+    void setCommandName(String name);
 
     /** Returns preview Url. */
-    String getConfigurationPreviewUrl();
+    String getCommandPreviewUrl();
+
+    /** Sets preview Url. */
+    void setCommandPreviewUrl(String previewUrl);
 
     /** Sets visible state of the 'Preview URL' panel. */
     void setPreviewUrlState(boolean enabled);
@@ -75,16 +77,13 @@ public interface EditCommandsView extends View<EditCommandsView.ActionDelegate> 
     /** Sets enabled state of the filter input field. */
     void setFilterState(boolean enabled);
 
-    /** Returns the selected command type or type of the selected command configuration. */
+    /** Returns type of the selected command or {@code null} if no command is selected. */
     @Nullable
-    CommandType getSelectedCommandType();
+    String getSelectedCommandType();
 
-    /** Select command with the given ID. */
-    void setSelectedConfiguration(CommandConfiguration config);
-
-    /** Returns the selected command configuration. */
+    /** Returns the command which is currently selected. */
     @Nullable
-    CommandConfiguration getSelectedConfiguration();
+    CommandImpl getSelectedCommand();
 
     /** Sets the focus on the 'Close' button. */
     void setCloseButtonInFocus();
@@ -114,26 +113,23 @@ public interface EditCommandsView extends View<EditCommandsView.ActionDelegate> 
         void onDuplicateClicked();
 
         /** Called when 'Remove' button is clicked. */
-        void onRemoveClicked(CommandConfiguration selectedConfiguration);
+        void onRemoveClicked();
 
-        /** Called when 'Execute' button is clicked. */
-        void onExecuteClicked();
-
-        /** Performs any actions appropriate in response to the user having clicked the Enter key. */
+        /** Called when 'Enter' key pressed. */
         void onEnterClicked();
 
         /**
-         * Called when some command configuration is selected.
+         * Called when some command has been selected.
          *
-         * @param configuration
-         *         selected command configuration
+         * @param command
+         *         selected command
          */
-        void onConfigurationSelected(CommandConfiguration configuration);
+        void onCommandSelected(CommandImpl command);
 
-        /** Called when configuration name has been changed. */
+        /** Called when command name has been changed. */
         void onNameChanged();
 
-        /** Called when configuration preview url has been changed. */
+        /** Called when preview url has been changed. */
         void onPreviewUrlChanged();
     }
 }

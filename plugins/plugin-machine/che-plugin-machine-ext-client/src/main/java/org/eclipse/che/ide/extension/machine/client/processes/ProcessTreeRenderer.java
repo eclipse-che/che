@@ -19,8 +19,9 @@ import elemental.html.SpanElement;
 
 import com.google.inject.Inject;
 
-import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.machine.shared.dto.MachineRuntimeInfoDto;
+import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.api.core.model.machine.MachineRuntimeInfo;
+import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.parts.PartStackUIResources;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
@@ -35,7 +36,7 @@ import org.vectomatic.dom.svg.ui.SVGResource;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter.SSH_PORT;
+import static org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter.SSH_PORT;
 import static org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign.MIDDLE;
 import static org.eclipse.che.ide.ui.menu.PositionController.VerticalAlign.BOTTOM;
 
@@ -83,7 +84,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         SpanElement treeNode;
         switch (node.getType()) {
             case MACHINE_NODE:
-                treeNode = createMachineElement(node, (MachineDto)node.getData());
+                treeNode = createMachineElement(node);
                 break;
             case COMMAND_NODE:
                 treeNode = createCommandElement(node);
@@ -113,9 +114,13 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
         return machineLabel;
     }
 
-    private SpanElement createMachineElement(final ProcessTreeNode node, final MachineDto machine) {
+    private SpanElement createMachineElement(final ProcessTreeNode node) {
+        final MachineEntity machine = (MachineEntity)node.getData();
+        final String machineId = machine.getId();
+        final MachineConfig machineConfig = machine.getConfig();
+        final String machineCategory = machineConfig.isDev() ? locale.devMachineCategory() : machineConfig.getType();
+
         SpanElement root = Elements.createSpanElement();
-        final String machineCategory = machine.getConfig().isDev() ? locale.devMachineCategory() : machine.getConfig().getType();
         root.appendChild(createMachineLabel(machineCategory));
 
         Element statusElement = Elements.createSpanElement(resources.getCss().machineStatus());
@@ -133,18 +138,59 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                        MIDDLE,
                        locale.viewMachineRunningTooltip());
 
-        SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().processButton());
-        newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
-        root.appendChild(newTerminalButton);
+        /***************************************************************************
+         *
+         * New terminal button
+         *
+         ***************************************************************************/
+        if (node.hasTerminalAgent()) {
+            SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
+            newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
+            root.appendChild(newTerminalButton);
 
-        Tooltip.create(newTerminalButton,
-                       BOTTOM,
-                       MIDDLE,
-                       locale.viewNewTerminalTooltip());
+            Tooltip.create(newTerminalButton,
+                           BOTTOM,
+                           MIDDLE,
+                           locale.viewNewTerminalTooltip());
 
-        MachineRuntimeInfoDto runtime = machine.getRuntime();
+            newTerminalButton.addEventListener(Event.CLICK, new EventListener() {
+                @Override
+                public void handleEvent(Event event) {
+                    event.stopPropagation();
+                    event.preventDefault();
 
-        if (runtime != null && runtime.getServers().containsKey(SSH_PORT + "/tcp")) {
+                    if (addTerminalClickHandler != null) {
+                        addTerminalClickHandler.onAddTerminalClick(machineId);
+                    }
+                }
+            }, true);
+
+            /**
+             * This listener cancels mouse events on '+' button and prevents the jitter of the selection in the tree.
+             */
+            EventListener blockMouseListener = new EventListener() {
+                @Override
+                public void handleEvent(Event event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+            };
+
+            /**
+             * Prevent jitter when pressing mouse on '+' button.
+             */
+            newTerminalButton.addEventListener(Event.MOUSEDOWN, blockMouseListener, true);
+            newTerminalButton.addEventListener(Event.MOUSEUP, blockMouseListener, true);
+            newTerminalButton.addEventListener(Event.CLICK, blockMouseListener, true);
+            newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
+        }
+
+        /***************************************************************************
+         *
+         * SSH button
+         *
+         ***************************************************************************/
+        if (node.hasSSHAgent()) {
             SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
             sshButton.setTextContent("SSH");
             root.appendChild(sshButton);
@@ -153,58 +199,25 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                 @Override
                 public void handleEvent(Event event) {
                     if (previewSshClickHandler != null) {
-                        previewSshClickHandler.onPreviewSshClick(machine.getId());
+                        previewSshClickHandler.onPreviewSshClick(machineId);
                     }
                 }
             }, true);
 
             Tooltip.create(sshButton,
-                           BOTTOM,
-                           MIDDLE,
-                           locale.connectViaSSH());
+                    BOTTOM,
+                    MIDDLE,
+                    locale.connectViaSSH());
         }
 
-        newTerminalButton.addEventListener(Event.CLICK, new EventListener() {
-            @Override
-            public void handleEvent(Event event) {
-                event.stopPropagation();
-                event.preventDefault();
-
-                if (addTerminalClickHandler != null) {
-                    addTerminalClickHandler.onAddTerminalClick(machine.getWorkspaceId(), machine.getId());
-                }
-            }
-        }, true);
-
-        /**
-         * This listener cancels mouse events on '+' button and prevents the jitter of the selection in the tree.
-         */
-        EventListener blockMouseListener = new EventListener() {
-            @Override
-            public void handleEvent(Event event) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
-        };
-
-        /**
-         * Prevent jitter when pressing mouse on '+' button.
-         */
-        newTerminalButton.addEventListener(Event.MOUSEDOWN, blockMouseListener, true);
-        newTerminalButton.addEventListener(Event.MOUSEUP, blockMouseListener, true);
-        newTerminalButton.addEventListener(Event.CLICK, blockMouseListener, true);
-        newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
-
-        Element monitorsElement = Elements.createSpanElement();
-        monitorsElement.getStyle().setProperty("float", "right");
-        monitorsElement.getStyle().setProperty("cursor", "default");
+        Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
         root.appendChild(monitorsElement);
 
-        Node monitorNode = (Node)machineMonitors.getMonitorWidget(machine.getId(), this).getElement();
+        Node monitorNode = (Node)machineMonitors.getMonitorWidget(machineId, this).getElement();
         monitorsElement.appendChild(monitorNode);
 
         Element nameElement = Elements.createSpanElement(resources.getCss().nameLabel());
-        nameElement.setTextContent(machine.getConfig().getName());
+        nameElement.setTextContent(machineConfig.getName());
         root.appendChild(nameElement);
 
         return root;
@@ -245,6 +258,8 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
     private SpanElement createTerminalElement(ProcessTreeNode node) {
         SpanElement root = Elements.createSpanElement();
 
+        root.appendChild(createCloseElement(node));
+
         SVGResource icon = node.getTitleIcon();
         if (icon != null) {
             SpanElement iconElement = Elements.createSpanElement(resources.getCss().processIcon());
@@ -255,8 +270,6 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
 
             divElement.appendChild((Node)new SVGImage(icon).getElement());
         }
-
-        root.appendChild(createCloseElement(node));
 
         Element nameElement = Elements.createSpanElement();
         nameElement.setTextContent(node.getName());

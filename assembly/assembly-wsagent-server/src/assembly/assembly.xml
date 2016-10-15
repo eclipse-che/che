@@ -15,6 +15,7 @@
     <id>tomcat-zip</id>
     <formats>
         <format>zip</format>
+        <format>tar.gz</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>

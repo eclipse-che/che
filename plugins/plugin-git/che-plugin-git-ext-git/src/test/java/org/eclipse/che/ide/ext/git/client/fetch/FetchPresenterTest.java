@@ -62,7 +62,7 @@ public class FetchPresenterTest extends BaseTest {
                                        notificationManager,
                                        branchSearcher,
                                        gitOutputConsoleFactory,
-                                       consolesPanelPresenter);
+                                       processesPanelPresenter);
 
         when(service.remoteList(anyObject(), any(Path.class), anyString(), anyBoolean())).thenReturn(remoteListPromise);
         when(remoteListPromise.then(any(Operation.class))).thenReturn(remoteListPromise);

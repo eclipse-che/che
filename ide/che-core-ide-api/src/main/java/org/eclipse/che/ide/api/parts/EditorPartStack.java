@@ -46,6 +46,16 @@ public interface EditorPartStack extends PartStack {
     EditorTab getTabByPart(EditorPartPresenter editorPart);
 
     /**
+     * Get {@link EditorTab} for given path
+     *
+     * @param path
+     *         path to file to find corresponding editor tab
+     * @return tab for given {@code editorPart} or null if this one is not found in {@link EditorPartStack}
+     */
+    @Nullable
+    EditorTab getTabByPath(Path path);
+
+    /**
      * Get editor part which associated with given {@code tabId}
      *
      * @param tabId

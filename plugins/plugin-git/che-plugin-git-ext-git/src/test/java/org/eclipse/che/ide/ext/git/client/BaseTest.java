@@ -12,8 +12,6 @@ package org.eclipse.che.ide.ext.git.client;
 
 import com.google.web.bindery.event.shared.EventBus;
 
-import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.api.git.shared.Branch;
 import org.eclipse.che.api.git.shared.MergeResult;
 import org.eclipse.che.api.git.shared.Remote;
@@ -23,6 +21,9 @@ import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.dialogs.DialogFactory;
+import org.eclipse.che.ide.api.git.GitServiceClient;
+import org.eclipse.che.ide.api.machine.DevMachine;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.Folder;
@@ -31,10 +32,9 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsole;
 import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
-import org.eclipse.che.ide.extension.machine.client.processes.ConsolesPanelPresenter;
+import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -81,7 +81,7 @@ public abstract class BaseTest {
     @Mock
     protected AppContext              appContext;
     @Mock
-    protected DevMachine               devMachine;
+    protected DevMachine              devMachine;
     @Mock
     protected GitServiceClient        service;
     @Mock
@@ -91,7 +91,7 @@ public abstract class BaseTest {
     @Mock
     protected GitOutputConsoleFactory gitOutputConsoleFactory;
     @Mock
-    protected ConsolesPanelPresenter  consolesPanelPresenter;
+    protected ProcessesPanelPresenter processesPanelPresenter;
     @Mock
     protected GitResources            resources;
     @Mock

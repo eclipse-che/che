@@ -14,22 +14,32 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
+import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
+import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
+import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
-import org.eclipse.che.api.machine.server.dao.SnapshotDao;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.LimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
+import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
+import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -42,21 +52,33 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -64,17 +86,29 @@ import static org.testng.Assert.assertTrue;
  */
 @Listeners(MockitoTestNGListener.class)
 public class CheEnvironmentEngineTest {
+    private static final int    DEFAULT_MACHINE_MEM_LIMIT_MB = 256;
+    private static final String API_ENDPOINT                 = "http://eclipse.che:8080/api";
+
     @Mock
     MessageConsumer<MachineLogMessage> messageConsumer;
     @Mock
-    InstanceProvider instanceProvider;
+    InstanceProvider                   instanceProvider;
+    @Mock
+    MachineInstanceProvider            machineProvider;
+    @Mock
+    MachineInstanceProviders           machineInstanceProviders;
+    @Mock
+    EventService                       eventService;
+    @Mock
+    SnapshotDao                        snapshotDao;
+    @Mock
+    RecipeDownloader                   recipeDownloader;
+    @Mock
+    AgentConfigApplier                 agentConfigApplier;
+    @Mock
+    ContainerNameGenerator             containerNameGenerator;
 
-    @Mock
-    SnapshotDao              snapshotDao;
-    @Mock
-    MachineInstanceProviders machineInstanceProviders;
-    @Mock
-    EventService             eventService;
+    EnvironmentParser environmentParser = new EnvironmentParser(new ComposeFileParser(), recipeDownloader);
 
     CheEnvironmentEngine engine;
 
@@ -83,8 +117,15 @@ public class CheEnvironmentEngineTest {
         engine = spy(new CheEnvironmentEngine(snapshotDao,
                                               machineInstanceProviders,
                                               "/tmp",
-                                              256,
-                                              eventService));
+                                              DEFAULT_MACHINE_MEM_LIMIT_MB,
+                                              eventService,
+                                              environmentParser,
+                                              new DefaultServicesStartStrategy(),
+                                              machineProvider,
+                                              agentConfigApplier,
+                                              API_ENDPOINT,
+                                              recipeDownloader,
+                                              containerNameGenerator));
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
@@ -153,25 +194,378 @@ public class CheEnvironmentEngineTest {
     public void shouldBeAbleToStartEnvironment() throws Exception {
         // given
         EnvironmentImpl env = createEnv();
+        String envName = "env-1";
         String workspaceId = "wsId";
         List<Instance> expectedMachines = new ArrayList<>();
-        when(instanceProvider.createInstance(any(Machine.class),
-                                             any(LineConsumer.class)))
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
                 .thenAnswer(invocationOnMock -> {
                     Object[] arguments = invocationOnMock.getArguments();
-                    Machine machine = (Machine)arguments[0];
-                    Instance instance = spy(new NoOpMachineInstance(machine));
+                    String machineName = (String)arguments[3];
+                    boolean isDev = (boolean)arguments[4];
+                    CheServiceImpl service = (CheServiceImpl)arguments[6];
+                    Machine machine = createMachine(workspaceId,
+                                                    envName,
+                                                    service,
+                                                    machineName,
+                                                    isDev);
+                    NoOpMachineInstance instance = spy(new NoOpMachineInstance(machine));
                     expectedMachines.add(instance);
                     return instance;
                 });
 
         // when
-        List<Instance> machines = engine.start(workspaceId, env, false, messageConsumer);
+        List<Instance> machines = engine.start(workspaceId,
+                                               envName,
+                                               env,
+                                               false,
+                                               messageConsumer);
 
         // then
         assertEquals(machines, expectedMachines);
-        verify(instanceProvider, times(env.getMachineConfigs().size()))
-                .createInstance(any(Machine.class), any(LineConsumer.class));
+    }
+
+    @Test
+    public void shouldSetDefaultRamToMachinesWithoutRamOnEnvironmentStart() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String machineName = "machineWithoutRam";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    image: codenvy/ubuntu_jdk8";
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+
+        // when
+        startEnv(env);
+
+        // then
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+        assertEquals((long)actualService.getMemLimit(), DEFAULT_MACHINE_MEM_LIMIT_MB * 1024L * 1024L);
+    }
+
+    @Test
+    public void shouldUseConfiguredInServiceRamInsteadOfSetDefaultOnEnvironmentStart() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String machineName = "machineWithoutRam";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 42943433";
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+
+        // when
+        startEnv(env);
+
+        // then
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+        assertEquals((long)actualService.getMemLimit(), 42943433L);
+    }
+
+    @Test
+    public void shouldSetDockerfileContentInsteadOfUrlIfUrlPointsToCheApiOnEnvironmentStart() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String machineName = "machineWithDockerfileFromApi";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    build:\n      context: " + API_ENDPOINT + "/recipe/12345";
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+        String dockerfileContent = "this is dockerfile content";
+        when(recipeDownloader.getRecipe(anyString())).thenReturn(dockerfileContent);
+
+        // when
+        startEnv(env);
+
+        // then
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+        assertNull(actualService.getBuild().getContext());
+        assertNull(actualService.getBuild().getDockerfilePath());
+        assertEquals(actualService.getBuild().getDockerfileContent(), dockerfileContent);
+    }
+
+    @Test
+    public void shouldNotSetDockerfileContentInsteadOfUrlIfUrlDoesNotPointToCheApiOnEnvironmentStart() throws Exception {
+        // given
+        EnvironmentImpl env = createEnv();
+        String machineName = "machineWithDockerfileNotFromApi";
+        String contextUrl = "http://another-server.com/recipe/12345";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    build:\n      context: " + contextUrl;
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+
+        // when
+        startEnv(env);
+
+        // then
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+        assertNull(actualService.getBuild().getDockerfilePath());
+        assertNull(actualService.getBuild().getDockerfileContent());
+        assertEquals(actualService.getBuild().getContext(), contextUrl);
+    }
+
+    @Test
+    public void shouldApplyAgentsOnEnvironmentStart() throws Exception {
+        EnvironmentImpl env = createEnv();
+        String machineName = "extraMachine";
+        String additionalServiceComposeFilePart = "\n  " + machineName + ":\n    image: codenvy/ubuntu_jdk8";
+        env.getRecipe().setContent(env.getRecipe().getContent() + additionalServiceComposeFilePart);
+
+        // when
+        startEnv(env);
+
+        // then
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             any(CheServiceImpl.class),
+                                             any(LineConsumer.class));
+        for (ExtendedMachineImpl extendedMachine : env.getMachines().values()) {
+            verify(agentConfigApplier).modify(any(CheServiceImpl.class), eq(extendedMachine.getAgents()));
+        }
+        verifyNoMoreInteractions(agentConfigApplier);
+    }
+
+    @Test
+    public void shouldSetDefaultRamToMachineWithoutRamOnMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(machineProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        String machineName = "extraMachine";
+        config.setName(machineName);
+        config.setLimits(null);
+
+        // when
+        engine.startMachine(workspaceId, config, emptyList());
+
+        // then
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+        assertEquals((long)actualService.getMemLimit(), DEFAULT_MACHINE_MEM_LIMIT_MB * 1024L * 1024L);
+    }
+
+    @Test
+    public void shouldUseConfiguredInMachineRamInsteadOfSetDefaultOnMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(machineProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        String machineName = "extraMachine";
+        config.setName(machineName);
+        config.setLimits(new MachineLimitsImpl(4096));
+
+        // when
+        engine.startMachine(workspaceId, config, emptyList());
+
+        // then
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+        assertEquals((long)actualService.getMemLimit(), 4096L * 1024L * 1024L);
+    }
+
+    @Test
+    public void shouldSetDockerfileContentInsteadOfUrlIfUrlPointsToCheApiOnMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(machineProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        String machineName = "extraMachine";
+        config.setName(machineName);
+        config.setSource(new MachineSourceImpl("docker").setLocation(API_ENDPOINT + "/recipe/12345"));
+        String dockerfileContent = "this is dockerfile content";
+        when(recipeDownloader.getRecipe(anyString())).thenReturn("this is dockerfile content");
+
+        // when
+        engine.startMachine(workspaceId, config, emptyList());
+
+        // then
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+        assertNull(actualService.getBuild().getContext());
+        assertNull(actualService.getBuild().getDockerfilePath());
+        assertEquals(actualService.getBuild().getDockerfileContent(), dockerfileContent);
+    }
+
+    @Test
+    public void shouldNotSetDockerfileContentInsteadOfUrlIfUrlDoesNotPointToCheApiOnMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(machineProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        String machineName = "extraMachine";
+        config.setName(machineName);
+        String contextUrl = "http://another-server.com/recipe/12345";
+        config.setSource(new MachineSourceImpl("docker").setLocation(contextUrl));
+
+        // when
+        engine.startMachine(workspaceId, config, emptyList());
+
+        // then
+        ArgumentCaptor<CheServiceImpl> captor = ArgumentCaptor.forClass(CheServiceImpl.class);
+        verify(machineProvider).startService(anyString(),
+                                             anyString(),
+                                             anyString(),
+                                             eq(machineName),
+                                             eq(false),
+                                             anyString(),
+                                             captor.capture(),
+                                             any(LineConsumer.class));
+        CheServiceImpl actualService = captor.getValue();
+        assertNull(actualService.getBuild().getDockerfilePath());
+        assertNull(actualService.getBuild().getDockerfileContent());
+        assertEquals(actualService.getBuild().getContext(), contextUrl);
+    }
+
+    @Test
+    public void shouldApplyAgentsOnDockerMachineStart() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(machineProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
+
+        MachineConfigImpl config = createConfig(false);
+        List<String> agents = asList("agent1", "agent2");
+
+        // when
+        engine.startMachine(workspaceId, config, agents);
+
+        // then
+        verify(agentConfigApplier).modify(any(CheServiceImpl.class), eq(agents));
     }
 
     @Test
@@ -204,9 +598,11 @@ public class CheEnvironmentEngineTest {
         List<Instance> instances = startEnv();
         Instance instance = instances.get(0);
         EnvironmentImpl env = createEnv();
+        String envName = "env-1";
 
         // when
         engine.start(instance.getWorkspaceId(),
+                     envName,
                      env,
                      false,
                      messageConsumer);
@@ -228,7 +624,7 @@ public class CheEnvironmentEngineTest {
     }
 
     @Test(expectedExceptions = EnvironmentNotRunningException.class,
-          expectedExceptionsMessageRegExp = "Environment with ID '.*' is not found")
+          expectedExceptionsMessageRegExp = "Stop of not running environment of workspace with ID '.*' is not allowed.")
     public void shouldThrowExceptionOnEnvStopIfItIsNotRunning() throws Exception {
         engine.stop("wsIdOFNonExistingEnv");
     }
@@ -237,9 +633,9 @@ public class CheEnvironmentEngineTest {
     public void destroyOfMachineOnEnvStopShouldNotPreventStopOfOthers() throws Exception {
         // given
         List<Instance> instances = startEnv();
+        assertTrue(instances.size() > 1, "This test requires at least 2 instances in environment");
         Instance instance = instances.get(0);
         doThrow(new MachineException("test exception")).when(instance).destroy();
-        assertTrue(instances.size() > 1, "This test requires at least 2 instances in environment");
 
         // when
         engine.stop(instance.getWorkspaceId());
@@ -255,23 +651,74 @@ public class CheEnvironmentEngineTest {
     public void shouldBeAbleToStartMachine() throws Exception {
         // given
         List<Instance> instances = startEnv();
+        verify(machineProvider, times(2)).startService(anyString(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anyBoolean(),
+                                                       anyString(),
+                                                       any(CheServiceImpl.class),
+                                                       any(LineConsumer.class));
         String workspaceId = instances.get(0).getWorkspaceId();
 
         when(engine.generateMachineId()).thenReturn("newMachineId");
         Instance newMachine = mock(Instance.class);
         when(newMachine.getId()).thenReturn("newMachineId");
         when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
-        doReturn(newMachine).when(instanceProvider).createInstance(any(Machine.class), any(LineConsumer.class));
+        when(machineProvider.startService(anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
+                .thenReturn(newMachine);
 
         MachineConfigImpl config = createConfig(false);
 
         // when
-        Instance actualInstance = engine.startMachine(workspaceId, config);
+        Instance actualInstance = engine.startMachine(workspaceId, config, emptyList());
+
+        // then
+        assertEquals(actualInstance, newMachine);
+        verify(instanceProvider, never()).createInstance(any(Machine.class), any(LineConsumer.class));
+        verify(machineProvider, times(3)).startService(anyString(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anyString(),
+                                                       anyBoolean(),
+                                                       anyString(),
+                                                       any(CheServiceImpl.class),
+                                                       any(LineConsumer.class));
+    }
+
+    @Test
+    public void shouldBeAbleToStartNonDockerMachine() throws Exception {
+        // given
+        List<Instance> instances = startEnv();
+        String workspaceId = instances.get(0).getWorkspaceId();
+
+        when(engine.generateMachineId()).thenReturn("newMachineId");
+        Instance newMachine = mock(Instance.class);
+        when(newMachine.getId()).thenReturn("newMachineId");
+        when(newMachine.getWorkspaceId()).thenReturn(workspaceId);
+        when(machineInstanceProviders.getProvider("anotherType")).thenReturn(instanceProvider);
+        doReturn(newMachine).when(instanceProvider).createInstance(any(Machine.class), any(LineConsumer.class));
+
+        MachineConfigImpl config = MachineConfigImpl.builder()
+                                                    .fromConfig(createConfig(false))
+                                                    .setType("anotherType")
+                                                    .build();
+
+
+        // when
+        Instance actualInstance = engine.startMachine(workspaceId, config, emptyList());
 
         // then
         assertEquals(actualInstance, newMachine);
         ArgumentCaptor<Machine> argumentCaptor = ArgumentCaptor.forClass(Machine.class);
-        verify(instanceProvider, times(3)).createInstance(argumentCaptor.capture(), any(LineConsumer.class));
+        verify(instanceProvider).createInstance(argumentCaptor.capture(), any(LineConsumer.class));
         assertEquals(argumentCaptor.getValue().getConfig(), config);
     }
 
@@ -281,7 +728,7 @@ public class CheEnvironmentEngineTest {
         MachineConfigImpl config = createConfig(false);
 
         // when
-        engine.startMachine("wsIdOfNotRunningEnv", config);
+        engine.startMachine("wsIdOfNotRunningEnv", config, emptyList());
     }
 
     @Test(expectedExceptions = ConflictException.class,
@@ -295,7 +742,7 @@ public class CheEnvironmentEngineTest {
         config.setName(instance.getConfig().getName());
 
         // when
-        engine.startMachine(instance.getWorkspaceId(), config);
+        engine.startMachine(instance.getWorkspaceId(), config, emptyList());
     }
 
     @Test
@@ -308,7 +755,7 @@ public class CheEnvironmentEngineTest {
         when(engine.generateMachineId()).thenReturn("newMachineId");
 
         // when
-        engine.startMachine(instance.getWorkspaceId(), config);
+        engine.startMachine(instance.getWorkspaceId(), config, emptyList());
 
         // then
         verify(eventService).publish(newDto(MachineStatusEvent.class)
@@ -450,35 +897,117 @@ public class CheEnvironmentEngineTest {
 
     private List<Instance> startEnv() throws Exception {
         EnvironmentImpl env = createEnv();
+        return startEnv(env);
+    }
+
+    private List<Instance> startEnv(EnvironmentImpl env) throws Exception {
+        String envName = "env-1";
         String workspaceId = "wsId";
-        when(instanceProvider.createInstance(any(Machine.class),
-                                             any(LineConsumer.class)))
+        when(machineProvider.startService(anyString(),
+                                          eq(workspaceId),
+                                          eq(envName),
+                                          anyString(),
+                                          anyBoolean(),
+                                          anyString(),
+                                          any(CheServiceImpl.class),
+                                          any(LineConsumer.class)))
                 .thenAnswer(invocationOnMock -> {
                     Object[] arguments = invocationOnMock.getArguments();
-                    Machine machine = (Machine)arguments[0];
+                    String machineName = (String)arguments[3];
+                    boolean isDev = (boolean)arguments[4];
+                    CheServiceImpl service = (CheServiceImpl)arguments[6];
+                    Machine machine = createMachine(workspaceId,
+                                                    envName,
+                                                    service,
+                                                    machineName,
+                                                    isDev);
                     return spy(new NoOpMachineInstance(machine));
                 });
 
         // when
-        return engine.start(workspaceId, env, false, messageConsumer);
+        return engine.start(workspaceId,
+                            envName,
+                            env,
+                            false,
+                            messageConsumer);
     }
 
     private static MachineConfigImpl createConfig(boolean isDev) {
         return MachineConfigImpl.builder()
                                 .setDev(isDev)
                                 .setType("docker")
-                                .setLimits(new LimitsImpl(1024))
+                                .setLimits(new MachineLimitsImpl(1024))
                                 .setSource(new MachineSourceImpl("dockerfile").setLocation("location"))
                                 .setName(UUID.randomUUID().toString())
                                 .build();
     }
 
     private EnvironmentImpl createEnv() {
-        List<MachineConfigImpl> machines = new ArrayList<>();
-        machines.add(createConfig(true));
-        machines.add(createConfig(false));
-        return new EnvironmentImpl("envName",
-                                   null,
-                                   machines);
+        // singletonMap, asList are wrapped into modifiable collections to ease env modifying by tests
+        EnvironmentImpl env = new EnvironmentImpl();
+        Map<String, ExtendedMachineImpl> machines = new HashMap<>();
+        Map<String, ServerConf2Impl> servers = new HashMap<>();
+
+        servers.put("ref1", new ServerConf2Impl("8080/tcp",
+                                                "proto1",
+                                                singletonMap("prop1", "propValue")));
+        servers.put("ref2", new ServerConf2Impl("8080/udp", "proto1", null));
+        servers.put("ref3", new ServerConf2Impl("9090", "proto1", null));
+        machines.put("dev-machine", new ExtendedMachineImpl(asList("org.eclipse.che.ws-agent", "someAgent"),
+                                                            servers,
+                                                            singletonMap("memoryLimitBytes", "10000")));
+        machines.put("machine2", new ExtendedMachineImpl(asList("someAgent2", "someAgent3"),
+                                                         null,
+                                                         singletonMap("memoryLimitBytes", "10000")));
+        String environmentRecipeContent =
+                "services:\n  " +
+                "dev-machine:\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 4294967296\n  " +
+                "machine2:\n    image: codenvy/ubuntu_jdk8\n    mem_limit: 100000";
+        env.setRecipe(new EnvironmentRecipeImpl("compose",
+                                                "application/x-yaml",
+                                                environmentRecipeContent,
+                                                null));
+        env.setMachines(machines);
+
+        return env;
+    }
+
+    private static MachineImpl createMachine(String workspaceId,
+                                             String envName,
+                                             CheServiceImpl service,
+                                             String serviceName,
+                                             boolean isDev) {
+        MachineSourceImpl machineSource;
+        if (service.getBuild() != null && service.getBuild().getContext() != null) {
+            machineSource = new MachineSourceImpl("dockerfile").setLocation(service.getBuild().getContext());
+        } else if (service.getImage() != null) {
+            machineSource = new MachineSourceImpl("image").setLocation(service.getImage());
+        } else if (service.getBuild() != null &&
+                   service.getBuild().getContext() == null &&
+                   service.getBuild().getDockerfileContent() != null) {
+
+            machineSource = new MachineSourceImpl("dockerfile").setContent(service.getBuild().getDockerfileContent());
+        } else {
+            throw new IllegalArgumentException("Build context or image should contain non empty value");
+        }
+        MachineLimitsImpl limits = new MachineLimitsImpl((int)Size.parseSizeToMegabytes(service.getMemLimit() + "b"));
+
+        return MachineImpl.builder()
+                          .setConfig(MachineConfigImpl.builder()
+                                                      .setDev(isDev)
+                                                      .setName(serviceName)
+                                                      .setSource(machineSource)
+                                                      .setLimits(limits)
+                                                      .setType("docker")
+                                                      .build())
+                          .setId(service.getId())
+                          .setOwner("userName")
+                          .setStatus(MachineStatus.RUNNING)
+                          .setWorkspaceId(workspaceId)
+                          .setEnvName(envName)
+                          .setRuntime(new MachineRuntimeInfoImpl(emptyMap(),
+                                                                 emptyMap(),
+                                                                 emptyMap()))
+                          .build();
     }
 }

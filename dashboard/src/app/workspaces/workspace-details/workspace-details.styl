@@ -1,25 +1,29 @@
-
-.che-button-right-bottom
-  position fixed
-  bottom 0
-  right 0
-  margin 20px
-
 .workspace-details-description
   color $disabled-color
 
-.workspace-details-content button
-  margin-left 0px
+.workspace-details-content
+  padding 0 14px
 
-.workspace-details-content label
-  width 120px
-  margin-right 10px
+  button
+    margin 0 30px 0 0
 
-.workspace-details-information button
-  min-width 100px
+  .workspace-status-indicator .fa-circle
+    font-size 19px
 
-.workspace-details-error-message
-  margin-left 10px
+  span.workspace-status-text
+    color lighten($che-ide-background-color, 40%) !important
+    margin-bottom 4px
+    margin-left 10px
 
-.workspace-details-error-message-alignment
-  width 108px
+  .workspace-delete-label label
+    color $che-delete-label-color
+
+  .che-label-container-content
+    .workspace-details-input
+      margin -6px 0
+    .workspace-details-action-buttons
+      margin-top 20px
+
+  .workspace-details-restart-message
+    color $disabled-color
+    margin-top 15px
