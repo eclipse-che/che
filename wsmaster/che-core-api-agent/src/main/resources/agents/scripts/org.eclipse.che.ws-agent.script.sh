@@ -15,7 +15,9 @@ command -v tar >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" tar"; }
 command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 test "$(id -u)" = 0 || SUDO="sudo"
 
-AGENT_BINARIES_URI=file:///mnt/che/ws-agent.tar.gz
+LOCAL_AGENT_BINARIES_URI="/mnt/che/ws-agent.tar.gz"
+DOWNLOAD_AGENT_BINARIES_URI="http://che-host:8080/agent-binaries/ws-agent.tar.gz"
+
 CHE_DIR=$HOME/che
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
 LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
@@ -118,6 +120,15 @@ command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
 
 rm -rf ${CHE_DIR}/ws-agent
 mkdir -p ${CHE_DIR}/ws-agent
+
+if [ -f "${LOCAL_AGENT_BINARIES_URI}" ]
+then
+	AGENT_BINARIES_URI="file://${LOCAL_AGENT_BINARIES_URI}"
+else
+    echo "Workspace Agent will be downloaded from Workspace Master"
+	AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}
+fi
+
 curl -s  ${AGENT_BINARIES_URI} | tar  xzf - -C ${CHE_DIR}/ws-agent
 
 ###############################################
