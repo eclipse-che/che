@@ -208,7 +208,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
     private void checkStateOfWsAgent(WsAgentHealthStateDto agentHealthStateDto) {
         final int statusCode = agentHealthStateDto.getCode();
         final String infoWindowTitle = "Workspace Agent Not Responding";
-        final ConfirmCallback restartCallback = new RestartCallback();
+        final ConfirmCallback restartCallback = new StopCallback();
 
         if (statusCode == 200) {
             dialogFactory.createMessageDialog(infoWindowTitle,
@@ -222,7 +222,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
         }
     }
 
-    private class RestartCallback implements ConfirmCallback {
+    private class StopCallback implements ConfirmCallback {
         @Override
         public void accepted() {
             workspaceServiceClient.stop(devMachine.getWorkspaceId());
