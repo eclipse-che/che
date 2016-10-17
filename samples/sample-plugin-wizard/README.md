@@ -77,7 +77,7 @@ Add:
 ...
 ```
 
-You can insert the dependency anywhere in the list. After you have inserted it, run `mvn sortpom:sort` and maven will order the pom.xml for you.
+You can insert the dependency anywhere in the list. After you have inserted it, run `mvn sortpom:sort` and maven will order the `pom.xml` for you.
 
 
 ### 2- Link to WS-Agent assembly
