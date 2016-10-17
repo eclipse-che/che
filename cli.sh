@@ -825,11 +825,12 @@ execute_che_mount() {
   if is_native; then
     docker_run_with_che_properties --cap-add SYS_ADMIN \
                                    --device /dev/fuse \
+                                   --name che-mount \
                                    -v ${HOME}/.ssh:${HOME}/.ssh \
-                                   -v ${HOME}/.unison:${HOME}/.unison \
                                    -v /etc/group:/etc/group:ro \
                                    -v /etc/passwd:/etc/passwd:ro \
                                    -u $(id -u ${USER}) \
+                                   -v ~/.che/unison:/profile \
                                    -v "${MOUNT_PATH}":/mnthost \
                                    "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" \
                                         "${GLOBAL_GET_DOCKER_HOST_IP}" $WS_PORT
@@ -837,11 +838,15 @@ execute_che_mount() {
   else
     docker_run_with_che_properties --cap-add SYS_ADMIN \
                                    --device /dev/fuse \
-                                   -v "${HOME_PATH}"/.ssh:/root/.ssh \
+                                   --name che-mount \
+                                   -v ~/.che/unison:/profile \
                                    -v "${MOUNT_PATH}":/mnthost \
                                    "${CHE_MOUNT_IMAGE_NAME}":"${CHE_UTILITY_VERSION}" \
                                         "${GLOBAL_GET_DOCKER_HOST_IP}" $WS_PORT
   fi
+
+  # Docker doesn't seem to normally clean up this container
+  docker rm -f che-mount
 }
 
 execute_che_compile() {

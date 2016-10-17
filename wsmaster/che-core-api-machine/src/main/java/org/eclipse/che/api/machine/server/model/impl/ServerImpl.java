@@ -34,7 +34,9 @@ public class ServerImpl implements Server {
         this.protocol = protocol;
         this.address = address;
         this.url = url;
-        this.properties = new ServerPropertiesImpl(properties);
+        if (properties != null) {
+            this.properties = new ServerPropertiesImpl(properties);
+        }
     }
 
     public ServerImpl(Server server) {
