@@ -25,6 +25,7 @@
     <packaging>pom</packaging>
     <name>Che Sample :: Parent</name>
     <modules>
+        <module>sample-plugin-actions</module>
         <module>sample-plugin-embedjs</module>
         <module>sample-plugin-json</module>
         <module>sample-plugin-filetype</module>
