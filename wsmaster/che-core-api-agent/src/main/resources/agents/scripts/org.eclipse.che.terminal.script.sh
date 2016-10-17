@@ -17,7 +17,7 @@ test "$(id -u)" = 0 || SUDO="sudo"
 
 CHE_DIR=$HOME/che
 LOCAL_AGENT_BINARIES_URI='/mnt/che/terminal/websocket-terminal-${PREFIX}.tar.gz'
-DOWNLOAD_AGENT_BINARIES_URI='http://che-host:8080/agent-binaries/${PREFIX}/terminal/websocket-terminal-${PREFIX}.tar.gz'
+DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/${PREFIX}/terminal/websocket-terminal-${PREFIX}.tar.gz'
 TARGET_AGENT_BINARIES_URI='file://${CHE_DIR}/websocket-terminal-${PREFIX}.tar.gz'
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
 LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
@@ -113,6 +113,9 @@ else
     >&2 uname -a
     exit 1
 fi
+
+# Compute URI of workspace master
+WORKSPACE_MASTER_URI=$(echo $CHE_API_ENDPOINT | cut -d / -f 1-3)
 
 ## Evaluate variables now that prefix is defined
 eval "LOCAL_AGENT_BINARIES_URI=${LOCAL_AGENT_BINARIES_URI}"

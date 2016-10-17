@@ -16,7 +16,7 @@ command -v curl >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" curl"; }
 test "$(id -u)" = 0 || SUDO="sudo"
 
 LOCAL_AGENT_BINARIES_URI="/mnt/che/ws-agent.tar.gz"
-DOWNLOAD_AGENT_BINARIES_URI="http://che-host:8080/agent-binaries/ws-agent.tar.gz"
+DOWNLOAD_AGENT_BINARIES_URI='${WORKSPACE_MASTER_URI}/agent-binaries/ws-agent.tar.gz'
 
 CHE_DIR=$HOME/che
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
@@ -120,6 +120,14 @@ command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || {
 
 rm -rf ${CHE_DIR}/ws-agent
 mkdir -p ${CHE_DIR}/ws-agent
+
+
+# Compute URI of workspace master
+WORKSPACE_MASTER_URI=$(echo $CHE_API_ENDPOINT | cut -d / -f 1-3)
+
+## Evaluate variables now that prefix is defined
+eval "DOWNLOAD_AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}"
+
 
 if [ -f "${LOCAL_AGENT_BINARIES_URI}" ]
 then
