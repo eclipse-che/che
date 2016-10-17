@@ -1,6 +1,6 @@
 ## Description
 
-This sample extension illustrate how to embed native HTML/JS in. 
+This sample extension illustrate how to extend Che IDE by using native web components (HTML/JS) not based on GWT.
 
 Read the tutorial at: https://eclipse-che.readme.io/v5.0/docs/embed-htmljs
 
