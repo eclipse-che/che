@@ -784,6 +784,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-actions-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
                 <artifactId>che-sample-plugin-filetype-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>

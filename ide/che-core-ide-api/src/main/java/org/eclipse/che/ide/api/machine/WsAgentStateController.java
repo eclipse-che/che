@@ -25,6 +25,7 @@ import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.callback.AsyncPromiseHelper;
 import org.eclipse.che.api.workspace.shared.dto.WsAgentHealthStateDto;
+import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
@@ -206,19 +207,25 @@ public class WsAgentStateController implements ConnectionOpenedHandler, Connecti
 
     private void checkStateOfWsAgent(WsAgentHealthStateDto agentHealthStateDto) {
         final int statusCode = agentHealthStateDto.getCode();
-
-        String infoWindowTitle = "Workspace Agent";
+        final String infoWindowTitle = "Workspace Agent Not Responding";
+        final ConfirmCallback restartCallback = new StopCallback();
 
         if (statusCode == 200) {
             dialogFactory.createMessageDialog(infoWindowTitle,
-                                              "Your workspace is not responding. To fix the problem, verify you have a good " +
-                                              "network connection and restart the workspace.",
-                                              null).show();
+                                              "Our workspace agent is no longer responding. To fix the problem, verify you have a" +
+                                              " good network connection and restart the workspace.",
+                                              restartCallback).show();
         } else {
             dialogFactory.createMessageDialog(infoWindowTitle,
-                                              "Your workspace has stopped responding. To fix the problem, " +
-                                              "restart the workspace in the dashboard.",
-                                              null).show();
+                                              "Our workspace agent is no longer responding. To fix the problem, restart the workspace.",
+                                              restartCallback).show();
+        }
+    }
+
+    private class StopCallback implements ConfirmCallback {
+        @Override
+        public void accepted() {
+            workspaceServiceClient.stop(devMachine.getWorkspaceId());
         }
     }
 
