@@ -11,32 +11,34 @@
 'use strict';
 
 /**
- * Defines a directive for displaying recipe widget.
- * @author Oleksii Orel
+ * Defines a directive for displaying stacks tab.
+ * @author Oleksii Kurinnyi
  */
-export class WorkspaceRecipe {
+export class WorkspaceStacks {
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/workspace-details/workspace-stacks/workspace-stacks.html';
+  replace: boolean = false;
+
+  controller: string = 'WorkspaceStacksController';
+  controllerAs: string = 'workspaceStacksController';
+
+  bindToController: boolean = true;
+
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor() {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/create-workspace/select-stack/recipe/workspace-recipe.html';
-    this.replace = false;
-
-    this.controller = 'WorkspaceRecipeController';
-    this.controllerAs = 'workspaceRecipeCtrl';
-
-    this.bindToController = true;
-
     // scope values
     this.scope = {
-      recipeUrl:'=cheRecipeUrl',
-      recipeScript:'=cheRecipeScript',
-      recipeFormat:'=cheRecipeFormat'
+      workspaceName: '=',
+      workspaceStackOnChange: '&'
     };
-
   }
 
 }
+

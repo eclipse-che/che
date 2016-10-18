@@ -27,7 +27,7 @@ export class WorkspaceMachineConfigController {
   environmentManager;
   machine;
   machineConfig;
-  machinesList: Array<any>;
+  machinesList: any[];
   machineName: string;
   newDev: boolean;
   newRam: number;

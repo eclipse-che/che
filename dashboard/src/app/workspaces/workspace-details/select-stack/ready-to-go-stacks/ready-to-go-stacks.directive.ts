@@ -12,16 +12,19 @@
 
 /**
  * @ngdoc directive
- * @name projects.create.directive:createProjectStackLibrary
+ * @name projects.create.directive:ReadyToGoStacks
  * @restrict E
  * @element
  *
  * @description
- * `<create-project-stack-library></create-project-stack-library>` for creating new projects from stack library.
+ * `<ready-to-go-stacks></ready-to-go-stacks>` for creating new projects from ready to go stacks.
+ *
+ * @usage
+ *   <ready-to-go-stacks></ready-to-go-stacks>
  *
  * @author Florent Benoit
  */
-export class CreateProjectStackLibrary {
+export class ReadyToGoStacks {
 
   /**
    * Default constructor that is using resource
@@ -29,17 +32,16 @@ export class CreateProjectStackLibrary {
    */
   constructor() {
     this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/create-workspace/select-stack/stack-library/create-project-stack-library.html';
+    this.templateUrl = 'app/workspaces/workspace-details/select-stack/ready-to-go-stacks/ready-to-go-stacks.html';
 
-    this.controller = 'CreateProjectStackLibraryController';
-    this.controllerAs = 'createProjectStackLibraryCtrl';
+    this.controller = 'ReadyToGoStacksController';
+    this.controllerAs = 'readyToGoStacksCtrl';
     this.bindToController = true;
 
     // scope values
     this.scope = {
       tabName: '@cheTabName'
     };
-
   }
 
 }

@@ -16,8 +16,11 @@
                              che-pattern="(^((ftp|http|https)://[\w@.\-\_]+(:\d{1,5})?(/[\w#!:.?+=&%@!\_\-/]+)*){1}$)"
                              che-width="auto"
                              ng-model="workspaceRecipeCtrl.recipeUrl"
+                             minlength="3"
+                             ng-required
                              ng-maxlength="255">
-                    <div ng-message="maxlength">The name has to be less than 255 characters long.</div>
+                    <div ng-message="required">URL is required.</div>
+                    <div ng-message="maxlength">URL has to be less than 255 characters long.</div>
                     <div ng-message="pattern">URL is not valid.</div>
                   </che-input>
                 </div>
@@ -40,7 +43,15 @@
           <div layout="row" layout-wrap>
             <div flex ng-if="workspaceRecipeCtrl.selectSourceOption === 'edit-your-stack'" class="recipe-editor">
               <ui-codemirror ui-codemirror="workspaceRecipeCtrl.editorOptions"
+                             ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1000, 'blur': 0 } }"
                              ng-model="workspaceRecipeCtrl.recipeScript"></ui-codemirror>
+              <che-input che-form="workspaceInformationForm"
+                         che-name="recipe"
+                         type="hidden"
+                         ng-model="workspaceRecipeCtrl.recipeScript"
+                         ng-required>
+                <div ng-message="required">The recipe is required.</div>
+              </che-input>
               <div class="recipe-docs-link">
                 <a href="https://eclipse-che.readme.io/docs/stacks#custom-stacks-for-che" target="_blank">Custom stack documentation</a>
               </div>
