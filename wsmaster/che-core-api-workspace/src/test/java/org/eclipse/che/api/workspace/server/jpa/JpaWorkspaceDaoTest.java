@@ -65,7 +65,7 @@ public class JpaWorkspaceDaoTest {
         final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
         final WorkspaceImpl workspace = createWorkspace("id", account, "name");
 
-        // Persist the workspace
+        // Persist the account
         manager.getTransaction().begin();
         manager.persist(account);
         manager.getTransaction().commit();

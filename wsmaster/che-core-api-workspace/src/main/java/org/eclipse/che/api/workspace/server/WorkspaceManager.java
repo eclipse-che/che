@@ -32,7 +32,6 @@ import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
-import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
@@ -326,8 +325,8 @@ public class WorkspaceManager {
         if (runtimes.hasRuntime(workspaceId)) {
             throw new ConflictException("The workspace '" + workspaceId + "' is currently running and cannot be removed.");
         }
+
         workspaceDao.remove(workspaceId);
-        eventService.publish(new WorkspaceRemovedEvent(workspaceId));
         LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUserNameOr("undefined"));
     }
 
@@ -648,7 +647,12 @@ public class WorkspaceManager {
     void performAsyncStop(WorkspaceImpl workspace) throws ConflictException {
         checkWorkspaceIsRunning(workspace, "stop");
         final String autoSnapshotAttr = workspace.getAttributes().get(AUTO_CREATE_SNAPSHOT);
-        final boolean createSnapshot = autoSnapshotAttr == null ? defaultAutoSnapshot : parseBoolean(autoSnapshotAttr);
+        boolean createSnapshot;
+        if (workspace.isTemporary()) {
+            createSnapshot = false;
+        } else {
+            createSnapshot = autoSnapshotAttr == null ? defaultAutoSnapshot : parseBoolean(autoSnapshotAttr);
+        }
         executor.execute(ThreadLocalPropagateContext.wrap(() -> {
             final String stoppedBy = sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY));
             LOG.info("Workspace '{}:{}' with id '{}' is being stopped by user '{}'",
