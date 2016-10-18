@@ -27,42 +27,41 @@ export class ListAgentsController {
 
     this.cheAgent.fetchAgents().then(() => {
       this.buildAgentsList();
-    }, (error) => {
-      if (error.status === 304) {
-        this.buildAgentsList();
-      }
     });
   }
 
   buildAgentsList() {
     this.agentsList = [];
-    this.availableAgents = this.cheAgent.getAgents();
-    this.availableAgents.forEach(agent => {
-      let isEnabled = this.isEnabled(agent, this.agents);
-      this.agentsList.push({ "name": agent, "isEnabled": isEnabled });
+    this.allAgents = this.cheAgent.getAgents();
+
+    this.allAgents.forEach(agent => {
+        let agentItem = angular.copy(agent);
+        let isEnabled = this.isEnabled(agent.id, this.agents);
+        agentItem.isEnabled = isEnabled;
+        this.agentsList.push(agentItem);
     });
   }
 
   updateAgent(agent) {
     if (agent.isEnabled) {
-      this.agents.push(agent.name);
+      this.agents.push(agent.id);
     } else {
-      this.agents.splice(this.agents.indexOf(agent.name), 1);
+      this.agents.splice(this.agents.indexOf(agent.id), 1);
     }
-    return this.agentsOnChange().then(() => { this.buildAgentsList() });
+    this.agentsOnChange();
   }
 
   /**
    * Switching of the "ws-agent" must happen only via "Dev" slider.
    * "ws-agent" should be listed, but always disabled regardless of the state
-   * @param agentName {string}
+   * @param agentId {string}
    */
-  needToDisable(agentName) {
-    return (agentName === "org.eclipse.che.ws-agent");
+  needToDisable(agentId) {
+    return (agentId === "org.eclipse.che.ws-agent");
   }
 
-  isEnabled(agentName, agents) {
-    return (-1 !== agents.indexOf(agentName));
+  isEnabled(agentId, agents) {
+    return (-1 !== agents.indexOf(agentId));
   }
 
 }

@@ -10,15 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.impl;
 
+import static org.testng.AssertJUnit.assertFalse;
+
+import java.util.Collection;
+
+import org.eclipse.che.api.agent.shared.model.Agent;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-
-import java.util.List;
-
-import static org.testng.AssertJUnit.assertFalse;
 
 /**
  * @author Anatoliy Bazko
@@ -31,7 +32,7 @@ public class LocalAgentRegistryImplTest {
 
     @Test
     public void testInitializeAgents() throws Exception {
-        List<String> agents = agentRegistry.getAgents();
+        Collection<Agent> agents = agentRegistry.getAgents();
         assertFalse(agents.isEmpty());
     }
 }
