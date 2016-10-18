@@ -17,6 +17,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import java.util.List;
+
 import org.eclipse.che.api.languageserver.shared.lsapi.CompletionItemDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.RangeDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
@@ -31,6 +33,7 @@ import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
+import org.eclipse.che.plugin.languageserver.ide.filters.Match;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
 /**
@@ -38,24 +41,27 @@ import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClie
  */
 public class CompletionItemBasedCompletionProposal implements CompletionProposal {
 
+    private final CompletionItemDTO         completionItem;
     private final TextDocumentServiceClient documentServiceClient;
     private final TextDocumentIdentifierDTO documentId;
     private final LanguageServerResources   resources;
     private final Icon                      icon;
     private final ServerCapabilities        serverCapabilities;
-    private       CompletionItemDTO         completionItem;
+    private final List<Match>               highlights;
 
     CompletionItemBasedCompletionProposal(CompletionItemDTO completionItem,
                                           TextDocumentServiceClient documentServiceClient,
                                           TextDocumentIdentifierDTO documentId,
                                           LanguageServerResources resources, Icon icon,
-                                          ServerCapabilities serverCapabilities) {
+                                          ServerCapabilities serverCapabilities,
+                                          List<Match> highlights) {
         this.completionItem = completionItem;
         this.documentServiceClient = documentServiceClient;
         this.documentId = documentId;
         this.resources = resources;
         this.icon = icon;
         this.serverCapabilities = serverCapabilities;
+        this.highlights = highlights;
     }
 
     @Override
@@ -72,14 +78,48 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
     @Override
     public String getDisplayString() {
-        if (completionItem.getDetail() != null) {
-            SafeHtmlBuilder builder = new SafeHtmlBuilder();
-            builder.appendEscaped(completionItem.getLabel());
-            builder.appendHtmlConstant(" <span class=\"" + resources.css().codeassistantDetail() + "\">");
-            builder.appendEscaped(completionItem.getDetail());
-            builder.appendHtmlConstant("</span>");
+        SafeHtmlBuilder builder = new SafeHtmlBuilder();
+        
+        String label = completionItem.getLabel();
+        int pos = 0;
+        for (Match highlight : highlights) {
+            if (highlight.getStart() == highlight.getEnd()) {
+                continue;
+            }
+            
+            if (pos < highlight.getStart()) {
+                appendPlain(builder, label.substring(pos, highlight.getStart()));
+            }
+            
+            appendHighlighted(builder, label.substring(highlight.getStart(), highlight.getEnd()));
+            pos = highlight.getEnd();
         }
-        return completionItem.getLabel();
+        
+        if (pos < label.length()) {
+            appendPlain(builder, label.substring(pos));
+        }
+        
+        if (completionItem.getDetail() != null) {
+            appendDetail(builder, completionItem.getDetail());
+        }
+        
+        return builder.toSafeHtml().asString();
+    }
+    
+    private void appendPlain(SafeHtmlBuilder builder, String text) {
+        builder.appendEscaped(text);
+    }
+    
+    private void appendHighlighted(SafeHtmlBuilder builder, String text) {
+        builder.appendHtmlConstant("<span class=\"" + resources.css().codeassistantHighlight() + "\">");
+        builder.appendEscaped(text);
+        builder.appendHtmlConstant("</span>");
+    }
+    
+    private void appendDetail(SafeHtmlBuilder builder, String text) {
+        builder.appendHtmlConstant(" <span class=\"" + resources.css().codeassistantDetail() + "\">");
+        builder.appendEscaped(text);
+        builder.appendHtmlConstant("</span>");
     }
 
     @Override

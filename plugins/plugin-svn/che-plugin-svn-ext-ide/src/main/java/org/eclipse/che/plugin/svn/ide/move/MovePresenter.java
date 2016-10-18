@@ -16,12 +16,15 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.Credentials;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.Arrays;
@@ -46,23 +49,25 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUC
 @Singleton
 public class MovePresenter extends SubversionActionPresenter implements MoveView.ActionDelegate {
 
-    private MoveView                                 view;
-    private SubversionExtensionLocalizationConstants locale;
-    private NotificationManager                      notificationManager;
-    private SubversionClientService                  service;
-    private Project                                  project;
-    private Resource                                 source;
+    private final MoveView                                 view;
+    private final SubversionExtensionLocalizationConstants locale;
+    private final NotificationManager                      notificationManager;
+    private final SubversionClientService                  service;
+
+    private Project  project;
+    private Resource source;
 
     @Inject
     public MovePresenter(AppContext appContext,
                          SubversionOutputConsoleFactory consoleFactory,
+                         SubversionCredentialsDialog subversionCredentialsDialog,
                          ProcessesPanelPresenter processesPanelPresenter,
                          MoveView view,
                          NotificationManager notificationManager,
                          SubversionClientService service,
                          SubversionExtensionLocalizationConstants locale,
                          StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, locale, notificationManager, subversionCredentialsDialog);
         this.notificationManager = notificationManager;
         this.service = service;
 
@@ -98,14 +103,21 @@ public class MovePresenter extends SubversionActionPresenter implements MoveView
         checkState(project != null);
 
         final Path source = getSource();
-        final Path target = getTarget();
         final String comment = view.isURLSelected() ? view.getComment() : null;
 
         final StatusNotification notification =
                 new StatusNotification(locale.moveNotificationStarted(source.toString()), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
-        service.move(project.getLocation(), source, target, comment).then(new Operation<CLIOutputResponse>() {
+        performOperationWithCredentialsRequestIfNeeded(new RemoteSubversionOperation<CLIOutputResponse>() {
+            @Override
+            public Promise<CLIOutputResponse> perform(Credentials credentials) {
+                notification.setStatus(PROGRESS);
+                notification.setTitle(locale.moveNotificationStarted(source.toString()));
+
+                return service.move(project.getLocation(), source, getTarget(), comment, credentials);
+            }
+        }, notification).then(new Operation<CLIOutputResponse>() {
             @Override
             public void apply(CLIOutputResponse response) throws OperationException {
                 notification.setTitle(locale.moveNotificationSuccessful());

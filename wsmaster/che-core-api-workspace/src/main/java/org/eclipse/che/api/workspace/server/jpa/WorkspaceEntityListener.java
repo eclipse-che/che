@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.jpa;
 
+import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -31,6 +32,10 @@ public class WorkspaceEntityListener {
 
     @PreRemove
     private void preRemove(WorkspaceImpl workspace) {
+        final BeforeWorkspaceRemovedEvent event = new BeforeWorkspaceRemovedEvent(workspace);
         eventService.publish(new BeforeWorkspaceRemovedEvent(workspace));
+        if (event.getContext().isFailed()) {
+            throw new CascadeRemovalException(event.getContext().getCause());
+        }
     }
 }

@@ -17,6 +17,7 @@ import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -40,7 +41,7 @@ public class EnvironmentImpl implements Environment {
     @Embedded
     private EnvironmentRecipeImpl recipe;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn
     private Map<String, ExtendedMachineImpl> machines;
 

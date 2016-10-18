@@ -18,9 +18,11 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.event.FileEvent;
+import org.eclipse.che.ide.api.parts.EditorTab;
 
 /**
  * Performs closing selected editor.
+ * Note: the pane which contains this editor will be closed when the pane doesn't contains editors anymore.
  *
  * @author Vlad Zhukovskiy
  */
@@ -37,6 +39,10 @@ public class CloseAction extends EditorAbstractAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
-        eventBus.fireEvent(FileEvent.createCloseFileEvent(getEditorTab(e)));
+        EditorTab editorTab = getEditorTab(e);
+        if (editorTab == null) {
+            return;
+        }
+        eventBus.fireEvent(FileEvent.createCloseFileEvent(editorTab));
     }
 }

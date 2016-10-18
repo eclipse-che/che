@@ -18,9 +18,10 @@ import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 
 /**
- * Performs closing all opened editors for current editor part stack.
+ * Performs closing pane and all opened editors for current pane.
  *
  * @author Vlad Zhukovskiy
  * @author Roman Nikitenko
@@ -38,8 +39,8 @@ public class CloseAllAction extends EditorAbstractAction {
     /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent event) {
-        EditorPartPresenter currentEditor = getEditorTab(event).getRelativeEditorPart();
-        for (EditorPartPresenter editorPart : editorAgent.getOpenedEditorsBasedOn(currentEditor)) {
+        EditorPartStack currentPartStack = getEditorPane(event);
+        for (EditorPartPresenter editorPart : editorAgent.getOpenedEditorsFor(currentPartStack)) {
             editorAgent.closeEditor(editorPart);
         }
     }

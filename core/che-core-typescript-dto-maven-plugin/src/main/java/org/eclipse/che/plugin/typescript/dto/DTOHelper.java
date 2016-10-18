@@ -129,7 +129,7 @@ public class DTOHelper {
         } else if (String.class.equals(type) || (type instanceof Class && ((Class)type).isEnum())) {
             // Maybe find a better enum type for typescript
             return "string";
-        } else if (Integer.class.equals(type) || Integer.TYPE.equals(type) || Long.class.equals(type) || Long.TYPE.equals(type)) {
+        } else if (Integer.class.equals(type) || Integer.TYPE.equals(type) || Long.class.equals(type) || Long.TYPE.equals(type) || Double.class.equals(type) || Double.TYPE.equals(type)) {
             return "number";
         } else if (Boolean.class.equals(type)) {
             return "boolean";

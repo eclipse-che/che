@@ -25,8 +25,6 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.plugin.svn.server.SubversionApi;
 import org.eclipse.che.plugin.svn.server.SubversionException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsException;
-import org.eclipse.che.plugin.svn.server.credentials.CredentialsProvider;
 import org.eclipse.che.plugin.svn.server.repository.RepositoryUrlProvider;
 import org.eclipse.che.plugin.svn.server.upstream.CommandLineResult;
 import org.eclipse.che.plugin.svn.server.upstream.UpstreamUtils;
@@ -61,44 +59,43 @@ public class TestUtils {
 
     private static DtoFactory dtoFactory = DtoFactory.getInstance();
 
-    private static SubversionApi subversionApi = new SubversionApi(new CredentialsProvider() {
+    private static SubversionApi subversionApi = new SubversionApi(new RepositoryUrlProvider() {
         @Override
-        public Credentials getCredentials(final String repositoryUrl) {
-            return null;
-        }
-
-        @Override
-        public void storeCredential(final String repositoryUrl, final Credentials credentials) throws CredentialsException {
-        }
-    }, new RepositoryUrlProvider() {
-        @Override
-        public String getRepositoryUrl(final String projectPath) throws IOException {
+        public String getRepositoryUrl(final String projectPath){
             return "";
         }
     }, null);
 
     public static final String[] GREEK_TREE = new String[] {
             "/",
-            "/iota",
-            "/A/",
-            "/A/mu",
-            "/A/B/",
-            "/A/B/lambda",
-            "/A/B/E/",
-            "/A/B/E/alpha",
-            "/A/B/E/beta",
-            "/A/B/F/",
-            "/A/C/",
-            "/A/D/",
-            "/A/D/gamma",
-            "/A/D/H/",
-            "/A/D/H/chi",
-            "/A/D/H/psi",
-            "/A/D/H/omega",
-            "/A/D/G/",
-            "/A/D/G/pi",
-            "/A/D/G/rho",
-            "/A/D/G/tau"
+            "/branches/",
+            "/branches/2.0/",
+            "/branches/2.0/A/",
+            "/branches/2.0/A/mu",
+            "/tags/",
+            "/tags/1.0/A/",
+            "/tags/1.0/A/gu",
+            "/trunk/",
+            "/trunk/A/",
+            "/trunk/A/mu",
+            "/trunk/A/B/",
+            "/trunk/A/B/lambda",
+            "/trunk/A/B/E/",
+            "/trunk/A/B/E/alpha",
+            "/trunk/A/B/E/beta",
+            "/trunk/A/B/F/",
+            "/trunk/A/C/",
+            "/trunk/A/D/",
+            "/trunk/A/D/gamma",
+            "/trunk/A/D/H/",
+            "/trunk/A/D/H/chi",
+            "/trunk/A/D/H/psi",
+            "/trunk/A/D/H/omega",
+            "/trunk/A/D/G/",
+            "/trunk/A/D/G/pi",
+            "/trunk/A/D/G/rho",
+            "/trunk/A/D/G/tau",
+            "/iota"
     };
 
     private static final Logger LOG = LoggerFactory.getLogger(TestUtils.class);

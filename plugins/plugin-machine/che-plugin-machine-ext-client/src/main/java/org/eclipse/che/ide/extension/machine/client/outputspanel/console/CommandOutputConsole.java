@@ -12,7 +12,7 @@ package org.eclipse.che.ide.extension.machine.client.outputspanel.console;
 
 import org.eclipse.che.api.machine.shared.dto.MachineProcessDto;
 import org.eclipse.che.ide.api.outputconsole.OutputConsole;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
+import org.eclipse.che.ide.api.command.CommandImpl;
 
 /**
  * Describes requirements for the console for command output.
@@ -21,12 +21,12 @@ import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration
  */
 public interface CommandOutputConsole extends OutputConsole {
 
-    /** Return command configuration which output this console shows. */
-    CommandConfiguration getCommand();
+    /** Return command which output this console shows. */
+    CommandImpl getCommand();
 
     /** Start listening to the output on the given WebSocket channel. */
     void listenToOutput(String wsChannel);
 
     /** Attaches to the process launched by the command. */
-    void attachToProcess(final MachineProcessDto process);
+    void attachToProcess(MachineProcessDto process);
 }

@@ -12,9 +12,11 @@ package org.eclipse.che.ide.extension.machine.client.actions;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 
+import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
+import org.eclipse.che.ide.extension.machine.client.processes.NewTerminalAction;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +38,8 @@ public class NewTerminalActionTest {
     private MachineLocalizationConstant locale;
     @Mock
     private MachineResources            resources;
+    @Mock
+    private EventBus eventBus;
 
 
     @Mock(answer = RETURNS_DEEP_STUBS)

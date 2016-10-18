@@ -5,8 +5,13 @@ Che Dashboard
 ==============
 
 #Requirements
+- Node.js `v4.x.x` (`v5.x.x` / `v6.x.x` are currently not supported)
+- npm
+- Bower
+- gulp
 
-This  version is using bower and gulp as tools.
+Installation instructions for Node.js and npm can be found on the following [link](https://docs.npmjs.com/getting-started/installing-node). Bower and gulp are CLI utilities which are installed via npm:
+
 ```sh
 $ npm install --global bower gulp
 ```

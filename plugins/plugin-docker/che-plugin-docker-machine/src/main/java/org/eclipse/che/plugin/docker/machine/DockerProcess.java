@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 
 /**
@@ -47,6 +48,7 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
     private final String              container;
     private final String              pidFilePath;
     private final String              commandLine;
+    private final String              shellInvoker;
 
     private volatile boolean started;
 
@@ -61,6 +63,7 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
         this.docker = docker;
         this.container = container;
         this.commandLine = command.getCommandLine();
+        this.shellInvoker = firstNonNull(command.getAttributes().get("shell"), "/bin/sh");
         this.pidFilePath = pidFilePath;
         this.started = false;
     }
@@ -95,7 +98,7 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
         final String trap = format("trap '[ -z \"$(jobs -p)\" ] || kill $(jobs -p); [ -e %1$s ] && rm %1$s' EXIT", pidFilePath);
         // 'echo' saves shell pid in file, then run command
         final String shellCommand = trap + "; echo $$>" + pidFilePath + "; " + commandLine;
-        final String[] command = {"/bin/bash", "-c", shellCommand};
+        final String[] command = {shellInvoker, "-c", shellCommand};
         Exec exec;
         try {
             exec = docker.createExec(CreateExecParams.create(container, command).withDetach(output == null));
@@ -121,7 +124,7 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
         // Read pid from file and run 'kill -0 [pid]' command.
         final String isAliveCmd = format("[ -r %1$s ] && kill -0 $(cat %1$s) || echo 'Unable read PID file'", pidFilePath);
         final ListLineConsumer output = new ListLineConsumer();
-        final String[] command = {"/bin/bash", "-c", isAliveCmd};
+        final String[] command = {"/bin/sh", "-c", isAliveCmd};
         Exec exec;
         try {
             exec = docker.createExec(CreateExecParams.create(container, command).withDetach(false));
@@ -146,7 +149,7 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
         if (started) {
             // Read pid from file and run 'kill [pid]' command.
             final String killCmd = format("[ -r %1$s ] && kill $(cat %1$s)", pidFilePath);
-            final String[] command = {"/bin/bash", "-c", killCmd};
+            final String[] command = {"/bin/sh", "-c", killCmd};
             Exec exec;
             try {
                 exec = docker.createExec(CreateExecParams.create(container, command).withDetach(true));
@@ -169,7 +172,7 @@ public class DockerProcess extends AbstractMachineProcess implements InstancePro
             // check if process is alive
             final Exec checkProcessExec = docker.createExec(
                     CreateExecParams.create(container,
-                                            new String[] {"/bin/bash",
+                                            new String[] {"/bin/sh",
                                                           "-c",
                                                           format("if kill -0 $(cat %1$s 2>/dev/null) 2>/dev/null; then cat %1$s; fi",
                                                                  pidFilePath)})

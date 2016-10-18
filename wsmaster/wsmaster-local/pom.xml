@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.0.0-M5-SNAPSHOT</version>
+        <version>5.0.0-M6-SNAPSHOT</version>
     </parent>
     <artifactId>wsmaster-local</artifactId>
     <name>Che Core :: API :: Impl Local</name>
@@ -122,10 +122,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-annotations</artifactId>
         </dependency>
         <dependency>
@@ -155,6 +151,11 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-workspace-shared</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>

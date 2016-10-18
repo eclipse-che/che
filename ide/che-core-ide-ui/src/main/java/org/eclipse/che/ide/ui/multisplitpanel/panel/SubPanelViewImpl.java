@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -53,7 +54,8 @@ import static com.google.gwt.user.client.ui.DockLayoutPanel.Direction.CENTER;
  */
 public class SubPanelViewImpl extends Composite implements SubPanelView,
                                                            Menu.ActionDelegate,
-                                                           Tab.ActionDelegate {
+                                                           Tab.ActionDelegate,
+                                                           RequiresResize {
 
     private final TabItemFactory                    tabItemFactory;
     private final Menu                              menu;
@@ -133,6 +135,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         splitLayoutPanel.remove(mainPanel);
         splitLayoutPanel.addSouth(subPanelView, height);
         splitLayoutPanel.add(mainPanel);
+
+        onResize();
     }
 
     @Override
@@ -144,6 +148,8 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         splitLayoutPanel.remove(mainPanel);
         splitLayoutPanel.addEast(subPanelView, width);
         splitLayoutPanel.add(mainPanel);
+
+        onResize();
     }
 
     @Override
@@ -300,7 +306,7 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
     public void onMenuItemClosing(MenuItem menuItem) {
         Object data = menuItem.getData();
         if (data instanceof Tab) {
-            closeTab((Tab)data);
+            closeTab((Tab) data);
         }
     }
 
@@ -326,6 +332,16 @@ public class SubPanelViewImpl extends Composite implements SubPanelView,
         closeTab(tab);
     }
 
+    @Override
+    public void onResize() {
+        for (WidgetToShow widgetToShow : widgets2Tabs.keySet()) {
+            if (widgetToShow.getWidget() instanceof RequiresResize) {
+                ((RequiresResize)widgetToShow.getWidget()).onResize();
+            }
+        }
+    }
+
     interface SubPanelViewImplUiBinder extends UiBinder<Widget, SubPanelViewImpl> {
     }
+
 }

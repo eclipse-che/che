@@ -16,12 +16,16 @@
     <parent>
         <artifactId>che-sample-plugin-json-parent</artifactId>
         <groupId>org.eclipse.che.sample</groupId>
-        <version>5.0.0-M5-SNAPSHOT</version>
+        <version>5.0.0-M6-SNAPSHOT</version>
     </parent>
     <artifactId>che-sample-plugin-json-ide</artifactId>
     <packaging>jar</packaging>
     <name>Che Sample :: Plugin JSON :: IDE</name>
     <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.gwt.inject</groupId>
             <artifactId>gin</artifactId>
@@ -31,24 +35,12 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.inject.extensions</groupId>
-            <artifactId>guice-assistedinject</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -90,6 +82,7 @@
             </resource>
         </resources>
         <plugins>
+            <!-- compiler inlines constants, so it is impossible to find reference on dependency -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -97,14 +90,13 @@
                     <execution>
                         <id>analyze</id>
                         <configuration>
-                            <skip>true</skip>
+                            <ignoredDependencies>
+                                <ignoreDependenvy>org.eclipse.che.core:che-core-ide-app</ignoreDependenvy>
+                                <ignoreDependenvy>org.eclipse.che.sample:che-sample-plugin-json-shared</ignoreDependenvy>
+                            </ignoredDependencies>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

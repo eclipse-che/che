@@ -19,6 +19,7 @@ import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStatusUpdateDto;
 import org.eclipse.che.api.vfs.impl.file.event.EventTreeNode;
 import org.eclipse.che.api.vfs.impl.file.event.HiEvent;
 import org.eclipse.che.api.vfs.impl.file.event.HiEventDetector;
+import org.eclipse.che.commons.schedule.executor.ThreadPullLauncher;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -28,7 +29,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toSet;
+import static java.lang.Math.min;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -41,17 +44,34 @@ public class ProjectTreeChangesDetector implements HiEventDetector<ProjectTreeCh
     private static final Logger LOG = getLogger(ProjectTreeChangesDetector.class);
 
     private final JsonRpcRequestTransmitter transmitter;
+    private final ThreadPullLauncher        launcher;
+
+    private final Set<EventTreeNode> trees = new HashSet<>();
 
     private State state;
 
     @Inject
-    public ProjectTreeChangesDetector(JsonRpcRequestTransmitter transmitter) {
+    public ProjectTreeChangesDetector(JsonRpcRequestTransmitter transmitter, ThreadPullLauncher launcher) {
         this.transmitter = transmitter;
+        this.launcher = launcher;
+    }
+
+    public static String findLongestPrefix(String s1, String s2) {
+        if (s1 == null) {
+            return s2;
+        }
+
+        for (int i = min(s1.length(), s2.length()); ; i--) {
+            if (s2.startsWith(s1.substring(0, i))) {
+                return s1.substring(0, i);
+            }
+        }
     }
 
     @PostConstruct
     public void postConstruct() {
         this.state = State.RESUMED;
+        launcher.scheduleWithFixedDelay(this::transmit, 20_000L, 1_500L, MILLISECONDS);
     }
 
     public void suspend() {
@@ -73,33 +93,30 @@ public class ProjectTreeChangesDetector implements HiEventDetector<ProjectTreeCh
 
     @Override
     public Optional<HiEvent<ProjectTreeChangesDetector>> detect(EventTreeNode eventTreeNode) {
-        if (!eventTreeNode.isRoot() || eventTreeNode.getChildren().isEmpty()) {
-            return Optional.empty();
-        }
-
-        if (state == State.RESUMED) {
-            final Set<EventTreeNode> directories = new HashSet<>();
-
-            for (EventTreeNode candidateDir : eventTreeNode.stream()
-                                                           .filter(EventTreeNode::modificationOccurred)
-                                                           .filter(EventTreeNode::isDir)
-                                                           .collect(toSet())) {
-                directories.removeIf(dir -> dir.getPath().contains(candidateDir.getPath()));
-
-                if (directories.stream().noneMatch(dir -> candidateDir.getPath().contains(dir.getPath()))) {
-                    directories.add(candidateDir);
-                }
-            }
-
-            for (EventTreeNode node : directories) {
-                final String path = node.getPath();
-                final FileWatcherEventType lastEventType = node.getLastEventType();
-
-                transmit(path, lastEventType);
-            }
+        if (eventTreeNode.isRoot() && !eventTreeNode.getChildren().isEmpty()) {
+            trees.add(eventTreeNode);
         }
 
         return Optional.empty();
+    }
+
+    private void transmit() {
+        if (state == State.SUSPENDED) {
+            return;
+        }
+
+        final Optional<String> commonSubstring = trees.stream()
+                                                      .flatMap(EventTreeNode::stream)
+                                                      .filter(EventTreeNode::modificationOccurred)
+                                                      .map(EventTreeNode::getPath)
+                                                      .reduce(ProjectTreeChangesDetector::findLongestPrefix);
+        if (commonSubstring.isPresent()) {
+            final String s = commonSubstring.get();
+            final String path = s.substring(0, s.lastIndexOf('/'));
+            transmit(path, FileWatcherEventType.MODIFIED);
+        }
+
+        trees.clear();
     }
 
     private void transmit(String path, FileWatcherEventType type) {

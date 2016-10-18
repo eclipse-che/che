@@ -455,8 +455,8 @@ public class WorkspaceDaoTest {
         recipe2.setContentType("text/x-dockerfile");
         recipe2.setContent("content");
         final EnvironmentImpl env2 = new EnvironmentImpl();
-        env2.setMachines(new HashMap<>(ImmutableMap.of("machine1", exMachine1,
-                                                       "machine3", exMachine3)));
+        env2.setMachines(new HashMap<>(ImmutableMap.of("machine1", new ExtendedMachineImpl(exMachine1),
+                                                       "machine3", new ExtendedMachineImpl(exMachine3))));
         env2.setRecipe(recipe2);
 
         final Map<String, EnvironmentImpl> environments = ImmutableMap.of("env1", env1, "env2", env2);
@@ -469,6 +469,9 @@ public class WorkspaceDaoTest {
         wCfg.setCommands(commands);
         wCfg.setProjects(projects);
         wCfg.setEnvironments(new HashMap<>(environments));
+
+        wCfg.getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+
         return wCfg;
     }
 
@@ -478,9 +481,8 @@ public class WorkspaceDaoTest {
         final WorkspaceImpl workspace = new WorkspaceImpl();
         workspace.setId(id);
         workspace.setAccount(account);
-        final WorkspaceConfigImpl cfg = new WorkspaceConfigImpl();
-        cfg.setName(name);
-        workspace.setConfig(cfg);
+        wCfg.setName(name);
+        workspace.setConfig(wCfg);
         workspace.setAttributes(new HashMap<>(ImmutableMap.of("attr1", "value1",
                                                               "attr2", "value2",
                                                               "attr3", "value3")));

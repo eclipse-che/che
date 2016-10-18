@@ -44,10 +44,6 @@ public interface MachineResources extends ClientBundle {
     @Source("images/recipe.svg")
     SVGResource recipe();
 
-    /** Returns the icon for 'Arbitrary' command type. */
-    @Source("command/arbitrary/arbitrary-command-type.svg")
-    SVGResource customCommandTypeSubElementIcon();
-
     @Source("images/process/output-icon.svg")
     SVGResource output();
 

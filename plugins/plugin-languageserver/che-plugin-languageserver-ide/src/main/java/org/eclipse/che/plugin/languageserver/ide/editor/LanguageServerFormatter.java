@@ -41,6 +41,7 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -156,6 +157,9 @@ public class LanguageServerFormatter implements ContentFormatter {
             if (undoRedo != null) {
                 undoRedo.beginCompoundChange();
             }
+            
+            // #2437: apply the text edits from last to first to avoid messing up the document
+            Collections.reverse(edits);
             for (TextEditDTO change : edits) {
                 RangeDTO range = change.getRange();
                 document.replace(range.getStart().getLine(), range.getStart().getCharacter(),

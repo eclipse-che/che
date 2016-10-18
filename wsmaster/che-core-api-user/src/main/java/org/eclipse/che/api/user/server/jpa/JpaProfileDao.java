@@ -17,13 +17,11 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -37,8 +35,6 @@ import static java.util.Objects.requireNonNull;
 
 @Singleton
 public class JpaProfileDao implements ProfileDao {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaProfileDao.class);
 
     @Inject
     private Provider<EntityManager> managerProvider;
@@ -119,7 +115,8 @@ public class JpaProfileDao implements ProfileDao {
     }
 
     @Singleton
-    public static class RemoveProfileBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveProfileBeforeUserRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private EventService  eventService;
         @Inject
@@ -127,21 +124,17 @@ public class JpaProfileDao implements ProfileDao {
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                profileDao.remove(event.getUser().getId());
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove profile before user '%s' is removed", event.getUser().getId()), x);
-            }
+        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+            profileDao.remove(event.getUser().getId());
         }
     }
 }
