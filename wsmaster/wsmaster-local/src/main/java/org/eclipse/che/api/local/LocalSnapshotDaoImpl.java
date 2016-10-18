@@ -27,6 +27,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +118,12 @@ public class LocalSnapshotDaoImpl implements SnapshotDao {
             throw new NotFoundException(format("Snapshot with id '%s' doesn't exist", snapshotId));
         }
         snapshots.remove(snapshotId);
+    }
+
+    @Override
+    public List<SnapshotImpl> replaceSnapshots(String workspaceId, String envName, Collection<? extends SnapshotImpl> newSnapshots)
+            throws SnapshotException {
+        throw new RuntimeException("Not implemented");
     }
 
     @PostConstruct

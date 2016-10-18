@@ -204,13 +204,14 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
 
     @Override
     public String toString() {
-        return "UsersWorkspaceImpl{" +
+        return "WorkspaceConfigImpl{" +
+               "id=" + id +
                ", name='" + name + '\'' +
+               ", description='" + description + '\'' +
                ", defaultEnv='" + defaultEnv + '\'' +
                ", commands=" + commands +
                ", projects=" + projects +
                ", environments=" + environments +
-               ", description='" + description + '\'' +
                '}';
     }
 
