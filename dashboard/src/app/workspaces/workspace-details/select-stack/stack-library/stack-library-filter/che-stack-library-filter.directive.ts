@@ -29,7 +29,7 @@ export class CheStackLibraryFilter {
    */
   constructor () {
     this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/create-workspace/select-stack/stack-library/stack-library-filter/che-stack-library-filter.html';
+    this.templateUrl = 'app/workspaces/workspace-details/select-stack/stack-library/stack-library-filter/che-stack-library-filter.html';
 
     this.controller = 'CheStackLibraryFilterController';
     this.controllerAs = 'cheStackLibraryFilterCtrl';

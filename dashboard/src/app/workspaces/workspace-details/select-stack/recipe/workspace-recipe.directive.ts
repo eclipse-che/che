@@ -11,10 +11,10 @@
 'use strict';
 
 /**
- * Defines a directive for displaying select stack widget.
+ * Defines a directive for displaying recipe widget.
  * @author Oleksii Orel
  */
-export class WorkspaceSelectStack {
+export class WorkspaceRecipe {
 
   /**
    * Default constructor that is using resource
@@ -22,21 +22,19 @@ export class WorkspaceSelectStack {
    */
   constructor() {
     this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/create-workspace/select-stack/workspace-select-stack.html';
-    this.replace = true;
+    this.templateUrl = 'app/workspaces/workspace-details/select-stack/recipe/workspace-recipe.html';
+    this.replace = false;
+
+    this.controller = 'WorkspaceRecipeController';
+    this.controllerAs = 'workspaceRecipeCtrl';
+
     this.bindToController = true;
-    this.controller = 'WorkspaceSelectStackController';
-    this.controllerAs = 'workspaceSelectStackCtrl';
 
     // scope values
     this.scope = {
-      tabName: '=cheTabName',
-      onTabChange: '&cheOnTabChange',
-      stack: '=cheStack',
-      onStackChange: '&cheStackChange',
-      recipeScript: '=cheRecipeScript',
-      recipeUrl: '=cheRecipeUrl',
-      recipeFormat: '=cheRecipeFormat'
+      recipeUrl:'=cheRecipeUrl',
+      recipeScript:'=cheRecipeScript',
+      recipeFormat:'=cheRecipeFormat'
     };
 
   }

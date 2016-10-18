@@ -24,7 +24,8 @@
         <span class="che-tab-label-title">Custom stack</span>
       </md-tab-label>
       <md-tab-body>
-        <che-workspace-recipe che-recipe-script="workspaceSelectStackCtrl.recipeScript"
+        <che-workspace-recipe ng-if="workspaceSelectStackCtrl.tabName==='custom-stack'"
+                              che-recipe-script="workspaceSelectStackCtrl.recipeScript"
                               che-recipe-url="workspaceSelectStackCtrl.recipeUrl"
                               che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe>
       </md-tab-body>

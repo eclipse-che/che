@@ -23,7 +23,7 @@ export class CheStackLibrarySelecter {
    */
   constructor () {
     this.restrict='E';
-    this.templateUrl = 'app/workspaces/create-workspace/select-stack/stack-library/stack-library-selecter/che-stack-library-selecter.html';
+    this.templateUrl = 'app/workspaces/workspace-details/select-stack/stack-library/stack-library-selecter/che-stack-library-selecter.html';
 
     // scope values
     this.scope = {

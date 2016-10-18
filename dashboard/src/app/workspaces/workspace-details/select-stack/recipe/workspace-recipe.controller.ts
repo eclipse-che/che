@@ -17,17 +17,31 @@
  * @author Oleksii Orel
  */
 export class WorkspaceRecipeController {
+  $timeout: ng.ITimeoutService;
+
+  editingTimeoutPromise: ng.IPromise<any>;
+
+  recipeUrl: string;
+  recipeFormat: string;
+  recipeScript: string;
+
+  // default selection
+  selectSourceOption: string = 'upload-custom-stack';
+
+  editorOptions: {
+    lineWrapping: boolean,
+    lineNumbers: boolean,
+    matchBrackets: boolean,
+    mode: string,
+    onLoad: Function
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout) {
+  constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;
-    this.recipeUrl = null;
-
-    //set default selection
-    this.selectSourceOption = 'upload-custom-stack';
 
     this.setDefaultData();
 
@@ -36,59 +50,50 @@ export class WorkspaceRecipeController {
       lineNumbers: true,
       matchBrackets: true,
       mode: this.recipeFormat,
-      onLoad: (editor) => {
+      onLoad: (editor: any) => {
         this.setEditor(editor);
       }
     };
   }
 
-  setDefaultData() {
+  setDefaultData(): void {
     this.recipeUrl = null;
     this.recipeScript = '';
     this.recipeFormat = 'compose';
   }
 
-  setEditor(editor) {
-    this.editor = editor;
+  setEditor(editor: any): void {
     editor.on('paste', () => {
-      this.detectFormat(editor, true);
+      this.detectFormat(editor);
     });
     editor.on('change', () => {
       this.trackChangesInProgress(editor);
     });
   }
 
-  trackChangesInProgress(editor) {
+  trackChangesInProgress(editor: any): void {
     if (this.editingTimeoutPromise) {
       this.$timeout.cancel(this.editingTimeoutPromise);
     }
 
     this.editingTimeoutPromise = this.$timeout(() => {
-      this.detectFormat(editor, false);
+      this.detectFormat(editor);
     }, 1000);
   }
 
-  detectFormat(editor, doFormating) {
+  detectFormat(editor: any): void {
     let content = editor.getValue();
 
-    //compose format detection:
+    // compose format detection:
     if (content.match(/^services:\n/m)) {
       this.recipeFormat = 'compose';
       this.editorOptions.mode = 'text/x-yaml';
     }
 
-    //docker file format detection
-    if (content.match(/^FROM /m)) {
+    // docker file format detection
+    if (content.match(/^FROM\s+\w+/m)) {
       this.recipeFormat = 'dockerfile';
       this.editorOptions.mode = 'text/x-dockerfile';
     }
-  }
-
-  formatLines(editor) {
-    this.$timeout(() => {
-      for(var i = 0; i <= editor.lineCount(); i++) {
-        editor.indentLine(i);
-      }
-    }, 100);
   }
 }
