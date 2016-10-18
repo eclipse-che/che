@@ -125,8 +125,8 @@ public class PoliciesImpl implements Policies {
         result = 31 * result + Objects.hashCode(referer);
         result = 31 * result + Objects.hashCode(match);
         result = 31 * result + Objects.hashCode(create);
-        result = 31 * result + Long.hashCode(until);
-        result = 31 * result + Long.hashCode(since);
+        result = 31 * result + Objects.hashCode(until);
+        result = 31 * result + Objects.hashCode(since);
         return result;
     }
 
