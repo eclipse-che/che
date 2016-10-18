@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
+import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 
@@ -45,6 +46,8 @@ import static java.util.Objects.requireNonNull;
 @Singleton
 public class JpaWorkspaceDao implements WorkspaceDao {
 
+    @Inject
+    private EventService            eventService;
     @Inject
     private Provider<EntityManager> manager;
 
@@ -162,6 +165,7 @@ public class JpaWorkspaceDao implements WorkspaceDao {
         if (workspace != null) {
             manager.get().remove(workspace);
         }
+        eventService.publish(new WorkspaceRemovedEvent(workspace));
     }
 
     @Transactional

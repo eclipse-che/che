@@ -28,6 +28,7 @@ public class DockerMachineModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(org.eclipse.che.plugin.docker.machine.cleaner.DockerContainerCleaner.class);
+        bind(org.eclipse.che.plugin.docker.machine.cleaner.RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.class);
 
         Multibinder<String> devMachineEnvVars = Multibinder.newSetBinder(binder(),
                                                                          String.class,
