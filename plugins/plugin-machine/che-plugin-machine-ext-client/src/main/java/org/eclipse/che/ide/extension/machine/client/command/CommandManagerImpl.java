@@ -38,6 +38,7 @@ import org.eclipse.che.ide.extension.machine.client.outputspanel.console.Command
 import org.eclipse.che.ide.extension.machine.client.outputspanel.console.CommandOutputConsole;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.util.UUID;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -233,6 +234,21 @@ public class CommandManagerImpl implements CommandManager {
             public void apply(String arg) throws OperationException {
                 final CommandImpl toExecute = new CommandImpl(command);
                 toExecute.setCommandLine(arg);
+
+                // if command line has not specified the shell attribute, use bash to be backward compliant for user commands
+                Map<String, String> attributes = toExecute.getAttributes();
+                if (attributes == null) {
+                    attributes = new HashMap<>(1);
+                    attributes.put("shell", "/bin/bash");
+                    toExecute.setAttributes(attributes);
+                } else if (!attributes.containsKey("shell")){
+                    attributes = new HashMap<>(attributes.size() + 1);
+                    attributes.put("shell", "/bin/bash");
+                    attributes.putAll(toExecute.getAttributes());
+                    toExecute.setAttributes(attributes);
+                }
+
+                Log.info(CommandManagerImpl.class, "Using shell " + toExecute.getAttributes().get("shell") + " for invoking command '" + command.getName() + "'");
 
                 Promise<MachineProcessDto> processPromise = machineServiceClient.executeCommand(machine.getWorkspaceId(),
                                                                                                 machine.getId(),
