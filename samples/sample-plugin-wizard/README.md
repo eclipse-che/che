@@ -22,11 +22,11 @@ https://github.com/eclipse/che/blob/master/samples/sample-plugin-wizard/che-samp
 - Create the UI for the wizard (view and presenter), and have it registered into the wizard registry. 
 https://github.com/eclipse/che/tree/master/samples/sample-plugin-wizard/che-sample-plugin-wizard-ide/src/main/java/org/eclipse/che/plugin/sample/wizard/ide/wizard
 
-SamplePageView.java - interface of wizard page
-SamplePageViewImpl.java - implementation of the wizard page 
-SamplePageViewImpl.ui.xml - UI Declaration of wizard page
-SamplePagePresenter.java - logic of wizard page
-SampleWizardRegistrar - class that register new wizard
+  - SamplePageView.java - interface of wizard page
+  - SamplePageViewImpl.java - implementation of the wizard page 
+  - SamplePageViewImpl.ui.xml - UI Declaration of wizard page
+  - SamplePagePresenter.java - logic of wizard page
+  - SampleWizardRegistrar - class that register new wizard
  
 - Use GIN injection to register the new wizard
 https://github.com/eclipse/che/blob/master/samples/sample-plugin-wizard/che-sample-plugin-wizard-ide/src/main/java/org/eclipse/che/plugin/sample/wizard/ide/inject/SampleWizardGinModule.java
@@ -43,10 +43,10 @@ https://github.com/eclipse/che/blob/master/samples/sample-plugin-wizard/che-samp
 - Create the UI for the wizard (view and presenter), and have it registered into the wizard registry:
 https://github.com/eclipse/che/tree/master/samples/sample-plugin-wizard/che-sample-plugin-wizard-ide/src/main/java/org/eclipse/che/plugin/sample/wizard/ide/file
 
-NewXfilePresenter.java - logic of wizard page
-NewXfileView.java - interface of wizard page
-NewXfileViewImpl.java - implementation of the wizard page
-NewXFileViewImpl.ui.xml - UI Declaration of the wizard page
+  - NewXfilePresenter.java - logic of wizard page
+  - NewXfileView.java - interface of wizard page
+  - NewXfileViewImpl.java - implementation of the wizard page
+  - NewXFileViewImpl.ui.xml - UI Declaration of the wizard page
 
 ### Create a new Action
 
