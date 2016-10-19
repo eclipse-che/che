@@ -772,7 +772,7 @@ public class EnvironmentParserTest {
     }
 
     private static EnvironmentImpl createCompose1MachineEnvConfig() {
-        HashMap<String, ExtendedMachineImpl> machines = new HashMap<>();
+        Map<String, ExtendedMachineImpl> machines = new HashMap<>();
         machines.put(DEFAULT_MACHINE_NAME, new ExtendedMachineImpl(emptyList(),
                                                          emptyMap(),
                                                          emptyMap()));
@@ -798,7 +798,7 @@ public class EnvironmentParserTest {
                                                                 List<String> expectedExpose,
                                                                 Map<String, String> expectedLabels) {
         CheServiceBuildContextImpl build =
-                dockerfile == null ? null : new CheServiceBuildContextImpl(null, null, dockerfile);
+                dockerfile == null ? null : new CheServiceBuildContextImpl(null, null, dockerfile, null);
         CheServicesEnvironmentImpl environment = new CheServicesEnvironmentImpl();
         environment.getServices()
                    .put(DEFAULT_MACHINE_NAME, new CheServiceImpl().withImage(image)
@@ -853,7 +853,8 @@ public class EnvironmentParserTest {
         BuildContextImpl buildContext = null;
         if (service.getBuild() != null) {
             buildContext = new BuildContextImpl().withContext(service.getBuild().getContext())
-                                                 .withDockerfile(service.getBuild().getDockerfilePath());
+                                                 .withDockerfile(service.getBuild().getDockerfilePath())
+                                                 .withArgs(service.getBuild().getArgs());
         }
 
         return new ComposeServiceImpl().withBuild(buildContext)
@@ -889,7 +890,8 @@ public class EnvironmentParserTest {
         CheServiceBuildContextImpl buildContext = null;
         if (service.getBuild() != null) {
             buildContext = new CheServiceBuildContextImpl().withContext(service.getBuild().getContext())
-                                                           .withDockerfilePath(service.getBuild().getDockerfile());
+                                                           .withDockerfilePath(service.getBuild().getDockerfile())
+                                                           .withArgs(service.getBuild().getArgs());
         }
 
         return new CheServiceImpl().withBuild(buildContext)
@@ -911,7 +913,11 @@ public class EnvironmentParserTest {
 
     private static CheServiceImpl createCheService(boolean isImageBased) {
         return new CheServiceImpl()
-                .withBuild(isImageBased ? null : new CheServiceBuildContextImpl("some url", "some path", null))
+                .withBuild(isImageBased ? null : new CheServiceBuildContextImpl("some url",
+                                                                                "some path",
+                                                                                null,
+                                                                                new HashMap<String, String>()
+                                                                                {{put("argkey","argvalue");}}))
                 .withCommand(asList("some", "command"))
                 .withContainerName("con name")
                 .withDependsOn(asList("depends1", "depends2"))

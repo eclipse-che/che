@@ -8,27 +8,25 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.workspace.server.event;
+package org.eclipse.che.api.workspace.server;
 
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.notification.EventOrigin;
+
+import java.io.IOException;
 
 /**
- * Informs that workspace was removed.
+ * This component removes workspace files with user's projects after delete workspace operation.
  *
- * @author Sergii Leschenko
  * @author Alexander Andrienko
  */
-@EventOrigin("workspace")
-public class WorkspaceRemovedEvent {
+public interface WorkspaceFilesCleaner {
 
-    private final Workspace workspace;
-
-    public WorkspaceRemovedEvent(Workspace workspace) {
-        this.workspace = workspace;
-    }
-
-    public Workspace getWorkspace() {
-        return workspace;
-    }
+    /**
+     * Removes workspace files with all projects. Note: all projects data for {@code workspace} will be lost.
+     *
+     * @param workspace
+     *         workspace to clean up files
+     */
+    void clear(Workspace workspace) throws IOException, ServerException;
 }

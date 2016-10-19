@@ -485,16 +485,6 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Creates snapshot of workspace
-   */
-  createSnapshotWorkspace(): void {
-    this.cheWorkspace.createSnapshot(this.workspaceId).then(() => {}, (error: any) => {
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Creating snapshot failed.');
-      this.$log.error(error);
-    });
-  }
-
-  /**
    * Register forms
    *
    * @param tab {number} tab number
