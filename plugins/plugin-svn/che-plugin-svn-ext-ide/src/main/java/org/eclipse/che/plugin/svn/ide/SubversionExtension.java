@@ -34,6 +34,7 @@ import org.eclipse.che.plugin.svn.ide.action.RemoveAction;
 import org.eclipse.che.plugin.svn.ide.action.ResolveAction;
 import org.eclipse.che.plugin.svn.ide.action.RevertAction;
 import org.eclipse.che.plugin.svn.ide.action.StatusAction;
+import org.eclipse.che.plugin.svn.ide.action.SwitchAction;
 import org.eclipse.che.plugin.svn.ide.action.UnlockAction;
 import org.eclipse.che.plugin.svn.ide.action.UpdateAction;
 import org.eclipse.che.plugin.svn.ide.action.UpdateToRevisionAction;
@@ -75,6 +76,7 @@ public class SubversionExtension {
                                final StatusAction statusAction,
                                final UnlockAction unlockAction,
                                final UpdateAction updateAction,
+                               final SwitchAction switchAction,
                                final UpdateToRevisionAction updateToRevisionAction,
                                final SubversionExtensionLocalizationConstants constants,
                                final SubversionExtensionResources resources) {
@@ -133,10 +135,11 @@ public class SubversionExtension {
         remoteCommandGroup.add(diffAction);
 
         // Commands that manage pull and push of changes
+        actionManager.registerAction("SvnSwitch", switchAction);
+        fileCommandGroup.add(switchAction);
         actionManager.registerAction("SvnUpdate", updateAction);
         fileCommandGroup.add(updateAction);
-        actionManager.registerAction("SvnUpdateToRevision",
-                                     updateToRevisionAction);
+        actionManager.registerAction("SvnUpdateToRevision", updateToRevisionAction);
         fileCommandGroup.add(updateToRevisionAction);
         actionManager.registerAction("SvnCommit", commitAction);
         fileCommandGroup.add(commitAction);
@@ -180,6 +183,7 @@ public class SubversionExtension {
         contextGroup.add(logAction);
         contextGroup.add(diffAction);
         contextGroup.addSeparator();
+        contextGroup.add(switchAction);
         contextGroup.add(updateAction);
         contextGroup.add(commitAction);
         contextGroup.add(resolveAction);

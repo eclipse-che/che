@@ -342,28 +342,31 @@ public class CheEnvironmentValidatorTest {
         serviceEntry = getAnyService(env);
         service = serviceEntry.getValue();
         service.setImage(null);
-        service.setBuild(new CheServiceBuildContextImpl(null, "dockerfile", null));
+        service.setBuild(new CheServiceBuildContextImpl(null, "dockerfile", null, null));
         data.add(asList(env, format("Field 'image' or 'build.context' is required in machine '%s' in environment 'env'", serviceEntry.getKey())));
 
         env = createServicesEnv();
         serviceEntry = getAnyService(env);
         service = serviceEntry.getValue();
         service.setImage("");
-        service.setBuild(new CheServiceBuildContextImpl("", "dockerfile", null));
+        service.setBuild(new CheServiceBuildContextImpl("", "dockerfile", null, null));
         data.add(asList(env, format("Field 'image' or 'build.context' is required in machine '%s' in environment 'env'", serviceEntry.getKey())));
 
         env = createServicesEnv();
         serviceEntry = getAnyService(env);
         service = serviceEntry.getValue();
         service.setImage("");
-        service.setBuild(new CheServiceBuildContextImpl(null, null, null));
+        service.setBuild(new CheServiceBuildContextImpl(null, null, null, null));
         data.add(asList(env, format("Field 'image' or 'build.context' is required in machine '%s' in environment 'env'", serviceEntry.getKey())));
 
         env = createServicesEnv();
         serviceEntry = getAnyService(env);
         service = serviceEntry.getValue();
         service.setImage("");
-        service.setBuild(new CheServiceBuildContextImpl("some url", null, "some content"));
+        service.setBuild(new CheServiceBuildContextImpl("some url",
+                                                        null,
+                                                        "some content",
+                                                        new HashMap<String, String>() {{put("argkey","argvalue");}}));
         data.add(asList(env, format("Machine '%s' in environment 'env' contains mutually exclusive dockerfile content and build context.",
                                     serviceEntry.getKey())));
 
@@ -600,6 +603,7 @@ public class CheEnvironmentValidatorTest {
         CheServicesEnvironmentImpl cheServicesEnvironment = new CheServicesEnvironmentImpl();
         cheServicesEnvironment.setVersion("2");
         Map<String, CheServiceImpl> services = new HashMap<>();
+        Map<String, String> buildArgs =  new HashMap<String, String>() {{put("argkey","argvalue");}};
         cheServicesEnvironment.setServices(services);
 
         services.put("dev-machine", createCheService("_dev",
@@ -613,7 +617,7 @@ public class CheEnvironmentValidatorTest {
                                                   null,
                                                   emptyList(),
                                                   null);
-        service.setBuild(new CheServiceBuildContextImpl("context", "file", null));
+        service.setBuild(new CheServiceBuildContextImpl("context", "file", null, buildArgs));
 
         services.put("machine2", service);
 

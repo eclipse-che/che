@@ -77,10 +77,22 @@ elif echo ${LINUX_TYPE} | grep -qi "opensuse"; then
 # Alpine 3.3
 ############$$
 elif echo ${LINUX_TYPE} | grep -qi "alpine"; then
+
+  # Setup OpenJDK8 (not using glibc) if missing
+  INSTALL_JDK=false
+  command -v ${JAVA_HOME}/bin/java >/dev/null 2>&1 || { PACKAGES=${PACKAGES}" openjdk8"; INSTALL_JDK=true;}
+
     test "${PACKAGES}" = "" || {
         ${SUDO} apk update
         ${SUDO} apk add ${PACKAGES};
     }
+
+    # Link OpenJDK to JAVA_HOME
+    if [ ${INSTALL_JDK} = true ]; then
+      export JAVA_HOME=${CHE_DIR}/jdk1.8
+      ln -s /usr/lib/jvm/java-1.8-openjdk $JAVA_HOME
+    fi
+
 
 else
     >&2 echo "Unrecognized Linux Type"

@@ -40,12 +40,6 @@ export class NavbarRecentWorkspacesController {
         icon: 'fa fa-stop',
         _onclick: (workspaceId) => { this.stopRecentWorkspace(workspaceId) }
       },
-      {
-        name: 'Snapshot',
-        scope: 'RUNNING',
-        icon: 'fa fa-clock-o',
-        _onclick: (workspaceId) => { this.createSnapshotRecentWorkspace(workspaceId) }
-      },
       // stopped
       {
         name: 'Run',
@@ -181,16 +175,6 @@ export class NavbarRecentWorkspacesController {
 
     this.updateRecentWorkspace(workspaceId);
     this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {}, (error) => {
-      this.$log.error(error);
-    });
-  }
-
-  /**
-   * Creates snapshot of specified workspace
-   * @param workspaceId {String} workspace id
-   */
-  createSnapshotRecentWorkspace(workspaceId) {
-    this.cheWorkspace.createSnapshot(workspaceId).then(() => {}, (error) => {
       this.$log.error(error);
     });
   }

@@ -10,22 +10,25 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.event;
 
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.notification.EventOrigin;
 
 /**
- * Informs that workspace with certain id was removed.
+ * Informs that workspace was removed.
  *
  * @author Sergii Leschenko
+ * @author Alexander Andrienko
  */
 @EventOrigin("workspace")
 public class WorkspaceRemovedEvent {
-    private final String workspaceId;
 
-    public WorkspaceRemovedEvent(String workspaceId) {
-        this.workspaceId = workspaceId;
+    private final Workspace workspace;
+
+    public WorkspaceRemovedEvent(Workspace workspace) {
+        this.workspace = workspace;
     }
 
-    public String getWorkspaceId() {
-        return workspaceId;
+    public Workspace getWorkspace() {
+        return workspace;
     }
 }

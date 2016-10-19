@@ -14,10 +14,10 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
 
+import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
 import org.eclipse.che.ide.project.ResolvingProjectStateHolder;
 import org.eclipse.che.plugin.maven.client.command.MavenCommandType;
 import org.eclipse.che.plugin.maven.client.editor.PomEditorConfigurationFactory;
@@ -37,10 +37,10 @@ import org.eclipse.che.plugin.maven.client.wizard.MavenProjectWizardRegistrar;
 @ExtensionGinModule
 public class MavenGinModule extends AbstractGinModule {
 
-    /** {@inheritDoc} */
     @Override
     protected void configure() {
         GinMultibinder.newSetBinder(binder(), ProjectWizardRegistrar.class).addBinding().to(MavenProjectWizardRegistrar.class);
+
         GinMultibinder.newSetBinder(binder(), CommandType.class).addBinding().to(MavenCommandType.class);
 
         GinMultibinder.newSetBinder(binder(), ResourceInterceptor.class).addBinding().to(MavenSourceFolderInterceptor.class);
@@ -50,8 +50,6 @@ public class MavenGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(PomReconcilingStrategyFactory.class));
         install(new GinFactoryModuleBuilder().build(PomEditorConfigurationFactory.class));
 
-        final GinMultibinder<ResolvingProjectStateHolder> resolvingProjectStateHolderBinder =
-                GinMultibinder.newSetBinder(binder(), ResolvingProjectStateHolder.class);
-        resolvingProjectStateHolderBinder.addBinding().to(ResolvingMavenProjectStateHolder.class);
+        GinMultibinder.newSetBinder(binder(), ResolvingProjectStateHolder.class).addBinding().to(ResolvingMavenProjectStateHolder.class);
     }
 }

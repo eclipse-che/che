@@ -62,10 +62,10 @@ public final class PagingUtil {
         pageRefs.add(Pair.of("first", page.getFirstPageRef()));
         pageRefs.add(Pair.of("last", page.getLastPageRef()));
         if (page.hasPreviousPage()) {
-            pageRefs.add(Pair.of("prev", page.getPreviousPageRef().get()));
+            pageRefs.add(Pair.of("prev", page.getPreviousPageRef()));
         }
         if (page.hasNextPage()) {
-            pageRefs.add(Pair.of("next", page.getNextPageRef().get()));
+            pageRefs.add(Pair.of("next", page.getNextPageRef()));
         }
         final UriBuilder ub = UriBuilder.fromUri(uri);
         return pageRefs.stream()

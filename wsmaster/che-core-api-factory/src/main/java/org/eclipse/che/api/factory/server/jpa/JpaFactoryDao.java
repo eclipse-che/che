@@ -17,13 +17,12 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.core.jdbc.jpa.IntegrityConstraintViolationException;
+import org.eclipse.che.api.core.jdbc.jpa.event.CascadeRemovalEventSubscriber;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.api.factory.server.spi.FactoryDao;
 import org.eclipse.che.api.user.server.event.BeforeUserRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +33,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import java.util.Collections;
 import javax.persistence.TypedQuery;
 import java.util.HashMap;
 import java.util.List;
@@ -170,7 +168,8 @@ public class JpaFactoryDao implements FactoryDao {
     }
 
     @Singleton
-    public static class RemoveFactoriesBeforeUserRemovedEventSubscriber implements EventSubscriber<BeforeUserRemovedEvent> {
+    public static class RemoveFactoriesBeforeUserRemovedEventSubscriber
+            extends CascadeRemovalEventSubscriber<BeforeUserRemovedEvent> {
         @Inject
         private FactoryDao   factoryDao;
         @Inject
@@ -178,23 +177,19 @@ public class JpaFactoryDao implements FactoryDao {
 
         @PostConstruct
         public void subscribe() {
-            eventService.subscribe(this);
+            eventService.subscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @PreDestroy
         public void unsubscribe() {
-            eventService.unsubscribe(this);
+            eventService.unsubscribe(this, BeforeUserRemovedEvent.class);
         }
 
         @Override
-        public void onEvent(BeforeUserRemovedEvent event) {
-            try {
-                final Pair<String, String> factoryCreator = Pair.of("creator.userId", event.getUser().getId());
-                for (FactoryImpl factory : factoryDao.getByAttribute(0, 0, singletonList(factoryCreator))) {
-                    factoryDao.remove(factory.getId());
-                }
-            } catch (Exception x) {
-                LOG.error(format("Couldn't remove factories before user '%s' removed", event.getUser().getId()), x);
+        public void onRemovalEvent(BeforeUserRemovedEvent event) throws Exception {
+            final Pair<String, String> factoryCreator = Pair.of("creator.userId", event.getUser().getId());
+            for (FactoryImpl factory : factoryDao.getByAttribute(0, 0, singletonList(factoryCreator))) {
+                factoryDao.remove(factory.getId());
             }
         }
     }

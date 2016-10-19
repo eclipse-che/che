@@ -12,7 +12,8 @@ package org.eclipse.che.ide.extension.machine.client.command.custom;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfigurationPage;
+import org.eclipse.che.ide.api.command.CommandPage;
+import org.eclipse.che.ide.api.command.CommandImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,23 +35,23 @@ public class CustomPagePresenterTest {
     private static final String COMMAND_LINE = "cmd";
 
     @Mock
-    private CustomPageView             arbitraryPageView;
+    private CustomPageView arbitraryPageView;
     @Mock
-    private CustomCommandConfiguration configuration;
+    private CommandImpl    command;
 
     @InjectMocks
     private CustomPagePresenter arbitraryPagePresenter;
 
     @Before
     public void setUp() {
-        when(configuration.getCommandLine()).thenReturn(COMMAND_LINE);
+        when(command.getCommandLine()).thenReturn(COMMAND_LINE);
 
-        arbitraryPagePresenter.resetFrom(configuration);
+        arbitraryPagePresenter.resetFrom(command);
     }
 
     @Test
     public void testResetting() throws Exception {
-        verify(configuration).getCommandLine();
+        verify(command).getCommandLine();
     }
 
     @Test
@@ -60,7 +61,7 @@ public class CustomPagePresenterTest {
         arbitraryPagePresenter.go(container);
 
         verify(container).setWidget(eq(arbitraryPageView));
-        verify(configuration, times(2)).getCommandLine();
+        verify(command, times(2)).getCommandLine();
         verify(arbitraryPageView).setCommandLine(eq(COMMAND_LINE));
     }
 
@@ -69,13 +70,13 @@ public class CustomPagePresenterTest {
         String commandLine = "commandLine";
         when(arbitraryPageView.getCommandLine()).thenReturn(commandLine);
 
-        final CommandConfigurationPage.DirtyStateListener listener = mock(CommandConfigurationPage.DirtyStateListener.class);
+        final CommandPage.DirtyStateListener listener = mock(CommandPage.DirtyStateListener.class);
         arbitraryPagePresenter.setDirtyStateListener(listener);
 
         arbitraryPagePresenter.onCommandLineChanged();
 
         verify(arbitraryPageView).getCommandLine();
-        verify(configuration).setCommandLine(eq(commandLine));
+        verify(command).setCommandLine(eq(commandLine));
         verify(listener).onDirtyStateChanged();
     }
 }

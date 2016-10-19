@@ -57,7 +57,11 @@ public class JpaTckRepository<T> implements TckRepository<T> {
         final EntityManager manager = managerProvider.get();
         try {
             manager.getTransaction().begin();
-            entities.forEach(manager::persist);
+            for (T entity : entities) {
+                manager.persist(entity);
+                manager.flush();
+            }
+
             manager.getTransaction().commit();
         } catch (RuntimeException x) {
             if (manager.getTransaction().isActive()) {

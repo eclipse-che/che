@@ -20,12 +20,7 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceRuntime;
-import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
-import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -34,23 +29,21 @@ import org.eclipse.che.ide.api.action.CustomComponentAction;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.Presentation;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.command.CommandImpl;
+import org.eclipse.che.ide.api.command.CommandManager;
+import org.eclipse.che.ide.api.command.CommandType;
+import org.eclipse.che.ide.api.command.CommandTypeRegistry;
 import org.eclipse.che.ide.api.machine.MachineEntity;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
-import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartedEvent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.MachineLocalizationConstant;
 import org.eclipse.che.ide.extension.machine.client.MachineResources;
-import org.eclipse.che.ide.extension.machine.client.command.CommandConfiguration;
-import org.eclipse.che.ide.extension.machine.client.command.CommandType;
-import org.eclipse.che.ide.extension.machine.client.command.CommandTypeRegistry;
-import org.eclipse.che.ide.extension.machine.client.command.edit.EditCommandsPresenter;
 import org.eclipse.che.ide.extension.machine.client.inject.factories.EntityFactory;
-import org.eclipse.che.ide.extension.machine.client.machine.MachineStateEvent;
+import org.eclipse.che.ide.api.machine.events.MachineStateEvent;
 import org.eclipse.che.ide.ui.dropdown.DropDownListFactory;
 import org.eclipse.che.ide.ui.dropdown.DropDownWidget;
-import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 import javax.validation.constraints.NotNull;
@@ -68,14 +61,14 @@ import static org.eclipse.che.ide.extension.machine.client.MachineExtension.GROU
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
- * Action that allows user to select command from list of all commands.
+ * Action allows user to select target machine and command to execute.
  *
  * @author Artem Zatsarynnyi
  * @author Oleksii Orel
  */
 @Singleton
 public class SelectCommandComboBox extends AbstractPerspectiveAction implements CustomComponentAction,
-                                                                                EditCommandsPresenter.ConfigurationChangedListener,
+                                                                                CommandManager.CommandChangedListener,
                                                                                 WsAgentStateHandler,
                                                                                 MachineStateEvent.Handler,
                                                                                 WorkspaceStartedEvent.Handler,
@@ -89,12 +82,12 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
     private final Map<String, Machine>        registeredMachineMap;
     private final ActionManager               actionManager;
     private final EntityFactory               entityFactory;
-    private final WorkspaceServiceClient      workspaceServiceClient;
+    private final CommandManager              commandManager;
     private final CommandTypeRegistry         commandTypeRegistry;
     private final AppContext                  appContext;
     private final DropDownWidget              commandsListWidget;
     private final DropDownWidget              machinesListWidget;
-    private final List<CommandConfiguration>  commands;
+    private final List<CommandImpl>           commands;
     private final DefaultActionGroup          commandActions;
     private final DefaultActionGroup          machinesActions;
 
@@ -107,19 +100,19 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
                                  EventBus eventBus,
                                  EntityFactory entityFactory,
                                  DropDownListFactory dropDownListFactory,
-                                 WorkspaceServiceClient workspaceServiceClient,
+                                 CommandManager commandManager,
                                  CommandTypeRegistry commandTypeRegistry,
-                                 EditCommandsPresenter editCommandsPresenter,
                                  AppContext appContext) {
         super(Collections.singletonList(PROJECT_PERSPECTIVE_ID),
               locale.selectCommandControlTitle(),
               locale.selectCommandControlDescription(),
               null, null);
+
         this.locale = locale;
         this.resources = resources;
         this.actionManager = actionManager;
+        this.commandManager = commandManager;
         this.entityFactory = entityFactory;
-        this.workspaceServiceClient = workspaceServiceClient;
         this.commandTypeRegistry = commandTypeRegistry;
         this.appContext = appContext;
 
@@ -129,7 +122,7 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
         this.machinesListWidget = dropDownListFactory.createDropDown(GROUP_MACHINES);
         this.commandsListWidget = dropDownListFactory.createDropDown(GROUP_COMMANDS);
 
-        editCommandsPresenter.addConfigurationsChangedListener(this);
+        commandManager.addCommandChangedListener(this);
 
         commandActions = new DefaultActionGroup(GROUP_COMMANDS, false, actionManager);
         actionManager.registerAction(GROUP_COMMANDS, commandActions);
@@ -174,85 +167,61 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
 
     /** Returns selected command. */
     @Nullable
-    public CommandConfiguration getSelectedCommand() {
+    public CommandImpl getSelectedCommand() {
         if (commands.isEmpty()) {
             return null;
         }
 
         final String selectedCommandName = commandsListWidget.getSelectedName();
 
-        for (CommandConfiguration configuration : commands) {
-            if (configuration.getName().equals(selectedCommandName)) {
-                return configuration;
+        for (CommandImpl command : commands) {
+            if (command.getName().equals(selectedCommandName)) {
+                return command;
             }
         }
         return null;
+    }
+
+    public void setSelectedCommand(CommandImpl command) {
+        commandsListWidget.selectElement(command.getName(), command.getName());
     }
 
     /** Returns command by it's name. */
     @Nullable
-    public CommandConfiguration getCommandByName(String name) {
+    public CommandImpl getCommandByName(String name) {
         if (commands.isEmpty()) {
             return null;
         }
 
-        for (CommandConfiguration configuration : commands) {
-            if (configuration.getName().equals(name)) {
-                return configuration;
+        for (CommandImpl command : commands) {
+            if (command.getName().equals(name)) {
+                return command;
             }
         }
         return null;
     }
 
-    public void setSelectedCommand(CommandConfiguration command) {
-        commandsListWidget.selectElement(command.getName(), command.getName());
-    }
-
     /**
-     * Load all saved commands.
+     * Load all commands to the widget.
      *
      * @param commandToSelect
      *         command that should be selected after loading all commands
      */
-    private void loadCommands(@Nullable final CommandConfiguration commandToSelect) {
-        workspaceServiceClient.getCommands(appContext.getWorkspaceId()).then(new Function<List<CommandDto>, List<CommandConfiguration>>() {
-            @Override
-            public List<CommandConfiguration> apply(List<CommandDto> arg) throws FunctionException {
-                final List<CommandConfiguration> configurationList = new ArrayList<>();
-
-                for (CommandDto command : arg) {
-                    final CommandType type = commandTypeRegistry.getCommandTypeById(command.getType());
-                    // skip command if it's type isn't registered
-                    if (type != null) {
-                        try {
-                            configurationList.add(type.getConfigurationFactory().createFromDto(command));
-                        } catch (IllegalArgumentException e) {
-                            Log.warn(EditCommandsPresenter.class, e.getMessage());
-                        }
-                    }
-                }
-
-                return configurationList;
-            }
-        }).then(new Operation<List<CommandConfiguration>>() {
-            @Override
-            public void apply(List<CommandConfiguration> commandConfigurations) throws OperationException {
-                setCommandConfigurations(commandConfigurations, commandToSelect);
-            }
-        });
+    private void loadCommands(@Nullable final CommandImpl commandToSelect) {
+        setCommands(commandManager.getCommands(), commandToSelect);
     }
 
     /**
-     * Sets command configurations to the list.
+     * Sets commands to the widget.
      *
-     * @param commandConfigurations
-     *         collection of command configurations to set
+     * @param commands
+     *         commands to set
      * @param commandToSelect
      *         command that should be selected or {@code null} if none
      */
-    private void setCommandConfigurations(@NotNull List<CommandConfiguration> commandConfigurations,
-                                          @Nullable CommandConfiguration commandToSelect) {
-        commands.clear();
+    private void setCommands(List<CommandImpl> commands, @Nullable CommandImpl commandToSelect) {
+        this.commands.clear();
+
         commandActions.removeAll();
 
         final DefaultActionGroup commandsList = (DefaultActionGroup)actionManager.getAction(GROUP_COMMANDS_LIST);
@@ -260,22 +229,25 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
             commandActions.addAll(commandsList);
         }
 
-        Collections.sort(commandConfigurations, new Comparator<CommandConfiguration>() {
+        Collections.sort(commands, new Comparator<CommandImpl>() {
             @Override
-            public int compare(CommandConfiguration o1, CommandConfiguration o2) {
-                return o1.getType().getId().compareTo(o2.getType().getId());
+            public int compare(CommandImpl o1, CommandImpl o2) {
+                return o1.getType().compareTo(o2.getType());
             }
         });
-        CommandConfiguration prevCommand = null;
-        for (CommandConfiguration configuration : commandConfigurations) {
-            if (prevCommand == null || !configuration.getType().getId().equals(prevCommand.getType().getId())) {
-                commandActions.addSeparator(configuration.getType().getDisplayName());
+
+        CommandImpl prevCommand = null;
+        for (CommandImpl command : commands) {
+            if (prevCommand == null || !command.getType().equals(prevCommand.getType())) {
+                CommandType commandType = commandTypeRegistry.getCommandTypeById(command.getType());
+                commandActions.addSeparator(commandType.getDisplayName());
             }
-            commandActions.add(commandsListWidget.createAction(configuration.getName(), configuration.getName()));
-            prevCommand = configuration;
+
+            commandActions.add(commandsListWidget.createAction(command.getName(), command.getName()));
+            prevCommand = command;
         }
 
-        commands.addAll(commandConfigurations);
+        this.commands.addAll(commands);
 
         if (commandToSelect != null) {
             setSelectedCommand(commandToSelect);
@@ -289,15 +261,14 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
         if (commands.isEmpty()) {
             setEmptyCommand();
         } else {
-            // TODO: consider to saving last used command ID somewhere
             // for now, we always select first command
-            final CommandConfiguration command = commands.get(0);
+            final CommandImpl command = commands.get(0);
             commandsListWidget.selectElement(command.getName(), command.getName());
         }
     }
 
     @Nullable
-    public Machine getSelectedMachine() {
+    Machine getSelectedMachine() {
         if (machinesListWidget.getSelectedId() == null) {
             return null;
         }
@@ -311,20 +282,21 @@ public class SelectCommandComboBox extends AbstractPerspectiveAction implements 
     }
 
     @Override
-    public void onConfigurationAdded(CommandConfiguration command) {
+    public void onCommandAdded(CommandImpl command) {
         loadCommands(null);
     }
 
     @Override
-    public void onConfigurationRemoved(CommandConfiguration command) {
-        loadCommands(null);
-    }
-
-    @Override
-    public void onConfigurationsUpdated(CommandConfiguration command) {
+    public void onCommandUpdated(CommandImpl command) {
         loadCommands(command);
     }
 
+    @Override
+    public void onCommandRemoved(CommandImpl command) {
+        loadCommands(null);
+    }
+
+    /** Load all machines to the widget. */
     private void loadMachines() {
         List<MachineEntity> machines = getMachines(appContext.getWorkspace());
         if (!machines.isEmpty()) {

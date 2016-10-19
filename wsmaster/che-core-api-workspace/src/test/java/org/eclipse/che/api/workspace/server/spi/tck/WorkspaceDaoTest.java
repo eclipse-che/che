@@ -16,7 +16,9 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
@@ -69,6 +71,9 @@ public class WorkspaceDaoTest {
 
     @Inject
     private WorkspaceDao workspaceDao;
+
+    @Inject
+    private EventService eventService;
 
     private AccountImpl[] accounts;
 
@@ -179,6 +184,16 @@ public class WorkspaceDaoTest {
 
         workspaceDao.remove(workspace.getId());
         workspaceDao.get(workspace.getId());
+    }
+
+    @Test
+    public void shouldPublicRemoveWorkspaceEventAfterRemoveWorkspace() throws Exception {
+        final boolean[] isNotified = new boolean[] { false };
+        eventService.subscribe(event -> isNotified[0] = true, WorkspaceRemovedEvent.class);
+
+        workspaceDao.remove(workspaces[0].getId());
+
+        assertTrue(isNotified[0], "Event subscriber notified");
     }
 
     @Test

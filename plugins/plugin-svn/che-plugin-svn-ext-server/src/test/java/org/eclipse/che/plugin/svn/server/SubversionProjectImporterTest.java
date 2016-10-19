@@ -162,14 +162,15 @@ public class SubversionProjectImporterTest {
     @Test
     public void testValidImportSources() throws Exception {
         final String projectName = NameGenerator.generate("project-", 3);
-        final VirtualFile virtualFile = root.createFolder(projectName);//root.getChild(org.eclipse.che.api.vfs.Path.of(projectName));
+        final VirtualFile virtualFile = root.createFolder(projectName);
         FolderEntry projectFolder = new FolderEntry(virtualFile);
         String repoUrl = Paths.get(repoRoot.getAbsolutePath()).toUri().toString();
         when(sourceStorage.getLocation()).thenReturn(repoUrl);
         projectImporter.importSources(projectFolder, sourceStorage, new TestUtils.SystemOutLineConsumerFactory());
 
         assertTrue(projectFolder.getChild(".svn").isFolder());
-        assertTrue(projectFolder.getChild("A").isFolder());
-        assertTrue(projectFolder.getChild("iota").isFile());
+        assertTrue(projectFolder.getChild("trunk").isFolder());
+        assertTrue(projectFolder.getChildFolder("trunk").getChild("A").isFolder());
+        assertTrue(projectFolder.getChildFolder("trunk").getChildFolder("A").getChild("mu").isFile());
     }
 }

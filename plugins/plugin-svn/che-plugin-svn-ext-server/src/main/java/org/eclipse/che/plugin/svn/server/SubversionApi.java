@@ -16,11 +16,13 @@ import com.google.common.io.Files;
 import com.google.common.net.MediaType;
 import com.google.inject.Singleton;
 
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ErrorCodes;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.vfs.util.DeleteOnCloseFileInputStream;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -59,6 +61,7 @@ import org.eclipse.che.plugin.svn.shared.ShowDiffRequest;
 import org.eclipse.che.plugin.svn.shared.ShowLogRequest;
 import org.eclipse.che.plugin.svn.shared.StatusRequest;
 import org.eclipse.che.plugin.svn.shared.SubversionItem;
+import org.eclipse.che.plugin.svn.shared.SwitchRequest;
 import org.eclipse.che.plugin.svn.shared.UpdateRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +83,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.singletonList;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.eclipse.che.plugin.svn.server.utils.InfoUtils.getRelativeUrl;
+import static org.eclipse.che.plugin.svn.server.utils.InfoUtils.getRepositoryRoot;
+import static org.eclipse.che.plugin.svn.server.utils.SubversionUtils.recognizeProjectUri;
 
 /**
  * Provides Subversion APIs.
@@ -226,6 +234,48 @@ public class SubversionApi {
                          .withCommand(result.getCommandLine().toString())
                          .withOutput(result.getStdout())
                          .withErrOutput(result.getStderr());
+    }
+
+    /**
+     * Perform a "svn switch" based on the request.
+     *
+     * @param request
+     *         the switch request
+     * @return the response
+     * @throws ApiException
+     *         if there is a Subversion issue
+     */
+    public CLIOutputWithRevisionResponse doSwitch(final SwitchRequest request) throws ApiException {
+
+        final File projectPath = new File(request.getProjectPath());
+        final List<String> cliArgs = defaultArgs();
+
+        // Flags
+        addFlag(cliArgs, "--ignore-externals", request.isIgnoreExternals());
+        addFlag(cliArgs, "--ignore-ancestry", request.isIgnoreAncestry());
+        addFlag(cliArgs, "--relocate", request.isRelocate());
+        addFlag(cliArgs, "--force", request.isForce());
+
+        // Options
+        addOption(cliArgs, "--depth", request.getDepth());
+        addOption(cliArgs, "--set-depth", request.getSetDepth());
+        addOption(cliArgs, "--revision", request.getRevision());
+        addOption(cliArgs, "--accept", request.getAccept());
+
+        // Command Name
+        cliArgs.add("switch");
+
+        CommandLineResult result = runCommand(null,
+                                              cliArgs,
+                                              projectPath,
+                                              singletonList(request.getLocation()),
+                                              request.getUsername(),
+                                              request.getPassword());
+
+        return newDto(CLIOutputWithRevisionResponse.class).withCommand(result.getCommandLine().toString())
+                                                          .withOutput(result.getStdout())
+                                                          .withErrOutput(result.getStderr())
+                                                          .withRevision(SubversionUtils.getUpdateRevision(result.getStdout()));
     }
 
     /**
@@ -509,25 +559,110 @@ public class SubversionApi {
     }
 
     /**
+     * Returns list of the branches of the project.
+     *
+     * @param request
+     *         the request
+     *
+     * @see #list(ListRequest)
+     * @see #info(InfoRequest)
+     */
+    public ListResponse listBranches(final ListRequest request) throws ApiException {
+        InfoResponse info = info(newDto(InfoRequest.class).withProjectPath(request.getProjectPath())
+                                                          .withTarget(".")
+                                                          .withPassword(request.getPassword())
+                                                          .withUsername(request.getUsername()));
+
+        final List<String> args = defaultArgs();
+        args.add("list");
+
+        String repositoryRoot = getRepositoryRoot(info.getOutput());
+        String projectRelativeUrl = getRelativeUrl(info.getOutput());
+        String projectUri = recognizeProjectUri(repositoryRoot, projectRelativeUrl);
+
+        String path = projectUri == null ? "^/branches"
+                                         : (projectUri + "/branches");
+
+        final CommandLineResult result = runCommand(null,
+                                                    args,
+                                                    new File(request.getProjectPath()),
+                                                    singletonList(path),
+                                                    request.getUsername(),
+                                                    request.getPassword());
+
+        return newDto(ListResponse.class).withCommand(result.getCommandLine().toString())
+                                         .withOutput(result.getStdout()
+                                                           .stream()
+                                                           .filter(s -> s.endsWith("/"))
+                                                           .map(s -> s.substring(0, s.length() - 1))
+                                                           .collect(Collectors.toList()))
+                                         .withErrorOutput(result.getStderr());
+    }
+
+    /**
+     * Returns list of the tags of the project.
+     *
+     * @param request
+     *         the request
+     *
+     * @see #list(ListRequest)
+     * @see #info(InfoRequest)
+     */
+    public ListResponse listTags(final ListRequest request) throws ApiException {
+        InfoResponse info = info(newDto(InfoRequest.class).withProjectPath(request.getProjectPath())
+                                                          .withTarget(".")
+                                                          .withPassword(request.getPassword())
+                                                          .withUsername(request.getUsername()));
+
+        final List<String> args = defaultArgs();
+        args.add("list");
+
+        String repositoryRoot = getRepositoryRoot(info.getOutput());
+        String projectRelativeUrl = getRelativeUrl(info.getOutput());
+        String projectUri = recognizeProjectUri(repositoryRoot, projectRelativeUrl);
+
+        String branchesPath = projectUri == null ? "^/tags"
+                                                 : (projectUri + "/tags");
+
+        final CommandLineResult result = runCommand(null,
+                                                    args,
+                                                    new File(request.getProjectPath()),
+                                                    singletonList(branchesPath),
+                                                    request.getUsername(),
+                                                    request.getPassword());
+
+        return newDto(ListResponse.class).withCommand(result.getCommandLine().toString())
+                                         .withOutput(result.getStdout()
+                                                           .stream()
+                                                           .filter(s -> s.endsWith("/"))
+                                                           .map(s -> s.substring(0, s.length() - 1))
+                                                           .collect(Collectors.toList()))
+                                         .withErrorOutput(result.getStderr());
+    }
+
+
+    /**
      * List remote subversion directory.
+     *
+     * @param request
+     *         the request
      *
      * @return the response containing target children
      */
-    public ListResponse list(final ListRequest request) throws IOException, SubversionException, UnauthorizedException {
-        final File projectPath = new File(request.getProjectPath());
+    public ListResponse list(final ListRequest request) throws ApiException {
         final List<String> args = defaultArgs();
-
         args.add("list");
 
-        List<String> paths = new ArrayList<>();
-        paths.add(request.getTarget());
+        final CommandLineResult result = runCommand(null,
+                                                    args,
+                                                    new File(request.getProjectPath()),
+                                                    singletonList(request.getTargetPath()),
+                                                    request.getUsername(),
+                                                    request.getPassword());
 
-        final CommandLineResult result = runCommand(null, args, projectPath, paths);
-
-        return DtoFactory.getInstance().createDto(ListResponse.class)
-                         .withCommand(result.getCommandLine().toString())
-                         .withOutput(result.getStdout())
-                         .withErrorOutput(result.getStderr());
+        return newDto(ListResponse.class).withCommand(result.getCommandLine().toString())
+                                         .withOutput(result.getStdout())
+                                         .withErrorOutput(result.getStderr());
     }
 
     /**
@@ -873,31 +1008,31 @@ public class SubversionApi {
         return paths;
     }
 
-    private CommandLineResult runCommand(Map<String, String> env,
+    private CommandLineResult runCommand(@Nullable Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
-                                         List<String> paths) throws IOException, SubversionException, UnauthorizedException {
+                                         List<String> paths) throws SubversionException, UnauthorizedException {
         String repoUrl = getRepositoryUrl(projectPath.getAbsolutePath());
         return runCommand(env, args, projectPath, paths, null, null, repoUrl);
     }
 
-    private CommandLineResult runCommand(Map<String, String> env,
+    private CommandLineResult runCommand(@Nullable Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths,
-                                         String username,
-                                         String password) throws IOException, SubversionException, UnauthorizedException {
+                                         @Nullable String username,
+                                         @Nullable String password) throws SubversionException, UnauthorizedException {
         String repoUrl = getRepositoryUrl(projectPath.getAbsolutePath());
         return runCommand(env, args, projectPath, paths, username, password, repoUrl);
     }
 
-    private CommandLineResult runCommand(Map<String, String> env,
+    private CommandLineResult runCommand(@Nullable Map<String, String> env,
                                          List<String> args,
                                          File projectPath,
                                          List<String> paths,
-                                         String username,
-                                         String password,
-                                         String repoUrl) throws IOException, SubversionException, UnauthorizedException {
+                                         @Nullable String username,
+                                         @Nullable String password,
+                                         String repoUrl) throws SubversionException, UnauthorizedException {
         final List<String> lines = new ArrayList<>();
         final CommandLineResult result;
         final StringBuffer buffer;
@@ -910,7 +1045,7 @@ public class SubversionApi {
 
         String[] credentialsArgs;
         if (!isNullOrEmpty(username) && !isNullOrEmpty(password)) {
-            credentialsArgs = new String[]{"--username", username, "--password", password};
+            credentialsArgs = new String[] {"--username", username, "--password", password};
         } else {
             credentialsArgs = null;
         }
@@ -932,6 +1067,8 @@ public class SubversionApi {
                                                       -1,
                                                       projectPath,
                                                       svnOutputPublisherFactory);
+        } catch (IOException e) {
+            throw new SubversionException(e);
         } finally {
             if (sshEnvironment != null) {
                 sshEnvironment.cleanUp();
@@ -967,8 +1104,8 @@ public class SubversionApi {
         return result;
     }
 
-    public String getRepositoryUrl(final String projectPath) throws SubversionException, IOException {
-        return this.repositoryUrlProvider.getRepositoryUrl(projectPath);
+    public String getRepositoryUrl(final String projectPath) throws SubversionException {
+        return repositoryUrlProvider.getRepositoryUrl(projectPath);
     }
 
     /**
@@ -978,9 +1115,8 @@ public class SubversionApi {
      *         request
      * @return response containing list of subversion items
      * @throws SubversionException
-     * @throws IOException
      */
-    public InfoResponse info(final InfoRequest request) throws SubversionException, IOException, UnauthorizedException {
+    public InfoResponse info(final InfoRequest request) throws SubversionException, UnauthorizedException {
         final List<String> args = defaultArgs();
 
         if (request.getRevision() != null && !request.getRevision().trim().isEmpty()) {
@@ -1019,18 +1155,21 @@ public class SubversionApi {
 
                 if (propertyLine.isEmpty()) {
                     // create Subversion item filling properties from the list
+                    String repositoryRoot = getRepositoryRoot(itemProperties);
+                    String relativeUrl = getRelativeUrl(itemProperties);
                     final SubversionItem item = DtoFactory.getInstance().createDto(SubversionItem.class)
                                                           .withPath(InfoUtils.getPath(itemProperties))
                                                           .withName(InfoUtils.getName(itemProperties))
                                                           .withURL(InfoUtils.getUrl(itemProperties))
-                                                          .withRelativeURL(InfoUtils.getRelativeUrl(itemProperties))
-                                                          .withRepositoryRoot(InfoUtils.getRepositoryRoot(itemProperties))
+                                                          .withRelativeURL(relativeUrl)
+                                                          .withRepositoryRoot(repositoryRoot)
                                                           .withRepositoryUUID(InfoUtils.getRepositoryUUID(itemProperties))
                                                           .withRevision(InfoUtils.getRevision(itemProperties))
                                                           .withNodeKind(InfoUtils.getNodeKind(itemProperties))
                                                           .withSchedule(InfoUtils.getSchedule(itemProperties))
                                                           .withLastChangedRev(InfoUtils.getLastChangedRev(itemProperties))
-                                                          .withLastChangedDate(InfoUtils.getLastChangedDate(itemProperties));
+                                                          .withLastChangedDate(InfoUtils.getLastChangedDate(itemProperties))
+                                                          .withProjectUri(recognizeProjectUri(repositoryRoot, relativeUrl));
                     items.add(item);
 
                     // clear item properties

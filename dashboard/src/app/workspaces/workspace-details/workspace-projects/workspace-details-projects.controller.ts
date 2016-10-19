@@ -60,6 +60,7 @@ export class WorkspaceDetailsProjectsCtrl {
   updateProjectsData() {
     this.workspace = this.cheWorkspace.getWorkspaceByName(this.namespace, this.workspaceName);
     this.projects = this.workspace.config.projects;
+    this.workspaceId = this.workspace.id;
   }
 
   /**

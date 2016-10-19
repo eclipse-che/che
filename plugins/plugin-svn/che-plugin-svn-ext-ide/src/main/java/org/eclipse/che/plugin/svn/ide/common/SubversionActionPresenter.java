@@ -37,7 +37,6 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.util.ExceptionUtils.getErrorCode;
 
-
 /**
  * Presenter to be extended by all {@link SubversionAction} presenters.
  */

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.jpa;
 
+import org.eclipse.che.api.core.jdbc.jpa.CascadeRemovalException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -31,6 +32,10 @@ public class StackEntityListener {
 
     @PreRemove
     private void preRemove(StackImpl stack) {
-        eventService.publish(new BeforeStackRemovedEvent(stack));
+        final BeforeStackRemovedEvent event = new BeforeStackRemovedEvent(stack);
+        eventService.publish(event);
+        if (event.getContext().isFailed()) {
+            throw new CascadeRemovalException(event.getContext().getCause());
+        }
     }
 }

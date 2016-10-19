@@ -138,17 +138,59 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
                        MIDDLE,
                        locale.viewMachineRunningTooltip());
 
-        SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
-        newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
-        root.appendChild(newTerminalButton);
+        /***************************************************************************
+         *
+         * New terminal button
+         *
+         ***************************************************************************/
+        if (node.hasTerminalAgent()) {
+            SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
+            newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
+            root.appendChild(newTerminalButton);
 
-        Tooltip.create(newTerminalButton,
-                       BOTTOM,
-                       MIDDLE,
-                       locale.viewNewTerminalTooltip());
+            Tooltip.create(newTerminalButton,
+                           BOTTOM,
+                           MIDDLE,
+                           locale.viewNewTerminalTooltip());
 
-        MachineRuntimeInfo runtime = machine.getRuntime();
-        if (runtime != null && runtime.getServers().containsKey(SSH_PORT + "/tcp")) {
+            newTerminalButton.addEventListener(Event.CLICK, new EventListener() {
+                @Override
+                public void handleEvent(Event event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+
+                    if (addTerminalClickHandler != null) {
+                        addTerminalClickHandler.onAddTerminalClick(machineId);
+                    }
+                }
+            }, true);
+
+            /**
+             * This listener cancels mouse events on '+' button and prevents the jitter of the selection in the tree.
+             */
+            EventListener blockMouseListener = new EventListener() {
+                @Override
+                public void handleEvent(Event event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+            };
+
+            /**
+             * Prevent jitter when pressing mouse on '+' button.
+             */
+            newTerminalButton.addEventListener(Event.MOUSEDOWN, blockMouseListener, true);
+            newTerminalButton.addEventListener(Event.MOUSEUP, blockMouseListener, true);
+            newTerminalButton.addEventListener(Event.CLICK, blockMouseListener, true);
+            newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
+        }
+
+        /***************************************************************************
+         *
+         * SSH button
+         *
+         ***************************************************************************/
+        if (node.hasSSHAgent()) {
             SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
             sshButton.setTextContent("SSH");
             root.appendChild(sshButton);
@@ -163,41 +205,10 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
             }, true);
 
             Tooltip.create(sshButton,
-                           BOTTOM,
-                           MIDDLE,
-                           locale.connectViaSSH());
+                    BOTTOM,
+                    MIDDLE,
+                    locale.connectViaSSH());
         }
-
-        newTerminalButton.addEventListener(Event.CLICK, new EventListener() {
-            @Override
-            public void handleEvent(Event event) {
-                event.stopPropagation();
-                event.preventDefault();
-
-                if (addTerminalClickHandler != null) {
-                    addTerminalClickHandler.onAddTerminalClick(machineId);
-                }
-            }
-        }, true);
-
-        /**
-         * This listener cancels mouse events on '+' button and prevents the jitter of the selection in the tree.
-         */
-        EventListener blockMouseListener = new EventListener() {
-            @Override
-            public void handleEvent(Event event) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
-        };
-
-        /**
-         * Prevent jitter when pressing mouse on '+' button.
-         */
-        newTerminalButton.addEventListener(Event.MOUSEDOWN, blockMouseListener, true);
-        newTerminalButton.addEventListener(Event.MOUSEUP, blockMouseListener, true);
-        newTerminalButton.addEventListener(Event.CLICK, blockMouseListener, true);
-        newTerminalButton.addEventListener(Event.DBLCLICK, blockMouseListener, true);
 
         Element monitorsElement = Elements.createSpanElement(resources.getCss().machineMonitors());
         root.appendChild(monitorsElement);

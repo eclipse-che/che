@@ -27,6 +27,8 @@ export class CheWorkspace {
    * @ngInject for Dependency injection
    */
   constructor ($resource, $q, cheWebsocket, lodash, cheEnvironmentRegistry, $log) {
+    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR', 'SNAPSHOT_CREATING'];
+
     // keep resource
     this.$resource = $resource;
     this.$q = $q;
@@ -59,8 +61,7 @@ export class CheWorkspace {
         deleteProject: {method: 'DELETE', url : '/api/workspace/:workspaceId/project/:path'},
         stopWorkspace: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url : '/api/workspace/:workspaceId/runtime?environment=:envName'},
-        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
-        createSnapshot: {method: 'POST', url: '/api/workspace/:workspaceId/snapshot'}
+        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
       }
     );
 
@@ -475,7 +476,15 @@ export class CheWorkspace {
       this.websocketBusByWorkspaceId.set(workspaceId, bus);
 
       bus.subscribe('workspace:' + workspaceId, (message) => {
-        this.getWorkspaceById(workspaceId).status = message.eventType;
+
+        //Filter workspace events, which really indicate the status change:
+        if (this.workspaceStatuses.indexOf(message.eventType) >= 0) {
+          this.getWorkspaceById(workspaceId).status = message.eventType;
+        } else if (message.eventType === 'SNAPSHOT_CREATED') {
+          //Snapshot can be created for RUNNING workspace only. As far as snapshot creation is only the events, not the state,
+          //we introduced SNAPSHOT_CREATING status to be handled by UI, though it is fake one, and end of it is indicated by SNAPSHOT_CREATED.
+          this.getWorkspaceById(workspaceId).status = 'RUNNING';
+        }
 
         if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.eventType]) {
           return;
@@ -486,14 +495,4 @@ export class CheWorkspace {
       });
     }
   }
-
-  /**
-   * Create snapshot of workspace
-   * @param workspaceId {String} workspace id
-   * @returns {*}
-   */
-  createSnapshot(workspaceId) {
-    return this.remoteWorkspaceAPI.createSnapshot({workspaceId : workspaceId}, {}).$promise;
-  }
-
 }
