@@ -95,12 +95,12 @@ public class StripedLocks {
 
         private WriteLock(String key) {
             this.key = key;
-            striped.get(key).readLock().lock();
+            striped.get(key).writeLock().lock();
         }
 
         @Override
         public void close() {
-            striped.get(key).readLock().unlock();
+            striped.get(key).writeLock().unlock();
         }
     }
 
