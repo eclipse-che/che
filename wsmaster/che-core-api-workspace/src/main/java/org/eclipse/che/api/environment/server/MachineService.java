@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.machine.server.DtoConverter;
+import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.shared.dto.CommandDto;
 import org.eclipse.che.api.machine.shared.dto.MachineConfigDto;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
@@ -293,7 +294,7 @@ public class MachineService extends Service {
                    ServerException,
                    IOException {
 
-        addLogsToResponse(machineProcessManager.getProcessLogReader(machineId, pid), httpServletResponse);
+        addProcessLogsToResponse(machineId, pid, httpServletResponse);
     }
 
     /**
@@ -317,11 +318,15 @@ public class MachineService extends Service {
         }
     }
 
-    private void addLogsToResponse(Reader logsReader, HttpServletResponse httpServletResponse) throws IOException {
-        // Response is written directly to the servlet request stream
-        httpServletResponse.setContentType("text/plain");
-        CharStreams.copy(logsReader, httpServletResponse.getWriter());
-        httpServletResponse.getWriter().flush();
+    private void addProcessLogsToResponse(String machineId, int pid, HttpServletResponse httpServletResponse) throws IOException,
+                                                                                                                     NotFoundException,
+                                                                                                                     MachineException {
+        try (Reader logsReader = machineProcessManager.getProcessLogReader(machineId, pid)) {
+            // Response is written directly to the servlet request stream
+            httpServletResponse.setContentType("text/plain");
+            CharStreams.copy(logsReader, httpServletResponse.getWriter());
+            httpServletResponse.getWriter().flush();
+        }
     }
 
     /**
