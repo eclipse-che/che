@@ -33,7 +33,7 @@ import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
  * 
  * @author Bartlomiej Laczkowski
  */
-public interface IDebuggerDelegate {
+public interface IDbgDelegate {
 
     /**
      * Starts debugger when connection is established.

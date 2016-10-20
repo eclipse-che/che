@@ -23,20 +23,20 @@ public interface ZendDebugConfigurationPageView extends View<ZendDebugConfigurat
     String getClientHostIP();
 
     /** Sets client host/IP. */
-    void setClientHostIP(String host);
+    void setClientHostIP(String value);
 
     /** Returns debug port. */
     int getDebugPort();
 
     /** Sets debug port. */
-    void setDebugPort(int port);
+    void setDebugPort(int value);
 
-    /** Returns broadcast port. */
-    int getBroadcastPort();
-
-    /** Sets broadcast port. */
-    void setBroadcastPort(int port);
-
+    /** Returns 'Break at first line' flag state. */
+    boolean getBreakAtFirstLine();
+    
+    /** Sets 'Break at first line' flag state. */
+    void setBreakAtFirstLine(boolean value);
+    
     /** Returns 'use ssl encryption' flag state. */
     boolean getUseSslEncryption();
 
@@ -51,10 +51,10 @@ public interface ZendDebugConfigurationPageView extends View<ZendDebugConfigurat
 
         /** Called when 'Debug Port' has been changed. */
         void onDebugPortChanged();
-        
-        /** Called when 'Broadcast Port' has been changed. */
-        void onBroadcastPortChanged();
 
+        /** Called when 'Break at first line' flag has been changed. */
+        void onBreakAtFirstLineChanged(boolean value);
+        
         /** Called when 'Use SSL encryption' flag has been changed. */
         void onUseSslEncryptionChanged(boolean value);
     }

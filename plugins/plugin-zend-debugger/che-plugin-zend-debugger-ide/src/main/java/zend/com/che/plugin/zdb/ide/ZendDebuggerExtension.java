@@ -26,7 +26,7 @@ import org.eclipse.che.plugin.debugger.ide.fqn.FqnResolverFactory;
  * @author Bartlomiej Laczkowski
  */
 @Singleton
-@Extension(title = "Zend Debugger", version = "0.0.1")
+@Extension(title = "Zend Debugger", version = "1.0.0")
 public class ZendDebuggerExtension {
 
     @Inject

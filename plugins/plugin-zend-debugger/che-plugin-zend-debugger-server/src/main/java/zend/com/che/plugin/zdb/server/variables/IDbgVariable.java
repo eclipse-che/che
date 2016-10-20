@@ -8,24 +8,17 @@
  * Contributors:
  *   Zend Technologies - initial API and implementation
  *******************************************************************************/
-package zend.com.che.plugin.zdb.server.connection;
+package zend.com.che.plugin.zdb.server.variables;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.util.List;
 
-/**
- * Zend debug client side message.
- * 
- * @author Bartlomiej Laczkowski
- */
-public interface IDebugClientMessage extends IDebugMessage {
+public interface IDbgVariable extends IDbgExpression {
 
-	/**
-	 * Serialize this debug message to an output stream
-	 * 
-	 * @param out
-	 *            output stream this message is going to be written to
-	 */
-	public void serialize(DataOutputStream out) throws IOException;
+	String getName();
+	
+	List<String> getPath();
+	
+	@Override
+	List<IDbgVariable> getChildren();
 	
 }

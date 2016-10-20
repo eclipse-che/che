@@ -1,19 +1,17 @@
-<!-- Copyright (c) 2016 Codenvy, S.A. All rights reserved. This program 
-	and the accompanying materials are made available under the terms of the 
-	Eclipse Public License v1.0 which accompanies this distribution, and is available 
-	at http://www.eclipse.org/legal/epl-v10.html Contributors: Zend Technologies - 
-	initial API and implementation -->
+<!-- Copyright (c) 2016 Codenvy, S.A. All rights reserved. This program and 
+	the accompanying materials are made available under the terms of the Eclipse 
+	Public License v1.0 which accompanies this distribution, and is available 
+	at http://www.eclipse.org/legal/epl-v10.html Contributors: Zend Technologies 
+	- initial API and implementation -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
 	xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
 	<ui:with field='locale'
 		type='zend.com.che.plugin.zdb.ide.ZendDebuggerLocalizationConstant' />
-
 	<ui:style>
 	.label {
 		margin-bottom: 15px;
 	}
 	</ui:style>
-
 	<g:FlowPanel debugId="zendDebugConfigurationPageView-mainPanel">
 		<g:Label text="{locale.zendDebugConfigurationPageViewNotice}"
 			addStyleNames="{style.label}" />
@@ -21,8 +19,8 @@
 		<g:TextBox ui:field="clientHostIP" />
 		<g:Label text="{locale.zendDebugConfigurationPageViewDebugPortLabel}" />
 		<g:TextBox ui:field="debugPort" />
-		<g:Label text="{locale.zendDebugConfigurationPageViewBroadcastPortLabel}" />
-		<g:TextBox ui:field="broadcastPort" />
+		<g:CheckBox ui:field="breakAtFirstLine"
+			text="{locale.zendDebugConfigurationPageViewBreakAtFirstLineCheckbox}" />
 		<g:CheckBox ui:field="useSslEncryption"
 			text="{locale.zendDebugConfigurationPageViewUseSslEncryptionCheckbox}" />
 	</g:FlowPanel>

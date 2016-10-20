@@ -30,16 +30,16 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 @Singleton
 public class ZendDebugConfigurationType implements DebugConfigurationType {
 
-    public static final String DISPLAY_NAME = "PHP (Zend Debugger)";
+    public static final String DISPLAY_NAME = "PHP - Zend Debugger";
     
     public static final String ATTR_CLIENT_HOST_IP = "client-host-ip";
     public static final String ATTR_DEBUG_PORT = "debug-port";
-    public static final String ATTR_BROADCAST_PORT = "broadcast-port";
+    public static final String ATTR_BREAK_AT_FIRST_LINE = "break-at-first-line";
     public static final String ATTR_USE_SSL_ENCRYPTION = "use-ssl-encryption";
     
     public static final String DEFAULT_CLIENT_HOST_IP = "127.0.0.1";
     public static final String DEFAULT_DEBUG_PORT = "10137";
-    public static final String DEFAULT_BROADCAST_PORT = "20080";
+    public static final String DEFAULT_BREAK_AT_FIRST_LINE = "true";
     public static final String DEFAULT_USE_SSL_ENCRYPTION = "false";
 
     private final ZendDebugConfigurationPagePresenter page;
@@ -70,7 +70,7 @@ public class ZendDebugConfigurationType implements DebugConfigurationType {
     public static void setDefaults(DebugConfiguration configuration) {
 		configuration.getConnectionProperties().put(ATTR_CLIENT_HOST_IP, DEFAULT_CLIENT_HOST_IP);
 		configuration.getConnectionProperties().put(ATTR_DEBUG_PORT, DEFAULT_DEBUG_PORT);
-		configuration.getConnectionProperties().put(ATTR_BROADCAST_PORT, DEFAULT_BROADCAST_PORT);
+		configuration.getConnectionProperties().put(ATTR_BREAK_AT_FIRST_LINE, DEFAULT_BREAK_AT_FIRST_LINE);
 		configuration.getConnectionProperties().put(ATTR_USE_SSL_ENCRYPTION, DEFAULT_USE_SSL_ENCRYPTION);
     }
     

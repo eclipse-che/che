@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
  * 
  * @author Bartlomiej Laczkowski
  */
-public class ZendConnectionUtils {
+public class ZendDbgConnectionUtils {
 
 	public static final void writeString(DataOutputStream out, String line) throws IOException {
 		byte[] byteArray = line.getBytes(Charset.defaultCharset());
