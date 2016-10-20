@@ -19,6 +19,9 @@ import {CheNotification} from "../../../components/notification/che-notification
  * @author Oleksii Orel
  */
 export class StackController {
+  GENERAL_SCOPE: string = "general";
+  ADVANCED_SCOPE: string = "advanced";
+
   $log: ng.ILogService;
   $filter: ng.IFilterService;
   $timeout: ng.ITimeoutService;
@@ -127,6 +130,20 @@ export class StackController {
         this.invalidStack = error.statusText + error.status;
       }
     });
+  }
+
+  /**
+   * Sets scope for current stack
+   *
+   * @param scope {string} stack's scope
+   */
+  setStackScope(scope: string): void {
+    if (this.stack.scope === scope) {
+      return;
+    }
+
+    this.stack.scope = scope;
+    this.saveStack();
   }
 
   /**

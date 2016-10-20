@@ -50,9 +50,41 @@
     </div>
   </che-label-container>
 
+  <!-- stack's environment -->
+  <che-label-container che-label-name="Machines">
+    <workspace-environments ng-repeat="(environmentName, environmentValue) in stackController.stack.workspaceConfig.environments"
+                            environment-name="environmentName"
+                            workspace-config="stackController.stack.workspaceConfig"
+                            machines-view-status="stackController.machinesViewStatus"
+                            environment-on-change="stackController.saveStack()"></workspace-environments>
+  </che-label-container>
+  <!-- Commands -->
+  <che-label-container che-label-name="Commands"
+                       che-label-description="Commands define the commands available for workspace">
+    <list-commands commands-on-change="stackController.saveStack()"
+                   commands="stackController.stack.workspaceConfig.commands"></list-commands>
+  </che-label-container>
+  <!-- Category -->
+  <che-label-container che-label-name="Category"
+                       che-label-description="Define where the stack will be displayed for users.">
+    <div layout="raw" flex="100" class="stack-category">
+      <che-button-primary che-button-title="Ready-to-go"
+                          ng-show="stackController.stack.scope === stackController.GENERAL_SCOPE"
+                          ng-click="stackController.setStackScope(stackController.GENERAL_SCOPE)"></che-button-primary>
+      <che-button-primary-flat che-button-title="Ready-to-go"
+                               ng-show="stackController.stack.scope !== stackController.GENERAL_SCOPE"
+                               ng-click="stackController.setStackScope(stackController.GENERAL_SCOPE)"></che-button-primary-flat>
+      <che-button-primary che-button-title="Advanced"
+                          ng-show="stackController.stack.scope === stackController.ADVANCED_SCOPE"
+                          ng-click="stackController.setStackScope(stackController.ADVANCED_SCOPE)"></che-button-primary>
+      <che-button-primary-flat che-button-title="Advanced"
+                               ng-show="stackController.stack.scope !== stackController.ADVANCED_SCOPE"
+                               ng-click="stackController.setStackScope(stackController.ADVANCED_SCOPE)"></che-button-primary-flat>
+    </div>
+  </che-label-container>
   <!-- stack's tags -->
   <che-label-container ng-if="stackController.stack && stackController.stack.tags"
-                       che-label-description="Tags define the templates available for workspace"
+                       che-label-description="Tags define the templates available for workspace."
                        che-label-name="Tags">
     <div layout="column" flex="100" class="stack-tags">
       <md-chips flex name="stack's tags"
@@ -72,20 +104,6 @@
         <div class="stack-tags-reset" data-ng-click="stackController.resetTags()">Reset</div>
       </div>
     </div>
-  </che-label-container>
-  <!-- stack's environment -->
-  <che-label-container che-label-name="Environments">
-    <workspace-environments ng-repeat="(environmentName, environmentValue) in stackController.stack.workspaceConfig.environments"
-                            environment-name="environmentName"
-                            workspace-config="stackController.stack.workspaceConfig"
-                            machines-view-status="stackController.machinesViewStatus"
-                            environment-on-change="stackController.saveStack()"></workspace-environments>
-  </che-label-container>
-  <!-- Commands -->
-  <che-label-container che-label-name="Commands"
-                       che-label-description="Commands define the commands available for workspace">
-    <list-commands commands-on-change="stackController.saveStack()"
-                   commands="stackController.stack.workspaceConfig.commands"></list-commands>
   </che-label-container>
   <!-- Delete stack -->
   <che-label-container class="stack-delete-label"
