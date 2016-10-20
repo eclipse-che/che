@@ -863,7 +863,6 @@
                 <gwt.compiler.localWorkers>2 -T 1C</gwt.compiler.localWorkers>
                 <license.skip>true</license.skip>
                 <mdep.analyze.skip>true</mdep.analyze.skip>
-                <skip-validate-sources>true</skip-validate-sources>
                 <skipTests>true</skipTests>
             </properties>
         </profile>
