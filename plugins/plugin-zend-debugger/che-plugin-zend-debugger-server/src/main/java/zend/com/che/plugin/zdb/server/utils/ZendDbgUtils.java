@@ -32,7 +32,7 @@ import com.google.inject.Singleton;
  * @author Bartlomiej Laczkowski
  */
 @Singleton
-public class ZendDebugUtils {
+public class ZendDbgUtils {
 
 	private static ProjectManager projectManager;
 	
@@ -42,6 +42,11 @@ public class ZendDebugUtils {
 	public static final String THIS = "$this"; //$NON-NLS-1$
 	public static final String CLASS_INDICATOR = "<class>"; //$NON-NLS-1$
 
+	@Inject
+	public ZendDbgUtils(ProjectManager projectManager) {
+		ZendDbgUtils.projectManager = projectManager;
+	}
+	
 	/**
 	 * Checks if given variable name is a name of super global variable.
 	 * 
@@ -65,11 +70,6 @@ public class ZendDebugUtils {
 	 */
 	public static boolean isThis(String name) {
 		return THIS.equalsIgnoreCase(name);
-	}
-
-	@Inject
-	public ZendDebugUtils(ProjectManager projectManager) {
-		ZendDebugUtils.projectManager = projectManager;
 	}
 
 	public static String getLocalPath(String remotePath) {

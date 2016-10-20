@@ -27,8 +27,8 @@ public interface ZendDebuggerLocalizationConstant extends com.google.gwt.i18n.cl
     @Key("view.zendDebugConfigurationPage.debugPortLabel")
     String zendDebugConfigurationPageViewDebugPortLabel();
     
-    @Key("view.zendDebugConfigurationPage.broadcastPortLabel")
-    String zendDebugConfigurationPageViewBroadcastPortLabel();
+    @Key("view.zendDebugConfigurationPage.breakAtFirstLineCheckbox")
+    String zendDebugConfigurationPageViewBreakAtFirstLineCheckbox();
     
     @Key("view.zendDebugConfigurationPage.useSslEncryptionCheckbox")
     String zendDebugConfigurationPageViewUseSslEncryptionCheckbox();

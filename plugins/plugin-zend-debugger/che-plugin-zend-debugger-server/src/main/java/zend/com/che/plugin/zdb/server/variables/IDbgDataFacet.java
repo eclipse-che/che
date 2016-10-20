@@ -8,7 +8,7 @@
  * Contributors:
  *   Zend Technologies - initial API and implementation
  *******************************************************************************/
-package zend.com.che.plugin.zdb.server.connection;
+package zend.com.che.plugin.zdb.server.variables;
 
 /**
  * Common interface for debug variables that might be described with the use of
@@ -17,7 +17,7 @@ package zend.com.che.plugin.zdb.server.connection;
  * 
  * @author Bartlomiej Laczkowski
  */
-public interface IDebugDataFacet {
+public interface IDbgDataFacet {
 
 	/**
 	 * Variable facets.

@@ -18,18 +18,13 @@ import org.eclipse.che.api.debug.shared.model.Variable;
 import org.eclipse.che.api.debug.shared.model.VariablePath;
 import org.eclipse.che.api.debug.shared.model.impl.VariablePathImpl;
 
-import zend.com.che.plugin.zdb.server.connection.IDebugExpression;
-import zend.com.che.plugin.zdb.server.connection.IDebugExpressionValue;
-import zend.com.che.plugin.zdb.server.connection.ZendDebugExpressionResolver;
-
 /**
  * Debug Zend variable.
  * 
  * @author Bartlomiej Laczkowski
  */
-public class ZendDebugVariable implements Variable {
-	private final IDebugExpression expression;
-	private final ZendDebugExpressionResolver expressionResolver;
+public class ZendDebuggerVariable implements Variable {
+	private final IDbgVariable zendDbgVariable;
 	private String name;
 	private boolean isExistInformation;
 	private String value;
@@ -39,22 +34,16 @@ public class ZendDebugVariable implements Variable {
 	private List<Variable> variables;
 	private VariablePath variablePath;
 
-	public ZendDebugVariable(VariablePath variablePath, IDebugExpression expression, ZendDebugExpressionResolver expressionResolver) {
+	public ZendDebuggerVariable(VariablePath variablePath, IDbgVariable expression) {
 		this.variablePath = variablePath;
-		this.expression = expression;
-		this.expressionResolver = expressionResolver;
-		create();
-	}
-
-	private void create() {
-		IDebugExpressionValue expressionValue = expression.getValue();
-		this.name = expression.getName();
-		this.value = expressionValue.getValue();
-		this.type = expressionValue.getDataType().getText();
-		this.hasVariables = expressionValue.getChildrenCount() > 0;
+		this.zendDbgVariable = expression;
+		this.name = zendDbgVariable.getName();
+		this.value = zendDbgVariable.getValue();
+		this.type = zendDbgVariable.getDataType().getText();
+		this.hasVariables = zendDbgVariable.getChildrenCount() > 0;
 		this.variablePath = new VariablePathImpl(name);
 		this.isExistInformation = true;
-		switch (expressionValue.getDataType()) {
+		switch (zendDbgVariable.getDataType()) {
 		case PHP_BOOL:
 		case PHP_FLOAT:
 		case PHP_INT:
@@ -115,11 +104,9 @@ public class ZendDebugVariable implements Variable {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof ZendDebugVariable))
+		if (!(o instanceof ZendDebuggerVariable))
 			return false;
-
-		ZendDebugVariable variable = (ZendDebugVariable) o;
-
+		ZendDebuggerVariable variable = (ZendDebuggerVariable) o;
 		if (isExistInformation != variable.isExistInformation)
 			return false;
 		if (isPrimitive != variable.isPrimitive)
@@ -149,11 +136,11 @@ public class ZendDebugVariable implements Variable {
 
 	private List<Variable> fetchVariables() {
 		List<Variable> children = new ArrayList<>();
-		expressionResolver.resolve(expression, 1);
-		for (IDebugExpression child : expression.getValue().getChildren()) {
+		zendDbgVariable.resolve();
+		for (IDbgVariable child : zendDbgVariable.getChildren()) {
 			List<String> childPath = new ArrayList<>(variablePath.getPath());
 			childPath.add(child.getName());
-			children.add(new ZendDebugVariable(new VariablePathImpl(childPath), child, expressionResolver));
+			children.add(new ZendDebuggerVariable(new VariablePathImpl(childPath), child));
 		}
 		return children;
 	}

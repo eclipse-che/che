@@ -14,13 +14,17 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.URLDecoder;
 
+import zend.com.che.plugin.zdb.server.connection.ZendDbgClientMessages.GetLocalFileContentResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgClientMessages.IDbgClientResponse;
+
 /**
  * Zend debug engine messages container.
  * 
  * @author Bartlomiej Laczkowski
  */
-public class ZendEngineMessages {
+public class ZendDbgEngineMessages {
 
+	// Notification types
 	public static final int NOTIFICATION_SRIPT_ENDED = 2002;
 	public static final int NOTIFICATION_READY = 2003;
 	public static final int NOTIFICATION_OUTPUT = 2004;
@@ -31,10 +35,9 @@ public class ZendEngineMessages {
 	public static final int NOTIFICATION_START_PROCESS_FILE = 2009;
 	public static final int NOTIFICATION_INI_ALTERED = 2011;
 	public static final int NOTIFICATION_CLOSE_MESSAGE_HANDLER = 0;
-	
+	// Response types
 	public static final int RESPONSE_START = 1001;
 	public static final int RESPONSE_PAUSE_DEBUGGER = 1002;
-	public static final int RESPONSE_CLOSE_SESSION = 1003;
 	public static final int RESPONSE_STEP_INTO = 1011;
 	public static final int RESPONSE_STEP_OVER = 1012;
 	public static final int RESPONSE_STEP_OUT = 1013;
@@ -51,8 +54,63 @@ public class ZendEngineMessages {
 	public static final int RESPONSE_ADD_FILES = 1038;
 	public static final int RESPONSE_SET_PROTOCOL = 11000;
 	public static final int RESPONSE_UNKNOWN = 1000;
+	// Request types
+	public static final int REQUEST_GET_LOCAL_FILE_CONTENT = 10002;
 	
-	private static abstract class AbstractEngineResponse extends AbstractMessage implements IDebugEngineResponse {
+	public interface IDbgEngineMessage extends IDbgMessage {
+
+		/**
+		 * De-serialize this debug message from an input stream
+		 * 
+		 * @param in
+		 *            input stream this message is going to be read from
+		 */
+		public void deserialize(DataInputStream in) throws IOException;
+		
+	}
+	
+	public interface IDbgEngineNotification extends IDbgEngineMessage {}
+	
+	public interface IDbgEngineRequest<T extends IDbgClientResponse> extends IDbgEngineMessage {
+		
+		/**
+		 * Return the request id.
+		 */
+		public int getID();
+		
+	}
+	
+	public interface IDbgEngineResponse extends IDbgEngineMessage {
+
+		/**
+		 * Return the response id.
+		 */
+		public int getID();
+
+		/**
+		 * Return the response status.
+		 */
+		public int getStatus();
+		
+	}
+	
+	private static abstract class AbstractEngineRequest<T extends IDbgClientResponse> extends AbstractDbgMessage implements IDbgEngineRequest<T> {
+		
+		private int id;
+		
+		@Override
+		public void deserialize(DataInputStream in) throws IOException {
+			id = in.readInt();
+		}
+		
+		@Override
+		public int getID() {
+			return id;
+		}
+		
+	}
+	
+	private static abstract class AbstractEngineResponse extends AbstractDbgMessage implements IDbgEngineResponse {
 	
 		protected int id;
 		protected int status;
@@ -74,12 +132,12 @@ public class ZendEngineMessages {
 		}
 	}
 
-	private ZendEngineMessages() {
+	private ZendDbgEngineMessages() {
 	}
 	
 	// Engine notifications
 
-	public static class DebuggerErrorNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class DebuggerErrorNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		private int errorLevel = 0;
 		private String errorText;
@@ -92,7 +150,7 @@ public class ZendEngineMessages {
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
 			errorLevel = in.readInt();
-			errorText = ZendConnectionUtils.readString(in);
+			errorText = ZendDbgConnectionUtils.readString(in);
 		}
 
 		public int getErrorLevel() {
@@ -104,7 +162,7 @@ public class ZendEngineMessages {
 		}
 	}
 
-	public static class ScriptEndedNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class ScriptEndedNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		private int status;
 
@@ -123,7 +181,7 @@ public class ZendEngineMessages {
 		}
 	}
 
-	public static class SessionStartedNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class SessionStartedNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		private String fileName = "";
 		private String uri = "";
@@ -139,10 +197,10 @@ public class ZendEngineMessages {
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
 			protocolID = in.readInt();
-			fileName = ZendConnectionUtils.readString(in);
-			uri = ZendConnectionUtils.readString(in);
-			query = URLDecoder.decode(ZendConnectionUtils.readString(in), "UTF-8");
-			additionalOptions = ZendConnectionUtils.readString(in);
+			fileName = ZendDbgConnectionUtils.readString(in);
+			uri = ZendDbgConnectionUtils.readString(in);
+			query = URLDecoder.decode(ZendDbgConnectionUtils.readString(in), "UTF-8");
+			additionalOptions = ZendDbgConnectionUtils.readString(in);
 		}
 
 		public String getFileName() {
@@ -166,7 +224,7 @@ public class ZendEngineMessages {
 		}
 	}
 
-	public static class HeaderOutputNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class HeaderOutputNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		private String output;
 
@@ -177,7 +235,7 @@ public class ZendEngineMessages {
 
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
-			output = ZendConnectionUtils.readString(in);
+			output = ZendDbgConnectionUtils.readString(in);
 		}
 
 		public String getOutput() {
@@ -185,7 +243,7 @@ public class ZendEngineMessages {
 		}
 	}
 
-	public static class IniAlteredNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class IniAlteredNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		private String name;
 		private String oldValue;
@@ -198,9 +256,9 @@ public class ZendEngineMessages {
 
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
-			name = ZendConnectionUtils.readString(in);
-			oldValue = ZendConnectionUtils.readString(in);
-			newValue = ZendConnectionUtils.readString(in);
+			name = ZendDbgConnectionUtils.readString(in);
+			oldValue = ZendDbgConnectionUtils.readString(in);
+			newValue = ZendDbgConnectionUtils.readString(in);
 		}
 
 		public String getName() {
@@ -216,7 +274,7 @@ public class ZendEngineMessages {
 		}
 	}
 
-	public static class OutputNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class OutputNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		private String output = null;
 
@@ -227,7 +285,7 @@ public class ZendEngineMessages {
 
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
-			output = ZendConnectionUtils.readEncodedString(in, getTransferEncoding());
+			output = ZendDbgConnectionUtils.readEncodedString(in, getTransferEncoding());
 		}
 
 		public String getOutput() {
@@ -235,7 +293,7 @@ public class ZendEngineMessages {
 		}
 	}
 
-	public static class ParsingErrorNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class ParsingErrorNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		private int errorLevel = 0;
 		private String fileName;
@@ -250,9 +308,9 @@ public class ZendEngineMessages {
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
 			errorLevel = in.readInt();
-			fileName = ZendConnectionUtils.readString(in);
+			fileName = ZendDbgConnectionUtils.readString(in);
 			lineNumber = in.readInt();
-			errorText = ZendConnectionUtils.readString(in);
+			errorText = ZendDbgConnectionUtils.readString(in);
 		}
 
 		public int getErrorLevel() {
@@ -272,7 +330,7 @@ public class ZendEngineMessages {
 		}
 	}
 
-	public static class ReadyNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class ReadyNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		private String fileName;
 		private int lineNumber;
@@ -284,7 +342,7 @@ public class ZendEngineMessages {
 
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
-			fileName  = ZendConnectionUtils.readString(in);
+			fileName  = ZendDbgConnectionUtils.readString(in);
 			lineNumber = in.readInt();
 			in.readInt(); // Read the 4 bytes of the watched-list length. this is 0 now.
 		}
@@ -298,7 +356,7 @@ public class ZendEngineMessages {
 		}
 	}
 
-	public static class StartProcessFileNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class StartProcessFileNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		private String fileName;
 
@@ -309,7 +367,7 @@ public class ZendEngineMessages {
 
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
-			fileName = ZendConnectionUtils.readString(in);
+			fileName = ZendDbgConnectionUtils.readString(in);
 		}
 
 		public String getFileName() {
@@ -318,7 +376,7 @@ public class ZendEngineMessages {
 	}
 	
 	// Phantom message used to notify that connection was closed
-	public static class CloseMessageHandlerNotification extends AbstractMessage implements IDebugEngineNotification {
+	public static class CloseMessageHandlerNotification extends AbstractDbgMessage implements IDbgEngineNotification {
 
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
@@ -397,7 +455,7 @@ public class ZendEngineMessages {
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
 			super.deserialize(in);
-			result = ZendConnectionUtils.readString(in);
+			result = ZendDbgConnectionUtils.readString(in);
 		}
 
 		public String getResult() {
@@ -418,16 +476,16 @@ public class ZendEngineMessages {
 			// Just read data for now and do nothing with it...
 			int depth = in.readInt();
 			for (int i = 0; i < depth; i++) {
-				ZendConnectionUtils.readString(in);
+				ZendDbgConnectionUtils.readString(in);
 				in.readInt();
-				ZendConnectionUtils.readString(in);
-				ZendConnectionUtils.readString(in);
+				ZendDbgConnectionUtils.readString(in);
+				ZendDbgConnectionUtils.readString(in);
 				in.readInt();
-				ZendConnectionUtils.readString(in);
+				ZendDbgConnectionUtils.readString(in);
 				int params = in.readInt();
 				for (int j = 0; j < params; j++) {
-					ZendConnectionUtils.readEncodedString(in, getTransferEncoding());
-					ZendConnectionUtils.readStringAsBytes(in);
+					ZendDbgConnectionUtils.readEncodedString(in, getTransferEncoding());
+					ZendDbgConnectionUtils.readStringAsBytes(in);
 				}
 			}
 		}
@@ -445,7 +503,7 @@ public class ZendEngineMessages {
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
 			super.deserialize(in);
-			cwd = ZendConnectionUtils.readString(in);
+			cwd = ZendDbgConnectionUtils.readString(in);
 		}
 
 		public String getCWD() {
@@ -465,7 +523,7 @@ public class ZendEngineMessages {
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
 			super.deserialize(in);
-			varResult = ZendConnectionUtils.readStringAsBytes(in);
+			varResult = ZendDbgConnectionUtils.readStringAsBytes(in);
 		}
 
 		public byte[] getVarResult() {
@@ -485,7 +543,7 @@ public class ZendEngineMessages {
 		@Override
 		public void deserialize(DataInputStream in) throws IOException {
 			super.deserialize(in);
-			variableValue = ZendConnectionUtils.readStringAsBytes(in);
+			variableValue = ZendDbgConnectionUtils.readStringAsBytes(in);
 		}
 
 		public byte[] getVariableValue() {
@@ -561,14 +619,6 @@ public class ZendEngineMessages {
 		}
 	}
 
-	public static class CloseSessionResponse extends AbstractEngineResponse {
-
-		@Override
-		public int getType() {
-			return RESPONSE_CLOSE_SESSION;
-		}
-	}
-
 	public static class UnknownMessageResponse extends AbstractEngineResponse {
 
 		private int origint;
@@ -589,7 +639,42 @@ public class ZendEngineMessages {
 		}
 	}
 	
-	public static IDebugEngineMessage create(int type) {
+	// Engine requests
+	
+	public static class GetLocalFileContentRequest extends AbstractEngineRequest<GetLocalFileContentResponse> {
+
+		private String fileName;
+		private int size;
+		private int checkSum;
+		
+		@Override
+		public int getType() {
+			return REQUEST_GET_LOCAL_FILE_CONTENT;
+		}
+		
+		@Override
+		public void deserialize(DataInputStream in) throws IOException {
+			super.deserialize(in);
+			fileName = ZendDbgConnectionUtils.readString(in);
+			size = in.readInt();
+			checkSum = in.readInt();
+		}
+		
+		public String getFileName() {
+			return fileName;
+		}
+
+		public int getSize() {
+			return size;
+		}
+
+		public int getCheckSum() {
+			return checkSum;
+		}
+
+	}
+	
+	public static IDbgEngineMessage create(int type) {
 		switch (type) {
 		// Engine notifications
 		case NOTIFICATION_DEBUGGER_ERROR:
@@ -645,8 +730,9 @@ public class ZendEngineMessages {
 			return new StepOutResponse();
 		case RESPONSE_STEP_OVER:
 			return new StepOverResponse();
-		case RESPONSE_CLOSE_SESSION:
-			return new CloseSessionResponse();
+		// Engine requests
+		case REQUEST_GET_LOCAL_FILE_CONTENT:
+			return new GetLocalFileContentRequest();
 		}
 		return null;
 	}

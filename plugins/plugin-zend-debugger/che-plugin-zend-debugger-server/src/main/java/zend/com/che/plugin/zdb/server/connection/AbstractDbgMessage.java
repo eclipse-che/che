@@ -15,7 +15,7 @@ package zend.com.che.plugin.zdb.server.connection;
  * 
  * @author Bartlomiej Laczkowski
  */
-public abstract class AbstractMessage implements IDebugMessage {
+public abstract class AbstractDbgMessage implements IDbgMessage {
 
 	@Override
 	public String getTransferEncoding() {
