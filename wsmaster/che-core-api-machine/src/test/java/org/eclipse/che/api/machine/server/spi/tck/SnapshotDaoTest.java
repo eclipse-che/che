@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.machine.server.spi.tck;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 
 import org.eclipse.che.api.core.NotFoundException;
@@ -30,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -178,6 +180,22 @@ public class SnapshotDaoTest {
     @Test(expectedExceptions = NullPointerException.class)
     public void shouldThrowNpeWhenRemovingNull() throws Exception {
         snapshotDao.removeSnapshot(null);
+    }
+
+    @Test(dependsOnMethods = "shouldFindSnapshotsByWorkspaceAndNamespace")
+    public void replacesSnapshots() throws Exception {
+        final SnapshotImpl newSnapshot = createSnapshot("new-snapshot",
+                                                        snapshots[0].getWorkspaceId(),
+                                                        snapshots[0].getEnvName(),
+                                                        snapshots[0].getMachineName());
+
+        final List<SnapshotImpl> replaced = snapshotDao.replaceSnapshots(newSnapshot.getWorkspaceId(),
+                                                                         newSnapshot.getEnvName(),
+                                                                         singletonList(newSnapshot));
+
+        assertEquals(new HashSet<>(replaced), Sets.newHashSet(snapshots[0], snapshots[1]));
+        assertEquals(new HashSet<>(snapshotDao.findSnapshots(snapshots[0].getWorkspaceId())),
+                     Sets.newHashSet(newSnapshot, snapshots[2]));
     }
 
     @DataProvider(name = "missingSnapshots")

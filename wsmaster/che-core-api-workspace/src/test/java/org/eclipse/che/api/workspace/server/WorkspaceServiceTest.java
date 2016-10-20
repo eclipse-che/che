@@ -471,7 +471,7 @@ public class WorkspaceServiceTest {
                                          .delete(SECURE_PATH + "/workspace/" + workspace.getId() + "/runtime");
 
         assertEquals(response.getStatusCode(), 204);
-        verify(wsManager).stopWorkspace(workspace.getId());
+        verify(wsManager).stopWorkspace(workspace.getId(), null);
     }
 
     @Test
