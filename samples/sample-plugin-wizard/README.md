@@ -126,6 +126,10 @@ mvn clean install
 cd che/assembly/assembly-wsagent-war
 mvn clean install
 
+# Creates a new workspace agent that includes new web app w/ your extension
+cd assembly/assembly-wsagent-server
+mvn clean install
+
 # Create a new Che assembly that includes all new server- and client-side extensions
 cd assembly/assembly-main
 mvn clean install
