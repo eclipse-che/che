@@ -16,6 +16,7 @@
  * @description This class is handling the controller for workspace creation
  * @author Ann Shumilova
  * @author Oleksii Orel
+ * @author Anatolii Bazko
  */
 export class CreateWorkspaceController {
 
@@ -23,13 +24,17 @@ export class CreateWorkspaceController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location, cheAPI, cheNotification, lodash, $rootScope, cheEnvironmentRegistry) {
+  constructor($location, $timeout, $log, $mdDialog, cheAPI, cheNotification, lodash, $rootScope, cheEnvironmentRegistry, createProjectProgressorSvc) {
     this.$location = $location;
+    this.$timeout = $timeout;
+    this.$mdDialog = $mdDialog;
+    this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
     this.lodash = lodash;
     this.$rootScope = $rootScope;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
+    this.createProjectProgressorSvc = createProjectProgressorSvc;
     this.stackMachines = {};
 
     this.selectSourceOption = 'select-source-recipe';
@@ -55,6 +60,8 @@ export class CreateWorkspaceController {
     this.recipeFormat = null;
     this.importWorkspace = '';
     this.defaultWorkspaceName = null;
+
+    this.resetCreateProgress();
 
     this.usedNamesList = [];
     cheAPI.cheWorkspace.fetchWorkspaces().then(() => {
@@ -156,8 +163,6 @@ export class CreateWorkspaceController {
     } else if (this.selectSourceOption === 'select-source-import') {
       this.importWorkspaceConfig.name = this.workspaceName;
       this.setEnvironment(this.importWorkspaceConfig);
-      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, this.importWorkspaceConfig);
-      this.redirectAfterSubmitWorkspace(creationPromise);
     } else {
       //check predefined recipe location
       if (this.stack && this.stack.source && this.stack.source.type === 'location') {
@@ -310,5 +315,37 @@ export class CreateWorkspaceController {
     let recipeType = environment.recipe.type;
     let environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(recipeType);
     workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, this.getMachines(environment));
+  }
+
+  getStepText(stepNumber) {
+    return this.createProjectProgressorSvc.getStepText(stepNumber);
+  }
+
+  getCreationSteps() {
+    return this.createProjectProgressorSvc.getProjectCreationSteps();
+  }
+
+  getCurrentProgressStep() {
+    return this.createProjectProgressorSvc.getCurrentProgressStep();
+  }
+
+  isCreateProjectInProgress() {
+    return this.createProjectProgressorSvc.isCreateProjectInProgress();
+  }
+
+  setCreateProjectInProgress() {
+    this.createProjectProgressorSvc.setCreateProjectInProgress(true);
+  }
+
+  getWorkspaceOfProject() {
+    return this.createProjectProgressorSvc.getWorkspaceOfProject();
+  }
+
+  getIDELink() {
+    return this.createProjectProgressorSvc.getIDELink();
+  }
+
+  resetCreateProgress() {
+    this.createProjectProgressorSvc.resetCreateProgress();
   }
 }

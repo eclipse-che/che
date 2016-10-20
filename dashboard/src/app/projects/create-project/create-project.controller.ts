@@ -20,7 +20,8 @@ export class CreateProjectController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory, $window, cheEnvironmentRegistry) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope,
+              createProjectProgressorSvc, createProjectSvc, lodash, cheNotification, $q, $log, $document, $window, cheEnvironmentRegistry) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -30,6 +31,7 @@ export class CreateProjectController {
     this.$mdDialog = $mdDialog;
     this.$scope = $scope;
     this.$rootScope = $rootScope;
+    this.createProjectProgressorSvc = createProjectProgressorSvc;
     this.createProjectSvc = createProjectSvc;
     this.lodash = lodash;
     this.cheNotification = cheNotification;
@@ -213,8 +215,8 @@ export class CreateProjectController {
   updateData() {
     this.workspaceResource = this.workspaces.length > 0 ? 'existing-workspace' : 'from-stack';
     //if create project in progress and workspace have started
-    if (this.createProjectSvc.isCreateProjectInProgress() && this.createProjectSvc.getCurrentProgressStep() > 0) {
-      let workspaceName = this.createProjectSvc.getWorkspaceOfProject();
+    if (this.createProjectProgressorSvc.isCreateProjectInProgress() && this.createProjectProgressorSvc.getCurrentProgressStep() > 0) {
+      let workspaceName = this.createProjectProgressorSvc.getWorkspaceOfProject();
       let findWorkspace = this.lodash.find(this.workspaces, (workspace) => {
         return workspace.config.name === workspaceName;
       });
@@ -344,7 +346,7 @@ export class CreateProjectController {
 
   startWorkspace(bus, workspace) {
     // then we've to start workspace
-    this.createProjectSvc.setCurrentProgressStep(1);
+    this.createProjectProgressorSvc.setCurrentProgressStep(1);
 
     let statusLink = this.lodash.find(workspace.links, (link) => {
       return link.rel === 'environment.status_channel';
@@ -362,8 +364,8 @@ export class CreateProjectController {
 
     this.listeningChannels.push(agentChannel);
     bus.subscribe(agentChannel, (message) => {
-      if (this.createProjectSvc.getCurrentProgressStep() < 2) {
-        this.createProjectSvc.setCurrentProgressStep(2);
+      if (this.createProjectProgressorSvc.getCurrentProgressStep() < 2) {
+        this.createProjectProgressorSvc.setCurrentProgressStep(2);
       }
       let agentStep = 2;
       if (this.getCreationSteps()[agentStep].logs.length > 0) {
@@ -470,9 +472,10 @@ export class CreateProjectController {
   }
 
   createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
+    projectData.name = projectName;
     this.updateRecentWorkspace(workspaceId);
 
-    this.createProjectSvc.setCurrentProgressStep(3);
+    this.createProjectProgressorSvc.setCurrentProgressStep(3);
 
     var promise;
     var channel = null;
@@ -499,44 +502,19 @@ export class CreateProjectController {
         this.getCreationSteps()[this.getCurrentProgressStep()].logs = message.line;
       });
 
-      let deferredImport = this.$q.defer();
-      let deferredImportPromise = deferredImport.promise;
-      let deferredAddCommand = this.$q.defer();
-      let deferredAddCommandPromise = deferredAddCommand.promise;
-      let deferredResolve = this.$q.defer();
-      let deferredResolvePromise = deferredResolve.promise;
-
-      let importPromise = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject().importProject(projectName, projectData.source);
-
-      importPromise.then(() => {
-        // add commands if there are some that have been defined
-        let commands = projectData.project.commands;
-        if (commands && commands.length > 0) {
-          this.addCommand(workspaceId, projectName, commands, 0, deferredAddCommand);
-        } else {
-          deferredAddCommand.resolve('no commands to add');
-        }
-        deferredImport.resolve();
-      }, (error) => {
-        deferredImport.reject(error);
-      });
-
-      // now, resolve the project
-      deferredImportPromise.then(() => {
-        this.resolveProjectType(workspaceId, projectName, projectData, deferredResolve);
-      });
-      promise = this.$q.all([deferredImportPromise, deferredAddCommandPromise, deferredResolvePromise]);
+      promise = this.createProjectSvc.importProject(workspaceId, projectData);
     }
+
     promise.then(() => {
       this.cheAPI.getWorkspace().fetchWorkspaces();
 
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
-      this.createProjectSvc.setCurrentProgressStep(4);
+      this.createProjectProgressorSvc.setCurrentProgressStep(4);
 
       // redirect to IDE from crane loader page
       let currentPath = this.$location.path();
       if (/create-project/.test(currentPath)) {
-        this.createProjectSvc.redirectToIDE();
+        this.createProjectProgressorSvc.redirectToIDE();
       }
     }, (error) => {
       this.cleanupChannels(websocketStream, workspaceBus, bus, channel);
@@ -556,120 +534,6 @@ export class CreateProjectController {
     });
 
   }
-
-  resolveProjectType(workspaceId, projectName, projectData, deferredResolve) {
-    let projectDetails = projectData.project;
-    if (!projectDetails.attributes) {
-      projectDetails.source = projectData.source;
-      projectDetails.attributes = {};
-    }
-
-    let projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject();
-    let projectTypeService = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProjectType();
-
-    if (projectDetails.type) {
-      let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
-      updateProjectPromise.then(() => {
-        deferredResolve.resolve();
-      }, (error) => {
-        deferredResolve.reject(error);
-      });
-      return;
-    }
-
-    let resolvePromise = projectService.fetchResolve(projectName);
-    resolvePromise.then(() => {
-      let resultResolve = projectService.getResolve(projectName);
-      // get project-types
-      let fetchTypePromise = projectTypeService.fetchTypes();
-      fetchTypePromise.then(() => {
-        let projectTypesByCategory = projectTypeService.getProjectTypesIDs();
-
-        let estimatePromises = [];
-        let estimateTypes = [];
-        resultResolve.forEach((sourceResolve) => {
-          // add attributes if any
-          if (sourceResolve.attributes && Object.keys(sourceResolve.attributes).length > 0) {
-            for (let attributeKey in sourceResolve.attributes) {
-              projectDetails.attributes[attributeKey] = sourceResolve.attributes[attributeKey];
-            }
-          }
-          let projectType = projectTypesByCategory.get(sourceResolve.type);
-          if (projectType.primaryable) {
-            // call estimate
-            let estimatePromise = projectService.fetchEstimate(projectName, sourceResolve.type);
-            estimatePromises.push(estimatePromise);
-            estimateTypes.push(sourceResolve.type);
-          }
-        });
-
-        if (estimateTypes.length > 0) {
-          // wait estimate are all finished
-          let waitEstimate = this.$q.all(estimatePromises);
-          let attributesByMatchingType = new Map();
-
-          waitEstimate.then(() => {
-            let firstMatchingType;
-            estimateTypes.forEach((type) => {
-              let resultEstimate = projectService.getEstimate(projectName, type);
-              // add attributes
-              if (Object.keys(resultEstimate.attributes).length > 0) {
-                attributesByMatchingType.set(type, resultEstimate.attributes);
-              }
-            });
-
-            attributesByMatchingType.forEach((attributes, type) => {
-              if (!firstMatchingType) {
-                let projectType = projectTypesByCategory.get(type);
-                if (projectType && projectType.parents) {
-                  projectType.parents.forEach((parentType) => {
-                    if (parentType === 'java') {
-                      let additionalType = 'maven';
-                      if (attributesByMatchingType.get(additionalType)) {
-                        firstMatchingType = additionalType;
-                      }
-                    }
-                    if (!firstMatchingType) {
-                      firstMatchingType = attributesByMatchingType.get(parentType) ? parentType : type;
-                    }
-                  });
-                } else {
-                  firstMatchingType = type;
-                }
-              }
-            });
-
-            if (firstMatchingType) {
-              projectDetails.attributes = attributesByMatchingType.get(firstMatchingType);
-              projectDetails.type = firstMatchingType;
-            let updateProjectPromise = projectService.updateProject(projectName, projectDetails);
-            updateProjectPromise.then(() => {
-              deferredResolve.resolve();
-            }, (error) => {
-              this.$log.log('Update project error', projectDetails, error);
-              //a second attempt with type blank
-              projectDetails.attributes = {};
-              projectDetails.type = 'blank';
-              projectService.updateProject(projectName, projectDetails).then(() => {
-                deferredResolve.resolve();
-              }, (error) => {
-                deferredResolve.reject(error);
-              });
-            });
-          } else {
-            deferredResolve.resolve();
-          }
-          });
-        } else {
-          deferredResolve.resolve();
-        }
-      });
-
-    }, (error) => {
-      deferredResolve.reject(error);
-    });
-  }
-
 
   /**
    * Show the add ssh key dialog
@@ -710,49 +574,6 @@ export class CreateProjectController {
     }
 
 
-  }
-
-
-  /**
-   * Add commands sequentially by iterating on the number of the commands.
-   * Wait the ack of remote addCommand before adding a new command to avoid concurrent access
-   * @param workspaceId the ID of the workspace to use for adding commands
-   * @param projectName the name that will be used to prefix the commands inserted
-   * @param commands the array to follow
-   * @param index the index of the array of commands to register
-   */
-  addCommand(workspaceId, projectName, commands, index, deferred) {
-    if (index < commands.length) {
-      let newCommand = angular.copy(commands[index]);
-
-      // Update project command lines using current.project.path with actual path based on workspace runtime configuration
-      // so adding the same project twice allow to use commands for each project without first selecting project in tree
-      let workspace = this.cheAPI.getWorkspace().getWorkspaceById(workspaceId);
-      if (workspace && workspace.runtime) {
-        let runtime = workspace.runtime.devMachine.runtime;
-        if (runtime) {
-          let envVar = runtime.envVariables;
-          if (envVar) {
-            let cheProjectsRoot = envVar['CHE_PROJECTS_ROOT'];
-            if (cheProjectsRoot) {
-              // replace current project path by the full path of the project
-              let projectPath = cheProjectsRoot + '/' + projectName;
-              newCommand.commandLine = newCommand.commandLine.replace(/\$\{current.project.path\}/g, projectPath);
-            }
-          }
-        }
-      }
-      newCommand.name = projectName + ': ' + newCommand.name;
-      var addPromise = this.cheAPI.getWorkspace().addCommand(workspaceId, newCommand);
-      addPromise.then(() => {
-        // call the method again
-        this.addCommand(workspaceId, projectName, commands, ++index, deferred);
-      }, (error) => {
-        deferred.reject(error);
-      });
-    } else {
-      deferred.resolve('All commands added');
-    }
   }
 
   connectToExtensionServer(websocketURL, workspaceId, projectName, projectData, workspaceBus, bus) {
@@ -830,10 +651,10 @@ export class CreateProjectController {
   create() {
     this.importProjectData.project.description = this.projectDescription;
     this.importProjectData.project.name = this.projectName;
-    this.createProjectSvc.setProject(this.projectName);
+    this.createProjectProgressorSvc.setProject(this.projectName);
 
     if (this.templatesChoice === 'templates-wizard') {
-      this.createProjectSvc.setIDEAction('createProject:projectName=' + this.projectName);
+      this.createProjectProgressorSvc.setIDEAction('createProject:projectName=' + this.projectName);
     }
 
     // reset logs and errors
@@ -847,8 +668,8 @@ export class CreateProjectController {
       // reuse existing workspace
       this.recipeUrl = null;
       this.stack = null;
-      this.createProjectSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
-      this.createProjectSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
+      this.createProjectProgressorSvc.setWorkspaceOfProject(this.workspaceSelected.config.name);
+      this.createProjectProgressorSvc.setWorkspaceNamespace(this.workspaceSelected.namespace);
       this.checkExistingWorkspaceState(this.workspaceSelected);
     } else {
       // create workspace based on a stack
@@ -926,7 +747,7 @@ export class CreateProjectController {
    */
   subscribeStatusChannel(workspace) {
     this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then((message) => {
-      this.createProjectSvc.setCurrentProgressStep(2);
+      this.createProjectProgressorSvc.setCurrentProgressStep(2);
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
       // need to show the error
       this.$mdDialog.show(
@@ -938,7 +759,7 @@ export class CreateProjectController {
       );
     });
     this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'RUNNING').then(() => {
-      this.createProjectSvc.setCurrentProgressStep(2);
+      this.createProjectProgressorSvc.setCurrentProgressStep(2);
 
       this.importProjectData.project.name = this.projectName;
 
@@ -959,7 +780,7 @@ export class CreateProjectController {
    * @param source machine source
    */
   createWorkspace(source) {
-    this.createProjectSvc.setWorkspaceOfProject(this.workspaceName);
+    this.createProjectProgressorSvc.setWorkspaceOfProject(this.workspaceName);
 
     let attributes = this.stack ? {stackId: this.stack.id} : {};
     let stackWorkspaceConfig = this.stack ? this.stack.workspaceConfig : {};
@@ -969,7 +790,7 @@ export class CreateProjectController {
     //TODO: no account in che ? it's null when testing on localhost
     let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, attributes);
     creationPromise.then((workspace) => {
-      this.createProjectSvc.setWorkspaceNamespace(workspace.namespace);
+      this.createProjectProgressorSvc.setWorkspaceNamespace(workspace.namespace);
       this.updateRecentWorkspace(workspace.id);
 
       // init message bus if not there
@@ -1050,7 +871,7 @@ export class CreateProjectController {
     if (this.isResourceProblem()) {
       this.$location.path('/workspaces');
     }
-    this.createProjectSvc.resetCreateProgress();
+    this.createProjectProgressorSvc.resetCreateProgress();
   }
 
   resetCreateNewProject() {
@@ -1064,31 +885,31 @@ export class CreateProjectController {
   }
 
   getStepText(stepNumber) {
-    return this.createProjectSvc.getStepText(stepNumber);
+    return this.createProjectProgressorSvc.getStepText(stepNumber);
   }
 
   getCreationSteps() {
-    return this.createProjectSvc.getProjectCreationSteps();
+    return this.createProjectProgressorSvc.getProjectCreationSteps();
   }
 
   getCurrentProgressStep() {
-    return this.createProjectSvc.getCurrentProgressStep();
+    return this.createProjectProgressorSvc.getCurrentProgressStep();
   }
 
   isCreateProjectInProgress() {
-    return this.createProjectSvc.isCreateProjectInProgress();
+    return this.createProjectProgressorSvc.isCreateProjectInProgress();
   }
 
   setCreateProjectInProgress() {
-    this.createProjectSvc.setCreateProjectInProgress(true);
+    this.createProjectProgressorSvc.setCreateProjectInProgress(true);
   }
 
   getWorkspaceOfProject() {
-    return this.createProjectSvc.getWorkspaceOfProject();
+    return this.createProjectProgressorSvc.getWorkspaceOfProject();
   }
 
   getIDELink() {
-    return this.createProjectSvc.getIDELink();
+    return this.createProjectProgressorSvc.getIDELink();
   }
 
   isResourceProblem() {

@@ -11,6 +11,7 @@
 'use strict';
 
 import {CreateProjectController} from './create-project/create-project.controller';
+import {CreateProjectProgressorSvc} from './create-project/create-project-progressor.service';
 import {CreateProjectSvc} from './create-project/create-project.service';
 import {CreateProjectGithubController} from './create-project/github/create-project-github.controller';
 
@@ -66,6 +67,7 @@ export class ProjectsConfig {
 
     register.directive('createProjectConfFile', CreateProjectConfFile);
 
+    register.service('createProjectProgressorSvc', CreateProjectProgressorSvc);
     register.service('createProjectSvc', CreateProjectSvc);
     register.controller('CreateProjectController', CreateProjectController);
 
