@@ -14,7 +14,6 @@ import com.google.common.base.Optional;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
-import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.promises.client.Operation;
@@ -26,7 +25,6 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
-import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.api.resources.File;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
@@ -39,14 +37,12 @@ import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
 public class ZendDebuggerFileHandler implements ActiveFileHandler {
 
 	private final EditorAgent editorAgent;
-	private final EventBus eventBus;
 	private final AppContext appContext;
 
 	@Inject
-	public ZendDebuggerFileHandler(EditorAgent editorAgent, AppContext appContext, EventBus eventBus) {
+	public ZendDebuggerFileHandler(EditorAgent editorAgent, AppContext appContext) {
 		this.editorAgent = editorAgent;
 		this.appContext = appContext;
-		this.eventBus = eventBus;
 	}
 
 	@Override
@@ -77,7 +73,6 @@ public class ZendDebuggerFileHandler implements ActiveFileHandler {
 			public void apply(Optional<File> file) throws OperationException {
 				if (file.isPresent()) {
 					handleActivatedFile(file.get(), callback, location.getLineNumber());
-					eventBus.fireEvent(FileEvent.createOpenFileEvent(file.get()));
 				} else {
 					callback.onFailure(new IllegalStateException("File is undefined"));
 				}
@@ -105,7 +100,7 @@ public class ZendDebuggerFileHandler implements ActiveFileHandler {
 						scrollEditorToExecutionPoint((TextEditor) editorAgent.getActiveEditor(), debugLine);
 						callback.onSuccess(virtualFile);
 					}
-				}.schedule(300);
+				}.schedule(200);
 			}
 
 			@Override
@@ -116,7 +111,7 @@ public class ZendDebuggerFileHandler implements ActiveFileHandler {
 						scrollEditorToExecutionPoint((TextEditor) editorAgent.getActiveEditor(), debugLine);
 						callback.onSuccess(virtualFile);
 					}
-				}.schedule(300);
+				}.schedule(200);
 			}
 
 			@Override
