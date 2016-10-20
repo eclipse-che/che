@@ -8,7 +8,7 @@
  * Contributors:
  *   Zend Technologies - initial API and implementation
  *******************************************************************************/
-package zend.com.che.plugin.zdb.server.connection;
+package zend.com.che.plugin.zdb.server.variables;
 
 /**
  * Interface for variables/values that are responsible for handling the
@@ -16,7 +16,7 @@ package zend.com.che.plugin.zdb.server.connection;
  * 
  * @author Bartlomiej Laczkowski
  */
-public interface IDebugDataType {
+public interface IDbgDataType {
 
 	/**
 	 * PHP data type enum.

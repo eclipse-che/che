@@ -35,13 +35,14 @@ public class ZendDebugConfigurationPagePresenter
 	private DebugConfiguration editedConfiguration;
 	private String originClientHostIp;
 	private int originDebugPort;
-	private int originBroadcastPort;
 	private boolean originUseSsslEncryption;
+	private boolean originBreakAtFirstLine;
 	private DirtyStateListener listener;
 	private Provider<DebugConfigurationsManager> debugConfigurationsManagerProvider;
 
 	@Inject
-	public ZendDebugConfigurationPagePresenter(ZendDebugConfigurationPageView view, Provider<DebugConfigurationsManager> debugConfigurationsManagerProvider) {
+	public ZendDebugConfigurationPagePresenter(ZendDebugConfigurationPageView view,
+			Provider<DebugConfigurationsManager> debugConfigurationsManagerProvider) {
 		this.view = view;
 		this.debugConfigurationsManagerProvider = debugConfigurationsManagerProvider;
 		view.setDelegate(this);
@@ -55,8 +56,8 @@ public class ZendDebugConfigurationPagePresenter
 				.get(ZendDebugConfigurationType.ATTR_CLIENT_HOST_IP);
 		originDebugPort = Integer
 				.valueOf(configuration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_DEBUG_PORT));
-		originBroadcastPort = Integer
-				.valueOf(configuration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_BROADCAST_PORT));
+		originBreakAtFirstLine = Boolean.valueOf(
+				configuration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_BREAK_AT_FIRST_LINE));
 		originUseSsslEncryption = Boolean.valueOf(
 				configuration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_USE_SSL_ENCRYPTION));
 	}
@@ -68,8 +69,8 @@ public class ZendDebugConfigurationPagePresenter
 				editedConfiguration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_CLIENT_HOST_IP));
 		view.setDebugPort(Integer.valueOf(
 				editedConfiguration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_DEBUG_PORT)));
-		view.setBroadcastPort(Integer.valueOf(
-				editedConfiguration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_BROADCAST_PORT)));
+		view.setBreakAtFirstLine(Boolean.valueOf(
+				editedConfiguration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_BREAK_AT_FIRST_LINE)));
 		view.setUseSslEncryption(Boolean.valueOf(
 				editedConfiguration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_USE_SSL_ENCRYPTION)));
 	}
@@ -78,10 +79,10 @@ public class ZendDebugConfigurationPagePresenter
 	public boolean isDirty() {
 		return !originClientHostIp.equals(
 				editedConfiguration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_CLIENT_HOST_IP))
-				|| originDebugPort != Integer.valueOf(editedConfiguration.getConnectionProperties()
-						.get(ZendDebugConfigurationType.ATTR_DEBUG_PORT))
-				|| originBroadcastPort != Integer.valueOf(editedConfiguration.getConnectionProperties()
-						.get(ZendDebugConfigurationType.ATTR_BROADCAST_PORT))
+				|| originDebugPort != Integer.valueOf(
+						editedConfiguration.getConnectionProperties().get(ZendDebugConfigurationType.ATTR_DEBUG_PORT))
+				|| originBreakAtFirstLine != Boolean.valueOf(editedConfiguration.getConnectionProperties()
+						.get(ZendDebugConfigurationType.ATTR_BREAK_AT_FIRST_LINE))
 				|| originUseSsslEncryption != Boolean.valueOf(editedConfiguration.getConnectionProperties()
 						.get(ZendDebugConfigurationType.ATTR_USE_SSL_ENCRYPTION));
 	}
@@ -106,9 +107,9 @@ public class ZendDebugConfigurationPagePresenter
 	}
 
 	@Override
-	public void onBroadcastPortChanged() {
-		editedConfiguration.getConnectionProperties().put(ZendDebugConfigurationType.ATTR_BROADCAST_PORT,
-				String.valueOf(view.getBroadcastPort()));
+	public void onBreakAtFirstLineChanged(boolean value) {
+		editedConfiguration.getConnectionProperties().put(ZendDebugConfigurationType.ATTR_BREAK_AT_FIRST_LINE,
+				String.valueOf(view.getBreakAtFirstLine()));
 		listener.onDirtyStateChanged();
 	}
 

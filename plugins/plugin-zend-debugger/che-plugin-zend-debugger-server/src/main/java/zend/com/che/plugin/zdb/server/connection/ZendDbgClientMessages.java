@@ -15,37 +15,38 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.AddBreakpointResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.AddFilesResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.AssignValueResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.DeleteAllBreakpointsResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.DeleteBreakpointResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.CloseSessionResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.EvalResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.GetCWDResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.GetCallStackResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.GetStackVariableValueResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.GetVariableValueResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.GoResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.PauseDebuggerResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.SetProtocolResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.StartResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.StepIntoResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.StepOutResponse;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.StepOverResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.AddBreakpointResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.AddFilesResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.AssignValueResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.DeleteAllBreakpointsResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.DeleteBreakpointResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.EvalResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.GetCWDResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.GetCallStackResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.GetStackVariableValueResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.GetVariableValueResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.GoResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.IDbgEngineResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.PauseDebuggerResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.SetProtocolResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.StartResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.StepIntoResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.StepOutResponse;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.StepOverResponse;
 
 /**
  * Zend debug client messages container.
  * 
  * @author Bartlomiej Laczkowski
  */
-public class ZendClientMessages {
+public class ZendDbgClientMessages {
 
+	// Notification types
 	public static final int NOTIFICATION_CONTINUE_PROCESS_FILE = 2010;
-
+	public static final int NOTIFICATION_CLOSE_SESSION = 3;
+	// Request types
 	public static final int REQUEST_START = 1;
 	public static final int REQUEST_PAUSE_DEBUGGER = 2;
-	public static final int REQUEST_CLOSE_SESSION = 3;
 	public static final int REQUEST_STEP_INTO = 11;
 	public static final int REQUEST_STEP_OVER = 12;
 	public static final int REQUEST_STEP_OUT = 13;
@@ -61,9 +62,54 @@ public class ZendClientMessages {
 	public static final int REQUEST_GET_CWD = 36;
 	public static final int REQUEST_ADD_FILES = 38;
 	public static final int REQUEST_SET_PROTOCOL = 10000;
+	// Response types
+	public static final int RESPONSE_GET_LOCAL_FILE_CONTENT = 11001;
 
-	private static abstract class AbstractClientRequest<T extends IDebugEngineResponse> extends AbstractMessage
-			implements IDebugClientRequest<T> {
+	public interface IDbgClientMessage extends IDbgMessage {
+
+		/**
+		 * Serialize this debug message to an output stream
+		 * 
+		 * @param out
+		 *            output stream this message is going to be written to
+		 */
+		public void serialize(DataOutputStream out) throws IOException;
+
+	}
+
+	public interface IDbgClientNotification extends IDbgClientMessage {
+	}
+
+	public interface IDbgClientRequest<T extends IDbgEngineResponse> extends IDbgClientMessage {
+
+		/**
+		 * Set the request id.
+		 */
+		public void setID(int id);
+
+		/**
+		 * Return the request id.
+		 */
+		public int getID();
+
+	}
+
+	public interface IDbgClientResponse extends IDbgClientMessage {
+
+		/**
+		 * Return the response id.
+		 */
+		public int getID();
+
+		/**
+		 * Return the response status.
+		 */
+		public int getStatus();
+
+	}
+
+	private static abstract class AbstractClientRequest<T extends IDbgEngineResponse> extends AbstractDbgMessage
+			implements IDbgClientRequest<T> {
 
 		private int id;
 
@@ -76,7 +122,7 @@ public class ZendClientMessages {
 		public int getID() {
 			return this.id;
 		}
-		
+
 		@Override
 		public void serialize(DataOutputStream out) throws IOException {
 			out.writeShort(getType());
@@ -85,16 +131,57 @@ public class ZendClientMessages {
 
 	}
 
-	private ZendClientMessages() {
+	private static abstract class AbstractClientResponse extends AbstractDbgMessage implements IDbgClientResponse {
+
+		protected int id;
+		protected int status;
+
+		public AbstractClientResponse(int id) {
+			this.id = id;
+		}
+
+		@Override
+		public int getID() {
+			return this.id;
+		}
+
+		@Override
+		public int getStatus() {
+			return status;
+		}
+
+		@Override
+		public void serialize(DataOutputStream out) throws IOException {
+			out.writeShort(getType());
+			out.writeInt(getID());
+			out.writeInt(getStatus());
+		}
+
+	}
+
+	private ZendDbgClientMessages() {
 	}
 
 	// Client notifications
 
-	public static class ContinueProcessFileNotification extends AbstractMessage implements IDebugClientNotification {
+	public static class ContinueProcessFileNotification extends AbstractDbgMessage implements IDbgClientNotification {
 
 		@Override
 		public int getType() {
 			return NOTIFICATION_CONTINUE_PROCESS_FILE;
+		}
+
+		@Override
+		public void serialize(DataOutputStream out) throws IOException {
+			out.writeShort(getType());
+		}
+	}
+
+	public static class CloseSessionNotification extends AbstractDbgMessage implements IDbgClientNotification {
+
+		@Override
+		public int getType() {
+			return NOTIFICATION_CLOSE_SESSION;
 		}
 
 		@Override
@@ -129,7 +216,7 @@ public class ZendClientMessages {
 			super.serialize(out);
 			out.writeShort(kind);
 			out.writeShort(lifeTime);
-			ZendConnectionUtils.writeString(out, fileName);
+			ZendDbgConnectionUtils.writeString(out, fileName);
 			out.writeInt(lineNumber);
 		}
 	}
@@ -152,7 +239,7 @@ public class ZendClientMessages {
 			super.serialize(out);
 			out.writeInt(paths.size());
 			for (String path : paths) {
-				ZendConnectionUtils.writeString(out, path);
+				ZendDbgConnectionUtils.writeString(out, path);
 			}
 		}
 	}
@@ -179,12 +266,12 @@ public class ZendClientMessages {
 		@Override
 		public void serialize(DataOutputStream out) throws IOException {
 			super.serialize(out);
-			ZendConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
-			ZendConnectionUtils.writeEncodedString(out, value, getTransferEncoding());
+			ZendDbgConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
+			ZendDbgConnectionUtils.writeEncodedString(out, value, getTransferEncoding());
 			out.writeInt(depth);
 			out.writeInt(path.size());
 			for (String p : path) {
-				ZendConnectionUtils.writeString(out, p);
+				ZendDbgConnectionUtils.writeString(out, p);
 			}
 		}
 	}
@@ -220,7 +307,7 @@ public class ZendClientMessages {
 	public static class EvalRequest extends AbstractClientRequest<EvalResponse> {
 
 		private String command;
-		
+
 		public EvalRequest(String command) {
 			this.command = command;
 		}
@@ -233,7 +320,7 @@ public class ZendClientMessages {
 		@Override
 		public void serialize(DataOutputStream out) throws IOException {
 			super.serialize(out);
-			ZendConnectionUtils.writeEncodedString(out, command, getTransferEncoding());
+			ZendDbgConnectionUtils.writeEncodedString(out, command, getTransferEncoding());
 		}
 	}
 
@@ -276,11 +363,11 @@ public class ZendClientMessages {
 		public void serialize(DataOutputStream out) throws IOException {
 			super.serialize(out);
 			out.writeInt(layerDepth);
-			ZendConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
+			ZendDbgConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
 			out.writeInt(depth);
 			out.writeInt(path.size());
 			for (String p : path) {
-				ZendConnectionUtils.writeString(out, p);
+				ZendDbgConnectionUtils.writeString(out, p);
 			}
 		}
 	}
@@ -305,11 +392,11 @@ public class ZendClientMessages {
 		@Override
 		public void serialize(DataOutputStream out) throws IOException {
 			super.serialize(out);
-			ZendConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
+			ZendDbgConnectionUtils.writeEncodedString(out, var, getTransferEncoding());
 			out.writeInt(depth);
 			out.writeInt(path.size());
 			for (String p : path) {
-				ZendConnectionUtils.writeString(out, p);
+				ZendDbgConnectionUtils.writeString(out, p);
 			}
 		}
 	}
@@ -382,12 +469,38 @@ public class ZendClientMessages {
 		}
 	}
 
-	public static class CloseSessionRequest extends AbstractClientRequest<CloseSessionResponse> {
+	// Client responses
+
+	public static class GetLocalFileContentResponse extends AbstractClientResponse {
+
+		public static final int STATUS_FAILURE = -1;
+		public static final int STATUS_SUCCESS = 0;
+		public static final int STATUS_FILES_IDENTICAL = 302;
+
+		private byte content[] = null;
+
+		public GetLocalFileContentResponse(int id, int status, byte[] content) {
+			super(id);
+			this.status = status;
+			this.content = content;
+		}
+
+		@Override
+		public void serialize(DataOutputStream out) throws IOException {
+			super.serialize(out);
+			if (content != null) {
+				out.write(content.length);
+				out.write(content);
+			} else {
+				out.writeInt(0);
+			}
+		}
 
 		@Override
 		public int getType() {
-			return REQUEST_CLOSE_SESSION;
+			return RESPONSE_GET_LOCAL_FILE_CONTENT;
 		}
+
 	}
 
 }

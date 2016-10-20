@@ -33,28 +33,30 @@ public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfiguratio
 			.create(ZendDebugConfigurationPageViewImplUiBinder.class);
 
 	private final FlowPanel rootElement;
-
+	private ActionDelegate delegate;
 	@UiField
 	TextBox clientHostIP;
 	@UiField
 	TextBox debugPort;
 	@UiField
-	TextBox broadcastPort;
+	CheckBox breakAtFirstLine;
 	@UiField
 	CheckBox useSslEncryption;
 
-	private ActionDelegate delegate;
-
 	public ZendDebugConfigurationPageViewImpl() {
 		rootElement = UI_BINDER.createAndBindUi(this);
-
+		breakAtFirstLine.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				delegate.onBreakAtFirstLineChanged(event.getValue());
+			}
+		});
 		useSslEncryption.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
 				delegate.onUseSslEncryptionChanged(event.getValue());
 			}
 		});
-
 		updateDialog();
 	}
 
@@ -74,13 +76,13 @@ public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfiguratio
 	}
 
 	@Override
-	public void setClientHostIP(String host) {
-		this.clientHostIP.setValue(host);
+	public void setClientHostIP(String value) {
+		this.clientHostIP.setValue(value);
 	}
 
 	@Override
 	public int getDebugPort() {
-		String port = this.debugPort.getValue().trim();
+		String port = debugPort.getValue().trim();
 		if (port.isEmpty()) {
 			return 0;
 		}
@@ -93,32 +95,23 @@ public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfiguratio
 	}
 
 	@Override
-	public void setDebugPort(int port) {
-		this.debugPort.setValue(port <= 0 ? "" : String.valueOf(port));
+	public void setDebugPort(int value) {
+		this.debugPort.setValue(value <= 0 ? "" : String.valueOf(value));
 	}
 	
 	@Override
-	public int getBroadcastPort() {
-		String port = this.broadcastPort.getValue().trim();
-		if (port.isEmpty()) {
-			return 0;
-		}
-
-		try {
-			return Integer.valueOf(port);
-		} catch (NumberFormatException e) {
-			return 0;
-		}
+	public boolean getBreakAtFirstLine() {
+		return breakAtFirstLine.getValue();
 	}
-
+	
 	@Override
-	public void setBroadcastPort(int port) {
-		this.broadcastPort.setValue(port <= 0 ? "" : String.valueOf(port));
+	public void setBreakAtFirstLine(boolean value) {
+		this.breakAtFirstLine.setValue(value);
 	}
-
+	
 	@Override
 	public boolean getUseSslEncryption() {
-		return this.useSslEncryption.getValue();
+		return useSslEncryption.getValue();
 	}
 
 	@Override
@@ -138,11 +131,6 @@ public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfiguratio
 	@UiHandler({ "debugPort" })
 	void onDebugPortChanged(KeyUpEvent event) {
 		delegate.onDebugPortChanged();
-	}
-
-	@UiHandler({ "broadcastPort" })
-	void onBroadcastPortChanged(KeyUpEvent event) {
-		delegate.onBroadcastPortChanged();
 	}
 
 	interface ZendDebugConfigurationPageViewImplUiBinder
