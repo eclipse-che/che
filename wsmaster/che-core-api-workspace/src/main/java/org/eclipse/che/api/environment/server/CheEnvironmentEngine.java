@@ -936,7 +936,7 @@ public class CheEnvironmentEngine {
     /**
      * Set correct values to docker compose links fields.
      * The problem is that a user writes names of other services in links section in compose file.
-     * But actually links are constraints and its values should be names of containers (not services) to be linked.
+     * But actually links are constraints and they values should be names of containers (not services) to be linked.
      *
      * @param serviceWithCorrectSource
      *         service which is starting now
