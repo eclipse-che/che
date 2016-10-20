@@ -8,17 +8,14 @@
  * Contributors:
  *   Zend Technologies - initial API and implementation
  *******************************************************************************/
-package zend.com.che.plugin.zdb.server.connection;
+package zend.com.che.plugin.zdb.server.variables;
 
 import java.util.List;
 
-/**
- * Interface for Zend debug expression value.
- * 
- * @author Bartlomiej Laczkowski
- */
-public interface IDebugExpressionValue extends IDebugDataType {
+public interface IDbgExpression extends IDbgDataFacet, IDbgDataType {
 
+	public String getStatement();
+	
 	/**
 	 * Returns expression value string.
 	 * 
@@ -31,7 +28,7 @@ public interface IDebugExpressionValue extends IDebugDataType {
 	 * 
 	 * @return expression value children
 	 */
-	public List<IDebugExpression> getChildren();
+	public List<? extends IDbgExpression> getChildren();
 
 	/**
 	 * Returns number of existing children.
@@ -39,5 +36,10 @@ public interface IDebugExpressionValue extends IDebugDataType {
 	 * @return number of existing children
 	 */
 	public int getChildrenCount();
+	
+	/**
+	 * Resolves this expression.
+	 */
+	public void resolve();
 	
 }

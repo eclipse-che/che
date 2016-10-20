@@ -22,10 +22,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 
-import zend.com.che.plugin.zdb.server.ZendDebugger;
-import zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.CloseMessageHandlerNotification;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 
-import static zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.*;
+import zend.com.che.plugin.zdb.server.ZendDebugger;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.CloseMessageHandlerNotification;
+
+import static zend.com.che.plugin.zdb.server.connection.ZendDbgEngineMessages.*;
+import static zend.com.che.plugin.zdb.server.connection.ZendDbgClientMessages.*;
 
 /**
  * The debug connection is responsible for initializing and handling a debug
@@ -33,12 +37,18 @@ import static zend.com.che.plugin.zdb.server.connection.ZendEngineMessages.*;
  * 
  * @author Bartlomiej Laczkowski
  */
-public class ZendDebugConnection {
+public class ZendDbgConnection {
 
 	private final class EngineConnectionRunnable implements Runnable {
 
+		private ServerSocket debugSocket;
+		private Socket socket;
 		private DataInputStream inputStream;
 		private DataOutputStream outputStream;
+
+		private EngineConnectionRunnable() {
+			open();
+		}
 
 		@Override
 		public void run() {
@@ -49,6 +59,7 @@ public class ZendDebugConnection {
 					socket.setReceiveBufferSize(1024 * 128);
 					socket.setSendBufferSize(1024 * 128);
 					socket.setTcpNoDelay(true);
+					this.socket = socket;
 					this.inputStream = inputStream;
 					this.outputStream = outputStream;
 					read();
@@ -59,7 +70,22 @@ public class ZendDebugConnection {
 					ZendDebugger.LOG.error(e.getMessage(), e);
 				}
 			}
-			engineNotificationRunnable.queue(new CloseMessageHandlerNotification());
+			engineMessageRunnable.queue(new CloseMessageHandlerNotification());
+		}
+
+		private void open() {
+			try {
+				if (debugSettings.isUseSsslEncryption()) {
+					SSLServerSocket sslServerSocket = (SSLServerSocket) SSLServerSocketFactory.getDefault()
+							.createServerSocket(debugSettings.getDebugPort());
+					sslServerSocket.setEnabledCipherSuites(sslServerSocket.getSupportedCipherSuites());
+					this.debugSocket = sslServerSocket;
+				} else {
+					this.debugSocket = new ServerSocket(debugSettings.getDebugPort());
+				}
+			} catch (IOException e) {
+				ZendDebugger.LOG.error(e.getMessage(), e);
+			}
 		}
 
 		private void read() {
@@ -70,23 +96,26 @@ public class ZendDebugConnection {
 					int length = inputStream.readInt();
 					if (length < 0) {
 						ZendDebugger.LOG.error("Socket error: (length is negative)");
+						purge();
 						break;
 					}
 					// Engine message arrived. read its type identifier.
 					int messageType = inputStream.readShort();
-					IDebugEngineMessage engineMessage = ZendEngineMessages.create(messageType);
+					IDbgEngineMessage engineMessage = ZendDbgEngineMessages.create(messageType);
 					engineMessage.deserialize(inputStream);
-					if (engineMessage instanceof IDebugEngineNotification) {
-						engineNotificationRunnable.queue((IDebugEngineNotification) engineMessage);
-					} else if (engineMessage instanceof IDebugEngineResponse) {
-						IDebugEngineResponse response = (IDebugEngineResponse) engineMessage;
-						EngineSyncResponse<IDebugEngineResponse> syncResponse = (EngineSyncResponse<IDebugEngineResponse>) engineSyncResponses
+					if (engineMessage instanceof IDbgEngineResponse) {
+						// Engine response has arrived...
+						IDbgEngineResponse response = (IDbgEngineResponse) engineMessage;
+						EngineSyncResponse<IDbgEngineResponse> syncResponse = (EngineSyncResponse<IDbgEngineResponse>) engineSyncResponses
 								.remove(response.getID());
 						if (syncResponse != null) {
-							// Set response and release waiting request provider
+							// Release waiting request provider
 							syncResponse.set(response);
 							continue;
 						}
+					} else {
+						// Notification or request from engine arrived...
+						engineMessageRunnable.queue(engineMessage);
 					}
 				} catch (EOFException e) {
 					// Engine closed the session
@@ -99,16 +128,41 @@ public class ZendDebugConnection {
 			isConnected = false;
 		}
 
-		private void write(IDebugClientMessage clientMessage) {
+		private void write(IDbgClientMessage clientMessage) {
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
 			try {
 				clientMessage.serialize(dataOutputStream);
 				int messageSize = byteArrayOutputStream.size();
 				// Write to connection output
-				outputStream.writeInt(messageSize);
-				byteArrayOutputStream.writeTo(outputStream);
-				outputStream.flush();
+				synchronized (this) {
+					outputStream.writeInt(messageSize);
+					byteArrayOutputStream.writeTo(outputStream);
+					outputStream.flush();
+				}
+			} catch (IOException e) {
+				ZendDebugger.LOG.error(e.getMessage(), e);
+			}
+			if (clientMessage.getType() == NOTIFICATION_CLOSE_SESSION) {
+				purge();
+			}
+		}
+
+		private void purge() {
+			if (socket != null) {
+				try {
+					socket.shutdownInput();
+					socket.shutdownOutput();
+				} catch (IOException e) {
+					ZendDebugger.LOG.error(e.getMessage(), e);
+				}
+			}
+		}
+
+		private void close() {
+			try {
+				purge();
+				debugSocket.close();
 			} catch (IOException e) {
 				ZendDebugger.LOG.error(e.getMessage(), e);
 			}
@@ -116,25 +170,25 @@ public class ZendDebugConnection {
 
 	}
 
-	private static final class EngineNotificationRunnable implements Runnable {
+	private final class EngineMessageRunnable implements Runnable {
 
-		private IEngineNotificationHandler handler;
-		private BlockingQueue<IDebugEngineNotification> messageQueue = new ArrayBlockingQueue<IDebugEngineNotification>(
-				100);
-
-		private EngineNotificationRunnable(IEngineNotificationHandler handler) {
-			this.handler = handler;
-		}
+		private BlockingQueue<IDbgEngineMessage> messageQueue = new ArrayBlockingQueue<IDbgEngineMessage>(100);
 
 		@Override
 		public void run() {
 			while (true) {
 				try {
-					IDebugEngineNotification message = messageQueue.take();
+					IDbgEngineMessage message = messageQueue.take();
 					if (message.getType() == NOTIFICATION_CLOSE_MESSAGE_HANDLER)
 						break;
 					try {
-						handler.handle(message);
+						if (message instanceof IDbgEngineNotification) {
+							debugSession.handleNotification((IDbgEngineNotification) message);
+						} else if (message instanceof IDbgEngineRequest) {
+							IDbgClientResponse response = debugSession
+									.handleRequest((IDbgEngineRequest<?>) message);
+							engineConnectionRunnable.write(response);
+						}
 					} catch (Exception e) {
 						ZendDebugger.LOG.error(e.getMessage(), e);
 					}
@@ -144,13 +198,13 @@ public class ZendDebugConnection {
 			}
 		}
 
-		private void queue(IDebugEngineNotification m) {
+		private void queue(IDbgEngineMessage m) {
 			messageQueue.offer(m);
 		}
 
 	}
 
-	private static final class EngineSyncResponse<T extends IDebugEngineResponse> {
+	private static final class EngineSyncResponse<T extends IDbgEngineResponse> {
 
 		private final Semaphore semaphore = new Semaphore(0);;
 		private T response;
@@ -164,27 +218,28 @@ public class ZendDebugConnection {
 			try {
 				semaphore.acquire();
 			} catch (InterruptedException e) {
-				// TODO
+				ZendDebugger.LOG.error(e.getMessage(), e);
 			}
 			return this.response;
 		}
 
 	}
 
-	interface IEngineNotificationHandler {
+	interface IEngineMessageHandler {
 
-		void handle(IDebugEngineNotification notification);
+		void handleNotification(IDbgEngineNotification notification);
+
+		<T extends IDbgClientResponse> T handleRequest(IDbgEngineRequest<T> request);
 
 	}
 
 	private EngineConnectionRunnable engineConnectionRunnable;
 	private ExecutorService engineConnectionRunnableExecutor;
-	private EngineNotificationRunnable engineNotificationRunnable;
-	private ExecutorService engineNotificationRunnableExecutor;
-	private Map<Integer, EngineSyncResponse<IDebugEngineResponse>> engineSyncResponses = new HashMap<>();
-	private int debugPort;
-	private ZendDebugSession debugSession;
-	private ServerSocket debugSocket;
+	private EngineMessageRunnable engineMessageRunnable;
+	private ExecutorService engineMessageRunnableExecutor;
+	private Map<Integer, EngineSyncResponse<IDbgEngineResponse>> engineSyncResponses = new HashMap<>();
+	private final ZendDbgSessionSettings debugSettings;
+	private ZendDbgSession debugSession;
 	private int debugRequestId = 1000;
 	private boolean isConnected = false;
 
@@ -193,9 +248,9 @@ public class ZendDebugConnection {
 	 * 
 	 * @param socket
 	 */
-	public ZendDebugConnection(ZendDebugSession debugSession, int debugPort) {
+	public ZendDbgConnection(ZendDbgSession debugSession, ZendDbgSessionSettings debugSettings) {
 		this.debugSession = debugSession;
-		this.debugPort = debugPort;
+		this.debugSettings = debugSettings;
 	}
 
 	/**
@@ -203,16 +258,15 @@ public class ZendDebugConnection {
 	 */
 	void connect() {
 		try {
-			this.debugSocket = new ServerSocket(debugPort);
 			engineConnectionRunnableExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
 				@Override
 				public Thread newThread(Runnable r) {
-					final Thread thread = new Thread(r, "ZendDbgClient:" + debugPort);
+					final Thread thread = new Thread(r, "ZendDbgClient:" + debugSettings.getDebugPort());
 					thread.setDaemon(true);
 					return thread;
 				}
 			});
-			engineNotificationRunnableExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+			engineMessageRunnableExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
 				@Override
 				public Thread newThread(Runnable r) {
 					final Thread thread = new Thread(r, "ZendDbgMsgHandler");
@@ -221,9 +275,9 @@ public class ZendDebugConnection {
 				}
 			});
 			engineConnectionRunnable = new EngineConnectionRunnable();
-			engineNotificationRunnable = new EngineNotificationRunnable(debugSession);
+			engineMessageRunnable = new EngineMessageRunnable();
 			engineConnectionRunnableExecutor.execute(engineConnectionRunnable);
-			engineNotificationRunnableExecutor.execute(engineNotificationRunnable);
+			engineMessageRunnableExecutor.execute(engineMessageRunnable);
 		} catch (Exception e) {
 			ZendDebugger.LOG.error(e.getMessage(), e);
 		}
@@ -233,26 +287,20 @@ public class ZendDebugConnection {
 	 * Closes the connection. Causes message receiver & handler to be shutdown.
 	 */
 	void disconnect() {
-		if (debugSocket != null) {
-			try {
-				debugSocket.close();
-			} catch (IOException e) {
-				// ignore
-			}
-		}
+		engineConnectionRunnable.close();
 		engineConnectionRunnableExecutor.shutdown();
-		engineNotificationRunnableExecutor.shutdown();
+		engineMessageRunnableExecutor.shutdown();
 	}
 
 	@SuppressWarnings("unchecked")
-	public synchronized <T extends IDebugEngineResponse> T sendRequest(IDebugClientRequest<T> request) {
+	public <T extends IDbgEngineResponse> T sendRequest(IDbgClientRequest<T> request) {
 		if (!isConnected) {
 			return null;
 		}
 		try {
 			request.setID(debugRequestId++);
 			EngineSyncResponse<T> syncResponse = new EngineSyncResponse<T>();
-			engineSyncResponses.put(request.getID(), (EngineSyncResponse<IDebugEngineResponse>) syncResponse);
+			engineSyncResponses.put(request.getID(), (EngineSyncResponse<IDbgEngineResponse>) syncResponse);
 			engineConnectionRunnable.write(request);
 			// Wait for response
 			return syncResponse.get();
@@ -262,7 +310,7 @@ public class ZendDebugConnection {
 		return null;
 	}
 
-	public synchronized void sendNotification(IDebugClientNotification request) {
+	public void sendNotification(IDbgClientNotification request) {
 		if (!isConnected) {
 			return;
 		}

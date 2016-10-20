@@ -30,7 +30,8 @@ import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import zend.com.che.plugin.zdb.server.connection.ZendDebugSession;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgSession;
+import zend.com.che.plugin.zdb.server.connection.ZendDbgSessionSettings;
 
 /**
  * Zend Debugger implementation.
@@ -39,31 +40,24 @@ import zend.com.che.plugin.zdb.server.connection.ZendDebugSession;
  */
 public class ZendDebugger implements Debugger {
 	public static final Logger LOG = LoggerFactory.getLogger(ZendDebugger.class);
-	private final String clientHostIP;
-	private final int debugPort;
-	private final int broadcastPort;
-	private final boolean useSsslEncryption;
+	private final ZendDbgSessionSettings debuggerSettings;
 	private final DebuggerCallback debuggerCallback;
-	private IDebuggerDelegate debugDelegate;
+	private IDbgDelegate debugDelegate;
 
-	ZendDebugger(String clientHostIP, int debugPort, int broadcastPort, boolean useSsslEncryption,
-			DebuggerCallback debuggerCallback) throws DebuggerException {
-		this.clientHostIP = clientHostIP;
-		this.debugPort = debugPort;
-		this.broadcastPort = broadcastPort;
-		this.useSsslEncryption = useSsslEncryption;
+	ZendDebugger(ZendDbgSessionSettings debuggerSettings, DebuggerCallback debuggerCallback) throws DebuggerException {
+		this.debuggerSettings = debuggerSettings;
 		this.debuggerCallback = debuggerCallback;
 		connect();
 	}
 
 	private void connect() throws DebuggerException {
-		this.debugDelegate = new ZendDebugSession(debugPort, debuggerCallback);
-		LOG.debug("Connect {}:{}", clientHostIP, debugPort);
+		this.debugDelegate = new ZendDbgSession(debuggerSettings, debuggerCallback);
+		LOG.debug("Connect {}:{}", debuggerSettings.getClientHostIP(), debuggerSettings.getDebugPort());
 	}
 
 	@Override
 	public DebuggerInfo getInfo() throws DebuggerException {
-		return new DebuggerInfoImpl("", debugPort, "Zend Debugger", "", 0, null);
+		return new DebuggerInfoImpl("", debuggerSettings.getDebugPort(), "Zend Debugger", "", 0, null);
 	}
 
 	@Override
@@ -138,8 +132,9 @@ public class ZendDebugger implements Debugger {
 
 	@Override
 	public String toString() {
-		return "ZendDebugger [clientHostIP=" + clientHostIP + ", debugPort=" + debugPort + ", broadcastPort="
-				+ broadcastPort + ", useSsslEncryption=" + useSsslEncryption + "]";
+		return "ZendDebugger [clientHostIP=" + debuggerSettings.getClientHostIP() + ", debugPort="
+				+ debuggerSettings.getDebugPort() + ", useSsslEncryption=" + debuggerSettings.isUseSsslEncryption()
+				+ "]";
 	}
 
 }
