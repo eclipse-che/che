@@ -352,16 +352,16 @@ public class CheEnvironmentEngine {
             machine.setId(service.getId());
 
             machineStarter = (machineLogger, machineSource) -> {
-                CheServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(service, machineSource);
+                CheServiceImpl serviceWithNormalizedSource = normalizeServiceSource(service, machineSource);
 
                 normalize(namespace,
                           workspaceId,
                           machineConfig.getName(),
-                          serviceWithCorrectSource);
+                          serviceWithNormalizedSource);
 
                 ExtendedMachineImpl extendedMachine = new ExtendedMachineImpl();
                 extendedMachine.setAgents(agents);
-                applyAgents(extendedMachine, serviceWithCorrectSource);
+                applyAgents(extendedMachine, serviceWithNormalizedSource);
 
                 return machineProvider.startService(namespace,
                                                     workspaceId,
@@ -369,7 +369,7 @@ public class CheEnvironmentEngine {
                                                     machineConfig.getName(),
                                                     machineConfig.isDev(),
                                                     environmentHolder.networkId,
-                                                    serviceWithCorrectSource,
+                                                    serviceWithNormalizedSource,
                                                     machineLogger);
             };
         } else {
@@ -696,15 +696,15 @@ public class CheEnvironmentEngine {
                 // needed to reuse startInstance method and
                 // create machine instances by different implementation-specific providers
                 MachineStarter machineStarter = (machineLogger, machineSource) -> {
-                    CheServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(service, machineSource);
-                    correctLinks(serviceWithCorrectSource, launchedServices);
+                    CheServiceImpl serviceWithNormalizedSource = normalizeServiceSource(service, machineSource);
+                    replaceServiceToContainerNameInLinks(serviceWithNormalizedSource, launchedServices);
                     return machineProvider.startService(namespace,
                                                         workspaceId,
                                                         envName,
-                                                        serviceWithCorrectSource.getName(),
+                                                        serviceWithNormalizedSource.getName(),
                                                         isDev,
                                                         networkId,
-                                                        serviceWithCorrectSource,
+                                                        serviceWithNormalizedSource,
                                                         machineLogger);
                 };
 
@@ -890,32 +890,32 @@ public class CheEnvironmentEngine {
                                                                   NotFoundException;
     }
 
-    private CheServiceImpl getServiceWithCorrectSource(CheServiceImpl service,
-                                                       MachineSource machineSource)
+    private CheServiceImpl normalizeServiceSource(CheServiceImpl service,
+                                                  MachineSource machineSource)
             throws ServerException {
-        CheServiceImpl serviceWithCorrectSource = service;
+        CheServiceImpl serviceWithNormalizedSource = service;
         if (machineSource != null) {
-            serviceWithCorrectSource = new CheServiceImpl(service);
+            serviceWithNormalizedSource = new CheServiceImpl(service);
             if ("image".equals(machineSource.getType())) {
-                serviceWithCorrectSource.setBuild(null);
-                serviceWithCorrectSource.setImage(machineSource.getLocation());
+                serviceWithNormalizedSource.setBuild(null);
+                serviceWithNormalizedSource.setImage(machineSource.getLocation());
             } else {
                 // dockerfile
-                serviceWithCorrectSource.setImage(null);
+                serviceWithNormalizedSource.setImage(null);
                 if (machineSource.getContent() != null) {
-                    serviceWithCorrectSource.setBuild(new CheServiceBuildContextImpl(null,
-                                                                                     null,
-                                                                                     machineSource.getContent(),
-                                                                                     null));
+                    serviceWithNormalizedSource.setBuild(new CheServiceBuildContextImpl(null,
+                                                                                        null,
+                                                                                        machineSource.getContent(),
+                                                                                        null));
                 } else {
-                    serviceWithCorrectSource.setBuild(new CheServiceBuildContextImpl(machineSource.getLocation(),
-                                                                                     null,
-                                                                                     null,
-                                                                                     null));
+                    serviceWithNormalizedSource.setBuild(new CheServiceBuildContextImpl(machineSource.getLocation(),
+                                                                                        null,
+                                                                                        null,
+                                                                                        null));
                 }
             }
         }
-        return serviceWithCorrectSource;
+        return serviceWithNormalizedSource;
     }
 
     private Machine getMachineWithCorrectSource(MachineImpl machine, MachineSource machineSource) {
@@ -934,17 +934,21 @@ public class CheEnvironmentEngine {
     }
 
     /**
-     * Set correct values to docker compose links fields.
+     * Replaces linked to this service's name with container name which represents the service in links section.
      * The problem is that a user writes names of other services in links section in compose file.
      * But actually links are constraints and they values should be names of containers (not services) to be linked.
+     * <br/>
+     * For example: serviceDB:serviceDbAlias -> container_1234:serviceDbAlias <br/>
+     * If alias is omitted then service name will be used.
      *
-     * @param serviceWithCorrectSource
+     * @param serviceToStart
      *         service which is starting now
      * @param launchedServices
      *         already running services
      */
-    private void correctLinks(CheServiceImpl serviceWithCorrectSource, List<CheServiceImpl> launchedServices) {
-        final List<String> containerLinks = serviceWithCorrectSource.getLinks();
+    @VisibleForTesting
+    void replaceServiceToContainerNameInLinks(CheServiceImpl serviceToStart, List<CheServiceImpl> launchedServices) {
+        final List<String> containerLinks = serviceToStart.getLinks();
         for (int i = 0;  i < containerLinks.size(); i++) {
             String link = containerLinks.get(i);
             String serviceName;
