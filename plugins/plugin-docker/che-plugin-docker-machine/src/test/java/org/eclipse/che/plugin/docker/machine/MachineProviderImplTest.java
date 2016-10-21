@@ -1291,8 +1291,6 @@ public class MachineProviderImplTest {
                                            devMachineVolumes,
                                            allMachineVolumes,
                                            extraHosts,
-                                           workspaceFolderPathProvider,
-                                           PROJECT_FOLDER_PATH,
                                            doForcePullOnBuild,
                                            privilegedMode,
                                            devMachineEnvVars,

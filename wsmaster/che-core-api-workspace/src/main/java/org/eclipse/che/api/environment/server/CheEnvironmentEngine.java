@@ -25,7 +25,6 @@ import org.eclipse.che.api.core.model.machine.MachineSource;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.workspace.Environment;
-import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
@@ -54,7 +53,6 @@ import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.StripedLocks;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -101,15 +99,15 @@ public class CheEnvironmentEngine {
     private final File                           machineLogsDir;
     private final MachineInstanceProviders       machineInstanceProviders;
     private final long                           defaultMachineMemorySizeBytes;
-    private final SnapshotDao                  snapshotDao;
-    private final EventService                 eventService;
-    private final EnvironmentParser            environmentParser;
-    private final DefaultServicesStartStrategy startStrategy;
-    private final MachineInstanceProvider      machineProvider;
-    private final AgentConfigApplier           agentConfigApplier;
-    private final RecipeDownloader             recipeDownloader;
-    private final Pattern                      recipeApiPattern;
-    private final ContainerNameGenerator       containerNameGenerator;
+    private final SnapshotDao                    snapshotDao;
+    private final EventService                   eventService;
+    private final EnvironmentParser              environmentParser;
+    private final DefaultServicesStartStrategy   startStrategy;
+    private final MachineInstanceProvider        machineProvider;
+    private final EnvConfigAgentApplier          agentConfigApplier;
+    private final RecipeDownloader               recipeDownloader;
+    private final Pattern                        recipeApiPattern;
+    private final ContainerNameGenerator         containerNameGenerator;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -122,7 +120,7 @@ public class CheEnvironmentEngine {
                                 EnvironmentParser environmentParser,
                                 DefaultServicesStartStrategy startStrategy,
                                 MachineInstanceProvider machineProvider,
-                                AgentConfigApplier agentConfigApplier,
+                                EnvConfigAgentApplier agentConfigApplier,
                                 @Named("api.endpoint") String apiEndpoint,
                                 RecipeDownloader recipeDownloader,
                                 ContainerNameGenerator containerNameGenerator) {
@@ -361,7 +359,11 @@ public class CheEnvironmentEngine {
 
                 ExtendedMachineImpl extendedMachine = new ExtendedMachineImpl();
                 extendedMachine.setAgents(agents);
-                applyAgents(extendedMachine, serviceWithCorrectSource);
+                try {
+                    agentConfigApplier.apply(extendedMachine, serviceWithCorrectSource);
+                } catch (AgentException e) {
+                    throw new ServerException("Can't apply agent config", e);
+                }
 
                 return machineProvider.startService(namespace,
                                                     workspaceId,
@@ -518,26 +520,32 @@ public class CheEnvironmentEngine {
     private void initializeEnvironment(String namespace,
                                        String workspaceId,
                                        String envName,
-                                       Environment env,
+                                       Environment envConfig,
                                        String networkId,
                                        MessageConsumer<MachineLogMessage> messageConsumer)
             throws ServerException,
                    ConflictException {
 
-        CheServicesEnvironmentImpl environment = environmentParser.parse(env);
+        CheServicesEnvironmentImpl internalEnv = environmentParser.parse(envConfig);
 
-        applyAgents(env, environment);
+        internalEnv.setWorkspaceId(workspaceId);
+
+        try {
+            agentConfigApplier.apply(envConfig, internalEnv);
+        } catch (AgentException e) {
+            throw new ServerException("Can't apply agent config", e);
+        }
 
         normalize(namespace,
                   workspaceId,
-                  environment);
+                  internalEnv);
 
-        List<String> servicesOrder = startStrategy.order(environment);
+        List<String> servicesOrder = startStrategy.order(internalEnv);
 
-        normilizeVolumesFrom(environment);
+        normalizeVolumesFrom(internalEnv);
 
         EnvironmentHolder environmentHolder = new EnvironmentHolder(servicesOrder,
-                                                                    environment,
+                                                                    internalEnv,
                                                                     messageConsumer,
                                                                     EnvStatus.STARTING,
                                                                     envName,
@@ -546,27 +554,6 @@ public class CheEnvironmentEngine {
         try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             if (environments.putIfAbsent(workspaceId, environmentHolder) != null) {
                 throw new ConflictException(format("Environment of workspace '%s' already exists", workspaceId));
-            }
-        }
-    }
-
-    private void applyAgents(Environment env, CheServicesEnvironmentImpl servicesEnvironment) throws ServerException {
-        for (Map.Entry<String, ? extends ExtendedMachine> machineEntry : env.getMachines().entrySet()) {
-            String machineName = machineEntry.getKey();
-            ExtendedMachine extendedMachine = machineEntry.getValue();
-            CheServiceImpl service = servicesEnvironment.getServices().get(machineName);
-
-            applyAgents(extendedMachine, service);
-        }
-    }
-
-    private void applyAgents(@Nullable ExtendedMachine extendedMachine,
-                             CheServiceImpl service) throws ServerException {
-        if (extendedMachine != null) {
-            try {
-                agentConfigApplier.modify(service, extendedMachine.getAgents());
-            } catch (AgentException e) {
-                throw new ServerException("Can't apply agent config", e);
             }
         }
     }
@@ -584,7 +571,7 @@ public class CheEnvironmentEngine {
         }
     }
 
-    private void normilizeVolumesFrom(CheServicesEnvironmentImpl environment) {
+    private void normalizeVolumesFrom(CheServicesEnvironmentImpl environment) {
         Map<String, CheServiceImpl> services = environment.getServices();
         // replace machines names in volumes_from with containers IDs
         for (Map.Entry<String, CheServiceImpl> serviceEntry : services.entrySet()) {

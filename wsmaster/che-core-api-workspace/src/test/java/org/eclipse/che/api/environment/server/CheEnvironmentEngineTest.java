@@ -104,7 +104,7 @@ public class CheEnvironmentEngineTest {
     @Mock
     RecipeDownloader                   recipeDownloader;
     @Mock
-    AgentConfigApplier                 agentConfigApplier;
+    EnvConfigAgentApplier              agentConfigApplier;
     @Mock
     ContainerNameGenerator             containerNameGenerator;
 
@@ -358,7 +358,7 @@ public class CheEnvironmentEngineTest {
                                              any(CheServiceImpl.class),
                                              any(LineConsumer.class));
         for (ExtendedMachineImpl extendedMachine : env.getMachines().values()) {
-            verify(agentConfigApplier).modify(any(CheServiceImpl.class), eq(extendedMachine.getAgents()));
+            verify(agentConfigApplier).apply(eq(extendedMachine), any(CheServiceImpl.class));
         }
         verifyNoMoreInteractions(agentConfigApplier);
     }
@@ -565,7 +565,9 @@ public class CheEnvironmentEngineTest {
         engine.startMachine(workspaceId, config, agents);
 
         // then
-        verify(agentConfigApplier).modify(any(CheServiceImpl.class), eq(agents));
+        ExtendedMachineImpl expectedMachine = new ExtendedMachineImpl();
+        expectedMachine.setAgents(agents);
+        verify(agentConfigApplier).apply(eq(expectedMachine), any(CheServiceImpl.class));
     }
 
     @Test

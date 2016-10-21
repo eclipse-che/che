@@ -61,12 +61,12 @@ public class AgentImpl implements Agent {
     }
 
     @Override
-    public List<String> getDependencies() {
+    public List<String> getDependencies() {// TODO rewrite
         return MoreObjects.firstNonNull(dependencies, new ArrayList<String>());
     }
 
     @Override
-    public Map<String, String> getProperties() {
+    public Map<String, String> getProperties() {// TODO rewrite
         return MoreObjects.firstNonNull(properties, new HashMap<String, String>());
     }
 

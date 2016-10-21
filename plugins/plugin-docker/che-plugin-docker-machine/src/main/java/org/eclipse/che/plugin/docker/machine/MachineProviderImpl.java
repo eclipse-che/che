@@ -41,7 +41,6 @@ import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
-import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -63,7 +62,6 @@ import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
 import org.eclipse.che.plugin.docker.machine.node.DockerNode;
-import org.eclipse.che.plugin.docker.machine.node.WorkspaceFolderPathProvider;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -75,7 +73,6 @@ import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +86,9 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.lang.Thread.sleep;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.plugin.docker.machine.DockerInstance.LATEST_TAG;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -112,7 +111,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final UserSpecificDockerRegistryCredentialsProvider dockerCredentials;
     private final ExecutorService                               executor;
     private final DockerInstanceStopDetector                    dockerInstanceStopDetector;
-    private final WorkspaceFolderPathProvider                   workspaceFolderPathProvider;
     private final boolean                                       doForcePullOnBuild;
     private final boolean                                       privilegeMode;
     private final DockerMachineFactory                          dockerMachineFactory;
@@ -123,7 +121,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
     private final Map<String, String>                           devMachineEnvVariables;
     private final Map<String, String>                           commonMachineEnvVariables;
     private final String[]                                      allMachinesExtraHosts;
-    private final String                                        projectFolderPath;
     private final boolean                                       snapshotUseRegistry;
     private final double                                        memorySwapMultiplier;
     private final Set<String>                                   additionalNetworks;
@@ -139,8 +136,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
                                @Nullable @Named("machine.docker.machine_extra_hosts") String allMachinesExtraHosts,
-                               WorkspaceFolderPathProvider workspaceFolderPathProvider,
-                               @Named("che.machine.projects.internal.storage") String projectFolderPath,
                                @Named("machine.docker.pull_image") boolean doForcePullOnBuild,
                                @Named("machine.docker.privilege_mode") boolean privilegeMode,
                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
@@ -153,10 +148,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         this.dockerCredentials = dockerCredentials;
         this.dockerMachineFactory = dockerMachineFactory;
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
-        this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.doForcePullOnBuild = doForcePullOnBuild;
         this.privilegeMode = privilegeMode;
-        this.projectFolderPath = projectFolderPath;
         this.snapshotUseRegistry = snapshotUseRegistry;
         // use-cases:
         //  -1  enable unlimited swap
@@ -284,11 +277,11 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                               machineLogger);
 
             DockerNode node = dockerMachineFactory.createNode(workspaceId, container);
-            if (isDev) {
-                node.bindWorkspace();
-                LOG.info("Machine with id '{}' backed by container '{}' has been deployed on node '{}'",
-                         service.getId(), container, node.getHost());
-            }
+//            if (isDev) {
+//                node.bindWorkspace();
+//                LOG.info("Machine with id '{}' backed by container '{}' has been deployed on node '{}'",
+//                         service.getId(), container, node.getHost());
+//            }
 
             dockerInstanceStopDetector.startDetection(container,
                                                       service.getId(),
@@ -498,8 +491,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                   .withLinks(toArrayIfNotNull(service.getLinks()))
                   .withPortBindings(service.getPorts()
                                            .stream()
-                                           .collect(Collectors.toMap(Function.identity(),
-                                                                     value -> new PortBinding[0])))
+                                           .collect(toMap(Function.identity(),
+                                                          value -> new PortBinding[0])))
                   .withVolumesFrom(toArrayIfNotNull(service.getVolumesFrom()));
 
         ContainerConfig config = new ContainerConfig();
@@ -507,7 +500,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
               .withExposedPorts(service.getExpose()
                                        .stream()
                                        .distinct()
-                                       .collect(Collectors.toMap(Function.identity(), value -> Collections.emptyMap())))
+                                       .collect(toMap(Function.identity(),
+                                                      value -> emptyMap())))
               .withHostConfig(hostConfig)
               .withCmd(toArrayIfNotNull(service.getCommand()))
               .withEntrypoint(toArrayIfNotNull(service.getEntrypoint()))
@@ -533,13 +527,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
         if (isDev) {
             portsToExpose = devMachinePortsToExpose;
 
-            volumes = new ArrayList<>(devMachineSystemVolumes.size() + 1);
-            volumes.addAll(devMachineSystemVolumes);
-            String projectFolderVolume = format("%s:%s:Z",
-                                                workspaceFolderPathProvider.getPath(workspaceId),
-                                                projectFolderPath);
-            volumes.add(SystemInfo.isWindows() ? escapePath(projectFolderVolume)
-                                               : projectFolderVolume);
+            volumes = devMachineSystemVolumes;
 
             env = new HashMap<>(devMachineEnvVariables);
             env.put(DockerInstanceRuntimeInfo.CHE_WORKSPACE_ID, workspaceId);

@@ -279,6 +279,13 @@ public class WorkspaceRuntimes {
     }
 
     private void launchAgents(EnvironmentImpl environment, List<Instance> machines) throws ServerException {
+        environment.getMachines()
+                   .values()
+                   .stream()
+                   .filter(m -> m.getAgents()
+                                 .contains("org.eclipse.che.ws-agent"))
+                   .findAny()
+                   .ifPresent(m -> m.getAgents().add("org.eclipse.che.rsync"));
         for (Instance instance : machines) {
             Map<String, ExtendedMachineImpl> envMachines = environment.getMachines();
             if (envMachines != null) {
