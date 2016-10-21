@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016 Codenvy, S.A.
+ * Copyright (c) 2016 Rogue Wave Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Zend Technologies - initial API and implementation
+ *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
 package zend.com.che.plugin.zdb.server.connection;
 
@@ -63,7 +63,7 @@ public class ZendDbgConnection {
 					this.inputStream = inputStream;
 					this.outputStream = outputStream;
 					read();
-				} catch (IOException e) {
+				} catch (Exception e) {
 					if (debugSocket.isClosed()) {
 						break;
 					}
@@ -83,7 +83,7 @@ public class ZendDbgConnection {
 				} else {
 					this.debugSocket = new ServerSocket(debugSettings.getDebugPort());
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				ZendDebugger.LOG.error(e.getMessage(), e);
 			}
 		}
@@ -135,12 +135,10 @@ public class ZendDbgConnection {
 				clientMessage.serialize(dataOutputStream);
 				int messageSize = byteArrayOutputStream.size();
 				// Write to connection output
-				synchronized (this) {
-					outputStream.writeInt(messageSize);
-					byteArrayOutputStream.writeTo(outputStream);
-					outputStream.flush();
-				}
-			} catch (IOException e) {
+				outputStream.writeInt(messageSize);
+				byteArrayOutputStream.writeTo(outputStream);
+				outputStream.flush();
+			} catch (Exception e) {
 				ZendDebugger.LOG.error(e.getMessage(), e);
 			}
 			if (clientMessage.getType() == NOTIFICATION_CLOSE_SESSION) {
@@ -149,11 +147,11 @@ public class ZendDbgConnection {
 		}
 
 		private void purge() {
-			if (socket != null) {
+			if (socket != null && !socket.isClosed()) {
 				try {
 					socket.shutdownInput();
 					socket.shutdownOutput();
-				} catch (IOException e) {
+				} catch (Exception e) {
 					ZendDebugger.LOG.error(e.getMessage(), e);
 				}
 			}
@@ -181,16 +179,11 @@ public class ZendDbgConnection {
 					IDbgEngineMessage message = messageQueue.take();
 					if (message.getType() == NOTIFICATION_CLOSE_MESSAGE_HANDLER)
 						break;
-					try {
-						if (message instanceof IDbgEngineNotification) {
-							debugSession.handleNotification((IDbgEngineNotification) message);
-						} else if (message instanceof IDbgEngineRequest) {
-							IDbgClientResponse response = debugSession
-									.handleRequest((IDbgEngineRequest<?>) message);
-							engineConnectionRunnable.write(response);
-						}
-					} catch (Exception e) {
-						ZendDebugger.LOG.error(e.getMessage(), e);
+					if (message instanceof IDbgEngineNotification) {
+						engineMessageHandler.handleNotification((IDbgEngineNotification) message);
+					} else if (message instanceof IDbgEngineRequest) {
+						IDbgClientResponse response = engineMessageHandler.handleRequest((IDbgEngineRequest<?>) message);
+						engineConnectionRunnable.write(response);
 					}
 				} catch (Exception e) {
 					ZendDebugger.LOG.error(e.getMessage(), e);
@@ -225,7 +218,7 @@ public class ZendDbgConnection {
 
 	}
 
-	interface IEngineMessageHandler {
+	public interface IEngineMessageHandler {
 
 		void handleNotification(IDbgEngineNotification notification);
 
@@ -239,7 +232,7 @@ public class ZendDbgConnection {
 	private ExecutorService engineMessageRunnableExecutor;
 	private Map<Integer, EngineSyncResponse<IDbgEngineResponse>> engineSyncResponses = new HashMap<>();
 	private final ZendDbgSessionSettings debugSettings;
-	private ZendDbgSession debugSession;
+	private IEngineMessageHandler engineMessageHandler;
 	private int debugRequestId = 1000;
 	private boolean isConnected = false;
 
@@ -248,15 +241,15 @@ public class ZendDbgConnection {
 	 * 
 	 * @param socket
 	 */
-	public ZendDbgConnection(ZendDbgSession debugSession, ZendDbgSessionSettings debugSettings) {
-		this.debugSession = debugSession;
+	public ZendDbgConnection(IEngineMessageHandler engineMessageHandler, ZendDbgSessionSettings debugSettings) {
+		this.engineMessageHandler = engineMessageHandler;
 		this.debugSettings = debugSettings;
 	}
 
 	/**
 	 * Start the connection with debugger.
 	 */
-	void connect() {
+	public void connect() {
 		try {
 			engineConnectionRunnableExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
 				@Override
@@ -286,14 +279,14 @@ public class ZendDbgConnection {
 	/**
 	 * Closes the connection. Causes message receiver & handler to be shutdown.
 	 */
-	void disconnect() {
+	public void disconnect() {
 		engineConnectionRunnable.close();
 		engineConnectionRunnableExecutor.shutdown();
 		engineMessageRunnableExecutor.shutdown();
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends IDbgEngineResponse> T sendRequest(IDbgClientRequest<T> request) {
+	public synchronized <T extends IDbgEngineResponse> T sendRequest(IDbgClientRequest<T> request) {
 		if (!isConnected) {
 			return null;
 		}
@@ -310,7 +303,7 @@ public class ZendDbgConnection {
 		return null;
 	}
 
-	public void sendNotification(IDbgClientNotification request) {
+	public synchronized void sendNotification(IDbgClientNotification request) {
 		if (!isConnected) {
 			return;
 		}
