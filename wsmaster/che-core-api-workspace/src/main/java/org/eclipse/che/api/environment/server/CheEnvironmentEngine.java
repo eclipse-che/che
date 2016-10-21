@@ -13,7 +13,10 @@ package org.eclipse.che.api.environment.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -101,15 +104,16 @@ public class CheEnvironmentEngine {
     private final File                           machineLogsDir;
     private final MachineInstanceProviders       machineInstanceProviders;
     private final long                           defaultMachineMemorySizeBytes;
-    private final SnapshotDao                  snapshotDao;
-    private final EventService                 eventService;
-    private final EnvironmentParser            environmentParser;
-    private final DefaultServicesStartStrategy startStrategy;
-    private final MachineInstanceProvider      machineProvider;
-    private final AgentConfigApplier           agentConfigApplier;
-    private final RecipeDownloader             recipeDownloader;
-    private final Pattern                      recipeApiPattern;
-    private final ContainerNameGenerator       containerNameGenerator;
+    private final SnapshotDao                    snapshotDao;
+    private final EventService                   eventService;
+    private final EnvironmentParser              environmentParser;
+    private final DefaultServicesStartStrategy   startStrategy;
+    private final MachineInstanceProvider        machineProvider;
+    private final AgentConfigApplier             agentConfigApplier;
+    private final RecipeDownloader               recipeDownloader;
+    private final Pattern                        recipeApiPattern;
+    private final ContainerNameGenerator         containerNameGenerator;
+    private final AgentRegistry                  agentRegistry;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -125,7 +129,8 @@ public class CheEnvironmentEngine {
                                 AgentConfigApplier agentConfigApplier,
                                 @Named("api.endpoint") String apiEndpoint,
                                 RecipeDownloader recipeDownloader,
-                                ContainerNameGenerator containerNameGenerator) {
+                                ContainerNameGenerator containerNameGenerator,
+                                AgentRegistry agentRegistry) {
         this.snapshotDao = snapshotDao;
         this.eventService = eventService;
         this.environmentParser = environmentParser;
@@ -133,6 +138,7 @@ public class CheEnvironmentEngine {
         this.machineProvider = machineProvider;
         this.agentConfigApplier = agentConfigApplier;
         this.recipeDownloader = recipeDownloader;
+        this.agentRegistry = agentRegistry;
         this.environments = new ConcurrentHashMap<>();
         this.machineInstanceProviders = machineInstanceProviders;
         this.machineLogsDir = new File(machineLogsDir);
@@ -243,7 +249,8 @@ public class CheEnvironmentEngine {
                               workspaceId,
                               devMachineName,
                               networkId,
-                              recover);
+                              recover,
+                              env.getMachines());
 
         try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             EnvironmentHolder environmentHolder = environments.get(workspaceId);
@@ -339,6 +346,7 @@ public class CheEnvironmentEngine {
                                          .setEnvName(environmentHolder.name)
                                          .setOwner(creator)
                                          .build();
+        addAgentsProvidedServers(machine, agents);
 
         MachineStarter machineStarter;
         if ("docker".equals(machineConfig.getType())) {
@@ -351,7 +359,7 @@ public class CheEnvironmentEngine {
                       service);
             machine.setId(service.getId());
 
-            machineStarter = (machineLogger, machineSource) -> {
+            machineStarter = (machineLogger, machineSource, providedServers) -> {
                 CheServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(service, machineSource);
 
                 normalize(namespace,
@@ -370,14 +378,15 @@ public class CheEnvironmentEngine {
                                                     machineConfig.isDev(),
                                                     environmentHolder.networkId,
                                                     serviceWithCorrectSource,
-                                                    machineLogger);
+                                                    machineLogger,
+                                                    providedServers);
             };
         } else {
             try {
                 InstanceProvider provider = machineInstanceProviders.getProvider(machineConfig.getType());
                 machine.setId(generateMachineId());
 
-                machineStarter = (machineLogger, machineSource) -> {
+                machineStarter = (machineLogger, machineSource, providedServers) -> {
                     Machine machineWithCorrectSource = getMachineWithCorrectSource(machine, machineSource);
                     return provider.createInstance(machineWithCorrectSource, machineLogger);
                 };
@@ -571,6 +580,17 @@ public class CheEnvironmentEngine {
         }
     }
 
+    private void addAgentsProvidedServers(MachineImpl machine, List<String> agentKeys) throws ServerException {
+        for (String agentKey : agentKeys) {
+            try {
+                AgentImpl agent = new AgentImpl(agentRegistry.getAgent(AgentKeyImpl.parse(agentKey)));
+                machine.getConfig().getServers().addAll(agent.getServers());
+            } catch (AgentException e) {
+                throw new ServerException(e);
+            }
+        }
+    }
+
     private void normalize(String namespace,
                            String workspaceId,
                            CheServicesEnvironmentImpl environment) throws ServerException {
@@ -648,7 +668,8 @@ public class CheEnvironmentEngine {
                                        String workspaceId,
                                        String devMachineName,
                                        String networkId,
-                                       boolean recover)
+                                       boolean recover,
+                                       Map<String, ? extends ExtendedMachine> extendedMachines)
             throws ServerException {
         // Starting all machines in environment one by one by getting configs
         // from the corresponding starting queue.
@@ -694,7 +715,7 @@ public class CheEnvironmentEngine {
                 final String finalMachineName = machineName;
                 // needed to reuse startInstance method and
                 // create machine instances by different implementation-specific providers
-                MachineStarter machineStarter = (machineLogger, machineSource) -> {
+                MachineStarter machineStarter = (machineLogger, machineSource, providedServers) -> {
                     CheServiceImpl serviceWithCorrectSource = getServiceWithCorrectSource(service, machineSource);
                     return machineProvider.startService(namespace,
                                                         workspaceId,
@@ -703,7 +724,8 @@ public class CheEnvironmentEngine {
                                                         isDev,
                                                         networkId,
                                                         serviceWithCorrectSource,
-                                                        machineLogger);
+                                                        machineLogger,
+                                                        providedServers);
                 };
 
                 MachineImpl machine =
@@ -722,6 +744,11 @@ public class CheEnvironmentEngine {
                                    .setEnvName(envName)
                                    .setOwner(creator)
                                    .build();
+
+                ExtendedMachine extendedMachine = extendedMachines.get(machineName);
+                if (extendedMachine != null) {
+                    addAgentsProvidedServers(machine, extendedMachine.getAgents());
+                }
 
                 Instance instance = startInstance(recover,
                                                   envLogger,
@@ -825,17 +852,22 @@ public class CheEnvironmentEngine {
                     machineSource = snapshot.getMachineSource();
                 }
 
-                instance = machineStarter.startMachine(machineLogger, machineSource);
+                instance = machineStarter.startMachine(machineLogger,
+                                                       machineSource,
+                                                       machine.getConfig().getServers());
             } catch (SourceNotFoundException e) {
                 if (recover) {
                     LOG.error("Image of snapshot for machine " + machine.getConfig().getName() +
                               " not found. " + "Machine will be created from origin source");
                     machine = originMachine;
-                    instance = machineStarter.startMachine(machineLogger, null);
+                    instance = machineStarter.startMachine(machineLogger,
+                                                           null,
+                                                           machine.getConfig().getServers());
                 } else {
                     throw e;
                 }
             }
+
             replaceMachine(instance);
 
             eventService.publish(newDto(MachineStatusEvent.class)
@@ -883,8 +915,8 @@ public class CheEnvironmentEngine {
 
     private interface MachineStarter {
         Instance startMachine(LineConsumer machineLogger,
-                              MachineSource machineSource) throws ServerException,
-                                                                  NotFoundException;
+                              MachineSource machineSource,
+                              List<? extends ServerConf> providedServers) throws ServerException, NotFoundException;
     }
 
     private CheServiceImpl getServiceWithCorrectSource(CheServiceImpl service,

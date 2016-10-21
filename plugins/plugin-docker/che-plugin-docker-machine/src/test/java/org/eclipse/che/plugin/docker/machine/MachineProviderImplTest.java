@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.plugin.docker.machine.DockerInstanceProvider.DOCKER_FILE_TYPE;
@@ -190,7 +191,8 @@ public class MachineProviderImplTest {
                               false,
                               NETWORK_NAME,
                               machine,
-                              LineConsumer.DEV_NULL);
+                              LineConsumer.DEV_NULL,
+                              emptyList());
 
         verify(dockerConnector, never()).pull(any(PullParams.class), any(ProgressMonitor.class));
     }
@@ -225,7 +227,8 @@ public class MachineProviderImplTest {
                               false,
                               NETWORK_NAME,
                               machine,
-                              LineConsumer.DEV_NULL);
+                              LineConsumer.DEV_NULL,
+                              emptyList());
 
         verify(dockerConnector, never()).removeImage(any(RemoveImageParams.class));
     }
@@ -1138,7 +1141,8 @@ public class MachineProviderImplTest {
                               isDev,
                               NETWORK_NAME,
                               service,
-                              LineConsumer.DEV_NULL);
+                              LineConsumer.DEV_NULL,
+                              emptyList());
     }
 
     private CheServiceImpl createInstanceFromSnapshot() throws ServerException {
@@ -1179,7 +1183,8 @@ public class MachineProviderImplTest {
                               isDev,
                               NETWORK_NAME,
                               service,
-                              LineConsumer.DEV_NULL);
+                              LineConsumer.DEV_NULL,
+                              emptyList());
     }
 
     public CheServiceImpl createService() {

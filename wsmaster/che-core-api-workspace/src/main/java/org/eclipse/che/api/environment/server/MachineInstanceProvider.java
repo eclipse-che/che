@@ -11,9 +11,12 @@
 package org.eclipse.che.api.environment.server;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
+
+import java.util.List;
 
 /**
  * Starts compose services and networks.
@@ -40,6 +43,8 @@ public interface MachineInstanceProvider {
      *         description of docker compose service
      * @param machineLogger
      *         consumer of logs of service
+     * @param providedServers
+     *          the list of known machine servers
      * @return machine instance
      * @throws ServerException
      *         if any error occurs
@@ -51,8 +56,8 @@ public interface MachineInstanceProvider {
                           boolean isDev,
                           String networkName,
                           CheServiceImpl service,
-                          LineConsumer machineLogger)
-            throws ServerException;
+                          LineConsumer machineLogger,
+                          List<? extends ServerConf> providedServers) throws ServerException;
 
     /**
      * Creates network for compose services.

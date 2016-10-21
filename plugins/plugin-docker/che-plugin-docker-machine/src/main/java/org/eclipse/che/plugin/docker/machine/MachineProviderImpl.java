@@ -41,7 +41,6 @@ import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
 import org.eclipse.che.plugin.docker.client.ProgressMonitor;
 import org.eclipse.che.plugin.docker.client.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.plugin.docker.client.exception.ContainerNotFoundException;
-import org.eclipse.che.plugin.docker.client.exception.DockerException;
 import org.eclipse.che.plugin.docker.client.exception.ImageNotFoundException;
 import org.eclipse.che.plugin.docker.client.exception.NetworkNotFoundException;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
@@ -245,8 +244,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                  boolean isDev,
                                  String networkName,
                                  CheServiceImpl service,
-                                 LineConsumer machineLogger)
-            throws ServerException {
+                                 LineConsumer machineLogger,
+                                 List<? extends ServerConf> providedServers) throws ServerException {
 
         // copy to not affect/be affected by changes in origin
         service = new CheServiceImpl(service);
@@ -308,6 +307,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                                                       .setLocation(service.getBuild() != null ?
                                                                                                    service.getBuild().getContext() :
                                                                                                    service.getImage()))
+                                                                   .setServers(providedServers)
                                                                    .build(),
                                                   service.getId(),
                                                   workspaceId,

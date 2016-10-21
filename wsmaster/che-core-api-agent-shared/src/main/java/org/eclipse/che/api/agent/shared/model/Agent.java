@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.shared.model;
 
+import org.eclipse.che.api.core.model.machine.ServerConf;
+
 import java.util.List;
 import java.util.Map;
 
@@ -44,4 +46,9 @@ public interface Agent {
      * Returns any machine specific properties.
      */
     Map<String, String> getProperties();
+
+    /**
+     * Returns Che servers in the machine.
+     */
+    List<? extends ServerConf> getServers();
 }

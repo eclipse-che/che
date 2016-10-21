@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -22,7 +23,6 @@ import org.eclipse.che.api.environment.server.compose.ComposeFileParser;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.MachineInstanceProviders;
-import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
@@ -32,6 +32,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
+import org.eclipse.che.api.machine.server.spi.SnapshotDao;
 import org.eclipse.che.api.machine.server.util.RecipeDownloader;
 import org.eclipse.che.api.machine.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -65,6 +66,7 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -107,6 +109,9 @@ public class CheEnvironmentEngineTest {
     AgentConfigApplier                 agentConfigApplier;
     @Mock
     ContainerNameGenerator             containerNameGenerator;
+    @Mock
+    AgentRegistry                      agentRegistry;
+
 
     EnvironmentParser environmentParser = new EnvironmentParser(new ComposeFileParser(), recipeDownloader);
 
@@ -125,7 +130,7 @@ public class CheEnvironmentEngineTest {
                                               agentConfigApplier,
                                               API_ENDPOINT,
                                               recipeDownloader,
-                                              containerNameGenerator));
+                                              containerNameGenerator, agentRegistry));
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
@@ -204,7 +209,8 @@ public class CheEnvironmentEngineTest {
                                           anyBoolean(),
                                           anyString(),
                                           any(CheServiceImpl.class),
-                                          any(LineConsumer.class)))
+                                          any(LineConsumer.class),
+                                          anyList()))
                 .thenAnswer(invocationOnMock -> {
                     Object[] arguments = invocationOnMock.getArguments();
                     String machineName = (String)arguments[3];
@@ -251,7 +257,8 @@ public class CheEnvironmentEngineTest {
                                              eq(false),
                                              anyString(),
                                              captor.capture(),
-                                             any(LineConsumer.class));
+                                             any(LineConsumer.class),
+                                             anyList());
         CheServiceImpl actualService = captor.getValue();
         assertEquals((long)actualService.getMemLimit(), DEFAULT_MACHINE_MEM_LIMIT_MB * 1024L * 1024L);
     }
@@ -276,7 +283,8 @@ public class CheEnvironmentEngineTest {
                                              eq(false),
                                              anyString(),
                                              captor.capture(),
-                                             any(LineConsumer.class));
+                                             any(LineConsumer.class),
+                                             anyList());
         CheServiceImpl actualService = captor.getValue();
         assertEquals((long)actualService.getMemLimit(), 42943433L);
     }
@@ -303,7 +311,8 @@ public class CheEnvironmentEngineTest {
                                              eq(false),
                                              anyString(),
                                              captor.capture(),
-                                             any(LineConsumer.class));
+                                             any(LineConsumer.class),
+                                             anyList());
         CheServiceImpl actualService = captor.getValue();
         assertNull(actualService.getBuild().getContext());
         assertNull(actualService.getBuild().getDockerfilePath());
@@ -331,7 +340,8 @@ public class CheEnvironmentEngineTest {
                                              eq(false),
                                              anyString(),
                                              captor.capture(),
-                                             any(LineConsumer.class));
+                                             any(LineConsumer.class),
+                                             anyList());
         CheServiceImpl actualService = captor.getValue();
         assertNull(actualService.getBuild().getDockerfilePath());
         assertNull(actualService.getBuild().getDockerfileContent());
@@ -356,7 +366,8 @@ public class CheEnvironmentEngineTest {
                                              eq(false),
                                              anyString(),
                                              any(CheServiceImpl.class),
-                                             any(LineConsumer.class));
+                                             any(LineConsumer.class),
+                                             anyList());
         for (ExtendedMachineImpl extendedMachine : env.getMachines().values()) {
             verify(agentConfigApplier).modify(any(CheServiceImpl.class), eq(extendedMachine.getAgents()));
         }
@@ -380,7 +391,8 @@ public class CheEnvironmentEngineTest {
                                           anyBoolean(),
                                           anyString(),
                                           any(CheServiceImpl.class),
-                                          any(LineConsumer.class)))
+                                          any(LineConsumer.class),
+                                          anyList()))
                 .thenReturn(newMachine);
 
         MachineConfigImpl config = createConfig(false);
@@ -400,7 +412,8 @@ public class CheEnvironmentEngineTest {
                                              eq(false),
                                              anyString(),
                                              captor.capture(),
-                                             any(LineConsumer.class));
+                                             any(LineConsumer.class),
+                                             anyList());
         CheServiceImpl actualService = captor.getValue();
         assertEquals((long)actualService.getMemLimit(), DEFAULT_MACHINE_MEM_LIMIT_MB * 1024L * 1024L);
     }
@@ -422,7 +435,8 @@ public class CheEnvironmentEngineTest {
                                           anyBoolean(),
                                           anyString(),
                                           any(CheServiceImpl.class),
-                                          any(LineConsumer.class)))
+                                          any(LineConsumer.class),
+                                          anyList()))
                 .thenReturn(newMachine);
 
         MachineConfigImpl config = createConfig(false);
@@ -442,7 +456,8 @@ public class CheEnvironmentEngineTest {
                                              eq(false),
                                              anyString(),
                                              captor.capture(),
-                                             any(LineConsumer.class));
+                                             any(LineConsumer.class),
+                                             anyList());
         CheServiceImpl actualService = captor.getValue();
         assertEquals((long)actualService.getMemLimit(), 4096L * 1024L * 1024L);
     }
@@ -464,7 +479,8 @@ public class CheEnvironmentEngineTest {
                                           anyBoolean(),
                                           anyString(),
                                           any(CheServiceImpl.class),
-                                          any(LineConsumer.class)))
+                                          any(LineConsumer.class),
+                                          anyList()))
                 .thenReturn(newMachine);
 
         MachineConfigImpl config = createConfig(false);
@@ -486,7 +502,8 @@ public class CheEnvironmentEngineTest {
                                              eq(false),
                                              anyString(),
                                              captor.capture(),
-                                             any(LineConsumer.class));
+                                             any(LineConsumer.class),
+                                             anyList());
         CheServiceImpl actualService = captor.getValue();
         assertNull(actualService.getBuild().getContext());
         assertNull(actualService.getBuild().getDockerfilePath());
@@ -510,7 +527,8 @@ public class CheEnvironmentEngineTest {
                                           anyBoolean(),
                                           anyString(),
                                           any(CheServiceImpl.class),
-                                          any(LineConsumer.class)))
+                                          any(LineConsumer.class),
+                                          anyList()))
                 .thenReturn(newMachine);
 
         MachineConfigImpl config = createConfig(false);
@@ -531,7 +549,8 @@ public class CheEnvironmentEngineTest {
                                              eq(false),
                                              anyString(),
                                              captor.capture(),
-                                             any(LineConsumer.class));
+                                             any(LineConsumer.class),
+                                             anyList());
         CheServiceImpl actualService = captor.getValue();
         assertNull(actualService.getBuild().getDockerfilePath());
         assertNull(actualService.getBuild().getDockerfileContent());
@@ -555,7 +574,8 @@ public class CheEnvironmentEngineTest {
                                           anyBoolean(),
                                           anyString(),
                                           any(CheServiceImpl.class),
-                                          any(LineConsumer.class)))
+                                          any(LineConsumer.class),
+                                          anyList()))
                 .thenReturn(newMachine);
 
         MachineConfigImpl config = createConfig(false);
@@ -658,7 +678,8 @@ public class CheEnvironmentEngineTest {
                                                        anyBoolean(),
                                                        anyString(),
                                                        any(CheServiceImpl.class),
-                                                       any(LineConsumer.class));
+                                                       any(LineConsumer.class),
+                                                       anyList());
         String workspaceId = instances.get(0).getWorkspaceId();
 
         when(engine.generateMachineId()).thenReturn("newMachineId");
@@ -672,7 +693,8 @@ public class CheEnvironmentEngineTest {
                                           anyBoolean(),
                                           anyString(),
                                           any(CheServiceImpl.class),
-                                          any(LineConsumer.class)))
+                                          any(LineConsumer.class),
+                                          anyList()))
                 .thenReturn(newMachine);
 
         MachineConfigImpl config = createConfig(false);
@@ -690,7 +712,8 @@ public class CheEnvironmentEngineTest {
                                                        anyBoolean(),
                                                        anyString(),
                                                        any(CheServiceImpl.class),
-                                                       any(LineConsumer.class));
+                                                       any(LineConsumer.class),
+                                                       anyList());
     }
 
     @Test
@@ -910,7 +933,8 @@ public class CheEnvironmentEngineTest {
                                           anyBoolean(),
                                           anyString(),
                                           any(CheServiceImpl.class),
-                                          any(LineConsumer.class)))
+                                          any(LineConsumer.class),
+                                          anyList()))
                 .thenAnswer(invocationOnMock -> {
                     Object[] arguments = invocationOnMock.getArguments();
                     String machineName = (String)arguments[3];

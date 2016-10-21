@@ -607,7 +607,7 @@ public class WorkspaceRuntimes {
     protected void launchAgents(Instance instance, List<String> agents) throws ServerException {
         try {
             for (AgentKey agentKey : agentSorter.sort(agents)) {
-                LOG.info("Launching '{}' agent", agentKey.getName());
+                LOG.info("Launching '{}' agent at workspace {}", agentKey.getName(), instance.getWorkspaceId());
                 
                 Agent agent = agentRegistry.getAgent(agentKey);
                 AgentLauncher launcher = launcherFactory.find(agentKey.getName(), instance.getConfig().getType());
