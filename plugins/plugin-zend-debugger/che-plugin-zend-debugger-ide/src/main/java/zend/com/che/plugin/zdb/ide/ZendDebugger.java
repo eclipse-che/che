@@ -1,19 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2016 Codenvy, S.A.
+ * Copyright (c) 2016 Rogue Wave Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Zend Technologies - initial API and implementation
+ *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package zend.com.che.plugin.zdb.ide.debug;
+package zend.com.che.plugin.zdb.ide;
 
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
-import zend.com.che.plugin.zdb.ide.configuration.ZendDebugConfigurationType;
+import zend.com.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType;
 
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.ide.api.debug.BreakpointManager;
@@ -47,7 +47,7 @@ public class ZendDebugger extends AbstractDebugger {
 	@Inject
 	public ZendDebugger(DebuggerServiceClient service, DtoFactory dtoFactory, LocalStorageProvider localStorageProvider,
 			MessageBusProvider messageBusProvider, EventBus eventBus, FqnResolverFactory fqnResolverFactory,
-			ZendDebuggerFileHandler zendDebuggerFileHandler, DebuggerManager debuggerManager,
+			ZendDbgFileHandler zendDebuggerFileHandler, DebuggerManager debuggerManager,
 			FileTypeRegistry fileTypeRegistry, BreakpointManager breakpointManager) {
 		super(service, dtoFactory, localStorageProvider, messageBusProvider, eventBus, zendDebuggerFileHandler,
 				debuggerManager, breakpointManager, ID);
@@ -74,7 +74,7 @@ public class ZendDebugger extends AbstractDebugger {
 	@Override
 	protected DebuggerDescriptor toDescriptor(Map<String, String> connectionProperties) {
 		return new DebuggerDescriptor("Zend Debugger", "Zend Debugger client, port: "
-				+ connectionProperties.get(ZendDebugConfigurationType.ATTR_DEBUG_PORT));
+				+ connectionProperties.get(ZendDbgConfigurationType.ATTR_DEBUG_PORT));
 	}
 
 }

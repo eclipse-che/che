@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016 Codenvy, S.A.
+ * Copyright (c) 2016 Rogue Wave Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Zend Technologies - initial API and implementation
+ *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
 package zend.com.che.plugin.zdb.server.variables;
 
@@ -39,38 +39,38 @@ public class ZendDbgExpressionResolver {
 				// the expression is Illeagal.
 				value = new byte[] { 'N' };
 			}
-			build(expression, new ExpressionValueReader(value));
+			read(expression, new ExpressionReader(value));
 		}
 
-		private void build(AbstractDbgExpression expression, ExpressionValueReader reader) {
+		private void read(AbstractDbgExpression expression, ExpressionReader reader) {
 			char type = reader.readType();
 			switch (type) {
 			case 'i': {
-				buildIntType(expression, reader);
+				readIntType(expression, reader);
 				break;
 			}
 			case 'd': {
-				buildFloatType(expression, reader);
+				readFloatType(expression, reader);
 				break;
 			}
 			case 's': {
-				buildSringType(expression, reader);
+				readSringType(expression, reader);
 				break;
 			}
 			case 'b': {
-				buildBooleanType(expression, reader);
+				readBooleanType(expression, reader);
 				break;
 			}
 			case 'r': {
-				buildResourceType(expression, reader);
+				readResourceType(expression, reader);
 				break;
 			}
 			case 'a': {
-				buildArrayType(expression, reader);
+				readArrayType(expression, reader);
 				break;
 			}
 			case 'O': {
-				buildObjectType(expression, reader);
+				readObjectType(expression, reader);
 				break;
 			}
 			default:
@@ -78,31 +78,31 @@ public class ZendDbgExpressionResolver {
 			}
 		}
 
-		private void buildIntType(AbstractDbgExpression expression, ExpressionValueReader reader) {
+		private void readIntType(AbstractDbgExpression expression, ExpressionReader reader) {
 			String value = reader.readToken();
 			expression.setDataType(PHP_INT);
 			expression.setValue(value);
 		}
 
-		private void buildFloatType(AbstractDbgExpression expression, ExpressionValueReader reader) {
+		private void readFloatType(AbstractDbgExpression expression, ExpressionReader reader) {
 			String value = reader.readToken();
 			expression.setDataType(PHP_FLOAT);
 			expression.setValue(value);
 		}
 
-		private void buildSringType(AbstractDbgExpression expression, ExpressionValueReader reader) {
+		private void readSringType(AbstractDbgExpression expression, ExpressionReader reader) {
 			String value = reader.readString();
 			expression.setDataType(PHP_STRING);
 			expression.setValue(value);
 		}
 
-		private void buildBooleanType(AbstractDbgExpression expression, ExpressionValueReader reader) {
+		private void readBooleanType(AbstractDbgExpression expression, ExpressionReader reader) {
 			String value = reader.readToken();
 			expression.setDataType(PHP_BOOL);
 			expression.setValue(value);
 		}
 
-		private void buildResourceType(AbstractDbgExpression expression, ExpressionValueReader reader) {
+		private void readResourceType(AbstractDbgExpression expression, ExpressionReader reader) {
 			// Read resource number and move on...
 			reader.readInt();
 			reader.readInt();
@@ -111,7 +111,7 @@ public class ZendDbgExpressionResolver {
 			expression.setValue(value);
 		}
 
-		private void buildArrayType(AbstractDbgExpression expression, ExpressionValueReader reader) {
+		private void readArrayType(AbstractDbgExpression expression, ExpressionReader reader) {
 			int arrayLength = reader.readInt();
 			expression.setDataType(PHP_ARRAY);
 			expression.setChildrenCount(arrayLength);
@@ -133,11 +133,11 @@ public class ZendDbgExpressionResolver {
 					return;
 				}
 				AbstractDbgExpression childExpression = expression.createChild(name, KIND_ARRAY_MEMBER);
-				build(childExpression, reader);
+				read(childExpression, reader);
 			}
 		}
 
-		private void buildObjectType(AbstractDbgExpression expression, ExpressionValueReader reader) {
+		private void readObjectType(AbstractDbgExpression expression, ExpressionReader reader) {
 			String className = reader.readString();
 			int objectLength = reader.readInt();
 			expression.setDataType(PHP_OBJECT);
@@ -167,15 +167,15 @@ public class ZendDbgExpressionResolver {
 					fieldFacet = MOD_PRIVATE;
 				}
 				childExpression = expression.createChild(name, KIND_OBJECT_MEMBER, fieldFacet);
-				build(childExpression, reader);
+				read(childExpression, reader);
 			}
 		}
 
 	}
 
-	private static class ExpressionValueReader extends ByteArrayInputStream {
+	private static class ExpressionReader extends ByteArrayInputStream {
 
-		private ExpressionValueReader(byte[] result) {
+		private ExpressionReader(byte[] result) {
 			super(result);
 		}
 

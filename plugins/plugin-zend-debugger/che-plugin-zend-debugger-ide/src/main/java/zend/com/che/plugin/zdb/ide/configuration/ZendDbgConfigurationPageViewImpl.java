@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016 Codenvy, S.A.
+ * Copyright (c) 2016 Rogue Wave Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Zend Technologies - initial API and implementation
+ *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
 package zend.com.che.plugin.zdb.ide.configuration;
 
@@ -23,11 +23,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * The implementation of {@link ZendDebugConfigurationPageView}.
+ * The implementation of {@link ZendDbgConfigurationPageView}.
  *
  * @author Bartlomiej Laczkowski
  */
-public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfigurationPageView {
+public class ZendDbgConfigurationPageViewImpl implements ZendDbgConfigurationPageView {
 
 	private static final ZendDebugConfigurationPageViewImplUiBinder UI_BINDER = GWT
 			.create(ZendDebugConfigurationPageViewImplUiBinder.class);
@@ -43,7 +43,7 @@ public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfiguratio
 	@UiField
 	CheckBox useSslEncryption;
 
-	public ZendDebugConfigurationPageViewImpl() {
+	public ZendDbgConfigurationPageViewImpl() {
 		rootElement = UI_BINDER.createAndBindUi(this);
 		breakAtFirstLine.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
@@ -71,6 +71,16 @@ public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfiguratio
 	}
 
 	@Override
+	public boolean getBreakAtFirstLine() {
+		return breakAtFirstLine.getValue();
+	}
+
+	@Override
+	public void setBreakAtFirstLine(boolean value) {
+		this.breakAtFirstLine.setValue(value);
+	}
+
+	@Override
 	public String getClientHostIP() {
 		return clientHostIP.getValue();
 	}
@@ -86,7 +96,6 @@ public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfiguratio
 		if (port.isEmpty()) {
 			return 0;
 		}
-
 		try {
 			return Integer.valueOf(port);
 		} catch (NumberFormatException e) {
@@ -97,16 +106,6 @@ public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfiguratio
 	@Override
 	public void setDebugPort(int value) {
 		this.debugPort.setValue(value <= 0 ? "" : String.valueOf(value));
-	}
-	
-	@Override
-	public boolean getBreakAtFirstLine() {
-		return breakAtFirstLine.getValue();
-	}
-	
-	@Override
-	public void setBreakAtFirstLine(boolean value) {
-		this.breakAtFirstLine.setValue(value);
 	}
 	
 	@Override
@@ -134,7 +133,7 @@ public class ZendDebugConfigurationPageViewImpl implements ZendDebugConfiguratio
 	}
 
 	interface ZendDebugConfigurationPageViewImplUiBinder
-			extends UiBinder<FlowPanel, ZendDebugConfigurationPageViewImpl> {
+			extends UiBinder<FlowPanel, ZendDbgConfigurationPageViewImpl> {
 	}
 
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016 Codenvy, S.A.
+ * Copyright (c) 2016 Rogue Wave Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Zend Technologies - initial API and implementation
+ *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
 package zend.com.che.plugin.zdb.server.variables;
 
@@ -17,6 +17,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Zend debug variable descriptor.
+ * 
+ * @author Bartlomiej Laczkowski
+ */
 public class ZendDbgVariable extends AbstractDbgExpression implements IDbgVariable {
 
 	private String simpleName;
@@ -31,15 +36,6 @@ public class ZendDbgVariable extends AbstractDbgExpression implements IDbgVariab
 	@Override
 	public List<IDbgVariable> getChildren() {
 		return children;
-	}
-
-	@Override
-	protected AbstractDbgExpression createChild(String childName, Facet... facets) {
-		List<String> childPath = new ArrayList<>(getPath());
-		childPath.add(childName);
-		ZendDbgVariable child = new ZendDbgVariable(getResolver(), childName, Collections.unmodifiableList(childPath), facets);
-		children.add(child);
-		return child;
 	}
 
 	@Override
@@ -60,6 +56,15 @@ public class ZendDbgVariable extends AbstractDbgExpression implements IDbgVariab
 			}
 		}
 		return simpleName;
+	}
+
+	@Override
+	protected AbstractDbgExpression createChild(String childName, Facet... facets) {
+		List<String> childPath = new ArrayList<>(getPath());
+		childPath.add(childName);
+		ZendDbgVariable child = new ZendDbgVariable(getResolver(), childName, Collections.unmodifiableList(childPath), facets);
+		children.add(child);
+		return child;
 	}
 
 }
