@@ -95,7 +95,7 @@
                         <configuration>
                             <target>
                                 <loadfile property="stack.che-in-che" srcFile="${project.basedir}/src/assembly/stack/che-in-che.json" />
-                                <unzip src="${org.eclipse.che.core:che-core-ide-stacks:jar}" dest="${project.build.directory}/stacks" />
+                                <unzip dest="${project.build.directory}/stacks" src="${org.eclipse.che.core:che-core-ide-stacks:jar}" />
                                 <replaceregexp file="${project.build.directory}/stacks/stacks.json" flags="m">
                                     <regexp pattern="^]$" />
                                     <substitution expression=", ${stack.che-in-che} ]" />
