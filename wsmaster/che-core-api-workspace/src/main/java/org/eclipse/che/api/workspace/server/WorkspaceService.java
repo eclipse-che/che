@@ -346,11 +346,13 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace with specified id doesn't exist"),
                    @ApiResponse(code = 403, message = "The user is not workspace owner"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
-    public void stop(@ApiParam("The workspace id") @PathParam("id") String id) throws ForbiddenException,
-                                                                                      NotFoundException,
-                                                                                      ServerException,
-                                                                                      ConflictException {
-        workspaceManager.stopWorkspace(id);
+    public void stop(@ApiParam("The workspace id") @PathParam("id") String id,
+                     @ApiParam("Whether to snapshot workspace before stopping it")
+                     @QueryParam("create-snapshot") Boolean createSnapshot) throws ForbiddenException,
+                                                                                   NotFoundException,
+                                                                                   ServerException,
+                                                                                   ConflictException {
+        workspaceManager.stopWorkspace(id, createSnapshot);
     }
 
     @POST
@@ -506,10 +508,10 @@ public class WorkspaceService extends Service {
                                        @ApiParam(value = "The name of the environment", required = true)
                                        @QueryParam("name")
                                        String envName) throws ServerException,
-                                                                             BadRequestException,
-                                                                             NotFoundException,
-                                                                             ConflictException,
-                                                                             ForbiddenException {
+                                                              BadRequestException,
+                                                              NotFoundException,
+                                                              ConflictException,
+                                                              ForbiddenException {
         requiredNotNull(newEnvironment, "New environment");
         requiredNotNull(envName, "New environment name");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
@@ -673,7 +675,7 @@ public class WorkspaceService extends Service {
                    @ApiResponse(code = 404, message = "The workspace with specified id does not exist"),
                    @ApiResponse(code = 500, message = "Internal server error occurred")})
     public WsAgentHealthStateDto checkAgentHealth(@ApiParam(value = "Workspace id")
-                                                  @PathParam("id") String key) throws NotFoundException, ServerException{
+                                                  @PathParam("id") String key) throws NotFoundException, ServerException {
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
         if (WorkspaceStatus.RUNNING != workspace.getStatus()) {
             return newDto(WsAgentHealthStateDto.class).withWorkspaceStatus(workspace.getStatus());

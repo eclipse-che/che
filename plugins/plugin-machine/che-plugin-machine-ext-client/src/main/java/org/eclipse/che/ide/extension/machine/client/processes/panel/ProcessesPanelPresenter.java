@@ -329,14 +329,14 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     @Override
     public void onAddTerminal(final String machineId) {
         final MachineEntity machine = getMachine(machineId);
-        final ProcessTreeNode machineTreeNode = findProcessTreeNodeById(machineId);
-        if (machineTreeNode == null || machine == null) {
+        if (machine == null) {
             notificationManager.notify(localizationConstant.failedToConnectTheTerminal(),
                                        localizationConstant.machineNotFound(machineId), FAIL, FLOAT_MODE);
             Log.error(getClass(), localizationConstant.machineNotFound(machineId));
             return;
         }
 
+        final ProcessTreeNode machineTreeNode = provideMachineNode(machine, false);
         final TerminalPresenter newTerminal = terminalFactory.create(machine);
         final IsWidget terminalWidget = newTerminal.getView();
         final String terminalName = getUniqueTerminalName(machineTreeNode);
@@ -694,11 +694,11 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
      */
     private ProcessTreeNode provideMachineNode(@NotNull MachineEntity machine, boolean replace) {
         final String machineId = machine.getId();
-        if (!replace && machineNodes.containsKey(machineId)) {
-            return machineNodes.get(machineId);
+        final ProcessTreeNode existedMachineNode = findProcessTreeNodeById(machineId);
+        if (!replace && existedMachineNode != null) {
+            return existedMachineNode;
         }
 
-        final ProcessTreeNode existedMachineNode = machineNodes.remove(machineId);
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, new ArrayList<ProcessTreeNode>());
         newMachineNode.setRunning(true);
         newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT));
