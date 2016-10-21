@@ -68,6 +68,7 @@ import {AddCommandDialogController} from  './workspace-details/list-commands/add
 import {EditCommandDialogController} from  './workspace-details/list-commands/edit-command-dialog/edit-command-dialog.controller';
 
 import {ListAgentsController} from  './workspace-details/environments/list-agents/list-agents.controller';
+import {AddMachineDialogController} from  './workspace-details/environments/add-machine-dialog/add-machine-dialog.controller';
 import {ListAgents} from  './workspace-details/environments/list-agents/list-agents.directive';
 
 
@@ -150,6 +151,7 @@ export class WorkspacesConfig {
     register.controller('AddCommandDialogController', AddCommandDialogController);
     register.controller('EditCommandDialogController', EditCommandDialogController);
 
+    register.controller('AddMachineDialogController', AddMachineDialogController);
     register.controller('ListAgentsController', ListAgentsController);
     register.directive('listAgents', ListAgents);
 

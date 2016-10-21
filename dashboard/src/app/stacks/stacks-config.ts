@@ -13,8 +13,9 @@
 import {ListStacksController} from './list-stacks/list-stacks.controller';
 import {StackItemController} from './list-stacks/stack-item/stack-item.controller';
 import {StackItem} from './list-stacks/stack-item/stack-item.directive';
-
 import {StackController} from './stack-details/stack.controller';
+
+
 /**
  * @ngdoc controller
  * @name stacks:StacksConfig

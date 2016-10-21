@@ -60,7 +60,9 @@
                    type="hidden"
                    ng-model="workspaceEnvironmentsController.devMachineName"
                    ng-required>
-          <div ng-message="required">The environment should contain exactly one dev machine. Switch on Dev property to have terminal, SSH and IDE tooling injected to the machine.</div>
+          <div ng-message="required">The environment should contain exactly one dev machine. Switch on Dev property to
+            have terminal, SSH and IDE tooling injected to the machine.
+          </div>
         </che-input>
       </div>
     </ng-form>
@@ -94,4 +96,11 @@
                    che-copy-clipboard="true"
                    class="recipe-location"></che-text-info>
   </che-label-container>
+  <che-button-default class="add-machine-button"
+                      che-button-title="Add" name="addButton"
+                      ng-disabled="workspaceEnvironmentsController.recipeType !== 'compose'"
+                      ng-click="workspaceEnvironmentsController.showAddMachineDialog($event)"></che-button-default>
+  <div class="recipe-warning-container" ng-show="workspaceEnvironmentsController.recipeType !== 'compose'">
+    Add another machine by changing the environment type to <b>compose</b>
+  </div>
 </div>

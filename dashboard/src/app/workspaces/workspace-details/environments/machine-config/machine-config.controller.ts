@@ -128,6 +128,7 @@ export class WorkspaceMachineConfigController {
     this.environmentManager.setAgents(this.machine, this.machineConfig.agents);
     return this.doUpdateConfig();
   }
+
   /**
    * Callback which is called in order to update list of environment variables
    * @returns {Promise}
@@ -193,9 +194,8 @@ export class WorkspaceMachineConfigController {
     this.showDeleteConfirmation().then(() => {
       this.machineOnDelete({
         name: this.machineName
-      }).then(() => {
-        this.init();
       });
+      this.init();
     });
   }
 

@@ -55,7 +55,6 @@
         </div>
       </div>
     </che-list-header>
-
     <che-list flex>
       <che-list-item ng-mouseover="hover=true" ng-mouseout="hover=false"
                      ng-repeat="command in listCommandsController.commands | orderBy:listCommandsController.commandsOrderBy">
@@ -100,12 +99,10 @@
       </che-list-item>
     </che-list>
   </div>
-
   <!-- buttons -->
   <div layout="row" flex>
     <div flex>
-      <che-button-default class="che-list-add-button"
-                          che-button-title="Add" name="addButton"
+      <che-button-default che-button-title="Add" name="addButton"
                           ng-click="listCommandsController.showAddDialog($event)"></che-button-default>
     </div>
     <div flex-offset="5" ng-if="listCommandsController.commands.length > 0">
