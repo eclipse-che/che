@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Codenvy, S.A.
+ * Copyright (c) 2016 Rogue Wave Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Zend Technologies - initial API and implementation
+ *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package zend.com.che.plugin.zdb.ide.fqn;
+package zend.com.che.plugin.zdb.ide;
 
 import com.google.inject.Singleton;
 
@@ -22,12 +22,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import javax.validation.constraints.NotNull;
 
 /**
- * PHP fqn resolver.
+ * PHP debug fqn resolver.
  * 
  * @author Bartlomiej Laczkowski
  */
 @Singleton
-public class ZendFqnResolver implements FqnResolver {
+public class ZendDbgFqnResolver implements FqnResolver {
 
     /** {@inheritDoc} */
     @NotNull

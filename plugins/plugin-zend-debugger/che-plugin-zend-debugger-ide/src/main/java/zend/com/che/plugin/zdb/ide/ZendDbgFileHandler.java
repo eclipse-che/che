@@ -1,14 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2016 Codenvy, S.A.
+ * Copyright (c) 2016 Rogue Wave Software, Inc.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Zend Technologies - initial API and implementation
+ *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package zend.com.che.plugin.zdb.ide.debug;
+package zend.com.che.plugin.zdb.ide;
 
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.Timer;
@@ -30,17 +30,17 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.plugin.debugger.ide.debug.ActiveFileHandler;
 
 /**
- * Responsible to open files in editor when debugger stopped at breakpoint.
+ * Responsible for opening files in editor when debugger stops at breakpoint.
  *
  * @author Bartlomiej Laczkowski
  */
-public class ZendDebuggerFileHandler implements ActiveFileHandler {
+public class ZendDbgFileHandler implements ActiveFileHandler {
 
 	private final EditorAgent editorAgent;
 	private final AppContext appContext;
 
 	@Inject
-	public ZendDebuggerFileHandler(EditorAgent editorAgent, AppContext appContext) {
+	public ZendDbgFileHandler(EditorAgent editorAgent, AppContext appContext) {
 		this.editorAgent = editorAgent;
 		this.appContext = appContext;
 	}
@@ -86,7 +86,7 @@ public class ZendDebuggerFileHandler implements ActiveFileHandler {
 	}
 
 	private void openExternalResource(final Location location, final AsyncCallback<VirtualFile> callback) {
-		// TODO - handle external resources
+		// TODO - handle opening of external resources
 	}
 
 	public void handleActivatedFile(final VirtualFile virtualFile, final AsyncCallback<VirtualFile> callback,
@@ -102,7 +102,6 @@ public class ZendDebuggerFileHandler implements ActiveFileHandler {
 					}
 				}.schedule(200);
 			}
-
 			@Override
 			public void onEditorActivated(EditorPartPresenter editor) {
 				new Timer() {
@@ -113,7 +112,6 @@ public class ZendDebuggerFileHandler implements ActiveFileHandler {
 					}
 				}.schedule(200);
 			}
-
 			@Override
 			public void onInitializationFailed() {
 				callback.onFailure(null);
@@ -123,7 +121,6 @@ public class ZendDebuggerFileHandler implements ActiveFileHandler {
 
 	private void scrollEditorToExecutionPoint(TextEditor editor, int lineNumber) {
 		Document document = editor.getDocument();
-
 		if (document != null) {
 			TextPosition newPosition = new TextPosition(lineNumber, 0);
 			document.setCursorPosition(newPosition);
