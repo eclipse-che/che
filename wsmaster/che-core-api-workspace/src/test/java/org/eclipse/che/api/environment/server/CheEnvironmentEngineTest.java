@@ -895,6 +895,43 @@ public class CheEnvironmentEngineTest {
         verify(instanceProvider).removeInstanceSnapshot(machineSource);
     }
 
+    @Test
+    public void shouldReplaceServiceNameWithContainerNameAndAliasInLinks() {
+        //given
+        final String service1Name = "service1";
+        final String service2Name = "service2";
+        final String service2alias = "service2Alias";
+        final String container1Name = "container1";
+        final String container2Name = "container2";
+
+        List<String> links = new ArrayList<>();
+        links.add(service1Name);
+        links.add(service2Name + ':' + service2alias);
+
+        CheServiceImpl service = new CheServiceImpl().withLinks(links);
+
+        CheServiceImpl service1 = mock(CheServiceImpl.class);
+        CheServiceImpl service2 = mock(CheServiceImpl.class);
+
+        Map<String, CheServiceImpl> allServices = new HashMap<>();
+        allServices.put(service1Name, service1);
+        allServices.put(service2Name, service2);
+        allServices.put("anotherService",  mock(CheServiceImpl.class));
+
+        when(service1.getName()).thenReturn(service1Name);
+        when(service2.getName()).thenReturn(service2Name);
+        when(service1.getContainerName()).thenReturn(container1Name);
+        when(service2.getContainerName()).thenReturn(container2Name);
+
+        // when
+        engine.replaceServiceToContainerNameInLinks(service, allServices);
+
+        // then
+        assertEquals(service.getLinks().size(), 2);
+        assertEquals(service.getLinks().get(0), container1Name + ':' + service1Name);
+        assertEquals(service.getLinks().get(1), container2Name + ':' + service2alias);
+    }
+
     private List<Instance> startEnv() throws Exception {
         EnvironmentImpl env = createEnv();
         return startEnv(env);

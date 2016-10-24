@@ -378,8 +378,8 @@ public class CheEnvironmentEngine {
                 machine.setId(generateMachineId());
 
                 machineStarter = (machineLogger, machineSource) -> {
-                    Machine machineWithCorrectSource = getMachineWithCorrectSource(machine, machineSource);
-                    return provider.createInstance(machineWithCorrectSource, machineLogger);
+                    Machine machineWithNormalizedSource = getMachineWithNormalizedSource(machine, machineSource);
+                    return provider.createInstance(machineWithNormalizedSource, machineLogger);
                 };
             } catch (NotFoundException e) {
                 throw new NotFoundException(format("Provider of machine type '%s' not found", machineConfig.getType()));
@@ -667,7 +667,7 @@ public class CheEnvironmentEngine {
         try {
             machineProvider.createNetwork(networkId);
 
-            final List<CheServiceImpl> launchedServices = new ArrayList<>();
+            EnvironmentHolder environmentHolder;
             String machineName = queuePeekOrFail(workspaceId);
             while (machineName != null) {
                 boolean isDev = devMachineName.equals(machineName);
@@ -678,7 +678,7 @@ public class CheEnvironmentEngine {
 
                 CheServiceImpl service;
                 try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
-                    EnvironmentHolder environmentHolder = environments.get(workspaceId);
+                    environmentHolder = environments.get(workspaceId);
                     if (environmentHolder == null) {
                         throw new ServerException("Environment start is interrupted.");
                     }
@@ -692,12 +692,12 @@ public class CheEnvironmentEngine {
                             format("Environment of workspace with ID '%s' failed due to internal error", workspaceId));
                 }
 
-                service.setName(machineName);
+                replaceServiceToContainerNameInLinks(service, environmentHolder.environment.getServices());
+
                 // needed to reuse startInstance method and
                 // create machine instances by different implementation-specific providers
                 MachineStarter machineStarter = (machineLogger, machineSource) -> {
                     CheServiceImpl serviceWithNormalizedSource = normalizeServiceSource(service, machineSource);
-                    replaceServiceToContainerNameInLinks(serviceWithNormalizedSource, launchedServices);
                     return machineProvider.startService(namespace,
                                                         workspaceId,
                                                         envName,
@@ -738,7 +738,7 @@ public class CheEnvironmentEngine {
                 boolean queuePolled = false;
                 try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                     ensurePreDestroyIsNotExecuted();
-                    EnvironmentHolder environmentHolder = environments.get(workspaceId);
+                    environmentHolder = environments.get(workspaceId);
                     if (environmentHolder != null) {
                         final Queue<String> queue = environmentHolder.startQueue;
                         if (queue != null) {
@@ -777,7 +777,6 @@ public class CheEnvironmentEngine {
                                               "' start interrupted. Workspace stopped before all its machines started");
                 }
 
-                launchedServices.add(service);
                 machineName = queuePeekOrFail(workspaceId);
             }
         } catch (RuntimeException | ServerException e) {
@@ -918,19 +917,19 @@ public class CheEnvironmentEngine {
         return serviceWithNormalizedSource;
     }
 
-    private Machine getMachineWithCorrectSource(MachineImpl machine, MachineSource machineSource) {
-        Machine machineWithCorrectSource = machine;
+    private Machine getMachineWithNormalizedSource(MachineImpl machine, MachineSource machineSource) {
+        Machine machineWithNormalizedSource = machine;
         if (machineSource != null) {
-            machineWithCorrectSource = MachineImpl.builder()
-                                                  .fromMachine(machine)
-                                                  .setConfig(MachineConfigImpl.builder()
-                                                                              .fromConfig(machine.getConfig())
-                                                                              .setSource(machineSource)
-                                                                              .build())
-                                                  .build();
+            machineWithNormalizedSource = MachineImpl.builder()
+                                                     .fromMachine(machine)
+                                                     .setConfig(MachineConfigImpl.builder()
+                                                                                 .fromConfig(machine.getConfig())
+                                                                                 .setSource(machineSource)
+                                                                                 .build())
+                                                     .build();
 
         }
-        return machineWithCorrectSource;
+        return machineWithNormalizedSource;
     }
 
     /**
@@ -943,11 +942,11 @@ public class CheEnvironmentEngine {
      *
      * @param serviceToStart
      *         service which is starting now
-     * @param launchedServices
-     *         already running services
+     * @param services
+     *         all services in environment
      */
     @VisibleForTesting
-    void replaceServiceToContainerNameInLinks(CheServiceImpl serviceToStart, List<CheServiceImpl> launchedServices) {
+    void replaceServiceToContainerNameInLinks(CheServiceImpl serviceToStart, Map<String, CheServiceImpl> services) {
         final List<String> containerLinks = serviceToStart.getLinks();
         for (int i = 0;  i < containerLinks.size(); i++) {
             String link = containerLinks.get(i);
@@ -961,13 +960,13 @@ public class CheEnvironmentEngine {
                 serviceName = link;
                 serviceAlias = null;
             }
-            for (CheServiceImpl launchedService : launchedServices) {
-                if (serviceName.equals(launchedService.getName())) {
-                    containerLinks.set(i, (serviceAlias == null) ?
-                                          launchedService.getContainerName() + ':' + serviceName :
-                                          launchedService.getContainerName() + ':' + serviceAlias);
-                    break;
-                }
+
+            CheServiceImpl serviceLinkedTo = services.get(serviceName);
+            if (serviceLinkedTo != null) {
+                String containerNameLinkedTo = serviceLinkedTo.getContainerName();
+                containerLinks.set(i, (serviceAlias == null) ?
+                                      containerNameLinkedTo + ':' + serviceName :
+                                      containerNameLinkedTo + ':' + serviceAlias);
             }
         }
     }
