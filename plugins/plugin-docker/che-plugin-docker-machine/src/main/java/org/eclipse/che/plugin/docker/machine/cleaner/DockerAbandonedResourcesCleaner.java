@@ -76,7 +76,7 @@ public class DockerAbandonedResourcesCleaner implements Runnable {
         this.environmentEngine = environmentEngine;
         this.dockerConnector = dockerConnector;
         this.nameGenerator = nameGenerator;
-        this.runtimes = workspaceRuntimes;
+		this.runtimes = workspaceRuntimes;
         this.additionalNetworks = additionalNetworks.stream()
                                                     .flatMap(Set::stream)
                                                     .collect(toSet());

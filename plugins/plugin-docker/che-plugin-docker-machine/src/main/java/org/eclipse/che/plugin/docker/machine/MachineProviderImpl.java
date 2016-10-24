@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.docker.machine;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
@@ -56,7 +55,6 @@ import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveContainerParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveImageParams;
 import org.eclipse.che.plugin.docker.client.params.RemoveNetworkParams;
-import org.eclipse.che.plugin.docker.client.params.StartContainerParams;
 import org.eclipse.che.plugin.docker.client.params.TagParams;
 import org.eclipse.che.plugin.docker.client.params.network.ConnectContainerToNetworkParams;
 import org.eclipse.che.plugin.docker.client.params.network.CreateNetworkParams;
@@ -72,6 +70,7 @@ import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -280,10 +279,11 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                         networkName,
                                         service);
 
-            connectContainerToAdditionalNetworks(container,
-                                                 service);
-
-            docker.startContainer(StartContainerParams.create(container));
+//            connectContainerToAdditionalNetworks(container,
+//                                                 service);
+//
+//            //docker.startContainer(StartContainerParams.create(container));
+//            openShift.startContainer(StartContainerParams.create(container));
 
             readContainerLogsInSeparateThread(container,
                                               workspaceId,
