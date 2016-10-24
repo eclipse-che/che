@@ -31,7 +31,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class ConfigTest {
 
-    private static final String PROPERTY_NAME         = "difftool.prompt";
+    private static final String PROPERTY_NAME         = "test.prop";
     private static final String INVALID_PROPERTY_NAME = "someInvalidProperty";
     private static final String PROPERTY_VALUE        = "testValue";
 
