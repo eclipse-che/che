@@ -9,6 +9,7 @@
  *   Codenvy, S.A. - initial API and implementation
  */
 'use strict';
+import {CheStack} from '../../../../components/api/che-stack.factory';
 
 /**
  * @ngdoc controller
@@ -17,12 +18,24 @@
  * @author Oleksii Orel
  */
 export class WorkspaceSelectStackController {
+  $timeout: ng.ITimeoutService;
+  $scope: ng.IScope;
+  lodash: any;
+
+  stack: any;
+  stacks: any[];
+  readyToGoStack: any;
+  stackLibraryUser: any;
+  tabName: string;
+
+  onTabChange: Function;
+  onStackChange: Function;
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($timeout, $scope, lodash, cheStack) {
+  constructor($timeout: ng.ITimeoutService, $scope: ng.IScope, lodash: any, cheStack: CheStack) {
     this.$timeout = $timeout;
     this.$scope = $scope;
     this.lodash = lodash;
@@ -36,9 +49,9 @@ export class WorkspaceSelectStackController {
       });
     }
 
-    $scope.$on('event:selectStackId', (event, data) => {
+    $scope.$on('event:selectStackId', (event: ng.IAngularEvent, data: any) => {
       event.stopPropagation();
-      let findStack = this.lodash.find(this.stacks, (stack) => {
+      let findStack = this.lodash.find(this.stacks, (stack: any) => {
         return stack.id === data.stackId;
       });
       if (findStack) {
@@ -56,9 +69,9 @@ export class WorkspaceSelectStackController {
 
   /**
    * Callback when tab has been change
-   * @param tabName  the select tab name
+   * @param tabName {string} the select tab name
    */
-  setStackTab(tabName) {
+  setStackTab(tabName: string): void {
     this.tabName = tabName;
     this.onTabChange({tabName: tabName});
 
@@ -76,7 +89,7 @@ export class WorkspaceSelectStackController {
    * Callback when stack has been select
    * @param stack
    */
-  onStackSelect(stack) {
+  onStackSelect(stack: any): void {
     this.stack = stack;
     this.onStackChange({stack: stack});
   }
