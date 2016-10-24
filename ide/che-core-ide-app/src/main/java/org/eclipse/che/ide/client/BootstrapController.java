@@ -35,7 +35,7 @@ import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
 import org.eclipse.che.ide.api.event.WindowActionEvent;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.WsAgentInitializer;
+import org.eclipse.che.ide.machine.WsAgentInitializer;
 import org.eclipse.che.ide.api.machine.WsAgentURLModifier;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;

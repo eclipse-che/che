@@ -56,7 +56,7 @@ import org.eclipse.che.ide.api.factory.FactoryServiceClientImpl;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.git.GitServiceClient;
-import org.eclipse.che.ide.api.machine.WsAgentInitializer;
+import org.eclipse.che.ide.machine.WsAgentInitializer;
 import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
 import org.eclipse.che.ide.git.GitServiceClientImpl;
 import org.eclipse.che.ide.api.icon.IconRegistry;

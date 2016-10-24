@@ -29,7 +29,6 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.WsAgentInitializer;
 import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
 import org.eclipse.che.ide.api.machine.WsAgentState;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;

@@ -8,7 +8,9 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.machine;
+package org.eclipse.che.ide.machine;
+
+import org.eclipse.che.ide.api.machine.DevMachine;
 
 /**
  * Initialize client's workspace agent component with specific developer machine. Usually, this interface
