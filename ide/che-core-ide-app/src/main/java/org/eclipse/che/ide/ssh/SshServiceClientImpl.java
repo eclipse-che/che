@@ -31,7 +31,6 @@ import java.util.List;
  *
  * @author Sergii Leschenko
  */
-@Singleton
 public class SshServiceClientImpl implements SshServiceClient {
     private final DtoFactory             dtoFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
