@@ -104,7 +104,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler,
         this.availableServices = new ArrayList<>();
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void initialize(DevMachine devMachine) {
         checkNotNull(devMachine, "Developer machine should not be a null");
 
