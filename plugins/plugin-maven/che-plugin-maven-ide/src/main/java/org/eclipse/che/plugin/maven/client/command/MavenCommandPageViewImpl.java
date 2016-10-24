@@ -76,9 +76,10 @@ public class MavenCommandPageViewImpl implements MavenCommandPageView {
         return arguments.getValue();
     }
 
+    // Note that Closure Compiler doesn't allow to use 'arguments' as a name of a method argument.
     @Override
-    public void setArguments(String arguments) {
-        this.arguments.setValue(arguments);
+    public void setArguments(String args) {
+        this.arguments.setValue(args);
     }
 
     @UiHandler({"workingDirectory"})

@@ -63,6 +63,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.SNAPSHOTTING;
 import static org.eclipse.che.api.machine.shared.Constants.ENVIRONMENT_OUTPUT_CHANNEL_TEMPLATE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -401,10 +403,7 @@ public class WorkspaceRuntimes {
                                                                      NotFoundException {
 
         try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
-            WorkspaceState workspaceState = workspaces.get(workspaceId);
-            if (workspaceState == null || workspaceState.status != WorkspaceStatus.RUNNING) {
-                throw new ConflictException(format("Environment of workspace '%s' is not running", workspaceId));
-            }
+            getRunningState(workspaceId);
         }
 
         List<String> agents = Collections.singletonList("org.eclipse.che.terminal");
@@ -413,7 +412,7 @@ public class WorkspaceRuntimes {
 
         try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);
-            if (workspaceState == null || workspaceState.status != WorkspaceStatus.RUNNING) {
+            if (workspaceState == null || workspaceState.status != RUNNING) {
                 try {
                     environmentEngine.stopMachine(workspaceId, instance.getId());
                 } catch (NotFoundException | ServerException | ConflictException e) {
@@ -424,6 +423,41 @@ public class WorkspaceRuntimes {
             }
         }
         return instance;
+    }
+
+    /**
+     * Changes workspace runtimes status from RUNNING to SNAPSHOTTING.
+     *
+     * @param workspaceId
+     *         the id of the workspace to begin snapshotting for
+     * @throws NotFoundException
+     *         when workspace with such id doesn't have runtime
+     * @throws ConflictException
+     *         when workspace status is different from SNAPSHOTTING
+     * @see WorkspaceStatus#SNAPSHOTTING
+     */
+    public void beginSnapshotting(String workspaceId) throws NotFoundException, ConflictException {
+        try (StripedLocks.WriteLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
+            getRunningState(workspaceId).status = SNAPSHOTTING;
+        }
+    }
+
+    /**
+     * Changes workspace runtimes status from SNAPSHOTTING back to RUNNING.
+     * This method won't affect workspace runtime or throw any exception
+     * if workspace is not in running status or doesn't have runtime.
+     *
+     * @param workspaceId
+     *         the id of the workspace to finish snapshotting for
+     * @see WorkspaceStatus#SNAPSHOTTING
+     */
+    public void finishSnapshotting(String workspaceId) {
+        try (StripedLocks.WriteLock ignored = stripedLocks.acquireWriteLock(workspaceId)) {
+            final WorkspaceState state = workspaces.get(workspaceId);
+            if (state != null && state.status == SNAPSHOTTING) {
+                state.status = RUNNING;
+            }
+        }
     }
 
     /**
@@ -447,7 +481,7 @@ public class WorkspaceRuntimes {
                                                                          ConflictException {
         try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);
-            if (workspaceState == null || workspaceState.status != WorkspaceStatus.RUNNING) {
+            if (workspaceState == null || workspaceState.status != RUNNING) {
                 throw new ConflictException(format("Environment of workspace '%s' is not running", workspaceId));
             }
         }
@@ -479,8 +513,8 @@ public class WorkspaceRuntimes {
 
         try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
             WorkspaceState workspaceState = workspaces.get(workspaceId);
-            if (workspaceState == null || workspaceState.status != WorkspaceStatus.RUNNING) {
-                throw new ConflictException(format("Environment of workspace '%s' is not running", workspaceId));
+            if (workspaceState == null || !(workspaceState.status == SNAPSHOTTING || workspaceState.status == RUNNING)) {
+                throw new ConflictException(format("Environment of workspace '%s' is not running or snapshotting", workspaceId));
             }
         }
         return environmentEngine.saveSnapshot(namespace, workspaceId, machineId);
@@ -549,7 +583,7 @@ public class WorkspaceRuntimes {
                                                                        .build());
         try (StripedLocks.WriteAllLock lock = stripedLocks.acquireWriteAllLock()) {
             for (Map.Entry<String, WorkspaceState> workspace : workspaces.entrySet()) {
-                if (workspace.getValue().status.equals(WorkspaceStatus.RUNNING) ||
+                if (workspace.getValue().status.equals(RUNNING) ||
                     workspace.getValue().status.equals(WorkspaceStatus.STARTING)) {
                     stopEnvExecutor.execute(() -> {
                         try {
@@ -586,29 +620,30 @@ public class WorkspaceRuntimes {
                                      .withError(error));
     }
 
-    private Instance getDevMachine(List<Instance> machines) throws ServerException {
-        Optional<Instance> devMachineOpt = machines.stream()
-                                                   .filter(machine -> machine.getConfig().isDev())
-                                                   .findAny();
-
-        if (devMachineOpt.isPresent()) {
-            return devMachineOpt.get();
-        }
-        throw new ServerException(
-                "Environment has booted but it doesn't contain dev machine. Environment has been stopped.");
-    }
-
     private void ensurePreDestroyIsNotExecuted() throws ServerException {
         if (isPreDestroyInvoked) {
             throw new ServerException("Could not perform operation because application server is stopping");
         }
     }
 
+    private WorkspaceState getRunningState(String workspaceId) throws NotFoundException, ConflictException {
+        final WorkspaceState state = workspaces.get(workspaceId);
+        if (state == null) {
+            throw new NotFoundException("Workspace with id '" + workspaceId + "' is not running");
+        }
+        if (state.getStatus() != RUNNING) {
+            throw new ConflictException(format("Workspace with id '%s' is not in 'RUNNING', it's status is '%s'",
+                                               workspaceId,
+                                               state.getStatus()));
+        }
+        return state;
+    }
+
     protected void launchAgents(Instance instance, List<String> agents) throws ServerException {
         try {
             for (AgentKey agentKey : agentSorter.sort(agents)) {
                 LOG.info("Launching '{}' agent", agentKey.getName());
-                
+
                 Agent agent = agentRegistry.getAgent(agentKey);
                 AgentLauncher launcher = launcherFactory.find(agentKey.getName(), instance.getConfig().getType());
                 launcher.launch(instance, agent);

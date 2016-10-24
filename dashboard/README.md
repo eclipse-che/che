@@ -5,6 +5,7 @@ Che Dashboard
 ==============
 
 #Requirements
+- Python `v2.7.x`(`v3.x.x`currently not supported)
 - Node.js `v4.x.x` (`v5.x.x` / `v6.x.x` are currently not supported)
 - npm
 - Bower

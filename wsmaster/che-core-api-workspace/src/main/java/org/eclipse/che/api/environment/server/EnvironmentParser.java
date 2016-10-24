@@ -171,7 +171,8 @@ public class EnvironmentParser {
             CheServiceBuildContextImpl buildContext = null;
             if (service.getBuild() != null) {
                 buildContext = new CheServiceBuildContextImpl().withContext(service.getBuild().getContext())
-                                                               .withDockerfilePath(service.getBuild().getDockerfile());
+                                                               .withDockerfilePath(service.getBuild().getDockerfile())
+                                                               .withArgs(service.getBuild().getArgs());
             }
 
             CheServiceImpl cheService = new CheServiceImpl().withBuild(buildContext)

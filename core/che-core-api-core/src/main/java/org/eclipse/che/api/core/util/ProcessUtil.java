@@ -10,9 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.api.core.util;
 
+import com.google.common.base.Joiner;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static java.lang.String.format;
 
 /**
  * Helpers to manage system processes.
@@ -21,6 +31,8 @@ import java.io.InputStreamReader;
  * @author Alexander Garagatyi
  */
 public final class ProcessUtil {
+
+    private static final Logger         LOG             = LoggerFactory.getLogger(ProcessUtil.class);
     private static final ProcessManager PROCESS_MANAGER = ProcessManager.newInstance();
 
     /**
@@ -65,6 +77,54 @@ public final class ProcessUtil {
                 stdout.writeLine(line);
             }
         }
+    }
+
+    /**
+     * Start the process, writing the stdout and stderr to {@code outputConsumer} and terminate process by {@code timeout}.<br>
+     *
+     * @param commandLine
+     *         arguments of process command
+     * @param timeout
+     *         timeout for process. If process duration > {@code timeout} than kill process and throw {@link TimeoutException}.
+     * @param timeUnit
+     *         timeUnit of the {@code timeout}.
+     * @param outputConsumer
+     *         a consumer where stdout and stderr will be redirected
+     * @return the started process
+     * @throws InterruptedException
+     *         in case terminate process
+     * @throws IOException
+     *         in case I/O error
+     * @throws TimeoutException
+     *         if process gets more time then defined by {@code timeout}
+     */
+    public static Process executeAndWait(String[] commandLine, int timeout, TimeUnit timeUnit, LineConsumer outputConsumer)
+            throws TimeoutException, IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(commandLine).redirectErrorStream(true);
+
+        Process process = pb.start();
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                // consume logs until process ends
+                process(process, outputConsumer);
+            } catch (IOException e) {
+                LOG.error(format("Failed to complete reading of the process '%s' output due to occurred error",
+                                 Joiner.on(" ").join(commandLine)), e);
+            }
+        });
+
+        if (!process.waitFor(timeout, timeUnit)) {
+            try {
+                ProcessUtil.kill(process);
+            } catch (RuntimeException x) {
+                LOG.error("An error occurred while killing process '{}'", Joiner.on(" ").join(commandLine));
+            }
+            throw new TimeoutException(format("Process '%s' was terminated by timeout %s %s.",
+                                              Joiner.on(" ").join(commandLine), timeout, timeUnit.name().toLowerCase()));
+        }
+
+        return process;
     }
 
     /**

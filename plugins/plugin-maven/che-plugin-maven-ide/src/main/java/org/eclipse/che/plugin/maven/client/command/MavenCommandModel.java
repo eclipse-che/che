@@ -22,9 +22,10 @@ class MavenCommandModel {
     private String workingDirectory;
     private String arguments;
 
-    MavenCommandModel(String workingDirectory, String arguments) {
+    // Note that Closure Compiler doesn't allow to use 'arguments' as a name of a method argument.
+    MavenCommandModel(String workingDirectory, String args) {
         this.workingDirectory = workingDirectory;
-        this.arguments = arguments;
+        this.arguments = args;
     }
 
     /** Crates {@link MavenCommandModel} instance from the given command line. */
@@ -58,9 +59,12 @@ class MavenCommandModel {
         return arguments;
     }
 
-    /** Set command arguments, e.g. {@code [options] [<goal(s)>] [<phase(s)>]}. */
-    void setArguments(String arguments) {
-        this.arguments = arguments;
+    /**
+     * Set command arguments, e.g. {@code [options] [<goal(s)>] [<phase(s)>]}.
+     * <p>Note that Closure Compiler doesn't allow to use 'arguments' as a name of a method argument.
+     */
+    void setArguments(String args) {
+        this.arguments = args;
     }
 
     String toCommandLine() {

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server.compose;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -18,19 +20,22 @@ import java.util.Objects;
  * @author Alexander Garagatyi
  */
 public class BuildContextImpl {
-    private String context;
-    private String dockerfile;
+    private String              context;
+    private String              dockerfile;
+    private Map<String, String> args;
 
     public BuildContextImpl() {}
 
-    public BuildContextImpl(String context, String dockerfile) {
+    public BuildContextImpl(String context, String dockerfile, Map<String,String> args) {
         this.context = context;
         this.dockerfile = dockerfile;
+        if (args != null) {
+          this.args = new HashMap<>(args);
+        }
     }
 
     public BuildContextImpl(BuildContextImpl buildContext) {
-        this.context = buildContext.getContext();
-        this.dockerfile = buildContext.getDockerfile();
+        this(buildContext.getContext(),buildContext.getDockerfile(), buildContext.getArgs());
     }
 
     /**
@@ -69,25 +74,46 @@ public class BuildContextImpl {
         return this;
     }
 
+    /**
+     * Args for Dockerfile build.
+     */
+    public Map<String,String> getArgs() {
+        if (args == null) {
+            args = new HashMap<>();
+        }
+        return args;
+    }
+
+    public void setArgs(Map<String,String> args) {
+        this.args = args;
+    }
+
+    public BuildContextImpl withArgs(Map<String,String> args) {
+        this.args = args;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BuildContextImpl)) return false;
         BuildContextImpl that = (BuildContextImpl)o;
         return Objects.equals(context, that.context) &&
-               Objects.equals(dockerfile, that.dockerfile);
+               Objects.equals(dockerfile, that.dockerfile) &&
+               Objects.equals(args, that.args);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(context, dockerfile);
+        return Objects.hash(context, dockerfile, args);
     }
 
     @Override
     public String toString() {
         return "BuildContextImpl{" +
                "context='" + context + '\'' +
-               ", dockerfile='" + dockerfile + '\'' +
+                ", dockerfile='" + dockerfile + '\'' +
+                ", args='" + args + '\'' +
                '}';
     }
 }
