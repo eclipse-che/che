@@ -149,7 +149,7 @@ public class WsAgentStateController implements ConnectionOpenedHandler,
         return state;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public Promise<MessageBus> getMessageBus() {
         return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<MessageBus>() {
             @Override
