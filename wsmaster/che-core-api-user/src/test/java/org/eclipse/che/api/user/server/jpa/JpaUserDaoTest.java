@@ -26,8 +26,10 @@ import java.util.Collections;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -63,6 +65,9 @@ public class JpaUserDaoTest {
         doReturn(1L).when(userDao).getTotalCount();
 
         userDao.getAll(30, Integer.MAX_VALUE);
+
+        verify(typedQuery).setMaxResults(eq(30));
+        verify(typedQuery).setFirstResult(eq(Integer.MAX_VALUE));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class,
