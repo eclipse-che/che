@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.event.ng;
 
+import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -19,13 +21,9 @@ import org.eclipse.che.ide.api.event.FileEvent;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.List;
 import java.util.Objects;
 
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.START;
-import static org.eclipse.che.api.project.shared.dto.event.FileTrackingOperationDto.Type.STOP;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStartEvent;
 import static org.eclipse.che.ide.api.event.ng.FileTrackingEvent.newFileTrackingStopEvent;
 

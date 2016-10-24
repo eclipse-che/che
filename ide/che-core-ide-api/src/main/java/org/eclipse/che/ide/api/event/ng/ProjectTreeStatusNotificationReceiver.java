@@ -11,6 +11,9 @@
 package org.eclipse.che.ide.api.event.ng;
 
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import org.eclipse.che.api.core.jsonrpc.shared.JsonRpcRequest;
 import org.eclipse.che.api.project.shared.dto.event.FileWatcherEventType;
 import org.eclipse.che.api.project.shared.dto.event.ProjectTreeStatusUpdateDto;
@@ -21,10 +24,6 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jsonrpc.JsonRpcRequestReceiver;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.loging.Log;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Objects;
 
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;

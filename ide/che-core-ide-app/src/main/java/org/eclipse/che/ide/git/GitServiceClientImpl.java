@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.git;
+package org.eclipse.che.ide.git;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
@@ -48,8 +48,8 @@ import org.eclipse.che.api.git.shared.ShowFileContentRequest;
 import org.eclipse.che.api.git.shared.ShowFileContentResponse;
 import org.eclipse.che.api.git.shared.Status;
 import org.eclipse.che.api.git.shared.StatusFormat;
+import org.eclipse.che.ide.api.git.GitServiceClient;
 import org.eclipse.che.ide.api.machine.DevMachine;
-import org.eclipse.che.ide.api.machine.WsAgentStateController;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -58,6 +58,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.MimeType;
 import org.eclipse.che.ide.api.app.AppContext;
+import org.eclipse.che.ide.api.machine.WsAgentMessageBusProvider;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
@@ -124,23 +125,23 @@ public class GitServiceClientImpl implements GitServiceClient {
     public static final String DELETE_REPOSITORY = "/git/delete-repository";
 
     /** Loader to be displayed. */
-    private final AsyncRequestLoader     loader;
-    private final WsAgentStateController wsAgentStateController;
-    private final DtoFactory             dtoFactory;
-    private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
-    private final AsyncRequestFactory    asyncRequestFactory;
-    private final AppContext             appContext;
+    private final AsyncRequestLoader        loader;
+    private final DtoFactory                dtoFactory;
+    private final DtoUnmarshallerFactory    dtoUnmarshallerFactory;
+    private final AsyncRequestFactory       asyncRequestFactory;
+    private final WsAgentMessageBusProvider wsAgentMessageBusProvider;
+    private final AppContext                appContext;
 
     @Inject
     protected GitServiceClientImpl(LoaderFactory loaderFactory,
-                                   WsAgentStateController wsAgentStateController,
+                                   WsAgentMessageBusProvider wsAgentMessageBusProvider,
                                    DtoFactory dtoFactory,
                                    AsyncRequestFactory asyncRequestFactory,
                                    DtoUnmarshallerFactory dtoUnmarshallerFactory,
                                    AppContext appContext) {
+        this.wsAgentMessageBusProvider = wsAgentMessageBusProvider;
         this.appContext = appContext;
         this.loader = loaderFactory.newLoader();
-        this.wsAgentStateController = wsAgentStateController;
         this.dtoFactory = dtoFactory;
         this.asyncRequestFactory = asyncRequestFactory;
         this.dtoUnmarshallerFactory = dtoUnmarshallerFactory;
@@ -219,7 +220,7 @@ public class GitServiceClientImpl implements GitServiceClient {
     }
 
     private void sendMessageToWS(final @NotNull Message message, final @NotNull RequestCallback<?> callback) {
-        wsAgentStateController.getMessageBus().then(new Operation<MessageBus>() {
+        wsAgentMessageBusProvider.getMessageBus().then(new Operation<MessageBus>() {
             @Override
             public void apply(MessageBus arg) throws OperationException {
                 try {
@@ -492,7 +493,7 @@ public class GitServiceClientImpl implements GitServiceClient {
                            @Nullable String remoteMode,
                            AsyncRequestCallback<List<Branch>> callback) {
         BranchListRequest branchListRequest = dtoFactory.createDto(BranchListRequest.class).withListMode(remoteMode);
-        String url =appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH_LIST + "?projectPath=" + project.getPath();
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH_LIST + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, branchListRequest).send(callback);
     }
 
@@ -544,7 +545,7 @@ public class GitServiceClientImpl implements GitServiceClient {
                              boolean force,
                              AsyncRequestCallback<String> callback) {
         BranchDeleteRequest branchDeleteRequest = dtoFactory.createDto(BranchDeleteRequest.class).withName(name).withForce(force);
-        String url =appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH_DELETE + "?projectPath=" + project.getPath();
+        String url = appContext.getDevMachine().getWsAgentBaseUrl() + BRANCH_DELETE + "?projectPath=" + project.getPath();
         asyncRequestFactory.createPostRequest(url, branchDeleteRequest).loader(loader).send(callback);
     }
 

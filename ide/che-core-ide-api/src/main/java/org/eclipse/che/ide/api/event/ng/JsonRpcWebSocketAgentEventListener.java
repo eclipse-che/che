@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.event.ng;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.ide.api.app.AppContext;
@@ -21,8 +22,6 @@ import org.eclipse.che.ide.api.machine.events.WsAgentStateEvent;
 import org.eclipse.che.ide.api.machine.events.WsAgentStateHandler;
 import org.eclipse.che.ide.jsonrpc.impl.JsonRpcInitializer;
 import org.eclipse.che.ide.util.loging.Log;
-
-import javax.inject.Singleton;
 
 import static java.util.Collections.singletonMap;
 

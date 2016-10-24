@@ -8,14 +8,16 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.api.ssh;
+package org.eclipse.che.ide.ssh;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
 import org.eclipse.che.api.ssh.shared.dto.SshPairDto;
 import org.eclipse.che.ide.MimeType;
+import org.eclipse.che.ide.api.ssh.SshServiceClient;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
@@ -29,6 +31,7 @@ import java.util.List;
  *
  * @author Sergii Leschenko
  */
+@Singleton
 public class SshServiceClientImpl implements SshServiceClient {
     private final DtoFactory             dtoFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
