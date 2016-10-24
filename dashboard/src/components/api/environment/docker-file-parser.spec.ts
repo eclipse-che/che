@@ -32,7 +32,7 @@ describe('Simper dockerfile parser', () => {
       let result = parser._parseArgument(instruction, argument);
 
       let expectedResult = [{
-        instruction:'ENV',
+        instruction: 'ENV',
         argument: ['name', 'environment variable value']
       }];
       expect(result).toEqual(expectedResult);
@@ -45,13 +45,13 @@ describe('Simper dockerfile parser', () => {
       let result = parser._parseArgument(instruction, argument);
 
       let expectedResult = [{
-        instruction:'ENV',
+        instruction: 'ENV',
         argument: ['myName', 'John Doe']
-      },{
-        instruction:'ENV',
+      }, {
+        instruction: 'ENV',
         argument: ['myDog', 'Rex The Dog']
       }, {
-        instruction:'ENV',
+        instruction: 'ENV',
         argument: ['myCat', 'fluffy']
       }];
       expect(result).toEqual(expectedResult);
@@ -60,23 +60,22 @@ describe('Simper dockerfile parser', () => {
 
   it('should parse a dockerfile', () => {
     let dockerfile = 'FROM codenvy/ubuntu_jdk8ENV'
-    +'\nENV myCat fluffy'
-    +'\nENV myDog Rex The Dog'
-    +'\nENV myName John Doe';
+    + '\n#ENV myCat fluffy'
+    + '\nENV myDog Rex The Dog'
+    + '\nENV myName John Doe';
 
     let result = parser.parse(dockerfile);
 
     let expectedResult = [{
-      instruction:'FROM',
+      instruction: 'FROM',
       argument: 'codenvy/ubuntu_jdk8ENV'
-    },{
-      instruction:'ENV',
-      argument: ['myCat', 'fluffy']
-    },{
-      instruction:'ENV',
+    }, {
+      comment: '#ENV myCat fluffy'
+    }, {
+      instruction: 'ENV',
       argument: ['myDog', 'Rex The Dog']
-    },{
-      instruction:'ENV',
+    }, {
+      instruction: 'ENV',
       argument: ['myName', 'John Doe']
     }];
     expect(result).toEqual(expectedResult);
@@ -84,25 +83,24 @@ describe('Simper dockerfile parser', () => {
 
   it('should stringify an object into a dockerfile', () => {
     let instructions = [{
-      instruction:'FROM',
+      instruction: 'FROM',
       argument: 'codenvy/ubuntu_jdk8ENV'
-    },{
-      instruction:'ENV',
-      argument: ['myCat', 'fluffy']
-    },{
-      instruction:'ENV',
+    }, {
+      comment: '#ENV myCat fluffy'
+    }, {
+      instruction: 'ENV',
       argument: ['myDog', 'Rex The Dog']
-    },{
-      instruction:'ENV',
+    }, {
+      instruction: 'ENV',
       argument: ['myName', 'John Doe']
     }];
 
     let result = parser.dump(instructions);
 
     let expectedResult = 'FROM codenvy/ubuntu_jdk8ENV'
-      +'\nENV myCat fluffy'
-      +'\nENV myDog Rex The Dog'
-      +'\nENV myName John Doe';
+      + '\n#ENV myCat fluffy'
+      + '\nENV myDog Rex The Dog'
+      + '\nENV myName John Doe';
     expect(result.trim()).toEqual(expectedResult);
   });
 

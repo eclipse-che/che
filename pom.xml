@@ -784,6 +784,16 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-actions-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-embedjs-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
                 <artifactId>che-sample-plugin-filetype-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -800,6 +810,26 @@
             <dependency>
                 <groupId>org.eclipse.che.sample</groupId>
                 <artifactId>che-sample-plugin-json-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-nativeaccess-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-parts-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-serverservice-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.sample</groupId>
+                <artifactId>che-sample-plugin-serverservice-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -858,7 +888,6 @@
                 <gwt.compiler.localWorkers>2 -T 1C</gwt.compiler.localWorkers>
                 <license.skip>true</license.skip>
                 <mdep.analyze.skip>true</mdep.analyze.skip>
-                <skip-validate-sources>true</skip-validate-sources>
                 <skipTests>true</skipTests>
             </properties>
         </profile>

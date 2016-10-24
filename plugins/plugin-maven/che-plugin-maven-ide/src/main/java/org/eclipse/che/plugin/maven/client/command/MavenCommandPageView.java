@@ -32,7 +32,7 @@ public interface MavenCommandPageView extends View<MavenCommandPageView.ActionDe
     String getArguments();
 
     /** Sets value of the 'Arguments' field. */
-    void setArguments(String arguments);
+    void setArguments(String args);
 
     /** Action handler for the view actions/controls. */
     interface ActionDelegate {

@@ -44,7 +44,12 @@ import java.util.Objects;
                 @NamedQuery(name = "Snapshot.findSnapshots",
                             query = "SELECT snapshot " +
                                     "FROM Snapshot snapshot " +
-                                    "WHERE snapshot.workspaceId = :workspaceId")
+                                    "WHERE snapshot.workspaceId = :workspaceId"),
+                @NamedQuery(name = "Snapshot.findByWorkspaceAndEnvironment",
+                            query = "SELECT snapshot " +
+                                    "FROM Snapshot snapshot " +
+                                    "WHERE snapshot.workspaceId = :workspaceId " +
+                                    "  AND snapshot.envName = :envName")
         }
 )
 @Table(indexes = @Index(columnList = "workspaceId, envName, machineName", unique = true))
