@@ -22,7 +22,6 @@ import org.eclipse.che.ide.rest.RestContext;
 /**
  * @author Sergii Leschenko
  */
-@Singleton
 public class OAuthServiceClientImpl implements OAuthServiceClient {
     private final AsyncRequestFactory asyncRequestFactory;
     private final String              restContext;
