@@ -28,11 +28,7 @@ import java.io.IOException;
 public interface ProjectImporter {
     enum ImporterCategory {
         SOURCE_CONTROL("Source Control"),
-        PACKAGE("Package"),
-        /**
-         * @deprecated Use {@link #PACKAGE} instead.
-         */
-        ARCHIVE("Package");
+        ARCHIVE("Archive");
 
         private final String value;
 

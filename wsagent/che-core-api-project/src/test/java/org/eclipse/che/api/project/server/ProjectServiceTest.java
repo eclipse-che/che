@@ -784,7 +784,7 @@ public class ProjectServiceTest {
 
             @Override
             public ImporterCategory getCategory() {
-                return ImporterCategory.PACKAGE;
+                return ImporterCategory.ARCHIVE;
             }
         });
     }
