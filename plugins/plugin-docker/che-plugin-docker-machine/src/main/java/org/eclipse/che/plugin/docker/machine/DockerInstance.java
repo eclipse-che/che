@@ -26,10 +26,7 @@ import org.eclipse.che.api.machine.server.spi.InstanceProcess;
 import org.eclipse.che.api.machine.server.spi.impl.AbstractInstance;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.Exec;
-import org.eclipse.che.plugin.docker.client.LogMessage;
-import org.eclipse.che.plugin.docker.client.ProgressLineFormatterImpl;
+import org.eclipse.che.plugin.docker.client.*;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.params.CommitParams;
 import org.eclipse.che.plugin.docker.client.params.CreateExecParams;
@@ -101,6 +98,7 @@ public class DockerInstance extends AbstractInstance {
     private final DockerInstanceProcessesCleaner              processesCleaner;
     private final ConcurrentHashMap<Integer, InstanceProcess> machineProcesses;
     private final boolean                                     snapshotUseRegistry;
+    private final OpenShiftConnector                          openShift;
 
     private MachineRuntimeInfoImpl machineRuntime;
 
@@ -121,6 +119,7 @@ public class DockerInstance extends AbstractInstance {
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;
         this.docker = docker;
+        this.openShift = new OpenShiftConnector();;
         this.image = image;
         this.outputConsumer = outputConsumer;
         this.registry = registry;
@@ -143,7 +142,8 @@ public class DockerInstance extends AbstractInstance {
         // if runtime info is not evaluated yet
         if (machineRuntime == null) {
             try {
-                final ContainerInfo containerInfo = docker.inspectContainer(container);
+//                final ContainerInfo containerInfo = docker.inspectContainer(container);
+                final ContainerInfo containerInfo = openShift.inspectContainer(docker, container);
                 machineRuntime = new MachineRuntimeInfoImpl(dockerMachineFactory.createMetadata(containerInfo,
                                                                                                 null,
                                                                                                 node.getHost(),
