@@ -11,6 +11,8 @@
 package org.eclipse.che.api.environment.server;
 
 import org.eclipse.che.api.agent.server.AgentRegistry;
+import org.eclipse.che.api.agent.shared.model.Agent;
+import org.eclipse.che.api.agent.shared.model.AgentKey;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
@@ -134,6 +136,7 @@ public class CheEnvironmentEngineTest {
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
+        when(agentRegistry.getAgent(any(AgentKey.class))).thenReturn(mock(Agent.class));
 
         EnvironmentContext.getCurrent().setSubject(new SubjectImpl("name", "id", "token", false));
     }

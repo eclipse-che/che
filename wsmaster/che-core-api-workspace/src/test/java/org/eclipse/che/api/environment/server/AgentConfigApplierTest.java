@@ -13,9 +13,10 @@ package org.eclipse.che.api.environment.server;
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
+import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
 import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
-import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -27,9 +28,11 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -45,11 +48,11 @@ public class AgentConfigApplierTest {
     @Mock
     private Instance             machine;
     @Mock
-    private Agent                agent1;
+    private AgentImpl            agent1;
     @Mock
-    private Agent                agent2;
+    private AgentImpl            agent2;
     @Mock
-    private Agent                agent3;
+    private AgentImpl            agent3;
     @Mock
     private AgentLauncherFactory agentLauncher;
     @Mock
@@ -76,11 +79,18 @@ public class AgentConfigApplierTest {
 
     @Test
     public void shouldAddExposedPorts() throws Exception {
+        ServerConfImpl serverConf1 = mock(ServerConfImpl.class);
+        ServerConfImpl serverConf2 = mock(ServerConfImpl.class);
+        when(serverConf1.getPort()).thenReturn("1111/udp");
+        when(serverConf2.getPort()).thenReturn("2222/tcp");
+
         when(sorter.sort(any())).thenReturn(asList(AgentKeyImpl.parse("agent1"),
                                                    AgentKeyImpl.parse("agent2"),
                                                    AgentKeyImpl.parse("agent3")));
-        when(agent1.getProperties()).thenReturn(singletonMap("ports", "terminal:1111/udp,terminal:2222/tcp"));
-        when(agent2.getProperties()).thenReturn(singletonMap("ports", "3333/udp"));
+
+        when(agent1.getServers()).thenReturn(singletonList(serverConf1));
+        when(agent2.getServers()).thenReturn(singletonList(serverConf2));
+        when(agent3.getServers()).thenReturn(emptyList());
         CheServiceImpl service = new CheServiceImpl();
 
         agentConfigApplier.modify(service, asList("agent1", "agent2", "agent3"));
@@ -88,7 +98,6 @@ public class AgentConfigApplierTest {
         List<String> exposedPorts = service.getExpose();
         assertTrue(exposedPorts.contains("1111/udp"));
         assertTrue(exposedPorts.contains("2222/tcp"));
-        assertTrue(exposedPorts.contains("3333/udp"));
     }
 
     @Test

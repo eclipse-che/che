@@ -21,7 +21,6 @@ import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.ServerImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerPropertiesImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceNode;
 import org.eclipse.che.api.machine.server.spi.InstanceProcess;
@@ -206,7 +205,7 @@ public class SshMachineInstance extends AbstractInstance {
                               serverConf.getProtocol(),
                               serverUri.getHost() + ":" + serverUri.getPort(),
                               serverConf.getProtocol() != null ? serverUri.toString() : null,
-                              new ServerPropertiesImpl(null, null, null));
+                              null);
     }
 
 }
