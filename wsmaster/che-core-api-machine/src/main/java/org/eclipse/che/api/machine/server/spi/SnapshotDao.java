@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -86,4 +87,24 @@ public interface SnapshotDao {
      *         if other error occur
      */
     void removeSnapshot(String snapshotId) throws NotFoundException, SnapshotException;
+
+    /**
+     * Replaces all the existing snapshots related to the given workspace
+     * with a new list of snapshots.
+     *
+     * @param workspaceId
+     *         the id of the workspace to replace snapshots
+     * @param envName
+     *         the name of the environment in workspace with given id
+     *         which is used to search those snapshots that should be replaced
+     * @param newSnapshots
+     *         the list of the snapshots which will be stored instead of existing ones
+     * @return the list of replaced(removed/old) snapshots for given workspace and environment,
+     * or an empty list when there is no a single snapshot for the given workspace
+     * @throws SnapshotException
+     *         when any error occurs
+     */
+    List<SnapshotImpl> replaceSnapshots(String workspaceId,
+                                        String envName,
+                                        Collection<? extends SnapshotImpl> newSnapshots) throws SnapshotException;
 }

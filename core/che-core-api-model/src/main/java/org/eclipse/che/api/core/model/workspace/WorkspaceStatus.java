@@ -47,6 +47,18 @@ public enum WorkspaceStatus {
     RUNNING,
 
     /**
+     * Workspace is in SNAPSHOTTING status if and only if the workspace
+     * is currently creating snapshots of it's machines.
+     *
+     * <p>Workspace is in SNAPSHOTTING status after it was {@link #RUNNING}.
+     * The status map:
+     * <pre>
+     *     RUNNING -> <b>SNAPSHOTTING</b> -> RUNNING (normal behaviour/error while snapshotting)
+     * </pre>
+     */
+    SNAPSHOTTING,
+
+    /**
      * Workspace considered as stopping if and only if its active environment is shutting down.
      *
      * <p>Workspace is in stopping status only if it was in {@link #RUNNING} status before.
