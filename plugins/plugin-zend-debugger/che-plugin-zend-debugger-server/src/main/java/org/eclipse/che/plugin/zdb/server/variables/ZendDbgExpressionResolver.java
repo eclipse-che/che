@@ -23,6 +23,7 @@ import org.eclipse.che.plugin.zdb.server.connection.IDbgMessage;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.GetVariableValueRequest;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgConnection;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.GetVariableValueResponse;
+import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.IDbgEngineResponse;
 import org.eclipse.che.plugin.zdb.server.variables.IDbgDataFacet.Facet;
 
 /**
@@ -269,7 +270,7 @@ public class ZendDbgExpressionResolver {
     private byte[] requestExpressionValue(String variable, int depth, List<String> parentPath) {
         GetVariableValueResponse response = debugConnection
                 .sendRequest(new GetVariableValueRequest(variable, depth, parentPath));
-        if (response != null && response.getStatus() == 0) {
+        if (isOK(response)) {
             return response.getVariableValue();
         }
         return null;
@@ -290,6 +291,10 @@ public class ZendDbgExpressionResolver {
             value = new byte[] { 'N' };
         }
         return value;
+    }
+    
+    private boolean isOK(IDbgEngineResponse response) {
+        return response != null && response.getStatus() == 0;
     }
 
 }

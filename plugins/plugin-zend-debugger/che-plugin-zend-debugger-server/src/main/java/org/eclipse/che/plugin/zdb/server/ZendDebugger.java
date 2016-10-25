@@ -62,6 +62,7 @@ import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.AddBre
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.GetLocalFileContentRequest;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.IDbgEngineNotification;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.IDbgEngineRequest;
+import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.IDbgEngineResponse;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.ReadyNotification;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.ScriptEndedNotification;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.SessionStartedNotification;
@@ -266,7 +267,9 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         if (debugSettings.isBreakAtFirstLine()) {
             AddBreakpointResponse response = debugConnection
                     .sendRequest(new AddBreakpointRequest(1, 1, -1, debugStartFile));
-            breakpointAflId = response.getBreakpointID();
+            if (isOK(response)) {
+                breakpointAflId = response.getBreakpointID();
+            }
         }
         sendAddBreakpointFiles();
         sendStartSession();
@@ -336,10 +339,10 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     private boolean sendSetProtocol() {
         SetProtocolResponse response = debugConnection.sendRequest(new SetProtocolRequest(SUPPORTED_PROTOCOL_ID));
-        if (response != null && response.getProtocolID() < SUPPORTED_PROTOCOL_ID) {
-            return false;
+        if (isOK(response)) {
+            return response.getProtocolID() >= SUPPORTED_PROTOCOL_ID;
         }
-        return true;
+        return false;
     }
 
     private void sendContinueProcessFile() {
@@ -377,7 +380,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         for (Breakpoint breakpoint : fileBreakpoints) {
             AddBreakpointResponse response = debugConnection.sendRequest(
                     new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
-            if (response != null && response.getStatus() == 0) {
+            if (isOK(response)) {
                 breakpointIds.put(breakpoint, response.getBreakpointID());
                 // Send breakpoint activated event
                 debugCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
@@ -389,7 +392,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
         String remoteFilePath = ZendDbgUtils.getAbsolutePath(breakpoint.getLocation().getResourcePath());
         AddBreakpointResponse response = debugConnection
                 .sendRequest(new AddBreakpointRequest(1, 2, breakpoint.getLocation().getLineNumber(), remoteFilePath));
-        if (response != null && response.getStatus() == 0) {
+        if (isOK(response)) {
             breakpointIds.put(breakpoint, response.getBreakpointID());
             debugCallback.onEvent(new BreakpointActivatedEventImpl(breakpoint));
         }
@@ -421,6 +424,10 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     private void sendCloseSession() {
         debugConnection.sendNotification(new CloseSessionNotification());
+    }
+
+    private boolean isOK(IDbgEngineResponse response) {
+        return response != null && response.getStatus() == 0;
     }
 
 }
