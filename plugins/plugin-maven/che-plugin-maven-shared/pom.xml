@@ -136,7 +136,7 @@
                                 <package>org.eclipse.che.plugin.maven.shared.dto</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
-                            <genClassName>org.eclipse.che.plugin.maven.client.dto.DtoServerImpls</genClassName>
+                            <genClassName>org.eclipse.che.plugin.maven.client.dto.DtoClientImpls</genClassName>
                             <impl>client</impl>
                         </configuration>
                     </execution>
