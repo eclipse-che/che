@@ -8,7 +8,7 @@ Currently only local debugging is supported so Zend Debugger extension needs to 
 
 ### Zend Debugger Installation
 
-The following steps describe have to be carried out to install Zend Debugger in Che's default PHP stack.
+The following steps have to be carried out to install Zend Debugger in Che's default PHP stack.
 * Create new workspace with the use of _PHP_ stack from the _Ready-to-go Stacks_ list
 * Download _Zend Studio Web Debugger - PHP 5.5 and PHP 5.6 (64 bit)_ package from [Zend Downloads](http://www.zend.com/en/products/studio/downloads-studio#Linux)
 * Add _ZendDebugger.so_ file from downloaded package to _/usr/lib/php5/20131226_
