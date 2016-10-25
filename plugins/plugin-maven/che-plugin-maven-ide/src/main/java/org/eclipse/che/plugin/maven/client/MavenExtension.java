@@ -58,7 +58,6 @@ public class MavenExtension {
                           MavenResources resources,
                           ResolvingMavenProjectStateHolder resolvingProjectStateHolder) {
         this.resources = resources;
-
         preSelectedProjectManager.setProjectTypeIdToPreselect(MavenAttributes.MAVEN_ID, 100);
 
         archetypes =

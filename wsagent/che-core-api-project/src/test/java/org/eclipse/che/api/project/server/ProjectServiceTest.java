@@ -40,6 +40,7 @@ import org.eclipse.che.api.project.shared.dto.MoveOptions;
 import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.vfs.Path;
 import org.eclipse.che.api.vfs.VirtualFile;
 import org.eclipse.che.api.vfs.impl.file.DefaultFileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
@@ -77,13 +78,12 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.core.Application;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -408,11 +408,12 @@ public class ProjectServiceTest {
 
         phRegistry.register(new CreateProjectHandler() {
             @Override
-            public void onCreateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes, Map<String, String> options)
+            public void onCreateProject(Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
                     throws ForbiddenException, ConflictException, ServerException {
-                baseFolder.createFolder("a");
-                baseFolder.createFolder("b");
-                baseFolder.createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
+                FolderEntry projectFolder = new FolderEntry(vfsProvider.getVirtualFileSystem().getRoot().createFolder("new_project"));
+                projectFolder.createFolder("a");
+                projectFolder.createFolder("b");
+                projectFolder.createFile("test.txt", "test".getBytes(Charset.defaultCharset()));
             }
 
             @Override

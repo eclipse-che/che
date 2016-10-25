@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.model.project.SourceStorage;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.LineConsumerFactory;
 import org.eclipse.che.api.core.util.ValueHolder;
+import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.importer.ProjectImporter;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
@@ -64,7 +65,7 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         projectTypeRegistry.registerProjectType(new M2());
         projectTypeRegistry.registerProjectType(new PTsettableVP());
 
-        projectHandlerRegistry.register(new PT3.SrcGenerator());
+        projectHandlerRegistry.register(new SrcGenerator());
 
     }
 
@@ -561,5 +562,21 @@ public class ProjectManagerWriteTest extends WsAgentTestBase {
         });
     }
 
+
+    class SrcGenerator implements CreateProjectHandler {
+
+        @Override
+        public void onCreateProject(Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
+                throws ForbiddenException, ConflictException, ServerException {
+            FolderEntry baseFolder = new FolderEntry(vfsProvider.getVirtualFileSystem().getRoot().createFolder(projectPath.toString()));
+            baseFolder.createFolder("file1");
+
+        }
+
+        @Override
+        public String getProjectType() {
+            return "pt3";
+        }
+    }
 
 }
