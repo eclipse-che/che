@@ -64,6 +64,7 @@ import {CheToolbar} from './toolbar/che-toolbar.directive';
 import {CheErrorNotification} from './notification/che-error-notification.directive';
 import {CheInfoNotification} from './notification/che-info-notification.directive';
 import {ChePopup} from './popup/che-popup.directive';
+import {CheShowArea} from './show-area/che-show-area.directive';
 
 
 export class WidgetConfig {
@@ -145,6 +146,7 @@ export class WidgetConfig {
       .directive('cheInfoNotification', CheInfoNotification)
       //wrapper for popup
       .directive('chePopup', ChePopup)
-
+      //show area
+      .directive('cheShowArea', CheShowArea)
   }
 }
