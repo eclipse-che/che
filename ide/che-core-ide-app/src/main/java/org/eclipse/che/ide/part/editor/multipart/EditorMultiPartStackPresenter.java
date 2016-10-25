@@ -266,7 +266,7 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
     }
 
     @Override
-    public EditorPartStack createFirstPartStack() {
+    public EditorPartStack createRootPartStack() {
         EditorPartStack editorPartStack = addEditorPartStack(null, null, null, -1);
         activeEditorPartStack = editorPartStack;
         return editorPartStack;

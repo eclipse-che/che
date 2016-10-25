@@ -448,7 +448,7 @@ public class EditorAgentImpl implements EditorAgent,
     public void loadState(@NotNull final JsonObject state) {
         if (state.hasKey("FILES")) {
             JsonObject files = state.getObject("FILES");
-            EditorPartStack partStack = editorMultiPartStack.createFirstPartStack();
+            EditorPartStack partStack = editorMultiPartStack.createRootPartStack();
             final Map<EditorPartPresenter, EditorPartStack> activeEditors = new HashMap<>();
             List<Promise<Void>> restore = restore(files, partStack, activeEditors);
             Promise<ArrayOf<?>> promise = promiseProvider.all2(restore.toArray(new Promise[restore.size()]));

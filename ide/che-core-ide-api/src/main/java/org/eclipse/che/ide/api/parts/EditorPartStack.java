@@ -96,8 +96,8 @@ public interface EditorPartStack extends PartStack {
 
     /**
      * Get all parts, opened in this stack.
-     * If part doesn't have constrain for part, map should contain null value.
-     * @return the parts mapped to their constrain.
+     *
+     * @return the parts list.
      */
     List<EditorPartPresenter> getParts();
 }

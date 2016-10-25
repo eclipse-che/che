@@ -149,7 +149,6 @@ public class WorkspacePresenter implements Presenter, WorkspaceView.ActionDelega
     @Override
     public JsonObject getState() {
         JsonObject state = Json.createObject();
-//        state.put("currentPerspectiveId", perspectiveManager.getPerspectiveId());
         JsonObject perspectivesJs = Json.createObject();
         state.put("perspectives", perspectivesJs);
         Map<String, Perspective> perspectives = perspectiveManager.getPerspectives();

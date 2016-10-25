@@ -139,7 +139,8 @@ public interface TextEditor extends EditorPartPresenter {
 
     /**
      * Set (scroll) top visible line
-     * @param line the top line
+     * @param line
+     *          the top line
      */
     void setTopLine(int line);
 

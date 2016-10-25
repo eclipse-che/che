@@ -29,8 +29,8 @@ import org.eclipse.che.ide.util.loging.Log;
 import java.util.Map;
 
 /**
- * Responsible for persisting and restoring IDE allWsState across sessions.
- * Uses user preferences as storage for serialized allWsState.
+ * Responsible for persisting and restoring IDE state across sessions.
+ * Uses user preferences as storage for serialized state.
  *
  * @author Artem Zatsarynnyi
  * @author Yevhen Vydolob
@@ -66,7 +66,7 @@ public class AppStateManager {
             try {
                 allWsState = jsonFactory.parse(json);
             } catch (Exception e) {
-                // create 'clear' allWsState if any deserializing error occurred
+                // create 'clear' state if any deserializing error occurred
                 allWsState = jsonFactory.createObject();
             }
         }

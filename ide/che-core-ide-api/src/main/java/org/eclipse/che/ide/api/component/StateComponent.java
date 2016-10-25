@@ -29,7 +29,7 @@ import javax.validation.constraints.NotNull;
 public interface StateComponent {
 
     /**
-     * Calls when component should store his state.
+     * Called when component should store his state.
      *
      * @return the JSON object that represent state of the component.
      */
@@ -37,7 +37,7 @@ public interface StateComponent {
     JsonObject getState();
 
     /**
-     * Calls when component should restore his state.
+     * Called when component should restore his state.
      *
      * @param state the component state object
      */

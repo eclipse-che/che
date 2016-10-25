@@ -135,20 +135,6 @@ public class AbstractPerspectivePersistenceTest {
         assertThat(partStacks).isNotNull();
     }
 
-//    @Test
-//    public void shouldStoreActivePartInPartStack() throws Exception {
-//        when(partStackPresenter.getActivePart()).thenReturn(activePart);
-//        Map<PartPresenter, Constraints> map = new HashMap<>();
-//        map.put(partPresenter, null);
-//        when(partStackPresenter.getParts()).thenReturn(map);
-//
-//        JsonObject state = perspective.getState();
-//
-//        JsonObject partStacks = state.getObject("PART_STACKS");
-//        JsonObject information = partStacks.getObject("INFORMATION");
-//        assertThat(information.getString("ACTIVE_PART")).isNotNull().isNotEmpty().isEqualTo(activePart.getClass().getName());
-//    }
-
     @Test
     public void shouldNotStoreEditorPartStack() throws Exception {
         JsonObject state = perspective.getState();
@@ -156,90 +142,6 @@ public class AbstractPerspectivePersistenceTest {
         String[] keys = partStacks.keys();
         assertThat(keys).containsOnly("INFORMATION", "NAVIGATION", "TOOLING");
     }
-
-//    @Test
-//    public void shouldStorePartStackSize() throws Exception {
-//        Map<PartPresenter, Constraints> map = new HashMap<>();
-//        map.put(partPresenter, null);
-//        when(partStackPresenter.getParts()).thenReturn(map);
-//        when(workBenchController.getSize()).thenReturn(42d, 24d, 13d);
-//
-//        JsonObject state = perspective.getState();
-//
-//        JsonObject partStacks = state.getObject("PART_STACKS");
-//        JsonObject partStacksObject = partStacks.getObject("INFORMATION");
-//        double size = partStacksObject.getNumber("SIZE");
-//        assertThat(size).isEqualTo(42d);
-//
-//        partStacksObject = partStacks.getObject("NAVIGATION");
-//        size = partStacksObject.getNumber("SIZE");
-//        assertThat(size).isEqualTo(24d);
-//
-//        partStacksObject = partStacks.getObject("TOOLING");
-//        size = partStacksObject.getNumber("SIZE");
-//        assertThat(size).isEqualTo(13d);
-//
-//    }
-
-//    @Test
-//    public void shouldStorePartPresenterClassName() throws Exception {
-//        Map<PartPresenter, Constraints> map = new HashMap<>();
-//        map.put(partPresenter, null);
-//        when(partStackPresenter.getParts()).thenReturn(map);
-//
-//        JsonObject state = perspective.getState();
-//
-//
-//        JsonObject partStacks = state.getObject("PART_STACKS");
-//        JsonObject information = partStacks.getObject("INFORMATION");
-//        JsonArray parts = information.getArray("PARTS");
-//        assertThat(parts).isNotNull();
-//
-//        JsonObject part = parts.getObject(0);
-//        assertThat(part.getString("CLASS")).isNotNull().isNotEmpty();
-//    }
-
-//    @Test
-//    public void shouldStorePartPresenterConstrain() throws Exception {
-//        Map<PartPresenter, Constraints> map = new HashMap<>();
-//        map.put(partPresenter, Constraints.FIRST);
-//        when(partStackPresenter.getParts()).thenReturn(map);
-//
-//        JsonObject state = perspective.getState();
-//
-//
-//        JsonObject partStacks = state.getObject("PART_STACKS");
-//        JsonObject information = partStacks.getObject("INFORMATION");
-//        JsonArray parts = information.getArray("PARTS");
-//        assertThat(parts).isNotNull();
-//
-//        JsonObject part = parts.getObject(0);
-//        assertThat(part.getObject("CONSTRAINTS")).isNotNull();
-//    }
-
-//    @Test
-//    public void shouldStorePartStackHiddenState() throws Exception {
-//        Map<PartPresenter, Constraints> map = new HashMap<>();
-//        map.put(partPresenter, null);
-//        when(partStackPresenter.getParts()).thenReturn(map);
-//        when(workBenchController.getSize()).thenReturn(42d, 24d, 13d);
-//        when(workBenchController.isHidden()).thenReturn(true, false, true);
-//
-//        JsonObject state = perspective.getState();
-//
-//        JsonObject partStacks = state.getObject("PART_STACKS");
-//        JsonObject partStacksObject = partStacks.getObject("INFORMATION");
-//        boolean hidden = partStacksObject.getBoolean("HIDDEN");
-//        assertThat(hidden).isTrue();
-//
-//        partStacksObject = partStacks.getObject("NAVIGATION");
-//        hidden = partStacksObject.getBoolean("HIDDEN");
-//        assertThat(hidden).isFalse();
-//
-//        partStacksObject = partStacks.getObject("TOOLING");
-//        hidden = partStacksObject.getBoolean("HIDDEN");
-//        assertThat(hidden).isTrue();
-//    }
 
     @Test
     public void shouldRestorePartStackSize() throws Exception {

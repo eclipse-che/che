@@ -85,10 +85,10 @@ public interface EditorMultiPartStack extends PartStack {
      * Create first(root) part stack
      * @return the first part stack
      */
-    EditorPartStack createFirstPartStack();
+    EditorPartStack createRootPartStack();
 
     /**
-     * Create split part stack
+     * Split part stack
      *
      * @param relativePartStack
      *          the relative part stack

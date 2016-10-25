@@ -66,7 +66,8 @@ public interface EditorRegistry {
      * Search editor provider by his id.
      * Should return default editor provider if provider with that id cannot be found.
      *
-     * @param id the provider id
+     * @param id
+     *         the provider id
      * @return the editor provider
      */
     @NotNull

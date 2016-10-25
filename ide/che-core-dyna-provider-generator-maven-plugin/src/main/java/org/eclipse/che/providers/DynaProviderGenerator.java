@@ -66,7 +66,6 @@ public class DynaProviderGenerator {
         st.add("className", className);
         st.add("classes", dynaClasses);
         return st.render();
-
     }
 
     private void findDynaObjects() throws IOException {
@@ -99,7 +98,7 @@ public class DynaProviderGenerator {
     }
 
     /**
-     * Get the template for typescript
+     * Get the template for provider
      * @return the String Template
      */
     protected ST getTemplate() {
