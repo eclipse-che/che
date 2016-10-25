@@ -14,6 +14,7 @@ import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.mvp.Presenter;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Part Stack is tabbed layout element, containing Parts.
@@ -87,4 +88,11 @@ public interface PartStack extends Presenter {
      * Update part stack reference
      */
     void updateStack();
+
+    /**
+     * Get all parts, opened in this stack.
+     * If part doesn't have constrain for part, map should contain null value.
+     * @return the parts mapped to their constrain.
+     */
+    List<? extends PartPresenter> getParts();
 }

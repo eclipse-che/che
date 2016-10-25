@@ -25,6 +25,7 @@ import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.perspectives.general.AbstractPerspective;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
+import org.eclipse.che.providers.DynaProvider;
 
 import javax.validation.constraints.NotNull;
 
@@ -53,8 +54,9 @@ public class OperationsPerspective extends AbstractPerspective {
                                  RecipePartPresenter recipePanel,
                                  NotificationManager notificationManager,
                                  MachineAppliancePresenter infoContainer,
-                                 EventBus eventBus) {
-        super(OPERATIONS_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
+                                 EventBus eventBus,
+                                 DynaProvider dynaProvider) {
+        super(OPERATIONS_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
         notificationManager.addRule(OPERATIONS_PERSPECTIVE_ID);
 
@@ -66,11 +68,6 @@ public class OperationsPerspective extends AbstractPerspective {
         addPart(recipePanel, NAVIGATION);
 
         setActivePart(machinePanel);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void go(@NotNull AcceptsOneWidget container) {
         PartStack information = getPartStack(INFORMATION);
         PartStack navigation = getPartStack(NAVIGATION);
         PartStack editing = getPartStack(EDITING);
@@ -84,11 +81,14 @@ public class OperationsPerspective extends AbstractPerspective {
         information.go(view.getInformationPanel());
         navigation.go(view.getNavigationPanel());
         editing.go(view.getEditorPanel());
-
-        container.setWidget(view);
-
         openActivePart(INFORMATION);
         openActivePart(NAVIGATION);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void go(@NotNull AcceptsOneWidget container) {
+        container.setWidget(view);
     }
 
 }

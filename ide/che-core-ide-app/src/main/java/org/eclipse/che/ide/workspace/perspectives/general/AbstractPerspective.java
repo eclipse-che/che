@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.ide.workspace.perspectives.general;
 
+import elemental.json.Json;
+import elemental.json.JsonArray;
+import elemental.json.JsonObject;
+
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.commons.annotation.Nullable;
@@ -26,8 +31,10 @@ import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.WorkBenchPartController;
+import org.eclipse.che.providers.DynaProvider;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,12 +51,14 @@ import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
  *
  * @author Dmitry Shnurenko
  */
+//TODO need rewrite this, remove direct dependency on PerspectiveViewImpl and other GWT Widgets
 public abstract class AbstractPerspective implements Presenter, Perspective, ActivePartChangedHandler {
 
     protected final Map<PartStackType, PartStack> partStacks;
     protected final PerspectiveViewImpl           view;
 
     private final String                  perspectiveId;
+    private final DynaProvider            dynaProvider;
     private final WorkBenchPartController leftPartController;
     private final WorkBenchPartController rightPartController;
     private final WorkBenchPartController belowPartController;
@@ -65,9 +74,11 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
                                   @NotNull PartStackPresenterFactory stackPresenterFactory,
                                   @NotNull PartStackViewFactory partViewFactory,
                                   @NotNull WorkBenchControllerFactory controllerFactory,
-                                  @NotNull EventBus eventBus) {
+                                  @NotNull EventBus eventBus,
+                                  @NotNull DynaProvider dynaProvider) {
         this.view = view;
         this.perspectiveId = perspectiveId;
+        this.dynaProvider = dynaProvider;
         this.partStacks = new HashMap<>();
 
         PartStackView navigationView = partViewFactory.create(LEFT, view.getLeftPanel());
@@ -87,9 +98,6 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         rightPartController = controllerFactory.createController(view.getSplitPanel(), view.getToolPanel());
         PartStack toolingPartStack = stackPresenterFactory.create(toolingView, rightPartController);
         partStacks.put(TOOLING, toolingPartStack);
-
-        /* Makes splitters much better */
-        view.tuneSplitters();
 
         eventBus.addHandler(ActivePartChangedEvent.TYPE, this);
     }
@@ -244,4 +252,106 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         return partStacks.get(type);
     }
 
+    @Override
+    public JsonObject getState() {
+        JsonObject state = Json.createObject();
+        JsonObject partStacks = Json.createObject();
+        state.put("ACTIVE_PART", activePart.getClass().getName());
+        state.put("PART_STACKS", partStacks);
+
+
+        partStacks.put(PartStackType.INFORMATION.name(), getPartStackState(this.partStacks.get(INFORMATION), belowPartController));
+        partStacks.put(PartStackType.NAVIGATION.name(), getPartStackState(this.partStacks.get(NAVIGATION), leftPartController));
+        partStacks.put(PartStackType.TOOLING.name(), getPartStackState(this.partStacks.get(TOOLING), rightPartController));
+
+        return state;
+    }
+
+    private JsonObject getPartStackState(PartStack partStack, WorkBenchPartController partController) {
+        JsonObject state = Json.createObject();
+        state.put("SIZE", partController.getSize());
+        if (partStack.getActivePart() != null) {
+            state.put("ACTIVE_PART", partStack.getActivePart().getClass().getName());
+        }
+        state.put("HIDDEN", partController.isHidden());
+        JsonArray parts = Json.createArray();
+        state.put("PARTS", parts);
+        int i = 0;
+        for (PartPresenter entry : partStack.getParts()) {
+            JsonObject presenterState = Json.createObject();
+            presenterState.put("CLASS", entry.getClass().getName());
+            parts.set(i++, presenterState);
+        }
+        return state;
+    }
+
+    @Override
+    public void loadState(@NotNull JsonObject state) {
+        if (state.hasKey("PART_STACKS")) {
+            JsonObject part_stacks = state.getObject("PART_STACKS");
+            List<PartPresenter> activeParts = new ArrayList<>();
+            for (String partStackType : part_stacks.keys()) {
+                JsonObject partStack = part_stacks.getObject(partStackType);
+                switch (PartStackType.valueOf(partStackType)) {
+                    case INFORMATION:
+                        belowPartSize = restorePartController(partStacks.get(INFORMATION), belowPartController, partStack, activeParts);
+                        break;
+                    case NAVIGATION:
+                        leftPartSize = restorePartController(partStacks.get(NAVIGATION), leftPartController, partStack, activeParts);
+                        break;
+                    case TOOLING:
+                        rightPartSize = restorePartController(partStacks.get(TOOLING), rightPartController, partStack, activeParts);
+                        break;
+                }
+            }
+            for (PartPresenter part : activeParts) {
+                setActivePart(part);
+            }
+        }
+        if (state.hasKey("ACTIVE_PART")) {
+            String activePart = state.getString("ACTIVE_PART");
+            Provider<PartPresenter> provider = dynaProvider.getProvider(activePart);
+            if (provider != null) {
+                setActivePart(provider.get());
+            }
+        }
+
+    }
+
+    private double restorePartController(PartStack stack, WorkBenchPartController controller, JsonObject partStack,
+                                         List<PartPresenter> activeParts) {
+        if (partStack.hasKey("HIDDEN")) {
+            controller.setHidden(partStack.getBoolean("HIDDEN"));
+        }
+        double size = 0;
+        if (partStack.hasKey("SIZE")) {
+            size = partStack.getNumber("SIZE");
+            controller.setSize(size);
+        }
+
+
+        if (partStack.hasKey("PARTS")) {
+            JsonArray parts = partStack.get("PARTS");
+            for (int i = 0; i < parts.length(); i++) {
+                JsonObject value = parts.get(i);
+                if (value.hasKey("CLASS")) {
+                    String className = value.getString("CLASS");
+                    Provider<PartPresenter> provider = dynaProvider.getProvider(className);
+                    if (provider != null) {
+                        PartPresenter partPresenter = provider.get();
+                        stack.addPart(partPresenter);
+                    }
+                }
+            }
+        }
+
+        if (partStack.hasKey("ACTIVE_PART")) {
+            String className = partStack.getString("ACTIVE_PART");
+            Provider<PartPresenter> provider = dynaProvider.getProvider(className);
+            if (provider != null) {
+                activeParts.add(provider.get());
+            }
+        }
+        return size;
+    }
 }
