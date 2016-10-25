@@ -29,6 +29,7 @@
             position: relative;
             line-height: 29px;
             margin-left: 20px;
+            display: inline-block;
 
         }
 

@@ -14,13 +14,13 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.api.project.server.FileEntry;
-import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -39,7 +39,6 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,12 +62,14 @@ public class SimpleGeneratorStrategyTest {
     private HttpJsonRequestFactory    httpJsonRequestFactory;
     @Mock
     private HttpJsonResponse          httpJsonResponse;
+    @Mock
+    private VirtualFileSystemProvider virtualFileSystemProvider;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 //        when(filterProvider.get()).thenReturn(filter);
-        simple = new SimpleGeneratorStrategy();
+        simple = new SimpleGeneratorStrategy(virtualFileSystemProvider);
     }
 
     @Test
@@ -89,9 +90,9 @@ public class SimpleGeneratorStrategyTest {
         attributeValues.put(SOURCE_FOLDER, new AttributeValue("src/main/java"));
         attributeValues.put(MavenAttributes.TEST_SOURCE_FOLDER, new AttributeValue("src/test/java"));
 
-        FolderEntry folder = pm.getProject("my_project").getBaseFolder();
+        pm.getProject("my_project").getBaseFolder();
 
-        simple.generateProject(folder, attributeValues, null);
+        simple.generateProject(org.eclipse.che.api.vfs.Path.of("my_project"), attributeValues, null);
 
         VirtualFileEntry pomFile = pm.getProject("my_project").getBaseFolder().getChild("pom.xml");
         Assert.assertTrue(pomFile.isFile());
