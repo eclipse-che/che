@@ -78,12 +78,13 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.core.Application;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -145,6 +146,8 @@ public class ProjectServiceTest {
     private static final String AND_OPERATOR = "AND";
     private static final String NOT_OPERATOR = "NOT";
 
+    private static final String EXCLUDE_SEARCH_PATH = ".codenvy";
+
     private ProjectManager         pm;
     private ResourceLauncher       launcher;
     private ProjectHandlerRegistry phRegistry;
@@ -195,7 +198,15 @@ public class ProjectServiceTest {
         indexDir.mkdir();
 
         Set<PathMatcher> filters = new HashSet<>();
-        filters.add(path -> true);
+        filters.add(path -> {
+            for (java.nio.file.Path pathElement : path) {
+                if (pathElement == null || EXCLUDE_SEARCH_PATH.equals(pathElement.toString())) {
+                    return true;
+                }
+            }
+            return false;
+        });
+
         FSLuceneSearcherProvider sProvider = new FSLuceneSearcherProvider(indexDir, filters);
 
         vfsProvider = new LocalVirtualFileSystemProvider(root, sProvider);
@@ -1687,6 +1698,26 @@ public class ProjectServiceTest {
         Set<String> paths = new LinkedHashSet<>(1);
         paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
         Assert.assertTrue(paths.contains("/my_project/x/y/__test.txt"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSearchByTextWhenFileWasNotIndexed() throws Exception {
+        RegisteredProject myProject = pm.getProject("my_project");
+        myProject.getBaseFolder().createFolder("a/b").createFile("test.txt", "hello".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder("x/y").createFile("__test.txt", "searchhit".getBytes(Charset.defaultCharset()));
+        myProject.getBaseFolder().createFolder(EXCLUDE_SEARCH_PATH).createFile("_test", "searchhit".getBytes(Charset.defaultCharset()));
+
+        ContainerResponse response = launcher.service(GET,
+                                                      "http://localhost:8080/api/project/search/my_project?text=searchhit",
+                                                      "http://localhost:8080/api", null, null, null);
+        assertEquals(response.getStatus(), 200, "Error: " + response.getEntity());
+        List<ItemReference> result = (List<ItemReference>)response.getEntity();
+        assertEquals(result.size(), 1);
+        Set<String> paths = new LinkedHashSet<>(1);
+        paths.addAll(result.stream().map(ItemReference::getPath).collect(Collectors.toList()));
+        Assert.assertTrue(paths.contains("/my_project/x/y/__test.txt"));
+        Assert.assertFalse(paths.contains("/my_project/" + EXCLUDE_SEARCH_PATH + "/_test"));
     }
 
     @SuppressWarnings("unchecked")
