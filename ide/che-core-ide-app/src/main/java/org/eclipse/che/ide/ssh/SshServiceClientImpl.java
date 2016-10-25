@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ssh;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.ssh.shared.dto.GenerateSshPairRequest;
