@@ -180,42 +180,6 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
     }
 
-    /**
-     * Updates list of the machines from application context.
-     */
-    public void updateMachineList() {
-        if (appContext.getWorkspace() == null) {
-            return;
-        }
-
-        List<MachineEntity> machines = getMachines(appContext.getWorkspace());
-        if (machines.isEmpty()) {
-            return;
-        }
-
-        ProcessTreeNode machineToSelect = null;
-        for (MachineEntity machine : machines) {
-            if (machine.isDev()) {
-                provideMachineNode(machine, true);
-                machines.remove(machine);
-                break;
-            }
-        }
-
-        for (MachineEntity machine : machines) {
-            provideMachineNode(machine, true);
-        }
-
-        if (machineToSelect == null) {
-            machineToSelect = machineNodes.entrySet().iterator().next().getValue();
-        }
-
-        view.selectNode(machineToSelect);
-
-        workspaceAgent.setActivePart(ProcessesPanelPresenter.this);
-    }
-
-
     @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
