@@ -25,7 +25,6 @@ import com.openshift.restclient.ResourceKind;
 import com.openshift.restclient.images.DockerImageURI;
 import com.openshift.restclient.model.*;
 import com.openshift.restclient.model.deploy.DeploymentTriggerType;
-import com.openshift.restclient.model.volume.IVolumeMount;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.PortBinding;
@@ -55,10 +54,11 @@ public class OpenShiftConnector {
     private static final String PROJECT_NAME = "eclipse-che";
     private static final String CHE_HOSTNAME = "che.openshift.adb";
     private static final String CHE_SERVICEACCOUNT = "cheserviceaccount";
-
+    private static final String CHE_OPENSHIFT_RESOURCES_PREFIX = "che-workspace";
 
     private final IClient client;
     private final IResourceFactory factory;
+    private final String cheOpenShiftServiceAccount;
 
     @Inject
     public OpenShiftConnector() {
@@ -67,48 +67,36 @@ public class OpenShiftConnector {
                 .withPassword("devel")
                 .build();
         this.factory = new ResourceFactory(client);
+        this.cheOpenShiftServiceAccount = CHE_SERVICEACCOUNT;
     }
 
     public ContainerCreated createContainer(CreateContainerParams createContainerParams) throws IOException {
 
-        String resourcesPrefix = "che-workspace";
-        String containerName = createContainerParams.getContainerName();
-        String sanitizedContaninerName = containerName.substring(9).replace('_', '-');
+        String containerName = getNormalizedContainerName(createContainerParams);
+        String workspaceID = getCheWorkspaceId(createContainerParams);
         String imageName = "mariolet/che-ws-agent";//"172.30.166.244:5000/eclipse-che/che-ws-agent:latest";//createContainerParams.getContainerConfig().getImage();
-        String containerid = "";
 
-        List<IProject> list = client.list(ResourceKind.PROJECT);
-        IProject cheproject = list.stream().filter(p -> p.getName().equals(PROJECT_NAME)).findFirst().orElse(null);
-        if (cheproject == null) {
-            LOG.equals("Project" + PROJECT_NAME + "not found");
-            throw new IOException("Project" + PROJECT_NAME + "not found");
+        IProject cheProject = getCheProject();
+        createOpenShiftService(cheProject);
+        String deploymentConfigName = createOpenShiftDeploymentConfig(cheProject, workspaceID, imageName, containerName);
+
+        String containerID = waitAndRetrieveContainerID(cheProject, deploymentConfigName);
+        if (containerID == null) {
+            throw new RuntimeException("Failed to get the ID of the container running in the OpenShift pod");
         }
 
-        // Create che-ws service
-        IService service = factory.create(VERSION, ResourceKind.SERVICE);
-        ((Service) service).setNamespace(cheproject.getNamespace()); //this will be the project's namespace
-        ((Service) service).setName(resourcesPrefix + "-service");
-        ((Service) service).setType("NodePort");
+        return new ContainerCreated(containerID, null);
+    }
 
-        //Map<String, Map<String, String>> ports = createContainerParams.getContainerConfig().getExposedPorts();
-        List<IServicePort> openShiftPorts = putServicePorts();
-        service.setPorts(openShiftPorts);
+    private String getNormalizedContainerName(CreateContainerParams createContainerParams) {
+        String containerName = createContainerParams.getContainerName();
+        // The name of a container in Kubernetes should be a
+        // valid hostname as specified by RFC 1123 (i.e. max length
+        // of 63 chars and no underscores)
+        return containerName.substring(9).replace('_', '-');
+    }
 
-        service.setSelector("deploymentConfig", (resourcesPrefix + "-dc"));
-        LOG.debug(String.format("Stubbing service: %s", service));
-        client.create(service);
-
-        // Create che-ws deployment config
-        IDeploymentConfig dc = factory.create(VERSION, ResourceKind.DEPLOYMENT_CONFIG);
-        ((DeploymentConfig) dc).setName(resourcesPrefix + "-dc");
-        ((DeploymentConfig) dc).setNamespace(cheproject.getName());
-        ((DeploymentConfig) dc).getNode().get("spec").get("template").get("spec").get("dnsPolicy").set("Default");
-        dc.setReplicas(1);
-        dc.setReplicaSelector("deploymentConfig", resourcesPrefix + "-dc");
-        dc.setServiceAccountName(CHE_SERVICEACCOUNT);
-        Set<IPort> containerPorts = new HashSet<>();
-        putContainerPorts(containerPorts);
-        Map<String, String> envVariables = new HashMap<>();
+    private String getCheWorkspaceId(CreateContainerParams createContainerParams) {
         String[] env = createContainerParams.getContainerConfig().getEnv();
         String workspaceID = "";
         for (String envVar : env) {
@@ -116,28 +104,62 @@ public class OpenShiftConnector {
                 workspaceID = envVar.substring(envVar.indexOf('=')+1);
             }
         }
+        return workspaceID;
+    }
+
+    private IProject getCheProject() throws IOException {
+        List<IProject> list = client.list(ResourceKind.PROJECT);
+        IProject cheproject = list.stream().filter(p -> p.getName().equals(PROJECT_NAME)).findFirst().orElse(null);
+        if (cheproject == null) {
+            LOG.equals("Project" + PROJECT_NAME + "not found");
+            throw new IOException("Project" + PROJECT_NAME + "not found");
+        }
+        return cheproject;
+    }
+
+    private void createOpenShiftService(IProject cheProject) {
+        IService service = factory.create(VERSION, ResourceKind.SERVICE);
+        ((Service) service).setNamespace(cheProject.getNamespace()); //this will be the project's namespace
+        ((Service) service).setName(CHE_OPENSHIFT_RESOURCES_PREFIX + "-service");
+        ((Service) service).setType("NodePort");
+
+        List<IServicePort> openShiftPorts = putServicePorts();
+        service.setPorts(openShiftPorts);
+
+        service.setSelector("deploymentConfig", (CHE_OPENSHIFT_RESOURCES_PREFIX + "-dc"));
+        LOG.debug(String.format("Stubbing service: %s", service));
+        client.create(service);
+    }
+
+    private String createOpenShiftDeploymentConfig(IProject cheProject, String workspaceID, String imageName, String sanitizedContaninerName) {
+        IDeploymentConfig dc = factory.create(VERSION, ResourceKind.DEPLOYMENT_CONFIG);
+        ((DeploymentConfig) dc).setName(CHE_OPENSHIFT_RESOURCES_PREFIX + "-dc");
+        ((DeploymentConfig) dc).setNamespace(cheProject.getName());
+        ((DeploymentConfig) dc).getNode().get("spec").get("template").get("spec").get("dnsPolicy").set("Default");
+        dc.setReplicas(1);
+        dc.setReplicaSelector("deploymentConfig", CHE_OPENSHIFT_RESOURCES_PREFIX + "-dc");
+        dc.setServiceAccountName(this.cheOpenShiftServiceAccount);
+
+        addContainer(dc, workspaceID, imageName, sanitizedContaninerName);
+        dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
+        client.create(dc);
+        return dc.getName();
+    }
+
+    private void addContainer(IDeploymentConfig dc, String workspaceID, String imageName, String containerName) {
+        Set<IPort> containerPorts = new HashSet<>();
+        putContainerPorts(containerPorts);
+        Map<String, String> envVariables = new HashMap<>();
         putEnvVariables(envVariables, workspaceID);
-        dc.addContainer(sanitizedContaninerName,
+        dc.addContainer(containerName,
                 new DockerImageURI(imageName),
                 containerPorts,
                 envVariables,
                 Collections.emptyList());
-        dc.getContainer(sanitizedContaninerName).setImagePullPolicy("Always");
-//        Set<IVolumeMount> volumeMounts = new HashSet<>();
-//        putVolumesMount(volumeMounts);
-//        dc.getContainer(containerName).setVolumeMounts(volumeMounts);
-        dc.addTrigger(DeploymentTriggerType.CONFIG_CHANGE);
-        client.create(dc);
-
-        containerid = waitAndRetrieveContainerID(cheproject, dc);
-        if (containerid == null) {
-            throw new RuntimeException("Failed to get the ID of the container running in the OpenShift pod");
-        }
-
-        return new ContainerCreated(containerid, null);
+        dc.getContainer(containerName).setImagePullPolicy("Always");
     }
 
-    private String waitAndRetrieveContainerID(IProject cheproject, IDeploymentConfig dc) {
+    private String waitAndRetrieveContainerID(IProject cheproject, String deploymentConfigName) {
         String deployerLabelKey = "openshift.io/deployer-pod-for.name";
         for (int i = 0; i < 120; i++) {
             try {
@@ -152,7 +174,7 @@ public class OpenShiftConnector {
             if (deployPodNum == 0) {
                 LOG.info("Pod has been deployed.");
                 for (IPod pod : pods) {
-                    if (pod.getLabels().get("deploymentConfig").equals(dc.getName())) {
+                    if (pod.getLabels().get("deploymentConfig").equals(deploymentConfigName)) {
                         ModelNode containerID = ((Pod) pod).getNode().get("status").get("containerStatuses").get(0).get("containerID");
                         return containerID.toString().substring(10, 74);
                     }
@@ -161,92 +183,6 @@ public class OpenShiftConnector {
         }
         return null;
     }
-
-    private void putVolumesMount(Set<IVolumeMount> volumeMounts, String workspaceName) {
-        IVolumeMount volumeMount1 = new IVolumeMount() {
-            public String getName() {
-                return "terminal";
-            }
-
-            public String getMountPath() {
-                return "/mnt/che/terminal";
-            }
-
-            public boolean isReadOnly() {
-                return true;
-            }
-
-            public void setName(String name) {
-            }
-
-            public void setMountPath(String path) {
-            }
-
-            public void setReadOnly(boolean readonly) {
-            }
-        };
-        volumeMounts.add(volumeMount1);
-        IVolumeMount volumeMount2 = new IVolumeMount() {
-            public String getName() {
-                return "ws-agent";
-            }
-
-            public String getMountPath() {
-                return "/mnt/che/ws-agent.tar.gz";
-            }
-
-            public boolean isReadOnly() {
-                return true;
-            }
-
-            public void setName(String name) {
-            }
-
-            public void setMountPath(String path) {
-            }
-
-            public void setReadOnly(boolean readonly) {
-            }
-        };
-        volumeMounts.add(volumeMount2);
-        IVolumeMount volumeMount3 = new IVolumeMount() {
-            public String getName() {
-                return "ws-agent";
-            }
-
-            public String getMountPath() {
-                return "/home/user/che/workspaces/" + workspaceName;
-            }
-
-            public boolean isReadOnly() {
-                return false;
-            }
-
-            public void setName(String name) {
-            }
-
-            public void setMountPath(String path) {
-            }
-
-            public void setReadOnly(boolean readonly) {
-            }
-        };
-        volumeMounts.add(volumeMount3);
-    }
-
-//    private List<IServicePort> putServicePorts(Map<String, Map<String, String>> ports) {
-//        List<IServicePort> openShiftPorts = new ArrayList<>();
-//        for (Map.Entry<String, Map<String, String>> dockerPort : ports.entrySet()) {
-//            int portNum = Integer.parseInt(dockerPort.getKey().split("\\/")[0]);
-//            IServicePort openShiftPort = OpenShiftPortFactory.createServicePort(
-//                    "port-" + portNum,
-//                    "TCP",
-//                    portNum,
-//                    portNum);
-//            openShiftPorts.add(openShiftPort);
-//        }
-//        return openShiftPorts;
-//    }
 
     private List<IServicePort> putServicePorts() {
         List<IServicePort> openShiftPorts = new ArrayList<>();
@@ -359,60 +295,72 @@ public class OpenShiftConnector {
     }
 
     public ContainerInfo inspectContainer(DockerConnector docker, String container) throws IOException {
-        // Proxy to Docker
+        // Proxy to DockerConnector
         ContainerInfo info = docker.inspectContainer(container);
         if (info == null) {
             return null;
         }
+        // Ignore portMapping for now: info.getNetworkSettings().setPortMapping();
+        // replacePortMapping(info)
+        replaceNetworkSettings(info);
+        replaceLabels(info);
 
-        // Ignore portMapping for now
-        //info.getNetworkSettings().setPortMapping();
-
-        // Find the project
-        if (info.getNetworkSettings() != null) {
-            List<IProject> list = client.list(ResourceKind.PROJECT);
-            IProject cheproject = list.stream().filter(p -> p.getName().equals(PROJECT_NAME)).findFirst().orElse(null);
-            if (cheproject == null) {
-                LOG.equals("Project" + PROJECT_NAME + "not found");
-                throw new IOException("Project" + PROJECT_NAME + "not found");
-            }
-
-            // Find the service
-            List<IService> services = client.list(ResourceKind.SERVICE, cheproject.getNamespace(), Collections.emptyMap());
-            IService service = services.stream().filter(s -> s.getName().equals("che-workspace-service")).findFirst().orElse(null);
-            if (service == null) {
-                LOG.equals("Service che-workspace-service not found");
-                throw new IOException("Service che-workspace-service not found");
-            }
-
-            // Find the ports
-            Map<String, List<PortBinding>> networkSettingsPorts = new HashMap<>();
-            List<ModelNode> servicePorts = ((Service) service).getNode().get("spec").get("ports").asList();
-            LOG.info("Adding " + servicePorts.size() + " ports");
-            for (ModelNode servicePort : servicePorts) {
-                String protocol = servicePort.get("protocol").asString();
-                String targetPort = servicePort.get("targetPort").asString();
-                String nodePort = servicePort.get("nodePort").asString();
-
-                LOG.info("Adding port: " + targetPort + "/" + protocol);
-
-                networkSettingsPorts.put(targetPort + "/" + protocol.toLowerCase(),
-                        Collections.singletonList(new PortBinding().withHostIp("172.17.0.1").withHostPort(nodePort)));
-            }
-            info.getNetworkSettings().setPorts(networkSettingsPorts);
-        }
-
-        // Add labels
-        if (info.getConfig() != null) {
-            Map<String,String> configLabels = new HashMap<>();
-            configLabels.put("che:server:8000:protocol", "http");
-            configLabels.put("che:server:8000:ref", "tomcat8-debug");
-            configLabels.put("che:server:8080:protocol", "http");
-            configLabels.put("che:server:8080:ref", "tomcat8");
-            configLabels.put("che:server:9876:protocol", "http");
-            configLabels.put("che:server:9876:ref", "codeserver");
-            info.getConfig().setLabels(configLabels);
-        }
         return info;
+    }
+
+    private void replaceLabels(ContainerInfo info) {
+        if (info.getConfig() == null) {
+            return;
+        }
+
+        Map<String,String> configLabels = new HashMap<>();
+        configLabels.put("che:server:8000:protocol", "http");
+        configLabels.put("che:server:8000:ref", "tomcat8-debug");
+        configLabels.put("che:server:8080:protocol", "http");
+        configLabels.put("che:server:8080:ref", "tomcat8");
+        configLabels.put("che:server:9876:protocol", "http");
+        configLabels.put("che:server:9876:ref", "codeserver");
+        info.getConfig().setLabels(configLabels);
+    }
+
+    private void replaceNetworkSettings(ContainerInfo info) throws IOException {
+
+        if (info.getNetworkSettings() == null) {
+            return;
+        }
+
+        IProject cheproject = getCheProject();
+
+        IService service = getCheWorkspaceService(cheproject);
+        Map<String, List<PortBinding>> networkSettingsPorts = getCheServicePorts((Service) service);
+
+        info.getNetworkSettings().setPorts(networkSettingsPorts);
+    }
+
+    private Map<String, List<PortBinding>> getCheServicePorts(Service service) {
+        Map<String, List<PortBinding>> networkSettingsPorts = new HashMap<>();
+        List<ModelNode> servicePorts = service.getNode().get("spec").get("ports").asList();
+        LOG.info("Adding " + servicePorts.size() + " ports");
+        for (ModelNode servicePort : servicePorts) {
+            String protocol = servicePort.get("protocol").asString();
+            String targetPort = servicePort.get("targetPort").asString();
+            String nodePort = servicePort.get("nodePort").asString();
+
+            LOG.info("Adding port: " + targetPort + "/" + protocol);
+
+            networkSettingsPorts.put(targetPort + "/" + protocol.toLowerCase(),
+                    Collections.singletonList(new PortBinding().withHostIp("172.17.0.1").withHostPort(nodePort)));
+        }
+        return networkSettingsPorts;
+    }
+
+    private IService getCheWorkspaceService(IProject cheproject) throws IOException {
+        List<IService> services = client.list(ResourceKind.SERVICE, cheproject.getNamespace(), Collections.emptyMap());
+        IService service = services.stream().filter(s -> s.getName().equals("che-workspace-service")).findFirst().orElse(null);
+        if (service == null) {
+            LOG.equals("Service che-workspace-service not found");
+            throw new IOException("Service che-workspace-service not found");
+        }
+        return service;
     }
 }
