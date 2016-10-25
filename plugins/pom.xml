@@ -52,6 +52,6 @@
         <module>plugin-ssh-key</module>
         <module>plugin-languageserver</module>
         <module>plugin-json</module>
-        <module>plugin-php-zend-debugger</module>
+        <module>plugin-zend-debugger</module>
     </modules>
 </project>
