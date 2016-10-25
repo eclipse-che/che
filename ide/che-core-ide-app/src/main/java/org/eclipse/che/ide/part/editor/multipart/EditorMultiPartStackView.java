@@ -52,5 +52,8 @@ public interface EditorMultiPartStackView extends IsWidget {
      */
     void removePartStack(@NotNull final EditorPartStack partStack);
 
+    /**
+     * @return the editor multi part stack state
+     */
     EditorMultiPartStackState getState();
 }

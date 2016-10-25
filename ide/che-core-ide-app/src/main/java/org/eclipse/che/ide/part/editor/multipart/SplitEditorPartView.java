@@ -60,5 +60,10 @@ public interface SplitEditorPartView extends IsWidget {
     /** Removes this view from its parent widget */
     void removeFromParent();
 
+    /**
+     * Get editor multi part stack state
+     * @param splitEditorParts split editor part view mapped to their part stack
+     * @return the editor multi part stack state
+     */
     EditorMultiPartStackState getState(BiMap<SplitEditorPartView, EditorPartStack> splitEditorParts);
 }

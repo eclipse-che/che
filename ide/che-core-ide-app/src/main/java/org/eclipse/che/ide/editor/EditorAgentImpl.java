@@ -104,7 +104,7 @@ public class EditorAgentImpl implements EditorAgent,
     private final Map<EditorPartPresenter, String>    openedEditorsToProviders;
     private final Provider<EditorContentSynchronizer> editorContentSynchronizerProvider;
     private final AppContext                          appContext;
-    private final PromiseProvider promiseProvider;
+    private final PromiseProvider                     promiseProvider;
     private       List<EditorPartPresenter>           dirtyEditors;
     private       EditorPartPresenter                 activeEditor;
 
@@ -395,8 +395,11 @@ public class EditorAgentImpl implements EditorAgent,
     public JsonObject getState() {
         JsonObject state = Json.createObject();
 
-
-        EditorMultiPartStackState stacks = editorMultiPartStack.getState();
+        EditorMultiPartStackState stacks = null;
+        try {
+            stacks = editorMultiPartStack.getState();
+        } catch (IllegalStateException ignore) {
+        }
         if (stacks != null) {
             state.put("FILES", storeEditors(stacks));
         }
@@ -443,31 +446,34 @@ public class EditorAgentImpl implements EditorAgent,
     @Override
     @SuppressWarnings("unchecked")
     public void loadState(@NotNull final JsonObject state) {
-        JsonObject files = state.getObject("FILES");
-        EditorPartStack partStack = editorMultiPartStack.createFirstPartStack();
-        final Map<EditorPartPresenter, EditorPartStack> activeEditors = new HashMap<>();
-        List<Promise<Void>> restore = restore(files, partStack, activeEditors);
-        Promise<ArrayOf<?>> promise = promiseProvider.all2(restore.toArray(new Promise[restore.size()]));
-        promise.then(new Operation() {
-            @Override
-            public void apply(Object arg) throws OperationException {
-                String activeFile = "";
-                if(state.hasKey("ACTIVE_EDITOR")){
-                    activeFile = state.getString("ACTIVE_EDITOR");
-                }
-                EditorPartPresenter activeEditorPart = null;
-                for (Map.Entry<EditorPartPresenter, EditorPartStack> entry : activeEditors.entrySet()) {
-                    entry.getValue().setActivePart(entry.getKey());
-                    if (activeFile.equals(entry.getKey().getEditorInput().getFile().getLocation().toString())) {
-                        activeEditorPart = entry.getKey();
+        if (state.hasKey("FILES")) {
+            JsonObject files = state.getObject("FILES");
+            EditorPartStack partStack = editorMultiPartStack.createFirstPartStack();
+            final Map<EditorPartPresenter, EditorPartStack> activeEditors = new HashMap<>();
+            List<Promise<Void>> restore = restore(files, partStack, activeEditors);
+            Promise<ArrayOf<?>> promise = promiseProvider.all2(restore.toArray(new Promise[restore.size()]));
+            promise.then(new Operation() {
+                @Override
+                public void apply(Object arg) throws OperationException {
+                    String activeFile = "";
+                    if (state.hasKey("ACTIVE_EDITOR")) {
+                        activeFile = state.getString("ACTIVE_EDITOR");
                     }
+                    EditorPartPresenter activeEditorPart = null;
+                    for (Map.Entry<EditorPartPresenter, EditorPartStack> entry : activeEditors.entrySet()) {
+                        entry.getValue().setActivePart(entry.getKey());
+                        if (activeFile.equals(entry.getKey().getEditorInput().getFile().getLocation().toString())) {
+                            activeEditorPart = entry.getKey();
+                        }
+                    }
+                    workspaceAgent.setActivePart(activeEditorPart);
                 }
-                workspaceAgent.setActivePart(activeEditorPart);
-            }
-        });
+            });
+        }
     }
 
-    private List<Promise<Void>> restore(JsonObject files, EditorPartStack editorPartStack, Map<EditorPartPresenter, EditorPartStack> activeEditors) {
+    private List<Promise<Void>> restore(JsonObject files, EditorPartStack editorPartStack,
+                                        Map<EditorPartPresenter, EditorPartStack> activeEditors) {
 
         if (files.hasKey("FILES")) {
             //plain
@@ -487,7 +493,8 @@ public class EditorAgentImpl implements EditorAgent,
 
     }
 
-    private List<Promise<Void>> restoreSplit(JsonObject files, EditorPartStack editorPartStack, Map<EditorPartPresenter, EditorPartStack> activeEditors) {
+    private List<Promise<Void>> restoreSplit(JsonObject files, EditorPartStack editorPartStack,
+                                             Map<EditorPartPresenter, EditorPartStack> activeEditors) {
         JsonObject splitFirst = files.getObject("SPLIT_FIRST");
         List<Promise<Void>> restoreFirst = restore(splitFirst, editorPartStack, activeEditors);
         String direction = files.getString("DIRECTION");
@@ -502,7 +509,7 @@ public class EditorAgentImpl implements EditorAgent,
     }
 
     private Promise<Void> openFile(final JsonObject file, final EditorPartStack editorPartStack,
-                          final Map<EditorPartPresenter, EditorPartStack> activeEditors) {
+                                   final Map<EditorPartPresenter, EditorPartStack> activeEditors) {
         return AsyncPromiseHelper.createFromAsyncRequest(new AsyncPromiseHelper.RequestCall<Void>() {
             @Override
             public void makeCall(final AsyncCallback<Void> callback) {
@@ -524,7 +531,8 @@ public class EditorAgentImpl implements EditorAgent,
     }
 
     private void restoreCreateEditor(final File resourceFile, JsonObject file, final EditorPartStack editorPartStack,
-                                     final AsyncCallback<Void> openCallback, final Map<EditorPartPresenter, EditorPartStack> activeEditors) {
+                                     final AsyncCallback<Void> openCallback,
+                                     final Map<EditorPartPresenter, EditorPartStack> activeEditors) {
         String providerId = file.getString("EDITOR_PROVIDER");
         final OpenEditorCallback callback;
         if (file.hasKey("CURSOR_OFFSET") && file.hasKey("TOP_VISIBLE_LINE")) {
@@ -560,7 +568,7 @@ public class EditorAgentImpl implements EditorAgent,
     }
 
     private void restoreInitEditor(final VirtualFile file, final OpenEditorCallback callback, FileType fileType,
-                            final EditorPartPresenter editor, EditorProvider editorProvider, EditorPartStack editorPartStack) {
+                                   final EditorPartPresenter editor, EditorProvider editorProvider, EditorPartStack editorPartStack) {
         editor.init(new EditorInputImpl(fileType, file), callback);
         editor.addCloseHandler(this);
 
@@ -569,8 +577,7 @@ public class EditorAgentImpl implements EditorAgent,
     }
 
 
-
-    private static class RestoreStateEditorCallBack extends OpenEditorCallbackImpl{
+    private static class RestoreStateEditorCallBack extends OpenEditorCallbackImpl {
         private final int cursorOffset;
         private final int topLine;
 
