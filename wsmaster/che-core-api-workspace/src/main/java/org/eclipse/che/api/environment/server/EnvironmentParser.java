@@ -178,7 +178,6 @@ public class EnvironmentParser {
             CheServiceImpl cheService = new CheServiceImpl().withBuild(buildContext)
                                                             .withCommand(service.getCommand())
                                                             .withContainerName(service.getContainerName())
-                                                            .withName(composeServiceEntry.getKey())
                                                             .withDependsOn(service.getDependsOn())
                                                             .withEntrypoint(service.getEntrypoint())
                                                             .withEnvironment(service.getEnvironment())

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.json;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +19,10 @@ import java.util.Map;
 
 /** @author andrew00x */
 public class NetworkSettings {
-    private String   iPAddress;
-    private int      iPPrefixLen;
+    @SerializedName("IPAddress")
+    private String   ipAddress;
+    @SerializedName("IPPrefixLen")
+    private int      ipPrefixLen;
     private String   gateway;
     private String   bridge;
     private String[] portMapping;
@@ -26,25 +30,26 @@ public class NetworkSettings {
     private int      linkLocalIPv6PrefixLen;
     private String   globalIPv6Address;
     private int      globalIPv6PrefixLen;
-    private String   iPv6Gateway;
+    @SerializedName("IPv6Gateway")
+    private String   ipV6Gateway;
     private String   linkLocalIPv6Address;
 
     private Map<String, List<PortBinding>> ports = new HashMap<>();
 
     public String getIpAddress() {
-        return iPAddress;
+        return ipAddress;
     }
 
     public void setIpAddress(String ipAddress) {
-        this.iPAddress = ipAddress;
+        this.ipAddress = ipAddress;
     }
 
     public int getIpPrefixLen() {
-        return iPPrefixLen;
+        return ipPrefixLen;
     }
 
     public void setIpPrefixLen(int iPPrefixLen) {
-        this.iPPrefixLen = iPPrefixLen;
+        this.ipPrefixLen = iPPrefixLen;
     }
 
     public String getGateway() {
@@ -111,12 +116,12 @@ public class NetworkSettings {
         this.globalIPv6PrefixLen = globalIPv6PrefixLen;
     }
 
-    public String getiPv6Gateway() {
-        return iPv6Gateway;
+    public String getIpV6Gateway() {
+        return ipV6Gateway;
     }
 
-    public void setiPv6Gateway(String iPv6Gateway) {
-        this.iPv6Gateway = iPv6Gateway;
+    public void setIpV6Gateway(String ipV6Gateway) {
+        this.ipV6Gateway = ipV6Gateway;
     }
 
     public String getLinkLocalIPv6Address() {
@@ -130,8 +135,8 @@ public class NetworkSettings {
     @Override
     public String toString() {
         return "NetworkSettings{" +
-               "ipAddress='" + iPAddress + '\'' +
-               ", iPPrefixLen=" + iPPrefixLen +
+               "ipAddress='" + ipAddress + '\'' +
+               ", ipPrefixLen=" + ipPrefixLen +
                ", gateway='" + gateway + '\'' +
                ", bridge='" + bridge + '\'' +
                ", portMapping=" + Arrays.toString(portMapping) +
@@ -139,7 +144,7 @@ public class NetworkSettings {
                ", linkLocalIPv6PrefixLen=" + linkLocalIPv6PrefixLen +
                ", globalIPv6Address='" + globalIPv6Address + '\'' +
                ", globalIPv6PrefixLen=" + globalIPv6PrefixLen +
-               ", iPv6Gateway='" + iPv6Gateway + '\'' +
+               ", ipV6Gateway='" + ipV6Gateway + '\'' +
                ", linkLocalIPv6Address='" + linkLocalIPv6Address + '\'' +
                ", ports=" + ports +
                '}';

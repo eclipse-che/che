@@ -23,7 +23,6 @@ import java.util.Objects;
  */
 public class CheServiceImpl {
     private String                     id;
-    private String                     name;
     private String                     containerName;
     private List<String>               command;
     private List<String>               entrypoint;
@@ -44,7 +43,6 @@ public class CheServiceImpl {
 
     public CheServiceImpl(CheServiceImpl service) {
         id = service.getId();
-        name = service.getName();
         image = service.getImage();
         if (service.getBuild() != null) {
             build = new CheServiceBuildContextImpl(service.getBuild());
@@ -99,22 +97,6 @@ public class CheServiceImpl {
 
     public CheServiceImpl withId(String id) {
         this.id = id;
-        return this;
-    }
-
-    /**
-     * Name of service
-     */
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public CheServiceImpl withName(String name) {
-        this.name = name;
         return this;
     }
 

@@ -378,7 +378,7 @@ public class CheEnvironmentEngine {
                 machine.setId(generateMachineId());
 
                 machineStarter = (machineLogger, machineSource) -> {
-                    Machine machineWithNormalizedSource = getMachineWithNormalizedSource(machine, machineSource);
+                    Machine machineWithNormalizedSource = normalizeMachineSource(machine, machineSource);
                     return provider.createInstance(machineWithNormalizedSource, machineLogger);
                 };
             } catch (NotFoundException e) {
@@ -534,7 +534,7 @@ public class CheEnvironmentEngine {
 
         List<String> servicesOrder = startStrategy.order(environment);
 
-        normilizeVolumesFrom(environment);
+        normalizeNames(environment);
 
         EnvironmentHolder environmentHolder = new EnvironmentHolder(servicesOrder,
                                                                     environment,
@@ -584,16 +584,60 @@ public class CheEnvironmentEngine {
         }
     }
 
-    private void normilizeVolumesFrom(CheServicesEnvironmentImpl environment) {
+    /**
+     * Sets specific names for this environment instance where it is required.
+     *
+     * @param environment
+     *         environment in which names will be normalized
+     */
+    private void normalizeNames(CheServicesEnvironmentImpl environment) {
         Map<String, CheServiceImpl> services = environment.getServices();
-        // replace machines names in volumes_from with containers IDs
         for (Map.Entry<String, CheServiceImpl> serviceEntry : services.entrySet()) {
             CheServiceImpl service = serviceEntry.getValue();
-            if (service.getVolumesFrom() != null) {
-                service.setVolumesFrom(service.getVolumesFrom()
-                                              .stream()
-                                              .map(serviceName -> services.get(serviceName).getContainerName())
-                                              .collect(toList()));
+            normalizeVolumesFrom(service, services);
+            normalizeLinks(service, services);
+        }
+    }
+
+    // replace machines names in volumes_from with containers IDs
+    private void normalizeVolumesFrom(CheServiceImpl service, Map<String, CheServiceImpl> services) {
+        if (service.getVolumesFrom() != null) {
+            service.setVolumesFrom(service.getVolumesFrom()
+                                          .stream()
+                                          .map(serviceName -> services.get(serviceName).getContainerName())
+                                          .collect(toList()));
+        }
+    }
+
+    /**
+     * Replaces linked to this service's name with container name which represents the service in links section.
+     * The problem is that a user writes names of other services in links section in compose file.
+     * But actually links are constraints and their values should be names of containers (not services) to be linked.
+     * <br/>
+     * For example: serviceDB:serviceDbAlias -> container_1234:serviceDbAlias <br/>
+     * If alias is omitted then service name will be used.
+     *
+     * @param serviceToNormalizeLinks
+     *         service which links will be normalized
+     * @param services
+     *         all services in environment
+     */
+    @VisibleForTesting
+    void normalizeLinks(CheServiceImpl serviceToNormalizeLinks, Map<String, CheServiceImpl> services) {
+        final List<String> containerLinks = serviceToNormalizeLinks.getLinks();
+        for (int i = 0;  i < containerLinks.size(); i++) {
+            String serviceNameAndAliasToLink[] = containerLinks.get(i).split(":"); // a link has format: 'name:alias' or 'name'
+            String serviceName = serviceNameAndAliasToLink[0];
+            String serviceAlias = (serviceNameAndAliasToLink.length > 1) ? serviceNameAndAliasToLink[1] : null;
+            CheServiceImpl serviceLinkTo = services.get(serviceName);
+            if (serviceLinkTo != null) {
+                String containerNameLinkTo = serviceLinkTo.getContainerName();
+                containerLinks.set(i, (serviceAlias == null) ?
+                                      containerNameLinkTo + ':' + serviceName :
+                                      containerNameLinkTo + ':' + serviceAlias);
+            } else {
+                // should never happens. Errors like this should be filtered by CheEnvironmentValidator
+                LOG.error("Attempt to link non existing service {} to {} service.", serviceName, serviceToNormalizeLinks);
             }
         }
     }
@@ -692,8 +736,7 @@ public class CheEnvironmentEngine {
                             format("Environment of workspace with ID '%s' failed due to internal error", workspaceId));
                 }
 
-                replaceServiceToContainerNameInLinks(service, environmentHolder.environment.getServices());
-
+                final String finalMachineName = machineName;
                 // needed to reuse startInstance method and
                 // create machine instances by different implementation-specific providers
                 MachineStarter machineStarter = (machineLogger, machineSource) -> {
@@ -701,7 +744,7 @@ public class CheEnvironmentEngine {
                     return machineProvider.startService(namespace,
                                                         workspaceId,
                                                         envName,
-                                                        serviceWithNormalizedSource.getName(),
+                                                        finalMachineName,
                                                         isDev,
                                                         networkId,
                                                         serviceWithNormalizedSource,
@@ -917,7 +960,7 @@ public class CheEnvironmentEngine {
         return serviceWithNormalizedSource;
     }
 
-    private Machine getMachineWithNormalizedSource(MachineImpl machine, MachineSource machineSource) {
+    private Machine normalizeMachineSource(MachineImpl machine, MachineSource machineSource) {
         Machine machineWithNormalizedSource = machine;
         if (machineSource != null) {
             machineWithNormalizedSource = MachineImpl.builder()
@@ -930,45 +973,6 @@ public class CheEnvironmentEngine {
 
         }
         return machineWithNormalizedSource;
-    }
-
-    /**
-     * Replaces linked to this service's name with container name which represents the service in links section.
-     * The problem is that a user writes names of other services in links section in compose file.
-     * But actually links are constraints and they values should be names of containers (not services) to be linked.
-     * <br/>
-     * For example: serviceDB:serviceDbAlias -> container_1234:serviceDbAlias <br/>
-     * If alias is omitted then service name will be used.
-     *
-     * @param serviceToStart
-     *         service which is starting now
-     * @param services
-     *         all services in environment
-     */
-    @VisibleForTesting
-    void replaceServiceToContainerNameInLinks(CheServiceImpl serviceToStart, Map<String, CheServiceImpl> services) {
-        final List<String> containerLinks = serviceToStart.getLinks();
-        for (int i = 0;  i < containerLinks.size(); i++) {
-            String link = containerLinks.get(i);
-            String serviceName;
-            String serviceAlias;
-            int colonIndex = link.indexOf(':');
-            if (colonIndex != -1) {
-                serviceName = link.substring(0, colonIndex);
-                serviceAlias = link.substring(colonIndex + 1);
-            } else {
-                serviceName = link;
-                serviceAlias = null;
-            }
-
-            CheServiceImpl serviceLinkedTo = services.get(serviceName);
-            if (serviceLinkedTo != null) {
-                String containerNameLinkedTo = serviceLinkedTo.getContainerName();
-                containerLinks.set(i, (serviceAlias == null) ?
-                                      containerNameLinkedTo + ':' + serviceName :
-                                      containerNameLinkedTo + ':' + serviceAlias);
-            }
-        }
     }
 
     private void addMachine(MachineImpl machine) throws ServerException {
