@@ -49,4 +49,6 @@ public interface MavenAttributes {
 
     /** Name of WebSocket chanel */
     String MAVEN_CHANEL_NAME = "maven:workspace";
+    /** Name of WebSocket chanel for Maven Archetype output */
+    String MAVEN_ARCHETYPE_CHANEL_NAME = "maven:archetype:output";
 }

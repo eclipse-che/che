@@ -11,7 +11,6 @@
 package org.eclipse.che.api.local;
 
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.api.core.ConflictException;
@@ -25,7 +24,6 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.UserDao;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -41,7 +39,6 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 
 /**
  * In-memory implementation of {@link UserDao}.
@@ -150,7 +147,7 @@ public class LocalUserDaoImpl implements UserDao {
     }
 
     @Override
-    public Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException {
+    public Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException {
         return new Page<>(users.values()
                                .stream()
                                .skip(skipCount)
