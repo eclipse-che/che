@@ -29,5 +29,16 @@
                                      che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe-import>
       </md-tab-body>
     </md-tab>
+    <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-authoring')">
+      <md-tab-label>
+        <md-icon md-font-icon="fa fa-pencil-square-o" class="che-tab-label-icon tab-fa-icon"></md-icon>
+        <span class="che-tab-label-title">Stack authoring</span>
+      </md-tab-label>
+      <md-tab-body>
+        <che-workspace-recipe-authoring ng-if="workspaceSelectStackCtrl.tabName==='stack-authoring'"
+                                        che-recipe-script="workspaceSelectStackCtrl.recipeScript"
+                                        che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe-authoring>
+      </md-tab-body>
+    </md-tab>
   </md-tabs>
 </div>
