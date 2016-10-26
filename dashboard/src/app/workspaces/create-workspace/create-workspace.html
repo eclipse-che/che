@@ -129,18 +129,18 @@
                                       ng-click="createWorkspaceCtrl.resetCreateProgress()"
                                       class="che-hover create-project-details-arrow"
                                       che-button-icon="fa fa-chevron-circle-right"
-                                      che-button-title="Open project(s) in IDE"></che-button-primary>
+                                      che-button-title="Open projects in IDE"></che-button-primary>
                 </div>
               </div>
-              <!--<div layout="column" layout-align="end end"-->
-                   <!--ng-show="createWorkspaceCtrl.getCreationSteps()[createWorkspaceCtrl.getCurrentProgressStep()].hasError">-->
-                <!--<che-button-danger-->
-                  <!--che-button-title="{{createProjectCtrl.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"-->
-                  <!--ng-click="createProjectCtrl.resetCreateProgress()"></che-button-danger>-->
-                <!--<che-link class="create-project-download-logs-link"-->
-                          <!--ng-click="createProjectCtrl.downloadLogs()"-->
-                          <!--che-link-text="Problem? download logs"></che-link>-->
-              <!--</div>-->
+              <div layout="column" layout-align="end end"
+                   ng-show="createWorkspaceCtrl.getCreationSteps()[createWorkspaceCtrl.getCurrentProgressStep()].hasError">
+                <che-button-danger
+                  che-button-title="{{createWorkspaceCtrl.isResourceProblem() ? 'Stop running workspaces' :  'Retry'}}"
+                  ng-click="createWorkspaceCtrl.resetCreateProgress()"></che-button-danger>
+                <che-link class="create-project-download-logs-link"
+                          ng-click="createWorkspaceCtrl.downloadLogs()"
+                          che-link-text="Problem? download logs"></che-link>
+              </div>
             </div>
           </div>
         </div>

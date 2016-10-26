@@ -26,12 +26,44 @@ export class CreateProjectSvc {
     this.cheAPI = cheAPI;
   }
 
-  importProjects(workspaceId, projects) {
+  importProjects(workspaceId, projects, commands) {
     let promises = [];
+
     projects.forEach((projectData) => {
-      let importProjectPromise = importProject(workspaceId, projectData);
-      promises.push(importProjectPromise);
+      let deferredImport = this.$q.defer();
+      let deferredImportPromise = deferredImport.promise;
+
+      let importPromise = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject().importProject(projectData.name, projectData.source);
+      importPromise.then(() => {
+        let deferredResolve = this.$q.defer();
+        let deferredResolvePromise = deferredResolve.promise;
+
+        projectData.project = projectData; // needed for resolveProjectType method only
+        this.resolveProjectType(workspaceId, projectData.name, projectData, deferredResolve);
+        promises.push(deferredResolvePromise);
+
+        deferredImport.resolve();
+      }, (error) => {
+        deferredImport.reject(error);
+      });
+
+      promises.push(deferredImportPromise);
     });
+
+    commands.forEach((command) => {
+      let deferredAddCommand = this.$q.defer();
+      let deferredAddCommandPromise = deferredAddCommand.promise;
+
+      let importCommand = this.cheAPI.getWorkspace().addCommand(workspaceId, command);
+      importCommand.then(() => {
+        deferredAddCommand.resolve();
+      }, (error) => {
+        deferredAddCommand.reject(error);
+      });
+
+      promises.push(deferredAddCommandPromise);
+    });
+
     return this.$q.all(promises);
   }
 

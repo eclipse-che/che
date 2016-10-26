@@ -24,17 +24,20 @@ export class CreateWorkspaceController {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($location, $timeout, $log, $mdDialog, cheAPI, cheNotification, lodash, $rootScope, cheEnvironmentRegistry, createProjectProgressorSvc) {
+  constructor($location, $timeout, $log, $mdDialog, $websocket, cheAPI, createProjectSvc, createProjectProgressorSvc,
+              cheNotification, lodash, $rootScope, cheEnvironmentRegistry) {
     this.$location = $location;
     this.$timeout = $timeout;
     this.$mdDialog = $mdDialog;
     this.$log = $log;
+    this.$websocket = $websocket;
     this.cheAPI = cheAPI;
+    this.createProjectProgressorSvc = createProjectProgressorSvc;
+    this.createProjectSvc = createProjectSvc;
     this.cheNotification = cheNotification;
     this.lodash = lodash;
     this.$rootScope = $rootScope;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
-    this.createProjectProgressorSvc = createProjectProgressorSvc;
     this.stackMachines = {};
 
     this.selectSourceOption = 'select-source-recipe';
@@ -60,6 +63,9 @@ export class CreateWorkspaceController {
     this.recipeFormat = null;
     this.importWorkspace = '';
     this.defaultWorkspaceName = null;
+
+    // channels on which we will subscribe on the workspace bus websocket
+    this.listeningChannels = [];
 
     this.resetCreateProgress();
 
@@ -163,6 +169,9 @@ export class CreateWorkspaceController {
     } else if (this.selectSourceOption === 'select-source-import') {
       this.importWorkspaceConfig.name = this.workspaceName;
       this.setEnvironment(this.importWorkspaceConfig);
+      this.resetCreateProgress();
+      this.setCreateProjectInProgress();
+      this.createWorkspaceFromConfig(this.importWorkspaceConfig);
     } else {
       //check predefined recipe location
       if (this.stack && this.stack.source && this.stack.source.type === 'location') {
@@ -317,6 +326,295 @@ export class CreateWorkspaceController {
     workspace.environments[workspace.defaultEnv] = environmentManager.getEnvironment(environment, this.getMachines(environment));
   }
 
+
+  createWorkspaceFromConfig(workspaceConfig) {
+    this.createProjectProgressorSvc.setWorkspaceOfProject(workspaceConfig.name);
+
+    let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, workspaceConfig, {});
+    creationPromise.then((workspace) => {
+      this.createProjectProgressorSvc.setWorkspaceNamespace(workspace.namespace);
+      this.updateRecentWorkspace(workspace.id);
+
+      this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id).then(() => {
+        this.subscribeStatusChannel(workspace, workspaceConfig.projects || [], workspaceConfig.commands || []);
+      });
+
+      this.$timeout(() => {
+        let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+        this.startWorkspace(bus, workspace);
+      }, 1000);
+    }, (error) => {
+      if (error.data.message) {
+        this.getCreationSteps()[this.getCurrentProgressStep()].logs = error.data.message;
+      }
+      this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+    });
+  }
+
+  /**
+   * Subscribe on workspace status channel
+   */
+  subscribeStatusChannel(workspace, projects, commands) {
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'ERROR').then((message) => {
+      this.createProjectProgressorSvc.setCurrentProgressStep(2);
+      this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+      // need to show the error
+      this.$mdDialog.show(
+        this.$mdDialog.alert()
+          .title('Error when starting agent')
+          .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
+          .ariaLabel('Workspace agent start')
+          .ok('OK')
+      );
+    });
+
+    this.cheAPI.getWorkspace().fetchStatusChange(workspace.id, 'RUNNING').then(() => {
+      this.createProjectProgressorSvc.setCurrentProgressStep(2);
+      let promiseWorkspace = this.cheAPI.getWorkspace().fetchWorkspaceDetails(workspace.id);
+      promiseWorkspace.then(() => {
+        let websocketUrl = this.cheAPI.getWorkspace().getWebsocketUrl(workspace.id);
+        let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+        this.connectToExtensionServer(websocketUrl, workspace.id, projects, commands, bus);
+      });
+    });
+  }
+
+  startWorkspace(bus, workspace) {
+    // then we've to start workspace
+    this.createProjectProgressorSvc.setCurrentProgressStep(1);
+
+    let statusLink = this.lodash.find(workspace.links, (link) => {
+      return link.rel === 'environment.status_channel';
+    });
+
+    let outputLink = this.lodash.find(workspace.links, (link) => {
+      return link.rel === 'environment.output_channel';
+    });
+
+    let workspaceId = workspace.id;
+
+    let agentChannel = 'workspace:' + workspace.id + ':ext-server:output';
+    let statusChannel = statusLink ? statusLink.parameters[0].defaultValue : null;
+    let outputChannel = outputLink ? outputLink.parameters[0].defaultValue : null;
+
+    this.listeningChannels.push(agentChannel);
+    bus.subscribe(agentChannel, (message) => {
+      if (this.createProjectProgressorSvc.getCurrentProgressStep() < 2) {
+        this.createProjectProgressorSvc.setCurrentProgressStep(2);
+      }
+      let agentStep = 2;
+      if (this.getCreationSteps()[agentStep].logs.length > 0) {
+        this.getCreationSteps()[agentStep].logs = this.getCreationSteps()[agentStep].logs + '\n' + message;
+      } else {
+        this.getCreationSteps()[agentStep].logs = message;
+      }
+    });
+
+    if (statusChannel) {
+      // for now, display log of status channel in case of errors
+      this.listeningChannels.push(statusChannel);
+      bus.subscribe(statusChannel, (message) => {
+        message = this.getDisplayMachineLog(message);
+        if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+
+          // need to show the error
+          this.$mdDialog.show(
+            this.$mdDialog.alert()
+              .title('Unable to start workspace')
+              .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
+              .ariaLabel('Workspace start')
+              .ok('OK')
+          );
+        }
+        if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+          let errorMessage = 'Error when trying to start the workspace';
+          if (message.error) {
+            errorMessage += ': ' + message.error;
+          } else {
+            errorMessage += '.';
+          }
+          // need to show the error
+          this.$mdDialog.show(
+            this.$mdDialog.alert()
+              .title('Error when starting workspace')
+              .content('Unable to start workspace. ' + errorMessage)
+              .ariaLabel('Workspace start')
+              .ok('OK')
+          );
+        }
+        this.$log.log('Status channel of workspaceID', workspaceId, message);
+      });
+    }
+
+    if (outputChannel) {
+      //this.listeningChannels.push(outputChannel);
+      bus.subscribe(outputChannel, (message) => {
+        message = this.getDisplayMachineLog(message);
+        if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
+        } else {
+          this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
+        }
+      });
+    }
+
+    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
+    startWorkspacePromise.then(() => {
+      // update list of workspaces
+      // for new workspace to show in recent workspaces
+      this.cheAPI.cheWorkspace.fetchWorkspaces();
+    }, (error) => {
+      let errorMessage;
+
+      if (!error || !error.data) {
+        errorMessage = 'Unable to start this workspace.';
+      } else if (error.data.errorCode === 10000 && error.data.attributes) {
+        let attributes = error.data.attributes;
+
+        errorMessage = 'Unable to start this workspace.' +
+          ' There are ' + attributes.workspaces_count + ' running workspaces consuming ' +
+          attributes.used_ram + attributes.ram_unit + ' RAM.' +
+          ' Your current RAM limit is ' + attributes.limit_ram + attributes.ram_unit +
+          '. This workspace requires an additional ' +
+          attributes.required_ram + attributes.ram_unit + '.' +
+          '  You can stop other workspaces to free resources.';
+      } else {
+        errorMessage = error.data.message;
+      }
+
+      this.cheNotification.showError(errorMessage);
+      this.getCreationSteps()[this.getCurrentProgressStep()].logs = errorMessage;
+      this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+    });
+    return startWorkspacePromise;
+  }
+
+  /**
+   * Gets the log to be displayed per machine.
+   *
+   * @param log origin log content
+   * @returns {*} parsed log
+   */
+  getDisplayMachineLog(log) {
+    log = angular.fromJson(log);
+    if (angular.isObject(log)) {
+      return '[' + log.machineName + '] ' + log.content;
+    } else {
+      return log;
+    }
+  }
+
+  connectToExtensionServer(websocketURL, workspaceId, projects, commands, bus) {
+    // try to connect
+    let websocketStream = this.$websocket(websocketURL);
+
+    // on success, create project
+    websocketStream.onOpen(() => {
+      let bus = this.cheAPI.getWebsocket().getExistingBus(websocketStream);
+      this.importProjects(websocketStream, workspaceId, projects, commands, bus);
+    });
+
+    // on error, retry to connect or after a delay, abort
+    let websocketReconnect = 10;
+    websocketStream.onError((error) => {
+      websocketReconnect--;
+      if (this.websocketReconnect > 0) {
+        this.$timeout(() => {
+          this.connectToExtensionServer(websocketURL, workspaceId, projects, commands, bus);
+        }, 1000);
+      } else {
+        this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+        this.$log.log('error when starting remote extension', error);
+        // need to show the error
+        this.$mdDialog.show(
+          this.$mdDialog.alert()
+            .title('Workspace Connection Error')
+            .content('It seems that your workspace is running, but we cannot connect your browser to it. This commonly happens when Che was' +
+            ' not configured properly. If your browser is connecting to workspaces running remotely, then you must start Che with the ' +
+            '--remote:<ip-address> flag where the <ip-address> is the IP address of the node that is running your Docker workspaces.' +
+            'Please restart Che with this flag. You can read about what this flag does and why it is essential at: ' +
+            'https://eclipse-che.readme.io/docs/configuration#envrionment-variables')
+            .ariaLabel('Project creation')
+            .ok('OK')
+        );
+      }
+    });
+  }
+
+  importProjects(websocketStream, workspaceId, projects, commands, bus) {
+    this.updateRecentWorkspace(workspaceId);
+    this.createProjectProgressorSvc.setCurrentProgressStep(3);
+
+    projects.forEach((projectData) => {
+      let channel = 'importProject:output:' + workspaceId + ':' + projectData.name;
+      this.listeningChannels.push(channel);
+      // on import
+      bus.subscribe(channel, (message) => {
+        this.getCreationSteps()[this.getCurrentProgressStep()].logs = message.line;
+      });
+    });
+
+    let promise = this.createProjectSvc.importProjects(workspaceId, projects, commands);
+
+    promise.then(() => {
+      this.cheAPI.getWorkspace().fetchWorkspaces();
+      this.cleanupChannels(websocketStream, bus);
+      this.createProjectProgressorSvc.setCurrentProgressStep(4);
+    }, (error) => {
+      this.cleanupChannels(websocketStream, bus);
+      this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+      //if we have a SSH error
+      if (error.data && error.data.errorCode === 32068) {
+        this.showAddSecretKeyDialog(projectData.source.location, workspaceId);
+        return;
+      }
+      this.$mdDialog.show(
+        this.$mdDialog.alert()
+          .title('Error while creating the project')
+          .content(error.statusText + ': ' + error.data.message)
+          .ariaLabel('Project creation')
+          .ok('OK')
+      );
+    });
+  }
+
+  /**
+   * Cleanup the websocket elements after actions are finished
+   */
+  cleanupChannels(websocketStream, bus) {
+    if (websocketStream != null) {
+      websocketStream.close();
+    }
+
+    if (bus != null) {
+      this.listeningChannels.forEach((channel) => {
+        bus.unsubscribe(channel);
+      });
+      this.listeningChannels.length = 0;
+    }
+  }
+
+  /**
+   * Show the add ssh key dialog
+   * @param repoURL  the repository URL
+   * @param workspaceId  the workspace IDL
+   */
+  showAddSecretKeyDialog(repoURL, workspaceId) {
+    let parentEl = angular.element(this.$document.body);
+
+    this.$mdDialog.show({
+      bindToController: true,
+      clickOutsideToClose: true,
+      controller: 'AddSecretKeyNotificationCtrl',
+      controllerAs: 'addSecretKeyNotificationCtrl',
+      locals: {repoURL: repoURL, workspaceId: workspaceId},
+      parent: parentEl,
+      templateUrl: 'app/projects/create-project/add-ssh-key-notification/add-ssh-key-notification.html'
+    });
+  }
+
   getStepText(stepNumber) {
     return this.createProjectProgressorSvc.getStepText(stepNumber);
   }
@@ -347,5 +645,18 @@ export class CreateWorkspaceController {
 
   resetCreateProgress() {
     this.createProjectProgressorSvc.resetCreateProgress();
+  }
+
+  isResourceProblem() {
+    let currentCreationStep = this.getCreationSteps()[this.getCurrentProgressStep()];
+    return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
+  }
+
+  downloadLogs() {
+    let logs = '';
+    this.getCreationSteps().forEach((step) => {
+      logs += step.logs + '\n';
+    });
+    this.$window.open('data:text/csv,' + encodeURIComponent(logs));
   }
 }
