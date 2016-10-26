@@ -137,7 +137,7 @@ public abstract class BaseTest {
         FolderEntry parent = projectManager.getProjectsRoot().createFolder("project");
         parent.createFolder("bin");
         parent.createFolder("src");
-        FolderEntry codenvyFolder = parent.createFolder(".codenvy");
+        FolderEntry codenvyFolder = parent.createFolder(".che");
         FolderEntry libFolder = parent.createFolder("lib");
 
         libFolder.createFile("a.jar", "text".getBytes());
