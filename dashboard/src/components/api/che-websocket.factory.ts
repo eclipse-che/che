@@ -32,7 +32,7 @@ export class CheWebsocket {
 
     if (inDevMode) {
       // it handle then http and https
-        wsUrl = proxySettings.replace('http', 'ws') + '/api/ws/';
+        wsUrl = proxySettings.replace('http', 'ws') + '/api/ws';
     } else {
 
       var wsProtocol;
@@ -42,10 +42,10 @@ export class CheWebsocket {
         wsProtocol = 'wss';
       }
 
-      wsUrl = wsProtocol + '://' + $location.host() + ':' + $location.port() + '/api/ws/';
+      wsUrl = wsProtocol + '://' + $location.host() + ':' + $location.port() + '/api/ws';
     }
     this.wsBaseUrl = wsUrl;
-    this.sockets = new Map();
+    this.bus = null;
   }
 
 
@@ -54,17 +54,12 @@ export class CheWebsocket {
   }
 
 
-  getBus(workspaceId) {
-    var currentBus = this.sockets.get(workspaceId);
-    if (!currentBus) {
+  getBus() {
+    if (!this.bus) {
       // needs to initialize
-      var url = this.wsBaseUrl + workspaceId;
-      var dataStream = this.$websocket(url);
-      var bus = new MessageBus(dataStream, this.$interval);
-      this.sockets.set(workspaceId, bus);
-      currentBus = bus;
+      this.bus = new MessageBus(this.$websocket(this.wsBaseUrl), this.$interval);
     }
-    return currentBus;
+    return this.bus;
   }
 
 
