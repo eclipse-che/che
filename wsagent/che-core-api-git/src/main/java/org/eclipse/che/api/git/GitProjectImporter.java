@@ -193,9 +193,9 @@ public class GitProjectImporter implements ProjectImporter {
                 if (branchMerge != null) {
                     git.getConfig().set("branch." + (branch == null ? "master" : branch) + ".merge", branchMerge);
                 }
-                if (!keepVcs) {
-                    cleanGit(git.getWorkingDir());
-                }
+            }
+            if (!keepVcs) {
+                cleanGit(git.getWorkingDir());
             }
         } catch (URISyntaxException e) {
             throw new ServerException(

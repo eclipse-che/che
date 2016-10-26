@@ -64,6 +64,6 @@ public class RemoveWorkspaceFilesAfterRemoveWorkspaceEventSubscriberTest {
         removeWorkspaceFilesAfterRemoveWorkspaceEventSubscriber.onEvent(event);
 
         verify(event, timeout(2000)).getWorkspace();
-        verify(workspaceFilesCleaner).clear(workspace);
+        verify(workspaceFilesCleaner, timeout(2000)).clear(workspace);
     }
 }

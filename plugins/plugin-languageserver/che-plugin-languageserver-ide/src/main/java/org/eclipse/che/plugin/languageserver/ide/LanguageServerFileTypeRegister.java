@@ -32,7 +32,9 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorProv
 import org.eclipse.che.plugin.languageserver.ide.hover.HoverProvider;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -49,8 +51,10 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
     private final EditorRegistry                      editorRegistry;
     private final OrionContentTypeRegistrant          contentTypeRegistrant;
     private final OrionHoverRegistrant                orionHoverRegistrant;
-    private final LanguageServerEditorProvider editorProvider;
-    private final HoverProvider hoverProvider;
+    private final LanguageServerEditorProvider        editorProvider;
+    private final HoverProvider                       hoverProvider;
+
+    private final Set<String> lsExtensions = new HashSet<>();
 
     @Inject
     public LanguageServerFileTypeRegister(LanguageServerRegistryServiceClient serverLanguageRegistry,
@@ -85,6 +89,7 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                             final FileType fileType = new FileType(resources.file(), ext);
                             fileTypeRegistry.registerFileType(fileType);
                             editorRegistry.registerDefaultEditor(fileType, editorProvider);
+                            lsExtensions.add(ext);
                         }
                         List<String> mimeTypes = lang.getMimeTypes();
                         if (mimeTypes.isEmpty()) {
@@ -118,5 +123,9 @@ public class LanguageServerFileTypeRegister implements WsAgentComponent {
                 callback.onFailure(new Exception(arg.getMessage(), arg.getCause()));
             }
         });
+    }
+
+    public boolean hasLSForExtension(String ext) {
+        return lsExtensions.contains(ext);
     }
 }

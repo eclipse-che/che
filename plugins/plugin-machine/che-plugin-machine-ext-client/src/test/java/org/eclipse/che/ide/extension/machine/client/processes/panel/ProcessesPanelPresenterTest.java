@@ -60,6 +60,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -381,11 +382,7 @@ public class ProcessesPanelPresenterTest {
         when(workspaceRuntime.getMachines()).thenReturn(machines);
         when(entityFactory.createMachine(machineDto)).thenReturn(machine);
 
-        ProcessTreeNode machineNode = mock(ProcessTreeNode.class);
-        when(machineNode.getId()).thenReturn(MACHINE_ID);
-        List<ProcessTreeNode> children = new ArrayList<>();
-        children.add(machineNode);
-        presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, children);
+        presenter.rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, Collections.EMPTY_LIST);
 
         TerminalPresenter terminal = mock(TerminalPresenter.class);
         when(terminalFactory.create(machine)).thenReturn(terminal);
@@ -396,7 +393,7 @@ public class ProcessesPanelPresenterTest {
 
         verify(terminalFactory).create(eq(machine));
         verify(terminal).getView();
-        verify(view).setProcessesData(anyObject());
+        verify(view, times(2)).setProcessesData(anyObject());
         verify(view).selectNode(anyObject());
         verify(view).addWidget(anyString(), anyString(), anyObject(), eq(terminalWidget), anyBoolean());
         verify(view).addProcessNode(anyObject());
