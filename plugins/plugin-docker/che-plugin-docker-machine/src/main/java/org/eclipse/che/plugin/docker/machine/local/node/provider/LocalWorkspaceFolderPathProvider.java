@@ -105,22 +105,30 @@ public class LocalWorkspaceFolderPathProvider implements WorkspaceFolderPathProv
 
     @Override
     public String getPath(@Assisted("workspace") String workspaceId) throws IOException {
-        if (isWindows || hostProjectsFolder == null) {
-            try {
-                WorkspaceManager workspaceManager = this.workspaceManager.get();
-                Workspace workspace = workspaceManager.getWorkspace(workspaceId);
-                String wsName = workspace.getConfig().getName();
-                String workspaceFolderPath = Paths.get(workspacesMountPoint).resolve(wsName).toString();
-
-                ensureExist(workspaceFolderPath, null);
-
-                return workspaceFolderPath;
-            } catch (NotFoundException | ServerException e) {
-                throw new IOException(e.getLocalizedMessage());
-            }
-        } else {
+        if (!isWindows && hostProjectsFolder != null) {
             return hostProjectsFolder;
         }
+        try {
+            WorkspaceManager workspaceManager = this.workspaceManager.get();
+            Workspace workspace = workspaceManager.getWorkspace(workspaceId);
+            String wsName = workspace.getConfig().getName();
+            return doGetPathByName(wsName);
+        } catch (NotFoundException | ServerException e) {
+            throw new IOException(e.getLocalizedMessage());
+        }
+    }
+
+    public String getPathByName(String workspaceName) throws IOException {
+        if (!isWindows && hostProjectsFolder != null) {
+            return hostProjectsFolder;
+        }
+        return doGetPathByName(workspaceName);
+    }
+
+    private String doGetPathByName(String workspaceName) throws IOException {
+        final String workspaceFolderPath = Paths.get(workspacesMountPoint).resolve(workspaceName).toString();
+        ensureExist(workspaceFolderPath, null);
+        return workspaceFolderPath;
     }
 
     @VisibleForTesting

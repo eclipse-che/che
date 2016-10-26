@@ -52,7 +52,7 @@ public class MemoryLuceneSearcherTest {
     @Before
     public void setUp() throws Exception {
         filter = mock(VirtualFileFilter.class);
-        when(filter.accept(any(VirtualFile.class))).thenReturn(true);
+        when(filter.accept(any(VirtualFile.class))).thenReturn(false);
         closeCallback = mock(AbstractLuceneSearcherProvider.CloseCallback.class);
         searcher = new MemoryLuceneSearcher(filter, closeCallback);
     }
@@ -222,7 +222,7 @@ public class MemoryLuceneSearcherTest {
         folder.createFile("yyy.txt", TEST_CONTENT[2]);
         folder.createFile("zzz.txt", TEST_CONTENT[2]);
 
-        when(filter.accept(withName("yyy.txt"))).thenReturn(false);
+        when(filter.accept(withName("yyy.txt"))).thenReturn(true);
         searcher.init(virtualFileSystem);
 
         List<String> paths = searcher.search(new QueryExpression().setText("be")).getFilePaths();

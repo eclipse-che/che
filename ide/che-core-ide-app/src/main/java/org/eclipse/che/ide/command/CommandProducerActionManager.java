@@ -19,7 +19,9 @@ import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.machine.shared.dto.MachineDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.action.Action;
+import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.app.AppContext;
@@ -39,6 +41,7 @@ import java.util.Set;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_EDITOR_TAB_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_CONTEXT_MENU;
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_TOOLBAR;
 
 /**
  * Manages actions for the contextual commands.
@@ -57,6 +60,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
     private final CommandProducerActionFactory commandProducerActionFactory;
     private final AppContext                   appContext;
     private final MachineServiceClient         machineServiceClient;
+    private final Resources                    resources;
 
     private final List<Machine>                            machines;
     private final Set<CommandProducer>                     commandProducers;
@@ -64,18 +68,20 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
     private final Map<Machine, List<Action>>               actionsByMachines;
     private final Map<CommandProducer, DefaultActionGroup> producersToActionGroups;
 
-    private DefaultActionGroup commandProducersActionsGroup;
+    private DefaultActionGroup commandActionsPopUpGroup;
 
     @Inject
     public CommandProducerActionManager(EventBus eventBus,
                                         ActionManager actionManager,
                                         CommandProducerActionFactory commandProducerActionFactory,
                                         AppContext appContext,
-                                        MachineServiceClient machineServiceClient) {
+                                        MachineServiceClient machineServiceClient,
+                                        Resources resources) {
         this.actionManager = actionManager;
         this.commandProducerActionFactory = commandProducerActionFactory;
         this.appContext = appContext;
         this.machineServiceClient = machineServiceClient;
+        this.resources = resources;
 
         machines = new ArrayList<>();
         commandProducers = new HashSet<>();
@@ -91,14 +97,22 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
     private void start(Set<CommandProducer> commandProducers) {
         this.commandProducers.addAll(commandProducers);
 
-        commandProducersActionsGroup = new DefaultActionGroup(actionManager);
-        actionManager.registerAction("commandProducersActionsGroup", commandProducersActionsGroup);
+        commandActionsPopUpGroup = new DefaultActionGroup("Commands", true, actionManager);
+        actionManager.registerAction("commandActionsPopUpGroup", commandActionsPopUpGroup);
+        commandActionsPopUpGroup.getTemplatePresentation().setSVGResource(resources.execute());
+        commandActionsPopUpGroup.getTemplatePresentation().setDescription("Execute command");
 
         DefaultActionGroup mainContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_CONTEXT_MENU);
-        mainContextMenu.add(commandProducersActionsGroup);
+        mainContextMenu.add(commandActionsPopUpGroup);
 
         DefaultActionGroup editorTabContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
-        editorTabContextMenu.add(commandProducersActionsGroup);
+        editorTabContextMenu.add(commandActionsPopUpGroup);
+
+        // add debug pop-up group to the main toolbar
+        DefaultActionGroup commandActionsToolbarGroup = new CommandActionsToolbarGroup(actionManager);
+        commandActionsToolbarGroup.add(commandActionsPopUpGroup);
+        DefaultActionGroup mainToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_TOOLBAR);
+        mainToolbarGroup.add(commandActionsToolbarGroup);
     }
 
     @Override
@@ -162,7 +176,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
             }
         }
 
-        commandProducersActionsGroup.add(action);
+        commandActionsPopUpGroup.add(action);
     }
 
     /**
@@ -208,6 +222,22 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Action group for placing {@link CommandProducerAction}s on the toolbar.
+     * It's visible when at least one {@link CommandProducerAction} exists.
+     */
+    private class CommandActionsToolbarGroup extends DefaultActionGroup {
+
+        CommandActionsToolbarGroup(ActionManager actionManager) {
+            super(actionManager);
+        }
+
+        @Override
+        public void update(ActionEvent e) {
+            e.getPresentation().setEnabledAndVisible(commandActionsPopUpGroup.getChildrenCount() != 0);
         }
     }
 }

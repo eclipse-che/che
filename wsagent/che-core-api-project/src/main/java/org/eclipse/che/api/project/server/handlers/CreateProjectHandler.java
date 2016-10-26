@@ -15,6 +15,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
+import org.eclipse.che.api.vfs.Path;
 
 import java.util.Map;
 
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 public interface CreateProjectHandler extends ProjectHandler {
 
-    void onCreateProject(FolderEntry baseFolder,
+    void onCreateProject(Path projectPath,
                          Map<String, AttributeValue> attributes,
-                         Map <String, String> options) throws ForbiddenException, ConflictException, ServerException;
+                         Map<String, String> options) throws ForbiddenException, ConflictException, ServerException;
 }

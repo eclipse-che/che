@@ -889,9 +889,11 @@ public class CheEnvironmentEngine {
                 if (machineSource.getContent() != null) {
                     serviceWithCorrectSource.setBuild(new CheServiceBuildContextImpl(null,
                                                                                      null,
-                                                                                     machineSource.getContent()));
+                                                                                     machineSource.getContent(),
+                                                                                     null));
                 } else {
                     serviceWithCorrectSource.setBuild(new CheServiceBuildContextImpl(machineSource.getLocation(),
+                                                                                     null,
                                                                                      null,
                                                                                      null));
                 }
@@ -1124,6 +1126,7 @@ public class CheEnvironmentEngine {
                         "Please use dockerfile location instead");
             } else {
                 service.setBuild(new CheServiceBuildContextImpl(machineConfig.getSource().getLocation(),
+                                                                null,
                                                                 null,
                                                                 null));
             }

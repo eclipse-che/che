@@ -41,7 +41,8 @@ export class ExportWorkspace {
     // scope values
     this.scope = {
       workspaceId: '@workspaceId',
-      workspaceDetails: '=workspaceDetails'
+      workspaceDetails: '=workspaceDetails',
+      workspaceExportDisabled: '='
     };
   }
 

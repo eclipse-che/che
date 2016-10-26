@@ -36,7 +36,6 @@ public class ProjectHandlerRegistry {
         postImportProjectHandlers = new HashMap<>();
         getItemHandlers = new HashMap<>();
         projectInitHandlers = new HashMap<>();
-
         projectHandlers.forEach(this::register);
     }
 
@@ -71,4 +70,5 @@ public class ProjectHandlerRegistry {
     public ProjectInitHandler getProjectInitHandler(@NotNull String projectType) {
         return projectInitHandlers.get(projectType);
     }
+
 }

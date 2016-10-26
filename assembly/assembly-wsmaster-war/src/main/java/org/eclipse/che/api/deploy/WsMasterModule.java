@@ -143,7 +143,8 @@ public class WsMasterModule extends AbstractModule {
         final MessageBodyAdapterInterceptor interceptor = new MessageBodyAdapterInterceptor();
         requestInjection(interceptor);
         bindInterceptor(subclassesOf(CheJsonProvider.class), names("readFrom"), interceptor);
-
+        bind(org.eclipse.che.api.workspace.server.WorkspaceFilesCleaner.class)
+                .to(org.eclipse.che.plugin.docker.machine.cleaner.LocalWorkspaceFilesCleaner.class);
         bind(EnvConfigAgentApplier.class).to(LocalEnvConfigAgentApplier.class);
     }
 }
