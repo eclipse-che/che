@@ -54,6 +54,8 @@ import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
+import javax.inject.Named;
+
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CONSOLES_TREE_CONTEXT_MENU;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
@@ -81,6 +83,16 @@ public class MachineExtension {
     public static final String GROUP_MACHINES_LIST     = "MachinesListGroup";
 
     private final PerspectiveManager perspectiveManager;
+
+    /**
+     * Controls central toolbar action group visibility. Use for example next snippet:
+     * <code>
+     *     bindConstant().annotatedWith(Names.named("machine.extension.central.toolbar.visibility")).to(false);
+     * </code>
+     * to define a constant. If no constant defined than default value is used - <code>true</code>.
+     */
+    @Inject(optional = true)
+    @Named("machine.extension.central.toolbar.visibility") boolean centralToolbarVisible = true;
 
     @Inject
     public MachineExtension(final MachineResources machineResources,
@@ -227,15 +239,17 @@ public class MachineExtension {
         machineMenu.add(destroyMachineAction);
         machineMenu.add(createSnapshotAction);
 
-        // add actions on center part of toolbar
-        final DefaultActionGroup centerToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_CENTER_TOOLBAR);
-        final DefaultActionGroup machineToolbarGroup = new DefaultActionGroup(GROUP_MACHINE_TOOLBAR, false, actionManager);
-        actionManager.registerAction(GROUP_MACHINE_TOOLBAR, machineToolbarGroup);
-        centerToolbarGroup.add(machineToolbarGroup, FIRST);
-        machineToolbarGroup.add(selectCommandAction);
-        final DefaultActionGroup executeToolbarGroup = new DefaultActionGroup(actionManager);
-        executeToolbarGroup.add(executeSelectedCommandAction);
-        machineToolbarGroup.add(executeToolbarGroup);
+        if (centralToolbarVisible) {
+            // add actions on center part of toolbar
+            final DefaultActionGroup centerToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_CENTER_TOOLBAR);
+            final DefaultActionGroup machineToolbarGroup = new DefaultActionGroup(GROUP_MACHINE_TOOLBAR, false, actionManager);
+            actionManager.registerAction(GROUP_MACHINE_TOOLBAR, machineToolbarGroup);
+            centerToolbarGroup.add(machineToolbarGroup, FIRST);
+            machineToolbarGroup.add(selectCommandAction);
+            final DefaultActionGroup executeToolbarGroup = new DefaultActionGroup(actionManager);
+            executeToolbarGroup.add(executeSelectedCommandAction);
+            machineToolbarGroup.add(executeToolbarGroup);
+        }
 
         // add actions on right part of toolbar
         final DefaultActionGroup rightToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_RIGHT_TOOLBAR);

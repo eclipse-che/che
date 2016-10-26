@@ -175,6 +175,9 @@ public interface Resources extends Tree.Resources,
     @Source("actions/execute.svg")
     SVGResource execute();
 
+    @Source("actions/evaluate.svg")
+    SVGResource compile();
+
     /** Interface for css resources. */
     interface CoreCss extends CssResource {
         String editorPaneMenuDelimiter();

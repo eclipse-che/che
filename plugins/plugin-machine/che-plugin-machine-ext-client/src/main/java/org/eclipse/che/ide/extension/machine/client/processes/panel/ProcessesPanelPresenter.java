@@ -78,6 +78,7 @@ import java.util.Map;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.extension.machine.client.processes.ProcessTreeNode.ProcessNodeType.COMMAND_NODE;
@@ -797,13 +798,13 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onWorkspaceStarted(WorkspaceStartedEvent event) {
-        List<MachineEntity> machines = getMachines(event.getWorkspace());
-        if (machines.isEmpty()) {
+        List<MachineEntity> wsMachines = getMachines(event.getWorkspace());
+        if (wsMachines.isEmpty()) {
             return;
         }
 
         MachineEntity devMachine = null;
-        for (MachineEntity machineEntity : machines) {
+        for (MachineEntity machineEntity : wsMachines) {
             if (machineEntity.isDev()) {
                 devMachine = machineEntity;
                 break;
@@ -813,10 +814,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         ProcessTreeNode machineToSelect = null;
         if (devMachine != null) {
             machineToSelect = provideMachineNode(devMachine, true);
-            machines.remove(devMachine);
+            wsMachines.remove(devMachine);
         }
 
-        for (MachineEntity machine : machines) {
+        for (MachineEntity machine : wsMachines) {
             provideMachineNode(machine, true);
         }
 
@@ -828,6 +829,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         workspaceAgent.setActivePart(ProcessesPanelPresenter.this);
+
+        for (MachineEntity machine : machines.values()) {
+            if (RUNNING.equals(machine.getStatus()) && !wsMachines.contains(machine)) {
+                provideMachineNode(machine, true);
+            }
+        }
     }
 
     @Override
