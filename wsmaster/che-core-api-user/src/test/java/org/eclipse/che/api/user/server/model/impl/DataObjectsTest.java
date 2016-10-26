@@ -124,7 +124,7 @@ public class DataObjectsTest {
         assertFalse(copy.getAttributes().containsKey("new-attribute"));
     }
 
-    @Test(dataProvider = "singleObjectProvider")
+    @Test(dataProvider = "reflexivenessProvider")
     @SuppressWarnings("all")
     public void testReflexiveness(Object obj) throws Exception {
         assertTrue(obj.equals(obj));
@@ -148,7 +148,7 @@ public class DataObjectsTest {
         assertTrue(object1.equals(object2));
     }
 
-    @Test(dataProvider = "singleObjectProvider")
+    @Test(dataProvider = "reflexivenessProvider")
     @SuppressWarnings("all")
     public void testNotEqualityToNull(Object object) throws Exception {
         assertFalse(object.equals(null));
