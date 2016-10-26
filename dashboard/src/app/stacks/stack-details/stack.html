@@ -71,6 +71,12 @@
         </che-toggle>
       </div>
     </che-label-container>
+    <!-- Components -->
+    <che-label-container che-label-name="Components"
+                         che-label-description="Components are listed in the stack's description for users.">
+      <list-components components-on-change="stackController.updateJsonFromStack()"
+                       components="stackController.stack.components"></list-components>
+    </che-label-container>
     <!-- stack's tags -->
     <che-label-container che-label-name="Tags"
                          che-label-description="Associate the type of templates available when creating projects for this workspace.">
@@ -94,8 +100,8 @@
       </div>
     </che-label-container>
     <!-- Configuration -->
-    <che-label-container che-label-name="Configuration"
-                         che-label-description="Edit your stack's data model.">
+    <che-label-container che-label-name="Raw Configuration"
+                         che-label-description="JSON definition of the stack.">
       <che-show-area>
         <div class="stack-editor">
               <textarea class="stack-editor"

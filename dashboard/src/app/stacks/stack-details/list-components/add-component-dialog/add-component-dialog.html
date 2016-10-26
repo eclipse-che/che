@@ -1,0 +1,47 @@
+<!--
+
+    Copyright (c) 2015 Codenvy, S.A.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Codenvy, S.A. - initial API and implementation
+
+-->
+<che-popup che-title="Add a new component" che-on-close="addComponentDialogController.hide()">
+  <ng-form name="addComponentForm" class="add-component-form">
+    <div class="form-input-fields">
+      <che-input type="text"
+                 che-form="addComponentForm"
+                 che-label-name="Name"
+                 che-name="name"
+                 che-place-holder="enter component's name"
+                 custom-validator="addComponentDialogController.isUnique($value)"
+                 ng-model="addComponentDialogController.name"
+                 ng-maxlength="256"
+                 required>
+        <div ng-message="required">Component's name is required.</div>
+        <div ng-message="customValidator">This component's name is already in use.</div>
+        <div ng-message="maxlength">Component's name should be less than 256 characters long.</div>
+      </che-input>
+      <che-input che-form="addComponentForm"
+                 che-label-name="Version"
+                 che-name="version"
+                 che-place-holder="enter component's version"
+                 type="text"
+                 ng-model="addComponentDialogController.version"
+                 ng-maxlength="256">
+        <div ng-message="maxlength">Component's version should be less than 256 characters long.</div>
+      </che-input>
+    </div>
+    <che-button-primary che-button-title="Add"
+                        ng-click="addComponentDialogController.addComponent()"
+                        ng-disabled="addComponentForm.$invalid">
+    </che-button-primary>
+    <che-button-notice che-button-title="Cancel"
+                       ng-click="addComponentDialogController.hide()">
+    </che-button-notice>
+  </ng-form>
+</che-popup>
