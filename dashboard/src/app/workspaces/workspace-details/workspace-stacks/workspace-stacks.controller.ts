@@ -69,7 +69,7 @@ export class WorkspaceStacksController {
    * @param tabName {string} the select tab name
    */
   setStackTab(tabName: string): void {
-    if (tabName === 'custom-stack') {
+    if (tabName === 'stack-import') {
       this.cheStackLibrarySelecter(null);
       this.isCustomStack = true;
     }
@@ -84,6 +84,7 @@ export class WorkspaceStacksController {
     if (stack) {
       this.isCustomStack = false;
       this.recipeUrl = null;
+      this.recipeScript = null;
     }
     this.stack = stack;
 

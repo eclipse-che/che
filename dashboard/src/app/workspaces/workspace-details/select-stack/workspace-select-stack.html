@@ -18,16 +18,15 @@
         <create-project-stack-library che-tab-name="stack-library"></create-project-stack-library>
       </md-tab-body>
     </md-tab>
-    <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('custom-stack')">
+    <md-tab md-on-select="workspaceSelectStackCtrl.setStackTab('stack-import')">
       <md-tab-label>
         <md-icon md-font-icon="material-design icon-ic_input_24px" class="che-tab-label-icon"></md-icon>
-        <span class="che-tab-label-title">Custom stack</span>
+        <span class="che-tab-label-title">Stack import</span>
       </md-tab-label>
       <md-tab-body>
-        <che-workspace-recipe ng-if="workspaceSelectStackCtrl.tabName==='custom-stack'"
-                              che-recipe-script="workspaceSelectStackCtrl.recipeScript"
-                              che-recipe-url="workspaceSelectStackCtrl.recipeUrl"
-                              che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe>
+        <che-workspace-recipe-import ng-if="workspaceSelectStackCtrl.tabName==='stack-import'"
+                                     che-recipe-url="workspaceSelectStackCtrl.recipeUrl"
+                                     che-recipe-format="workspaceSelectStackCtrl.recipeFormat"></che-workspace-recipe-import>
       </md-tab-body>
     </md-tab>
   </md-tabs>

@@ -31,8 +31,8 @@ import {ExportWorkspaceDialogController} from  './workspace-details/export-works
 import {WorkspaceDetailsProjects} from './workspace-details/workspace-projects/workspace-details-projects.directive';
 import {ReadyToGoStacksController} from './workspace-details/select-stack/ready-to-go-stacks/ready-to-go-stacks.controller';
 import {ReadyToGoStacks} from './workspace-details/select-stack/ready-to-go-stacks/ready-to-go-stacks.directive';
-import {WorkspaceRecipeController} from './workspace-details/select-stack/recipe/workspace-recipe.controller';
-import {WorkspaceRecipe} from './workspace-details/select-stack/recipe/workspace-recipe.directive';
+import {WorkspaceRecipeImportController} from './workspace-details/select-stack/recipe-import/workspace-recipe-import.controller';
+import {WorkspaceRecipeImport} from './workspace-details/select-stack/recipe-import/workspace-recipe-import.directive';
 import {CheStackLibrarySelecter} from './workspace-details/select-stack/stack-library/stack-library-selecter/che-stack-library-selecter.directive';
 import {CreateProjectStackLibraryController} from './workspace-details/select-stack/stack-library/create-project-stack-library.controller';
 import {CreateProjectStackLibrary} from './workspace-details/select-stack/stack-library/create-project-stack-library.directive';
@@ -111,8 +111,8 @@ export class WorkspacesConfig {
     register.controller('ExportWorkspaceController', ExportWorkspaceController);
     register.directive('exportWorkspace', ExportWorkspace);
 
-    register.controller('WorkspaceRecipeController', WorkspaceRecipeController);
-    register.directive('cheWorkspaceRecipe', WorkspaceRecipe);
+    register.controller('WorkspaceRecipeImportController', WorkspaceRecipeImportController);
+    register.directive('cheWorkspaceRecipeImport', WorkspaceRecipeImport);
 
     register.controller('CheWorkspaceRamAllocationSliderController', CheWorkspaceRamAllocationSliderController);
     register.directive('cheWorkspaceRamAllocationSlider', CheWorkspaceRamAllocationSlider);
@@ -159,7 +159,7 @@ export class WorkspacesConfig {
     register.directive('listAgents', ListAgents);
 
     let locationProvider = {
-      title: (params) => { return params.workspaceName;},
+      title: (params: any) => { return params.workspaceName; },
       templateUrl: 'app/workspaces/workspace-details/workspace-details.html',
       controller: 'WorkspaceDetailsController',
       controllerAs: 'workspaceDetailsController'
