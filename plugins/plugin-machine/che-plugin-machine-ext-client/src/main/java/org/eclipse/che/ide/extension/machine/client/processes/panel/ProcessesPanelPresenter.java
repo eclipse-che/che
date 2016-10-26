@@ -417,6 +417,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
 
         if (defaultConsole instanceof DefaultOutputConsole) {
+            ((DefaultOutputConsole)defaultConsole).enableAutoScroll(false);
             ((DefaultOutputConsole)defaultConsole).printText(localizationConstant.sshConnectInfo(machineName, machineHost, sshPort));
         }
     }
