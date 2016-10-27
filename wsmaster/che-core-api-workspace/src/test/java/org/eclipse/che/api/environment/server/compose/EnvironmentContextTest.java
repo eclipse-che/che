@@ -12,13 +12,15 @@ package org.eclipse.che.api.environment.server.compose;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.core.ServerException;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author Dmytro Nochevnov
@@ -27,105 +29,143 @@ public class EnvironmentContextTest {
 
     ComposeFileParser parser = new ComposeFileParser();
 
-    @Test
-    public void shouldParseDictionaryTypeEnvironment() throws ServerException {
-        // given
-        String recipeContent = "services: \n"
-                               + " dev-machine: \n"
-                               + "  image: codenvy/ubuntu_jdk8\n"
-                               + "  environment:\n"
-                               + "    RACK_ENV: development\n"
-                               + "    SHOW: 'true'";
-
-        String recipeContentType = "application/x-yaml";
-
-        Map<String,String> expected = ImmutableMap.of("RACK_ENV", "development",
-                                                      "SHOW", "true");
-
+    @Test(dataProvider = "correctContentTestData")
+    public void testCorrectContentParsing(String content, Map<String, String> expected) throws ServerException {
         // when
-        ComposeEnvironmentImpl composeEnvironment = parser.parse(recipeContent, recipeContentType);
+        ComposeEnvironmentImpl composeEnvironment = parser.parse(content, "application/x-yaml");
 
         // then
         assertEquals(composeEnvironment.getServices().get("dev-machine").getEnvironment(), expected);
     }
 
-    @Test
-    public void shouldParseArrayTypeEnvironment() throws ServerException {
-        // given
-        String recipeContent = "services: \n"
-                               + " dev-machine: \n"
-                               + "  image: codenvy/ubuntu_jdk8\n"
-                               + "  environment:\n"
-                               + "   - MYSQL_ROOT_PASSWORD=root\n"
-                               + "   - MYSQL_DATABASE=db";
+    @DataProvider
+    public Object[][] correctContentTestData() {
+        return new Object[][] {
+            // dictionary type environment
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "    RACK_ENV: development\n"
+             + "    SHOW: 'true'",
+             ImmutableMap.of("RACK_ENV", "development",
+                             "SHOW", "true")
+            },
 
-        String recipeContentType = "application/x-yaml";
+            // array type environment
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   - MYSQL_ROOT_PASSWORD=root\n"
+             + "   - MYSQL_DATABASE=db",
+             ImmutableMap.of("MYSQL_ROOT_PASSWORD", "root",
+                             "MYSQL_DATABASE", "db")
+            },
 
-        Map<String,String> expected = ImmutableMap.of("MYSQL_ROOT_PASSWORD","root",
-                                                      "MYSQL_DATABASE","db");
+            // empty environment
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:",
+             ImmutableMap.of()
+            },
 
-        // when
-        ComposeEnvironmentImpl composeEnvironment = parser.parse(recipeContent, recipeContentType);
+            // dictionary format, value of variable is empty
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   MYSQL_ROOT_PASSWORD: ",
+             ImmutableMap.of("MYSQL_ROOT_PASSWORD", "")
+            },
 
-        // then
-        assertEquals(composeEnvironment.getServices().get("dev-machine").getEnvironment(), expected);
+            // dictionary format, value of variable contains colon sign
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   VAR : val:1",
+             ImmutableMap.of("VAR", "val:1")
+            },
+        };
     }
 
-    @Test
-    public void shouldParseEmptyEnvironment() throws ServerException {
-        // given
-        String recipeContent = "services: \n"
-                               + " dev-machine: \n"
-                               + "  image: codenvy/ubuntu_jdk8\n"
-                               + "  environment:";
+    @Test(dataProvider = "incorrectContentTestData")
+    public void shouldThrowError(String content, String errorPattern) throws ServerException {
+        try {
+            parser.parse(content, "application/x-yaml");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().matches(errorPattern),
+                       format("Actual error message \"%s\" doesn't match regex \"%s\" for content \"%s\"",
+                              e.getMessage(),
+                              errorPattern,
+                              content));
+            return;
+        }
 
-        String recipeContentType = "application/x-yaml";
-
-        Map<String,String> expected = ImmutableMap.of();
-
-        // when
-        ComposeEnvironmentImpl composeEnvironment = parser.parse(recipeContent, recipeContentType);
-
-        // then
-        assertEquals(composeEnvironment.getServices().get("dev-machine").getEnvironment(), expected);
+        fail(format("Content \"%s\" should throw IllegalArgumentException", content));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,
-          expectedExceptionsMessageRegExp = "Parsing of environment configuration failed. Unsupported type 'class java.lang.Boolean'.*")
-    public void shouldThrowErrorOnUnsupportedTypeOfEnvironment() throws ServerException {
-        // given
-        String recipeContent = "services: \n"
-                               + " dev-machine: \n"
-                               + "  image: codenvy/ubuntu_jdk8\n"
-                               + "  environment:\n"
-                               + "   true";
+    @DataProvider
+    public Object[][] incorrectContentTestData() {
+        return new Object[][] {
+            // unsupported type of environment
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   true",
+             "Parsing of environment configuration failed. Unsupported type 'class java.lang.Boolean'.*(?s).*"
+             },
 
-        String recipeContentType = "application/x-yaml";
+            // unsupported format of list environment
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   - MYSQL_ROOT_PASSWORD: root\n",
+             "Parsing of environment configuration failed. Unsupported value '\\[\\{MYSQL_ROOT_PASSWORD=root}]'.*(?s).*"
+             },
 
-        // when
-        ComposeEnvironmentImpl composeEnvironment = parser.parse(recipeContent, recipeContentType);
+            // dictionary format, no colon in entry
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   MYSQL_ROOT_PASSWORD",
+             "Parsing of environment configuration failed. Unsupported value 'MYSQL_ROOT_PASSWORD'.*(?s).*"
+            },
 
-        // then
-        composeEnvironment.getServices().get("dev-machine").getEnvironment();
+            // array format, no equal sign in entry
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   - MYSQL_ROOT_PASSWORD=root\n"
+             + "   - MYSQL_DATABASE\n",
+             "Parsing of environment configuration failed. Unsupported value 'MYSQL_DATABASE'.*(?s).*"
+            },
+
+            // array format, empty value of variable
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   =value ",
+             "Parsing of environment configuration failed. Unsupported value '=value'.*(?s).*"
+            },
+
+            // array format, value of variable contains equal sign
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   VAR=val=1",
+             "Parsing of environment configuration failed. Unsupported value 'VAR=val=1'.*(?s).*"
+            },
+        };
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class,
-        expectedExceptionsMessageRegExp = "Parsing of environment configuration failed. Unsupported value '\\[\\{MYSQL_ROOT_PASSWORD=root}]'.*")
-    public void shouldThrowErrorOnUnsupportedFormatOfListEnvironment() throws ServerException {
-        // given
-        String recipeContent = "services: \n"
-                               + " dev-machine: \n"
-                               + "  image: codenvy/ubuntu_jdk8\n"
-                               + "  environment:\n"
-                               + "   - MYSQL_ROOT_PASSWORD: root\n";
-
-        String recipeContentType = "application/x-yaml";
-
-        // when
-        ComposeEnvironmentImpl composeEnvironment = parser.parse(recipeContent, recipeContentType);
-
-        // then
-        composeEnvironment.getServices().get("dev-machine").getEnvironment();
-    }
 
 }
