@@ -173,7 +173,7 @@ export class ExportWorkspaceDialogController {
 
     // compute WS url
     let remoteURL = authData.url;
-    let remoteWsURL = remoteURL.replace('http', 'ws') + '/api/ws/';
+    let remoteWsURL = remoteURL.replace('http', 'ws') + '/api/ws';
 
     let startWorkspacePromise = remoteWorkspaceAPI.startWorkspace(remoteWsURL, remoteWorkspace.id, remoteWorkspace.config.defaultEnv);
 

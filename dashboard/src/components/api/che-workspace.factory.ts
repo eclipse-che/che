@@ -471,7 +471,7 @@ export class CheWorkspace {
    * @param workspaceId
      */
   startUpdateWorkspaceStatus(workspaceId) {
-    if (!this.websocketBuscvcByWorkspaceId.includes(workspaceId)) {
+    if (!this.subscribedWorkspacesIds.includes(workspaceId)) {
       let bus = this.cheWebsocket.getBus();
       this.subscribedWorkspacesIds.push(workspaceId);
 
