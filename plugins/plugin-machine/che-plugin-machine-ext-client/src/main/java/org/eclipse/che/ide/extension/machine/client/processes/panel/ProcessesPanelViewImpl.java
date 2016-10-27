@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.ide.extension.machine.client.processes.panel;
 
+import com.google.gwt.core.client.Scheduler;
 import elemental.events.KeyboardEvent;
 import elemental.events.MouseEvent;
 
@@ -313,7 +314,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
     }
 
     @Override
-    public void selectNode(ProcessTreeNode node) {
+    public void selectNode(final ProcessTreeNode node) {
         final SelectionModel<ProcessTreeNode> selectionModel = processTree.getSelectionModel();
 
         if (node == null) {
@@ -325,6 +326,13 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
             node.getTreeNodeElement().scrollIntoView();
         }
+
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                delegate.onTreeNodeSelected(node);
+            }
+        });
     }
 
     @Override
@@ -478,4 +486,5 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
     interface ProcessesPartViewImplUiBinder extends UiBinder<Widget, ProcessesPanelViewImpl> {
     }
+
 }

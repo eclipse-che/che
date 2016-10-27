@@ -34,6 +34,7 @@ import org.eclipse.che.ide.api.parts.Perspective;
 import org.eclipse.che.ide.api.parts.PerspectiveManager;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStartingEvent;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateMachineAction;
 import org.eclipse.che.ide.extension.machine.client.actions.CreateSnapshotAction;
 import org.eclipse.che.ide.extension.machine.client.actions.DestroyMachineAction;
@@ -127,6 +128,20 @@ public class MachineExtension {
             @Override
             public void onWorkspaceStarting(WorkspaceStartingEvent event) {
                 maximizeTerminal();
+            }
+        });
+
+        eventBus.addHandler(WorkspaceStoppedEvent.TYPE, new WorkspaceStoppedEvent.Handler() {
+            @Override
+            public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        workspaceAgent.setActivePart(projectExplorerPresenter);
+                        processesPanelPresenter.selectDevMachine();
+                        maximizeTerminal();
+                    }
+                });
             }
         });
 

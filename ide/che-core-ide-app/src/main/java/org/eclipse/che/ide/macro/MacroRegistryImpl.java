@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 
 import org.eclipse.che.ide.api.macro.Macro;
 import org.eclipse.che.ide.api.macro.MacroRegistry;
-import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,9 +38,7 @@ public class MacroRegistryImpl implements MacroRegistry {
     public void register(Set<Macro> macros) {
         for (Macro macro : macros) {
             final String name = macro.getName();
-            if (this.macros.containsKey(name)) {
-                Log.warn(MacroRegistryImpl.class, "Command macro '" + name + "' is already registered.");
-            } else {
+            if (!this.macros.containsKey(name)) {
                 this.macros.put(name, macro);
             }
         }
