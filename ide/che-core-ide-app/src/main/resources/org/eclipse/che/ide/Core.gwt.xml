@@ -35,5 +35,6 @@
     <inherits name="com.google.gwt.user.Debug"/>
     <inherits name="com.google.common.base.Base"/>
     <inherits name="com.google.common.collect.Collect"/>
+    <inherits name="org.eclipse.che.providers.Providers"/>
 
 </module>

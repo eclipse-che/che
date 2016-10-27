@@ -13,6 +13,7 @@ package org.eclipse.che.ide.api.parts;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.constraints.Constraints;
 
 import javax.validation.constraints.NotNull;
@@ -23,7 +24,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Dmitry Shnurenko
  */
-public interface Perspective {
+public interface Perspective extends StateComponent {
 
     /** Maximizes central part */
     void maximizeCentralPart();

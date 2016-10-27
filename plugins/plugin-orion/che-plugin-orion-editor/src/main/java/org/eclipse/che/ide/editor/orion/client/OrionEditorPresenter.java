@@ -677,6 +677,16 @@ public class OrionEditorPresenter extends AbstractEditorPresenter implements Tex
     }
 
     @Override
+    public int getTopVisibleLine() {
+        return editorWidget.getTopVisibleLine();
+    }
+
+    @Override
+    public void setTopLine(int line) {
+        editorWidget.setTopLine(line);
+    }
+
+    @Override
     public void refreshEditor() {
         if (this.updateActions != null) {
             for (final EditorUpdateAction action : this.updateActions) {

@@ -707,6 +707,14 @@ public class OrionEditorWidget extends CompositeEditorWidget implements HasChang
         return gutter;
     }
 
+    public int getTopVisibleLine() {
+        return editorOverlay.getTextView().getTopIndex();
+    }
+
+    public void setTopLine(int line) {
+        editorOverlay.getTextView().setTopIndex(line);
+    }
+
     /**
      * UI binder interface for this component.
      *
