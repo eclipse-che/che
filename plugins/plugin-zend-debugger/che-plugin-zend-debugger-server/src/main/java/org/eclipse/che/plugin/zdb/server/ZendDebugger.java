@@ -69,12 +69,14 @@ import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.Sessio
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.SetProtocolResponse;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.StartProcessFileNotification;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgSettings;
+import org.eclipse.che.plugin.zdb.server.expressions.IDbgExpression;
+import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpression;
+import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpressionEvaluator;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgConnectionUtils;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgUtils;
 import org.eclipse.che.plugin.zdb.server.variables.IDbgVariable;
-import org.eclipse.che.plugin.zdb.server.variables.ZendDbgExpressionResolver;
+import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariable;
 import org.eclipse.che.plugin.zdb.server.variables.ZendDbgVariables;
-import org.eclipse.che.plugin.zdb.server.variables.ZendDebuggerVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +87,35 @@ import org.slf4j.LoggerFactory;
  */
 public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
+    private static final class VariablesStorage {
+
+        private final List<IDbgVariable> variables;
+
+        public VariablesStorage(List<IDbgVariable> variables) {
+            this.variables = variables;
+        }
+
+        List<IDbgVariable> getVariables() {
+            return variables;
+        }
+
+        IDbgVariable findVariable(VariablePath variablePath) {
+            List<IDbgVariable> currentVariables = variables;
+            IDbgVariable matchingVariable = null;
+            for (String variableName : variablePath.getPath()) {
+                for (IDbgVariable currentVariable : currentVariables) {
+                    if (currentVariable.getName().equals(variableName)) {
+                        matchingVariable = currentVariable;
+                        currentVariables = new ArrayList<>(currentVariable.getVariables());
+                        break;
+                    }
+                }
+            }
+            return matchingVariable;
+        }
+
+    }
+
     public static final Logger LOG = LoggerFactory.getLogger(ZendDebugger.class);
     private static final int SUPPORTED_PROTOCOL_ID = 2012121702;
 
@@ -92,9 +123,9 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     private final ZendDbgSettings debugSettings;
     private final ZendDbgConnection debugConnection;
 
-    private final ZendDbgExpressionResolver debugExpressionResolver;
+    private final ZendDbgExpressionEvaluator debugExpressionEvaluator;
+    private VariablesStorage debugVariableStorage;
     private String debugStartFile;
-    private List<Variable> debugVariables;
     private List<Breakpoint> breakpoints;
     private Map<Breakpoint, Integer> breakpointIds = new HashMap<>();
     private Integer breakpointAflId = null;
@@ -102,9 +133,9 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     public ZendDebugger(ZendDbgSettings debugSettings, DebuggerCallback debugCallback) throws DebuggerException {
         this.debugCallback = debugCallback;
         this.debugSettings = debugSettings;
-        this.debugVariables = new ArrayList<>();
         this.debugConnection = new ZendDbgConnection(this, debugSettings);
-        this.debugExpressionResolver = new ZendDbgExpressionResolver(debugConnection);
+        this.debugExpressionEvaluator = new ZendDbgExpressionEvaluator(debugConnection);
+        this.debugVariableStorage = new VariablesStorage(Collections.emptyList());
     }
 
     @Override
@@ -163,23 +194,13 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     @Override
     public StackFrameDump dumpStackFrame() {
         sendGetVariables();
-        return new StackFrameDumpImpl(Collections.emptyList(), debugVariables);
+        return new StackFrameDumpImpl(Collections.emptyList(), debugVariableStorage.getVariables());
     }
 
     @Override
     public SimpleValue getValue(VariablePath variablePath) {
-        List<Variable> currentVariables = debugVariables;
-        Variable matchingVariable = null;
-        for (String variableName : variablePath.getPath()) {
-            for (Variable currentVariable : currentVariables) {
-                if (currentVariable.getName().equals(variableName)) {
-                    matchingVariable = currentVariable;
-                    currentVariables = new ArrayList<>(currentVariable.getVariables());
-                    break;
-                }
-            }
-        }
-        return new SimpleValueImpl(currentVariables, matchingVariable.getValue());
+        Variable matchingVariable = debugVariableStorage.findVariable(variablePath);
+        return new SimpleValueImpl(matchingVariable.getVariables(), matchingVariable.getValue());
     }
 
     @Override
@@ -242,13 +263,16 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
 
     @Override
     public void setValue(Variable variable) throws DebuggerException {
-        // TODO - not supported yet...
+        Variable matchingVariable = debugVariableStorage.findVariable(variable.getVariablePath());
+        ((ZendDbgVariable) matchingVariable).setValue(variable.getValue());
     }
 
     @Override
     public String evaluate(String expression) throws DebuggerException {
-        // TODO - not supported yet...
-        return null;
+        ZendDbgExpression zendDbgExpression = new ZendDbgExpression(debugExpressionEvaluator, expression,
+                Collections.emptyList());
+        zendDbgExpression.evaluate();
+        return zendDbgExpression.getValue();
     }
 
     @Override
@@ -350,14 +374,14 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
     }
 
     private void sendGetVariables() {
+        ZendDbgVariables zendVariablesExpression = new ZendDbgVariables(debugExpressionEvaluator);
+        zendVariablesExpression.evaluate();
         List<IDbgVariable> variables = new ArrayList<>();
-        ZendDbgVariables zendVariablesExpression = new ZendDbgVariables(debugExpressionResolver);
-        zendVariablesExpression.resolve();
-        variables = zendVariablesExpression.getChildren();
-        debugVariables.clear();
-        for (IDbgVariable variable : variables) {
-            debugVariables.add(new ZendDebuggerVariable(new VariablePathImpl(variable.getName()), variable));
+        for (IDbgExpression zendVariableExpression : zendVariablesExpression.getChildren()) {
+            variables.add(new ZendDbgVariable(new VariablePathImpl(ZendDbgVariable.createName(zendVariableExpression)),
+                    zendVariableExpression));
         }
+        debugVariableStorage = new VariablesStorage(variables);
     }
 
     private void sendAddBreakpointFiles() {
