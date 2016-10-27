@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.providers;
 
+import com.google.common.annotations.Beta;
 import com.google.inject.Provider;
 
 import org.eclipse.che.commons.annotation.Nullable;
@@ -20,6 +21,7 @@ import org.eclipse.che.commons.annotation.Nullable;
  *
  * @author Evgen Vidolob
  */
+@Beta
 public interface DynaProvider {
 
     /**
