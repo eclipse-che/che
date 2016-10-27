@@ -27,7 +27,7 @@ import static java.nio.file.Files.notExists;
  */
 public class DockerMachineTerminalChecker {
 
-    public static final String TERMINAL_ARCHIVE_LOCATION = "machine.server.terminal.path_to_archive.linux_amd64";
+    public static final String TERMINAL_ARCHIVE_LOCATION = "che.workspace.terminal_linux_amd64";
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerMachineTerminalChecker.class);
 

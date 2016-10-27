@@ -397,7 +397,7 @@ public class UserServiceTest {
         assertEquals(response.getStatusCode(), 200);
         final Map<String, String> settings = new Gson().fromJson(response.print(),
                                                                  new TypeToken<Map<String, String>>() {}.getType());
-        assertEquals(settings, ImmutableMap.of("user.self.creation.allowed", "true"));
+        assertEquals(settings, ImmutableMap.of("che.auth.user_self_creation", "true"));
     }
 
     @Filter

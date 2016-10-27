@@ -85,7 +85,7 @@ public class LocalDataMigrator {
 
     @Inject
     @PostConstruct
-    public void performMigration(@Named("che.conf.storage") String baseDir,
+    public void performMigration(@Named("che.database") String baseDir,
                                  UserDao userDao,
                                  ProfileDao profileDao,
                                  PreferenceDao preferenceDao,
