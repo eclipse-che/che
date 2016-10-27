@@ -18,7 +18,7 @@ import org.eclipse.che.api.agent.server.exception.AgentException;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.agent.shared.model.AgentKey;
-import org.eclipse.che.api.core.model.machine.ServerConf;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.slf4j.Logger;
@@ -77,6 +77,22 @@ public class AgentConfigApplier {
             Agent agent = agentRegistry.getAgent(agentKey);
             addEnv(service, agent.getProperties());
             addExposedPorts(service, agent.getServers());
+            addLabels(service, agent.getServers());
+        }
+    }
+
+    private void addLabels(CheServiceImpl service, List<? extends ServerConf2> confs) {
+        for (ServerConf2 conf : confs) {
+            service.getLabels().put("che:server:" + conf.getPort() + ":protocol", conf.getProtocol());
+
+            String ref = conf.getProperties().get("ref");
+            String path = conf.getProperties().get("path");
+            if (!isNullOrEmpty(ref)) {
+                service.getLabels().put("che:server:" + conf.getPort() + ":ref", ref);
+            }
+            if (!isNullOrEmpty(path)) {
+                service.getLabels().put("che:server:" + conf.getPort() + ":path", path);
+            }
         }
     }
 
@@ -106,8 +122,8 @@ public class AgentConfigApplier {
         service.setEnvironment(newEnv);
     }
 
-    private void addExposedPorts(CheServiceImpl service, List<? extends ServerConf> confs) {
-        for (ServerConf serverConf : confs) {
+    private void addExposedPorts(CheServiceImpl service, List<? extends ServerConf2> confs) {
+        for (ServerConf2 serverConf : confs) {
             service.getExpose().add(serverConf.getPort());
         }
     }

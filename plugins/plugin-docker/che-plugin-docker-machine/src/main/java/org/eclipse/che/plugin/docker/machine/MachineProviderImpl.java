@@ -244,8 +244,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                  boolean isDev,
                                  String networkName,
                                  CheServiceImpl service,
-                                 LineConsumer machineLogger,
-                                 List<? extends ServerConf> providedServers) throws ServerException {
+                                 LineConsumer machineLogger) throws ServerException {
 
         // copy to not affect/be affected by changes in origin
         service = new CheServiceImpl(service);
@@ -307,7 +306,6 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                                                                       .setLocation(service.getBuild() != null ?
                                                                                                    service.getBuild().getContext() :
                                                                                                    service.getImage()))
-                                                                   .setServers(providedServers)
                                                                    .build(),
                                                   service.getId(),
                                                   workspaceId,

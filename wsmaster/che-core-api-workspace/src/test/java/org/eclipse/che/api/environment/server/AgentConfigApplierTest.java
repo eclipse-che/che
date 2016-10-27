@@ -15,9 +15,10 @@ import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
 import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
 import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -79,8 +80,8 @@ public class AgentConfigApplierTest {
 
     @Test
     public void shouldAddExposedPorts() throws Exception {
-        ServerConfImpl serverConf1 = mock(ServerConfImpl.class);
-        ServerConfImpl serverConf2 = mock(ServerConfImpl.class);
+        ServerConf2 serverConf1 = mock(ServerConf2.class);
+        ServerConf2 serverConf2 = mock(ServerConf2.class);
         when(serverConf1.getPort()).thenReturn("1111/udp");
         when(serverConf2.getPort()).thenReturn("2222/tcp");
 

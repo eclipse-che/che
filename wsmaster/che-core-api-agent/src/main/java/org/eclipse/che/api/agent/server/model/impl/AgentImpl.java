@@ -13,8 +13,7 @@ package org.eclipse.che.api.agent.server.model.impl;
 import com.google.common.base.MoreObjects;
 
 import org.eclipse.che.api.agent.shared.model.Agent;
-import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,31 +26,25 @@ import java.util.stream.Collectors;
  * @author Anatoliy Bazko
  */
 public class AgentImpl implements Agent {
-    private final String               name;
-    private final String               version;
-    private final List<String>         dependencies;
-    private final Map<String, String>  properties;
-    private final String               script;
-    private final List<ServerConfImpl> servers;
+    private final String              name;
+    private final String              version;
+    private final List<String>        dependencies;
+    private final Map<String, String> properties;
+    private final String              script;
+    private final List<ServerConf2>   servers;
 
     public AgentImpl(String name,
                      String version,
                      List<String> dependencies,
                      Map<String, String> properties,
                      String script,
-                     List<? extends ServerConf> servers) {
+                     List<? extends ServerConf2> servers) {
         this.name = name;
         this.version = version;
         this.dependencies = dependencies;
         this.properties = properties;
         this.script = script;
-        if (servers != null) {
-            this.servers = servers.stream()
-                                  .map(ServerConfImpl::new)
-                                  .collect(Collectors.toList());
-        } else {
-            this.servers = new ArrayList<>();
-        }
+        this.servers = servers.stream().map(serverConf2 -> serverConf2).collect(Collectors.toList());
     }
 
     public AgentImpl(Agent agent) {
@@ -75,12 +68,12 @@ public class AgentImpl implements Agent {
 
     @Override
     public List<String> getDependencies() {
-        return MoreObjects.firstNonNull(dependencies, new ArrayList<String>());
+        return MoreObjects.firstNonNull(dependencies, new ArrayList<>());
     }
 
     @Override
     public Map<String, String> getProperties() {
-        return MoreObjects.firstNonNull(properties, new HashMap<String, String>());
+        return MoreObjects.firstNonNull(properties, new HashMap<>());
     }
 
     @Override
@@ -89,7 +82,7 @@ public class AgentImpl implements Agent {
     }
 
     @Override
-    public List<ServerConfImpl> getServers() {
+    public List<ServerConf2> getServers() {
         return servers;
     }
 
