@@ -12,6 +12,7 @@ package org.eclipse.che.api.promises.client.js;
 
 import elemental.js.util.JsArrayOf;
 import elemental.util.ArrayOf;
+import elemental.util.Collections;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayMixed;
@@ -49,6 +50,24 @@ public class JsPromiseProvider implements PromiseProvider {
         }
         return all(promisesArray);
     }
+
+    @Override
+    public Promise<ArrayOf<?>> all2(ArrayOf<Promise<?>> promises) {
+        return internalAll(promises);
+    }
+
+    @Override
+    public Promise<ArrayOf<?>> all2(Promise<?>... promises) {
+        ArrayOf<Promise<?>> arrayOf = Collections.arrayOf();
+        for (Promise<?> promise : promises) {
+            arrayOf.push(promise);
+        }
+        return internalAll(arrayOf);
+    }
+
+    private native Promise<ArrayOf<?>> internalAll(ArrayOf<Promise<?>> promises) /*-{
+        return Promise.all(promises);
+    }-*/;
 
     /** {@inheritDoc} */
     @Override

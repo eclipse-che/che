@@ -53,6 +53,7 @@ import org.eclipse.che.ide.extension.machine.client.processes.actions.StopProces
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.extension.machine.client.targets.EditTargetsAction;
 import org.eclipse.che.ide.part.explorer.project.ProjectExplorerPresenter;
+import org.eclipse.che.ide.statepersistance.AppStateManager;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_CENTER_TOOLBAR;
@@ -81,7 +82,8 @@ public class MachineExtension {
     public static final String GROUP_MACHINES_DROPDOWN = "MachinesSelector";
     public static final String GROUP_MACHINES_LIST     = "MachinesListGroup";
 
-    private final PerspectiveManager perspectiveManager;
+    private final PerspectiveManager        perspectiveManager;
+    private final Provider<AppStateManager> appStateManagerProvider;
 
     @Inject
     public MachineExtension(final MachineResources machineResources,
@@ -92,8 +94,10 @@ public class MachineExtension {
                             final Provider<ServerPortProvider> machinePortProvider,
                             final PerspectiveManager perspectiveManager,
                             final Provider<MachineStatusHandler> machineStatusHandlerProvider,
-                            final ProjectExplorerPresenter projectExplorerPresenter) {
+                            final ProjectExplorerPresenter projectExplorerPresenter,
+                            final Provider<AppStateManager> appStateManagerProvider) {
         this.perspectiveManager = perspectiveManager;
+        this.appStateManagerProvider = appStateManagerProvider;
 
         machineResources.getCss().ensureInjected();
         machineStatusHandlerProvider.get();
@@ -115,8 +119,9 @@ public class MachineExtension {
                     });
                     workspaceAgent.openPart(processesPanelPresenter, PartStackType.INFORMATION);
                 }
-
-                workspaceAgent.setActivePart(projectExplorerPresenter);
+                if (!appStateManagerProvider.get().hasStateForWorkspace(appContext.getWorkspaceId())) {
+                    workspaceAgent.setActivePart(projectExplorerPresenter);
+                }
             }
 
             @Override

@@ -672,6 +672,16 @@ public class TextEditorPresenter<T extends EditorWidget> extends AbstractEditorP
     }
 
     @Override
+    public int getTopVisibleLine() {
+        throw new UnsupportedOperationException("getTopVisibleLine is not supported");
+    }
+
+    @Override
+    public void setTopLine(int line) {
+        throw new UnsupportedOperationException("setTopLine(int line) is not supported");
+    }
+
+    @Override
     public void refreshEditor() {
         if (this.updateActions != null) {
             for (final EditorUpdateAction action : this.updateActions) {

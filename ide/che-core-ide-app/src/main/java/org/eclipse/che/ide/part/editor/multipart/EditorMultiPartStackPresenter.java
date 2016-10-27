@@ -12,6 +12,7 @@ package org.eclipse.che.ide.part.editor.multipart;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
@@ -21,13 +22,14 @@ import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.event.ActivePartChangedHandler;
 import org.eclipse.che.ide.api.parts.EditorMultiPartStack;
+import org.eclipse.che.ide.api.parts.EditorMultiPartStackState;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.parts.PartPresenter;
-import org.eclipse.che.ide.part.editor.EditorPartStackFactory;
 
 import javax.validation.constraints.NotNull;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Presenter to control the displaying of multi editors.
@@ -37,17 +39,16 @@ import java.util.LinkedList;
 @Singleton
 public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
                                                       ActivePartChangedHandler {
-    private PartPresenter   activeEditor;
-    private EditorPartStack activeEditorPartStack;
-
-    private final EditorPartStackFactory      editorPartStackFactory;
+    private final Provider<EditorPartStack>   editorPartStackFactory;
     private final EditorMultiPartStackView    view;
     private final LinkedList<EditorPartStack> partStackPresenters;
+    private       PartPresenter               activeEditor;
+    private       EditorPartStack             activeEditorPartStack;
 
     @Inject
     public EditorMultiPartStackPresenter(EventBus eventBus,
                                          EditorMultiPartStackView view,
-                                         EditorPartStackFactory editorPartStackFactory) {
+                                         Provider<EditorPartStack> editorPartStackFactory) {
         this.view = view;
         this.editorPartStackFactory = editorPartStackFactory;
         this.partStackPresenters = new LinkedList<>();
@@ -81,7 +82,7 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
         }
 
         //open the part in the new editorPartStack
-        addEditorPartStack(part, null, null);
+        addEditorPartStack(part, null, null, -1);
     }
 
     /** {@inheritDoc} */
@@ -95,19 +96,21 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
         EditorPartStack relativePartStack = getPartStackByTabId(constraint.relativeId);
         if (relativePartStack != null) {
             //view of relativePartStack will be split corresponding to constraint on two areas and part will be added into created area
-            addEditorPartStack(part, relativePartStack, constraint);
+            addEditorPartStack(part, relativePartStack, constraint, -1);
         }
     }
 
-    private void addEditorPartStack(final PartPresenter part, final EditorPartStack relativePartStack, final Constraints constraints) {
-        final EditorPartStack editorPartStack = editorPartStackFactory.create();
+    private EditorPartStack addEditorPartStack(final PartPresenter part, final EditorPartStack relativePartStack,
+                                               final Constraints constraints, double size) {
+        final EditorPartStack editorPartStack = editorPartStackFactory.get();
         partStackPresenters.add(editorPartStack);
 
-        view.addPartStack(editorPartStack, relativePartStack, constraints);
+        view.addPartStack(editorPartStack, relativePartStack, constraints, size);
 
         if (part != null) {
             editorPartStack.addPart(part);
         }
+        return editorPartStack;
     }
 
     @Override
@@ -190,6 +193,11 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
         return activeEditorPartStack;
     }
 
+    @Override
+    public List<EditorPartPresenter> getParts() {
+        throw new UnsupportedOperationException();
+    }
+
     @Nullable
     public EditorPartStack getPartStackByPart(PartPresenter part) {
         if (part == null) {
@@ -255,6 +263,25 @@ public class EditorMultiPartStackPresenter implements EditorMultiPartStack,
             }
         }
         return null;
+    }
+
+    @Override
+    public EditorPartStack createRootPartStack() {
+        EditorPartStack editorPartStack = addEditorPartStack(null, null, null, -1);
+        activeEditorPartStack = editorPartStack;
+        return editorPartStack;
+    }
+
+    @Override
+    public EditorPartStack split(EditorPartStack relativePartStack, Constraints constraints, double size) {
+        EditorPartStack editorPartStack = addEditorPartStack(null, relativePartStack, constraints, size);
+        activeEditorPartStack = editorPartStack;
+        return editorPartStack;
+    }
+
+    @Override
+    public EditorMultiPartStackState getState() {
+        return view.getState();
     }
 
     @Override

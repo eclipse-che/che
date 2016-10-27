@@ -20,7 +20,7 @@
 <md-progress-linear md-mode="indeterminate" ng-show="workspaceDetailsController.loading"></md-progress-linear>
 
 <md-content md-scroll-y flex
-            class="workspace-details-content">
+            class="workspace-details-content" md-theme="default">
   <md-tabs md-dynamic-height md-stretch-tabs="auto"
            md-selected="workspaceDetailsController.selectedTabIndex"
            md-center-tabs="">
@@ -60,6 +60,18 @@
                 </che-input>
               </ng-form>
             </div>
+          </che-label-container>
+
+          <!-- Namespace -->
+          <che-label-container che-label-name="Team" ng-if="workspaceDetailsController.getNamespaces().length > 0">
+            <che-toggle ng-if="workspaceDetailsController.isCreationFlow" ng-model="workspaceDetailsController.workspaceNamespace" layout="row"
+                        ng-init="workspaceDetailsController.workspaceNamespace = workspaceDetailsController.getNamespaces()[0]">
+              <che-toggle-button ng-repeat="namespace in workspaceDetailsController.getNamespaces()"
+                                 che-title="{{namespace}}" class="namespace-button">
+              </che-toggle-button>
+            </che-toggle>
+            <che-button-default ng-if="!workspaceDetailsController.isCreationFlow"
+                                che-button-title="{{workspaceDetailsController.namespace}}"></che-button-default>
           </che-label-container>
 
           <!-- Status -->

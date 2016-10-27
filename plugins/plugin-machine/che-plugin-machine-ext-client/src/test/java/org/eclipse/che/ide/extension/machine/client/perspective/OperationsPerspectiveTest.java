@@ -31,6 +31,7 @@ import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.WorkBenchPartController;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
+import org.eclipse.che.providers.DynaProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,6 +86,8 @@ public class OperationsPerspectiveTest {
     private PartStackPresenter      partStackPresenter;
     @Mock
     private AcceptsOneWidget        container;
+    @Mock
+    private DynaProvider            dynaProvider;
 
     private OperationsPerspective perspective;
 
@@ -110,14 +113,15 @@ public class OperationsPerspectiveTest {
                                           Matchers.<WorkBenchPartController>anyObject())).thenReturn(partStackPresenter);
 
         perspective = new OperationsPerspective(view,
-                                             partViewFactory,
-                                             controllerFactory,
-                                             stackPresenterFactory,
-                                             machinePanel,
-                                             recipePanel,
-                                             notificationManager,
-                                             infoContainer,
-                                             eventBus);
+                                                partViewFactory,
+                                                controllerFactory,
+                                                stackPresenterFactory,
+                                                machinePanel,
+                                                recipePanel,
+                                                notificationManager,
+                                                infoContainer,
+                                                eventBus,
+                                                dynaProvider);
     }
 
     @Test
