@@ -48,11 +48,31 @@ public interface PromiseProvider {
      * @param promises
      *         the included promises
      * @return a promise with an array of unit values as fulfillment value
+     * @deprecated use {@link #all2(ArrayOf)}
      */
+    @Deprecated
     Promise<JsArrayMixed> all(ArrayOf<Promise<?>> promises);
 
-    /** @see {@link #all(ArrayOf)} */
+    /**
+     * @see {@link #all(ArrayOf)}
+     * @deprecated use {@link #all2(Promise[])}
+     */
+    @Deprecated
     Promise<JsArrayMixed> all(final Promise<?>... promises);
+
+    /**
+     * Creates a promise that resolves as soon as all the promises used as parameters are resolved or
+     * rejected as soon as the first rejection happens on one of the included promises.
+     * This is useful for aggregating results of multiple promises together.
+     *
+     * @param promises
+     *         the included promises
+     * @return a promise with an array of unit values as fulfillment value
+     */
+    Promise<ArrayOf<?>> all2(ArrayOf<Promise<?>> promises);
+
+    /** @see {@link #all(ArrayOf)} */
+    Promise<ArrayOf<?>> all2(final Promise<?>... promises);
 
     /**
      * Returns a promise that is rejected with the given reason.

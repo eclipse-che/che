@@ -61,4 +61,15 @@ public interface EditorRegistry {
      */
     @NotNull
     List<EditorProvider> getAllEditorsForFileType(@NotNull FileType fileType);
+
+    /**
+     * Search editor provider by his id.
+     * Should return default editor provider if provider with that id cannot be found.
+     *
+     * @param id
+     *         the provider id
+     * @return the editor provider
+     */
+    @NotNull
+    EditorProvider findEditorProviderById(@NotNull String id);
 }

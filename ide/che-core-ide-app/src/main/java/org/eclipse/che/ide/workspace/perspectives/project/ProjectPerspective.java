@@ -24,6 +24,7 @@ import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.perspectives.general.AbstractPerspective;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
+import org.eclipse.che.providers.DynaProvider;
 
 import javax.validation.constraints.NotNull;
 
@@ -56,8 +57,9 @@ public class ProjectPerspective extends AbstractPerspective {
                               WorkBenchControllerFactory controllerFactory,
                               ProjectExplorerPart projectExplorerPart,
                               NotificationManager notificationManager,
-                              EventBus eventBus) {
-        super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
+                              EventBus eventBus,
+                              DynaProvider dynaProvider) {
+        super(PROJECT_PERSPECTIVE_ID, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
         notificationManager.addRule(PROJECT_PERSPECTIVE_ID);
 
@@ -65,12 +67,7 @@ public class ProjectPerspective extends AbstractPerspective {
 
         addPart(notificationManager, INFORMATION);
         addPart(projectExplorerPart, NAVIGATION);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void go(@NotNull AcceptsOneWidget container) {
-        PartStack navigatorPanel = getPartStack(NAVIGATION);
+                PartStack navigatorPanel = getPartStack(NAVIGATION);
         PartStack editorPanel = getPartStack(EDITING);
         PartStack toolPanel = getPartStack(TOOLING);
         PartStack infoPanel = getPartStack(INFORMATION);
@@ -85,11 +82,12 @@ public class ProjectPerspective extends AbstractPerspective {
         editorPanel.go(view.getEditorPanel());
         toolPanel.go(view.getToolPanel());
         infoPanel.go(view.getInformationPanel());
-
-        container.setWidget(view);
-
         openActivePart(NAVIGATION);
+    }
 
-        restoreState();
+    /** {@inheritDoc} */
+    @Override
+    public void go(@NotNull AcceptsOneWidget container) {
+        container.setWidget(view);
     }
 }

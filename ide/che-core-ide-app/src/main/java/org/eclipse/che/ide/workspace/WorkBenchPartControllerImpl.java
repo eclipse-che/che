@@ -82,6 +82,11 @@ public class WorkBenchPartControllerImpl implements WorkBenchPartController {
     }
 
     @Override
+    public boolean isHidden() {
+        return splitLayoutPanel.getWidgetSize(widget) == 0;
+    }
+
+    @Override
     public void setMinSize(int minSize) {
         splitLayoutPanel.setWidgetMinSize(widget, minSize);
     }
