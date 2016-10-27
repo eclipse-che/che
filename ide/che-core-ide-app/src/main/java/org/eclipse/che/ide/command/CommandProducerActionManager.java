@@ -108,7 +108,7 @@ public class CommandProducerActionManager implements MachineStateEvent.Handler, 
         DefaultActionGroup editorTabContextMenu = (DefaultActionGroup)actionManager.getAction(GROUP_EDITOR_TAB_CONTEXT_MENU);
         editorTabContextMenu.add(commandActionsPopUpGroup);
 
-        // add debug pop-up group to the main toolbar
+        // add 'Commands' pop-up group to the main toolbar
         DefaultActionGroup commandActionsToolbarGroup = new CommandActionsToolbarGroup(actionManager);
         commandActionsToolbarGroup.add(commandActionsPopUpGroup);
         DefaultActionGroup mainToolbarGroup = (DefaultActionGroup)actionManager.getAction(GROUP_MAIN_TOOLBAR);

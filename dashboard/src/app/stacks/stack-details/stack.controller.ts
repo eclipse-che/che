@@ -225,7 +225,6 @@ export class StackController {
    */
   createStack(): void {
     this.cheStack.createStack(this.stackContent).then((stack) => {
-      this.cheNotification.showInfo('Stack is successfully created.');
       this.stack = stack;
       this.isLoading = false;
       this.cheStack.fetchStacks();

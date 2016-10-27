@@ -27,7 +27,7 @@ export class CheWorkspace {
    * @ngInject for Dependency injection
    */
   constructor ($resource, $q, cheWebsocket, lodash, cheEnvironmentRegistry, $log) {
-    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR', 'SNAPSHOT_CREATING'];
+    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
 
     // keep resource
     this.$resource = $resource;
@@ -480,6 +480,8 @@ export class CheWorkspace {
         //Filter workspace events, which really indicate the status change:
         if (this.workspaceStatuses.indexOf(message.eventType) >= 0) {
           this.getWorkspaceById(workspaceId).status = message.eventType;
+        } else if (message.eventType === 'SNAPSHOT_CREATING') {
+          this.getWorkspaceById(workspaceId).status = 'SNAPSHOTTING';
         } else if (message.eventType === 'SNAPSHOT_CREATED') {
           //Snapshot can be created for RUNNING workspace only. As far as snapshot creation is only the events, not the state,
           //we introduced SNAPSHOT_CREATING status to be handled by UI, though it is fake one, and end of it is indicated by SNAPSHOT_CREATED.

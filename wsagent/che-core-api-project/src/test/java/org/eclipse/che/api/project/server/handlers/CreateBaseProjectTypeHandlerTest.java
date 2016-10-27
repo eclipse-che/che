@@ -10,16 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.handlers;
 
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.Listeners;
+import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.vfs.VirtualFile;
+import org.eclipse.che.api.vfs.VirtualFileSystem;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.testng.annotations.Test;
 
-
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  *  @author Vitalii Parfonov
@@ -28,9 +28,26 @@ public class CreateBaseProjectTypeHandlerTest {
 
     @Test
     public void testCreateProject() throws Exception {
-        FolderEntry folderEntry = mock(FolderEntry.class);
-        CreateBaseProjectTypeHandler createBaseProjectTypeHandler = new CreateBaseProjectTypeHandler();
-        createBaseProjectTypeHandler.onCreateProject(folderEntry, null, null);
-        verify(folderEntry).createFile(anyString(), any(byte[].class));
+        Path path = Path.of("test");
+        VirtualFileSystemProvider virtualFileSystemProvider = mock(VirtualFileSystemProvider.class);
+        VirtualFileSystem virtualFileSystem = mock(VirtualFileSystem.class);
+
+        VirtualFile base = mock(VirtualFile.class);
+        when(base.isRoot()).thenReturn(false);
+
+
+        VirtualFile root = mock(VirtualFile.class);
+        when(root.isRoot()).thenReturn(true);
+        when(root.createFolder(anyString())).thenReturn(base);
+        when(virtualFileSystem.getRoot()).thenReturn(root);
+
+
+        when(virtualFileSystemProvider.getVirtualFileSystem()).thenReturn(virtualFileSystem);
+        when(virtualFileSystem.getRoot()).thenReturn(root);
+
+
+        CreateBaseProjectTypeHandler createBaseProjectTypeHandler = new CreateBaseProjectTypeHandler(virtualFileSystemProvider);
+        createBaseProjectTypeHandler.onCreateProject(path, null, null);
+        verify(root).createFolder("test");
     }
 }

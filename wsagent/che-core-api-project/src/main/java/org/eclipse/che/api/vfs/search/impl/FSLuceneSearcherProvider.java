@@ -45,6 +45,6 @@ public class FSLuceneSearcherProvider extends AbstractLuceneSearcherProvider {
 
     @Override
     protected LuceneSearcher createLuceneSearcher(CloseCallback closeCallback) {
-        return new FSLuceneSearcher(indexRootDirectory, fileIndexFilter, closeCallback);
+        return new FSLuceneSearcher(indexRootDirectory, excludeFileIndexFilters, closeCallback);
     }
 }

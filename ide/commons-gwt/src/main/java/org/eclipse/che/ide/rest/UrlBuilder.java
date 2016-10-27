@@ -37,7 +37,12 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
         JSONObject o = new JSONObject(jso);
         setHost(o.get("host").isString().stringValue());
         setProtocol(o.get("protocol").isString().stringValue());
-        setPort(Integer.valueOf(o.get("port").isString().stringValue()));
+        if (o.containsKey("port")) {
+            final String port = o.get("port").isString().stringValue();
+            if (!port.isEmpty()) {
+                setPort(Integer.valueOf(port));
+            }
+        }
         setPath(o.get("path").isString().stringValue());
         //fill query parameters
         JSONObject query = o.get("queryKey").isObject();
@@ -58,10 +63,8 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
                 parser: /(?:^|&)([^&=]*)=?([^&]*)/g
             },
             parser: {
-                strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))
-                    (?:\?([^#]*))?(?:#(.*))?)/,
-                loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/
-                    (?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+                strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+                loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
             }
         }
         var o = options, m = o.parser[o.strictMode ? "strict" : "loose"]

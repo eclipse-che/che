@@ -366,9 +366,6 @@ export class WorkspaceDetailsController {
       // update list of workspaces
       // for new workspace to show in recent workspaces
       this.updateRecentWorkspace(workspaceData.id);
-
-      let infoMessage = 'Workspace ' + workspaceData.config.name + ' successfully created.';
-      this.cheNotification.showInfo(infoMessage);
       this.cheWorkspace.fetchWorkspaces().then(() => {
         this.$location.path('/workspace/' + workspaceData.namespace + '/' +  workspaceData.config.name);
       });
