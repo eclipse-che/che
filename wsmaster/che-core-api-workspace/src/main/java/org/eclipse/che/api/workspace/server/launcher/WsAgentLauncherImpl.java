@@ -61,9 +61,9 @@ public class WsAgentLauncherImpl implements AgentLauncher {
     public WsAgentLauncherImpl(Provider<MachineProcessManager> machineProcessManagerProvider,
                                WsAgentPingRequestFactory wsAgentPingRequestFactory,
                                @Nullable @Named("machine.ws_agent.run_command") String wsAgentRunCommand,
-                               @Named("machine.ws_agent.max_start_time_ms") long wsAgentMaxStartTimeMs,
-                               @Named("machine.ws_agent.ping_delay_ms") long wsAgentPingDelayMs,
-                               @Named("machine.ws_agent.ping_timed_out_error_msg") String pingTimedOutErrorMessage) {
+                               @Named("che.workspace.agent.dev.max_start_time_ms") long wsAgentMaxStartTimeMs,
+                               @Named("che.workspace.agent.dev.ping_delay_ms") long wsAgentPingDelayMs,
+                               @Named("che.workspace.agent.dev.ping_timeout_error_msg") String pingTimedOutErrorMessage) {
         this.machineProcessManagerProvider = machineProcessManagerProvider;
         this.wsAgentPingRequestFactory = wsAgentPingRequestFactory;
         this.wsAgentMaxStartTimeMs = wsAgentMaxStartTimeMs;

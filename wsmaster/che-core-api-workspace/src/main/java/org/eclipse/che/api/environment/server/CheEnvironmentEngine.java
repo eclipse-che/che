@@ -116,14 +116,14 @@ public class CheEnvironmentEngine {
     @Inject
     public CheEnvironmentEngine(SnapshotDao snapshotDao,
                                 MachineInstanceProviders machineInstanceProviders,
-                                @Named("machine.logs.location") String machineLogsDir,
-                                @Named("machine.default_mem_size_mb") int defaultMachineMemorySizeMB,
+                                @Named("che.workspace.logs") String machineLogsDir,
+                                @Named("che.workspace.default_memory_mb") int defaultMachineMemorySizeMB,
                                 EventService eventService,
                                 EnvironmentParser environmentParser,
                                 DefaultServicesStartStrategy startStrategy,
                                 MachineInstanceProvider machineProvider,
                                 AgentConfigApplier agentConfigApplier,
-                                @Named("api.endpoint") String apiEndpoint,
+                                @Named("che.api") String apiEndpoint,
                                 RecipeDownloader recipeDownloader,
                                 ContainerNameGenerator containerNameGenerator) {
         this.snapshotDao = snapshotDao;

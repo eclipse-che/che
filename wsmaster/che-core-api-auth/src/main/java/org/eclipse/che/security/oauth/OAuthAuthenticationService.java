@@ -62,7 +62,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 public class OAuthAuthenticationService {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAuthenticationService.class);
     @Inject
-    @Named("auth.oauth.access_denied_error_page")
+    @Named("che.auth.access_denied_error_page")
     protected String                     errorPage;
     @Inject
     protected OAuthAuthenticatorProvider providers;
