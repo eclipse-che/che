@@ -8,42 +8,46 @@
  * Contributors:
  *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.zdb.server.variables;
+package org.eclipse.che.plugin.zdb.server.expressions;
 
-import static org.eclipse.che.plugin.zdb.server.variables.IDbgDataFacet.Facet.*;
-import static org.eclipse.che.plugin.zdb.server.variables.IDbgDataType.DataType.*;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.*;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.che.plugin.zdb.server.ZendDebugger;
 import org.eclipse.che.plugin.zdb.server.connection.IDbgMessage;
+import org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.AssignValueRequest;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.GetVariableValueRequest;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgConnection;
+import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.AssignValueResponse;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.GetVariableValueResponse;
 import org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.IDbgEngineResponse;
-import org.eclipse.che.plugin.zdb.server.variables.IDbgDataFacet.Facet;
+import org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet;
 
 /**
- * Zend debug expressions resolver.
+ * Zend debug expressions manager.
  *
  * @author Bartlomiej Laczkowski
  */
-public class ZendDbgExpressionResolver {
+public class ZendDbgExpressionEvaluator {
 
-    private static class ExpressionDecoder {
+    private static class ValueDecoder {
 
-        public void deserialize(AbstractDbgExpression expression, byte[] value) {
+        public void deserialize(ZendDbgExpression expression, byte[] value) {
             if (value == null) {
                 // Expression is illegal.
                 value = new byte[] { 'N' };
             }
-            read(expression, new Reader(value));
+            read(expression, new ValueReader(value));
         }
 
-        private void read(AbstractDbgExpression expression, Reader reader) {
+        private void read(ZendDbgExpression expression, ValueReader reader) {
             char type = reader.readType();
             switch (type) {
             case 'i': {
@@ -79,47 +83,42 @@ public class ZendDbgExpressionResolver {
             }
         }
 
-        private void readIntType(AbstractDbgExpression expression, Reader reader) {
+        private void readIntType(ZendDbgExpression expression, ValueReader reader) {
             String value = reader.readToken();
-            expression.setDataType(PHP_INT);
-            expression.setValue(value);
+            expression.setExpressionResult(new ZendDbgExpressionResult(value, PHP_INT));
         }
 
-        private void readFloatType(AbstractDbgExpression expression, Reader reader) {
+        private void readFloatType(ZendDbgExpression expression, ValueReader reader) {
             String value = reader.readToken();
-            expression.setDataType(PHP_FLOAT);
-            expression.setValue(value);
+            expression.setExpressionResult(new ZendDbgExpressionResult(value, PHP_FLOAT));
         }
 
-        private void readSringType(AbstractDbgExpression expression, Reader reader) {
+        private void readSringType(ZendDbgExpression expression, ValueReader reader) {
             String value = reader.readString();
-            expression.setDataType(PHP_STRING);
-            expression.setValue(value);
+            expression.setExpressionResult(new ZendDbgExpressionResult(value, PHP_STRING));
         }
 
-        private void readBooleanType(AbstractDbgExpression expression, Reader reader) {
+        private void readBooleanType(ZendDbgExpression expression, ValueReader reader) {
             String value = reader.readToken();
-            expression.setDataType(PHP_BOOL);
-            expression.setValue(value);
+            expression.setExpressionResult(new ZendDbgExpressionResult(value, PHP_BOOL));
         }
 
-        private void readResourceType(AbstractDbgExpression expression, Reader reader) {
+        private void readResourceType(ZendDbgExpression expression, ValueReader reader) {
             // Read resource number and move on...
             reader.readInt();
             reader.readInt();
             String value = reader.readToken();
-            expression.setDataType(PHP_RESOURCE);
-            expression.setValue(value);
+            expression.setExpressionResult(new ZendDbgExpressionResult(value, PHP_RESOURCE));
         }
 
-        private void readArrayType(AbstractDbgExpression expression, Reader reader) {
+        private void readArrayType(ZendDbgExpression expression, ValueReader reader) {
             int arrayLength = reader.readInt();
-            expression.setDataType(PHP_ARRAY);
-            expression.setChildrenCount(arrayLength);
-            expression.setValue("Array [" + arrayLength + "]");
+            String arrayDescriptor = "array [" + arrayLength + "]";
             if (reader.isEnd()) {
+                expression.setExpressionResult(new ZendDbgExpressionResult(arrayDescriptor, PHP_ARRAY, arrayLength));
                 return;
             }
+            List<IDbgExpression> childExpressions = new ArrayList<>();
             for (int i = 0; i < arrayLength; i++) {
                 char type = reader.readType();
                 String name;
@@ -129,24 +128,24 @@ public class ZendDbgExpressionResolver {
                     name = reader.readString();
                 } else {
                     // Fall back when type is invalid
-                    expression.setDataType(PHP_NULL);
-                    expression.setValue(PHP_NULL.getText());
                     return;
                 }
-                AbstractDbgExpression childExpression = expression.createChild(name, KIND_ARRAY_MEMBER);
+                ZendDbgExpression childExpression = expression.createChild(name, KIND_ARRAY_MEMBER);
+                childExpressions.add(childExpression);
                 read(childExpression, reader);
             }
+            expression.setExpressionResult(
+                    new ZendDbgExpressionResult(arrayDescriptor, PHP_OBJECT, arrayLength, childExpressions));
         }
 
-        private void readObjectType(AbstractDbgExpression expression, Reader reader) {
+        private void readObjectType(ZendDbgExpression expression, ValueReader reader) {
             String className = reader.readString();
             int objectLength = reader.readInt();
-            expression.setDataType(PHP_OBJECT);
-            expression.setChildrenCount(objectLength);
-            expression.setValue(className);
             if (reader.isEnd()) {
+                expression.setExpressionResult(new ZendDbgExpressionResult(className, PHP_OBJECT, objectLength));
                 return;
             }
+            List<IDbgExpression> childExpressions = new ArrayList<>();
             for (int i = 0; i < objectLength; i++) {
                 char type = reader.readType();
                 String name;
@@ -156,11 +155,9 @@ public class ZendDbgExpressionResolver {
                     name = reader.readString();
                 } else {
                     // Fall back when type is invalid
-                    expression.setDataType(PHP_NULL);
-                    expression.setValue(PHP_NULL.getText());
                     return;
                 }
-                AbstractDbgExpression childExpression;
+                ZendDbgExpression childExpression;
                 Facet fieldFacet = MOD_PUBLIC;
                 if (name.startsWith("*::")) {
                     fieldFacet = MOD_PROTECTED;
@@ -168,15 +165,18 @@ public class ZendDbgExpressionResolver {
                     fieldFacet = MOD_PRIVATE;
                 }
                 childExpression = expression.createChild(name, KIND_OBJECT_MEMBER, fieldFacet);
+                childExpressions.add(childExpression);
                 read(childExpression, reader);
             }
+            expression.setExpressionResult(
+                    new ZendDbgExpressionResult(className, PHP_OBJECT, objectLength, childExpressions));
         }
 
     }
 
-    private static class Reader extends ByteArrayInputStream {
+    private static class ValueReader extends ByteArrayInputStream {
 
-        private Reader(byte[] result) {
+        private ValueReader(byte[] result) {
             super(result);
         }
 
@@ -253,46 +253,57 @@ public class ZendDbgExpressionResolver {
     }
 
     private ZendDbgConnection debugConnection;
-    private ExpressionDecoder expressionDecoder;
+    private ValueDecoder valueDecoder;
 
-    public ZendDbgExpressionResolver(ZendDbgConnection debugConnection) {
+    public ZendDbgExpressionEvaluator(ZendDbgConnection debugConnection) {
         this.debugConnection = debugConnection;
-        this.expressionDecoder = new ExpressionDecoder();
+        this.valueDecoder = new ValueDecoder();
     }
 
-    public void resolve(AbstractDbgExpression expression, int depth) {
-        if (expression.getDataType() == PHP_VIRTUAL_CLASS)
-            return;
-        byte[] value = read(expression, depth);
-        expressionDecoder.deserialize(expression, value);
+    public void evaluate(ZendDbgExpression expression, int depth) {
+        byte[] value = requestEvaluation(expression, depth);
+        valueDecoder.deserialize(expression, value);
     }
 
-    private byte[] requestExpressionValue(String variable, int depth, List<String> parentPath) {
-        GetVariableValueResponse response = debugConnection
-                .sendRequest(new GetVariableValueRequest(variable, depth, parentPath));
-        if (isOK(response)) {
-            return response.getVariableValue();
+    public boolean assign(ZendDbgExpression expression, String newValue, int depth) {
+        if (!requestAssignment(expression, newValue, depth)) {
+            ZendDebugger.LOG.error("Could not assign new value for: " + expression.getExpression() + " variable.");
+            return false;
         }
-        return null;
+        // Re-evaluate to update changed state
+        evaluate(expression, depth);
+        return true;
     }
 
-    private byte[] read(AbstractDbgExpression expression, int depth) {
+    private byte[] requestEvaluation(ZendDbgExpression expression, int depth) {
+        String variableOwner = expression.getExpression();
+        List<String> variableElementPath = Collections.emptyList();
+        List<String> chain = expression.getExpressionChain();
+        if (!chain.isEmpty()) {
+            variableOwner = chain.get(0);
+            variableElementPath = chain.subList(1, chain.size());
+        }
         byte[] value = null;
-        if (expression instanceof IDbgVariable) {
-            IDbgVariable variable = (IDbgVariable) expression;
-            List<String> path = variable.getPath();
-            String variableOwner = path.get(0);
-            List<String> variableElementPath = path.subList(1, path.size());
-            value = requestExpressionValue(variableOwner, depth, variableElementPath);
-        } else {
-            value = requestExpressionValue(expression.getStatement(), depth, Collections.emptyList());
+        GetVariableValueResponse response = debugConnection
+                .sendRequest(new GetVariableValueRequest(variableOwner, depth, variableElementPath));
+        if (isOK(response)) {
+            value = response.getVariableValue();
         }
         if (value == null) {
             value = new byte[] { 'N' };
         }
         return value;
     }
-    
+
+    private boolean requestAssignment(ZendDbgExpression expression, String newValue, int depth) {
+        List<String> path = expression.getExpressionChain();
+        String variableOwner = path.get(0);
+        List<String> variableElementPath = path.subList(1, path.size());
+        AssignValueResponse response = debugConnection
+                .sendRequest(new AssignValueRequest(variableOwner, newValue, depth, variableElementPath));
+        return isOK(response);
+    }
+
     private boolean isOK(IDbgEngineResponse response) {
         return response != null && response.getStatus() == 0;
     }

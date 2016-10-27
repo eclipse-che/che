@@ -12,30 +12,23 @@ package org.eclipse.che.plugin.zdb.server.variables;
 
 import java.util.List;
 
+import org.eclipse.che.api.debug.shared.model.Variable;
+
 /**
- * Common interface for Zend dbg expressions that are describing stack
- * variables.
+ * Zend debugger specific variable.
  *
  * @author Bartlomiej Laczkowski
  */
-public interface IDbgVariable extends IDbgExpression {
+public interface IDbgVariable extends Variable {
 
-    // Specifies concrete type of children
     @Override
-    List<IDbgVariable> getChildren();
+    List<IDbgVariable> getVariables();
 
     /**
-     * Returns name of the variable.
+     * Assigns new value to this variable.
      *
-     * @return
+     * @param newValue
      */
-    String getName();
-
-    /**
-     * Returns path/chain to variable.
-     *
-     * @return path/chain to variable
-     */
-    List<String> getPath();
+    public void setValue(String newValue);
 
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.zdb.server.variables;
+package org.eclipse.che.plugin.zdb.server.expressions;
 
 import java.util.List;
 
@@ -24,21 +24,21 @@ public interface IDbgExpression extends IDbgDataFacet, IDbgDataType {
      *
      * @return textual representation/statement for this expression
      */
-    public String getStatement();
+    public String getExpression();
 
     /**
-     * Returns expression value string.
+     * Returns expressions chain (from entry expression to current expression).
      *
-     * @return expression value string
+     * @return expressions chain (from entry expression to current expression)
      */
-    public String getValue();
+    public List<String> getExpressionChain();
 
     /**
      * Returns expression value children.
      *
      * @return expression value children
      */
-    public List<? extends IDbgExpression> getChildren();
+    public List<IDbgExpression> getChildren();
 
     /**
      * Returns number of existing children.
@@ -48,8 +48,22 @@ public interface IDbgExpression extends IDbgDataFacet, IDbgDataType {
     public int getChildrenCount();
 
     /**
-     * Resolves this expression (computes its value on engine side).
+     * Returns expression value string.
+     *
+     * @return expression value string
      */
-    public void resolve();
+    public String getValue();
+
+    /**
+     * Returns expression value string.
+     *
+     * @return expression value string
+     */
+    public boolean setValue(String value);
+
+    /**
+     * Evaluates this expression (computes its value on engine side).
+     */
+    public void evaluate();
 
 }

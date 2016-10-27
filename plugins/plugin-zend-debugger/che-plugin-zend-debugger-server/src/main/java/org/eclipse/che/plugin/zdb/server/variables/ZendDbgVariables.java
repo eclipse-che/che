@@ -10,12 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server.variables;
 
-import static org.eclipse.che.plugin.zdb.server.variables.IDbgDataFacet.Facet.*;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.*;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
+import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpression;
+import org.eclipse.che.plugin.zdb.server.expressions.ZendDbgExpressionEvaluator;
 import org.eclipse.che.plugin.zdb.server.utils.ZendDbgUtils;
 
 /**
@@ -23,32 +23,24 @@ import org.eclipse.che.plugin.zdb.server.utils.ZendDbgUtils;
  *
  * @author Bartlomiej Laczkowski
  */
-public class ZendDbgVariables extends AbstractDbgExpression {
+public class ZendDbgVariables extends ZendDbgExpression {
 
     private final static String DUMP_VARIABLES_EXPRESSION = "eval('if (isset($this)) {$this;}; return get_defined_vars();')";
 
-    private final List<IDbgVariable> children = new ArrayList<>();
-
-    public ZendDbgVariables(ZendDbgExpressionResolver resolver) {
-        super(resolver, DUMP_VARIABLES_EXPRESSION);
+    public ZendDbgVariables(ZendDbgExpressionEvaluator expressionEvaluator) {
+        super(expressionEvaluator, DUMP_VARIABLES_EXPRESSION, Collections.emptyList());
     }
 
     @Override
-    protected AbstractDbgExpression createChild(String name, Facet... facets) {
-        name = '$' + name;
+    protected ZendDbgExpression createChild(String variableName, Facet... facets) {
+        variableName = '$' + variableName;
         Facet facet = KIND_LOCAL;
-        if (ZendDbgUtils.isThis(name))
+        if (ZendDbgUtils.isThis(variableName))
             facet = KIND_THIS;
-        else if (ZendDbgUtils.isSuperGlobal(name))
+        else if (ZendDbgUtils.isSuperGlobal(variableName))
             facet = KIND_SUPER_GLOBAL;
-        ZendDbgVariable variable = new ZendDbgVariable(getResolver(), name, Collections.singletonList(name), facet);
-        children.add(variable);
-        return variable;
-    }
-
-    @Override
-    public List<IDbgVariable> getChildren() {
-        return children;
+        return new ZendDbgExpression(getExpressionEvaluator(), variableName, Collections.singletonList(variableName),
+                facet);
     }
 
 }

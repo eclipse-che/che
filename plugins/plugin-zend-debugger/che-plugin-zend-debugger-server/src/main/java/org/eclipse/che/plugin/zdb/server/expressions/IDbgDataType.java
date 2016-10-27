@@ -8,7 +8,7 @@
  * Contributors:
  *   Rogue Wave Software, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.zdb.server.variables;
+package org.eclipse.che.plugin.zdb.server.expressions;
 
 /**
  * Interface for variables/values that are responsible for handling the
