@@ -853,17 +853,13 @@ public class CheEnvironmentEngine {
                     machineSource = snapshot.getMachineSource();
                 }
 
-                instance = machineStarter.startMachine(machineLogger,
-                                                       machineSource
-                );
+                instance = machineStarter.startMachine(machineLogger, machineSource);
             } catch (SourceNotFoundException e) {
                 if (recover) {
                     LOG.error("Image of snapshot for machine " + machine.getConfig().getName() +
                               " not found. " + "Machine will be created from origin source");
                     machine = originMachine;
-                    instance = machineStarter.startMachine(machineLogger,
-                                                           null
-                    );
+                    instance = machineStarter.startMachine(machineLogger, null);
                 } else {
                     throw e;
                 }
@@ -916,7 +912,8 @@ public class CheEnvironmentEngine {
 
     private interface MachineStarter {
         Instance startMachine(LineConsumer machineLogger,
-                              MachineSource machineSource) throws ServerException, NotFoundException;
+                              MachineSource machineSource) throws ServerException,
+                                                                  NotFoundException;
     }
 
     private CheServiceImpl getServiceWithCorrectSource(CheServiceImpl service,

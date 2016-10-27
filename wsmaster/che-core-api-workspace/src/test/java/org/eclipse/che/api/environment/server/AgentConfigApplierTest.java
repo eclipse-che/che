@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.api.environment.server;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.impl.AgentSorter;
 import org.eclipse.che.api.agent.server.launcher.AgentLauncherFactory;
@@ -18,7 +20,6 @@ import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
-import org.eclipse.che.api.workspace.server.model.impl.ServerConf2Impl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -79,18 +80,37 @@ public class AgentConfigApplierTest {
     }
 
     @Test
+    public void shouldAddLabels() throws Exception {
+        final ServerConf2 serverConf1 = mock(ServerConf2.class);
+        when(serverConf1.getPort()).thenReturn("1111/udp");
+        when(serverConf1.getProtocol()).thenReturn("http");
+        when(serverConf1.getProperties()).thenReturn(ImmutableMap.of("ref", "a", "path", "b"));
+
+        when(sorter.sort(any())).thenReturn(singletonList(AgentKeyImpl.parse("agent1")));
+        when(agent1.getServers()).thenAnswer(invocation -> singletonList(serverConf1));
+        CheServiceImpl service = new CheServiceImpl();
+
+        agentConfigApplier.modify(service, singletonList("agent1"));
+
+        Map<String, String> labels = service.getLabels();
+        assertEquals(labels.size(), 3);
+        assertEquals(labels.get("che:server:1111/udp:ref"), "a");
+        assertEquals(labels.get("che:server:1111/udp:protocol"), "http");
+        assertEquals(labels.get("che:server:1111/udp:path"), "b");
+    }
+
+    @Test
     public void shouldAddExposedPorts() throws Exception {
-        ServerConf2 serverConf1 = mock(ServerConf2.class);
-        ServerConf2 serverConf2 = mock(ServerConf2.class);
+        final ServerConf2 serverConf1 = mock(ServerConf2.class);
+        final ServerConf2 serverConf2 = mock(ServerConf2.class);
         when(serverConf1.getPort()).thenReturn("1111/udp");
         when(serverConf2.getPort()).thenReturn("2222/tcp");
 
         when(sorter.sort(any())).thenReturn(asList(AgentKeyImpl.parse("agent1"),
                                                    AgentKeyImpl.parse("agent2"),
                                                    AgentKeyImpl.parse("agent3")));
-
-        when(agent1.getServers()).thenReturn(singletonList(serverConf1));
-        when(agent2.getServers()).thenReturn(singletonList(serverConf2));
+        when(agent1.getServers()).thenAnswer(invocation -> singletonList(serverConf1));
+        when(agent2.getServers()).thenAnswer(invocation -> singletonList(serverConf2));
         when(agent3.getServers()).thenReturn(emptyList());
         CheServiceImpl service = new CheServiceImpl();
 

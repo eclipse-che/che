@@ -46,6 +46,7 @@ import static org.eclipse.che.api.environment.server.AgentConfigApplier.PROPERTI
  * @see Agent#getProperties()
  * @see CheServiceImpl#getEnvironment()
  * @see CheServiceImpl#getPorts()
+ * @see CheServiceImpl#getLabels()
  *
  * @author Anatolii Bazko
  */

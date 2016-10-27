@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author Anatoliy Bazko
@@ -31,7 +30,7 @@ public class AgentImpl implements Agent {
     private final List<String>        dependencies;
     private final Map<String, String> properties;
     private final String              script;
-    private final List<ServerConf2>   servers;
+    private final List<? extends ServerConf2> servers;
 
     public AgentImpl(String name,
                      String version,
@@ -44,7 +43,7 @@ public class AgentImpl implements Agent {
         this.dependencies = dependencies;
         this.properties = properties;
         this.script = script;
-        this.servers = servers.stream().map(serverConf2 -> serverConf2).collect(Collectors.toList());
+        this.servers = MoreObjects.firstNonNull(servers, new ArrayList<>());
     }
 
     public AgentImpl(Agent agent) {
@@ -82,7 +81,7 @@ public class AgentImpl implements Agent {
     }
 
     @Override
-    public List<ServerConf2> getServers() {
+    public List<? extends ServerConf2> getServers() {
         return servers;
     }
 
