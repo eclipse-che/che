@@ -80,8 +80,6 @@ import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
 /**
  * Default implementation of {@link EditorAgent}.
  *
- * @author Evgen Vidolob
- * @author Vlad Zhukovskyi
  * @see EditorAgent
  **/
 @Singleton
@@ -496,10 +494,10 @@ public class EditorAgentImpl implements EditorAgent,
     private List<Promise<Void>> restoreSplit(JsonObject files, EditorPartStack editorPartStack,
                                              Map<EditorPartPresenter, EditorPartStack> activeEditors) {
         JsonObject splitFirst = files.getObject("SPLIT_FIRST");
-        List<Promise<Void>> restoreFirst = restore(splitFirst, editorPartStack, activeEditors);
         String direction = files.getString("DIRECTION");
         double size = files.getNumber("SIZE");
         EditorPartStack split = editorMultiPartStack.split(editorPartStack, new Constraints(Direction.valueOf(direction), null), size);
+        List<Promise<Void>> restoreFirst = restore(splitFirst, editorPartStack, activeEditors);
         JsonObject splitSecond = files.getObject("SPLIT_SECOND");
         List<Promise<Void>> restoreSecond = restore(splitSecond, split, activeEditors);
         List<Promise<Void>> result = new ArrayList<>();
