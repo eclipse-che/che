@@ -64,7 +64,7 @@
                    ng-change="workspaceMachineConfigController.enableDev()"
                    ng-disabled="workspaceMachineConfigController.machineConfig.isDev"
                    aria-label="Dev machine">
-          <span class="config-dev-machine-info">Injects terminal, SSH and IDE tooling.</span>
+          <span class="config-dev-machine-info">Injects terminal, SSH and IDE tooling</span>
         </md-switch>
       </div>
     </che-label-container>
@@ -78,7 +78,7 @@
     </che-label-container>
 
     <!-- Ports -->
-    <che-label-container che-label-name="Exposed Ports">
+    <che-label-container che-label-name="Exposed ports">
       <div class="config-params-table">
         <list-ports servers="workspaceMachineConfigController.machineConfig.servers"
                     servers-on-change="workspaceMachineConfigController.updateServers()"></list-ports>
