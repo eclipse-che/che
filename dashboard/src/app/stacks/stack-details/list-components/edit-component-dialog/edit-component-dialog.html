@@ -10,14 +10,14 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<che-popup che-title="Edit the component" che-on-close="editComponentDialogController.hide()">
+<che-popup che-title="{{editComponentDialogController.popupTitle}}" che-on-close="editComponentDialogController.hide()">
   <ng-form name="editComponentForm" class="edit-component-form">
     <div class="form-input-fields">
       <che-input type="text"
                  che-form="editComponentForm"
                  che-label-name="Name"
                  che-name="name"
-                 che-place-holder="enter component's name"
+                 che-place-holder="Enter component's name"
                  custom-validator="editComponentDialogController.isUnique($value)"
                  ng-model="editComponentDialogController.name"
                  ng-maxlength="256"
@@ -29,7 +29,7 @@
       <che-input che-form="editComponentForm"
                  che-label-name="Version"
                  che-name="version"
-                 che-place-holder="enter component's version"
+                 che-place-holder="Enter component's version"
                  type="text"
                  ng-model="editComponentDialogController.version"
                  ng-maxlength="256">

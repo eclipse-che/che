@@ -16,7 +16,6 @@ import {StackItem} from './list-stacks/stack-item/stack-item.directive';
 import {StackController} from './stack-details/stack.controller';
 import {ListComponents} from './stack-details/list-components/list-components.directive';
 import {ListComponentsController} from './stack-details/list-components/list-components.controller';
-import {AddComponentDialogController} from './stack-details/list-components/add-component-dialog/add-component-dialog.controller';
 import {EditComponentDialogController} from './stack-details/list-components/edit-component-dialog/edit-component-dialog.controller';
 
 /**
@@ -37,7 +36,6 @@ export class StacksConfig {
     register.directive('listComponents', ListComponents);
 
     register.controller('StackController', StackController);
-    register.controller('AddComponentDialogController', AddComponentDialogController);
     register.controller('EditComponentDialogController', EditComponentDialogController);
 
     // config routes

@@ -19,9 +19,9 @@ import {ListCommandsController} from "../list-commands.controller";
  */
 export class EditCommandDialogController {
   $mdDialog: ng.material.IDialogService;
-
   index: number;
   name: string;
+  popupTitle: string;
   previewUrl: string;
   commandLine: string;
   commands: Array<any>;
@@ -35,7 +35,8 @@ export class EditCommandDialogController {
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
 
-    let command = this.commands[this.index];
+    let isAddMode: boolean = (this.index === -1);
+    let command: any = isAddMode ? {name: '', commandLine: ''} : this.commands[this.index];
     this.name = command.name;
     this.commandLine = command.commandLine;
     if (command.attributes && command.attributes.previewUrl) {
@@ -44,10 +45,12 @@ export class EditCommandDialogController {
 
     this.usedCommandsName = [];
     this.commands.forEach((command) => {
-      if(this.name !== command.name) {
+      if (isAddMode || this.name !== command.name) {
         this.usedCommandsName.push(command.name);
       }
     });
+
+    this.popupTitle = isAddMode ? 'Add a new command' : 'Edit the command';
   }
 
   /**

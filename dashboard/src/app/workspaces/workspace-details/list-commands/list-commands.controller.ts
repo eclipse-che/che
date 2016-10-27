@@ -57,7 +57,11 @@ export class ListCommandsController {
     });
   }
 
-  changeCommandSelection(name): void {
+  /**
+   * Change command selection
+   * @param name: string
+   */
+  changeCommandSelection(name: string): void {
     this.commandsSelectedStatus[name] = !this.commandsSelectedStatus[name];
     this.updateSelectedStatus();
   }
@@ -96,6 +100,9 @@ export class ListCommandsController {
 
   /**
    * Add a new command
+   * @param name: string
+   * @param commandLine: string
+   * @param previewUrl: string
    */
   addCommand(name: string, commandLine: string, previewUrl: string): void {
     let command: any = {};
@@ -107,47 +114,42 @@ export class ListCommandsController {
       command.attributes.previewUrl = previewUrl;
     }
     this.commands.push(command);
-    this.updateSelectedStatus();
-    this.commandsOnChange();
   }
 
   /**
    * Update the command
+   * @param index: number
+   * @param name: string
+   * @param commandLine: string
+   * @param previewUrl: string
    */
   updateCommand(index: number, name: string, commandLine: string, previewUrl: string): void {
-    this.commands[index].name = name;
-    this.commands[index].commandLine = commandLine;
-    if (!this.commands[index].attributes) {
-      this.commands[index].attributes = {};
+    if(index === -1){
+      this.addCommand(name, commandLine, previewUrl);
+    } else {
+      this.commands[index].name = name;
+      this.commands[index].commandLine = commandLine;
+      if (!this.commands[index].attributes) {
+        this.commands[index].attributes = {};
+      }
+      this.commands[index].previewUrl = previewUrl;
     }
-    this.commands[index].previewUrl = previewUrl;
     this.updateSelectedStatus();
     this.commandsOnChange();
   }
 
   /**
    * Show dialog to add a new command
-   * @param $event
+   * @param $event: MouseEvent
    */
   showAddDialog($event: MouseEvent): void {
-    this.$mdDialog.show({
-      targetEvent: $event,
-      controller: 'AddCommandDialogController',
-      controllerAs: 'addCommandDialogController',
-      bindToController: true,
-      clickOutsideToClose: true,
-      locals: {
-        commands: this.commands,
-        callbackController: this
-      },
-      templateUrl: 'app/workspaces/workspace-details/list-commands/add-command-dialog/add-command-dialog.html'
-    });
+    this.showEditDialog($event, -1)
   }
 
   /**
    * Show dialog to edit the existing command
-   * @param $event
-   * @param index {number} index of selected command
+   * @param $event: MouseEvent
+   * @param index: number - index of selected command
    */
   showEditDialog($event: MouseEvent, index: number): void {
     this.$mdDialog.show({
@@ -182,10 +184,10 @@ export class ListCommandsController {
 
   /**
    * Show confirmation popup before delete
-   * @param numberToDelete
-   * @returns {*}
+   * @param numberToDelete: number
+   * @returns {ng.IPromise<any>}
    */
-  showDeleteConfirmation(numberToDelete): ng.IPromise<any> {
+  showDeleteConfirmation(numberToDelete: number): ng.IPromise<any> {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
       confirmTitle += 'these ' + numberToDelete + ' commands?';
@@ -201,5 +203,4 @@ export class ListCommandsController {
 
     return this.$mdDialog.show(confirm);
   }
-
 }

@@ -10,14 +10,14 @@
       Codenvy, S.A. - initial API and implementation
 
 -->
-<che-popup che-title="Edit the command" che-on-close="editCommandDialogController.hide()">
-  <ng-form name="editCommandForm" class="edit-command-form">
+<che-popup che-title="{{editCommandDialogController.popupTitle}}" che-on-close="editCommandDialogController.hide()">
+  <ng-form name="commandForm" class="edit-command-form">
     <div class="form-input-fields">
       <che-input type="text"
-                 che-form="editCommandForm"
+                 che-form="commandForm"
                  che-label-name="Name"
                  che-name="name"
-                 che-place-holder="enter command's name"
+                 che-place-holder="Enter command's name"
                  custom-validator="editCommandDialogController.isUnique($value)"
                  ng-model="editCommandDialogController.name"
                  ng-maxlength="256"
@@ -26,10 +26,10 @@
         <div ng-message="customValidator">This command's name is already in use.</div>
         <div ng-message="maxlength">Command's name should be less than 256 characters long.</div>
       </che-input>
-      <che-input che-form="editCommandForm"
+      <che-input che-form="commandForm"
                  che-label-name="Command"
                  che-name="command"
-                 che-place-holder="enter command's line"
+                 che-place-holder="Enter command's line"
                  type="text"
                  ng-model="editCommandDialogController.commandLine"
                  ng-maxlength="256"
@@ -37,10 +37,10 @@
         <div ng-message="required">Command's line is required.</div>
         <div ng-message="maxlength">Command's line should be less than 256 characters long.</div>
       </che-input>
-      <che-input che-form="editCommandForm"
+      <che-input che-form="commandForm"
                  che-name="previewUrl"
                  che-label-name="Preview URL"
-                 che-place-holder="enter preview URL"
+                 che-place-holder="Enter preview URL"
                  ng-maxlength="256"
                  type="text"
                  ng-model="editCommandDialogController.previewUrl">
@@ -49,7 +49,7 @@
     </div>
     <che-button-primary che-button-title="Update"
                         ng-click="editCommandDialogController.updateCommand()"
-                        ng-disabled="editCommandForm.$invalid">
+                        ng-disabled="commandForm.$invalid">
     </che-button-primary>
     <che-button-notice che-button-title="Cancel"
                        ng-click="editCommandDialogController.hide()">

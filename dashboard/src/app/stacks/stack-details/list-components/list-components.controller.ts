@@ -57,6 +57,10 @@ export class ListComponentsController {
     });
   }
 
+  /**
+   * Change component selection
+   * @param name: string
+   */
   changeComponentSelection(name): void {
     this.componentsSelectedStatus[name] = !this.componentsSelectedStatus[name];
     this.updateSelectedStatus();
@@ -96,49 +100,45 @@ export class ListComponentsController {
 
   /**
    * Add a new component
+   * @param name: string
+   * @param version: string
    */
   addComponent(name: string, version: string): void {
     let component: any = {};
     component.name = name;
     component.version = version ? version : '---';
     this.components.push(component);
-    this.updateSelectedStatus();
-    this.componentsOnChange();
   }
 
   /**
    * Update the component
+   * @param index: number
+   * @param name: string
+   * @param version: string
    */
   updateComponent(index: number, name: string, version: string): void {
-    this.components[index].name = name;
-    this.components[index].version = version ? version : '---';
+    if(index === -1){
+      this.addComponent(name, version);
+    } else {
+      this.components[index].name = name;
+      this.components[index].version = version ? version : '---';
+    }
     this.updateSelectedStatus();
     this.componentsOnChange();
   }
 
   /**
    * Show dialog to add a new component
-   * @param $event
+   * @param $event: MouseEvent
    */
   showAddDialog($event: MouseEvent): void {
-    this.$mdDialog.show({
-      targetEvent: $event,
-      controller: 'AddComponentDialogController',
-      controllerAs: 'addComponentDialogController',
-      bindToController: true,
-      clickOutsideToClose: true,
-      locals: {
-        components: this.components,
-        callbackController: this
-      },
-      templateUrl: 'app/stacks/stack-details/list-components/add-component-dialog/add-component-dialog.html'
-    });
+    this.showEditDialog($event, -1);
   }
 
   /**
    * Show dialog to edit the existing component
-   * @param $event
-   * @param index {number} index of selected component
+   * @param $event: MouseEvent
+   * @param index: number - index of selected component
    */
   showEditDialog($event: MouseEvent, index: number): void {
     this.$mdDialog.show({
@@ -174,9 +174,9 @@ export class ListComponentsController {
   /**
    * Show confirmation popup before delete
    * @param numberToDelete
-   * @returns {*}
+   * @returns {ng.IPromise<any>}
    */
-  showDeleteConfirmation(numberToDelete): ng.IPromise<any> {
+  showDeleteConfirmation(numberToDelete: number): ng.IPromise<any> {
     let confirmTitle = 'Would you like to delete ';
     if (numberToDelete > 1) {
       confirmTitle += 'these ' + numberToDelete + ' components?';
@@ -192,5 +192,4 @@ export class ListComponentsController {
 
     return this.$mdDialog.show(confirm);
   }
-
 }

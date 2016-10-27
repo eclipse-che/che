@@ -21,7 +21,7 @@
                che-subheader-title="{{stackController.stack.type}}">
   </che-toolbar>
   <md-progress-linear md-mode="indeterminate" ng-show="stackController.loading"></md-progress-linear>
-  <md-content md-scroll-y flex class="stack-content">
+  <md-content md-scroll-y flex class="stack-content" ng-if="!stackController.loading">
     <!-- Name -->
     <che-label-container che-label-name="Name">
       <div layout="column" class="stack-details-input">
@@ -30,7 +30,7 @@
                    aria-label="Name of the stack"
                    che-place-holder="Name of the stack"
                    ng-model="stackController.stackName"
-                   unique-stack-name="stackController.stack.name"
+                   custom-validator="stackController.isUniqueName($value)"
                    ng-change="stackController.updateStackName(stackForm.$valid)"
                    required
                    ng-maxlength="128"
@@ -40,7 +40,7 @@
           </div>
           <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
           <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-          <div ng-message="uniqueStackName">This stack name is already used.</div>
+          <div ng-message="customValidator">This stack name is already used.</div>
         </che-input>
       </div>
     </che-label-container>

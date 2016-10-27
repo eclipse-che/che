@@ -21,6 +21,7 @@ export class EditComponentDialogController {
   $mdDialog: ng.material.IDialogService;
 
   index: number;
+  popupTitle: string;
   name: string;
   version: string;
   components: Array<any>;
@@ -34,16 +35,19 @@ export class EditComponentDialogController {
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
 
-    let component = this.components[this.index];
+    let isAddMode: boolean = (this.index === -1);
+    let component: any = isAddMode ? {name: '', version: ''} : this.components[this.index];
     this.name = component.name;
     this.version = component.version;
 
     this.usedComponentsName = [];
     this.components.forEach((component) => {
-      if(this.name !== component.name) {
+      if (this.name !== component.name) {
         this.usedComponentsName.push(component.name);
       }
     });
+
+    this.popupTitle = isAddMode ? 'Add a new component' : 'Edit the component';
   }
 
   /**
@@ -58,14 +62,14 @@ export class EditComponentDialogController {
   /**
    * It will hide the dialog box.
    */
-  hide() {
+  hide(): void {
     this.$mdDialog.hide();
   }
 
   /**
    * Update the component
    */
-  updateComponent() {
+  updateComponent(): void {
     this.callbackController.updateComponent(this.index, this.name, this.version);
     this.hide();
   }

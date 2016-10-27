@@ -73,12 +73,33 @@ export class StackController {
     this.copyStack = {};
     this.stackTags = [];
 
+    if(!this.cheStack.getStacks().length) {
+      this.loading = true;
+      this.cheStack.fetchStacks().finally(()=>{
+        this.loading = false;
+      });
+    }
+
     if (this.isCreation) {
       this.stack = this.getNewStackTemplate();
+      this.stackTags = angular.copy(this.stack.tags);
+      this.stackName = angular.copy(this.stack.name);
     } else {
       this.stackId = $route.current.params.stackId;
       this.fetchStack();
     }
+  }
+
+  /**
+   * Check if the name is unique.
+   * @param name
+   * @returns {boolean}
+   */
+  isUniqueName(name: string): boolean {
+    if(this.copyStack && this.copyStack.name === name) {
+      return true;
+    }
+    return this.cheStack.isUniqueName(name);
   }
 
   /**
@@ -110,47 +131,8 @@ export class StackController {
    * @returns {{stack}} new stack template
    */
   getNewStackTemplate(): any {
-    this.stackName = 'New Stack';
-    let stack: any = {
-      'name': this.stackName,
-      'description': 'New Java Stack',
-      'scope': 'general',
-      'tags': [
-        'Java 1.8'
-      ],
-      'components': [],
-      'source': {
-        'type': 'image',
-        'origin': 'codenvy/ubuntu_jdk8'
-      },
-      'workspaceConfig': {
-        'environments': {
-          'default': {
-            'machines': {
-              'dev-machine': {
-                'agents': [
-                  'org.eclipse.che.terminal', 'org.eclipse.che.ws-agent', 'org.eclipse.che.ssh'
-                ],
-                'servers': {},
-                'attributes': {
-                  'memoryLimitBytes': '2147483648'
-                }
-              }
-            },
-            'recipe': {
-              'content': 'services:\n dev-machine:\n  image: codenvy/ubuntu_jdk8\n',
-              'contentType': 'application/x-yaml',
-              'type': 'compose'
-            }
-          }
-        },
-        'name': 'default',
-        'defaultEnv': 'default',
-        'description': null,
-        'commands': []
-      }
-    };
-
+    let stack: any = this.cheStack.getStackTemplate();
+    this.stackName = stack.name;
     return stack;
   }
 

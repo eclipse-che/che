@@ -79,10 +79,16 @@ export class AddMachineDialogController {
     };
     this.machineRecipeScript = 'new-machine:\n  image: codenvy/ubuntu_jdk8\n  mem_limit: 2147483648\n';
     this.updateMachineRecipe();
-    if (!this.isUnique(this.machineName)) {
-      this.machineName = 'machine-' + (('0000' + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)); // jshint ignore:line
-      this.updateMachineName(true);
+    if (this.isUnique(this.machineName)) {
+      return;
     }
+    for (let pos: number = 1; pos < 1000; pos++) {
+      if (this.isUnique(this.machineName + pos.toString())) {
+        this.machineName += pos.toString();
+        break;
+      }
+    }
+    this.updateMachineName(true);
   }
 
   /**

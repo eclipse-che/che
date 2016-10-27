@@ -64,7 +64,6 @@ import {EditPortDialogController} from  './workspace-details/environments/list-p
 
 import {ListCommandsController} from './workspace-details/list-commands/list-commands.controller';
 import {ListCommands} from './workspace-details/list-commands/list-commands.directive';
-import {AddCommandDialogController} from  './workspace-details/list-commands/add-command-dialog/add-command-dialog.controller';
 import {EditCommandDialogController} from  './workspace-details/list-commands/edit-command-dialog/edit-command-dialog.controller';
 
 import {ListAgentsController} from  './workspace-details/environments/list-agents/list-agents.controller';
@@ -148,7 +147,6 @@ export class WorkspacesConfig {
 
     register.controller('ListCommandsController', ListCommandsController);
     register.directive('listCommands', ListCommands);
-    register.controller('AddCommandDialogController', AddCommandDialogController);
     register.controller('EditCommandDialogController', EditCommandDialogController);
 
     register.controller('AddMachineDialogController', AddMachineDialogController);
