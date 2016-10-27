@@ -419,14 +419,8 @@ public class WorkspaceEventsHandler {
 
                 case STOPPED:
                     loader.setSuccess(LoaderPresenter.Phase.STOPPING_WORKSPACE);
-
-                    try {
-                        eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
-                    } catch (Exception e) {
-                        Log.error(WorkspaceEventsHandler.class, e.getMessage(), e);
-                    }
-
                     startWorkspaceNotification.show(statusEvent.getWorkspaceId());
+                    eventBus.fireEvent(new WorkspaceStoppedEvent(workspace));
                     break;
 
                 case SNAPSHOT_CREATING:
