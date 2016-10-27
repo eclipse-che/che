@@ -121,11 +121,7 @@ public class MachineStatusHandler implements MachineStatusChangedEvent.Handler {
             return;
         }
 
-        try {
-            eventBus.fireEvent(new MachineStateEvent(machine, RUNNING));
-        } catch (Exception e) {
-            Log.error(MachineStatusHandler.class, e.getMessage(), e);
-        }
-
+        eventBus.fireEvent(new MachineStateEvent(machine, RUNNING));
     }
+
 }
