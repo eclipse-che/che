@@ -25,9 +25,9 @@ FROM alpine:3.4
 ENV LANG=C.UTF-8 \
     JAVA_HOME=/usr/lib/jvm/default-jvm/jre \
     PATH=${PATH}:${JAVA_HOME}/bin \
-    CHE_HOME=/home/user/che \
     DOCKER_VERSION=1.6.0 \
-    DOCKER_BUCKET=get.docker.com
+    DOCKER_BUCKET=get.docker.com \
+    CHE_IN_CONTAINER=true
 
 RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
     apk upgrade --update && \
@@ -46,13 +46,6 @@ RUN echo "http://dl-4.alpinelinux.org/alpine/edge/community" >> /etc/apk/reposit
     rm -rf /tmp/* /var/cache/apk/*
 
 EXPOSE 8000 8080
-
 USER user
-
 ADD assembly/assembly-main/target/eclipse-che-*/eclipse-che-* /home/user/che/
-
-ENV CHE_HOME /home/user/che
-
-ENTRYPOINT [ "/home/user/che/bin/che.sh", "-c" ]
-
-CMD [ "run" ]
+ENTRYPOINT ["/home/user/che/bin/docker.sh"]
