@@ -53,7 +53,7 @@ export class WorkspaceStatusIndicator {
       '<div class="spinner"><div class="rect1"></div><div class="rect2"></div><div class="rect3"></div></div>' +
       '</span>' +
       '<span ng-switch-when="ERROR" class="fa fa-circle workspace-status-error"></span>' +
-      '<span ng-switch-when="SNAPSHOT_CREATING" class="fa fa-circle workspace-status-snapshot"></span>' +
+      '<span ng-switch-when="SNAPSHOTTING" class="fa fa-circle workspace-status-snapshot"></span>' +
       '<span ng-switch-default class="fa ' + (emptyCircleOnStopped ? 'fa-circle-o' : 'fa-circle') + ' workspace-status-default"></span>' +
       '</span>';
   }
