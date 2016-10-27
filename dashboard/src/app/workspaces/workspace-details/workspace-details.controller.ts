@@ -37,6 +37,7 @@ export class WorkspaceDetailsController {
   cheEnvironmentRegistry: CheEnvironmentRegistry;
   cheNotification: CheNotification;
   cheWorkspace: CheWorkspace;
+  cheNamespaceRegistry: CheNamespaceRegistry;
   ideSvc: IdeSvc;
   workspaceDetailsService: WorkspaceDetailsService;
 
@@ -56,6 +57,7 @@ export class WorkspaceDetailsController {
   invalidWorkspace: string;
   editMode: boolean = false;
   showApplyMessage: boolean = false;
+  workspaceNamespace: string = undefined;
 
   usedNamesList: any = [];
 
@@ -66,7 +68,10 @@ export class WorkspaceDetailsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, $route: ng.route.IRouteService, $rootScope: ng.IRootScopeService, $scope: ng.IScope, $timeout: ng.ITimeoutService, cheEnvironmentRegistry: CheEnvironmentRegistry, cheNotification: CheNotification, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService,
+              $route: ng.route.IRouteService, $rootScope: ng.IRootScopeService, $scope: ng.IScope, $timeout: ng.ITimeoutService,
+              cheEnvironmentRegistry: CheEnvironmentRegistry, cheNotification: CheNotification, cheWorkspace: CheWorkspace,
+              ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, cheNamespaceRegistry: CheNamespaceRegistry) {
     this.$log = $log;
     this.$location = $location;
     this.$mdDialog = $mdDialog;
@@ -78,6 +83,7 @@ export class WorkspaceDetailsController {
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
+    this.cheNamespaceRegistry = cheNamespaceRegistry;
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
 
@@ -226,6 +232,15 @@ export class WorkspaceDetailsController {
   }
 
   /**
+   * Returns the list of available namespaces.
+   *
+   * @returns {Array} array of namespaces
+   */
+  getNamespaces(): Array<string> {
+    return this.cheNamespaceRegistry.getNamespaces();
+  }
+
+  /**
    * Returns workspace details sections (tabs, example - projects)
    *
    * @returns {*}
@@ -351,7 +366,7 @@ export class WorkspaceDetailsController {
    */
   createWorkspace(): void {
     let attributes = this.stack ? {stackId: this.stack.id} : {};
-    let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(null, this.copyWorkspaceDetails.config, attributes);
+    let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(this.workspaceNamespace, this.copyWorkspaceDetails.config, attributes);
     this.redirectAfterSubmitWorkspace(creationPromise);
   }
 

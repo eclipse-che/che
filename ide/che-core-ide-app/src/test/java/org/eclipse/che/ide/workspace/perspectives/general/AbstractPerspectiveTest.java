@@ -199,8 +199,8 @@ public class AbstractPerspectiveTest {
 
     @Test
     public void partsShouldBeRestored() {
+        perspective.maximizeBottomPart();
         perspective.restoreParts();
-
         verify(workBenchController, times(3)).setSize(anyDouble());
     }
 

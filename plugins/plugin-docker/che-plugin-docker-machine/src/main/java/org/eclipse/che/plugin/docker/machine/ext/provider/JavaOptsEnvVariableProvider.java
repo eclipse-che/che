@@ -25,7 +25,7 @@ import javax.inject.Singleton;
 @Singleton
 public class JavaOptsEnvVariableProvider implements Provider<String> {
     @Inject
-    @Named("che.machine.java_opts")
+    @Named("che.workspace.java_opts")
     private String javaOpts;
 
     @Override

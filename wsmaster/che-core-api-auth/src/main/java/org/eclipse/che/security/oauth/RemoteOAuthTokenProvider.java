@@ -45,7 +45,7 @@ public class RemoteOAuthTokenProvider implements OAuthTokenProvider {
     private final HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public RemoteOAuthTokenProvider(@Named("api.endpoint") String apiEndpoint, HttpJsonRequestFactory httpJsonRequestFactory) {
+    public RemoteOAuthTokenProvider(@Named("che.api") String apiEndpoint, HttpJsonRequestFactory httpJsonRequestFactory) {
         this.apiEndpoint = apiEndpoint;
         this.httpJsonRequestFactory = httpJsonRequestFactory;
     }

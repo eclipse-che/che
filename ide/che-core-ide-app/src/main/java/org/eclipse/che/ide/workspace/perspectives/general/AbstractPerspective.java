@@ -54,6 +54,14 @@ import static org.eclipse.che.ide.api.parts.PartStackView.TabPosition.RIGHT;
 //TODO need rewrite this, remove direct dependency on PerspectiveViewImpl and other GWT Widgets
 public abstract class AbstractPerspective implements Presenter, Perspective, ActivePartChangedHandler {
 
+    private enum State {
+        NORMAL,
+        MAXIMIZED_LEFT_PART,
+        MAXIMIZED_RIGHT_PART,
+        MAXIMIZED_BOTTOM_PART,
+        MAXIMIZED_CENTRAL_PART
+    }
+
     protected final Map<PartStackType, PartStack> partStacks;
     protected final PerspectiveViewImpl           view;
 
@@ -66,6 +74,9 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
     private double        leftPartSize;
     private double        rightPartSize;
     private double        belowPartSize;
+
+    private State         layoutState = State.NORMAL;
+
     private PartPresenter activePart;
     private PartPresenter activePartBeforeChangePerspective;
 
@@ -110,7 +121,6 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
      */
     protected void openActivePart(@NotNull PartStackType partStackType) {
         PartStack partStack = partStacks.get(partStackType);
-
         partStack.openPreviousActivePart();
     }
 
@@ -127,7 +137,6 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
     public void restoreState() {
         if (activePartBeforeChangePerspective != null) {
             setActivePart(activePartBeforeChangePerspective);
-
             activePartBeforeChangePerspective.restoreState();
         }
     }
@@ -158,6 +167,10 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
     /** {@inheritDoc} */
     @Override
     public void maximizeCentralPart() {
+        if (layoutState == State.MAXIMIZED_CENTRAL_PART) {
+            return;
+        }
+
         leftPartSize = leftPartController.getSize();
         rightPartSize = rightPartController.getSize();
         belowPartSize = belowPartController.getSize();
@@ -165,11 +178,17 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         leftPartController.setHidden(true);
         rightPartController.setHidden(true);
         belowPartController.setHidden(true);
+
+        layoutState = State.MAXIMIZED_CENTRAL_PART;
     }
 
     /** {@inheritDoc} */
     @Override
     public void maximizeBottomPart() {
+        if (layoutState == State.MAXIMIZED_BOTTOM_PART) {
+            return;
+        }
+
         leftPartSize = leftPartController.getSize();
         rightPartSize = rightPartController.getSize();
         belowPartSize = belowPartController.getSize();
@@ -177,14 +196,22 @@ public abstract class AbstractPerspective implements Presenter, Perspective, Act
         leftPartController.setHidden(true);
         rightPartController.setHidden(true);
         belowPartController.maximize();
+
+        layoutState = State.MAXIMIZED_BOTTOM_PART;
     }
 
     /** {@inheritDoc} */
     @Override
     public void restoreParts() {
+        if (layoutState == State.NORMAL) {
+            return;
+        }
+
         leftPartController.setSize(leftPartSize);
         rightPartController.setSize(rightPartSize);
         belowPartController.setSize(belowPartSize);
+
+        layoutState = State.NORMAL;
     }
 
     /** {@inheritDoc} */

@@ -106,8 +106,8 @@ public class DockerInstance extends AbstractInstance {
 
     @Inject
     public DockerInstance(DockerConnector docker,
-                          @Named("machine.docker.registry") String registry,
-                          @Named("machine.docker.snapshot.registry_namespace") @Nullable String registryNamespace,
+                          @Named("che.docker.registry") String registry,
+                          @Named("che.docker.namespace") @Nullable String registryNamespace,
                           DockerMachineFactory dockerMachineFactory,
                           @Assisted Machine machine,
                           @Assisted("container") String container,
@@ -116,7 +116,7 @@ public class DockerInstance extends AbstractInstance {
                           @Assisted LineConsumer outputConsumer,
                           DockerInstanceStopDetector dockerInstanceStopDetector,
                           DockerInstanceProcessesCleaner processesCleaner,
-                          @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry) {
+                          @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry) {
         super(machine);
         this.dockerMachineFactory = dockerMachineFactory;
         this.container = container;

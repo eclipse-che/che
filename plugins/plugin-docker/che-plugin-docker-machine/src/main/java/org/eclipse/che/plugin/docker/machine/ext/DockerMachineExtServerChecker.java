@@ -30,7 +30,7 @@ public class DockerMachineExtServerChecker {
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerMachineExtServerChecker.class);
 
-    public static final String EXT_SERVER_ARCHIVE_LOCATION = "machine.server.ext.archive";
+    public static final String EXT_SERVER_ARCHIVE_LOCATION = "che.workspace.agent.dev";
 
     private final String extServerArchiveLocation;
 
