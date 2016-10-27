@@ -624,22 +624,27 @@ public class CheEnvironmentEngine {
      */
     @VisibleForTesting
     void normalizeLinks(CheServiceImpl serviceToNormalizeLinks, Map<String, CheServiceImpl> services) {
-        final List<String> containerLinks = serviceToNormalizeLinks.getLinks();
-        for (int i = 0;  i < containerLinks.size(); i++) {
-            String serviceNameAndAliasToLink[] = containerLinks.get(i).split(":"); // a link has format: 'name:alias' or 'name'
-            String serviceName = serviceNameAndAliasToLink[0];
-            String serviceAlias = (serviceNameAndAliasToLink.length > 1) ? serviceNameAndAliasToLink[1] : null;
-            CheServiceImpl serviceLinkTo = services.get(serviceName);
-            if (serviceLinkTo != null) {
-                String containerNameLinkTo = serviceLinkTo.getContainerName();
-                containerLinks.set(i, (serviceAlias == null) ?
-                                      containerNameLinkTo + ':' + serviceName :
-                                      containerNameLinkTo + ':' + serviceAlias);
-            } else {
-                // should never happens. Errors like this should be filtered by CheEnvironmentValidator
-                LOG.error("Attempt to link non existing service {} to {} service.", serviceName, serviceToNormalizeLinks);
-            }
-        }
+        serviceToNormalizeLinks.setLinks(
+                serviceToNormalizeLinks.getLinks()
+                                       .stream()
+                                       .map(link -> {
+                                           // a link has format: 'name:alias' or 'name'
+                                           String serviceNameAndAliasToLink[] = link.split(":", 2);
+                                           String serviceName = serviceNameAndAliasToLink[0];
+                                           String serviceAlias = (serviceNameAndAliasToLink.length > 1) ?
+                                                                 serviceNameAndAliasToLink[1] : null;
+                                           CheServiceImpl serviceLinkTo = services.get(serviceName);
+                                           if (serviceLinkTo != null) {
+                                               String containerNameLinkTo = serviceLinkTo.getContainerName();
+                                               return (serviceAlias == null) ?
+                                                      containerNameLinkTo :
+                                                      containerNameLinkTo + ':' + serviceAlias;
+                                           } else {
+                                               // should never happens. Errors like this should be filtered by CheEnvironmentValidator
+                                               throw new IllegalArgumentException("Attempt to link non existing service " + serviceName +
+                                                                                  " to " + serviceToNormalizeLinks + " service.");
+                                           }
+                                       }).collect(toList()));
     }
 
     private void normalize(String namespace,
@@ -711,7 +716,6 @@ public class CheEnvironmentEngine {
         try {
             machineProvider.createNetwork(networkId);
 
-            EnvironmentHolder environmentHolder;
             String machineName = queuePeekOrFail(workspaceId);
             while (machineName != null) {
                 boolean isDev = devMachineName.equals(machineName);
@@ -722,7 +726,7 @@ public class CheEnvironmentEngine {
 
                 CheServiceImpl service;
                 try (StripedLocks.ReadLock lock = stripedLocks.acquireReadLock(workspaceId)) {
-                    environmentHolder = environments.get(workspaceId);
+                    EnvironmentHolder environmentHolder = environments.get(workspaceId);
                     if (environmentHolder == null) {
                         throw new ServerException("Environment start is interrupted.");
                     }
@@ -781,7 +785,7 @@ public class CheEnvironmentEngine {
                 boolean queuePolled = false;
                 try (StripedLocks.WriteLock lock = stripedLocks.acquireWriteLock(workspaceId)) {
                     ensurePreDestroyIsNotExecuted();
-                    environmentHolder = environments.get(workspaceId);
+                    EnvironmentHolder environmentHolder = environments.get(workspaceId);
                     if (environmentHolder != null) {
                         final Queue<String> queue = environmentHolder.startQueue;
                         if (queue != null) {
