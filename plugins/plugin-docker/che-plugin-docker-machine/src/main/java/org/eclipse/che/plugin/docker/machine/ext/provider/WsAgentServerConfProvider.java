@@ -31,7 +31,7 @@ import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 public class WsAgentServerConfProvider implements Provider<ServerConf> {
 
     @Inject
-    @Named("api.endpoint")
+    @Named("che.api")
     private URI apiEndpoint;
 
     @Override

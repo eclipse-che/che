@@ -20,12 +20,9 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.machine.shared.dto.SnapshotDto;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.workspace.WorkspaceServiceClient;
 import org.eclipse.che.ide.ui.loaders.LoaderPresenter;
@@ -48,7 +45,6 @@ public class StartWorkspaceNotification {
     private final WorkspaceStarterUiBinder      uiBinder;
 
     private final LoaderPresenter               loader;
-    private final AppContext                    appContext;
     private final WorkspaceServiceClient        workspaceServiceClient;
     private final WorkspaceComponentProvider    workspaceComponentProvider;
 
@@ -63,12 +59,10 @@ public class StartWorkspaceNotification {
     @Inject
     public StartWorkspaceNotification(LoaderPresenter loader,
                                       WorkspaceStarterUiBinder uiBinder,
-                                      AppContext appContext,
                                       WorkspaceServiceClient workspaceServiceClient,
                                       WorkspaceComponentProvider workspaceComponentProvider) {
         this.loader = loader;
         this.uiBinder = uiBinder;
-        this.appContext = appContext;
         this.workspaceServiceClient = workspaceServiceClient;
         this.workspaceComponentProvider = workspaceComponentProvider;
     }
@@ -94,6 +88,13 @@ public class StartWorkspaceNotification {
                 loader.show(LoaderPresenter.Phase.WORKSPACE_STOPPED, widget);
             }
         });
+    }
+
+    /**
+     * Hides a notification.
+     */
+    public void hide() {
+        loader.setSuccess(LoaderPresenter.Phase.WORKSPACE_STOPPED);
     }
 
     @UiHandler("button")

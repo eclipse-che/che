@@ -52,8 +52,8 @@ public class SshMachineImplTerminalLauncher extends AbstractAgentLauncher {
     private final String                             terminalLocation;
 
     @Inject
-    public SshMachineImplTerminalLauncher(@Named("machine.agent.max_start_time_ms") long agentMaxStartTimeMs,
-                                          @Named("machine.agent.ping_delay_ms") long agentPingDelayMs,
+    public SshMachineImplTerminalLauncher(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
+                                          @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs,
                                           @Named("machine.ssh.server.terminal.location") String terminalLocation,
                                           WebsocketTerminalFilesPathProvider terminalPathProvider) {
         super(agentMaxStartTimeMs, agentPingDelayMs, new ProcessIsLaunchedChecker("che-websocket-terminal"));

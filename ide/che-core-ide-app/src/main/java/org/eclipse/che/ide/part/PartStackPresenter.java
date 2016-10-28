@@ -34,6 +34,7 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,7 +87,7 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
         this.partsComparator = partsComparator;
 
         this.parts = new HashMap<>();
-        this.constraints = new HashMap<>();
+        this.constraints = new LinkedHashMap<>();
 
         this.propertyListener = new PropertyListener() {
             @Override
@@ -253,6 +254,11 @@ public class PartStackPresenter implements Presenter, PartStackView.ActionDelega
                 ((BasePresenter)partPresenter).setPartStack(this);
             }
         }
+    }
+
+    @Override
+    public List<? extends PartPresenter> getParts() {
+        return new ArrayList<>(constraints.keySet());
     }
 
     /** {@inheritDoc} */

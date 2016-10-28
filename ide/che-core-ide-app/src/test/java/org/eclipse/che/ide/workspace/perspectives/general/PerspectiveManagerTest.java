@@ -49,7 +49,7 @@ public class PerspectiveManagerTest {
         perspectives.put("Machine Perspective", machinePerspective);
         perspectives.put("Project Perspective", projectPerspective);
 
-        manager = new PerspectiveManager(perspectives);
+        manager = new PerspectiveManager(perspectives, "Project Perspective");
     }
 
     @Test

@@ -31,12 +31,10 @@ export class CheToggleButton {
       ngDisabled: '@ngDisabled'
     };
 
-
-
   }
 
   link($scope) {
-    $scope.controller = $scope.$parent.$parent.cheToggleCtrl;
+    $scope.controller = $scope.$parent.$parent.cheToggleCtrl || $scope.$parent.$parent.$parent.cheToggleCtrl;
   }
 
 

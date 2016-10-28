@@ -137,8 +137,8 @@ export class NavbarRecentWorkspacesController {
    */
   getDropdownItems(workspaceId) {
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId),
-      disabled = workspace && (workspace.status === 'STARTING' || workspace.status === 'STOPPING'),
-      visibleScope = (workspace && (workspace.status === 'RUNNING' || workspace.status === 'STOPPING')) ? 'RUNNING' : 'STOPPED';
+      disabled = workspace && (workspace.status === 'STARTING' || workspace.status === 'STOPPING' || workspace.status === 'SNAPSHOTTING'),
+      visibleScope = (workspace && (workspace.status === 'RUNNING' || workspace.status === 'STOPPING' || workspace.status === 'SNAPSHOTTING')) ? 'RUNNING' : 'STOPPED';
 
     if (!this.dropdownItems[workspaceId]) {
       this.dropdownItems[workspaceId] = [];

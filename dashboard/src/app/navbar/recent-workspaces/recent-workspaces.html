@@ -4,17 +4,20 @@
 
     <div class="navbar-section navbar-section-title"
          flex layout="row">
-      <div flex>
-        <span>Recent workspaces</span>
-      </div>
-      <div>
-        <md-button class="navbar-section-title-button" ng-href="#/create-workspace">
-          <i class="fa fa-plus" aria-hidden="true" aria-label="Add workspace"></i>
-        </md-button>
-      </div>
+      <span>Recent workspaces</span>
     </div>
 
     <md-list layout="column">
+      <md-list-item flex class="navbar-subsection-item">
+        <md-button flex che-reload-href
+                   ng-href="#/create-workspace"
+                   layout-align="left">
+          <div class="navbar-item" layout="row" layout-align="start center">
+            <i class="fa fa-plus navbar-icon navbar-primary"></i>
+            <span>Create Workspace</span>
+          </div>
+        </md-button>
+      </md-list-item>
       <md-list-item flex class="navbar-subsection-item"
                     ng-repeat="workspace in navbarRecentWorkspacesController.getRecentWorkspaces()
                     | orderBy:['attributes.opened', 'attributes.updated']:'reverse'

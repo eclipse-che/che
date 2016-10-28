@@ -61,7 +61,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
     /**
      * Env variable for dev machine that contains url of Che API
      */
-    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API_ENDPOINT";
+    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API";
 
     /**
      * Environment variable that will be setup in developer machine will contain ID of a workspace for which this machine has been created

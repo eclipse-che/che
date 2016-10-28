@@ -41,7 +41,7 @@ public class ApiEndpointAccessibilityChecker {
     private final HttpJsonRequestFactory httpJsonRequestFactory;
 
     @Inject
-    public ApiEndpointAccessibilityChecker(@Named("api.endpoint") String apiEndpoint,
+    public ApiEndpointAccessibilityChecker(@Named("che.api") String apiEndpoint,
                                            HttpJsonRequestFactory httpJsonRequestFactory) {
         // everest respond 404 to path to rest without trailing slash
         this.apiEndpoint = apiEndpoint.endsWith("/") ? apiEndpoint : apiEndpoint + "/";
