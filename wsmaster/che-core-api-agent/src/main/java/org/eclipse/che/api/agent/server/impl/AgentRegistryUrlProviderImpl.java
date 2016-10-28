@@ -29,7 +29,7 @@ import java.net.URL;
 @Singleton
 public class AgentRegistryUrlProviderImpl implements AgentRegistryUrlProvider {
     public static final String VERSION = "${version}";
-    public static final String NAME    = "${name}";
+    public static final String ID    = "${id}";
 
     private final String agentLatestVersionUrl;
     private final String agentSpecificVersionUrl;
@@ -48,9 +48,9 @@ public class AgentRegistryUrlProviderImpl implements AgentRegistryUrlProvider {
     public URL getAgentUrl(AgentKey agentKey) throws AgentException {
         String url;
         if (agentKey.getVersion() == null) {
-            url = agentLatestVersionUrl.replace(NAME, agentKey.getName());
+            url = agentLatestVersionUrl.replace(ID, agentKey.getId());
         } else {
-            url = agentSpecificVersionUrl.replace(NAME, agentKey.getName()).replace(VERSION, agentKey.getVersion());
+            url = agentSpecificVersionUrl.replace(ID, agentKey.getId()).replace(VERSION, agentKey.getVersion());
         }
         try {
             return new URL(url);
@@ -61,8 +61,8 @@ public class AgentRegistryUrlProviderImpl implements AgentRegistryUrlProvider {
 
 
     @Override
-    public URL getAgentVersionsUrl(String name) throws AgentException {
-        String url = agentVersionsUrl.replace(NAME, name);
+    public URL getAgentVersionsUrl(String id) throws AgentException {
+        String url = agentVersionsUrl.replace(ID, id);
         try {
             return new URL(url);
         } catch (MalformedURLException e) {

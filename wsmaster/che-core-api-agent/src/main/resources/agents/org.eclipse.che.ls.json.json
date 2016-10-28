@@ -1,5 +1,7 @@
 {
-"name": "org.eclipse.che.ls.json",
+"id": "org.eclipse.che.ls.json",
+"name": "JSON language server",
+"description" : "JSON support",
 "dependencies": [],
 "properties": {
 },
