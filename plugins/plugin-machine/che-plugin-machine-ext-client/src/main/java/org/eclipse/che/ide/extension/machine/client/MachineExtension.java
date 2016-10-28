@@ -92,7 +92,7 @@ public class MachineExtension {
      * to define a constant. If no constant defined than default value is used - <code>true</code>.
      */
     @Inject(optional = true)
-    @Named("machine.extension.central.toolbar.visibility") boolean centralToolbarVisible = true;
+    @Named("central.toolbar.visibility") boolean centralToolbarVisible = true;
 
     @Inject
     public MachineExtension(final MachineResources machineResources,
