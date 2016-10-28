@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineLogMessage;
 import org.eclipse.che.api.core.model.machine.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
@@ -31,6 +32,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
@@ -64,6 +66,7 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.Matchers.any;
@@ -112,6 +115,8 @@ public class CheEnvironmentEngineTest {
     ContainerNameGenerator             containerNameGenerator;
     @Mock
     AgentRegistry                      agentRegistry;
+    @Mock
+    Agent agent;
 
 
     EnvironmentParser environmentParser = new EnvironmentParser(new ComposeFileParser(), recipeDownloader);
@@ -135,7 +140,7 @@ public class CheEnvironmentEngineTest {
 
         when(machineInstanceProviders.getProvider("docker")).thenReturn(instanceProvider);
         when(instanceProvider.getRecipeTypes()).thenReturn(Collections.singleton("dockerfile"));
-        when(agentRegistry.getAgent(any(AgentKey.class))).thenReturn(mock(Agent.class));
+        when(agentRegistry.getAgent(any(AgentKey.class))).thenReturn(agent);
 
         EnvironmentContext.getCurrent().setSubject(new SubjectImpl("name", "id", "token", false));
     }
@@ -703,6 +708,12 @@ public class CheEnvironmentEngineTest {
     @Test
     public void shouldBeAbleToStartNonDockerMachine() throws Exception {
         // given
+        ServerConf2 serverConf2 = mock(ServerConf2.class);
+        when(serverConf2.getPort()).thenReturn("1111/tcp");
+        when(serverConf2.getProtocol()).thenReturn("http");
+        when(serverConf2.getProperties()).thenReturn(singletonMap("path", "some path"));
+        when(agent.getServers()).thenAnswer(invocation -> singletonMap("ssh", serverConf2));
+
         List<Instance> instances = startEnv();
         String workspaceId = instances.get(0).getWorkspaceId();
 
@@ -718,15 +729,17 @@ public class CheEnvironmentEngineTest {
                                                     .setType("anotherType")
                                                     .build();
 
-
         // when
-        Instance actualInstance = engine.startMachine(workspaceId, config, emptyList());
+        Instance actualInstance = engine.startMachine(workspaceId, config, singletonList("agent"));
 
         // then
         assertEquals(actualInstance, newMachine);
         ArgumentCaptor<Machine> argumentCaptor = ArgumentCaptor.forClass(Machine.class);
         verify(instanceProvider).createInstance(argumentCaptor.capture(), any(LineConsumer.class));
-        assertEquals(argumentCaptor.getValue().getConfig(), config);
+
+        MachineConfigImpl newConfig = new MachineConfigImpl(config);
+        newConfig.setServers(singletonList(new ServerConfImpl("ssh", "1111/tcp", "http", "some path")));
+        assertEquals(argumentCaptor.getValue().getConfig(), newConfig);
     }
 
     @Test(expectedExceptions = EnvironmentNotRunningException.class,
