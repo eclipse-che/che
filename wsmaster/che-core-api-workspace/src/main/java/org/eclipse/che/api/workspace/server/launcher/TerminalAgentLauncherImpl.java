@@ -40,7 +40,7 @@ public class TerminalAgentLauncherImpl extends AbstractAgentLauncher {
     }
 
     @Override
-    public String getAgentName() {
+    public String getAgentId() {
         return "org.eclipse.che.terminal";
     }
 }

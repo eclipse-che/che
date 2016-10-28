@@ -21,34 +21,45 @@ export class CheAgent {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-   constructor ($resource) {
+  constructor($resource, $q) {
 
     // keep resource
     this.$resource = $resource;
+    this.$q = $q;
 
     // agents
     this.agents = [];
 
     // remote call
-    this.remoteAgentAPI = this.$resource('/api/agent',{}, {
-      getAgents: {method: 'GET', url: '/api/agent', isArray: true
-    }});
+    this.remoteAgentAPI = this.$resource('/api/agent', {}, {
+      getAgents: { method: 'GET', url: '/api/agent', isArray: true }
+    });
   }
 
   /**
    * Fetch the agents
    */
   fetchAgents() {
+    var defer = this.$q.defer();
     let promise = this.remoteAgentAPI.getAgents().$promise;
-    let updatedPromise = promise.then((agents) => {
+
+    promise.then((agents) => {
       // reset global list
       this.agents.length = 0;
 
       agents.forEach((agent) => {
         this.agents.push(agent);
       });
+      defer.resolve();
+    }, (error) => {
+      if (error.status != 304) {
+        defer.reject(error);
+      } else {
+        defer.resolve();
+      }
     });
-    return updatedPromise;
+
+    return defer.promise;
   }
 
   /**
@@ -58,5 +69,5 @@ export class CheAgent {
   getAgents() {
     return this.agents;
   }
-  
+
 }
