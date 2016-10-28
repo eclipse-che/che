@@ -141,7 +141,7 @@ update_che_cli() {
     GITHUB_VERSION=$CHE_CLI_VERSION
   fi
   
-  URL=https://raw.githubusercontent.com/eclipse/che/$GITHUB_VERSION/cli.sh
+  URL=https://raw.githubusercontent.com/eclipse/che/prop-fix/cli.sh
 
   if ! curl --output /dev/null --silent --head --fail "$URL"; then
     error "CLI download error. Bad network or version. CLI update works for 5.0.0-M3+."
