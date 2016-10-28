@@ -37,6 +37,7 @@ export class WorkspaceEnvironmentsController {
     onLoad: Function
   };
 
+  stackId: string;
   workspaceConfig: any;
   environment: any;
   environmentName: string;
@@ -227,8 +228,10 @@ export class WorkspaceEnvironmentsController {
    * Callback when stack has been changed.
    *
    * @param config {object} workspace config
+   * @param stackId {string}
    */
-  changeWorkspaceStack(config: any): void {
+  changeWorkspaceStack(config: any, stackId: string): void {
+    this.stackId = stackId;
     this.workspaceConfig = config;
 
     if (!this.environmentName) {

@@ -44,7 +44,7 @@
                        che-label-description="Stacks are recipes or images used to define your environment runtime. Workspace environments are used to build and run your project.">
     <ng-form name="workspaceStackForm">
       <workspace-stacks ng-if="workspaceEnvironmentsController.workspaceName"
-                        workspace-stack-on-change="workspaceEnvironmentsController.changeWorkspaceStack(config)"
+                        workspace-stack-on-change="workspaceEnvironmentsController.changeWorkspaceStack(config, stackId)"
                         workspace-name="workspaceEnvironmentsController.workspaceName"></workspace-stacks>
     </ng-form>
   </che-label-container>
