@@ -522,7 +522,7 @@ export class CreateProjectController {
       });
 
       // now, resolve the project
-      deferredImportPromise.then(() => {
+      deferredAddCommandPromise.then(() => {
         this.resolveProjectType(workspaceId, projectName, projectData, deferredResolve);
       });
       promise = this.$q.all([deferredImportPromise, deferredAddCommandPromise, deferredResolvePromise]);
