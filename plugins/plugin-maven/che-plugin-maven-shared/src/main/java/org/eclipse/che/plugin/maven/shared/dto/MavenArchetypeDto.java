@@ -8,9 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.plugin.maven.generator.archetype.dto;
+package org.eclipse.che.plugin.maven.shared.dto;
 
 import org.eclipse.che.dto.shared.DTO;
+import org.eclipse.che.plugin.maven.shared.MavenArchetype;
 
 import java.util.Map;
 
@@ -20,40 +21,25 @@ import java.util.Map;
  * @author Artem Zatsarynnyi
  */
 @DTO
-public interface MavenArchetype {
-
-    /** Returns the archetype's groupId. */
-    String getGroupId();
+public interface MavenArchetypeDto extends MavenArchetype {
 
     void setGroupId(String groupId);
 
-    MavenArchetype withGroupId(String groupId);
-
-    /** Returns the archetype's artifactId. */
-    String getArtifactId();
+    MavenArchetypeDto withGroupId(String groupId);
 
     void setArtifactId(String artifactId);
 
-    MavenArchetype withArtifactId(String artifactId);
-
-    /** Returns the archetype's version. */
-    String getVersion();
+    MavenArchetypeDto withArtifactId(String artifactId);
 
     void setVersion(String version);
 
-    MavenArchetype withVersion(String version);
-
-    /** Returns the repository where to find the archetype. */
-    String getRepository();
+    MavenArchetypeDto withVersion(String version);
 
     void setRepository(String repository);
 
-    MavenArchetype withRepository(String repository);
-
-    /** Returns the additional properties for the archetype. */
-    Map<String, String> getProperties();
+    MavenArchetypeDto withRepository(String repository);
 
     void setProperties(Map<String, String> properties);
 
-    MavenArchetype withProperties(Map<String, String> properties);
+    MavenArchetypeDto withProperties(Map<String, String> properties);
 }

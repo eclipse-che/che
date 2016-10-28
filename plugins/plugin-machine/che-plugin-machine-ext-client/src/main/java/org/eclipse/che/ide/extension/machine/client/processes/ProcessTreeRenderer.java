@@ -143,7 +143,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
          * New terminal button
          *
          ***************************************************************************/
-        if (node.hasTerminalAgent()) {
+        if (node.isRunning() && node.hasTerminalAgent()) {
             SpanElement newTerminalButton = Elements.createSpanElement(resources.getCss().newTerminalButton());
             newTerminalButton.appendChild((Node)new SVGImage(resources.addTerminalIcon()).getElement());
             root.appendChild(newTerminalButton);
@@ -190,7 +190,7 @@ public class ProcessTreeRenderer implements NodeRenderer<ProcessTreeNode> {
          * SSH button
          *
          ***************************************************************************/
-        if (node.hasSSHAgent()) {
+        if (node.isRunning() && node.hasSSHAgent()) {
             SpanElement sshButton = Elements.createSpanElement(resources.getCss().sshButton());
             sshButton.setTextContent("SSH");
             root.appendChild(sshButton);

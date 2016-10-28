@@ -16,7 +16,9 @@ import org.eclipse.che.ide.api.parts.EditorPartStack;
  * The factory which creates instances of {@link EditorPartStack}.
  *
  * @author Roman Nikitenko
+ * @deprecated use {@link com.google.inject.Provider} to get new instance
  */
+@Deprecated
 public interface EditorPartStackFactory {
 
     /**

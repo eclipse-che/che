@@ -43,7 +43,7 @@ public class WsAgentVolumeProvider implements Provider<String> {
     private static final Logger LOG = LoggerFactory.getLogger(WsAgentVolumeProvider.class);
 
     @Inject
-    @Named("machine.server.ext.archive")
+    @Named("che.workspace.agent.dev")
     private String wsAgentArchivePath;
 
     @Override

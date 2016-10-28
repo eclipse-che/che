@@ -20,14 +20,14 @@ import java.net.URI;
  */
 public class UriApiEndpointProvider implements Provider<URI> {
 
-    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API_ENDPOINT";
+    public static final String API_ENDPOINT_URL_VARIABLE = "CHE_API";
 
     @Override
     public URI get() {
         try {
             return new URI(System.getenv(API_ENDPOINT_URL_VARIABLE));
         } catch (Exception e) {
-            throw new RuntimeException("System variable CHE_API_ENDPOINT contain invalid value of Che api endpoint:" +
+            throw new RuntimeException("System variable CHE_API contain invalid value of Che api endpoint:" +
                                        System.getenv(API_ENDPOINT_URL_VARIABLE));
         }
     }

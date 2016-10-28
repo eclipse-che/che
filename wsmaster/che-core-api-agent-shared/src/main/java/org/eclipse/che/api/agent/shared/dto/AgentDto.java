@@ -24,6 +24,13 @@ import java.util.Map;
 public interface AgentDto extends Agent {
 
     @Override
+    String getId();
+
+    void setId(String id);
+
+    AgentDto withId(String id);
+
+    @Override
     String getName();
 
     void setName(String name);
@@ -36,6 +43,13 @@ public interface AgentDto extends Agent {
     void setVersion(String version);
 
     AgentDto withVersion(String version);
+
+    @Override
+    String getDescription();
+
+    void setDescription(String description);
+
+    AgentDto withDescription(String description);
 
     @Override
     List<String> getDependencies();

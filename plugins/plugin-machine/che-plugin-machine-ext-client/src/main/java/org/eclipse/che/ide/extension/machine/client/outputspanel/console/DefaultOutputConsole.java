@@ -46,6 +46,7 @@ public class DefaultOutputConsole implements OutputConsole, OutputConsoleView.Ac
         this.view = view;
         this.title = title;
         this.resources = resources;
+        this.view.enableAutoScroll(true);
 
         view.setDelegate(this);
 

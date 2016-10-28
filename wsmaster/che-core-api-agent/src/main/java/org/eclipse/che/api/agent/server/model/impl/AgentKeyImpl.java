@@ -19,11 +19,11 @@ import java.util.Objects;
  * @author Anatolii Bazko
  */
 public class AgentKeyImpl implements AgentKey {
-    private final String name;
+    private final String id;
     private final String version;
 
-    public AgentKeyImpl(String name, @Nullable String version) {
-        this.name = name;
+    public AgentKeyImpl(String id, @Nullable String version) {
+        this.id = id;
         this.version = version;
     }
 
@@ -31,8 +31,8 @@ public class AgentKeyImpl implements AgentKey {
         this(name, null);
     }
 
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
     public String getVersion() {
@@ -40,7 +40,7 @@ public class AgentKeyImpl implements AgentKey {
     }
 
     /**
-     * Factory method. Agent key is basically a string meeting the format: {@code name:version}.
+     * Factory method. Agent key is basically a string meeting the format: {@code id:version}.
      * The version part can be omitted.
      *
      * @throws IllegalArgumentException
@@ -63,23 +63,23 @@ public class AgentKeyImpl implements AgentKey {
         if (this == o) return true;
         if (!(o instanceof AgentKeyImpl)) return false;
         AgentKeyImpl agentKey = (AgentKeyImpl)o;
-        return Objects.equals(name, agentKey.name) &&
+        return Objects.equals(id, agentKey.id) &&
                Objects.equals(version, agentKey.version);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, version);
+        return Objects.hash(id, version);
     }
 
     public String asString() {
-        return name + (version != null ? ":" + version : "");
+        return id + (version != null ? ":" + version : "");
     }
 
     @Override
     public String toString() {
         return "AgentImpl{" +
-               "name='" + name + '\'' +
+               "name='" + id + '\'' +
                ", version='" + version + "\'}";
     }
 }

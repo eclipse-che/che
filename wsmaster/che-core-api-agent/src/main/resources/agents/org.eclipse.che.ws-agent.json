@@ -1,5 +1,7 @@
 {
-  "name": "org.eclipse.che.ws-agent",
+  "id": "org.eclipse.che.ws-agent",
+  "name": "WS-agent",
+  "description" : "WS-agent support",
   "dependencies": [
     "org.eclipse.che.terminal"
   ],

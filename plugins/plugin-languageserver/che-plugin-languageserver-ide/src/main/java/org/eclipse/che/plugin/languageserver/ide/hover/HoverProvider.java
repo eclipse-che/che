@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.languageserver.ide.hover;
 
+import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.languageserver.shared.lsapi.HoverDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.MarkedStringDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.PositionDTO;
-import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
 import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
@@ -33,6 +32,11 @@ import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import io.typefox.lsapi.MarkedString;
 
 /**
  * Provides hover LS functionality for Orion editor.
@@ -80,11 +84,7 @@ public class HoverProvider implements OrionHoverHandler {
             public OrionHoverOverlay apply(HoverDTO arg) throws FunctionException {
                 OrionHoverOverlay hover = OrionHoverOverlay.create();
                 hover.setType("markdown");
-                StringBuilder b = new StringBuilder();
-                for (MarkedStringDTO dto : arg.getContents()) {
-                    b.append(dto.getValue());
-                }
-                String content = b.toString();
+                String content = renderContent(arg);
                 //do not show hover with only white spaces
                 if (StringUtils.isNullOrWhitespace(content)) {
                     return null;
@@ -92,6 +92,21 @@ public class HoverProvider implements OrionHoverHandler {
                 hover.setContent(content);
 
                 return hover;
+            }
+
+            private String renderContent(HoverDTO hover) {
+                List<String> contents = new ArrayList<String>();
+                for (MarkedStringDTO dto : hover.getContents()) {
+                    String lang = dto.getLanguage();
+                    if (lang == null || MarkedString.PLAIN_STRING.equals(lang)) {
+                        // plain markdown text
+                        contents.add(dto.getValue());
+                    } else {
+                        // markdown code block
+                        contents.add("```" + lang + "\n" + dto.getValue() + "\n```");
+                    }
+                }
+                return Joiner.on("\n\n").join(contents);
             }
         });
         return (JsPromise<OrionHoverOverlay>)then;

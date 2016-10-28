@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.csharp.projecttype;
 
+import com.google.inject.Inject;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FolderEntry;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
+import org.eclipse.che.api.vfs.Path;
+import org.eclipse.che.api.vfs.VirtualFileSystem;
+import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.plugin.csharp.shared.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,16 +36,19 @@ import static com.google.common.io.Resources.toByteArray;
  */
 public class CreateNetCoreProjectHandler implements CreateProjectHandler {
 
+    @Inject
+    private VirtualFileSystemProvider virtualFileSystemProvider;
+
     private static final Logger LOG = LoggerFactory.getLogger(CreateNetCoreProjectHandler.class);
 
     private final String PROJECT_FILE_NAME = "project.json";
 
-
     @Override
-    public void onCreateProject(FolderEntry baseFolder, Map<String, AttributeValue> attributes, Map<String, String> options)
+    public void onCreateProject(Path projectPath, Map<String, AttributeValue> attributes, Map<String, String> options)
             throws ForbiddenException, ConflictException, ServerException {
+        VirtualFileSystem vfs = virtualFileSystemProvider.getVirtualFileSystem();
+        FolderEntry baseFolder  = new FolderEntry(vfs.getRoot().createFolder(projectPath.toString()));
         baseFolder.createFile(PROJECT_FILE_NAME, getProjectContent());
-
     }
 
     private byte[] getProjectContent() {

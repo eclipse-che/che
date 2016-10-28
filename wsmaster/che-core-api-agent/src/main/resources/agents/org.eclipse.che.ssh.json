@@ -1,5 +1,7 @@
 {
-  "name": "org.eclipse.che.ssh",
+  "id": "org.eclipse.che.ssh",
+  "name": "SSH",
+  "description" : "SSH support",
   "dependencies": [],
   "properties": {},
   "servers": {

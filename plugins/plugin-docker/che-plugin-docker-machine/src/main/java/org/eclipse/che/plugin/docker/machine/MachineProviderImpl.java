@@ -137,15 +137,15 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                @Named("machine.docker.machine_servers") Set<ServerConf> allMachinesServers,
                                @Named("machine.docker.dev_machine.machine_volumes") Set<String> devMachineSystemVolumes,
                                @Named("machine.docker.machine_volumes") Set<String> allMachinesSystemVolumes,
-                               @Nullable @Named("machine.docker.machine_extra_hosts") String allMachinesExtraHosts,
+                               @Nullable @Named("che.workspace.hosts") String allMachinesExtraHosts,
                                WorkspaceFolderPathProvider workspaceFolderPathProvider,
-                               @Named("che.machine.projects.internal.storage") String projectFolderPath,
-                               @Named("machine.docker.pull_image") boolean doForcePullOnBuild,
-                               @Named("machine.docker.privilege_mode") boolean privilegeMode,
+                               @Named("che.workspace.projects.storage") String projectFolderPath,
+                               @Named("che.docker.always_pull_image") boolean doForcePullOnBuild,
+                               @Named("che.docker.privilege") boolean privilegeMode,
                                @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables,
-                               @Named("machine.docker.snapshot_use_registry") boolean snapshotUseRegistry,
-                               @Named("machine.docker.memory_swap_multiplier") double memorySwapMultiplier,
+                               @Named("che.docker.registry_for_snapshots") boolean snapshotUseRegistry,
+                               @Named("che.docker.swap") double memorySwapMultiplier,
                                @Named("machine.docker.networks") Set<Set<String>> additionalNetworks)
             throws IOException {
         this.docker = docker;

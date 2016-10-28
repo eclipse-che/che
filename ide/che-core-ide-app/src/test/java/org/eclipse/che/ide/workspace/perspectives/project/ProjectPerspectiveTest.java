@@ -29,6 +29,7 @@ import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.WorkBenchPartController;
 import org.eclipse.che.ide.workspace.perspectives.general.PerspectiveViewImpl;
+import org.eclipse.che.providers.DynaProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +83,8 @@ public class ProjectPerspectiveTest {
     private PartStackPresenter      partStackPresenter;
     @Mock
     private AcceptsOneWidget        container;
+    @Mock
+    private DynaProvider            dynaProvider;
 
     private ProjectPerspective perspective;
 
@@ -115,7 +118,8 @@ public class ProjectPerspectiveTest {
                                              controllerFactory,
                                              projectExplorerPart,
                                              notificationManager,
-                                             eventBus);
+                                             eventBus,
+                                             dynaProvider);
     }
 
     @Test
@@ -129,7 +133,8 @@ public class ProjectPerspectiveTest {
                                              controllerFactory,
                                              projectExplorerPart,
                                              notificationManager,
-                                             eventBus);
+                                             eventBus,
+                                             dynaProvider);
 
         verify(partStackPresenter, times(2)).addPart(notificationManager, null);
         verify(partStackPresenter).addPart(projectExplorerPart, null);
