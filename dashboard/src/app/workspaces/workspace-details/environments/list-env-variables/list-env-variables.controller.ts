@@ -94,10 +94,8 @@ export class ListEnvVariablesController {
 
   updateEnvVariable(name, value) {
     this.envVariables[name] = value;
-
-    return this.envVariablesOnChange().then(() => {
-      this.buildVariablesList();
-    });
+    this.envVariablesOnChange();
+    this.buildVariablesList();
   }
 
   /**
@@ -151,7 +149,8 @@ export class ListEnvVariablesController {
       });
       this.deselectAllVariables();
       this.isBulkChecked = false;
-      this.envVariablesOnChange().then(() => {this.buildVariablesList();});
+      this.envVariablesOnChange();
+      this.buildVariablesList();
     })
   }
 

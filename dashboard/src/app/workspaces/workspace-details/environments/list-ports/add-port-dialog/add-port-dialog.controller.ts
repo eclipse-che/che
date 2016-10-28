@@ -24,7 +24,6 @@ export class AddPortDialogController {
    */
   constructor($mdDialog, lodash) {
     this.$mdDialog = $mdDialog;
-    this.updateInProgress = false;
     this.lodash = lodash;
 
     this.usedPorts = [];
@@ -68,12 +67,8 @@ export class AddPortDialogController {
    * Adds new port
    */
   addPort() {
-    this.updateInProgress = true;
-
-    this.callbackController.addPort(this.port, this.protocol).finally(() => {
-      this.updateInProgress = false;
-      this.hide();
-    });
+    this.callbackController.addPort(this.port, this.protocol);
+    this.hide();
   }
 
 }
