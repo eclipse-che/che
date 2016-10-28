@@ -1,5 +1,5 @@
 <div class="che-label-container" layout="column" flex>
-  <div layout="row" flex layout-align="start start" class="che-label-container-row">
+  <div layout="{{alignment ? alignment : 'row'}}" flex layout-align="start start" class="che-label-container-row">
     <div layout="column" class="che-label-container-label">
       <label class="che-label-container-label-name">{{labelName}}</label>
       <div layout="row" class="che-label-container-description" ng-if="labelDescription">
