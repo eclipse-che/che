@@ -584,12 +584,14 @@ public class CheEnvironmentEngine {
         for (String agentKey : agentKeys) {
             try {
                 AgentImpl agent = new AgentImpl(agentRegistry.getAgent(AgentKeyImpl.parse(agentKey)));
-                for (ServerConf2 conf2 : agent.getServers()) {
-                    Map<String, String> properties = conf2.getProperties();
-                    ServerConfImpl conf = new ServerConfImpl(properties.get("ref"),
+                for (Map.Entry<String, ? extends ServerConf2> entry : agent.getServers().entrySet()) {
+                    String ref = entry.getKey();
+                    ServerConf2 conf2 = entry.getValue();
+
+                    ServerConfImpl conf = new ServerConfImpl(ref,
                                                              conf2.getPort(),
                                                              conf2.getProtocol(),
-                                                             properties.get("path"));
+                                                             conf2.getProperties().get("path"));
                     machine.getConfig().getServers().add(conf);
                 }
             } catch (AgentException e) {

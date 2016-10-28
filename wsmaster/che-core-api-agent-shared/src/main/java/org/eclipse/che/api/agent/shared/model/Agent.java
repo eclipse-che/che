@@ -50,5 +50,5 @@ public interface Agent {
     /**
      * Returns Che servers in the machine.
      */
-    List<? extends ServerConf2> getServers();
+    Map<String, ? extends ServerConf2> getServers();
 }

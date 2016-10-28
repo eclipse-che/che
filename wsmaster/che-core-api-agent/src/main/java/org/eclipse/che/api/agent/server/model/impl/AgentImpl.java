@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.api.agent.server.model.impl;
 
-import com.google.common.base.MoreObjects;
-
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.model.workspace.ServerConf2;
 
@@ -25,25 +23,25 @@ import java.util.Objects;
  * @author Anatoliy Bazko
  */
 public class AgentImpl implements Agent {
-    private final String              name;
-    private final String              version;
-    private final List<String>        dependencies;
-    private final Map<String, String> properties;
-    private final String              script;
-    private final List<? extends ServerConf2> servers;
+    private final String                             name;
+    private final String                             version;
+    private final List<String>                       dependencies;
+    private final Map<String, String>                properties;
+    private final String                             script;
+    private final Map<String, ? extends ServerConf2> servers;
 
     public AgentImpl(String name,
                      String version,
                      List<String> dependencies,
                      Map<String, String> properties,
                      String script,
-                     List<? extends ServerConf2> servers) {
+                     Map<String, ? extends ServerConf2> servers) {
         this.name = name;
         this.version = version;
         this.dependencies = dependencies;
         this.properties = properties;
         this.script = script;
-        this.servers = MoreObjects.firstNonNull(servers, new ArrayList<>());
+        this.servers = servers;
     }
 
     public AgentImpl(Agent agent) {
@@ -67,12 +65,12 @@ public class AgentImpl implements Agent {
 
     @Override
     public List<String> getDependencies() {
-        return MoreObjects.firstNonNull(dependencies, new ArrayList<>());
+        return dependencies != null ? dependencies : new ArrayList<>();
     }
 
     @Override
     public Map<String, String> getProperties() {
-        return MoreObjects.firstNonNull(properties, new HashMap<>());
+        return properties != null ? properties : new HashMap<>();
     }
 
     @Override
@@ -81,8 +79,8 @@ public class AgentImpl implements Agent {
     }
 
     @Override
-    public List<? extends ServerConf2> getServers() {
-        return servers;
+    public Map<String, ? extends ServerConf2> getServers() {
+        return servers != null ? servers : new HashMap<>();
     }
 
     @Override

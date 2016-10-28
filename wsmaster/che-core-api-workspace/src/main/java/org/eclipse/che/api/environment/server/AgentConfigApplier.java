@@ -82,15 +82,15 @@ public class AgentConfigApplier {
         }
     }
 
-    private void addLabels(CheServiceImpl service, List<? extends ServerConf2> confs) {
-        for (ServerConf2 conf : confs) {
-            service.getLabels().put("che:server:" + conf.getPort() + ":protocol", conf.getProtocol());
+    private void addLabels(CheServiceImpl service, Map<String, ? extends ServerConf2> servers) {
+        for (Map.Entry<String, ? extends ServerConf2> entry : servers.entrySet()) {
+            String ref = entry.getKey();
+            ServerConf2 conf = entry.getValue();
 
-            String ref = conf.getProperties().get("ref");
+            service.getLabels().put("che:server:" + conf.getPort() + ":protocol", conf.getProtocol());
+            service.getLabels().put("che:server:" + conf.getPort() + ":ref", ref);
+
             String path = conf.getProperties().get("path");
-            if (!isNullOrEmpty(ref)) {
-                service.getLabels().put("che:server:" + conf.getPort() + ":ref", ref);
-            }
             if (!isNullOrEmpty(path)) {
                 service.getLabels().put("che:server:" + conf.getPort() + ":path", path);
             }
@@ -123,9 +123,9 @@ public class AgentConfigApplier {
         service.setEnvironment(newEnv);
     }
 
-    private void addExposedPorts(CheServiceImpl service, List<? extends ServerConf2> confs) {
-        for (ServerConf2 serverConf : confs) {
-            service.getExpose().add(serverConf.getPort());
+    private void addExposedPorts(CheServiceImpl service, Map<String, ? extends ServerConf2> servers) {
+        for (ServerConf2 server : servers.values()) {
+            service.getExpose().add(server.getPort());
         }
     }
 

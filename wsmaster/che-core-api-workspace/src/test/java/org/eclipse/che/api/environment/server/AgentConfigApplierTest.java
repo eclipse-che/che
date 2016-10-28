@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
@@ -111,7 +111,7 @@ public class AgentConfigApplierTest {
                                                    AgentKeyImpl.parse("agent3")));
         when(agent1.getServers()).thenAnswer(invocation -> singletonList(serverConf1));
         when(agent2.getServers()).thenAnswer(invocation -> singletonList(serverConf2));
-        when(agent3.getServers()).thenReturn(emptyList());
+        when(agent3.getServers()).thenReturn(emptyMap());
         CheServiceImpl service = new CheServiceImpl();
 
         agentConfigApplier.modify(service, asList("agent1", "agent2", "agent3"));

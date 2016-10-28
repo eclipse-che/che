@@ -59,9 +59,9 @@ public interface AgentDto extends Agent {
     AgentDto withProperties(Map<String, String> properties);
 
     @Override
-    List<ServerConf2Dto> getServers();
+    Map<String, ServerConf2Dto> getServers();
 
-    void setServers(List<ServerConf2Dto> servers);
+    void setServers(Map<String, ServerConf2Dto> servers);
 
-    AgentDto withServers(List<ServerConf2Dto> servers);
+    AgentDto withServers(Map<String, ServerConf2Dto> servers);
 }
