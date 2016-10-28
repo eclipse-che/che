@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.ide.configuration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.eclipse.che.ide.api.debug.DebugConfiguration;
 import org.eclipse.che.ide.api.debug.DebugConfigurationPage;

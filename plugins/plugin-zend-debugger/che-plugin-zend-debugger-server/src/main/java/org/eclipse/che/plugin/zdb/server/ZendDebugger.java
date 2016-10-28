@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server;
 
-import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.*;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_READY;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SESSION_STARTED;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_SRIPT_ENDED;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_START_PROCESS_FILE;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.REQUEST_GET_LOCAL_FILE_CONTENT;
 
 import java.util.ArrayList;
 import java.util.Collections;

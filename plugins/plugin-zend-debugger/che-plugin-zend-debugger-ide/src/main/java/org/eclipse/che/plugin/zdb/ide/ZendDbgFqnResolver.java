@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.ide;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import javax.validation.constraints.NotNull;
 

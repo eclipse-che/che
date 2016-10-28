@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server.expressions;
 
-import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.*;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.PHP_NULL;
 
 import java.util.Collections;
 import java.util.List;

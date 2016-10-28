@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server.variables;
 
-import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.*;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_LOCAL;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_SUPER_GLOBAL;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_THIS;
 
 import java.util.Collections;
 

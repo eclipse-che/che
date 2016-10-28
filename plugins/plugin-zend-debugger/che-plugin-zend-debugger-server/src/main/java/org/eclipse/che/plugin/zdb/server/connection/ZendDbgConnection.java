@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server.connection;
 
-import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.*;
-import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.*;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgClientMessages.NOTIFICATION_CLOSE_SESSION;
+import static org.eclipse.che.plugin.zdb.server.connection.ZendDbgEngineMessages.NOTIFICATION_CLOSE_MESSAGE_HANDLER;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

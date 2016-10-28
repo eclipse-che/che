@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.Map;
 

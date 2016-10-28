@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server.variables;
 
-import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.*;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_ARRAY_MEMBER;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_OBJECT_MEMBER;
 
 import java.util.ArrayList;
 import java.util.List;

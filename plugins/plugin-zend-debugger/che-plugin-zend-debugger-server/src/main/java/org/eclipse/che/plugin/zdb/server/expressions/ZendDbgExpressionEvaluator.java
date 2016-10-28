@@ -10,8 +10,18 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.server.expressions;
 
-import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.*;
-import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.*;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_ARRAY_MEMBER;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.KIND_OBJECT_MEMBER;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.MOD_PRIVATE;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.MOD_PROTECTED;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataFacet.Facet.MOD_PUBLIC;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.PHP_ARRAY;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.PHP_BOOL;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.PHP_FLOAT;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.PHP_INT;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.PHP_OBJECT;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.PHP_RESOURCE;
+import static org.eclipse.che.plugin.zdb.server.expressions.IDbgDataType.DataType.PHP_STRING;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;

@@ -10,9 +10,19 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.zdb.ide.configuration;
 
-import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.ATTR_BREAK_AT_FIRST_LINE;
+import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.ATTR_CLIENT_HOST_IP;
+import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.ATTR_DEBUG_PORT;
+import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.ATTR_USE_SSL_ENCRYPTION;
+import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.DEFAULT_BREAK_AT_FIRST_LINE;
+import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.DEFAULT_CLIENT_HOST_IP;
+import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.DEFAULT_DEBUG_PORT;
+import static org.eclipse.che.plugin.zdb.ide.configuration.ZendDbgConfigurationType.DEFAULT_USE_SSL_ENCRYPTION;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
