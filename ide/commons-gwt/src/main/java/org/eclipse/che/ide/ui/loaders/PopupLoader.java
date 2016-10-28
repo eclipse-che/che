@@ -27,4 +27,23 @@ public interface PopupLoader {
      */
     void setError();
 
+    /**
+     * Shows a button to download logs.
+     */
+    void showDownloadButton();
+
+    /**
+     * Sets an action delegate to handle user actions.
+     *
+     * @param actionDelegate
+     *          action delegate
+     */
+    void setDelegate(ActionDelegate actionDelegate);
+
+    interface ActionDelegate {
+
+        void onDownloadLogs();
+
+    }
+
 }

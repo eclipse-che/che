@@ -31,6 +31,7 @@ import {CheFrame} from './frame/che-frame.directive';
 import {CheFooter} from './footer/che-footer.directive';
 import {CheHtmlSource} from './html-source/che-html-source.directive';
 import {CheInput} from './input/che-input.directive';
+import {CheInputBox} from './input/che-input-box.directive';
 import {CheTextarea} from './input/che-textarea.directive';
 import {CheLabel} from './label/che-label.directive';
 import {CheLabelContainer} from './label-container/che-label-container.directive';
@@ -95,6 +96,7 @@ export class WidgetConfig {
       .directive('cheFooter', CheFooter)
       .directive('cheHtmlSource', CheHtmlSource)
       .directive('cheInput', CheInput)
+      .directive('cheInputBox', CheInputBox)
       .directive('cheTextarea', CheTextarea)
       .directive('cheLabel', CheLabel)
       .directive('cheLabelContainer', CheLabelContainer)

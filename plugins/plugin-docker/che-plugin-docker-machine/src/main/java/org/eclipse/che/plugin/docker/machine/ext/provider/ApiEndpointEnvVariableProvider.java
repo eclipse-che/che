@@ -27,7 +27,7 @@ import javax.inject.Singleton;
 @Singleton
 public class ApiEndpointEnvVariableProvider implements Provider<String> {
     @Inject
-    @Named("machine.docker.che_api.endpoint")
+    @Named("che.workspace.che_server_endpoint")
     private String apiEndpoint;
 
     @Override

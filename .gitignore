@@ -1,12 +1,14 @@
 # Eclipse  #
 ###################
 
+*.launch
 .classpath
 .project
 .settings/
 target/
 bin/
 test-output/
+maven-eclipse.xml
 
 # Idea #
 ##################

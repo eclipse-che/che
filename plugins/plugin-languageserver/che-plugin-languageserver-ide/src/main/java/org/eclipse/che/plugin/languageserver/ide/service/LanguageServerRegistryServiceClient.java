@@ -12,12 +12,12 @@ package org.eclipse.che.plugin.languageserver.ide.service;
 
 import com.google.inject.Inject;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.InitializeResultDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.LanguageDescriptionDTO;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.InitializeResultDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.LanguageDescriptionDTO;
 
 import java.util.List;
 

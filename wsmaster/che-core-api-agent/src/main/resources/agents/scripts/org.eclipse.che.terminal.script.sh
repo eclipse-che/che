@@ -21,6 +21,8 @@ TARGET_AGENT_BINARIES_URI="file://"${CHE_DIR}"/websocket-terminal-\\${PREFIX}.ta
 LINUX_TYPE=$(cat /etc/os-release | grep ^ID= | tr '[:upper:]' '[:lower:]')
 LINUX_VERSION=$(cat /etc/os-release | grep ^VERSION_ID=)
 MACHINE_TYPE=$(uname -m)
+SHELL_INTERPRETER="/bin/sh"
+
 
 mkdir -p ${CHE_DIR}
 
@@ -118,4 +120,9 @@ elif curl -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed
 fi
 
 curl -s $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
-$HOME/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static $HOME/che/terminal/
+
+if [ -f /bin/bash ]; then
+  SHELL_INTERPRETER="/bin/bash"
+fi
+
+$HOME/che/terminal/che-websocket-terminal -addr :4411 -cmd ${SHELL_INTERPRETER} -static $HOME/che/terminal/

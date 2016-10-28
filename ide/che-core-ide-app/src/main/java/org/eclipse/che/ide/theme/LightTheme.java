@@ -488,6 +488,11 @@ public class LightTheme implements Theme {
     }
 
     @Override
+    public String completionPopupItemHighlightTextColor() {
+        return "#1A68AF";
+    }
+
+    @Override
     public String getWindowContentBackground() {
         return "#ECECEC";
     }

@@ -53,7 +53,8 @@ public class LanguageServerEditorConfiguration extends DefaultTextEditorConfigur
                                              LanguageServerSignatureHelpFactory signatureHelpFactory,
                                              @Assisted ServerCapabilities serverCapabilities) {
         codeAssistProcessorFactory = codeAssistProcessor;
-        if (serverCapabilities.isDocumentFormattingProvider() || serverCapabilities.isDocumentRangeFormattingProvider() ||
+        if ((serverCapabilities.isDocumentFormattingProvider() != null && serverCapabilities.isDocumentFormattingProvider()) ||
+            (serverCapabilities.isDocumentRangeFormattingProvider() != null && serverCapabilities.isDocumentRangeFormattingProvider()) ||
             serverCapabilities.getDocumentOnTypeFormattingProvider() != null) {
             this.formatter = formatterFactory.create(serverCapabilities);
             formatter.setTabWidth(getTabWidth());

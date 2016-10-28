@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.workspace.server.launcher;
 
+import org.eclipse.che.api.agent.server.WsAgentPingRequestFactory;
 import org.eclipse.che.api.agent.shared.model.Agent;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.machine.Command;
 import org.eclipse.che.api.core.model.machine.Server;
-import org.eclipse.che.api.core.model.machine.ServerProperties;
 import org.eclipse.che.api.core.rest.HttpJsonRequest;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -36,8 +36,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Collections;
@@ -58,33 +56,34 @@ public class WsAgentLauncherImplTest {
     private static final String               WS_AGENT_PORT                 = Constants.WS_AGENT_PORT;
     private static final long                 WS_AGENT_MAX_START_TIME_MS    = 1000;
     private static final long                 WS_AGENT_PING_DELAY_MS        = 1;
-    private static final int                  WS_AGENT_PING_CONN_TIMEOUT_MS = 1;
     private static final String               WS_AGENT_SERVER_LOCATION      = "ws-agent.com:456789/";
     private static final String               WS_AGENT_SERVER_URL           = "http://" + WS_AGENT_SERVER_LOCATION;
     private static final String               WS_AGENT_SERVER_LOCATION_EXT  = "ws-agent-ext.com:456789/";
     private static final String               WS_AGENT_SERVER_URL_EXT       = "http://" + WS_AGENT_SERVER_LOCATION;
     private static final ServerPropertiesImpl SERVER_PROPERTIES             = new ServerPropertiesImpl(null,
-                                                                                   WS_AGENT_SERVER_LOCATION,
-                                                                                   WS_AGENT_SERVER_URL);
+                                                                                                       WS_AGENT_SERVER_LOCATION,
+                                                                                                       WS_AGENT_SERVER_URL);
     private static final ServerImpl           SERVER                        = new ServerImpl("ref",
-                                                                                   "http",
-                                                                                   WS_AGENT_SERVER_LOCATION_EXT,
-                                                                                   WS_AGENT_SERVER_URL_EXT,
-                                                                                   SERVER_PROPERTIES);
+                                                                                             "http",
+                                                                                             WS_AGENT_SERVER_LOCATION_EXT,
+                                                                                             WS_AGENT_SERVER_URL_EXT,
+                                                                                             SERVER_PROPERTIES);
     private static final String               WS_AGENT_TIMED_OUT_MESSAGE    = "timeout error message";
 
     @Mock
-    private MachineProcessManager  machineProcessManager;
+    private MachineProcessManager     machineProcessManager;
     @Mock
-    private HttpJsonRequestFactory requestFactory;
+    private HttpJsonRequestFactory    requestFactory;
     @Mock
-    private Instance               machine;
+    private Instance                  machine;
     @Mock
-    private HttpJsonResponse       pingResponse;
+    private HttpJsonResponse          pingResponse;
     @Mock
-    private MachineRuntimeInfoImpl machineRuntime;
+    private MachineRuntimeInfoImpl    machineRuntime;
     @Mock
-    private Agent                  agent;
+    private WsAgentPingRequestFactory wsAgentPingRequestFactory;
+    @Mock
+    private Agent                     agent;
 
     private HttpJsonRequest     pingRequest;
     private WsAgentLauncherImpl wsAgentLauncher;
@@ -92,10 +91,9 @@ public class WsAgentLauncherImplTest {
     @BeforeMethod
     public void setUp() throws Exception {
         wsAgentLauncher = new WsAgentLauncherImpl(() -> machineProcessManager,
-                                                  requestFactory, null,
+                                                  wsAgentPingRequestFactory, null,
                                                   WS_AGENT_MAX_START_TIME_MS,
                                                   WS_AGENT_PING_DELAY_MS,
-                                                  WS_AGENT_PING_CONN_TIMEOUT_MS,
                                                   WS_AGENT_TIMED_OUT_MESSAGE
         );
         pingRequest = Mockito.mock(HttpJsonRequest.class, new SelfReturningAnswer());
@@ -105,6 +103,7 @@ public class WsAgentLauncherImplTest {
         when(machine.getRuntime()).thenReturn(machineRuntime);
         doReturn(Collections.<String, Server>singletonMap(WS_AGENT_PORT, SERVER)).when(machineRuntime).getServers();
         when(requestFactory.fromUrl(anyString())).thenReturn(pingRequest);
+        when(wsAgentPingRequestFactory.createRequest(machine)).thenReturn(pingRequest);
         when(pingRequest.request()).thenReturn(pingResponse);
         when(pingResponse.getResponseCode()).thenReturn(HttpURLConnection.HTTP_OK);
     }
@@ -126,11 +125,6 @@ public class WsAgentLauncherImplTest {
     public void shouldPingWsAgentAfterStart() throws Exception {
         wsAgentLauncher.launch(machine, agent);
 
-        verify(requestFactory).fromUrl(UriBuilder.fromUri(WS_AGENT_SERVER_URL)
-                                                 .build()
-                                                 .toString());
-        verify(pingRequest).setMethod(HttpMethod.GET);
-        verify(pingRequest).setTimeout(WS_AGENT_PING_CONN_TIMEOUT_MS);
         verify(pingRequest).request();
         verify(pingResponse).getResponseCode();
     }
@@ -144,9 +138,6 @@ public class WsAgentLauncherImplTest {
 
         wsAgentLauncher.launch(machine, agent);
 
-        verify(requestFactory).fromUrl(WS_AGENT_SERVER_URL);
-        verify(pingRequest).setMethod(HttpMethod.GET);
-        verify(pingRequest).setTimeout(WS_AGENT_PING_CONN_TIMEOUT_MS);
         verify(pingRequest, times(4)).request();
         verify(pingResponse).getResponseCode();
     }
@@ -159,9 +150,6 @@ public class WsAgentLauncherImplTest {
 
         wsAgentLauncher.launch(machine, agent);
 
-        verify(requestFactory).fromUrl(WS_AGENT_SERVER_URL);
-        verify(pingRequest).setMethod(HttpMethod.GET);
-        verify(pingRequest).setTimeout(WS_AGENT_PING_CONN_TIMEOUT_MS);
         verify(pingRequest, times(3)).request();
         verify(pingResponse, times(3)).getResponseCode();
     }
@@ -226,18 +214,11 @@ public class WsAgentLauncherImplTest {
     }
 
     @Test(expectedExceptions = ServerException.class,
-          expectedExceptionsMessageRegExp = WS_AGENT_TIMED_OUT_MESSAGE)
+            expectedExceptionsMessageRegExp = WS_AGENT_TIMED_OUT_MESSAGE)
     public void shouldThrowMachineExceptionIfPingsWereUnsuccessfulTooLong() throws Exception {
         when(pingRequest.request()).thenThrow(new ServerException(""));
 
         wsAgentLauncher.launch(machine, agent);
     }
 
-    @Test(expectedExceptions = ServerException.class,
-          expectedExceptionsMessageRegExp = "Workspace agent server not found in dev machine.")
-    public void shouldThrowExceptionIfWsAgentNotFound() throws Exception {
-        doReturn(Collections.emptyMap()).when(machineRuntime).getServers();
-
-        wsAgentLauncher.launch(machine, agent);
-    }
 }

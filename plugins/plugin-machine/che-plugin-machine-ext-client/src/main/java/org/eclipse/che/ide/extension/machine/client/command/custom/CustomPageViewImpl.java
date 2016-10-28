@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class CustomPageViewImpl implements CustomPageView {
 
-    private static final MavenPageViewImplUiBinder UI_BINDER = GWT.create(MavenPageViewImplUiBinder.class);
+    private static final CustomPageViewImplUiBinder UI_BINDER = GWT.create(CustomPageViewImplUiBinder.class);
 
     private final FlowPanel rootElement;
 
@@ -63,7 +63,7 @@ public class CustomPageViewImpl implements CustomPageView {
     @UiHandler({"commandLine"})
     void onKeyUp(KeyUpEvent event) {
         // commandLine value may not be updated immediately after keyUp
-        // therefore use the timer with delay=0
+        // therefore use the timer with zero delay
         new Timer() {
             @Override
             public void run() {
@@ -72,6 +72,6 @@ public class CustomPageViewImpl implements CustomPageView {
         }.schedule(0);
     }
 
-    interface MavenPageViewImplUiBinder extends UiBinder<FlowPanel, CustomPageViewImpl> {
+    interface CustomPageViewImplUiBinder extends UiBinder<FlowPanel, CustomPageViewImpl> {
     }
 }

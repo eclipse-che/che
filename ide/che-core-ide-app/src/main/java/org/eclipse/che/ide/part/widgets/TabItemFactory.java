@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.part.widgets;
 
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
+import org.eclipse.che.ide.api.parts.EditorPartStack;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.part.widgets.partbutton.PartButton;
 
@@ -24,5 +25,5 @@ public interface TabItemFactory {
 
     PartButton createPartButton(@NotNull String title);
 
-    EditorTab createEditorPartButton(@NotNull EditorPartPresenter relatedEditorPart);
+    EditorTab createEditorPartButton(@NotNull EditorPartPresenter relatedEditorPart, @NotNull EditorPartStack editorPartStack);
 }

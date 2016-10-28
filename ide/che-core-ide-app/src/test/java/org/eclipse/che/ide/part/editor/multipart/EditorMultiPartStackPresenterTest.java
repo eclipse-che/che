@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.part.editor.multipart;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.inject.Provider;
 import com.google.web.bindery.event.shared.Event;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
@@ -20,7 +21,7 @@ import org.eclipse.che.ide.api.editor.AbstractEditorPresenter;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.event.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.EditorPartStack;
-import org.eclipse.che.ide.part.editor.EditorPartStackFactory;
+import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.ide.part.editor.EditorPartStackPresenter;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,11 +50,11 @@ public class EditorMultiPartStackPresenterTest {
 
     //constructor mocks
     @Mock
-    private EditorMultiPartStackView view;
+    private EditorMultiPartStackView  view;
     @Mock
-    private EventBus                 eventBus;
+    private EventBus                  eventBus;
     @Mock
-    private EditorPartStackFactory   editorPartStackFactory;
+    private Provider<EditorPartStack> editorPartStackFactory;
 
     //additional mocks
     @Mock
@@ -71,7 +72,7 @@ public class EditorMultiPartStackPresenterTest {
 
     @Before
     public void setUp() {
-        when(editorPartStackFactory.create()).thenReturn(editorPartStack);
+        when(editorPartStackFactory.get()).thenReturn(editorPartStack);
         when(editorPartStack.containsPart(partPresenter1)).thenReturn(true);
         when(eventBus.addHandler((Event.Type<Object>)anyObject(), anyObject())).thenReturn(handlerRegistration);
 
@@ -87,9 +88,9 @@ public class EditorMultiPartStackPresenterTest {
     public void shouldOpenPartInNewEditorPartStack() {
         presenter.addPart(partPresenter1, null);
 
-        verify(editorPartStackFactory).create();
+        verify(editorPartStackFactory).get();
         verify(editorPartStack).addPart(partPresenter1);
-        verify(view).addPartStack(eq(editorPartStack), isNull(EditorPartStack.class), isNull(Constraints.class));
+        verify(view).addPartStack(eq(editorPartStack), isNull(EditorPartStack.class), isNull(Constraints.class), eq(-1.0));
     }
 
     @Test
@@ -101,23 +102,23 @@ public class EditorMultiPartStackPresenterTest {
 
         presenter.addPart(partPresenter2, null);
 
-        verify(editorPartStackFactory, never()).create();
+        verify(editorPartStackFactory, never()).get();
         verify(editorPartStack).addPart(partPresenter2);
-        verify(view, never()).addPartStack((EditorPartStack)anyObject(), (EditorPartStack)anyObject(), (Constraints)anyObject());
+        verify(view, never()).addPartStack((EditorPartStack)anyObject(), (EditorPartStack)anyObject(), (Constraints)anyObject(), eq(-1.0));
     }
 
     @Test
     public void shouldSplitEditorPartStackAndOpenPart() {
         presenter.addPart(partPresenter1);
         reset(editorPartStackFactory);
-        when(editorPartStackFactory.create()).thenReturn(editorPartStack);
+        when(editorPartStackFactory.get()).thenReturn(editorPartStack);
         when(editorPartStack.getPartByTabId(RELATIVE_PART_ID)).thenReturn(partPresenter1);
 
         presenter.addPart(partPresenter2, constraints);
 
-        verify(editorPartStackFactory).create();
+        verify(editorPartStackFactory).get();
         verify(editorPartStack).addPart(partPresenter2);
-        verify(view).addPartStack(editorPartStack, editorPartStack, constraints);
+        verify(view).addPartStack(editorPartStack, editorPartStack, constraints, -1);
     }
 
     @Test
@@ -156,7 +157,6 @@ public class EditorMultiPartStackPresenterTest {
 
         verify(editorPartStack).containsPart(partPresenter1);
         verify(editorPartStack).removePart(partPresenter1);
-        verify(view, never()).removePartStack(editorPartStack);
     }
 
     @Test
@@ -172,15 +172,26 @@ public class EditorMultiPartStackPresenterTest {
     }
 
     @Test
-    public void shouldOpenPreviousActivePartStack() {
-        when(editorPartStack.getActivePart()).thenReturn(null);
+    public void shouldNotRemovePartStackWhenPartStackIsNotEmpty() {
+        when(editorPartStack.getActivePart()).thenReturn(partPresenter2);
 
-        presenter.addPart(partPresenter2);
         presenter.addPart(partPresenter1);
         presenter.removePart(partPresenter1);
 
         verify(editorPartStack).containsPart(partPresenter1);
         verify(editorPartStack).removePart(partPresenter1);
+        verify(view, never()).removePartStack(editorPartStack);
+    }
+
+    @Test
+    public void shouldOpenPreviousActivePartStack() {
+        when(editorPartStack.containsPart(partPresenter1)).thenReturn(true);
+        presenter.addPart(partPresenter1);
+        presenter.addPart(partPresenter2);
+
+        presenter.removePart(partPresenter1);
+
+        verify(editorPartStack).containsPart((PartPresenter)anyObject());
         verify(view).removePartStack(editorPartStack);
         verify(editorPartStack).openPreviousActivePart();
     }

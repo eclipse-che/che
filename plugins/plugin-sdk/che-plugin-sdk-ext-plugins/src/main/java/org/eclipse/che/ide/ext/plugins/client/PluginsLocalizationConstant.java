@@ -20,7 +20,7 @@ import com.google.gwt.i18n.client.Messages;
  */
 public interface PluginsLocalizationConstant extends Messages {
 
-    /* CommandPageView */
+    /* GwtCheCommandPageView */
     @Key("view.gwtCheCommandPage.gwtModule.text")
     String gwtCheCommandPageViewGwtModuleText();
 

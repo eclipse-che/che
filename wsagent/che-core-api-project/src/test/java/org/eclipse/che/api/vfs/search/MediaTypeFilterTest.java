@@ -22,7 +22,6 @@ import org.junit.runner.RunWith;
 import java.io.ByteArrayInputStream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,11 +33,11 @@ public class MediaTypeFilterTest {
     @DataProvider
     public static Object[][] testData() throws Exception {
         return new Object[][]{
-                {virtualFileWithContent("to be or not to be".getBytes()), true},
-                {virtualFileWithContent("<html><head></head></html>".getBytes()), true},
-                {virtualFileWithContent("<a><b/></a>".getBytes()), true},
-                {virtualFileWithContent("public class SomeClass {}".getBytes()), true},
-                {virtualFileWithContent(new byte[10]), false}
+                {virtualFileWithContent("to be or not to be".getBytes()), false},
+                {virtualFileWithContent("<html><head></head></html>".getBytes()), false},
+                {virtualFileWithContent("<a><b/></a>".getBytes()), false},
+                {virtualFileWithContent("public class SomeClass {}".getBytes()), false},
+                {virtualFileWithContent(new byte[10]), true}
         };
     }
 

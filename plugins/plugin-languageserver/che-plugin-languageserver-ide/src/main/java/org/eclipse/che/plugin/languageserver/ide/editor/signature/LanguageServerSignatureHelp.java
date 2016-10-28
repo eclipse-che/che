@@ -17,6 +17,8 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.SignatureHelpDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -33,8 +35,6 @@ import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.SignatureHelpDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentPositionParamsDTO;
 
 import java.util.List;
 

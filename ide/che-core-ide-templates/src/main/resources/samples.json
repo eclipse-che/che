@@ -671,7 +671,7 @@
       {
         "name": "install dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && npm install --no-bin-links && bower install",
+        "commandLine": "cd ${current.project.path} && npm install && bower install",
         "attributes": {
           "previewUrl": ""
         }
@@ -1259,6 +1259,57 @@
     "category": "Samples",
     "tags": [
       "Play"
+    ]
+  },
+  {
+    "name": "astro-splash",
+    "displayName": "astro-splash",
+    "path": "/astro-splash",
+    "description": "An app that uses the Astronomy Picture of the Day API provided by NASA and the Zend Expressive framework.",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/kaloyan-raev/AstroSplash.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "configure",
+        "type": "custom",
+        "commandLine": "chmod 777 ${current.project.path}/data; echo -e \"<VirtualHost *:80>\n    DocumentRoot ${current.project.path}/public\n    SetEnv APPLICATION_ENV 'development'\n    <Directory ${current.project.path}/public>\n        DirectoryIndex index.php\n        AllowOverride All\n        Require all granted\n    </Directory>\n</VirtualHost>\" | sudo tee /etc/apache2/sites-available/000-default.conf; composer --working-dir=${current.project.path} install && cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo -e \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "update images",
+        "type": "custom",
+        "commandLine": "cp /usr/local/zend/etc/php.ini /tmp/update-php.ini && grep -q 'extension=pcntl.so' /tmp/update-php.ini || echo -e \"\nextension=pcntl.so\" | sudo tee -a /tmp/update-php.ini && php -c /tmp/update-php.ini ${current.project.path}/bin/update.php && rm /tmp/update-php.ini",
+        "attributes": {
+          "previewUrl": ""
+        }
+      },
+      {
+        "name": "clean doctrine cache",
+        "type": "custom",
+        "commandLine": "sudo rm -rf ${current.project.path}/data/doctrine-cache",
+        "attributes": {
+          "previewUrl": ""
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Zend"
     ]
   }
 ]

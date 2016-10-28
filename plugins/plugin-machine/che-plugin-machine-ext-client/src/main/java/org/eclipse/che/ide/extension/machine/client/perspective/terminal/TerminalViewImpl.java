@@ -93,6 +93,8 @@ final class TerminalViewImpl extends Composite implements TerminalView, Requires
         int offsetWidth = terminalPanel.getOffsetWidth();
         int offsetHeight = terminalPanel.getOffsetHeight();
         if (offsetWidth <= 0 || offsetHeight <= 0) {
+            resizeTimer.cancel();
+            resizeTimer.schedule(500);
             return;
         }
 

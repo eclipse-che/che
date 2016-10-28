@@ -20,6 +20,7 @@ import org.eclipse.che.ide.api.dialogs.DialogFactory;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
+import org.eclipse.che.ide.api.subversion.SubversionCredentialsDialog;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 import org.eclipse.che.ide.util.Arrays;
 import org.eclipse.che.plugin.svn.ide.SubversionClientService;
@@ -54,12 +55,13 @@ public class ResolvePresenter extends SubversionActionPresenter implements Resol
                                SubversionOutputConsoleFactory consoleFactory,
                                AppContext appContext,
                                SubversionExtensionLocalizationConstants constants,
+                               SubversionCredentialsDialog credentialsDialog,
                                NotificationManager notificationManager,
                                DialogFactory dialogFactory,
                                SubversionClientService service,
                                ResolveView view,
                                StatusColors statusColors) {
-        super(appContext, consoleFactory, processesPanelPresenter, statusColors);
+        super(appContext, consoleFactory, processesPanelPresenter, statusColors, constants, notificationManager, credentialsDialog);
 
         this.service = service;
         this.notificationManager = notificationManager;

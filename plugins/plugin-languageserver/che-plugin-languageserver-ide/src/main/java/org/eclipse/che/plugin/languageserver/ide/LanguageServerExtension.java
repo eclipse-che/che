@@ -14,6 +14,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
+import org.eclipse.che.api.languageserver.shared.lsapi.TextDocumentItemDTO;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.ide.api.action.ActionManager;
@@ -25,6 +30,7 @@ import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
@@ -33,11 +39,6 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.references.FindRefer
 import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidCloseTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidOpenTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.DidSaveTextDocumentParamsDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentIdentifierDTO;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.TextDocumentItemDTO;
 
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 
@@ -86,13 +87,18 @@ public class LanguageServerExtension {
     @Inject
     protected void registerFileEventHandler(final EventBus eventBus,
                                             final TextDocumentServiceClient serviceClient,
-                                            final DtoFactory dtoFactory) {
+                                            final DtoFactory dtoFactory,
+                                            final LanguageServerFileTypeRegister fileTypeRegister) {
         eventBus.addHandler(FileEvent.TYPE, new FileEvent.FileEventHandler() {
 
             @Override
             public void onFileOperation(final FileEvent event) {
+                Path location = event.getFile().getLocation();
+                if (location.getFileExtension() == null || !fileTypeRegister.hasLSForExtension(location.getFileExtension())) {
+                    return;
+                }
                 final TextDocumentIdentifierDTO documentId = dtoFactory.createDto(TextDocumentIdentifierDTO.class);
-                documentId.setUri(event.getFile().getPath());
+                documentId.setUri(location.toString());
                 switch (event.getOperationType()) {
                     case OPEN:
                         onOpen(event, dtoFactory, serviceClient);

@@ -17,28 +17,28 @@ import {EnvironmentManager} from './environment-manager';
  *
  * Format sample and specific description:
  * <code>
- *services:
- *  devmachine:
- *    image: codenvy/ubuntu_jdk8
- *    depends_on:
- *      - anotherMachine
- *    mem_limit: 2147483648
- *  anotherMachine:
- *    image: codenvy/ubuntu_jdk8
- *    depends_on:
- *      - thirdMachine
- *    mem_limit: 1073741824
- *  thirdMachine:
- *    image: codenvy/ubuntu_jdk8
- *    mem_limit: 512741824
- *    labels:
- *      com.example.description: "Accounting webapp"
- *      com.example.department: "Finance"
- *      com.example.label-with-empty-value: ""
- *    environment:
- *      SOME_ENV: development
- *      SHOW: 'true'
- *      SESSION_SECRET:
+ * services:
+ *   devmachine:
+ *     image: codenvy/ubuntu_jdk8
+ *     depends_on:
+ *       - anotherMachine
+ *     mem_limit: 2147483648
+ *   anotherMachine:
+ *     image: codenvy/ubuntu_jdk8
+ *     depends_on:
+ *       - thirdMachine
+ *     mem_limit: 1073741824
+ *   thirdMachine:
+ *     image: codenvy/ubuntu_jdk8
+ *     mem_limit: 512741824
+ *     labels:
+ *       com.example.description: "Accounting webapp"
+ *       com.example.department: "Finance"
+ *       com.example.label-with-empty-value: ""
+ *     environment:
+ *       SOME_ENV: development
+ *       SHOW: 'true'
+ *       SESSION_SECRET:
  * </code>
  *
  *
@@ -50,16 +50,22 @@ import {EnvironmentManager} from './environment-manager';
  *  @author Ann Shumilova
  */
 
+interface IComposeRecipe {
+  services: {
+    [machineName: string]: any
+  };
+}
 
 export class ComposeEnvironmentManager extends EnvironmentManager {
+  $log: ng.ILogService;
 
-  constructor($log) {
+  constructor($log: ng.ILogService) {
     super();
 
     this.$log = $log;
   }
 
-  get editorMode() {
+  get editorMode(): string {
     return 'text/x-yaml';
   }
 
@@ -67,15 +73,38 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * Parses recipe content
    *
    * @param content {string} recipe content
-   * @returns {object} recipe object
+   * @returns {IComposeRecipe} recipe object
    */
-  _parseRecipe(content) {
-    let recipe = {};
+  _parseRecipe(content: string): IComposeRecipe {
+    let recipe = null;
     try {
-      recipe = jsyaml.load(content);
+      recipe = this._validate(jsyaml.load(content));
     } catch (e) {
       this.$log.error(e);
     }
+    return recipe;
+  }
+
+  /**
+   * Validate given recipe
+   *
+   * @param {IComposeRecipe} recipe
+   * @returns {IComposeRecipe | *}
+   * @private
+   */
+  _validate(recipe: IComposeRecipe): IComposeRecipe | void {
+    if (!recipe.services) {
+      throw new Error('Recipe should contain services section.');
+    }
+
+    let services: any = Object.keys(recipe.services);
+    services.forEach((serviceName: string) => {
+      let serviceFields: any = Object.keys(recipe.services[serviceName] || {});
+      if (!serviceFields || (serviceFields.includes('build') === false && serviceFields.includes('image') === false)) {
+        throw new Error('Service \'' + serviceName + '\' should contain \'build\' or \'image\' section.');
+      }
+    });
+
     return recipe;
   }
 
@@ -86,7 +115,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @returns {string} recipe content
    */
 
-  _stringifyRecipe(recipe) {
+  _stringifyRecipe(recipe: IComposeRecipe): string {
     let content = '';
     try {
       content = jsyaml.dump(recipe);
@@ -103,20 +132,27 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param environment environment's configuration
    * @returns {Array} list of machines defined in environment
    */
-  getMachines(environment) {
-    let recipe = null,
-        machines = [],
-        machineNames;
+  getMachines(environment: any): any[] {
+    let recipe: any = null,
+        machines: any[] = [],
+        machineNames: string[] = [];
 
     if (environment.recipe.content) {
       recipe = this._parseRecipe(environment.recipe.content);
-      machineNames = Object.keys(recipe.services);
-    } else {
+      if (recipe) {
+        machineNames = Object.keys(recipe.services);
+      } else if (environment.machines) {
+        machineNames = Object.keys(environment.machines);
+      }
+    } else if (environment.recipe.location) {
       machineNames = Object.keys(environment.machines);
     }
 
-    machineNames.forEach((machineName) => {
-      let machine = angular.copy(environment.machines[machineName]) || {};
+    machineNames.forEach((machineName: string) => {
+      let machine: any = {};
+      if (environment.machines && environment.machines[machineName]) {
+        machine = angular.copy(environment.machines[machineName]);
+      }
       machine.name = machineName;
       machine.recipe = recipe ? recipe.services[machineName] : recipe;
 
@@ -138,24 +174,30 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param machines the list of machines
    * @returns environment's configuration
    */
-  getEnvironment(environment, machines) {
+  getEnvironment(environment: any, machines: any[]): any {
     let newEnvironment = super.getEnvironment(environment, machines);
 
     if (newEnvironment.recipe.content) {
-      let recipe = this._parseRecipe(newEnvironment.recipe.content);
+      let recipe: IComposeRecipe = this._parseRecipe(newEnvironment.recipe.content);
 
-      machines.forEach((machine) => {
-        let machineName = machine.name;
-        if (machine.recipe.environment && Object.keys(machine.recipe.environment).length) {
-          recipe.services[machineName].environment = angular.copy(machine.recipe.environment);
-        } else {
-          delete recipe.services[machineName].environment;
+      if (recipe) {
+        machines.forEach((machine: any) => {
+          let machineName = machine.name;
+          if (!recipe.services[machineName]) {
+            return;
+          }
+          if (machine.recipe.environment && Object.keys(machine.recipe.environment).length) {
+            recipe.services[machineName].environment = angular.copy(machine.recipe.environment);
+          } else {
+            delete recipe.services[machineName].environment;
+          }
+        });
+
+        try {
+          newEnvironment.recipe.content = this._stringifyRecipe(recipe);
+        } catch (e) {
+          this.$log.error('Cannot retrieve environment\'s recipe, error: ', e);
         }
-      });
-      try {
-        newEnvironment.recipe.content = this._stringifyRecipe(recipe);
-      } catch (e) {
-        this.$log.error('Cannot retrieve environment\'s recipe, error: ', e);
       }
     }
 
@@ -168,7 +210,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param machine {object}
    * @returns {*}
    */
-  getSource(machine) {
+  getSource(machine: any): any {
     if (!machine.recipe) {
       return null;
     }
@@ -186,7 +228,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param machine {object}
    * @returns {boolean}
    */
-  canEditEnvVariables(machine) {
+  canEditEnvVariables(machine: any): boolean {
     return !!machine.recipe;
   }
 
@@ -196,7 +238,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param machine {object}
    * @returns {*}
    */
-  getEnvVariables(machine) {
+  getEnvVariables(machine: any): any {
     if (!machine.recipe) {
       return null;
     }
@@ -210,7 +252,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param machine {object}
    * @param envVariables {object}
    */
-  setEnvVariables(machine, envVariables) {
+  setEnvVariables(machine: any, envVariables: any): void {
     if (!machine.recipe) {
       return;
     }
@@ -228,7 +270,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param machine {object}
    * @returns {boolean}
    */
-  canRenameMachine(machine) {
+  canRenameMachine(machine: any): boolean {
     return !!machine.recipe;
   }
 
@@ -240,12 +282,12 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param newName {string}
    * @returns {*} new environment
    */
-  renameMachine(environment, oldName, newName) {
+  renameMachine(environment: any, oldName: string, newName: string): any {
     try {
-      let recipe = this._parseRecipe(environment.recipe.content);
+      let recipe: IComposeRecipe = this._parseRecipe(environment.recipe.content);
 
       // fix relations to other machines in recipe
-      Object.keys(recipe.services).forEach((serviceName) => {
+      Object.keys(recipe.services).forEach((serviceName: any) => {
         if (serviceName === oldName) {
           return;
         }
@@ -297,7 +339,7 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param machine {object}
    * @returns {boolean}
    */
-  canDeleteMachine(machine) {
+  canDeleteMachine(machine: any): boolean {
     return !!machine.recipe;
   }
 
@@ -308,12 +350,12 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
    * @param name {string} name of machine
    * @returns {*} new environment
    */
-  deleteMachine(environment, name) {
+  deleteMachine(environment: any, name: string): any {
     try {
-      let recipe = this._parseRecipe(environment.recipe.content);
+      let recipe: IComposeRecipe = this._parseRecipe(environment.recipe.content);
 
       // fix relations to other machines in recipe
-      Object.keys(recipe.services).forEach((serviceName) => {
+      Object.keys(recipe.services).forEach((serviceName: any) => {
         if (serviceName === name) {
           return;
         }

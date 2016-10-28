@@ -30,6 +30,7 @@ import org.eclipse.che.ide.workspace.PartStackPresenterFactory;
 import org.eclipse.che.ide.workspace.PartStackViewFactory;
 import org.eclipse.che.ide.workspace.WorkBenchControllerFactory;
 import org.eclipse.che.ide.workspace.WorkBenchPartController;
+import org.eclipse.che.providers.DynaProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -94,6 +95,8 @@ public class AbstractPerspectiveTest {
     private PartPresenter           activePart;
     @Mock
     private AbstractEditorPresenter editorPart;
+    @Mock
+    private DynaProvider            dynaProvider;
 
     private AbstractPerspective perspective;
 
@@ -118,7 +121,9 @@ public class AbstractPerspectiveTest {
         when(stackPresenterFactory.create(Matchers.<PartStackView>anyObject(),
                                           Matchers.<WorkBenchPartController>anyObject())).thenReturn(partStackPresenter);
 
-        perspective = new DummyPerspective(view, stackPresenterFactory, partStackViewFactory, controllerFactory, eventBus);
+        perspective =
+                new DummyPerspective(view, stackPresenterFactory, partStackViewFactory, controllerFactory, eventBus, partStackPresenter,
+                                     dynaProvider);
     }
 
     @Test
@@ -194,8 +199,8 @@ public class AbstractPerspectiveTest {
 
     @Test
     public void partsShouldBeRestored() {
+        perspective.maximizeBottomPart();
         perspective.restoreParts();
-
         verify(workBenchController, times(3)).setSize(anyDouble());
     }
 
@@ -264,14 +269,16 @@ public class AbstractPerspectiveTest {
     }
 
 
-    private class DummyPerspective extends AbstractPerspective {
+    public static class DummyPerspective extends AbstractPerspective {
 
-        private DummyPerspective(@NotNull PerspectiveViewImpl view,
-                                 @NotNull PartStackPresenterFactory stackPresenterFactory,
-                                 @NotNull PartStackViewFactory partViewFactory,
-                                 @NotNull WorkBenchControllerFactory controllerFactory,
-                                 @NotNull EventBus eventBus) {
-            super(SOME_TEXT, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus);
+        public DummyPerspective(@NotNull PerspectiveViewImpl view,
+                                @NotNull PartStackPresenterFactory stackPresenterFactory,
+                                @NotNull PartStackViewFactory partViewFactory,
+                                @NotNull WorkBenchControllerFactory controllerFactory,
+                                @NotNull EventBus eventBus,
+                                PartStackPresenter partStackPresenter,
+                                DynaProvider dynaProvider) {
+            super(SOME_TEXT, view, stackPresenterFactory, partViewFactory, controllerFactory, eventBus, dynaProvider);
 
             partStacks.put(EDITING, partStackPresenter);
         }

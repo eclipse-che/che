@@ -207,6 +207,40 @@ public interface DialogFactory {
                                   @Nullable CancelCallback cancelCallback);
 
     /**
+     * Create an input dialog with the specified initial value.
+     * <p/>
+     * The {@code initialValue} may be pre-selected. Selection begins
+     * at the specified {@code selectionStartIndex} and extends to the
+     * character at index {@code selectionLength}.
+     *
+     * @param title
+     *         the window title
+     * @param label
+     *         the label of the input field
+     * @param initialValue
+     *         the value used to initialize the input
+     * @param selectionStartIndex
+     *         the beginning index of the {@code initialValue} to select, inclusive
+     * @param selectionLength
+     *         the number of characters of the {@code initialValue} to be selected
+     * @param okButtonLabel
+     *         label for OK button
+     * @param inputCallback
+     *         the callback used on OK
+     * @param cancelCallback
+     *         the callback used on cancel
+     * @return an {@link InputDialog} instance
+     */
+    InputDialog createInputDialog(@NotNull @Assisted("title") String title,
+                                  @NotNull @Assisted("label") String label,
+                                  @NotNull @Assisted("initialValue") String initialValue,
+                                  @NotNull @Assisted("selectionStartIndex") Integer selectionStartIndex,
+                                  @NotNull @Assisted("selectionLength") Integer selectionLength,
+                                  @NotNull @Assisted("okButtonLabel") String okButtonLabel,
+                                  @Nullable InputCallback inputCallback,
+                                  @Nullable CancelCallback cancelCallback);
+
+    /**
      * Create a choice dialog with only text as content.
      * Use empty string for button label to hide button.
      *

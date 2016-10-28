@@ -663,6 +663,13 @@ public interface Theme {
     String completionPopupItemSubtitleTextColor();
 
     /**
+     * Item highlight text color for completion popup.
+     *
+     * @return color
+     */
+    String completionPopupItemHighlightTextColor();
+
+    /**
      * Background color of the window widget.
      *
      * @return the color

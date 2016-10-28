@@ -30,7 +30,7 @@ public class CheInContainerNetworkProvider implements Provider<Set<String>> {
     private Set<String> networks;
 
     @Inject
-    public CheInContainerNetworkProvider(@Nullable @Named("docker.che_host_network") String cheMasterNetwork) {
+    public CheInContainerNetworkProvider(@Nullable @Named("che.docker.network") String cheMasterNetwork) {
         if (cheMasterNetwork == null) {
             networks = Collections.emptySet();
         } else {

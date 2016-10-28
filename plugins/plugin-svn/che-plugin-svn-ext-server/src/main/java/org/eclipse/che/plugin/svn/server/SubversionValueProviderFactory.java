@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -81,7 +80,7 @@ public class SubversionValueProviderFactory implements ValueProviderFactory {
             } else {
                 return Collections.emptyList();
             }
-        } catch (final IOException | ForbiddenException | ServerException e) {
+        } catch (ForbiddenException | ServerException e) {
             LOG.debug("svn info error", e);
             throw new ValueStorageException(e.getMessage());
         }

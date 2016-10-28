@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jdbc.jpa.DuplicateKeyException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -30,7 +31,6 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -123,6 +123,9 @@ public class JpaStackDao implements StackDao {
 
     @Transactional
     protected void doCreate(StackImpl stack) {
+        if (stack.getWorkspaceConfig() != null) {
+            stack.getWorkspaceConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
         managerProvider.get().persist(stack);
     }
 
@@ -140,6 +143,9 @@ public class JpaStackDao implements StackDao {
         final EntityManager manager = managerProvider.get();
         if (manager.find(StackImpl.class, update.getId()) == null) {
             throw new NotFoundException(format("Workspace with id '%s' doesn't exist", update.getId()));
+        }
+        if (update.getWorkspaceConfig() != null) {
+            update.getWorkspaceConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
         }
         return manager.merge(update);
     }

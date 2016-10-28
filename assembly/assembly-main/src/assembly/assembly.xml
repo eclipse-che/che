@@ -193,6 +193,12 @@
     </fileSets>
       <files>
         <file>
+            <source>${project.basedir}/src/assembly/bin/docker.sh</source>
+            <outputDirectory>bin</outputDirectory>
+            <destName>docker.sh</destName>
+            <fileMode>755</fileMode>
+        </file>
+        <file>
             <source>${project.basedir}/src/assembly/bin/che.sh</source>
             <outputDirectory>bin</outputDirectory>
             <destName>che.sh</destName>

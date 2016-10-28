@@ -69,6 +69,11 @@ public class FieldAttributeModel {
     private boolean isListOfDto;
 
     /**
+     * This map type is a map of DTOs
+     */
+    private boolean isMapOfDto;
+
+    /**
      * The type is a DTO or a list of DTO and then this value is the name of the DTO implementation
      */
     private String dtoImpl;
@@ -78,6 +83,10 @@ public class FieldAttributeModel {
      */
     private boolean isDto;
 
+    /**
+     * type is a Enum object.
+     */
+    private boolean isEnum;
 
     /**
      * Build a new field model based on the name and Java type
@@ -105,6 +114,8 @@ public class FieldAttributeModel {
         } else if (this.type instanceof Class && ((Class)this.type).isAnnotationPresent(DTO.class)) {
             this.isDto = true;
             dtoImpl = this.type.getTypeName() + "Impl";
+        } else if (this.type instanceof Class && ((Class)this.type).isEnum()) {
+            this.isEnum = true;
         }
 
     }
@@ -124,6 +135,11 @@ public class FieldAttributeModel {
             }
         } else if (Map.class.equals(rawType)) {
             isMap = true;
+            if (parameterizedType.getActualTypeArguments()[1] instanceof Class &&
+                ((Class)parameterizedType.getActualTypeArguments()[1]).isAnnotationPresent(DTO.class)) {
+                isMapOfDto = true;
+                dtoImpl = convertType(parameterizedType.getActualTypeArguments()[1]) + "Impl";
+            }
         }
     }
 
@@ -155,6 +171,10 @@ public class FieldAttributeModel {
         return isListOfDto;
     }
 
+    public boolean isMapOfDto() {
+        return isMapOfDto;
+    }
+
     public String getDtoImpl() {
         return dtoImpl;
     }
@@ -165,6 +185,10 @@ public class FieldAttributeModel {
 
     public boolean isNeedInitialize() {
         return needInitialize;
+    }
+
+    public boolean isEnum() {
+        return isEnum;
     }
 
     public String getName() {

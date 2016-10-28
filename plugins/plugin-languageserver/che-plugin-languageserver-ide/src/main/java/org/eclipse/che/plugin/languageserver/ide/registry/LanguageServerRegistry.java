@@ -18,6 +18,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
 
+import org.eclipse.che.api.languageserver.shared.ProjectExtensionKey;
+import org.eclipse.che.api.languageserver.shared.event.LanguageServerInitializeEventDto;
+import org.eclipse.che.api.languageserver.shared.lsapi.InitializeResultDTO;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
+import org.eclipse.che.api.languageserver.shared.model.impl.InitializeResultImpl;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
@@ -35,17 +40,13 @@ import org.eclipse.che.ide.websocket.WebSocketException;
 import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 import org.eclipse.che.ide.websocket.rest.Unmarshallable;
 import org.eclipse.che.plugin.languageserver.ide.service.LanguageServerRegistryServiceClient;
-import org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey;
-import org.eclipse.che.plugin.languageserver.shared.event.LanguageServerInitializeEventDto;
-import org.eclipse.che.plugin.languageserver.shared.lsapi.InitializeResultDTO;
-import org.eclipse.che.plugin.languageserver.shared.model.LanguageDescription;
-import org.eclipse.che.plugin.languageserver.shared.model.impl.InitializeResultImpl;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.eclipse.che.plugin.languageserver.shared.ProjectExtensionKey.createProjectKey;
+import static org.eclipse.che.api.languageserver.shared.ProjectExtensionKey.createProjectKey;
+
 
 /**
  * @author Anatoliy Bazko

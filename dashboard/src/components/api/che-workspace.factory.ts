@@ -27,6 +27,8 @@ export class CheWorkspace {
    * @ngInject for Dependency injection
    */
   constructor ($resource, $q, cheWebsocket, lodash, cheEnvironmentRegistry, $log) {
+    this.workspaceStatuses = ['RUNNING', 'STOPPED', 'PAUSED', 'STARTING', 'STOPPING', 'ERROR'];
+
     // keep resource
     this.$resource = $resource;
     this.$q = $q;
@@ -52,15 +54,16 @@ export class CheWorkspace {
     // remote call
     this.remoteWorkspaceAPI = this.$resource('/api/workspace', {}, {
         getDetails: {method: 'GET', url: '/api/workspace/:workspaceKey'},
-        create: {method: 'POST', url: '/api/workspace?account=:accountId'},
+        //having 2 methods for creation to ensure namespace parameter won't be send at all if value is null or undefined
+        create: {method: 'POST', url: '/api/workspace'},
+        createWithNamespace: {method: 'POST', url: '/api/workspace?namespace=:namespace'},
         deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
         updateWorkspace: {method: 'PUT', url : '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url : '/api/workspace/:workspaceId/project'},
         deleteProject: {method: 'DELETE', url : '/api/workspace/:workspaceId/project/:path'},
         stopWorkspace: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url : '/api/workspace/:workspaceId/runtime?environment=:envName'},
-        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
-        createSnapshot: {method: 'POST', url: '/api/workspace/:workspaceId/snapshot'}
+        addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
       }
     );
 
@@ -315,17 +318,18 @@ export class CheWorkspace {
     return config;
   }
 
-  createWorkspace(accountId, workspaceName, source, ram, attributes) {
+  createWorkspace(namespace, workspaceName, source, ram, attributes) {
     let data = this.formWorkspaceConfig({}, workspaceName, source, ram);
-
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item) => { return item[0] + ':' + item[1]});
-    let promise = this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, data).$promise;
+    let promise = namespace ? this.remoteWorkspaceAPI.createWithNamespace({namespace : namespace, attribute: attrs}, data).$promise :
+      this.remoteWorkspaceAPI.create({attribute: attrs}, data).$promise;
     return promise;
   }
 
-  createWorkspaceFromConfig(accountId, workspaceConfig, attributes) {
+  createWorkspaceFromConfig(namespace, workspaceConfig, attributes) {
     let attrs = this.lodash.map(this.lodash.pairs(attributes || {}), (item) => { return item[0] + ':' + item[1]});
-    return this.remoteWorkspaceAPI.create({accountId : accountId, attribute: attrs}, workspaceConfig).$promise;
+    return namespace ? this.remoteWorkspaceAPI.createWithNamespace({namespace : namespace, attribute: attrs}, workspaceConfig).$promise :
+      this.remoteWorkspaceAPI.create({attribute: attrs}, workspaceConfig).$promise;
   }
 
   /**
@@ -475,7 +479,17 @@ export class CheWorkspace {
       this.websocketBusByWorkspaceId.set(workspaceId, bus);
 
       bus.subscribe('workspace:' + workspaceId, (message) => {
-        this.getWorkspaceById(workspaceId).status = message.eventType;
+
+        //Filter workspace events, which really indicate the status change:
+        if (this.workspaceStatuses.indexOf(message.eventType) >= 0) {
+          this.getWorkspaceById(workspaceId).status = message.eventType;
+        } else if (message.eventType === 'SNAPSHOT_CREATING') {
+          this.getWorkspaceById(workspaceId).status = 'SNAPSHOTTING';
+        } else if (message.eventType === 'SNAPSHOT_CREATED') {
+          //Snapshot can be created for RUNNING workspace only. As far as snapshot creation is only the events, not the state,
+          //we introduced SNAPSHOT_CREATING status to be handled by UI, though it is fake one, and end of it is indicated by SNAPSHOT_CREATED.
+          this.getWorkspaceById(workspaceId).status = 'RUNNING';
+        }
 
         if (!this.statusDefers[workspaceId] || !this.statusDefers[workspaceId][message.eventType]) {
           return;
@@ -486,14 +500,4 @@ export class CheWorkspace {
       });
     }
   }
-
-  /**
-   * Create snapshot of workspace
-   * @param workspaceId {String} workspace id
-   * @returns {*}
-   */
-  createSnapshot(workspaceId) {
-    return this.remoteWorkspaceAPI.createSnapshot({workspaceId : workspaceId}, {}).$promise;
-  }
-
 }

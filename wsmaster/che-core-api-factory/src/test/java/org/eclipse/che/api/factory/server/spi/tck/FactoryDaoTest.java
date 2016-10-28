@@ -257,17 +257,18 @@ public class FactoryDaoTest {
         final List<ActionImpl> a3 = new ArrayList<>(singletonList(new ActionImpl("id" + index, ImmutableMap.of("key3", "value3"))));
         final OnAppClosedImpl onAppClosed = new OnAppClosedImpl(a3);
         final IdeImpl ide = new IdeImpl(onAppLoaded, onProjectsLoaded, onAppClosed);
-        return FactoryImpl.builder()
-                          .generateId()
-                          .setVersion("4_0")
-                          .setName("factoryName" + index)
-                          .setWorkspace(createWorkspaceConfig(index))
-                          .setButton(factoryButton)
-                          .setCreator(creator)
-                          .setPolicies(policies)
-                          .setImages(images)
-                          .setIde(ide)
-                          .build();
+        final FactoryImpl factory = FactoryImpl.builder()
+                                               .generateId()
+                                               .setVersion("4_0")
+                                               .setName("factoryName" + index)
+                                               .setButton(factoryButton)
+                                               .setCreator(creator)
+                                               .setPolicies(policies)
+                                               .setImages(images)
+                                               .setIde(ide)
+                                               .build();
+        factory.setWorkspace(createWorkspaceConfig(index));
+        return factory;
     }
 
     public static WorkspaceConfigImpl createWorkspaceConfig(int index) {
@@ -363,6 +364,9 @@ public class FactoryDaoTest {
         wCfg.setCommands(commands);
         wCfg.setProjects(projects);
         wCfg.setEnvironments(environments);
+
+        wCfg.getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+
         return wCfg;
     }
 }

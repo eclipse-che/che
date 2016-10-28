@@ -16,7 +16,9 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.machine.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.event.WorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ExtendedMachineImpl;
@@ -69,6 +71,9 @@ public class WorkspaceDaoTest {
 
     @Inject
     private WorkspaceDao workspaceDao;
+
+    @Inject
+    private EventService eventService;
 
     private AccountImpl[] accounts;
 
@@ -179,6 +184,16 @@ public class WorkspaceDaoTest {
 
         workspaceDao.remove(workspace.getId());
         workspaceDao.get(workspace.getId());
+    }
+
+    @Test
+    public void shouldPublicRemoveWorkspaceEventAfterRemoveWorkspace() throws Exception {
+        final boolean[] isNotified = new boolean[] { false };
+        eventService.subscribe(event -> isNotified[0] = true, WorkspaceRemovedEvent.class);
+
+        workspaceDao.remove(workspaces[0].getId());
+
+        assertTrue(isNotified[0], "Event subscriber notified");
     }
 
     @Test
@@ -455,8 +470,8 @@ public class WorkspaceDaoTest {
         recipe2.setContentType("text/x-dockerfile");
         recipe2.setContent("content");
         final EnvironmentImpl env2 = new EnvironmentImpl();
-        env2.setMachines(new HashMap<>(ImmutableMap.of("machine1", exMachine1,
-                                                       "machine3", exMachine3)));
+        env2.setMachines(new HashMap<>(ImmutableMap.of("machine1", new ExtendedMachineImpl(exMachine1),
+                                                       "machine3", new ExtendedMachineImpl(exMachine3))));
         env2.setRecipe(recipe2);
 
         final Map<String, EnvironmentImpl> environments = ImmutableMap.of("env1", env1, "env2", env2);
@@ -469,6 +484,9 @@ public class WorkspaceDaoTest {
         wCfg.setCommands(commands);
         wCfg.setProjects(projects);
         wCfg.setEnvironments(new HashMap<>(environments));
+
+        wCfg.getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+
         return wCfg;
     }
 
@@ -478,9 +496,8 @@ public class WorkspaceDaoTest {
         final WorkspaceImpl workspace = new WorkspaceImpl();
         workspace.setId(id);
         workspace.setAccount(account);
-        final WorkspaceConfigImpl cfg = new WorkspaceConfigImpl();
-        cfg.setName(name);
-        workspace.setConfig(cfg);
+        wCfg.setName(name);
+        workspace.setConfig(wCfg);
         workspace.setAttributes(new HashMap<>(ImmutableMap.of("attr1", "value1",
                                                               "attr2", "value2",
                                                               "attr3", "value3")));

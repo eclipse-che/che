@@ -60,7 +60,7 @@ public class FSLuceneSearcherTest {
         assertTrue(indexDirectory.mkdir());
 
         filter = mock(VirtualFileFilter.class);
-        when(filter.accept(any(VirtualFile.class))).thenReturn(true);
+        when(filter.accept(any(VirtualFile.class))).thenReturn(false);
 
         closeCallback = mock(AbstractLuceneSearcherProvider.CloseCallback.class);
         searcher = new FSLuceneSearcher(indexDirectory, filter, closeCallback);
@@ -232,7 +232,7 @@ public class FSLuceneSearcherTest {
         folder.createFile("yyy.txt", TEST_CONTENT[2]);
         folder.createFile("zzz.txt", TEST_CONTENT[2]);
 
-        when(filter.accept(withName("yyy.txt"))).thenReturn(false);
+        when(filter.accept(withName("yyy.txt"))).thenReturn(true);
         searcher.init(virtualFileSystem);
 
         List<String> paths = searcher.search(new QueryExpression().setText("be")).getFilePaths();

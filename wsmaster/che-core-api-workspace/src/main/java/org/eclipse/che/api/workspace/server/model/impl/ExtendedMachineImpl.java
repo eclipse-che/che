@@ -16,6 +16,7 @@ import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -37,13 +38,13 @@ public class ExtendedMachineImpl implements ExtendedMachine {
     @GeneratedValue
     private Long id;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> agents;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Map<String, String> attributes;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn
     private Map<String, ServerConf2Impl> servers;
 

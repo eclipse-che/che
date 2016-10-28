@@ -24,6 +24,7 @@ import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Objects;
 
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
@@ -80,8 +81,12 @@ public class ProjectTreeStatusNotificationReceiver implements JsonRpcRequestRece
             }
         }
 
-        Log.debug(getClass(), "Received request\npath: " + path +"\ntype:"+ type +"\nstatus:" + status);
+        Log.debug(getClass(), "Received request\npath: " + path + "\ntype:" + type + "\nstatus:" + status);
 
-        appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(Path.valueOf(path), Path.valueOf(path), status));
+        if (path == null || path.isEmpty()) {
+            appContext.getWorkspaceRoot().synchronize();
+        } else {
+            appContext.getWorkspaceRoot().synchronize(new ExternalResourceDelta(Path.valueOf(path), Path.valueOf(path), status));
+        }
     }
 }
