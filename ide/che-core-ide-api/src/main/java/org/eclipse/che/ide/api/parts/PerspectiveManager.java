@@ -12,11 +12,13 @@ package org.eclipse.che.ide.api.parts;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,12 +37,11 @@ public class PerspectiveManager {
     private String currentPerspectiveId;
 
     @Inject
-    public PerspectiveManager(Map<String, Perspective> perspectives) {
+    public PerspectiveManager(Map<String, Perspective> perspectives, @Named("defaultPerspectiveId") String defaultPerspectiveId) {
         this.perspectives = perspectives;
         listeners = new ArrayList<>();
 
-        //perspective by default
-        currentPerspectiveId = "Project Perspective";
+        currentPerspectiveId = defaultPerspectiveId;
     }
 
     /** Returns current active perspective. The method can return null, if current perspective isn't found. */
@@ -81,6 +82,13 @@ public class PerspectiveManager {
      */
     public void addListener(@NotNull PerspectiveTypeListener listener) {
         listeners.add(listener);
+    }
+
+    /**
+     * @return current map of all perspectives
+     */
+    public Map<String, Perspective> getPerspectives() {
+        return new HashMap<>(perspectives);
     }
 
     /** The interface which must be implemented by all elements who need react on perspective changing. */

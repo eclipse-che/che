@@ -51,6 +51,10 @@ export class CheButton {
       template = template + ` ng-href="${attrs.ngHref}"`;
     }
 
+    if (attrs.ngDisabled) {
+      template = template + ` disabled="${attrs.ngHref}"`;
+    }
+
     template = template + '>';
 
     if (attrs.cheButtonIcon) {

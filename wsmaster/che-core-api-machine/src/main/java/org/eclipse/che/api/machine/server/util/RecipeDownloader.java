@@ -45,7 +45,7 @@ public class RecipeDownloader {
     private final URI apiEndpoint;
 
     @Inject
-    public RecipeDownloader(@Named("api.endpoint") URI apiEndpoint) {
+    public RecipeDownloader(@Named("che.api") URI apiEndpoint) {
         this.apiEndpoint = apiEndpoint;
     }
 

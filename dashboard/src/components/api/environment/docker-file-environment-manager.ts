@@ -31,19 +31,22 @@ import {DockerfileParser} from './docker-file-parser';
  *
  * @author Ann Shumilova
  */
-export class DockerFileEnvironmentManager extends EnvironmentManager {
 
-  constructor($log) {
+const ENV_INSTRUCTION: string = 'ENV';
+
+export class DockerFileEnvironmentManager extends EnvironmentManager {
+  $log: ng.ILogService;
+  parser: DockerfileParser;
+
+  constructor($log: ng.ILogService) {
     super();
 
     this.$log = $log;
 
-    this.ENV_INSTRUCTION = 'ENV';
-
     this.parser = new DockerfileParser();
   }
 
-  get editorMode() {
+  get editorMode(): string {
     return 'text/x-dockerfile';
   }
 
@@ -54,8 +57,8 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @returns {Array} a list of instructions and arguments
    * @private
    */
-  _parseRecipe(content) {
-    let recipe = [];
+  _parseRecipe(content: string): any[] {
+    let recipe: any[] = null;
     try {
       recipe = this.parser.parse(content);
     } catch (e) {
@@ -67,11 +70,11 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
   /**
    * Dumps a list of instructions and arguments into dockerfile
    *
-   * @param instructions {array} array of objects
+   * @param instructions {Array} array of objects
    * @returns {string} dockerfile
    * @private
    */
-  _stringifyRecipe(instructions) {
+  _stringifyRecipe(instructions: any[]): string {
     let content = '';
 
     try {
@@ -90,7 +93,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @param machines the list of machines
    * @returns environment's configuration
    */
-  getEnvironment(environment, machines) {
+  getEnvironment(environment: any, machines: any): any {
     let newEnvironment = super.getEnvironment(environment, machines);
 
     // machines should contain one machine only
@@ -111,7 +114,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @param environment environment's configuration
    * @returns {Array} list of machines defined in environment
    */
-  getMachines(environment) {
+  getMachines(environment: any): any[] {
     let recipe = null,
         machines = [];
 
@@ -119,7 +122,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
       recipe = this._parseRecipe(environment.recipe.content);
     }
 
-    Object.keys(environment.machines).forEach((machineName) => {
+    Object.keys(environment.machines).forEach((machineName: string) => {
       let machine = angular.copy(environment.machines[machineName]);
       machine.name = machineName;
       machine.recipe = recipe;
@@ -136,12 +139,12 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @param machine
    * @returns {*}
    */
-  getSource(machine) {
+  getSource(machine: any): any {
     if (!machine.recipe) {
       return null;
     }
 
-    let from = machine.recipe.find((line) => {
+    let from = machine.recipe.find((line: any) => {
       return line.instruction === 'FROM';
     });
 
@@ -154,7 +157,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @param machine {object}
    * @returns {boolean}
    */
-  canEditEnvVariables(machine) {
+  canEditEnvVariables(machine: any): boolean {
     return !!machine.recipe;
   }
 
@@ -164,18 +167,18 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @param machine {object}
    * @returns {*}
    */
-  getEnvVariables(machine) {
+  getEnvVariables(machine: any): any {
     if (!machine.recipe) {
       return null;
     }
 
     let envVariables = {};
 
-    let envList = machine.recipe.filter((line) => {
-      return line.instruction === this.ENV_INSTRUCTION;
+    let envList = machine.recipe.filter((line: any) => {
+      return line.instruction === ENV_INSTRUCTION;
     }) || [];
 
-    envList.forEach((line) => {
+    envList.forEach((line: any) => {
       envVariables[line.argument[0]] = line.argument[1];
     });
 
@@ -188,7 +191,7 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
    * @param machine {object}
    * @param envVariables {object}
    */
-  setEnvVariables(machine, envVariables) {
+  setEnvVariables(machine: any, envVariables: any): void {
     if (!machine.recipe) {
       return;
     }
@@ -196,19 +199,19 @@ export class DockerFileEnvironmentManager extends EnvironmentManager {
     let newRecipe = [];
 
     // new recipe without any 'ENV' instruction
-    newRecipe = machine.recipe.filter((line) => {
-      return line.instruction !== this.ENV_INSTRUCTION;
+    newRecipe = machine.recipe.filter((line: any) => {
+      return line.instruction !== ENV_INSTRUCTION;
     });
 
     // add environments if any
     if (Object.keys(envVariables).length) {
-      Object.keys(envVariables).forEach((name) => {
+      Object.keys(envVariables).forEach((name: string) => {
         let line = {
-          instruction: this.ENV_INSTRUCTION,
+          instruction: ENV_INSTRUCTION,
           argument: [name, envVariables[name]]
         };
-        newRecipe.splice(1,0,line);
-      })
+        newRecipe.splice(1, 0, line);
+      });
     }
 
     machine.recipe = newRecipe;

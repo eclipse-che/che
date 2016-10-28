@@ -67,7 +67,7 @@ public class MachineProcessManager {
     final ExecutorService executor;
 
     @Inject
-    public MachineProcessManager(@Named("machine.logs.location") String machineLogsDir,
+    public MachineProcessManager(@Named("che.workspace.logs") String machineLogsDir,
                                  EventService eventService,
                                  CheEnvironmentEngine environmentEngine) {
         this.eventService = eventService;

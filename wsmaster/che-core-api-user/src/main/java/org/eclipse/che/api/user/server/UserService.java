@@ -62,7 +62,7 @@ import static org.eclipse.che.api.user.server.DtoConverter.asDto;
 @Path("/user")
 @Api(value = "/user", description = "User REST API")
 public class UserService extends Service {
-    public static final String USER_SELF_CREATION_ALLOWED = "user.self.creation.allowed";
+    public static final String USER_SELF_CREATION_ALLOWED = "che.auth.user_self_creation";
 
     private final UserManager       userManager;
     private final TokenValidator    tokenValidator;

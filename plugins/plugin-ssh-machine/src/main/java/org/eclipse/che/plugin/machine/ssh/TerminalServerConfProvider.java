@@ -29,7 +29,7 @@ public class TerminalServerConfProvider implements Provider<ServerConf> {
     public static final String TERMINAL_SERVER_REFERENCE = "terminal";
 
     @Inject
-    @Named("api.endpoint")
+    @Named("che.api")
     private URI apiEndpoint;
 
     @Override

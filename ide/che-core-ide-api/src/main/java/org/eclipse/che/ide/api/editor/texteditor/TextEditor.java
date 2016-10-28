@@ -132,6 +132,19 @@ public interface TextEditor extends EditorPartPresenter {
     int getCursorOffset();
 
     /**
+     * Returns the top visible line. Used to determine editor vertical scroll position
+     * @return the top visible line
+     */
+    int getTopVisibleLine();
+
+    /**
+     * Set (scroll) top visible line
+     * @param line
+     *          the top line
+     */
+    void setTopLine(int line);
+
+    /**
      * Displays a message to the user.
      * @param message message
      */

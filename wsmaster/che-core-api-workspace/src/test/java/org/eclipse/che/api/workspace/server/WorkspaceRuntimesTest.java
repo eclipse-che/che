@@ -36,8 +36,11 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceRuntimeImpl;
+import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent.EventType;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.dto.server.DtoFactory;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -51,23 +54,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 /**
  * @author Yevhenii Voevodin
@@ -436,8 +445,8 @@ public class WorkspaceRuntimesTest {
         verify(runtimes).launchAgents(instance, singletonList("org.eclipse.che.terminal"));
     }
 
-    @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Environment of workspace '.*' is not running")
+    @Test(expectedExceptions = NotFoundException.class,
+          expectedExceptionsMessageRegExp = "Workspace with id '.*' is not running")
     public void shouldNotStartMachineIfEnvironmentIsNotRunning() throws Exception {
         // when
         MachineConfigImpl config = createConfig(false);
@@ -493,7 +502,7 @@ public class WorkspaceRuntimesTest {
     }
 
     @Test(expectedExceptions = ConflictException.class,
-          expectedExceptionsMessageRegExp = "Environment of workspace '.*' is not running")
+          expectedExceptionsMessageRegExp = "Environment of workspace 'workspaceId' is not running or snapshotting")
     public void shouldNotSaveMachineIfEnvironmentIsNotRunning() throws Exception {
         // when
         runtimes.saveMachine("namespace", "workspaceId", "machineId");
@@ -570,6 +579,72 @@ public class WorkspaceRuntimesTest {
 
         // then
         assertEquals(actualWorkspaces, expectedWorkspaces);
+    }
+
+    @Test
+    public void changesStatusFromRunningToSnapshotting() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
+
+        runtimes.beginSnapshotting(workspace.getId());
+
+        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(), WorkspaceStatus.SNAPSHOTTING);
+    }
+
+    @Test
+    public void changesStatusFromSnapshottingToRunning() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
+        runtimes.beginSnapshotting(workspace.getId());
+
+        runtimes.finishSnapshotting(workspace.getId());
+
+        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(), WorkspaceStatus.RUNNING);
+    }
+
+    @Test
+    public void doesNothingWhenWorkspaceDoesNotHaveRuntimeAndFinishSnapshottingIsCalled() throws Exception {
+        runtimes.finishSnapshotting("fake");
+    }
+
+    @Test
+    public void doesNothingWhenWorkspaceStatusIsNotSnapshottingAndFinishSnapshottingIsCalled() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace();
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
+
+        runtimes.finishSnapshotting(workspace.getId());
+
+        assertEquals(runtimes.get(workspace.getId()).getRuntimeStatus(), WorkspaceStatus.RUNNING);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class,
+          expectedExceptionsMessageRegExp = "Workspace with id 'non-existing' is not running")
+    public void throwsNotFoundExceptionWhenBeginningSnapshottingForNonExistingWorkspace() throws Exception {
+        runtimes.beginSnapshotting("non-existing");
+    }
+
+    @Test
+    public void throwsConflictExceptionWhenBeginningSnapshottingForNotRunningWorkspace() throws Exception {
+        final WorkspaceImpl workspace = createWorkspace();
+
+        doAnswer(inv -> {
+            // checking exception here
+            try {
+                runtimes.beginSnapshotting(workspace.getId());
+                fail("Expected to get an exception");
+            } catch (ConflictException x) {
+                assertEquals(x.getMessage(), format("Workspace with id '%s' is not in '%s', it's status is '%s'",
+                                                    workspace.getId(),
+                                                    WorkspaceStatus.RUNNING,
+                                                    WorkspaceStatus.STARTING));
+            }
+            return null;
+        }).when(eventService)
+          .publish(DtoFactory.newDto(WorkspaceStatusEvent.class)
+                             .withEventType(EventType.STARTING)
+                             .withWorkspaceId(workspace.getId()));
+
+        runtimes.start(workspace, workspace.getConfig().getDefaultEnv(), false);
     }
 
     private static Instance createMachine(boolean isDev) {

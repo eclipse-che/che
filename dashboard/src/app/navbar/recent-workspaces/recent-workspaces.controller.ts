@@ -40,12 +40,6 @@ export class NavbarRecentWorkspacesController {
         icon: 'fa fa-stop',
         _onclick: (workspaceId) => { this.stopRecentWorkspace(workspaceId) }
       },
-      {
-        name: 'Snapshot',
-        scope: 'RUNNING',
-        icon: 'fa fa-clock-o',
-        _onclick: (workspaceId) => { this.createSnapshotRecentWorkspace(workspaceId) }
-      },
       // stopped
       {
         name: 'Run',
@@ -143,8 +137,8 @@ export class NavbarRecentWorkspacesController {
    */
   getDropdownItems(workspaceId) {
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId),
-      disabled = workspace && (workspace.status === 'STARTING' || workspace.status === 'STOPPING'),
-      visibleScope = (workspace && (workspace.status === 'RUNNING' || workspace.status === 'STOPPING')) ? 'RUNNING' : 'STOPPED';
+      disabled = workspace && (workspace.status === 'STARTING' || workspace.status === 'STOPPING' || workspace.status === 'SNAPSHOTTING'),
+      visibleScope = (workspace && (workspace.status === 'RUNNING' || workspace.status === 'STOPPING' || workspace.status === 'SNAPSHOTTING')) ? 'RUNNING' : 'STOPPED';
 
     if (!this.dropdownItems[workspaceId]) {
       this.dropdownItems[workspaceId] = [];
@@ -181,16 +175,6 @@ export class NavbarRecentWorkspacesController {
 
     this.updateRecentWorkspace(workspaceId);
     this.cheWorkspace.startWorkspace(workspace.id, workspace.config.defaultEnv).then(() => {}, (error) => {
-      this.$log.error(error);
-    });
-  }
-
-  /**
-   * Creates snapshot of specified workspace
-   * @param workspaceId {String} workspace id
-   */
-  createSnapshotRecentWorkspace(workspaceId) {
-    this.cheWorkspace.createSnapshot(workspaceId).then(() => {}, (error) => {
       this.$log.error(error);
     });
   }

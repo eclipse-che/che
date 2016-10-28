@@ -25,25 +25,31 @@
  * @author Oleksii Kurinnyi
  */
 export class WorkspaceEnvironments {
+  restrict: string = 'E';
+  templateUrl: string = 'app/workspaces/workspace-details/environments/environments.html';
+
+  controller: string = 'WorkspaceEnvironmentsController';
+  controllerAs: string = 'workspaceEnvironmentsController';
+  bindToController: boolean = true;
+
+  scope: {
+    [propName: string]: string
+  };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
   constructor () {
-    this.restrict = 'E';
-    this.templateUrl = 'app/workspaces/workspace-details/environments/environments.html';
-
-    this.controller = 'WorkspaceEnvironmentsController';
-    this.controllerAs = 'workspaceEnvironmentsController';
-    this.bindToController = true;
-
+    // scope values
     this.scope = {
+      workspaceCreationFlow: '=',
+      workspaceName: '=',
       environmentName: '=',
       machinesViewStatus: '=',
       workspaceConfig: '=',
       environmentOnChange: '&'
-    }
+    };
   }
 }
 

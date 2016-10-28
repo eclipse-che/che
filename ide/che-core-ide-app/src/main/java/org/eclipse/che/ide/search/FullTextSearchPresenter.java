@@ -118,7 +118,7 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
         String[] items = escapedText.trim().split("\\s+");
         int numberItem = items.length;
         if (numberItem == 1) {
-            return items[0] + '*';
+            return items[0];
         }
 
         String lastItem = items[numberItem - 1];
@@ -127,7 +127,6 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
         sb.append(escapedText.substring(0, escapedText.lastIndexOf(lastItem)));
         sb.append("\" " + AND_OPERATOR + " ");
         sb.append(lastItem);
-        sb.append('*');
         return sb.toString();
     }
 

@@ -37,6 +37,10 @@ public class TextDocumentSynchronizeFactory {
     }
 
     public TextDocumentSynchronize getSynchronize(TextDocumentSyncKind kind) {
+        if (kind == null) {
+            // use NONE syncronizer if server doesn't require any
+            return NONE;
+        }
         switch (kind) {
             case None:
                 return NONE;

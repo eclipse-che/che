@@ -31,7 +31,6 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 
 /**
