@@ -52,25 +52,6 @@ public class EnvironmentContextTest {
                              "SHOW", "true")
             },
 
-            // array type environment
-            {"services: \n"
-             + " dev-machine: \n"
-             + "  image: codenvy/ubuntu_jdk8\n"
-             + "  environment:\n"
-             + "   - MYSQL_ROOT_PASSWORD=root\n"
-             + "   - MYSQL_DATABASE=db",
-             ImmutableMap.of("MYSQL_ROOT_PASSWORD", "root",
-                             "MYSQL_DATABASE", "db")
-            },
-
-            // empty environment
-            {"services: \n"
-             + " dev-machine: \n"
-             + "  image: codenvy/ubuntu_jdk8\n"
-             + "  environment:",
-             ImmutableMap.of()
-            },
-
             // dictionary format, value of variable is empty
             {"services: \n"
              + " dev-machine: \n"
@@ -87,6 +68,43 @@ public class EnvironmentContextTest {
              + "  environment:\n"
              + "   VAR : val:1",
              ImmutableMap.of("VAR", "val:1")
+            },
+
+            // array type environment
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   - MYSQL_ROOT_PASSWORD=root\n"
+             + "   - MYSQL_DATABASE=db",
+             ImmutableMap.of("MYSQL_ROOT_PASSWORD", "root",
+                             "MYSQL_DATABASE", "db")
+            },
+
+            // array format, value of variable contains equal sign
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   - VAR=val=1",
+             ImmutableMap.of("VAR", "val=1")
+            },
+
+            // array format, empty value of variable
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   - VAR= ",
+             ImmutableMap.of("VAR", "")
+            },
+
+            // empty environment
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:",
+             ImmutableMap.of()
             },
         };
     }
@@ -116,7 +134,7 @@ public class EnvironmentContextTest {
              + "  image: codenvy/ubuntu_jdk8\n"
              + "  environment:\n"
              + "   true",
-             "Parsing of environment configuration failed. Unsupported type 'class java.lang.Boolean'.*(?s).*"
+             "Parsing of environment configuration failed. Unsupported type 'class java.lang.Boolean'\\.(?s).*"
              },
 
             // unsupported format of list environment
@@ -125,7 +143,7 @@ public class EnvironmentContextTest {
              + "  image: codenvy/ubuntu_jdk8\n"
              + "  environment:\n"
              + "   - MYSQL_ROOT_PASSWORD: root\n",
-             "Parsing of environment configuration failed. Unsupported value '\\[\\{MYSQL_ROOT_PASSWORD=root}]'.*(?s).*"
+             "Parsing of environment configuration failed. Unsupported value '\\[\\{MYSQL_ROOT_PASSWORD=root}]'\\.(?s).*"
              },
 
             // dictionary format, no colon in entry
@@ -134,7 +152,16 @@ public class EnvironmentContextTest {
              + "  image: codenvy/ubuntu_jdk8\n"
              + "  environment:\n"
              + "   MYSQL_ROOT_PASSWORD",
-             "Parsing of environment configuration failed. Unsupported value 'MYSQL_ROOT_PASSWORD'.*(?s).*"
+             "Parsing of environment configuration failed. Unsupported value 'MYSQL_ROOT_PASSWORD'\\.(?s).*"
+            },
+
+            // dictionary format, value of variable contains equal sign
+            {"services: \n"
+             + " dev-machine: \n"
+             + "  image: codenvy/ubuntu_jdk8\n"
+             + "  environment:\n"
+             + "   VAR=val=1",
+             "Parsing of environment configuration failed. Unsupported value 'VAR=val=1'\\.(?s).*"
             },
 
             // array format, no equal sign in entry
@@ -144,25 +171,7 @@ public class EnvironmentContextTest {
              + "  environment:\n"
              + "   - MYSQL_ROOT_PASSWORD=root\n"
              + "   - MYSQL_DATABASE\n",
-             "Parsing of environment configuration failed. Unsupported value 'MYSQL_DATABASE'.*(?s).*"
-            },
-
-            // array format, empty value of variable
-            {"services: \n"
-             + " dev-machine: \n"
-             + "  image: codenvy/ubuntu_jdk8\n"
-             + "  environment:\n"
-             + "   =value ",
-             "Parsing of environment configuration failed. Unsupported value '=value'.*(?s).*"
-            },
-
-            // array format, value of variable contains equal sign
-            {"services: \n"
-             + " dev-machine: \n"
-             + "  image: codenvy/ubuntu_jdk8\n"
-             + "  environment:\n"
-             + "   VAR=val=1",
-             "Parsing of environment configuration failed. Unsupported value 'VAR=val=1'.*(?s).*"
+             "Parsing of environment configuration failed. Unsupported value 'MYSQL_DATABASE'\\.(?s).*"
             },
         };
     }

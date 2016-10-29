@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.common.collect.ImmutableMap;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -29,11 +29,13 @@ import static java.lang.String.format;
  * @author Dmytro Nochevnov
  */
 public class EnvironmentDeserializer extends JsonDeserializer<Map<String, String>> {
+
+    public static final String ARRAY_ITEM_DIVIDER        = "=";
+    public static final String UNSUPPORTED_VALUE_MESSAGE = "Unsupported value '%s'.";
+
     @Override
     public Map<String, String> deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
         Object environment = jsonParser.readValueAs(Object.class);
-
-        JsonMappingException jsonMappingException = ctxt.mappingException(format("Unsupported value '%s'.", environment.toString()));
 
         try {
             /* Parse dictionary in view of:
@@ -54,20 +56,16 @@ public class EnvironmentDeserializer extends JsonDeserializer<Map<String, String
                 // convert array to Map<String, String>{ key1: value1, key2: value2 }
                 Map<String, String> map = new HashMap<>();
                 for (String item : (List<String>) environment) {
-                    String[] splitResult = item.split("=");
-                    if (splitResult.length < 2) {
-                        throw ctxt.mappingException(format("Unsupported value '%s'.", item));
-                    }
-
-                    map.put(splitResult[0].trim(), splitResult[1].trim());
+                    map.putAll(parseEnvironmentItem(item));
                 }
 
                 return map;
             }
-        } catch (JsonMappingException je) {
-            throw je;
+        } catch (IllegalArgumentException ie) {
+            throw ctxt.mappingException(ie.getMessage());
+
         } catch (Exception e) {
-            throw jsonMappingException;
+            throw ctxt.mappingException(format(UNSUPPORTED_VALUE_MESSAGE, environment));
         }
 
         // work around empty environment
@@ -76,7 +74,7 @@ public class EnvironmentDeserializer extends JsonDeserializer<Map<String, String
                 return new HashMap<>();
             }
 
-            throw jsonMappingException;
+            throw ctxt.mappingException(format(UNSUPPORTED_VALUE_MESSAGE, environment));
         }
 
         /* Work around unsupported type of environment content, for example, 'Boolean' in case of content:
@@ -84,5 +82,22 @@ public class EnvironmentDeserializer extends JsonDeserializer<Map<String, String
              true"
         */
         throw ctxt.mappingException(format("Unsupported type '%s'.", environment.getClass()));
+    }
+
+    /**
+     * Parse "key=value" item.
+     * @param item - environment array item to parse
+     * @return map of key/value which are divided by "=" sign in item.
+     * @throws IllegalArgumentException if there is no "=" sign in item, or if there is empty key in item
+     */
+    private Map<String, String> parseEnvironmentItem(String item) throws IllegalArgumentException {
+        if (!item.contains(ARRAY_ITEM_DIVIDER) || item.indexOf(ARRAY_ITEM_DIVIDER) == 0) {
+            throw new IllegalArgumentException(format(UNSUPPORTED_VALUE_MESSAGE, item));
+        }
+
+        String key = item.substring(0, item.indexOf(ARRAY_ITEM_DIVIDER));
+        String value = item.substring(item.indexOf(ARRAY_ITEM_DIVIDER) + 1, item.length());
+
+        return ImmutableMap.of(key, value);
     }
 }
