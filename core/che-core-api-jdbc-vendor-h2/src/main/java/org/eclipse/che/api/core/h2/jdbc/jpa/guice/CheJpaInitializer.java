@@ -28,7 +28,7 @@ import java.nio.file.Paths;
 public class CheJpaInitializer extends JpaInitializer {
 
     @Inject
-    @Named("che.conf.storage")
+    @Named("che.database")
     private String storageRoot;
 
     @Inject

@@ -19,6 +19,11 @@ import java.util.Map;
  * @author Anatoliy Bazko
  */
 public interface Agent {
+	
+    /**
+     * Returns the id of the agent.
+     */
+    String getId();
 
     /**
      * Returns the name of the agent.
@@ -29,6 +34,11 @@ public interface Agent {
      * Returns the version of the agent.
      */
     String getVersion();
+
+    /**
+     * Returns the description of the agent.
+     */
+    String getDescription();
 
     /**
      * Returns the depending agents, that must be applied before.

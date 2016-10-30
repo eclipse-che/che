@@ -32,6 +32,7 @@ import org.eclipse.che.plugin.maven.server.projecttype.handler.ArchetypeGenerati
 import org.eclipse.che.plugin.maven.server.projecttype.handler.GeneratorStrategy;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectGenerator;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectInitHandler;
+import org.eclipse.che.plugin.maven.server.projecttype.handler.SimpleGeneratorStrategy;
 import org.eclipse.che.plugin.maven.server.rest.MavenServerService;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
@@ -53,7 +54,9 @@ public class MavenModule extends AbstractModule {
         projectHandlerMultibinder.addBinding().to(MavenProjectGenerator.class);
         projectHandlerMultibinder.addBinding().to(MavenProjectInitHandler.class);
 
-        newSetBinder(binder(), GeneratorStrategy.class).addBinding().to(ArchetypeGenerationStrategy.class);
+        Multibinder<GeneratorStrategy> generatorStrategyMultibinder = newSetBinder(binder(), GeneratorStrategy.class);
+        generatorStrategyMultibinder.addBinding().to(SimpleGeneratorStrategy.class);
+        generatorStrategyMultibinder.addBinding().to(ArchetypeGenerationStrategy.class);
 
         bind(MavenTerminal.class).to(MavenTerminalImpl.class).in(Singleton.class);
         bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);

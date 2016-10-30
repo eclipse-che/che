@@ -20,7 +20,7 @@
 <md-progress-linear md-mode="indeterminate" ng-show="workspaceDetailsController.loading"></md-progress-linear>
 
 <md-content md-scroll-y flex
-            class="workspace-details-content">
+            class="workspace-details-content" md-theme="default">
   <md-tabs md-dynamic-height md-stretch-tabs="auto"
            md-selected="workspaceDetailsController.selectedTabIndex"
            md-center-tabs="">
@@ -62,6 +62,18 @@
             </div>
           </che-label-container>
 
+          <!-- Namespace -->
+          <che-label-container che-label-name="Team" ng-if="workspaceDetailsController.getNamespaces().length > 0">
+            <che-toggle ng-if="workspaceDetailsController.isCreationFlow" ng-model="workspaceDetailsController.workspaceNamespace" layout="row"
+                        ng-init="workspaceDetailsController.workspaceNamespace = workspaceDetailsController.getNamespaces()[0]">
+              <che-toggle-button ng-repeat="namespace in workspaceDetailsController.getNamespaces()"
+                                 che-title="{{namespace}}" class="namespace-button">
+              </che-toggle-button>
+            </che-toggle>
+            <che-button-default ng-if="!workspaceDetailsController.isCreationFlow"
+                                che-button-title="{{workspaceDetailsController.namespace}}"></che-button-default>
+          </che-label-container>
+
           <!-- Status -->
           <che-label-container che-label-name="State">
             <div layout="column">
@@ -73,11 +85,11 @@
               <div layout="row" class="workspace-details-action-buttons">
                 <div>
                   <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STARTING')"
-                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPING')"
+                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() !== 'RUNNING' && workspaceDetailsController.getWorkspaceStatus() !== 'STOPPING' && workspaceDetailsController.getWorkspaceStatus() !== 'SNAPSHOTTING')"
                                       che-button-title="Run" name="runButton"
                                       ng-click="workspaceDetailsController.runWorkspace()"></che-button-default>
-                  <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING')"
-                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING')"
+                  <che-button-default ng-disabled="(workspaceDetailsController.isCreationFlow || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING')"
+                                      ng-show="(workspaceDetailsController.getWorkspaceStatus() === 'RUNNING' || workspaceDetailsController.getWorkspaceStatus() === 'STOPPING' || workspaceDetailsController.getWorkspaceStatus() === 'SNAPSHOTTING')"
                                       che-button-title="Stop" name="stopButton"
                                       ng-click="workspaceDetailsController.stopWorkspace()"></che-button-default>
                 </div>
@@ -117,6 +129,7 @@
             ng-init="workspaceDetailsController.setForm(workspaceDetailsController.tab.Runtime, workspaceRuntimeForm)"
             workspace-creation-flow="workspaceDetailsController.isCreationFlow"
             workspace-name="workspaceDetailsController.newName"
+            stack-id="workspaceDetailsController.stackId"
             environment-name="workspaceDetailsController.copyWorkspaceDetails.config.defaultEnv"
             workspace-config="workspaceDetailsController.copyWorkspaceDetails.config"
             machines-view-status="workspaceDetailsController.machinesViewStatus"

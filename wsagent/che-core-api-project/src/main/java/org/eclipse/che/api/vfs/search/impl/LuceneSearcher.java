@@ -71,7 +71,7 @@ public abstract class LuceneSearcher implements Searcher {
 
     private static final int RESULT_LIMIT = 1000;
 
-    private final List<VirtualFileFilter>                      indexFilters;
+    private final List<VirtualFileFilter>                      excludeFileIndexFilters;
     private final AbstractLuceneSearcherProvider.CloseCallback closeCallback;
 
     private IndexWriter     luceneIndexWriter;
@@ -88,24 +88,24 @@ public abstract class LuceneSearcher implements Searcher {
     }
 
     /**
-     * @param indexFilter
+     * @param excludeFileIndexFilter
      *         common filter for files that should not be indexed. If complex excluding rules needed then few filters might be combined
      *         with {@link VirtualFileFilters#createAndFilter} or {@link VirtualFileFilters#createOrFilter} methods
      */
-    protected LuceneSearcher(VirtualFileFilter indexFilter, AbstractLuceneSearcherProvider.CloseCallback closeCallback) {
+    protected LuceneSearcher(VirtualFileFilter excludeFileIndexFilter, AbstractLuceneSearcherProvider.CloseCallback closeCallback) {
         this.closeCallback = closeCallback;
-        indexFilters = new CopyOnWriteArrayList<>();
-        indexFilters.add(indexFilter);
+        excludeFileIndexFilters = new CopyOnWriteArrayList<>();
+        excludeFileIndexFilters.add(excludeFileIndexFilter);
     }
 
     @Override
     public boolean addIndexFilter(VirtualFileFilter indexFilter) {
-        return indexFilters.add(indexFilter);
+        return excludeFileIndexFilters.add(indexFilter);
     }
 
     @Override
     public boolean removeIndexFilter(VirtualFileFilter indexFilter) {
-        return indexFilters.remove(indexFilter);
+        return excludeFileIndexFilters.remove(indexFilter);
     }
 
     protected Analyzer makeAnalyzer() {
@@ -389,8 +389,8 @@ public abstract class LuceneSearcher implements Searcher {
     }
 
     private boolean shouldIndexContent(VirtualFile virtualFile) {
-        for (VirtualFileFilter indexFilter : indexFilters) {
-            if (!indexFilter.accept(virtualFile)) {
+        for (VirtualFileFilter indexFilter : excludeFileIndexFilters) {
+            if (indexFilter.accept(virtualFile)) {
                 return false;
             }
         }

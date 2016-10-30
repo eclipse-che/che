@@ -10,99 +10,104 @@
  *******************************************************************************/
 package org.eclipse.che.ide.statepersistance;
 
+import elemental.json.Json;
+import elemental.json.JsonException;
+import elemental.json.JsonFactory;
+import elemental.json.JsonObject;
+
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.ide.api.action.Action;
-import org.eclipse.che.ide.api.action.ActionEvent;
-import org.eclipse.che.ide.api.action.ActionManager;
-import org.eclipse.che.ide.api.parts.PerspectiveManager;
+import org.eclipse.che.ide.api.component.StateComponent;
 import org.eclipse.che.ide.api.preferences.PreferencesManager;
-import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.statepersistance.dto.ActionDescriptor;
-import org.eclipse.che.ide.statepersistance.dto.AppState;
-import org.eclipse.che.ide.statepersistance.dto.WorkspaceState;
-import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
-import org.eclipse.che.ide.util.Pair;
 import org.eclipse.che.ide.util.loging.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Responsible for persisting and restoring IDE state across sessions.
  * Uses user preferences as storage for serialized state.
  *
  * @author Artem Zatsarynnyi
+ * @author Yevhen Vydolob
  */
 @Singleton
 public class AppStateManager {
 
     /** The name of the property for the mappings in user preferences. */
-    public static final String PREFERENCE_PROPERTY_NAME = "IdeAppState";
+    public static final String PREFERENCE_PROPERTY_NAME = "IdeAppStates";
 
-    private final Set<PersistenceComponent>    persistenceComponents;
-    private final PreferencesManager           preferencesManager;
-    private final DtoFactory                   dtoFactory;
-    private final ActionManager                actionManager;
-    private final PresentationFactory          presentationFactory;
-    private final Provider<PerspectiveManager> perspectiveManagerProvider;
+    private static final String WORKSPACE = "workspace";
 
-    private AppState appState;
+    private final Map<String, StateComponent> persistenceComponents;
+    private final PreferencesManager          preferencesManager;
+    private final JsonFactory                 jsonFactory;
+    private       JsonObject                  allWsState;
 
     @Inject
-    public AppStateManager(Set<PersistenceComponent> persistenceComponents,
+    public AppStateManager(Map<String, StateComponent> persistenceComponents,
                            PreferencesManager preferencesManager,
-                           DtoFactory dtoFactory,
-                           ActionManager actionManager,
-                           PresentationFactory presentationFactory,
-                           Provider<PerspectiveManager> perspectiveManagerProvider) {
+                           JsonFactory jsonFactory) {
         this.persistenceComponents = persistenceComponents;
         this.preferencesManager = preferencesManager;
-        this.dtoFactory = dtoFactory;
-        this.actionManager = actionManager;
-        this.presentationFactory = presentationFactory;
-        this.perspectiveManagerProvider = perspectiveManagerProvider;
-
+        this.jsonFactory = jsonFactory;
         readStateFromPreferences();
     }
 
     private void readStateFromPreferences() {
         final String json = preferencesManager.getValue(PREFERENCE_PROPERTY_NAME);
         if (json == null) {
-            appState = dtoFactory.createDto(AppState.class);
+            allWsState = jsonFactory.createObject();
         } else {
             try {
-                appState = dtoFactory.createDtoFromJson(json, AppState.class);
+                allWsState = jsonFactory.parse(json);
             } catch (Exception e) {
                 // create 'clear' state if any deserializing error occurred
-                appState = dtoFactory.createDto(AppState.class);
+                allWsState = jsonFactory.createObject();
             }
         }
     }
 
-    public Promise<Void> persistWorkspaceState(String wsId) {
-        appState.setRecentWorkspaceId(wsId);
-
-        final WorkspaceState workspaceState = dtoFactory.createDto(WorkspaceState.class);
-        appState.getWorkspaces().put(wsId, workspaceState);
-
-        final List<ActionDescriptor> actions = workspaceState.getActions();
-        for (PersistenceComponent persistenceComponent : persistenceComponents) {
-            actions.addAll(persistenceComponent.getActions());
+    public void restoreWorkspaceState(String wsId) {
+        if (allWsState.hasKey(wsId)) {
+            restoreState(allWsState.getObject(wsId));
         }
-
-        return writeStateToPreferences();
     }
 
-    private Promise<Void> writeStateToPreferences() {
-        final String json = dtoFactory.toJson(appState);
+    private void restoreState(JsonObject settings) {
+        try {
+            if (settings.hasKey(WORKSPACE)) {
+                JsonObject workspace = settings.getObject(WORKSPACE);
+                for (String key : workspace.keys()) {
+                    if (persistenceComponents.containsKey(key)) {
+                        StateComponent component = persistenceComponents.get(key);
+                        component.loadState(workspace.getObject(key));
+                    }
+                }
+            }
+        } catch (JsonException e) {
+            Log.error(getClass(), e);
+        }
+    }
+
+    public Promise<Void> persistWorkspaceState(String wsId) {
+        final JsonObject settings = Json.createObject();
+        JsonObject workspace = Json.createObject();
+        settings.put(WORKSPACE, workspace);
+        for (Map.Entry<String, StateComponent> entry : persistenceComponents.entrySet()) {
+            String key = entry.getKey();
+            workspace.put(key, entry.getValue().getState());
+        }
+        allWsState.put(wsId, settings);
+        return writeStateToPreferences(allWsState);
+    }
+
+    private Promise<Void> writeStateToPreferences(JsonObject state) {
+        final String json = state.toJson();
         Log.info(getClass(), "write: " + json);
         preferencesManager.setValue(PREFERENCE_PROPERTY_NAME, json);
         return preferencesManager.flushPreferences().catchError(new Operation<PromiseError>() {
@@ -113,36 +118,8 @@ public class AppStateManager {
         });
     }
 
-    public void restoreWorkspaceState(String wsId) {
-        final WorkspaceState workspaceState = appState.getWorkspaces().get(wsId);
-
-        if (workspaceState == null) {
-            return;
-        }
-
-        List<ActionDescriptor> actions = workspaceState.getActions();
-        if (actions.isEmpty()) {
-            return;
-        }
-
-        List<Pair<Action, ActionEvent>> actionsToPerform = new ArrayList<>(actions.size());
-        for (ActionDescriptor actionDescriptor : actions) {
-            final Action action = actionManager.getAction(actionDescriptor.getId());
-            if (action == null) {
-                continue;
-            }
-
-            actionsToPerform.add(new Pair<>(action, new ActionEvent(presentationFactory.getPresentation(action),
-                                                                    actionManager,
-                                                                    perspectiveManagerProvider.get(),
-                                                                    actionDescriptor.getParameters())));
-        }
-
-        actionManager.performActions(actionsToPerform, false).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                Log.info(AppStateManager.class, "Failed to restore workspace state.");
-            }
-        });
+    public boolean hasStateForWorkspace(String wsId) {
+        return allWsState.hasKey(wsId);
     }
+
 }

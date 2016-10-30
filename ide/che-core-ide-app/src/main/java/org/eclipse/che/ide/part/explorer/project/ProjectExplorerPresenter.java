@@ -44,6 +44,7 @@ import org.eclipse.che.ide.ui.smartTree.NodeDescriptor;
 import org.eclipse.che.ide.ui.smartTree.Tree;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent;
 import org.eclipse.che.ide.ui.smartTree.event.SelectionChangedEvent.SelectionChangedHandler;
+import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.validation.constraints.NotNull;
@@ -62,6 +63,7 @@ import static org.eclipse.che.ide.api.resources.ResourceDelta.UPDATED;
  * @author Dmitry Shnurenko
  */
 @Singleton
+@DynaObject
 public class ProjectExplorerPresenter extends BasePresenter implements ActionDelegate,
                                                                        ProjectExplorerPart,
                                                                        ResourceChangedHandler,

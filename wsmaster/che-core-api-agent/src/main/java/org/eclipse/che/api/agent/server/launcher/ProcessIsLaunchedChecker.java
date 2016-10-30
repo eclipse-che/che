@@ -43,7 +43,7 @@ public class ProcessIsLaunchedChecker implements AgentLaunchingChecker {
 
     @Override
     public boolean isLaunched(Agent agent, InstanceProcess process, Instance machine) throws MachineException {
-            Command command = new CommandImpl(format("Wait for %s, try %d", agent.getName(), ++counter),
+            Command command = new CommandImpl(format("Wait for %s, try %d", agent.getId(), ++counter),
                                           format(CHECK_COMMAND, processNameToWait),
                                           "test");
 

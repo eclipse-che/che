@@ -236,23 +236,24 @@ public final class ProjectManager {
                 throw new ConflictException("Project config already exists " + path);
             }
 
-            final FolderEntry projectFolder = new FolderEntry(vfs.getRoot().createFolder(path), projectRegistry);
             final CreateProjectHandler generator = handlers.getCreateProjectHandler(projectConfig.getType());
-
+            FolderEntry projectFolder;
             if (generator != null) {
                 Map<String, AttributeValue> valueMap = new HashMap<>();
                 Map<String, List<String>> attributes = projectConfig.getAttributes();
-
                 if (attributes != null) {
-                    for (Map.Entry<String, List<String>> entry : attributes.entrySet()) {
-                        valueMap.put(entry.getKey(), new AttributeValue(entry.getValue()));
-                    }
+                      for (Map.Entry<String, List<String>> entry : attributes.entrySet()) {
+                           valueMap.put(entry.getKey(), new AttributeValue(entry.getValue()));
+                      }
                 }
-
                 if (options == null) {
                     options = new HashMap<>();
                 }
-                generator.onCreateProject(projectFolder, valueMap, options);
+                Path projectPath = Path.of(path);
+                generator.onCreateProject(projectPath, valueMap, options);
+                projectFolder = new FolderEntry(vfs.getRoot().getChild(projectPath), projectRegistry);
+            } else {
+                projectFolder = new FolderEntry(vfs.getRoot().createFolder(path), projectRegistry);
             }
 
             final RegisteredProject project;
@@ -260,6 +261,7 @@ public final class ProjectManager {
                 project = projectRegistry.putProject(projectConfig, projectFolder, true, false);
             } catch (Exception e) {
                 // rollback project folder
+
                 projectFolder.getVirtualFile().delete();
                 throw e;
             }

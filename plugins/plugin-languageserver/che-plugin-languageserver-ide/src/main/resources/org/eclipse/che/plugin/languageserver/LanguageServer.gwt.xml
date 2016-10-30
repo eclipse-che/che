@@ -25,6 +25,7 @@
     <inherits name="io.typefox.lsapi.LsApi"/>
     <inherits name="org.eclipse.che.ide.editor.orion.OrionEditor"/>
     <inherits name="org.eclipse.che.api.promises.Promises"/>
+    <inherits name="org.eclipse.che.api.languageserver.LanguageServer"/>
 
     <source path="ide"/>
 </module>

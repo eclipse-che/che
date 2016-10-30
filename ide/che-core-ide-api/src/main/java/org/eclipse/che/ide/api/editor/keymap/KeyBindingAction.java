@@ -16,5 +16,5 @@ package org.eclipse.che.ide.api.editor.keymap;
 public interface KeyBindingAction {
 
     /** The triggered action. */
-    void action();
+    boolean action();
 }

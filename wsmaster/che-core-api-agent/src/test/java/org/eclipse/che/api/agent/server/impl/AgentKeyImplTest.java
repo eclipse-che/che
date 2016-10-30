@@ -23,22 +23,22 @@ public class AgentKeyImplTest {
 
     @Test
     public void testAgentKeyWithNameAndVersion() {
-        AgentKeyImpl agentKey = AgentKeyImpl.parse("name:1");
+        AgentKeyImpl agentKey = AgentKeyImpl.parse("id:1");
 
-        assertEquals(agentKey.getName(), "name");
+        assertEquals(agentKey.getId(), "id");
         assertEquals(agentKey.getVersion(), "1");
     }
 
     @Test
-    public void testParseAgentKeyWithName() {
-        AgentKeyImpl agentKey = AgentKeyImpl.parse("name");
+    public void testParseAgentKeyWithId() {
+        AgentKeyImpl agentKey = AgentKeyImpl.parse("id");
 
-        assertEquals(agentKey.getName(), "name");
+        assertEquals(agentKey.getId(), "id");
         assertNull(agentKey.getVersion());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testParseAgentKeyFails() {
-        AgentKeyImpl.parse("name:1:2");
+        AgentKeyImpl.parse("id:1:2");
     }
 }

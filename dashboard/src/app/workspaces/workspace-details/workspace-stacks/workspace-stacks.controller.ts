@@ -94,7 +94,7 @@ export class WorkspaceStacksController {
       return;
     }
 
-    this.workspaceStackOnChange({config: config});
+    this.workspaceStackOnChange({config: config, stackId: this.stack ? this.stack.id : ''});
   }
 
   /**

@@ -64,10 +64,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -172,10 +175,16 @@ public class ProjectService extends Service {
      * NOTE: parentPath is added to make a module
      */
     public ProjectConfigDto createProject(@ApiParam(value = "Add to this project as module", required = false)
+                                          @Context UriInfo uriInfo,
                                           @Description("descriptor of project") ProjectConfigDto projectConfig) throws ConflictException,
                                                                                                                        ForbiddenException,
                                                                                                                        ServerException,
                                                                                                                        NotFoundException {
+        Map<String, String> options = new HashMap<>();
+        MultivaluedMap<String, String> map = uriInfo.getQueryParameters();
+        for(String key: map.keySet()) {
+            options.put(key, map.get(key).get(0));
+        }
         String pathToProject = projectConfig.getPath();
         String pathToParent = pathToProject.substring(0, pathToProject.lastIndexOf("/"));
 
@@ -186,7 +195,7 @@ public class ProjectService extends Service {
             }
         }
 
-        final RegisteredProject project = projectManager.createProject(projectConfig, null);
+        final RegisteredProject project = projectManager.createProject(projectConfig, options);
         final ProjectConfigDto configDto = asDto(project);
 
         eventService.publish(new ProjectCreatedEvent(workspace, project.getPath()));

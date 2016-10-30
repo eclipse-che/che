@@ -37,11 +37,11 @@ public class DockerRegistryChecker {
 
     @Inject
     @Nullable
-    @Named("machine.docker.registry")
+    @Named("che.docker.registry")
     private String machineDockerRegistry;
 
     @Inject
-    @Named("machine.docker.snapshot_use_registry")
+    @Named("che.docker.registry_for_snapshots")
     private boolean snapshotUseRegistry;
 
     /**

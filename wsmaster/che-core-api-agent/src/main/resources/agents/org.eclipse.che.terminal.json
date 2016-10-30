@@ -1,5 +1,7 @@
 {
-"name": "org.eclipse.che.terminal",
+"id": "org.eclipse.che.terminal",
+"name": "Terminal",
+"description" : "Terminal support",
 "dependencies": [],
 "properties": {
 "ports": "terminal:4411/tcp"

@@ -54,8 +54,8 @@ public class DockerContainerCleaner implements Runnable {
         this.nameGenerator = nameGenerator;
     }
 
-    @ScheduleRate(periodParameterName = "machine.docker.unused_containers_cleanup_period_min",
-                  initialDelayParameterName = "machine.docker.unused_containers_cleanup_period_min",
+    @ScheduleRate(periodParameterName = "che.docker.unused_containers_cleanup_min",
+                  initialDelayParameterName = "che.docker.unused_containers_cleanup_min",
                   unit = TimeUnit.MINUTES)
     @Override
     public void run() {

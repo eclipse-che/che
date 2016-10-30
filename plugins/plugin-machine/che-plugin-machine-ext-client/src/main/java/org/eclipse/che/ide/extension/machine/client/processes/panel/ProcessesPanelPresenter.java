@@ -124,13 +124,12 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     private final DialogFactory                 dialogFactory;
     private final ConsoleTreeContextMenuFactory consoleTreeContextMenuFactory;
     private final CommandTypeRegistry           commandTypeRegistry;
-    private final Map<String, ProcessTreeNode>  machineNodes;
     private final EventBus                      eventBus;
 
-    ProcessTreeNode rootNode;
+    ProcessTreeNode                             rootNode;
+    private final Map<String, ProcessTreeNode>  machineNodes;
 
-    private List<ProcessTreeNode> rootNodes;
-    private ProcessTreeNode       contextTreeNode;
+    private ProcessTreeNode                     contextTreeNode;
 
     @Inject
     public ProcessesPanelPresenter(ProcessesPanelView view,
@@ -163,8 +162,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         this.commandTypeRegistry = commandTypeRegistry;
 
         machineNodes = new HashMap<>();
-        rootNodes = new ArrayList<>();
-        rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, rootNodes);
+        rootNode = new ProcessTreeNode(ROOT_NODE, null, null, null, new ArrayList<ProcessTreeNode>());
         terminals = new HashMap<>();
         consoles = new HashMap<>();
         consoleCommands = new HashMap<>();
@@ -178,6 +176,44 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         eventBus.addHandler(MachineStateEvent.TYPE, this);
         eventBus.addHandler(EnvironmentOutputEvent.TYPE, this);
         eventBus.addHandler(DownloadWorkspaceOutputEvent.TYPE, this);
+
+        updateMachineList();
+    }
+
+    /**
+     * Updates list of the machines from application context.
+     */
+    public void updateMachineList() {
+        if (appContext.getWorkspace() == null) {
+            return;
+        }
+
+        List<MachineEntity> machines = getMachines(appContext.getWorkspace());
+        if (machines.isEmpty()) {
+            return;
+        }
+
+        ProcessTreeNode machineToSelect = null;
+        for (MachineEntity machine : machines) {
+            if (machine.isDev()) {
+                provideMachineNode(machine, true);
+                machines.remove(machine);
+                break;
+            }
+        }
+
+        for (MachineEntity machine : machines) {
+            provideMachineNode(machine, true);
+        }
+
+        if (machineToSelect == null) {
+            machineToSelect = machineNodes.entrySet().iterator().next().getValue();
+        }
+
+        view.selectNode(machineToSelect);
+        notifyTreeNodeSelected(machineToSelect);
+
+        workspaceAgent.setActivePart(ProcessesPanelPresenter.this);
     }
 
     @Override
@@ -232,7 +268,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return;
         }
 
-        rootNodes.remove(destroyedMachineNode);
+        rootNode.getChildren().remove(destroyedMachineNode);
         view.setProcessesData(rootNode);
 
         final Collection<ProcessTreeNode> children = new ArrayList<>();
@@ -308,13 +344,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             if (processTreeNode.getData() instanceof MachineEntity) {
                 if (((MachineEntity)processTreeNode.getData()).isDev()) {
                     view.selectNode(processTreeNode);
-
-                    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                        @Override
-                        public void execute() {
-                            eventBus.fireEvent(new ProcessTreeNodeSelectedEvent(processTreeNode));
-                        }
-                    });
+                    notifyTreeNodeSelected(processTreeNode);
                 }
             }
         }
@@ -393,15 +423,16 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onTreeNodeSelected(final ProcessTreeNode node) {
-        view.showProcessOutput(node.getId());
-        refreshStopButtonState(node.getId());
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                eventBus.fireEvent(new ProcessTreeNodeSelectedEvent(node));
+        if (node != null) {
+            if (ProcessTreeNode.ProcessNodeType.MACHINE_NODE == node.getType()) {
+                view.showProcessOutput(node.getName());
+            } else {
+                view.showProcessOutput(node.getId());
+                refreshStopButtonState(node.getId());
             }
-        });
+        }
+
+        notifyTreeNodeSelected(node);
     }
 
     /**
@@ -485,7 +516,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
                 view.addProcessNode(processNode);
                 view.addWidget(id, outputConsole.getTitle(), outputConsole.getTitleIcon(), widget, machineConsole);
                 if (!MACHINE_NODE.equals(processNode.getType())) {
-                    view.selectNode(view.getNodeById(id));
+                    ProcessTreeNode node = view.getNodeById(id);
+                    view.selectNode(node);
+                    notifyTreeNodeSelected(node);
                 }
             }
         });
@@ -592,6 +625,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         removeChildFromMachineNode(node, parentNode);
         view.selectNode(neighborNode);
+        notifyTreeNodeSelected(neighborNode);
     }
 
     private String getUniqueTerminalName(ProcessTreeNode machineNode) {
@@ -621,13 +655,7 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         machineTreeNode.getChildren().add(childNode);
         view.setProcessesData(rootNode);
         view.selectNode(childNode);
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                eventBus.fireEvent(new ProcessTreeNodeSelectedEvent(childNode));
-            }
-        });
+        notifyTreeNodeSelected(childNode);
     }
 
     private void removeChildFromMachineNode(ProcessTreeNode childNode, ProcessTreeNode machineTreeNode) {
@@ -673,8 +701,10 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         for (Environment environment : environments.values()) {
             ExtendedMachine extendedMachine = environment.getMachines().get(machineName);
-            if (extendedMachine.getAgents() != null && extendedMachine.getAgents().contains(agent)) {
-                return true;
+            if (extendedMachine != null) {
+                if (extendedMachine.getAgents() != null && extendedMachine.getAgents().contains(agent)) {
+                    return true;
+                }
             }
         }
 
@@ -699,23 +729,31 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
             return existedMachineNode;
         }
 
+        // remove existed node
+        for (ProcessTreeNode node : rootNode.getChildren()) {
+            if (machine.getConfig().getName().equals(node.getName())) {
+                rootNode.getChildren().remove(node);
+                break;
+            }
+        }
+
+        // create new node
         final ProcessTreeNode newMachineNode = new ProcessTreeNode(MACHINE_NODE, rootNode, machine, null, new ArrayList<ProcessTreeNode>());
         newMachineNode.setRunning(true);
         newMachineNode.setHasTerminalAgent(hasAgent(machine.getDisplayName(), TERMINAL_AGENT));
         newMachineNode.setHasSSHAgent(hasAgent(machine.getDisplayName(), SSH_AGENT));
         machineNodes.put(machineId, newMachineNode);
 
-        if (rootNodes.contains(existedMachineNode)) {
-            rootNodes.remove(existedMachineNode);
-        }
+        // add to children
+        rootNode.getChildren().add(newMachineNode);
 
-        rootNodes.add(newMachineNode);
-
+        // update the view
         view.setProcessesData(rootNode);
 
-        if (existedMachineNode == null) {
-            final OutputConsole outputConsole = commandConsoleFactory.create(machine.getConfig().getName());
-            addOutputConsole(machineId, newMachineNode, outputConsole, true);
+        // add output for the machine if it is not exist
+        if (!consoles.containsKey(machine.getConfig().getName())) {
+            OutputConsole outputConsole = commandConsoleFactory.create(machine.getConfig().getName());
+            addOutputConsole(machine.getConfig().getName(), newMachineNode, outputConsole, true);
         }
 
         return newMachineNode;
@@ -750,26 +788,9 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         return null;
     }
 
-    //TODO: need to improve this method. Avoid duplicate for(;;).
-    //Then we get output form machine it must be added to process tree already.
     @Override
     public void onEnvironmentOutputEvent(EnvironmentOutputEvent event) {
-        final String content = event.getContent();
-        final String machineName = event.getMachineName();
-        for (ProcessTreeNode machineNode : machineNodes.values()) {
-            if (machineName.equals(machineNode.getName())) {
-                printMachineOutput(machineNode.getId(), content);
-                return;
-            }
-        }
-
-        final List<MachineEntity> machines = getMachines(appContext.getWorkspace());
-        for (MachineEntity machineEntity : machines) {
-            if (machineName.equals(machineEntity.getDisplayName())) {
-                ProcessTreeNode machineNode = provideMachineNode(machineEntity, false);
-                printMachineOutput(machineNode.getId(), content);
-            }
-        }
+        printMachineOutput(event.getMachineName(), event.getContent());
     }
 
     @Override
@@ -799,9 +820,11 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
         if (machineToSelect != null) {
             view.selectNode(machineToSelect);
+            notifyTreeNodeSelected(machineToSelect);
         } else if (!machineNodes.isEmpty()) {
             machineToSelect = machineNodes.entrySet().iterator().next().getValue();
             view.selectNode(machineToSelect);
+            notifyTreeNodeSelected(machineToSelect);
         }
 
         workspaceAgent.setActivePart(ProcessesPanelPresenter.this);
@@ -809,23 +832,38 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
 
     @Override
     public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
-        for (ProcessTreeNode processTreeNode : rootNode.getChildren()) {
-            if (processTreeNode.getType() == MACHINE_NODE) {
-                onCloseTerminal(processTreeNode);
-                processTreeNode.setRunning(false);
-                if (processTreeNode.getChildren() != null) {
-                    processTreeNode.getChildren().clear();
+        try {
+            for (ProcessTreeNode node : rootNode.getChildren()) {
+                if (MACHINE_NODE == node.getType()) {
+                    node.setRunning(false);
+
+                    ArrayList<ProcessTreeNode> children = new ArrayList<>();
+                    children.addAll(node.getChildren());
+
+                    for (ProcessTreeNode child : children) {
+                        if (COMMAND_NODE == child.getType()) {
+                            closeCommandOutput(child, new SubPanel.RemoveCallback() {
+                                @Override
+                                public void remove() {
+                                }
+                            });
+                        } else if (TERMINAL_NODE == child.getType()) {
+                            closeTerminal(child);
+                        }
+
+                        view.hideProcessOutput(child.getId());
+                        view.removeProcessNode(child);
+
+                    }
                 }
             }
+
+        } catch (Exception e) {
+            Log.error(getClass(), e);
         }
 
-        rootNode.getChildren().clear();
-        rootNodes.clear();
-        machineNodes.clear();
-
-        view.clear();
-        view.selectNode(null);
         view.setProcessesData(rootNode);
+        selectDevMachine();
     }
 
     @Override
@@ -896,8 +934,16 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         }
     }
 
-    public void printMachineOutput(String machineId, String text) {
-        OutputConsole console = consoles.get(machineId);
+    /**
+     * Prints text to the machine console.
+     *
+     * @param machineName
+     *         machine name
+     * @param text
+     *          text to be printed
+     */
+    public void printMachineOutput(String machineName, String text) {
+        OutputConsole console = consoles.get(machineName);
         if (console != null && console instanceof DefaultOutputConsole) {
             ((DefaultOutputConsole)console).printText(text);
         }
@@ -906,15 +952,15 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
     /**
      * Prints text to the machine console.
      *
-     * @param machineId
-     *         machine Id
+     * @param machineName
+     *         machine name
      * @param text
      *         text to be printed
      * @param color
      *         color of the text or NULL
      */
-    public void printMachineOutput(String machineId, String text, String color) {
-        OutputConsole console = consoles.get(machineId);
+    public void printMachineOutput(String machineName, String text, String color) {
+        OutputConsole console = consoles.get(machineName);
         if (console != null && console instanceof DefaultOutputConsole) {
             ((DefaultOutputConsole)console).printText(text, color);
         }
@@ -965,9 +1011,25 @@ public class ProcessesPanelPresenter extends BasePresenter implements ProcessesP
         return consoles.get(contextTreeNode.getId());
     }
 
+    /**
+     * Sends an event informing that process tree node has been selected.
+     *
+     * @param node
+     *          selected node
+     */
+    private void notifyTreeNodeSelected(final ProcessTreeNode node) {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+            @Override
+            public void execute() {
+                eventBus.fireEvent(new ProcessTreeNodeSelectedEvent(node));
+            }
+        });
+    }
+
     @Override
     public void onContextMenu(final int mouseX, final int mouseY, final ProcessTreeNode node) {
         view.selectNode(node);
+        notifyTreeNodeSelected(node);
 
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override

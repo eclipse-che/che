@@ -41,7 +41,7 @@ public class WsAgentURLProvider implements Provider<String> {
     private String cachedAgentUrl;
 
     @Inject
-    public WsAgentURLProvider(@Named("api.endpoint") String apiEndpoint,
+    public WsAgentURLProvider(@Named("che.api") String apiEndpoint,
                               @Named("env.CHE_WORKSPACE_ID") String wsId,
                               HttpJsonRequestFactory requestFactory) {
         this.wsId = wsId;

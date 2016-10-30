@@ -10,15 +10,16 @@
  *******************************************************************************/
 package org.eclipse.che.ide.api.parts;
 
-import org.eclipse.che.ide.api.mvp.View;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+
+import org.eclipse.che.ide.api.mvp.View;
 
 /**
  * Perspective View contains abstract containers for PartStack
  *
- * @author <a href="mailto:nzamosenchuk@exoplatform.com">Nikolay Zamosenchuk</a>
+ * @author Nikolay Zamosenchuk
  */
-public interface WorkBenchView<T> extends View<T> {
+public interface PerspectiveView<T> extends View<T> {
     /**
      * Returns central panel.
      *

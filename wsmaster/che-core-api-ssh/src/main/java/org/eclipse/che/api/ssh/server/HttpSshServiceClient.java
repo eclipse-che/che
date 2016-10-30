@@ -40,7 +40,7 @@ public class HttpSshServiceClient implements SshServiceClient {
     private final HttpJsonRequestFactory requestFactory;
 
     @Inject
-    public HttpSshServiceClient(@Named("api.endpoint") String apiUrl,
+    public HttpSshServiceClient(@Named("che.api") String apiUrl,
                                 HttpJsonRequestFactory requestFactory) {
         this.sshUrl = UriBuilder.fromUri(apiUrl)
                                 .path(SshService.class)

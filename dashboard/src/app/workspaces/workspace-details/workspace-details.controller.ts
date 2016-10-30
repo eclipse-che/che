@@ -14,6 +14,7 @@ import {CheNotification} from '../../../components/notification/che-notification
 import {CheWorkspace} from '../../../components/api/che-workspace.factory';
 import IdeSvc from '../../ide/ide.service';
 import {WorkspaceDetailsService} from './workspace-details.service';
+import {CheNamespaceRegistry} from "../../../components/api/namespace/che-namespace-registry.factory";
 
 /**
  * @ngdoc controller
@@ -37,6 +38,7 @@ export class WorkspaceDetailsController {
   cheEnvironmentRegistry: CheEnvironmentRegistry;
   cheNotification: CheNotification;
   cheWorkspace: CheWorkspace;
+  cheNamespaceRegistry: CheNamespaceRegistry;
   ideSvc: IdeSvc;
   workspaceDetailsService: WorkspaceDetailsService;
 
@@ -48,7 +50,7 @@ export class WorkspaceDetailsController {
   workspaceId: string;
   workspaceName: string;
   newName: string;
-  stack: any;
+  stackId: string;
   workspaceDetails: any = {};
   copyWorkspaceDetails: any = {};
   machinesViewStatus: any = {};
@@ -56,6 +58,7 @@ export class WorkspaceDetailsController {
   invalidWorkspace: string;
   editMode: boolean = false;
   showApplyMessage: boolean = false;
+  workspaceNamespace: string = undefined;
 
   usedNamesList: any = [];
 
@@ -66,7 +69,10 @@ export class WorkspaceDetailsController {
    * Default constructor that is using resource injection
    * @ngInject for Dependency injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService, $route: ng.route.IRouteService, $rootScope: ng.IRootScopeService, $scope: ng.IScope, $timeout: ng.ITimeoutService, cheEnvironmentRegistry: CheEnvironmentRegistry, cheNotification: CheNotification, cheWorkspace: CheWorkspace, ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $mdDialog: ng.material.IDialogService, $q: ng.IQService,
+              $route: ng.route.IRouteService, $rootScope: ng.IRootScopeService, $scope: ng.IScope, $timeout: ng.ITimeoutService,
+              cheEnvironmentRegistry: CheEnvironmentRegistry, cheNotification: CheNotification, cheWorkspace: CheWorkspace,
+              ideSvc: IdeSvc, workspaceDetailsService: WorkspaceDetailsService, cheNamespaceRegistry: CheNamespaceRegistry) {
     this.$log = $log;
     this.$location = $location;
     this.$mdDialog = $mdDialog;
@@ -78,6 +84,7 @@ export class WorkspaceDetailsController {
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.cheNotification = cheNotification;
     this.cheWorkspace = cheWorkspace;
+    this.cheNamespaceRegistry = cheNamespaceRegistry;
     this.ideSvc = ideSvc;
     this.workspaceDetailsService = workspaceDetailsService;
 
@@ -226,6 +233,15 @@ export class WorkspaceDetailsController {
   }
 
   /**
+   * Returns the list of available namespaces.
+   *
+   * @returns {Array} array of namespaces
+   */
+  getNamespaces(): Array<string> {
+    return this.cheNamespaceRegistry.getNamespaces();
+  }
+
+  /**
    * Returns workspace details sections (tabs, example - projects)
    *
    * @returns {*}
@@ -239,7 +255,7 @@ export class WorkspaceDetailsController {
    *
    * @returns {ng.IPromise<any>}
    */
-  updateWorkspaceConfig(): ng.IPromise<any> {
+  updateWorkspaceConfig(): void {
     if (!this.isCreationFlow) {
       this.editMode = !angular.equals(this.copyWorkspaceDetails.config, this.workspaceDetails.config);
 
@@ -250,10 +266,6 @@ export class WorkspaceDetailsController {
         this.showApplyMessage = true;
       }
     }
-
-    let defer = this.$q.defer();
-    defer.resolve();
-    return defer.promise;
   }
 
   /**
@@ -350,8 +362,8 @@ export class WorkspaceDetailsController {
    * Submit a new workspace
    */
   createWorkspace(): void {
-    let attributes = this.stack ? {stackId: this.stack.id} : {};
-    let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(null, this.copyWorkspaceDetails.config, attributes);
+    let attributes = this.stackId ? {stackId: this.stackId} : {};
+    let creationPromise = this.cheWorkspace.createWorkspaceFromConfig(this.workspaceNamespace, this.copyWorkspaceDetails.config, attributes);
     this.redirectAfterSubmitWorkspace(creationPromise);
   }
 
@@ -366,9 +378,6 @@ export class WorkspaceDetailsController {
       // update list of workspaces
       // for new workspace to show in recent workspaces
       this.updateRecentWorkspace(workspaceData.id);
-
-      let infoMessage = 'Workspace ' + workspaceData.config.name + ' successfully created.';
-      this.cheNotification.showInfo(infoMessage);
       this.cheWorkspace.fetchWorkspaces().then(() => {
         this.$location.path('/workspace/' + workspaceData.namespace + '/' +  workspaceData.config.name);
       });
@@ -444,7 +453,7 @@ export class WorkspaceDetailsController {
   }
 
   runWorkspace(): void {
-    delete this.errorMessage;
+    this.errorMessage = '';
 
     let promise = this.ideSvc.startIde(this.workspaceDetails);
     promise.then(() => {}, (error: any) => {

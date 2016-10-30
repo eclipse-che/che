@@ -24,7 +24,7 @@ public class NoProxyEnvVariableProvider implements Provider<String> {
     private static final String NO_PROXY = "no_proxy=";
 
     @Inject
-    @Named("no_proxy")
+    @Named("che.workspace.no_proxy")
     private String noProxy;
 
     @Override
