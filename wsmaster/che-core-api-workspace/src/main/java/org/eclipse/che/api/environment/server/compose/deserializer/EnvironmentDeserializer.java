@@ -91,7 +91,7 @@ public class EnvironmentDeserializer extends JsonDeserializer<Map<String, String
      * @throws IllegalArgumentException if there is no "=" sign in item, or if there is empty key in item
      */
     private Map<String, String> parseEnvironmentItem(String item) throws IllegalArgumentException {
-        if (!item.contains(ARRAY_ITEM_DIVIDER) || item.indexOf(ARRAY_ITEM_DIVIDER) == 0) {
+        if (item.indexOf(ARRAY_ITEM_DIVIDER) < 1) {
             throw new IllegalArgumentException(format(UNSUPPORTED_VALUE_MESSAGE, item));
         }
 
