@@ -27,7 +27,7 @@
     </che-list-header>
 
     <che-list flex>
-      <che-list-item ng-repeat="agent in listAgentsController.agentsList">
+      <che-list-item ng-repeat="agent in listAgentsController.agentsList | orderBy: 'id'">
         <div flex="100" layout="row" layout-align="start stretch" class="agent-item-row">
           <div layout="row" layout-align="start center">
           </div>
@@ -38,7 +38,7 @@
             <div flex="20">
               <div>
                 <md-switch ng-model="agent.isEnabled"
-                           ng-disabled="listAgentsController.needToDisable(agent.name)"
+                           ng-disabled="listAgentsController.needToDisable(agent.id)"
                            ng-change="listAgentsController.updateAgent(agent)"
                            aria-label="Agent">
                   <span ng-if="agent.isEnabled === true">ACTIVE</span>
@@ -47,7 +47,7 @@
               </div>
             </div>
             <div flex="50" class="agent-description">
-              <span>No Description Available</span>
+              <span>{{agent.description}}</span>
             </div>
           </div>
         </div>

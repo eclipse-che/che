@@ -57,12 +57,14 @@ import {CheSelecter} from './selecter/che-selecter.directive';
 import {CheSlider} from './slider/che-slider.directive';
 import {CheLogsOutput} from './logs-output/che-logs-output.directive';
 import {CheTextInfo} from './text-info/che-text-info.directive';
-import {CheToggleCtrl} from './toggle-button/che-toggle.controller';
+import {CheToggleController} from './toggle-button/che-toggle.controller';
 import {CheToggleButton} from './toggle-button/che-toggle-button.directive';
 import {CheToggle} from './toggle-button/che-toggle.directive';
 import {CheToolbar} from './toolbar/che-toolbar.directive';
 import {CheErrorNotification} from './notification/che-error-notification.directive';
 import {CheInfoNotification} from './notification/che-info-notification.directive';
+import {ChePopup} from './popup/che-popup.directive';
+import {CheShowArea} from './show-area/che-show-area.directive';
 
 
 export class WidgetConfig {
@@ -134,7 +136,7 @@ export class WidgetConfig {
 
       .directive('cheTextInfo', CheTextInfo)
 
-      .controller('CheToggleCtrl', CheToggleCtrl)
+      .controller('CheToggleController', CheToggleController)
       .directive('cheToggleButton', CheToggleButton)
       .directive('cheToggle', CheToggle)
 
@@ -142,6 +144,9 @@ export class WidgetConfig {
       //notifications
       .directive('cheErrorNotification', CheErrorNotification)
       .directive('cheInfoNotification', CheInfoNotification)
-
+      //wrapper for popup
+      .directive('chePopup', ChePopup)
+      //show area
+      .directive('cheShowArea', CheShowArea)
   }
 }

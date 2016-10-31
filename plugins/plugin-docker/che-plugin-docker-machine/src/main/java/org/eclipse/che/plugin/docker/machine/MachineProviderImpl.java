@@ -244,8 +244,7 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                  boolean isDev,
                                  String networkName,
                                  CheServiceImpl service,
-                                 LineConsumer machineLogger)
-            throws ServerException {
+                                 LineConsumer machineLogger) throws ServerException {
 
         // copy to not affect/be affected by changes in origin
         service = new CheServiceImpl(service);
