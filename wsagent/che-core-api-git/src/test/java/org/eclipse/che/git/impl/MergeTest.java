@@ -123,7 +123,7 @@ public class MergeTest {
 //
 //        connection.checkout(newDto(CheckoutRequest.class).withName(branchName).withCreateNew(true));
 //        addFile(connection, "t-merge-failed", "aaa\n");
-//        connection.add(newDto(AddRequest.class).withFilepattern(new ArrayList<>(singletonList("."))));
+//        connection.add(newDto(AddRequest.class).withFilepattern(new ArrayList<>(Arrays.asList("."))));
 //        connection.commit(newDto(CommitRequest.class).withMessage("add file in new branch"));
 //
 //        connection.checkout(newDto(CheckoutRequest.class).withName("master"));

@@ -98,7 +98,7 @@ public class BranchPresenterTest extends BaseTest {
         when(selectedBranch.isRemote()).thenReturn(IS_REMOTE);
         when(selectedBranch.isActive()).thenReturn(IS_ACTIVE);
 
-        when(service.branchList(anyObject(), anyObject(), any())).thenReturn(branchListPromise);
+        when(service.branchList(anyObject(), anyObject(), anyObject())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
     }
@@ -107,7 +107,7 @@ public class BranchPresenterTest extends BaseTest {
     public void testShowBranchesWhenGetBranchesRequestIsSuccessful() throws Exception {
         final List<Branch> branches = Collections.singletonList(selectedBranch);
 
-        when(service.branchList(anyObject(), anyObject(), any())).thenReturn(branchListPromise);
+        when(service.branchList(anyObject(), anyObject(), anyObject())).thenReturn(branchListPromise);
         when(branchListPromise.then(any(Operation.class))).thenReturn(branchListPromise);
         when(branchListPromise.catchError(any(Operation.class))).thenReturn(branchListPromise);
 

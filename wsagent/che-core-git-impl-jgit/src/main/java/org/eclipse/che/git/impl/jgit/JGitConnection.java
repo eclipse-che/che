@@ -229,12 +229,12 @@ class JGitConnection implements GitConnection {
     private static final String ERROR_AUTHENTICATION_REQUIRED = "Authentication is required but no CredentialsProvider has been registered";
     private static final String ERROR_AUTHENTICATION_FAILED   = "fatal: Authentication failed for '%s/'" + lineSeparator();
 
-    private static final String ERROR_TAG_DELETE                        = "Could not delete the tag %1$s. An error occurred: %2$s.";
-    private static final String ERROR_LOG_NO_HEAD_EXISTS                = "No HEAD exists and no explicit starting revision was specified";
-    private static final String ERROR_INIT_FOLDER_MISSING               = "The working folder %s does not exist.";
-    private static final String ERROR_NO_REMOTE_REPOSITORY              = "No remote repository specified.  Please, specify either a " +
-                                                                          "URL or a remote name from which new revisions should be " +
-                                                                          "fetched in request.";
+    private static final String ERROR_TAG_DELETE           = "Could not delete the tag %1$s. An error occurred: %2$s.";
+    private static final String ERROR_LOG_NO_HEAD_EXISTS   = "No HEAD exists and no explicit starting revision was specified";
+    private static final String ERROR_INIT_FOLDER_MISSING  = "The working folder %s does not exist.";
+    private static final String ERROR_NO_REMOTE_REPOSITORY = "No remote repository specified.  Please, specify either a " +
+                                                             "URL or a remote name from which new revisions should be " +
+                                                             "fetched in request.";
 
     private static final String MESSAGE_COMMIT_NOT_POSSIBLE       = "Commit is not possible because repository state is '%s'";
     private static final String MESSAGE_COMMIT_AMEND_NOT_POSSIBLE = "Amend is not possible because repository state is '%s'";
@@ -336,13 +336,13 @@ class JGitConnection implements GitConnection {
         }
         try {
             checkoutCommand.call();
-        } catch(CheckoutConflictException exception){
+        } catch (CheckoutConflictException exception) {
             throw new GitConflictException(exception.getMessage(), exception.getConflictingPaths());
-        } catch(RefAlreadyExistsException exception){
+        } catch (RefAlreadyExistsException exception) {
             throw new GitRefAlreadyExistsException(exception.getMessage());
-        } catch(RefNotFoundException exception){
+        } catch (RefNotFoundException exception) {
             throw new GitRefNotFoundException(exception.getMessage());
-        } catch(InvalidRefNameException exception){
+        } catch (InvalidRefNameException exception) {
             throw new GitInvalidRefNameException(exception.getMessage());
         } catch (GitAPIException exception) {
             if (exception.getMessage().endsWith("already exists")) {
@@ -495,7 +495,7 @@ class JGitConnection implements GitConnection {
                 }
             });
 
-            executeRemoteCommand(remoteUri, cloneCommand , params.getUsername(), params.getPassword());
+            executeRemoteCommand(remoteUri, cloneCommand, params.getUsername(), params.getPassword());
 
             StoredConfig repositoryConfig = getRepository().getConfig();
             GitUser gitUser = getUser();
@@ -750,7 +750,7 @@ class JGitConnection implements GitConnection {
 
         return newDto(Revision.class).withId(commit.getId().getName())
                                      .withMessage(commit.getFullMessage())
-                                     .withCommitTime((long) commit.getCommitTime() * 1000)
+                                     .withCommitTime((long)commit.getCommitTime() * 1000)
                                      .withCommitter(getCommitCommitter(commit))
                                      .withAuthor(getCommitAuthor(commit))
                                      .withBranches(getBranchesOfCommit(commit, ListMode.ALL))
@@ -770,7 +770,7 @@ class JGitConnection implements GitConnection {
                                     .withEmail(authorIdentity.getEmailAddress());
     }
 
-    private List<Branch>  getBranchesOfCommit(RevCommit commit, ListMode mode) throws GitAPIException {
+    private List<Branch> getBranchesOfCommit(RevCommit commit, ListMode mode) throws GitAPIException {
         List<Ref> branches = getGit().branchList()
                                      .setListMode(mode)
                                      .setContains(commit.getName())
@@ -787,7 +787,7 @@ class JGitConnection implements GitConnection {
             filter = AndTreeFilter.create(PathFilterGroup.createFromStrings(Collections.singleton(pattern)), TreeFilter.ANY_DIFF);
         }
         List<DiffCommitFile> commitFilesList = new ArrayList<>();
-        try (TreeWalk tw = new TreeWalk(repository)){
+        try (TreeWalk tw = new TreeWalk(repository)) {
             tw.setRecursive(true);
             // get the current commit parent in order to compare it with the current commit
             // and to get the list of DiffEntry.
@@ -810,7 +810,8 @@ class JGitConnection implements GitConnection {
                     if (filter != null) {
                         diffFormat.setPathFilter(filter);
                     }
-                    diffs = diffFormat.scan(new EmptyTreeIterator(), new CanonicalTreeParser(null, rw.getObjectReader(), revCommit.getTree()));
+                    diffs = diffFormat.scan(new EmptyTreeIterator(),
+                                            new CanonicalTreeParser(null, rw.getObjectReader(), revCommit.getTree()));
                 }
             }
         }
@@ -818,7 +819,7 @@ class JGitConnection implements GitConnection {
             commitFilesList.addAll(diffs.stream().map(diff -> newDto(DiffCommitFile.class).withOldPath(diff.getOldPath())
                                                                                           .withNewPath(diff.getNewPath())
                                                                                           .withChangeType(diff.getChangeType().name()))
-                                                 .collect(Collectors.toList()));
+                                        .collect(Collectors.toList()));
         }
         return commitFilesList;
     }
@@ -1666,7 +1667,7 @@ class JGitConnection implements GitConnection {
 
         try {
             if (GitUrlUtils.isSSH(remoteUrl)) {
-                keyDirectory =  Files.createTempDir();
+                keyDirectory = Files.createTempDir();
                 final File sshKey = writePrivateKeyFile(remoteUrl, keyDirectory);
 
                 SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
@@ -1824,7 +1825,7 @@ class JGitConnection implements GitConnection {
      * start with "file name to long" then it raise the relevant message
      *
      * @param error
-     *        throwable error
+     *         throwable error
      * @return exception message
      */
     private String generateExceptionMessage(Throwable error) {

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 
 import org.eclipse.che.api.git.DiffPage;
@@ -357,7 +356,7 @@ public class DiffTest {
     private void makeCommitInMaster(GitConnection connection) throws GitException, IOException {
         //create branch "master"
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial addd"));
 
         //make some changes

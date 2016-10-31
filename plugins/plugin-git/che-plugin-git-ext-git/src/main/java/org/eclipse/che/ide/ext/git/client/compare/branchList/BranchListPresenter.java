@@ -34,7 +34,6 @@ import org.eclipse.che.ide.ext.git.client.outputconsole.GitOutputConsoleFactory;
 import org.eclipse.che.ide.extension.machine.client.processes.panel.ProcessesPanelPresenter;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

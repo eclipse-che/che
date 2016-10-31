@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 
 import org.eclipse.che.api.git.GitConnection;
@@ -59,7 +58,7 @@ public class BranchCreateTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial addd"));
 
         int beforeCountOfBranches = connection.branchList(LIST_LOCAL).size();

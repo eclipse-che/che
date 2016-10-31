@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
@@ -60,7 +59,7 @@ public class BranchDeleteTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial addd"));
         connection.branchCreate("newbranch", null);
 
@@ -92,7 +91,7 @@ public class BranchDeleteTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial addd"));
         //create new branch and make a commit
         connection.checkout(CheckoutParams.create("newbranch").withCreateNew(true));
@@ -122,7 +121,7 @@ public class BranchDeleteTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial addd"));
         //create new branch and make a commit
         connection.checkout(CheckoutParams.create("newbranch").withCreateNew(true));

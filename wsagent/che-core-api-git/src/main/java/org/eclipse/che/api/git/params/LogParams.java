@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.api.git.params;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -147,7 +148,7 @@ public class LogParams {
 
     /** Returns the Filter revisions list by range of files. */
     public List<String> getFileFilter() {
-        return fileFilter;
+        return fileFilter == null ? new ArrayList<>() : fileFilter;
     }
 
     /** Set range of files. */

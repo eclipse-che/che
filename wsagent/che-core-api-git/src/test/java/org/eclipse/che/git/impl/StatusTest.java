@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.che.git.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitConnectionFactory;
@@ -25,8 +26,10 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 
-import static java.util.Arrays.asList;
-import static org.eclipse.che.git.impl.GitTestUtil.*;
+import static org.eclipse.che.git.impl.GitTestUtil.addFile;
+import static org.eclipse.che.git.impl.GitTestUtil.cleanupTestRepo;
+import static org.eclipse.che.git.impl.GitTestUtil.connectToInitializedGitRepository;
+import static org.eclipse.che.git.impl.GitTestUtil.deleteFile;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -72,7 +75,7 @@ public class StatusTest {
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
-        assertEquals(status.getUntracked(), asList("a", "b"));
+        assertEquals(status.getUntracked(), ImmutableList.of("a", "b"));
         assertTrue(status.getAdded().isEmpty());
         assertTrue(status.getChanged().isEmpty());
         assertTrue(status.getConflicting().isEmpty());
@@ -89,7 +92,7 @@ public class StatusTest {
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
-        assertEquals(status.getUntrackedFolders(), asList("new_directory"));
+        assertEquals(status.getUntrackedFolders(), ImmutableList.of("new_directory"));
         assertTrue(status.getAdded().isEmpty());
         assertTrue(status.getChanged().isEmpty());
         assertTrue(status.getConflicting().isEmpty());
@@ -105,12 +108,12 @@ public class StatusTest {
         addFile(connection, "b", "b content");
         addFile(connection, "c", "c content");
         //add "a" and "b" files
-        connection.add(AddParams.create(asList("a", "b")));
+        connection.add(AddParams.create(ImmutableList.of("a", "b")));
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
-        assertEquals(status.getAdded(), asList("a", "b"));
-        assertEquals(status.getUntracked(), asList("c"));
+        assertEquals(status.getAdded(), ImmutableList.of("a", "b"));
+        assertEquals(status.getUntracked(), ImmutableList.of("c"));
         assertTrue(status.getChanged().isEmpty());
         assertTrue(status.getConflicting().isEmpty());
         assertTrue(status.getMissing().isEmpty());
@@ -125,13 +128,13 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(AddParams.create(asList("a", "b")));
+        connection.add(AddParams.create(ImmutableList.of("a", "b")));
         //modify "a"
         addFile(connection, "a", "new content of a");
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
-        assertEquals(status.getModified(), asList("a"));
+        assertEquals(status.getModified(), ImmutableList.of("a"));
         assertTrue(status.getUntracked().isEmpty());
         assertTrue(status.getChanged().isEmpty());
         assertTrue(status.getConflicting().isEmpty());
@@ -147,19 +150,19 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(AddParams.create(asList("a", "b")));
+        connection.add(AddParams.create(ImmutableList.of("a", "b")));
         //commit "a" and "b"
         connection.commit(CommitParams.create("add 2 test files"));
         //modify "a"
         addFile(connection, "a", "modified content of a");
         //add "a"
-        connection.add(AddParams.create(asList("a")));
+        connection.add(AddParams.create(ImmutableList.of("a")));
         //change "a"
         addFile(connection, "a", "changed content of a");
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
-        assertEquals(status.getChanged(), asList("a"));
+        assertEquals(status.getChanged(), ImmutableList.of("a"));
         assertTrue(status.getAdded().isEmpty());
         assertTrue(status.getUntracked().isEmpty());
         assertTrue(status.getConflicting().isEmpty());
@@ -175,7 +178,7 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(AddParams.create(asList("a", "b")));
+        connection.add(AddParams.create(ImmutableList.of("a", "b")));
         //commit "a" and "b"
         connection.commit(CommitParams.create("add 2 test files"));
         //switch to other branch
@@ -193,7 +196,7 @@ public class StatusTest {
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
-        assertEquals(status.getConflicting(), asList("a"));
+        assertEquals(status.getConflicting(), ImmutableList.of("a"));
         assertTrue(status.getModified().isEmpty());
         assertTrue(status.getAdded().isEmpty());
         assertTrue(status.getUntracked().isEmpty());
@@ -208,14 +211,14 @@ public class StatusTest {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "a", "content of a");
         //add "a"
-        connection.add(AddParams.create(asList("a")));
+        connection.add(AddParams.create(ImmutableList.of("a")));
         //delete "a"
         deleteFile(connection, "a");
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
-        assertEquals(status.getMissing(), asList("a"));
-        assertEquals(status.getAdded(), asList("a"));
+        assertEquals(status.getMissing(), ImmutableList.of("a"));
+        assertEquals(status.getAdded(), ImmutableList.of("a"));
         assertTrue(status.getChanged().isEmpty());
         assertTrue(status.getConflicting().isEmpty());
         assertTrue(status.getRemoved().isEmpty());
@@ -230,7 +233,7 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(AddParams.create(asList("a", "b")));
+        connection.add(AddParams.create(ImmutableList.of("a", "b")));
         //commit "a" and "b"
         connection.commit(CommitParams.create("add 2 test files"));
         //delete "a"
@@ -242,7 +245,7 @@ public class StatusTest {
         assertTrue(status.getAdded().isEmpty());
         assertTrue(status.getChanged().isEmpty());
         assertTrue(status.getConflicting().isEmpty());
-        assertEquals(status.getMissing(), asList("a"));
+        assertEquals(status.getMissing(), ImmutableList.of("a"));
         assertTrue(status.getUntracked().isEmpty());
         assertTrue(status.getUntrackedFolders().isEmpty());
     }
@@ -254,15 +257,15 @@ public class StatusTest {
         addFile(connection, "a", "a content");
         addFile(connection, "b", "b content");
         //add "a" and "b"
-        connection.add(AddParams.create(asList("a", "b")));
+        connection.add(AddParams.create(ImmutableList.of("a", "b")));
         //commit "a" and "b"
         connection.commit(CommitParams.create("add 2 test files"));
         //remove "a" from index
-        connection.rm(RmParams.create(asList("a")));
+        connection.rm(RmParams.create(ImmutableList.of("a")));
         //when
         final Status status = connection.status(StatusFormat.SHORT);
         //then
-        assertEquals(status.getRemoved(), asList("a"));
+        assertEquals(status.getRemoved(), ImmutableList.of("a"));
         assertTrue(status.getAdded().isEmpty());
         assertTrue(status.getChanged().isEmpty());
         assertTrue(status.getConflicting().isEmpty());

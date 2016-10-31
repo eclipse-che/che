@@ -62,7 +62,7 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial addd"));
 
         //when
@@ -87,7 +87,7 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial addd"));
 
         //when
@@ -149,7 +149,7 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial addd"));
 
         //check existence of branch master
@@ -167,7 +167,7 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial addd"));
 
         //when
@@ -196,7 +196,7 @@ public class CheckoutTest {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
         addFile(connection, "README.txt", org.eclipse.che.git.impl.GitTestUtil.CONTENT);
-        connection.add(AddParams.create(ImmutableList.of("README.txt")));
+        connection.add(AddParams.create(singletonList("README.txt")));
         connection.commit(CommitParams.create("Initial add"));
 
         //when
