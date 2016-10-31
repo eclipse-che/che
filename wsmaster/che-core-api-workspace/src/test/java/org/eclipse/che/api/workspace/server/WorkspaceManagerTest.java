@@ -28,6 +28,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineRuntimeInfoImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.ssh.server.SshManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentRecipeImpl;
@@ -117,6 +118,8 @@ public class WorkspaceManagerTest {
     private AccountManager                     accountManager;
     @Mock
     private SnapshotDao                        snapshotDao;
+    @Mock
+    private SshManager                    sshManager;
     @Captor
     private ArgumentCaptor<WorkspaceImpl>      workspaceCaptor;
     @Captor
@@ -132,7 +135,8 @@ public class WorkspaceManagerTest {
                                                     accountManager,
                                                     false,
                                                     false,
-                                                    snapshotDao));
+                                                    snapshotDao,
+                                                    sshManager));
         when(accountManager.getByName(NAMESPACE)).thenReturn(new AccountImpl("accountId", NAMESPACE, "test"));
         when(accountManager.getByName(NAMESPACE_2)).thenReturn(new AccountImpl("accountId2", NAMESPACE_2, "test"));
         when(workspaceDao.create(any(WorkspaceImpl.class))).thenAnswer(invocation -> invocation.getArguments()[0]);
@@ -755,7 +759,8 @@ public class WorkspaceManagerTest {
                                                     accountManager,
                                                     true,
                                                     false,
-                                                    snapshotDao));
+                                                    snapshotDao,
+                                                    sshManager));
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         final RuntimeDescriptor descriptor = createDescriptor(workspace, RUNNING);
@@ -784,7 +789,8 @@ public class WorkspaceManagerTest {
                                                     accountManager,
                                                     false,
                                                     true,
-                                                    snapshotDao));
+                                                    snapshotDao,
+                                                    sshManager));
         final WorkspaceImpl workspace = workspaceManager.createWorkspace(createConfig(), NAMESPACE);
         when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
         when(runtimes.get(any())).thenThrow(new NotFoundException(""));

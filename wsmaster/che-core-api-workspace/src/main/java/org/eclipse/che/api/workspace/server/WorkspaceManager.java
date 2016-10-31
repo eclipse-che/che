@@ -31,6 +31,8 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.SnapshotDao;
+import org.eclipse.che.api.ssh.server.SshManager;
+import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes.RuntimeDescriptor;
 import org.eclipse.che.api.workspace.server.event.WorkspaceCreatedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -101,15 +103,17 @@ public class WorkspaceManager {
     private final boolean           defaultAutoSnapshot;
     private final boolean           defaultAutoRestore;
     private final SnapshotDao       snapshotDao;
+    private final SshManager        sshManager;
 
     @Inject
     public WorkspaceManager(WorkspaceDao workspaceDao,
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
                             AccountManager accountManager,
-                            @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
-                            @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
-                            SnapshotDao snapshotDao) {
+                            @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
+                            @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore,
+                            SnapshotDao snapshotDao,
+                            SshManager sshManager) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;
         this.accountManager = accountManager;
@@ -117,6 +121,7 @@ public class WorkspaceManager {
         this.defaultAutoSnapshot = defaultAutoSnapshot;
         this.defaultAutoRestore = defaultAutoRestore;
         this.snapshotDao = snapshotDao;
+        this.sshManager = sshManager;
 
         executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("WorkspaceManager-%d")
                                                                            .setDaemon(true)
@@ -877,6 +882,10 @@ public class WorkspaceManager {
                                                      .setAttributes(attributes)
                                                      .setTemporary(isTemporary)
                                                      .build();
+
+        // Register default SSH keypair for this workspace
+        SshPairImpl sshPair = this.sshManager.generatePair(EnvironmentContext.getCurrent().getSubject().getUserId(), "workspace", workspace.getId());
+
         workspace.getAttributes().put(CREATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
         workspaceDao.create(workspace);
         LOG.info("Workspace '{}:{}' with id '{}' created by user '{}'",

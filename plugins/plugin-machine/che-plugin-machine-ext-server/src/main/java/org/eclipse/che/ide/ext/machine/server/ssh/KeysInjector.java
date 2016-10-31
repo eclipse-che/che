@@ -31,6 +31,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,11 +70,25 @@ public class KeysInjector {
                     try {
                         final Instance machine = environmentEngine.getMachine(event.getWorkspaceId(),
                                                                               event.getMachineId());
+
+                        // get machine keypairs
                         List<SshPairImpl> sshPairs = sshManager.getPairs(machine.getOwner(), "machine");
-                        final List<String> publicKeys = sshPairs.stream()
+                        final List<String> publicMachineKeys = sshPairs.stream()
                                                              .filter(sshPair -> sshPair.getPublicKey() != null)
                                                              .map(SshPairImpl::getPublicKey)
                                                              .collect(Collectors.toList());
+
+                        // get workspace keypair
+                        SshPairImpl sshWorkspacePair = sshManager.getPair(machine.getOwner(), "workspace", event.getWorkspaceId());
+
+                        // build list of all pairs.
+                        final List<String> publicKeys;
+                        if (sshWorkspacePair != null && sshWorkspacePair.getPublicKey() != null) {
+                            publicKeys = new ArrayList<>(publicMachineKeys.size() + 1);
+                            publicKeys.add(sshWorkspacePair.getPublicKey());
+                        } else {
+                            publicKeys = publicMachineKeys;
+                        }
 
                         if (publicKeys.isEmpty()) {
                             return;
