@@ -35,6 +35,8 @@ import {WorkspaceRecipeImportController} from './workspace-details/select-stack/
 import {WorkspaceRecipeImport} from './workspace-details/select-stack/recipe-import/workspace-recipe-import.directive';
 import {WorkspaceRecipeAuthoringController} from './workspace-details/select-stack/recipe-authoring/workspace-recipe-authoring.controller';
 import {WorkspaceRecipeAuthoring} from './workspace-details/select-stack/recipe-authoring/workspace-recipe-authoring.directive';
+import {WorkspaceConfigImportController} from './workspace-details/config-import/workspace-config-import.controller';
+import {WorkspaceConfigImport} from './workspace-details/config-import/workspace-config-import.directive';
 import {CheStackLibrarySelecter} from './workspace-details/select-stack/stack-library/stack-library-selecter/che-stack-library-selecter.directive';
 import {CreateProjectStackLibraryController} from './workspace-details/select-stack/stack-library/create-project-stack-library.controller';
 import {CreateProjectStackLibrary} from './workspace-details/select-stack/stack-library/create-project-stack-library.directive';
@@ -118,6 +120,9 @@ export class WorkspacesConfig {
 
     register.controller('WorkspaceRecipeAuthoringController', WorkspaceRecipeAuthoringController);
     register.directive('cheWorkspaceRecipeAuthoring', WorkspaceRecipeAuthoring);
+
+    register.controller('WorkspaceConfigImportController', WorkspaceConfigImportController);
+    register.directive('cheWorkspaceConfigImport', WorkspaceConfigImport);
 
     register.controller('CheWorkspaceRamAllocationSliderController', CheWorkspaceRamAllocationSliderController);
     register.directive('cheWorkspaceRamAllocationSlider', CheWorkspaceRamAllocationSlider);
