@@ -24,7 +24,6 @@ export class AddVariableDialogController {
    */
   constructor($mdDialog) {
     this.$mdDialog = $mdDialog;
-    this.updateInProgress = false;
 
     this.name = '';
     this.value = '';
@@ -45,12 +44,8 @@ export class AddVariableDialogController {
    * Adds new environment variable
    */
   addVariable() {
-    this.updateInProgress = true;
-
-    this.callbackController.updateEnvVariable(this.name, this.value).finally(() => {
-      this.updateInProgress = false;
-      this.hide();
-    });
+    this.callbackController.updateEnvVariable(this.name, this.value);
+    this.hide();
   }
 
 }

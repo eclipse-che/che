@@ -39,6 +39,10 @@ import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.CREA
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardMode.UPDATE;
 import static org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar.WIZARD_MODE_KEY;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_ARTIFACT_ID_OPTION;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_GROUP_ID_OPTION;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_REPOSITORY_OPTION;
+import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARCHETYPE_VERSION_OPTION;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.ARTIFACT_ID;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_PACKAGING;
 import static org.eclipse.che.plugin.maven.shared.MavenAttributes.DEFAULT_SOURCE_FOLDER;
@@ -237,12 +241,17 @@ public class MavenPagePresenter extends AbstractWizardPage<MutableProjectConfig>
         } else {
             view.setArchetypes(MavenExtension.getAvailableArchetypes());
         }
-
+        archetypeChanged(MavenExtension.getAvailableArchetypes().get(0));
         updateDelegate.updateControls();
     }
 
     @Override
     public void archetypeChanged(MavenArchetype archetype) {
+        dataObject.getOptions().put("type", "archetype");
+        dataObject.getOptions().put(ARCHETYPE_GROUP_ID_OPTION, archetype.getGroupId());
+        dataObject.getOptions().put(ARCHETYPE_ARTIFACT_ID_OPTION, archetype.getArtifactId());
+        dataObject.getOptions().put(ARCHETYPE_VERSION_OPTION, archetype.getVersion());
+        dataObject.getOptions().put(ARCHETYPE_REPOSITORY_OPTION, archetype.getRepository());
         updateDelegate.updateControls();
     }
 

@@ -33,7 +33,7 @@ public class DockerApiVersionPathPrefixProvider implements Provider<String> {
     private static final String  VALID_PROPERTY_EXAMPLE =
             "Valid docker api version contains digits which can be separated by symbol '.'. For example: '1', '1.18'";
 
-    public static final String MACHINE_DOCKER_API_VERSION = "docker.api.version";
+    public static final String MACHINE_DOCKER_API_VERSION = "che.docker.api";
 
     private final String apiVersionPrefixPath;
 

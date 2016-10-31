@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>5.0.0-M6-SNAPSHOT</version>
+        <version>5.0.0-M7-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-core-ide-app</artifactId>
@@ -308,16 +308,20 @@
                 </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-dyna-provider-generator-maven-plugin</artifactId>
+                <version>${project.version}</version>
                 <executions>
                     <execution>
-                        <id>pre-compile</id>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>compile</goal>
+                            <goal>generate</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <outputDirectory>${generated.sources.directory}</outputDirectory>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>

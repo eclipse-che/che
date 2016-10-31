@@ -1,0 +1,65 @@
+.add-machine-form
+  width 550px
+  min-height 350px
+
+  .form-input-fields
+    margin-top 5px
+    max-width 550px
+
+    .che-input
+      min-height 50px
+
+    .ram-slider
+      margin-top 5px
+
+      .che-ram-allocation-slider
+        width 100%
+        max-width 100%
+
+        .slider-actual-ram-caption,
+        .slider-max-ram-caption,
+        .md-input-has-value
+          width 50px
+
+          *
+            width inherit
+            white-space nowrap
+
+    .che-label-description
+      color $disabled-color
+      font-size 10px
+      margin-top 5px
+
+    ui-codemirror
+      display inline-block
+      border 1px solid $list-separator-color
+      width 100%
+      float none
+
+      .CodeMirror
+        max-height 200px
+        width inherit
+
+        .CodeMirror-sizer
+          margin-left 26px
+
+        .CodeMirror-gutter-wrapper
+          left 0 !important
+
+        .CodeMirror-linenumber
+          margin-left -55px
+
+        .CodeMirror-scroll
+          margin-left -20px
+
+    .recipe-errors-container
+      color $error-color
+      min-height 20px
+
+.add-machine-form che-button-primary,
+.add-machine-form che-button-notice
+  float right
+
+  button
+    margin-right 0
+    margin-bottom 0

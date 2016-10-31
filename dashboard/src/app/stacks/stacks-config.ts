@@ -13,8 +13,11 @@
 import {ListStacksController} from './list-stacks/list-stacks.controller';
 import {StackItemController} from './list-stacks/stack-item/stack-item.controller';
 import {StackItem} from './list-stacks/stack-item/stack-item.directive';
-
 import {StackController} from './stack-details/stack.controller';
+import {ListComponents} from './stack-details/list-components/list-components.directive';
+import {ListComponentsController} from './stack-details/list-components/list-components.controller';
+import {EditComponentDialogController} from './stack-details/list-components/edit-component-dialog/edit-component-dialog.controller';
+
 /**
  * @ngdoc controller
  * @name stacks:StacksConfig
@@ -29,7 +32,11 @@ export class StacksConfig {
     register.controller('StackItemController', StackItemController);
     register.directive('stackItem', StackItem);
 
+    register.controller('ListComponentsController', ListComponentsController);
+    register.directive('listComponents', ListComponents);
+
     register.controller('StackController', StackController);
+    register.controller('EditComponentDialogController', EditComponentDialogController);
 
     // config routes
     register.app.config(function ($routeProvider) {

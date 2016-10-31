@@ -176,7 +176,7 @@ public interface UserDao {
      * @throws ServerException
      *         when any other error occurs
      */
-    Page<UserImpl> getAll(int maxItems, int skipCount) throws ServerException;
+    Page<UserImpl> getAll(int maxItems, long skipCount) throws ServerException;
 
     /**
      * Get count of all users from persistent layer.

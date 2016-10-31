@@ -27,6 +27,7 @@ import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.notification.StatusNotification.Status;
 import org.eclipse.che.ide.api.notification.StatusNotificationListener;
 import org.eclipse.che.ide.api.parts.base.BasePresenter;
+import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import javax.annotation.PostConstruct;
@@ -51,6 +52,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMod
  * @author Dmitry Shnurenko
  */
 @Singleton
+@DynaObject
 public class NotificationManagerImpl extends BasePresenter implements NotificationManager,
                                                                       NotificationObserver,
                                                                       StatusNotificationListener,

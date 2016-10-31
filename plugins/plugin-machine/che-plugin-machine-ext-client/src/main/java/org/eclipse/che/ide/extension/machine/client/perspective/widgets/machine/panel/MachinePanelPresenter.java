@@ -264,8 +264,11 @@ public class MachinePanelPresenter extends BasePresenter implements MachinePanel
 
         selectedMachine = event.getMachine();
         final MachineTreeNode machineTreeNode = existingMachineNodes.get(selectedMachine.getId());
-        machineTreeNode.setData(selectedMachine);
+        if (machineTreeNode == null) {
+            return;
+        }
 
+        machineTreeNode.setData(selectedMachine);
         view.selectNode(machineTreeNode);
     }
 
