@@ -73,7 +73,7 @@ class IdeSvc {
 
     this.updateRecentWorkspace(workspace.id);
 
-    let bus = this.cheAPI.getWebsocket().getBus(workspace.id);
+    let bus = this.cheAPI.getWebsocket().getBus();
 
     let startWorkspaceDefer = this.$q.defer();
     this.startWorkspace(bus, workspace).then(() => {
@@ -279,7 +279,7 @@ class IdeSvc {
       websocketStream.close();
     }
 
-    let workspaceBus = this.cheAPI.getWebsocket().getBus(workspaceId);
+    let workspaceBus = this.cheAPI.getWebsocket().getBus();
 
     if (workspaceBus != null) {
       this.listeningChannels.forEach((channel) => {
