@@ -40,6 +40,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesResponse;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.rest.HTTPStatus;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.providers.DynaObject;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
@@ -51,6 +52,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  * @author Evgen Vidolob
  */
 @Singleton
+@DynaObject
 public class FindUsagesPresenter extends BasePresenter implements FindUsagesView.ActionDelegate {
 
 

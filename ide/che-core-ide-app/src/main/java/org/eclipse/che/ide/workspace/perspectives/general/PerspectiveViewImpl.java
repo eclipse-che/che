@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-import org.eclipse.che.ide.api.parts.WorkBenchView;
+import org.eclipse.che.ide.api.parts.PerspectiveView;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.workspace.WorkBenchResources;
 
@@ -37,7 +37,7 @@ import org.eclipse.che.ide.workspace.WorkBenchResources;
  * @author Nikolay Zamosenchuk
  * @author Dmitry Shnurenko
  */
-public class PerspectiveViewImpl extends LayoutPanel implements WorkBenchView<WorkBenchView.ActionDelegate> {
+public class PerspectiveViewImpl extends LayoutPanel implements PerspectiveView<PerspectiveView.ActionDelegate> {
 
     interface PerspectiveViewImplUiBinder extends UiBinder<Widget, PerspectiveViewImpl> {
     }
@@ -87,6 +87,8 @@ public class PerspectiveViewImpl extends LayoutPanel implements WorkBenchView<Wo
         bottomPanel = new FlowPanel();
         bottomPanelContainer.add(bottomPanel);
         bottomPanel.addStyleName(resources.workBenchCss().ideWorkBenchToolPanelBottom());
+         /* Makes splitters much better */
+        tuneSplitters();
     }
 
     /** {@inheritDoc} */

@@ -11,6 +11,7 @@
 package org.eclipse.che.ide.api.parts;
 
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 
 import javax.validation.constraints.NotNull;
@@ -79,4 +80,28 @@ public interface EditorMultiPartStack extends PartStack {
      */
     @Nullable
     EditorPartPresenter getPreviousFor(EditorPartPresenter editorPart);
+
+    /**
+     * Create first(root) part stack
+     * @return the first part stack
+     */
+    EditorPartStack createRootPartStack();
+
+    /**
+     * Split part stack
+     *
+     * @param relativePartStack
+     *          the relative part stack
+     * @param constraints
+     *          the constraints of split(should contains direction of splitting:vertical or horizontal)
+     * @param size
+     *          the size of splits part stack (use -1 if not set)
+     * @return the new splits part stack
+     */
+    EditorPartStack split(EditorPartStack relativePartStack, Constraints constraints, double size);
+
+    /**
+     * @return the editor multi part stack state
+     */
+    EditorMultiPartStackState getState();
 }

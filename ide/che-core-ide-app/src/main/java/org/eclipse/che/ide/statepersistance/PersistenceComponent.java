@@ -19,8 +19,11 @@ import java.util.List;
  * <p/>Implementations of this interface need to be registered using
  * a multibinder in order to be picked-up on IDE start-up.
  *
+ * @deprecated use {@link org.eclipse.che.ide.api.component.StateComponent} instead.
+ *
  * @author Artem Zatsarynnyi
  */
+@Deprecated
 public interface PersistenceComponent {
 
     /**

@@ -107,8 +107,8 @@ public class WorkspaceManager {
                             WorkspaceRuntimes workspaceRegistry,
                             EventService eventService,
                             AccountManager accountManager,
-                            @Named("workspace.runtime.auto_snapshot") boolean defaultAutoSnapshot,
-                            @Named("workspace.runtime.auto_restore") boolean defaultAutoRestore,
+                            @Named("che.workspace.auto_snapshot") boolean defaultAutoSnapshot,
+                            @Named("che.workspace.auto_restore") boolean defaultAutoRestore,
                             SnapshotDao snapshotDao) {
         this.workspaceDao = workspaceDao;
         this.runtimes = workspaceRegistry;

@@ -17,7 +17,8 @@
       font-size 12px
       color #555c65 //TODO
 
-    .config-title-action-show, .config-title-action-delete
+    .config-title-action-show,
+    .config-title-action-delete
       color darken($stroke-color, 13%)
       font-size 14px
       cursor pointer
@@ -26,6 +27,18 @@
       color $primary-color
       font-size 14px
       cursor pointer
+
+    .che-list-actions
+      float right
+
+      & > *:not(.tooltip)
+        line-height 49px
+
+        .fa-trash-o
+          padding 5px
+
+        .fa-trash-o:hover
+          color $menu-bg-color !important
 
   .config-input
     margin -6px 0
@@ -39,10 +52,10 @@
 
   .config-ram
     margin-bottom -26px
-  
+
   .config-agents
     margin-top -30px
-  
+
   .config-agent-switch
     padding-left 13px
 

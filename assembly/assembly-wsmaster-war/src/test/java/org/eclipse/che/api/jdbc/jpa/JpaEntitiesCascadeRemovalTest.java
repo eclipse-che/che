@@ -151,8 +151,8 @@ public class JpaEntitiesCascadeRemovalTest {
                 when(wR.hasRuntime(Mockito.anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);
-                bind(Boolean.class).annotatedWith(Names.named("workspace.runtime.auto_snapshot")).toInstance(false);
-                bind(Boolean.class).annotatedWith(Names.named("workspace.runtime.auto_restore")).toInstance(false);
+                bind(Boolean.class).annotatedWith(Names.named("che.workspace.auto_snapshot")).toInstance(false);
+                bind(Boolean.class).annotatedWith(Names.named("che.workspace.auto_restore")).toInstance(false);
             }
         });
 

@@ -29,8 +29,8 @@ public class SshAgentLauncherImpl extends AbstractAgentLauncher {
     protected static final Logger LOG = LoggerFactory.getLogger(SshAgentLauncherImpl.class);
 
     @Inject
-    public SshAgentLauncherImpl(@Named("machine.agent.max_start_time_ms") long agentMaxStartTimeMs,
-                                @Named("machine.agent.ping_delay_ms") long agentPingDelayMs) {
+    public SshAgentLauncherImpl(@Named("che.agent.dev.max_start_time_ms") long agentMaxStartTimeMs,
+                                @Named("che.agent.dev.ping_delay_ms") long agentPingDelayMs) {
         super(agentMaxStartTimeMs, agentPingDelayMs, new ProcessIsLaunchedChecker("sshd"));
     }
 
@@ -40,7 +40,7 @@ public class SshAgentLauncherImpl extends AbstractAgentLauncher {
     }
 
     @Override
-    public String getAgentName() {
+    public String getAgentId() {
         return "org.eclipse.che.ssh";
     }
 }

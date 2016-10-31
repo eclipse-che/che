@@ -41,7 +41,7 @@ public class AgentLauncherFactory {
      * Find launcher for given agent independently of version.
      * If the specific {@link AgentLauncher} isn't registered then the default one will be used.
      *
-     * @see Agent#getName()
+     * @see Agent#getId()
      * @see MachineConfig#getType()
      *
      * @param agentName
@@ -50,9 +50,9 @@ public class AgentLauncherFactory {
      *      the machine type
      * @return {@link AgentLauncher}
      */
-    public AgentLauncher find(String agentName, String machineType) {
+    public AgentLauncher find(String agentId, String machineType) {
         return launchers.stream()
-                        .filter(l -> l.getAgentName().equals(agentName))
+                        .filter(l -> l.getAgentId().equals(agentId))
                         .filter(l -> l.getMachineType().equals(machineType))
                         .findAny()
                         .orElse(defaultLauncher);

@@ -39,7 +39,7 @@ public class TerminalVolumeProvider implements Provider<String> {
     private static final Logger LOG              = LoggerFactory.getLogger(TerminalVolumeProvider.class);
 
     @Inject
-    @Named("machine.server.terminal.path_to_archive.linux_amd64")
+    @Named("che.workspace.terminal_linux_amd64")
     private String terminalArchivePath;
 
     @Override

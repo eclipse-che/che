@@ -148,8 +148,7 @@ public class OrionTextViewOverlay extends JavaScriptObject {
 
     public final native void setAction(String actionId, Action action) /*-{
         this.setAction(actionId, function () {
-            action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
-            return true;
+            return action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
         });
     }-*/;
 
@@ -166,8 +165,7 @@ public class OrionTextViewOverlay extends JavaScriptObject {
     public final native void setAction(String actionId, Action action, String description) /*-{
         var actionDescription = {name: description};
         this.setAction(actionId, function () {
-            action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
-            return true;
+            return action.@org.eclipse.che.ide.editor.orion.client.Action::onAction()();
         }, actionDescription);
     }-*/;
 

@@ -27,7 +27,7 @@ public class EventBusURLProvider implements Provider<String> {
     String token;
 
     @Inject
-    @Named("api.endpoint")
+    @Named("che.api")
     String apiEndpoint;
 
     @Override

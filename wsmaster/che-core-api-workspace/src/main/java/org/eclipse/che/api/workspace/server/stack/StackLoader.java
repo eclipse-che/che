@@ -57,8 +57,8 @@ public class StackLoader {
 
     @Inject
     @SuppressWarnings("unused")
-    public StackLoader(@Named("che.stacks.default") String stacksPath,
-                       @Named("che.stacks.images.storage") String stackIconFolder,
+    public StackLoader(@Named("che.stacks.storage") String stacksPath,
+                       @Named("che.stacks.images") String stackIconFolder,
                        StackDao stackDao,
                        EntityListenerInjectionManagerInitializer installer) {
         this.stackJsonPath = Paths.get(stacksPath);

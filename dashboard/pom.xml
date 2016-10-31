@@ -62,6 +62,10 @@
                                 <exec dir="${basedir}" executable="npm" failonerror="true">
                                     <arg value="install" />
                                 </exec>
+                                <!-- Download Typings dependencies -->
+                                <exec dir="${basedir}" executable="typings" failonerror="true">
+                                    <arg value="install" />
+                                </exec>
                                 <!-- Download Bower dependencies -->
                                 <exec dir="${basedir}" executable="bower" failonerror="true">
                                     <arg value="install" />

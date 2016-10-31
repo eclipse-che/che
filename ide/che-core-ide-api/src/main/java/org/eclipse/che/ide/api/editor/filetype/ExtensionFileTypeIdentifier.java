@@ -114,6 +114,7 @@ public class ExtensionFileTypeIdentifier implements FileTypeIdentifier {
         this.mappings.put("py", makeList("text/x-python"));
         this.mappings.put("pyx", makeList("text/x-cython"));
         this.mappings.put("rb", makeList("text/x-ruby"));
+        this.mappings.put("erb", makeList("text/html"));//templates with embedded ruby
         this.mappings.put("gemspec", makeList("text/x-ruby"));
         this.mappings.put("go", makeList("text/x-go"));
         this.mappings.put("rs", makeList("text/x-rustsrc"));

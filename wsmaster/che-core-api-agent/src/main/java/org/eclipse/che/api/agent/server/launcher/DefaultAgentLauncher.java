@@ -42,7 +42,7 @@ public class DefaultAgentLauncher implements AgentLauncher {
 
     @Override
     public void launch(Instance machine, Agent agent) throws ServerException {
-        final Command command = new CommandImpl(agent.getName(), agent.getScript(), "agent");
+        final Command command = new CommandImpl(agent.getId(), agent.getScript(), "agent");
         final InstanceProcess process = machine.createProcess(command, null);
         final LineConsumer lineConsumer = new AbstractLineConsumer() {
             @Override
@@ -67,7 +67,7 @@ public class DefaultAgentLauncher implements AgentLauncher {
     }
 
     @Override
-    public String getAgentName() {
+    public String getAgentId() {
         return "any";
     }
 
