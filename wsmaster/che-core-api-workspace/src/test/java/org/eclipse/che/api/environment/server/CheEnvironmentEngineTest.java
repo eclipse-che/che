@@ -941,7 +941,7 @@ public class CheEnvironmentEngineTest {
 
         // then
         assertEquals(serviceToNormalizeLinks.getLinks().size(), 1);
-        assertEquals(serviceToNormalizeLinks.getLinks().get(0), containerNameToLink + ':' + serviceNameToLink);
+        assertEquals(serviceToNormalizeLinks.getLinks().get(0), containerNameToLink);
     }
 
     @Test
