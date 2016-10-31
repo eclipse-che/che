@@ -13,7 +13,10 @@ package org.eclipse.che.api.environment.server;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 
+import org.eclipse.che.api.agent.server.AgentRegistry;
 import org.eclipse.che.api.agent.server.exception.AgentException;
+import org.eclipse.che.api.agent.server.model.impl.AgentImpl;
+import org.eclipse.che.api.agent.server.model.impl.AgentKeyImpl;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -26,6 +29,7 @@ import org.eclipse.che.api.core.model.machine.MachineStatus;
 import org.eclipse.che.api.core.model.machine.ServerConf;
 import org.eclipse.che.api.core.model.workspace.Environment;
 import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
+import org.eclipse.che.api.core.model.workspace.ServerConf2;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
@@ -46,6 +50,7 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLimitsImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineLogMessageImpl;
 import org.eclipse.che.api.machine.server.model.impl.MachineSourceImpl;
+import org.eclipse.che.api.machine.server.model.impl.ServerConfImpl;
 import org.eclipse.che.api.machine.server.model.impl.SnapshotImpl;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
@@ -101,15 +106,16 @@ public class CheEnvironmentEngine {
     private final File                           machineLogsDir;
     private final MachineInstanceProviders       machineInstanceProviders;
     private final long                           defaultMachineMemorySizeBytes;
-    private final SnapshotDao                  snapshotDao;
-    private final EventService                 eventService;
-    private final EnvironmentParser            environmentParser;
-    private final DefaultServicesStartStrategy startStrategy;
-    private final MachineInstanceProvider      machineProvider;
-    private final AgentConfigApplier           agentConfigApplier;
-    private final RecipeDownloader             recipeDownloader;
-    private final Pattern                      recipeApiPattern;
-    private final ContainerNameGenerator       containerNameGenerator;
+    private final SnapshotDao                    snapshotDao;
+    private final EventService                   eventService;
+    private final EnvironmentParser              environmentParser;
+    private final DefaultServicesStartStrategy   startStrategy;
+    private final MachineInstanceProvider        machineProvider;
+    private final AgentConfigApplier             agentConfigApplier;
+    private final RecipeDownloader               recipeDownloader;
+    private final Pattern                        recipeApiPattern;
+    private final ContainerNameGenerator         containerNameGenerator;
+    private final AgentRegistry                  agentRegistry;
 
     private volatile boolean isPreDestroyInvoked;
 
@@ -125,7 +131,8 @@ public class CheEnvironmentEngine {
                                 AgentConfigApplier agentConfigApplier,
                                 @Named("che.api") String apiEndpoint,
                                 RecipeDownloader recipeDownloader,
-                                ContainerNameGenerator containerNameGenerator) {
+                                ContainerNameGenerator containerNameGenerator,
+                                AgentRegistry agentRegistry) {
         this.snapshotDao = snapshotDao;
         this.eventService = eventService;
         this.environmentParser = environmentParser;
@@ -133,6 +140,7 @@ public class CheEnvironmentEngine {
         this.machineProvider = machineProvider;
         this.agentConfigApplier = agentConfigApplier;
         this.recipeDownloader = recipeDownloader;
+        this.agentRegistry = agentRegistry;
         this.environments = new ConcurrentHashMap<>();
         this.machineInstanceProviders = machineInstanceProviders;
         this.machineLogsDir = new File(machineLogsDir);
@@ -376,6 +384,7 @@ public class CheEnvironmentEngine {
             try {
                 InstanceProvider provider = machineInstanceProviders.getProvider(machineConfig.getType());
                 machine.setId(generateMachineId());
+                addAgentsProvidedServers(machine, agents);
 
                 machineStarter = (machineLogger, machineSource) -> {
                     Machine machineWithCorrectSource = getMachineWithCorrectSource(machine, machineSource);
@@ -570,6 +579,27 @@ public class CheEnvironmentEngine {
             }
         }
     }
+
+    private void addAgentsProvidedServers(MachineImpl machine, List<String> agentKeys) throws ServerException {
+        for (String agentKey : agentKeys) {
+            try {
+                AgentImpl agent = new AgentImpl(agentRegistry.getAgent(AgentKeyImpl.parse(agentKey)));
+                for (Map.Entry<String, ? extends ServerConf2> entry : agent.getServers().entrySet()) {
+                    String ref = entry.getKey();
+                    ServerConf2 conf2 = entry.getValue();
+
+                    ServerConfImpl conf = new ServerConfImpl(ref,
+                                                             conf2.getPort(),
+                                                             conf2.getProtocol(),
+                                                             conf2.getProperties().get("path"));
+                    machine.getConfig().getServers().add(conf);
+                }
+            } catch (AgentException e) {
+                throw new ServerException(e);
+            }
+        }
+    }
+
 
     private void normalize(String namespace,
                            String workspaceId,
@@ -836,6 +866,7 @@ public class CheEnvironmentEngine {
                     throw e;
                 }
             }
+
             replaceMachine(instance);
 
             eventService.publish(newDto(MachineStatusEvent.class)
