@@ -915,6 +915,65 @@ public class CheEnvironmentEngineTest {
         verify(instanceProvider).removeInstanceSnapshot(machineSource);
     }
 
+    @Test
+    public void shouldReplaceServiceNameWithContainerNameInLinks() {
+        //given
+        final String serviceNameToLink = "service";
+        final String containerNameToLink = "container";
+
+        List<String> links = new ArrayList<>();
+        links.add(serviceNameToLink);
+
+        CheServiceImpl serviceToNormalizeLinks = new CheServiceImpl().withLinks(links);
+
+        CheServiceImpl service1 = mock(CheServiceImpl.class);
+        CheServiceImpl service2 = mock(CheServiceImpl.class);
+
+        Map<String, CheServiceImpl> allServices = new HashMap<>();
+        allServices.put("this", serviceToNormalizeLinks);
+        allServices.put(serviceNameToLink, service1);
+        allServices.put("anotherService", service2);
+
+        when(service1.getContainerName()).thenReturn(containerNameToLink);
+
+        // when
+        engine.normalizeLinks(serviceToNormalizeLinks, allServices);
+
+        // then
+        assertEquals(serviceToNormalizeLinks.getLinks().size(), 1);
+        assertEquals(serviceToNormalizeLinks.getLinks().get(0), containerNameToLink);
+    }
+
+    @Test
+    public void shouldReplaceServiceNameWithContainerNameAndUseAliasInLinks() {
+        //given
+        final String serviceNameToLink = "service";
+        final String containerNameToLink = "container";
+        final String AliasToServiceToLink = "alias";
+
+        List<String> links = new ArrayList<>();
+        links.add(serviceNameToLink + ':' + AliasToServiceToLink);
+
+        CheServiceImpl serviceToNormalizeLinks = new CheServiceImpl().withLinks(links);
+
+        CheServiceImpl service1 = mock(CheServiceImpl.class);
+        CheServiceImpl service2 = mock(CheServiceImpl.class);
+
+        Map<String, CheServiceImpl> allServices = new HashMap<>();
+        allServices.put("this", serviceToNormalizeLinks);
+        allServices.put(serviceNameToLink, service1);
+        allServices.put("anotherService", service2);
+
+        when(service1.getContainerName()).thenReturn(containerNameToLink);
+
+        // when
+        engine.normalizeLinks(serviceToNormalizeLinks, allServices);
+
+        // then
+        assertEquals(serviceToNormalizeLinks.getLinks().size(), 1);
+        assertEquals(serviceToNormalizeLinks.getLinks().get(0), containerNameToLink + ':' + AliasToServiceToLink);
+    }
+
     private List<Instance> startEnv() throws Exception {
         EnvironmentImpl env = createEnv();
         return startEnv(env);

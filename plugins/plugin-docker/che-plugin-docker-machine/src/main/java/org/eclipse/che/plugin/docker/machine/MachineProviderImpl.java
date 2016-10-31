@@ -482,7 +482,8 @@ public class MachineProviderImpl implements MachineInstanceProvider {
                                        isDev,
                                        service);
 
-        EndpointConfig endpointConfig = new EndpointConfig().withAliases(machineName);
+        EndpointConfig endpointConfig = new EndpointConfig().withAliases(machineName)
+                                                            .withLinks(toArrayIfNotNull(service.getLinks()));
         NetworkingConfig networkingConfig = new NetworkingConfig().withEndpointsConfig(singletonMap(networkName,
                                                                                                     endpointConfig));
 
