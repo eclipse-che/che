@@ -70,7 +70,7 @@ export class CheRemoteWorkspace {
     let deferred = this.$q.defer();
     let deferredPromise = deferred.promise;
 
-    let bus = this.cheWebsocket.getRemoteBus(remoteWsURL, workspaceId);
+    let bus = this.cheWebsocket.getRemoteBus(remoteWsURL);
     // subscribe to workspace events
     bus.subscribe('workspace:' + workspaceId, (message) => {
       if (message.eventType === 'RUNNING' && message.workspaceId === workspaceId) {

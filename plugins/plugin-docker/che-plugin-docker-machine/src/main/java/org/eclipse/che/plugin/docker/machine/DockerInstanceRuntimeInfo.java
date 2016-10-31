@@ -181,7 +181,7 @@ public class DockerInstanceRuntimeInfo implements MachineRuntimeInfo {
             md.put("network.linkLocalIPv6PrefixLen", String.valueOf(networkSettings.getLinkLocalIPv6PrefixLen()));
             md.put("network.globalIPv6Address", networkSettings.getGlobalIPv6Address());
             md.put("network.globalIPv6PrefixLen", String.valueOf(networkSettings.getGlobalIPv6PrefixLen()));
-            md.put("network.iPv6Gateway", networkSettings.getiPv6Gateway());
+            md.put("network.iPv6Gateway", networkSettings.getIpV6Gateway());
             md.put("network.linkLocalIPv6Address", networkSettings.getLinkLocalIPv6Address());
         }
         HostConfig hostConfig = info.getHostConfig();
