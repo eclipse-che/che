@@ -27,9 +27,15 @@ export class WorkspaceSelectStackController {
   readyToGoStack: any;
   stackLibraryUser: any;
   tabName: string;
+  selectedTabIndex: number;
+
+  recipeUrl: string;
+  recipeScript: string;
 
   onTabChange: Function;
   onStackChange: Function;
+
+  tabs: string[];
 
   /**
    * Default constructor that is using resource
@@ -39,6 +45,9 @@ export class WorkspaceSelectStackController {
     this.$timeout = $timeout;
     this.$scope = $scope;
     this.lodash = lodash;
+
+    this.tabs = ['ready-to-go', 'stack-library', 'stack-import', 'stack-authoring'];
+    this.setSelectedTab();
 
     this.stacks = cheStack.getStacks();
     if (this.stacks.length) {
@@ -65,6 +74,19 @@ export class WorkspaceSelectStackController {
         }
       }
     });
+
+    $scope.$watch(() => { return this.tabName; }, () => {
+      if (!this.tabName) {
+        return;
+      }
+      this.setSelectedTab();
+    });
+  }
+
+  setSelectedTab(): void {
+    this.selectedTabIndex = this.tabs.indexOf(this.tabName) !== -1
+      ? this.tabs.indexOf(this.tabName)
+      : 0;
   }
 
   /**
@@ -77,10 +99,26 @@ export class WorkspaceSelectStackController {
 
     if (tabName === 'ready-to-go') {
       this.onStackSelect(this.readyToGoStack);
+      this.recipeScript = null;
+      this.recipeUrl = null;
       return;
     } else if (tabName === 'stack-library') {
       this.onStackSelect(this.stackLibraryUser);
+      this.recipeScript = null;
+      this.recipeUrl = null;
       return;
+    } else {
+      if (tabName === 'stack-import') {
+        if (this.recipeUrl) {
+          return;
+        }
+        this.recipeScript = null;
+      } else if (tabName === 'stack-authoring') {
+        if (this.recipeScript) {
+          return;
+        }
+        this.recipeUrl = null;
+      }
     }
     this.onStackSelect(null);
   }
@@ -90,7 +128,7 @@ export class WorkspaceSelectStackController {
    * @param stack
    */
   onStackSelect(stack: any): void {
-    this.stack = stack;
-    this.onStackChange({stack: stack});
+    this.stack = angular.copy(stack);
+    this.onStackChange({stack: this.stack});
   }
 }

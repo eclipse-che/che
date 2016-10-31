@@ -38,16 +38,21 @@ export class WorkspaceEditModeToolbarButton {
   replace = true;
   templateUrl = 'app/workspaces/workspace-edit-mode/workspace-edit-mode-toolbar-button.html';
 
-  scope = {
-    message: '@?workspaceEditModeMessage',
-    showMessage: '=?workspaceEditModeShowMessage',
-    onSave: '&workspaceEditModeOnSave'
+  scope: {
+    [propName: string]: string;
   };
 
   /**
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor () { }
+  constructor () {
+    this.scope = {
+      message: '@?workspaceEditModeMessage',
+      showMessage: '=?workspaceEditModeShowMessage',
+      onSave: '&workspaceEditModeOnSave',
+      disableSaveButton: '=workspaceEditDisableSaveButton'
+    };
+  }
 
 }

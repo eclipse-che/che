@@ -268,7 +268,6 @@ export class CheWorkspace {
     //Check default environment is provided and add if there is no:
     if (!defaultEnvironment) {
       defaultEnvironment = {
-        'name': config.defaultEnv,
         'recipe': null,
         'machines': {'dev-machine': {'attributes': {'memoryLimitBytes': ram}, 'agents': ['org.eclipse.che.ws-agent', 'org.eclipse.che.terminal', 'org.eclipse.che.ssh']}}
       };

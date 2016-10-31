@@ -40,9 +40,6 @@ export class WorkspaceRecipeAuthoringController {
   constructor($timeout: ng.ITimeoutService) {
     this.$timeout = $timeout;
 
-    this.recipeScript = '';
-    this.recipeFormat = 'compose';
-
     this.editorOptions = {
       lineWrapping: true,
       lineNumbers: true,

@@ -24,14 +24,12 @@ export class WorkspaceConfigImportController {
     lineNumbers: boolean,
     matchBrackets: boolean,
     mode: string,
-    readOnly: boolean,
     onLoad: Function
   };
 
   validationError: string;
   importWorkspaceJson: string;
   copyImportWorkspaceJson: string;
-  workspaceConfigReadonly: boolean;
   workspaceConfig: any;
   newWorkspaceConfig: any;
   workspaceConfigOnChange: Function;
@@ -48,7 +46,6 @@ export class WorkspaceConfigImportController {
       lineNumbers: true,
       matchBrackets: true,
       mode: 'application/json',
-      readOnly: this.workspaceConfigReadonly,
       onLoad: (editor: any) => {
         $timeout(() => {
           editor.refresh();
