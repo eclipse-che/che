@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.util;
+package org.eclipse.che.api.core.util.lineconsumer;
 
 import java.io.IOException;
 

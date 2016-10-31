@@ -8,41 +8,46 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.api.core.util;
+package org.eclipse.che.api.core.util.lineconsumer;
 
-import org.eclipse.che.api.core.util.lineconsumer.ConsumerAlreadyClosedException;
+import org.eclipse.che.api.core.util.LineConsumer;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author andrew00x
  * @author Mykola Morhun
  */
-public class FileLineConsumer implements LineConsumer {
+public class ConcurrentFileLineConsumer implements LineConsumer {
+    private final File                   file;
+    private final Writer                 writer;
+    private final ReentrantReadWriteLock lock;
 
+    private volatile boolean isOpen;
 
-    private final File   file;
-    private final Writer writer;
-
-    private boolean isOpen;
-
-    public FileLineConsumer(File file) throws IOException {
+    public ConcurrentFileLineConsumer(File file) throws IOException {
         this.file = file;
         writer = Files.newBufferedWriter(file.toPath(), Charset.defaultCharset());
         isOpen = true;
+        lock = new ReentrantReadWriteLock();
     }
 
     public File getFile() {
         return file;
     }
 
+    public boolean isOpen() {
+        return isOpen;
+    }
+
     @Override
     public void writeLine(String line) throws IOException {
-        if (isOpen) {
+        if (isOpen && lock.readLock().tryLock()) {
             try {
                 if (line != null) {
                     writer.write(line);
@@ -54,6 +59,8 @@ public class FileLineConsumer implements LineConsumer {
                     throw new ConsumerAlreadyClosedException(e.getMessage());
                 }
                 throw e;
+            } finally {
+                lock.readLock().unlock();
             }
         }
     }
@@ -61,8 +68,14 @@ public class FileLineConsumer implements LineConsumer {
     @Override
     public void close() throws IOException {
         if (isOpen) {
-            isOpen = false;
-            writer.close();
+            lock.writeLock().lock();
+            try {
+                isOpen = false;
+                writer.close();
+            } finally {
+                lock.writeLock().unlock();
+            }
         }
     }
+
 }

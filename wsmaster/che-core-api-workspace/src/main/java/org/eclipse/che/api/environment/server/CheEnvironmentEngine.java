@@ -29,10 +29,10 @@ import org.eclipse.che.api.core.model.workspace.ExtendedMachine;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.core.util.AbstractLineConsumer;
-import org.eclipse.che.api.core.util.CompositeLineConsumer;
-import org.eclipse.che.api.core.util.FileLineConsumer;
 import org.eclipse.che.api.core.util.LineConsumer;
 import org.eclipse.che.api.core.util.MessageConsumer;
+import org.eclipse.che.api.core.util.lineconsumer.ConcurrentCompositeLineConsumer;
+import org.eclipse.che.api.core.util.lineconsumer.ConcurrentFileLineConsumer;
 import org.eclipse.che.api.environment.server.exception.EnvironmentNotRunningException;
 import org.eclipse.che.api.environment.server.model.CheServiceBuildContextImpl;
 import org.eclipse.che.api.environment.server.model.CheServiceImpl;
@@ -1095,8 +1095,8 @@ public class CheEnvironmentEngine {
             }
         };
         try {
-            return new CompositeLineConsumer(new FileLineConsumer(getMachineLogsFile(machineId)),
-                                             lineConsumer);
+            return new ConcurrentCompositeLineConsumer(new ConcurrentFileLineConsumer(getMachineLogsFile(machineId)),
+                                                       lineConsumer);
         } catch (IOException e) {
             throw new MachineException(format("Unable create log file '%s' for machine '%s'.",
                                               e.getLocalizedMessage(),

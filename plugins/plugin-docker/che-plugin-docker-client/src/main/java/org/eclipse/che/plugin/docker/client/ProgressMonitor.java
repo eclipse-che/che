@@ -21,7 +21,7 @@ import java.io.IOException;
  * @author Alexander Garagatyi
  */
 public interface ProgressMonitor {
-    void updateProgress(ProgressStatus currentProgressStatus) throws IOException;
+    void updateProgress(ProgressStatus currentProgressStatus);
 
     ProgressMonitor DEV_NULL = new ProgressMonitor() {
         @Override
